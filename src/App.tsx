@@ -1,10 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider, useApp } from "./context/AppContext";
+
 import { HomePage } from "./pages/HomePage";
 import { CoursesPage } from "./pages/CoursesPage";
 import { CourseDetailPage } from "./pages/CourseDetailPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
+
+/* Student */
 import { StudentDashboard } from "./pages/student/StudentDashboard";
 import { LessonPlayer } from "./pages/student/LessonPlayer";
 import { QuizPage } from "./pages/student/QuizPage";
@@ -12,14 +15,38 @@ import { AnnouncementsPage } from "./pages/student/AnnouncementsPage";
 import { ProfilePage } from "./pages/student/ProfilePage";
 import { LeaderboardPage } from "./pages/student/LeaderboardPage";
 import { MyCoursesPage } from "./pages/student/MyCourses";
+import { HomeworkPage } from "./pages/student/HomeworkPage";
+
+/* Instructor */
 import { InstructorDashboard } from "./pages/instructor/InstructorDashboard";
+import { InstructorCourses } from "./pages/instructor/InstructorCourses";
+import { CreateCourse } from "./pages/instructor/CreateCourse";
+import { InstructorStudents } from "./pages/instructor/InstructorStudents";
+import { InstructorAssignments } from "./pages/instructor/InstructorAssignments";
+import { InstructorExams } from "./pages/instructor/InstructorExams";
+import { InstructorNotifications } from "./pages/instructor/InstructorNotifications";
+import { InstructorAnalytics } from "./pages/instructor/InstructorAnalytics";
+
+/* Admin */
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 
-// Protected route wrapper
-function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
+function ProtectedRoute({
+  children,
+  roles,
+}: {
+  children: React.ReactNode;
+  roles?: string[];
+}) {
   const { user } = useApp();
-  if (!user) return <Navigate to="/login" replace />;
-  if (roles && !roles.includes(user.role)) return <Navigate to="/" replace />;
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (roles && !roles.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+
   return <>{children}</>;
 }
 
@@ -33,24 +60,184 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Student */}
-      <Route path="/dashboard" element={<ProtectedRoute roles={["student"]}><StudentDashboard /></ProtectedRoute>} />
-      <Route path="/dashboard/courses" element={<ProtectedRoute roles={["student"]}><MyCoursesPage /></ProtectedRoute>} />
-      <Route path="/dashboard/lesson/:id" element={<ProtectedRoute roles={["student"]}><LessonPlayer /></ProtectedRoute>} />
-      <Route path="/dashboard/quiz" element={<ProtectedRoute roles={["student"]}><QuizPage /></ProtectedRoute>} />
-      <Route path="/dashboard/announcements" element={<ProtectedRoute roles={["student"]}><AnnouncementsPage /></ProtectedRoute>} />
-      <Route path="/dashboard/leaderboard" element={<ProtectedRoute roles={["student"]}><LeaderboardPage /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            {/* Student */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute roles={["student"]}>
+            <StudentDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/courses"
+        element={
+          <ProtectedRoute roles={["student"]}>
+            <MyCoursesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/homework"
+        element={
+          <ProtectedRoute roles={["student"]}>
+            <HomeworkPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/exams"
+        element={
+          <ProtectedRoute roles={["student"]}>
+            <QuizPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/lesson/:id"
+        element={
+          <ProtectedRoute roles={["student"]}>
+            <LessonPlayer />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/quiz"
+        element={
+          <ProtectedRoute roles={["student"]}>
+            <QuizPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/announcements"
+        element={
+          <ProtectedRoute roles={["student"]}>
+            <AnnouncementsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/leaderboard"
+        element={
+          <ProtectedRoute roles={["student"]}>
+            <LeaderboardPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Instructor */}
-      <Route path="/instructor" element={<ProtectedRoute roles={["instructor"]}><InstructorDashboard /></ProtectedRoute>} />
-      <Route path="/instructor/*" element={<ProtectedRoute roles={["instructor"]}><InstructorDashboard /></ProtectedRoute>} />
+
+      <Route
+        path="/instructor"
+        element={
+          <ProtectedRoute roles={["instructor"]}>
+            <InstructorDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/instructor/courses"
+        element={
+          <ProtectedRoute roles={["instructor"]}>
+            <InstructorCourses />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/instructor/create-course"
+        element={
+          <ProtectedRoute roles={["instructor"]}>
+            <CreateCourse />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/instructor/students"
+        element={
+          <ProtectedRoute roles={["instructor"]}>
+            <InstructorStudents />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/instructor/assignments"
+        element={
+          <ProtectedRoute roles={["instructor"]}>
+            <InstructorAssignments />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/instructor/exams"
+        element={
+          <ProtectedRoute roles={["instructor"]}>
+            <InstructorExams />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/instructor/notifications"
+        element={
+          <ProtectedRoute roles={["instructor"]}>
+            <InstructorNotifications />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/instructor/analytics"
+        element={
+          <ProtectedRoute roles={["instructor"]}>
+            <InstructorAnalytics />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Admin */}
-      <Route path="/admin" element={<ProtectedRoute roles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
-      <Route path="/admin/*" element={<ProtectedRoute roles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
+
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Fallback */}
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

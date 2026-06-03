@@ -40,8 +40,8 @@ export function AnnouncementsPage() {
               <Bell size={20} className="text-blue-600" />
             </div>
             <div>
-              <h1 className="text-xl font-black text-slate-900">الإعلانات</h1>
-              <p className="text-slate-500 text-sm">{ANNOUNCEMENTS.filter(a => a.isNew).length} إعلانات جديدة</p>
+              <h1 className="text-xl font-black text-slate-900">الإشعارات</h1>
+              <p className="text-slate-500 text-sm">{ANNOUNCEMENTS.filter(a => a.isNew).length} إشعارات جديدة</p>
             </div>
           </div>
         </div>
@@ -116,8 +116,8 @@ export function AnnouncementsPage() {
           {filtered.length === 0 && (
             <div className="text-center py-16">
               <div className="text-5xl mb-3">📭</div>
-              <p className="text-xl font-bold text-slate-700 mb-1">لا توجد إعلانات</p>
-              <p className="text-slate-500 text-sm">لا توجد إعلانات في هذه الفئة حتى الآن</p>
+              <p className="text-xl font-bold text-slate-700 mb-1">لا توجد إشعارات</p>
+              <p className="text-slate-500 text-sm">لا توجد إشعارات في هذه الفئة حتى الآن</p>
             </div>
           )}
         </div>

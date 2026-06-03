@@ -458,3 +458,89 @@ export const GOVERNORATES = [
   "بورسعيد", "السويس", "دمياط", "المنصورة", "طنطا", "الفيوم",
   "بني سويف", "المنيا", "أسيوط", "سوهاج", "قنا", "الأقصر", "أسوان",
 ];
+// ============================================================
+// HOMEWORKS
+// ============================================================
+
+export const HOMEWORKS = [
+  {
+    id: "hw1",
+    title: "واجب الهيدروكربونات الأليفاتية",
+    courseId: "c1",
+    courseTitle: "كيمياء الصف الثالث الثانوي",
+    dueDate: "2026-06-10",
+    status: "submitted",
+    submissionType: "pdf",
+    grade: 18,
+    totalGrade: 20,
+    successRate: 90,
+  },
+  {
+    id: "hw2",
+    title: "واجب المركبات الحلقية",
+    courseId: "c1",
+    courseTitle: "كيمياء الصف الثالث الثانوي",
+    dueDate: "2026-06-15",
+    status: "pending",
+    submissionType: "image",
+    grade: null,
+    totalGrade: 20,
+    successRate: null,
+  },
+  {
+    id: "hw3",
+    title: "واجب الكيمياء الحرارية",
+    courseId: "c1",
+    courseTitle: "كيمياء الصف الثالث الثانوي",
+    dueDate: "2026-06-18",
+    status: "interactive",
+    submissionType: "quiz",
+    grade: null,
+    totalGrade: 20,
+    successRate: null,
+  },
+];
+
+
+// ============================================================
+// EXAMS
+// ============================================================
+
+export const EXAMS = [
+  {
+    id: "ex1",
+    title: "اختبار الوحدة الأولى",
+    courseId: "c1",
+    courseTitle: "كيمياء الصف الثالث الثانوي",
+    duration: 20,
+    passingScore: 60,
+    status: "completed",
+    score: 90,
+    correctAnswers: 9,
+    wrongAnswers: 1,
+  },
+  {
+    id: "ex2",
+    title: "اختبار الكيمياء الحرارية",
+    courseId: "c1",
+    courseTitle: "كيمياء الصف الثالث الثانوي",
+    duration: 30,
+    passingScore: 60,
+    status: "upcoming",
+    score: null,
+    correctAnswers: null,
+    wrongAnswers: null,
+  },
+  {
+    id: "ex3",
+    title: "اختبار الكيمياء الكهربية",
+    courseId: "c1",
+    courseTitle: "كيمياء الصف الثالث الثانوي",
+    duration: 25,
+    passingScore: 60,
+    status: "not_started",
+    score: null,
+    correctAnswers: null,
+    wrongAnswers: null,
+  },
+];

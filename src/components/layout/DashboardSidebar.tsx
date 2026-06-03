@@ -23,12 +23,19 @@ const studentNav: NavItem[] = [
 
 const instructorNav: NavItem[] = [
   { label: "لوحة التحكم", path: "/instructor", icon: <LayoutDashboard size={18} /> },
+
   { label: "كورساتي", path: "/instructor/courses", icon: <BookOpen size={18} /> },
-  { label: "إنشاء كورس", path: "/instructor/courses/create", icon: <PlusCircle size={18} /> },
-  { label: "الاختبارات", path: "/instructor/quizzes", icon: <ClipboardList size={18} /> },
-  { label: "الواجبات", path: "/instructor/homework", icon: <FileText size={18} /> },
-  { label: "الإعلانات", path: "/instructor/announcements", icon: <MessageSquare size={18} /> },
+
+  { label: "إنشاء كورس", path: "/instructor/create-course", icon: <PlusCircle size={18} /> },
+
+  { label: "الاختبارات", path: "/instructor/exams", icon: <ClipboardList size={18} /> },
+
+  { label: "الواجبات", path: "/instructor/assignments", icon: <FileText size={18} /> },
+
+  { label: "الإشعارات", path: "/instructor/notifications", icon: <Bell size={18} /> },
+
   { label: "الطلاب", path: "/instructor/students", icon: <Users size={18} /> },
+
   { label: "التحليلات", path: "/instructor/analytics", icon: <BarChart2 size={18} /> },
 ];
 
