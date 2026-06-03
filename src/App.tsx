@@ -16,6 +16,7 @@ import { ProfilePage } from "./pages/student/ProfilePage";
 import { LeaderboardPage } from "./pages/student/LeaderboardPage";
 import { MyCoursesPage } from "./pages/student/MyCourses";
 import { HomeworkPage } from "./pages/student/HomeworkPage";
+import { ExamsPage } from "./pages/student/ExamsPage";
 
 /* Instructor */
 import { InstructorDashboard } from "./pages/instructor/InstructorDashboard";
@@ -88,14 +89,14 @@ function AppRoutes() {
         }
       />
 
-      <Route
-        path="/dashboard/exams"
-        element={
-          <ProtectedRoute roles={["student"]}>
-            <QuizPage />
-          </ProtectedRoute>
-        }
-      />
+     <Route
+  path="/dashboard/exams"
+  element={
+    <ProtectedRoute roles={["student"]}>
+      <ExamsPage />
+    </ProtectedRoute>
+  }
+/>
 
       <Route
         path="/dashboard/lesson/:id"
