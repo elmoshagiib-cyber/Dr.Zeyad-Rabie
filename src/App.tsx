@@ -1,0 +1,67 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AppProvider, useApp } from "./context/AppContext";
+import { HomePage } from "./pages/HomePage";
+import { CoursesPage } from "./pages/CoursesPage";
+import { CourseDetailPage } from "./pages/CourseDetailPage";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { StudentDashboard } from "./pages/student/StudentDashboard";
+import { LessonPlayer } from "./pages/student/LessonPlayer";
+import { QuizPage } from "./pages/student/QuizPage";
+import { AnnouncementsPage } from "./pages/student/AnnouncementsPage";
+import { ProfilePage } from "./pages/student/ProfilePage";
+import { LeaderboardPage } from "./pages/student/LeaderboardPage";
+import { MyCoursesPage } from "./pages/student/MyCourses";
+import { InstructorDashboard } from "./pages/instructor/InstructorDashboard";
+import { AdminDashboard } from "./pages/admin/AdminDashboard";
+
+// Protected route wrapper
+function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
+  const { user } = useApp();
+  if (!user) return <Navigate to="/login" replace />;
+  if (roles && !roles.includes(user.role)) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      {/* Public */}
+      <Route path="/" element={<HomePage />} />
+      <Route path="/courses" element={<CoursesPage />} />
+      <Route path="/courses/:slug" element={<CourseDetailPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+
+      {/* Student */}
+      <Route path="/dashboard" element={<ProtectedRoute roles={["student"]}><StudentDashboard /></ProtectedRoute>} />
+      <Route path="/dashboard/courses" element={<ProtectedRoute roles={["student"]}><MyCoursesPage /></ProtectedRoute>} />
+      <Route path="/dashboard/lesson/:id" element={<ProtectedRoute roles={["student"]}><LessonPlayer /></ProtectedRoute>} />
+      <Route path="/dashboard/quiz" element={<ProtectedRoute roles={["student"]}><QuizPage /></ProtectedRoute>} />
+      <Route path="/dashboard/announcements" element={<ProtectedRoute roles={["student"]}><AnnouncementsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/leaderboard" element={<ProtectedRoute roles={["student"]}><LeaderboardPage /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+
+      {/* Instructor */}
+      <Route path="/instructor" element={<ProtectedRoute roles={["instructor"]}><InstructorDashboard /></ProtectedRoute>} />
+      <Route path="/instructor/*" element={<ProtectedRoute roles={["instructor"]}><InstructorDashboard /></ProtectedRoute>} />
+
+      {/* Admin */}
+      <Route path="/admin" element={<ProtectedRoute roles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/admin/*" element={<ProtectedRoute roles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+export default function App() {
+  return (
+    <AppProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </AppProvider>
+  );
+}
