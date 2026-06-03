@@ -26,7 +26,7 @@ const instructorNav: NavItem[] = [
 
   { label: "كورساتي", path: "/instructor/courses", icon: <BookOpen size={18} /> },
 
-  { label: "إنشاء كورس", path: "/instructor/create-course", icon: <PlusCircle size={18} /> },
+{ label: "إنشاء كورس", path: "/instructor/courses/create", icon: <PlusCircle size={18} /> },
 
   { label: "الاختبارات", path: "/instructor/exams", icon: <ClipboardList size={18} /> },
 

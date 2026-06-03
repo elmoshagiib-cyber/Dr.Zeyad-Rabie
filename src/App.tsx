@@ -164,13 +164,13 @@ function AppRoutes() {
       />
 
       <Route
-        path="/instructor/create-course"
-        element={
-          <ProtectedRoute roles={["instructor"]}>
-            <CreateCourse />
-          </ProtectedRoute>
-        }
-      />
+  path="/instructor/courses/create"
+  element={
+    <ProtectedRoute roles={["instructor"]}>
+      <CreateCourse />
+    </ProtectedRoute>
+  }
+/>
 
       <Route
         path="/instructor/students"
