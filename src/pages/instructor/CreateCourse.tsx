@@ -6,41 +6,83 @@ import { Input, Select } from "../../components/ui/Input";
 import { Plus, BookOpen, Save, Upload } from "lucide-react";
 
 export function CreateCourse() {
-  const [sections, setSections] = useState([
+ const [sections, setSections] = useState([
+  {
+    id: 1,
+    title: "القسم الأول",
+    lessons: [
+      {
+        title: "الدرس الأول",
+        videoUrl: "",
+        pdfUrl: "",
+      },
+    ],
+  },
+]);
+
+const [newSectionTitle, setNewSectionTitle] = useState("");
+const [newLessonTitle, setNewLessonTitle] = useState("");
+const [newVideoUrl, setNewVideoUrl] = useState("");
+const [newPdfUrl, setNewPdfUrl] = useState("");
+
+  const addSection = () => {
+  if (!newSectionTitle.trim()) return;
+
+  setSections([
+    ...sections,
     {
-      id: 1,
-      title: "القسم الأول",
-      lessons: ["الدرس الأول"],
+      id: Date.now(),
+      title: newSectionTitle,
+      lessons: [],
     },
   ]);
 
-  const addSection = () => {
-    setSections([
-      ...sections,
-      {
-        id: Date.now(),
-        title: `قسم جديد ${sections.length + 1}`,
-        lessons: [],
-      },
-    ]);
-  };
+  setNewSectionTitle("");
+};
+const addLesson = (sectionId: number) => {
+  if (!newLessonTitle.trim()) return;
 
-  const addLesson = (sectionId: number) => {
-    setSections(
-      sections.map((section) =>
-        section.id === sectionId
-          ? {
-              ...section,
-              lessons: [
-                ...section.lessons,
-                `درس جديد ${section.lessons.length + 1}`,
-              ],
-            }
-          : section
-      )
-    );
-  };
+  setSections(
+    sections.map((section) =>
+      section.id === sectionId
+        ? {
+            ...section,
+            lessons: [
+              ...section.lessons,
+              {
+                title: newLessonTitle,
+                videoUrl: newVideoUrl,
+                pdfUrl: newPdfUrl,
+              },
+            ],
+          }
+        : section
+    )
+  );
 
+  setNewLessonTitle("");
+  setNewVideoUrl("");
+  setNewPdfUrl("");
+};
+const deleteLesson = (sectionId: number, lessonIndex: number) => {
+  setSections(
+    sections.map((section) =>
+      section.id === sectionId
+        ? {
+            ...section,
+            lessons: section.lessons.filter(
+              (_, index) => index !== lessonIndex
+            ),
+          }
+        : section
+    )
+  );
+};
+const deleteSection = (sectionId: number) => {
+  setSections(
+    sections.filter((section) => section.id !== sectionId)
+  );
+};
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden" dir="rtl">
       <div className="hidden lg:block flex-shrink-0">
@@ -111,33 +153,71 @@ export function CreateCourse() {
 
           {/* Sections */}
           <Card>
-            <CardContent>
-              <div className="flex justify-between items-center mb-5">
-                <h2 className="font-black text-lg">
-                  محتوى الكورس
-                </h2>
+  <CardContent>
 
-                <Button onClick={addSection}>
-                  <Plus size={16} />
-                  إضافة قسم
-                </Button>
-              </div>
+    <div className="mb-4">
+      <Input
+        placeholder="اكتب اسم القسم..."
+        value={newSectionTitle}
+        onChange={(e) => setNewSectionTitle(e.target.value)}
+      />
+    </div>
 
-              <div className="space-y-4">
+    <div className="flex justify-between items-center mb-5">
+      <h2 className="font-black text-lg">
+        محتوى الكورس
+      </h2>
+
+      <Button onClick={addSection}>
+        <Plus size={16} />
+        إضافة قسم
+      </Button>
+    </div>
+
+    <div className="space-y-4">
                 {sections.map((section) => (
                   <div
                     key={section.id}
                     className="border rounded-2xl p-4 bg-slate-50"
                   >
                     <div className="flex justify-between items-center mb-3">
-                      <h3 className="font-bold">
-                        {section.title}
-                      </h3>
+  <div className="flex justify-between items-center w-full">
+  <h3 className="font-bold">
+    {section.title}
+  </h3>
 
-                      <Button
-                        size="sm"
-                        onClick={() => addLesson(section.id)}
-                      >
+  <button
+    onClick={() => deleteSection(section.id)}
+    className="text-red-600 font-bold hover:text-red-700"
+  >
+    حذف القسم
+  </button>
+</div>
+</div>
+
+<div className="grid gap-3 mb-4">
+  <Input
+    placeholder="اسم الدرس"
+    value={newLessonTitle}
+    onChange={(e) => setNewLessonTitle(e.target.value)}
+  />
+
+  <Input
+    placeholder="رابط الفيديو"
+    value={newVideoUrl}
+    onChange={(e) => setNewVideoUrl(e.target.value)}
+  />
+
+  <Input
+    placeholder="رابط PDF"
+    value={newPdfUrl}
+    onChange={(e) => setNewPdfUrl(e.target.value)}
+  />
+
+  <Button
+    size="sm"
+    onClick={() => addLesson(section.id)}
+  >
                         <Plus size={14} />
                         إضافة درس
                       </Button>
@@ -145,17 +225,53 @@ export function CreateCourse() {
 
                     <div className="space-y-2">
                       {section.lessons.map((lesson, index) => (
-                        <div
-                          key={index}
-                          className="bg-white rounded-xl border p-3 flex items-center gap-2"
-                        >
-                          <BookOpen size={16} />
-                          <span>{lesson}</span>
-                        </div>
-                      ))}
+  <div
+    key={index}
+    className="bg-white rounded-xl border p-4"
+  >
+    <div className="flex justify-between items-center mb-2">
+  <div className="flex items-center gap-2">
+    <BookOpen size={16} />
+    <span className="font-bold">
+      {lesson.title}
+    </span>
+  </div>
+
+  <button
+    onClick={() => deleteLesson(section.id, index)}
+    className="text-red-600 font-bold hover:text-red-700"
+  >
+    حذف
+  </button>
+</div>
+
+    {lesson.videoUrl && (
+  <a
+    href={lesson.videoUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-sm text-blue-600 font-semibold"
+  >
+    🎥 مشاهدة الفيديو
+  </a>
+)}
+
+    {lesson.pdfUrl && (
+  <a
+    href={lesson.pdfUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-sm text-emerald-600 font-semibold block mt-1"
+  >
+    📄 فتح الملف
+  </a>
+)}
+  </div>
+))}
                     </div>
                   </div>
                 ))}
+                ٍ
               </div>
             </CardContent>
           </Card>

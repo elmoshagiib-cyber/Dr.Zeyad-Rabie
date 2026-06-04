@@ -27,6 +27,8 @@ import { InstructorAssignments } from "./pages/instructor/InstructorAssignments"
 import { InstructorExams } from "./pages/instructor/InstructorExams";
 import { InstructorNotifications } from "./pages/instructor/InstructorNotifications";
 import { InstructorAnalytics } from "./pages/instructor/InstructorAnalytics";
+import { StudentDetails } from "./pages/instructor/StudentDetails";
+import { EditStudent } from "./pages/instructor/EditStudent";
 
 /* Admin */
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
@@ -180,7 +182,22 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-
+      <Route
+  path="/instructor/students/edit/:id"
+  element={
+    <ProtectedRoute roles={["instructor"]}>
+      <EditStudent />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/instructor/students/:id"
+  element={
+    <ProtectedRoute roles={["instructor"]}>
+      <StudentDetails />
+    </ProtectedRoute>
+  }
+/>
       <Route
         path="/instructor/assignments"
         element={
