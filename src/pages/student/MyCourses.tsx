@@ -9,10 +9,19 @@ import { COURSES, CURRENT_STUDENT } from "../../data/mockData";
 
 export function MyCoursesPage() {
   const navigate = useNavigate();
-  const enrolledCourses = CURRENT_STUDENT.enrolledCourses.map(ec => ({
-    ...ec,
-    course: COURSES.find(c => c.id === ec.courseId),
-  })).filter(ec => ec.course);
+  const studentCourses = JSON.parse(
+  localStorage.getItem("student-courses-1") || "[]"
+);
+
+const enrolledCourses = studentCourses
+  .filter((course: any) => course.active)
+  .map((course: any, index: number) => ({
+    id: index,
+    title: course.name,
+    progress: 0,
+    lastLesson: "لم يبدأ بعد",
+    lastAccessedAt: "لا يوجد",
+  }));
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden" dir="rtl">
@@ -25,24 +34,33 @@ export function MyCoursesPage() {
           <p className="text-slate-500 text-sm">{enrolledCourses.length} كورسات مشترك بها</p>
         </div>
         <div className="p-6 space-y-4">
-          {enrolledCourses.map(({ course, progress, lastLesson, lastAccessedAt }) => course && (
-            <Card key={course.id} hover>
+         {enrolledCourses.map(
+  (
+    {
+      id,
+      title,
+      progress,
+      lastLesson,
+      lastAccessedAt,
+    }: any
+  ) => (
+            <Card key={id} hover>
               <CardContent className="flex flex-col sm:flex-row gap-5">
                 <img
-                  src={course.thumbnail}
-                  alt={course.title}
+                  src="https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=400"
+                  alt={title}
                   className="w-full sm:w-40 h-32 sm:h-24 rounded-xl object-cover flex-shrink-0"
                   onError={e => { (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=160&h=96&fit=crop`; }}
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-3 mb-2">
-                    <h3 className="font-black text-slate-900">{course.title}</h3>
+                    <h3 className="font-black text-slate-900">{title}</h3>
                     <Badge variant={progress === 100 ? "emerald" : "blue"} className="flex-shrink-0">
                       {progress === 100 ? "مكتمل ✓" : `${progress}%`}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-4 text-xs text-slate-500 mb-3">
-                    <span className="flex items-center gap-1"><BookOpen size={12} />{course.lessonsCount} درس</span>
+                    <span className="flex items-center gap-1"><BookOpen size={12} />0 درس</span>
                     <span className="flex items-center gap-1"><Clock size={12} />آخر نشاط: {lastAccessedAt}</span>
                   </div>
                   <p className="text-xs text-slate-500 mb-3">
@@ -58,7 +76,8 @@ export function MyCoursesPage() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          )
+)}
 
           {/* Browse more */}
           <div

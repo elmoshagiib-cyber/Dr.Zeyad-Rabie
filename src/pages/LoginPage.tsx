@@ -95,7 +95,6 @@ export function LoginPage() {
           <div className="px-8 mb-6">
             <div className="bg-white/10 rounded-2xl p-1 flex">
               {([
-                { role: "student" as LoginRole, label: "طالب" },
                 { role: "instructor" as LoginRole, label: "مدرس" },
                 { role: "admin" as LoginRole, label: "مدير" },
               ]).map(tab => (

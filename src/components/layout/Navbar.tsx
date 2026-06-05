@@ -4,14 +4,15 @@ import { Menu, X, Bell, ChevronDown, GraduationCap } from "lucide-react";
 import { Button } from "../ui/Button";
 import { Avatar } from "../ui/Avatar";
 import { useApp } from "../../context/AppContext";
-
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "../../context/ThemeContext";
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useApp();
-
+  const { isDark, toggleTheme } = useTheme();
   const navLinks = [
     { label: "الرئيسية", path: "/" },
     { label: "الكورسات", path: "/courses" },
@@ -55,6 +56,12 @@ export function Navbar() {
 
           {/* Right Side */}
           <div className="flex items-center gap-3">
+           <button
+  onClick={toggleTheme}
+  className="p-2 rounded-xl border border-slate-200 hover:bg-slate-100"
+>
+  {isDark ? <Sun size={18} /> : <Moon size={18} />}
+</button>
             {user ? (
               <>
                 <button className="relative p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition-colors">
@@ -92,10 +99,21 @@ export function Navbar() {
                 </div>
               </>
             ) : (
-              <>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>دخول</Button>
-                <Button variant="primary" size="sm" onClick={() => navigate("/register")}>إنشاء حساب</Button>
-              </>
+             <>
+  <button
+    onClick={() => navigate("/login")}
+    className="px-5 py-2.5 rounded-xl font-semibold text-slate-700 hover:text-purple-600 transition-all"
+  >
+    تسجيل الدخول
+  </button>
+
+  <button
+    onClick={() => navigate("/register")}
+    className="px-6 py-2.5 rounded-xl text-white font-bold bg-gradient-to-r from-purple-700 to-violet-500 hover:scale-105 transition-all shadow-lg shadow-purple-500/25"
+  >
+    إنشاء حساب
+  </button>
+</>
             )}
             {/* Mobile Menu Toggle */}
             <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100">

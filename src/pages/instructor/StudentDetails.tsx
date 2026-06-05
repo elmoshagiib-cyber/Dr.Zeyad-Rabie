@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "../../components/ui/Card";
 import {
   useParams,
@@ -52,9 +53,18 @@ const navigate = useNavigate();
   subscriptionEnd: "2026-09-01",
 
   coursesList: [
-    "الكيمياء العضوية",
-    "الهيدروكربونات",
-    "المراجعة النهائية",
+    {
+      name: "الكيمياء العضوية",
+      active: true,
+    },
+    {
+      name: "الهيدروكربونات",
+      active: true,
+    },
+    {
+      name: "المراجعة النهائية",
+      active: false,
+    },
   ],
 
   activity: [
@@ -87,27 +97,37 @@ const navigate = useNavigate();
   totalHomework: 10,
 
   exams: [
-    {
-      title: "اختبار الباب الأول",
-      score: 15,
-      total: 20,
-    },
-  ],
+  {
+    title: "اختبار الباب الأول",
+    score: 15,
+    total: 20,
+  },
+],
 
-  subscriptionStatus: "مفعل",
-  subscriptionEnd: "2026-09-01",
+subscriptionStatus: "مفعل",
+subscriptionEnd: "2026-09-01",
 
-  coursesList: [
-    "الكيمياء العضوية",
-    "الهيدروكربونات",
-  ],
+coursesList: [
+  {
+    name: "الكيمياء العضوية",
+    active: true,
+  },
+  {
+    name: "الهيدروكربونات",
+    active: true,
+  },
+  {
+    name: "المراجعة النهائية",
+    active: false,
+  },
+],
 
-  activity: [
-    "شاهد محاضرة الهيدروكربونات",
-    "حل اختبار الباب الأول",
-  ],
+activity: [
+  "شاهد محاضرة الهيدروكربونات",
+  "حل اختبار الباب الأول",
+],
 },
-   {
+ {
   id: 3,
   name: "محمود أحمد",
   code: "ZR-7632",
@@ -131,12 +151,19 @@ const navigate = useNavigate();
 
   exams: [],
 
+  coursesList: [
+    {
+      name: "الكيمياء العضوية",
+      active: true,
+    },
+    {
+      name: "الهيدروكربونات",
+      active: false,
+    },
+  ],
+
   subscriptionStatus: "موقوف",
   subscriptionEnd: "2026-07-01",
-
-  coursesList: [
-    "الكيمياء العضوية",
-  ],
 
   activity: [
     "شاهد محاضرة الباب الأول",
@@ -148,7 +175,85 @@ const navigate = useNavigate();
     (s) => s.id === Number(id)
   );
 
+  const [courses, setCourses] = useState(() => {
+  if (!student) return [];
+
+  const savedCourses =
+    localStorage.getItem(
+      `student-courses-${student.id}`
+    );
+
+  return savedCourses
+    ? JSON.parse(savedCourses)
+    : student.coursesList;
+});
+
+const [selectedCourse, setSelectedCourse] =
+  useState("");
+
+const addCourse = () => {
+  if (!selectedCourse) return;
+
+  const exists = courses.find(
+    (course: any) =>
+      course.name === selectedCourse
+  );
+
+  if (exists) {
+    alert("الكورس مضاف بالفعل");
+    return;
+  }
+
+  setCourses([
+    ...courses,
+    {
+      name: selectedCourse,
+      active: false,
+    },
+  ]);
+
+  setSelectedCourse("");
+};
+
+
+const toggleCourse = (index: number) => {
+  setCourses(
+    courses.map((course: any, i: number) =>
+      i === index
+        ? {
+            ...course,
+            active: !course.active,
+          }
+        : course
+    )
+  );
+};
+const deleteCourse = (index: number) => {
+  setCourses(
+    courses.filter(
+      (_: any, i: number) =>
+        i !== index
+    )
+  );
+};
+useEffect(() => {
+  if (!student) return;
+
+  localStorage.setItem(
+    `student-courses-${student.id}`,
+    JSON.stringify(courses)
+  );
+}, [courses, student]);
+const availableCourses = [
+  "الكيمياء العضوية",
+  "الهيدروكربونات",
+  "المراجعة النهائية",
+  "الباب الأول",
+  "الباب الثاني",
+];
+
   if (!student) {
+    
     return (
       <div className="p-10 text-center">
         الطالب غير موجود
@@ -332,34 +437,96 @@ const navigate = useNavigate();
           <CardContent>
 
             <h2 className="font-black text-xl mb-4">
-              الكورسات المشترك بها
-            </h2>
+  الكورسات المشترك بها
+</h2>
 
-            <div className="space-y-3">
+<div className="mb-4 flex gap-2">
 
-              {(student.coursesList || []).map(
-                (course: string, index: number) => (
-                  <div
-                    key={index}
-                    className="border rounded-xl p-3 flex justify-between"
-                  >
-                    <span>{course}</span>
+  <select
+  value={selectedCourse}
+  onChange={(e) =>
+    setSelectedCourse(e.target.value)
+  }
+  className="border rounded-xl px-3 py-2 flex-1"
+>
+  <option value="">
+    اختر كورس
+  </option>
 
-                    <span className="text-emerald-600 font-bold">
-                      نشط
-                    </span>
-                  </div>
-                )
-              )}
+  {availableCourses.map((course, index) => (
+    <option
+      key={index}
+      value={course}
+    >
+      {course}
+    </option>
+  ))}
+</select>
+ <Button
+  onClick={addCourse}
+>
+  إضافة كورس
+</Button>
+</div>
 
-            </div>
+<div className="space-y-3">
 
-          </CardContent>
-        </Card>
+  {courses.map(
+  (course: any, index: number) => (
+    <div
+      key={index}
+      className="border rounded-xl p-3 flex justify-between items-center"
+    >
+      <span>
+        {course.name}
+      </span>
 
-        <Card>
-          <CardContent>
+      <div className="flex gap-2 items-center">
 
+        <span
+          className={`font-bold ${
+            course.active
+              ? "text-emerald-600"
+              : "text-red-600"
+          }`}
+        >
+          {course.active
+            ? "مفعل"
+            : "غير مفعل"}
+        </span>
+
+        <Button
+          size="sm"
+          variant={
+            course.active
+              ? "danger"
+              : "outline"
+          }
+          onClick={() =>
+            toggleCourse(index)
+          }
+        >
+          {course.active
+            ? "إلغاء التفعيل"
+            : "تفعيل"}
+        </Button>
+
+        <Button
+          size="sm"
+          variant="danger"
+          onClick={() =>
+            deleteCourse(index)
+          }
+        >
+          حذف
+        </Button>
+
+      </div>
+
+    </div>
+  )
+)}
+</div>
             <h2 className="font-black text-xl mb-4">
               بيانات الاشتراك
             </h2>

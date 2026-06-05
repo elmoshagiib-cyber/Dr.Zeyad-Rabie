@@ -9,57 +9,71 @@ import {
   Power,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
-import { useNavigate } from "react-router-dom";
 
 export function InstructorStudents() {
 
   const navigate = useNavigate();
 
-  const [students, setStudents] = useState<any[]>([
-    {
-      id: 1,
-      name: "أحمد محمد",
-      code: "ZR-5821",
+  const defaultStudents = [
+  {
+    id: 1,
+    name: "أحمد محمد",
+    code: "ZR-5821",
 
-      grade: "الصف الثالث الثانوي",
-      courses: 3,
+    grade: "الصف الثالث الثانوي",
+    courses: 3,
 
-      status: "نشط",
-      type: "سنتر",
-      joinDate: "2026-06-01",
-    },
+    status: "نشط",
+    type: "سنتر",
+    joinDate: "2026-06-01",
+  },
 
-    {
-      id: 2,
-      name: "محمد علي",
-      code: "ZR-1947",
+  {
+    id: 2,
+    name: "محمد علي",
+    code: "ZR-1947",
 
-      grade: "الصف الثالث الثانوي",
-      courses: 2,
+    grade: "الصف الثالث الثانوي",
+    courses: 2,
 
-      status: "نشط",
-      type: "أونلاين",
-      joinDate: "2026-06-02",
-    },
+    status: "نشط",
+    type: "أونلاين",
+    joinDate: "2026-06-02",
+  },
 
-    {
-      id: 3,
-      name: "محمود أحمد",
-      code: "ZR-7632",
+  {
+    id: 3,
+    name: "محمود أحمد",
+    code: "ZR-7632",
 
-      grade: "الصف الثاني الثانوي",
-      courses: 1,
+    grade: "الصف الثاني الثانوي",
+    courses: 1,
 
-      status: "موقوف",
-      type: "سنتر",
-      joinDate: "2026-05-15",
-    },
-  ]);
+    status: "موقوف",
+    type: "سنتر",
+    joinDate: "2026-05-15",
+  },
+];
 
+const [students, setStudents] = useState<any[]>(() => {
+  const savedStudents =
+    localStorage.getItem("students");
+
+  return savedStudents
+    ? JSON.parse(savedStudents)
+    : defaultStudents;
+});
+useEffect(() => {
+  localStorage.setItem(
+    "students",
+    JSON.stringify(students)
+  );
+}, [students]);
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
@@ -377,16 +391,6 @@ const [searchTerm, setSearchTerm] =
 <div className="flex gap-2">
 
 <Button
-  size="sm"
-  variant="outline"
-  onClick={() =>
-    navigate(
-      `/instructor/students/${student.id}`
-    )
-  }
->    <Eye size={14} />
-    عرض
-  </Button><Button
   size="sm"
   variant="outline"
   onClick={() =>

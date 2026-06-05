@@ -1,11 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider, useApp } from "./context/AppContext";
-
 import { HomePage } from "./pages/HomePage";
 import { CoursesPage } from "./pages/CoursesPage";
 import { CourseDetailPage } from "./pages/CourseDetailPage";
-import { LoginPage } from "./pages/LoginPage";
-import { RegisterPage } from "./pages/RegisterPage";
+import { ThemeProvider } from "./context/ThemeContext";
+
+import StudentLoginPage from "./pages/StudentLoginPage";
+import StudentRegisterPage from "./pages/StudentRegisterPage";
+
+import { StaffLoginPage } from "./pages/StaffLoginPage";
 
 /* Student */
 import { StudentDashboard } from "./pages/student/StudentDashboard";
@@ -58,10 +61,22 @@ function AppRoutes() {
     <Routes>
       {/* Public */}
       <Route path="/" element={<HomePage />} />
-      <Route path="/courses" element={<CoursesPage />} />
-      <Route path="/courses/:slug" element={<CourseDetailPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+<Route path="/courses" element={<CoursesPage />} />
+<Route path="/courses/:slug" element={<CourseDetailPage />} />
+
+<Route path="/login" element={<StudentLoginPage />} />
+<Route path="/register" element={<StudentRegisterPage />} />
+
+<Route path="/staff-login" element={<StaffLoginPage />} />
+     <Route
+  path="/login"
+  element={<StudentLoginPage />}
+/>
+
+<Route
+  path="/register"
+  element={<StudentRegisterPage />}
+/>
 
             {/* Student */}
       <Route
@@ -99,7 +114,10 @@ function AppRoutes() {
     </ProtectedRoute>
   }
 />
-
+<Route
+  path="/staff-login"
+  element={<StaffLoginPage />}
+/>
       <Route
         path="/dashboard/lesson/:id"
         element={
