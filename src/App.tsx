@@ -43,7 +43,15 @@ function ProtectedRoute({
   children: React.ReactNode;
   roles?: string[];
 }) {
-  const { user } = useApp();
+  const { user, loading } = useApp();
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        جاري التحميل...
+      </div>
+    );
+  }
 
   if (!user) {
     return <Navigate to="/login" replace />;

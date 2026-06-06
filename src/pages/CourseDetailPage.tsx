@@ -8,19 +8,75 @@ import { Card, CardContent } from "../components/ui/Card";
 import { Avatar } from "../components/ui/Avatar";
 import { COURSES, TEACHER } from "../data/mockData";
 import { useApp } from "../context/AppContext";
-
+import { supabase } from "../lib/supabase";
+import { useEffect, useState } from "react";
 const gradeColors: Record<string, string> = {
   third_sec: "rose", second_sec: "violet", first_sec: "blue", primary: "emerald",
 };
-
 export function CourseDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { user } = useApp();
-  const course = COURSES.find(c => c.slug === slug) || COURSES[0];
+
+  const [isEnrolled, setIsEnrolled] = useState(false);
+
+  const course = COURSES.find((c) => c.slug === slug) || COURSES[0];
 
   const totalDuration = "18 ساعة و 30 دقيقة";
-  const isEnrolled = user && user.role === "student";
+
+  const checkEnrollment = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from("student_courses")
+      .select("*")
+      .eq("student_id", user.id)
+      .eq("course_id", course.id)
+      .eq("active", true);
+
+    setIsEnrolled(!!data?.length);
+  };
+
+  useEffect(() => {
+    checkEnrollment();
+  }, [user, course.id]);
+
+  const handleEnroll = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    const { data: existing } = await supabase
+      .from("student_courses")
+      .select("id")
+      .eq("student_id", user.id)
+      .eq("course_id", course.id);
+
+    if (existing && existing.length > 0) {
+      alert("أنت مشترك بالفعل في هذا الكورس");
+      setIsEnrolled(true);
+      return;
+    }
+
+    const { error } = await supabase
+      .from("student_courses")
+      .insert({
+        student_id: user.id,
+        course_id: course.id,
+        active: true,
+      });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setIsEnrolled(true);
+
+    alert("تم الاشتراك في الكورس بنجاح");
+    navigate("/dashboard/courses");
+  };
 
   return (
     <div className="min-h-screen bg-slate-50" dir="rtl">
@@ -95,30 +151,51 @@ export function CourseDetailPage() {
                   </div>
                   <CardContent className="space-y-4">
                     <div className="text-center">
-                      {course.isFree ? (
-                        <p className="text-3xl font-black text-emerald-600">مجاني تماماً</p>
-                      ) : (
-                        <div>
-                          <p className="text-3xl font-black text-slate-900">{course.price} جنيه</p>
-                          <p className="text-sm text-slate-500">اشتراك كامل للكورس</p>
-                        </div>
-                      )}
-                    </div>
-                    {isEnrolled ? (
-                      <Button fullWidth size="lg" onClick={() => navigate("/dashboard/courses")}>
-                        <Play size={18} />
-                        متابعة الدراسة
-                      </Button>
-                    ) : (
-                      <>
-                        <Button fullWidth size="lg" onClick={() => navigate("/register")}>
-                          سجل واشترك الآن
-                        </Button>
-                        <Button fullWidth size="lg" variant="outline" onClick={() => navigate("/login")}>
-                          دخول للمشتركين
-                        </Button>
-                      </>
-                    )}
+  {course.isFree ? (
+    <p className="text-3xl font-black text-emerald-600">
+      مجاني تماماً
+    </p>
+  ) : (
+    <div>
+      <p className="text-3xl font-black text-slate-900">
+        {course.price} جنيه
+      </p>
+      <p className="text-sm text-slate-500">
+        اشتراك كامل للكورس
+      </p>
+    </div>
+  )}
+</div>
+
+{isEnrolled ? (
+  <Button
+    fullWidth
+    size="lg"
+    onClick={() => navigate("/dashboard/courses")}
+  >
+    <Play size={18} />
+    متابعة الدراسة
+  </Button>
+) : (
+  <>
+    <Button
+      fullWidth
+      size="lg"
+      onClick={handleEnroll}
+    >
+      اشترك في الكورس
+    </Button>
+
+    <Button
+      fullWidth
+      size="lg"
+      variant="outline"
+      onClick={() => navigate("/login")}
+    >
+      دخول للمشتركين
+    </Button>
+  </>
+)}
                     <div className="space-y-2 text-sm">
                       {[
                         { icon: <CheckCircle size={14} className="text-emerald-500" />, text: `${course.lessonsCount} درس فيديو` },

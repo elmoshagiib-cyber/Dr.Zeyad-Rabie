@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 
 export type UserRole = "student" | "instructor" | "admin";
 
@@ -16,24 +22,51 @@ export interface AppUser {
 
 interface AppContextType {
   user: AppUser | null;
+  loading: boolean;
   login: (user: AppUser) => void;
   logout: () => void;
 }
 
 const AppContext = createContext<AppContextType>({
   user: null,
+  loading: true,
   login: () => {},
   logout: () => {},
 });
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (u: AppUser) => setUser(u);
-  const logout = () => setUser(null);
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+
+    setLoading(false);
+  }, []);
+
+  const login = (u: AppUser) => {
+    setUser(u);
+    localStorage.setItem("user", JSON.stringify(u));
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("user");
+  };
 
   return (
-    <AppContext.Provider value={{ user, login, logout }}>
+    <AppContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

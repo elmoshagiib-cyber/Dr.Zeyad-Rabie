@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/layout/Navbar";
+import { supabase } from "../lib/supabase";
 import {
   Eye, EyeOff, Phone, Lock, User, Mail, BookOpen,
   Layers, ChevronLeft, Loader2, ShieldCheck, CheckCircle2, AlertTriangle
@@ -56,14 +57,34 @@ const SECTIONS = ['علمي رياضة', 'علمي علوم', 'أدبي', 'تج�
   };
 
   const handleSubmit = async (ev: React.FormEvent) => {
-    ev.preventDefault();
-    if (!validate()) return;
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 2000));
-    setLoading(false);
-    setSuccess(true);
-    setTimeout(() => navigate("/login"), 3000);
-  };
+  ev.preventDefault();
+
+  try {
+    const { data, error } = await supabase
+      .from("students")
+      .insert([
+        {
+          student_code: "ZR-000001",
+          full_name: form.name,
+          phone: form.phone,
+          grade: form.grade,
+          password: form.password,
+          status: "active",
+        },
+      ]);
+
+    if (error) {
+      console.error(error);
+      alert(error.message);
+      return;
+    }
+
+    console.log(data);
+    alert("تم حفظ الطالب بنجاح");
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   const passwordStrength = () => {
     const p = form.password;

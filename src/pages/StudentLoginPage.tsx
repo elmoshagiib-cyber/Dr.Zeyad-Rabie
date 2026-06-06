@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from "../components/layout/Navbar";
 import { useApp } from "../context/AppContext";
-import { CURRENT_STUDENT } from "../data/mockData";
+import { supabase } from "../lib/supabase";
 import {
   Eye, EyeOff, Phone, Lock, KeyRound, Wifi, Building2,
   ChevronLeft, Loader2, ShieldCheck, CheckCircle2
@@ -32,29 +32,62 @@ const LoginPage = () => {  const navigate = useNavigate();
   }`;
 
   const focusShadow = { boxShadow: '0 0 0 3px rgba(139,92,246,0.18)' };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
   setLoading(true);
 
-  await new Promise((r) => setTimeout(r, 1200));
+  try {
+    const phone =
+      tab === "online"
+        ? onlineForm.phone
+        : centerForm.code;
 
-  login({
-    id: CURRENT_STUDENT.id,
-    name: CURRENT_STUDENT.name,
-    role: "student",
-    grade: CURRENT_STUDENT.grade,
-    gradeLabel: CURRENT_STUDENT.gradeLabel,
-    code: CURRENT_STUDENT.code,
-    governorate: CURRENT_STUDENT.governorate,
-    phone: CURRENT_STUDENT.phone,
-    status: "approved",
-  });
+    const password =
+      tab === "online"
+        ? onlineForm.password
+        : centerForm.password;
 
-  setLoading(false);
+    const { data, error } = await supabase
+      .from("students")
+      .select("*")
+      .eq("phone", phone)
+      .eq("password", password);
 
-  navigate("/dashboard");
+    if (error) {
+      alert(error.message);
+      setLoading(false);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      setLoading(false);
+      alert("رقم الهاتف أو كلمة المرور غير صحيحة");
+      return;
+    }
+
+    const student = data[0];
+
+    login({
+      id: String(student.id),
+      name: student.full_name,
+      role: "student",
+      grade: student.grade,
+      gradeLabel: student.grade,
+      code: student.student_code,
+      governorate: student.governorate,
+      phone: student.phone,
+      status: "approved",
+    });
+
+    setLoading(false);
+    navigate("/dashboard");
+
+  } catch (err) {
+    console.error(err);
+    setLoading(false);
+    alert("حدث خطأ أثناء تسجيل الدخول");
+  }
 };
   const cardShadow = isDark
     ? '0 20px 60px rgba(109,40,217,0.18), 0 0 0 1px rgba(255,255,255,0.05)'
