@@ -99,7 +99,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     <div
       className="min-h-screen pt-[62px] sm:pt-16"
-        style={{ background: isDark ? '#0B0715' : '#F1F5F9' }}
+        style={{ background: isDark ? '#0B0715' : '#ffffff' }}
       >
         <div className="flex flex-col lg:flex-row min-h-[calc(100vh-62px)] sm:min-h-[calc(100vh-64px)]">
 
@@ -456,7 +456,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
           {/* ────────────────────── RIGHT: HERO ─────────────────── */}
           <motion.div
-            className="w-full lg:w-[46%] order-1 lg:order-2 min-h-[400px] sm:min-h-[460px] lg:min-h-0 lg:sticky lg:top-[62px] lg:h-[calc(100vh-62px)] lg:self-start"
+            className="w-full lg:w-[46%] order-1 lg:order-2 min-h-[400px] sm:min-h-[460px] lg:min-h-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}

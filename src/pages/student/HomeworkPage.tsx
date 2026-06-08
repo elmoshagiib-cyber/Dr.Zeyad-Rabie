@@ -2,14 +2,145 @@ import { Upload, FileText, CheckCircle, Clock, AlertCircle } from "lucide-react"
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
-import { HOMEWORKS } from "../../data/mockData";
+import { useEffect, useState, useRef } from "react";
+import { useApp } from "../../context/AppContext";
+import { supabase } from "../../lib/supabase";
+
 
 export function HomeworkPage() {
-  const submitted = HOMEWORKS.filter(h => h.status === "submitted").length;
-  const pending = HOMEWORKS.filter(h => h.status === "pending").length;
-  const interactive = HOMEWORKS.filter(h => h.status === "interactive").length;
+  const { user } = useApp();
+  const [uploading, setUploading] = useState(false);
+  const [homeworks, setHomeworks] = useState<any[]>([]);
+  const pdfRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (user?.id) {
+      loadHomeworks();
+    }
+  }, [user]);
 
-  return (
+  const submitted =
+  homeworks.filter(h => h.submitted).length;
+
+const pending =
+  homeworks.filter(h => !h.submitted).length;
+
+const interactive = 0;
+
+ const loadHomeworks = async () => {
+  if (!user?.id) return;
+
+  const { data: enrollments } = await supabase
+    .from("student_courses")
+    .select("course_id")
+    .eq("student_id", Number(user.id));
+
+  if (!enrollments) return;
+
+  const courseIds = enrollments.map(c => c.course_id);
+
+  const { data: homeworksData } = await supabase
+    .from("homeworks")
+    .select("*")
+    .in("course_id", courseIds);
+
+  const { data: submissions } = await supabase
+    .from("homework_submissions")
+    .select("*")
+    .eq("student_id", Number(user.id));
+
+  const submissionsMap =
+  submissions?.reduce((acc, item) => {
+    acc[item.homework_id] = item;
+    return acc;
+  }, {} as any) || {};
+
+  const finalHomeworks =
+  homeworksData?.map(hw => ({
+    ...hw,
+    submitted: !!submissionsMap[hw.id],
+    submission: submissionsMap[hw.id]
+  })) || [];
+
+  console.log("HOMEWORKS:", finalHomeworks);
+
+  setHomeworks(finalHomeworks);
+};
+const uploadHomework = async (
+  file: File,
+  homeworkId: number
+) => {
+  if (!user?.id) return;
+
+  try {
+    setUploading(true);
+
+    const fileName = `${Date.now()}-${file.name}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("homework-files")
+      .upload(fileName, file);
+
+    if (uploadError) {
+      console.error(uploadError);
+      return;
+    }
+
+    const { data } = supabase.storage
+      .from("homework-files")
+      .getPublicUrl(fileName);
+
+    const { data: existing } = await supabase
+  .from("homework_submissions")
+  .select("*")
+  .eq("homework_id", homeworkId)
+  .eq("student_id", Number(user.id))
+  .maybeSingle();
+
+  
+if (existing) {
+
+  const { error: submitError } = await supabase
+    .from("homework_submissions")
+    .update({
+      answer: data.publicUrl,
+      submitted_at: new Date().toISOString()
+    })
+    .eq("id", existing.id);
+
+  if (submitError) {
+    console.error(submitError);
+    return;
+  }
+
+} else {
+
+  const { error: submitError } = await supabase
+    .from("homework_submissions")
+    .insert({
+      homework_id: homeworkId,
+      student_id: Number(user.id),
+      answer: data.publicUrl
+    });
+
+  if (submitError) {
+    console.error(submitError);
+    return;
+  }
+
+}
+
+await loadHomeworks();
+alert("تم رفع الواجب بنجاح");
+
+} catch (err) {
+  console.error(err);
+} finally {
+  setUploading(false);
+}
+};
+
+return (
     <div className="flex h-screen bg-slate-50 overflow-hidden" dir="rtl">
       <div className="hidden lg:block flex-shrink-0">
         <DashboardSidebar type="student" />
@@ -75,7 +206,7 @@ export function HomeworkPage() {
           {/* Homework List */}
           <div className="space-y-4">
 
-            {HOMEWORKS.map(hw => (
+            {homeworks.map(hw => (
               <Card key={hw.id} hover>
                 <CardContent className="p-5">
 
@@ -87,73 +218,112 @@ export function HomeworkPage() {
                       </h3>
 
                       <p className="text-sm text-slate-500 mt-1">
-                        {hw.courseTitle}
+                        {hw.description}
                       </p>
 
                       <p className="text-xs text-slate-400 mt-2">
-                        موعد التسليم: {hw.dueDate}
+                        موعد التسليم: {new Date(hw.due_date).toLocaleDateString("ar-EG", {
+  day: "numeric",
+  month: "long",
+})}
                       </p>
+                      {hw.submission && (
+  <div className="mt-2 flex gap-3">
+
+    <span className="text-green-600 text-sm font-bold">
+  {hw.submission.answer.split("/").pop()}
+</span>
+
+    <a
+      href={hw.submission.answer}
+      target="_blank"
+      rel="noreferrer"
+      className="text-blue-600 text-sm font-bold"
+    >
+      عرض الملف
+    </a>
+
+  </div>
+)}
                     </div>
 
                     <div className="flex flex-wrap gap-2">
 
-                      {hw.status === "submitted" && (
-                        <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
-                          تم التسليم
-                        </span>
-                      )}
-
-                      {hw.status === "pending" && (
-                        <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">
-                          لم يتم التسليم
-                        </span>
-                      )}
-
-                      {hw.status === "interactive" && (
-                        <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold">
-                          واجب تفاعلي
-                        </span>
-                      )}
+                     {hw.submitted ? (
+  <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
+    تم التسليم
+  </span>
+) : (
+  <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">
+    لم يتم التسليم
+  </span>
+)}
 
                     </div>
                   </div>
+{hw.submitted && (
+  <p className="text-green-600 text-sm font-bold">
+    يمكنك رفع ملف جديد وسيتم استبدال الملف السابق
+  </p>
+)}
+<div 
+className="flex flex-wrap gap-3 mt-5">
+{/* PDF */}
+<label>
+  <input
+  ref={pdfRef}
+  type="file"
+  accept=".pdf"
+  hidden
+  onChange={async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-                  {hw.grade && (
-                    <div className="mt-4 text-sm">
-                      <span className="font-bold text-slate-700">
-                        الدرجة:
-                      </span>{" "}
-                      {hw.grade}/{hw.totalGrade}
-                      {" • "}
-                      <span className="text-emerald-600 font-bold">
-                        {hw.successRate}%
-                      </span>
-                    </div>
-                  )}
+    await uploadHomework(file, hw.id);
+  }}
+/>
 
-                  <div className="flex flex-wrap gap-3 mt-5">
+<Button
+  size="sm"
+  onClick={() => pdfRef.current?.click()}
+>
+  رفع PDF
+</Button>
+</label>
+{/* IMAGE */}
+<label>
+<input
+  ref={imageRef}
+  type="file"
+  accept="image/*"
+  hidden
+  onChange={async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-                    <Button size="sm">
-                      <Upload size={14} />
-                      رفع PDF
-                    </Button>
+    await uploadHomework(file, hw.id);
+  }}
+/>
 
-                    <Button variant="outline" size="sm">
-                      <Upload size={14} />
-                      رفع صورة
-                    </Button>
+<Button
+  variant="outline"
+  size="sm"
+  onClick={() => imageRef.current?.click()}
+>
+  رفع صورة
+</Button>
+</label>
+             {hw.status === "interactive" && (
+  <Button variant="success" size="sm">
+    <FileText size={14} />
+    ابدأ الحل
+  </Button>
+)}
 
-                    {hw.status === "interactive" && (
-                      <Button variant="success" size="sm">
-                        <FileText size={14} />
-                        ابدأ الحل
-                      </Button>
-                    )}
+</div>
 
-                  </div>
-
-                </CardContent>
-              </Card>
+</CardContent>
+</Card>
             ))}
 
           </div>

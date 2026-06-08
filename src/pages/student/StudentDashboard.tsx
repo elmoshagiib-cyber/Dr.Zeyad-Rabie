@@ -6,28 +6,110 @@ import { Badge } from "../../components/ui/Badge";
 import { ProgressBar } from "../../components/ui/ProgressBar";
 import { Avatar } from "../../components/ui/Avatar";
 import { useApp } from "../../context/AppContext";
-import { COURSES, ANNOUNCEMENTS, LEADERBOARD, CURRENT_STUDENT } from "../../data/mockData";
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
+import { COURSES, LEADERBOARD, CURRENT_STUDENT } from "../../data/mockData";
 export function StudentDashboard() {
   const navigate = useNavigate();
   const { user } = useApp();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const enrolledCourses = CURRENT_STUDENT.enrolledCourses.map(ec => ({
-    ...ec,
-    course: COURSES.find(c => c.id === ec.courseId),
-  }));
+const [announcements, setAnnouncements] = useState<any[]>([]);
+const [studentCourses, setStudentCourses] = useState<any[]>([]);
+const [homeworks, setHomeworks] = useState<any[]>([]);
+useEffect(() => {
+  loadAnnouncements();
+}, []);
 
-  const stats = [
-    { label: "الكورسات المشترك بها", value: enrolledCourses.length.toString(), icon: <BookOpen size={20} />, color: "bg-blue-500", light: "bg-blue-50 text-blue-700" },
-    { label: "نسبة الإكمال", value: `${CURRENT_STUDENT.completionRate}%`, icon: <TrendingUp size={20} />, color: "bg-violet-500", light: "bg-violet-50 text-violet-700" },
-    { label: "الترتيب في الصف", value: `#${CURRENT_STUDENT.rank}`, icon: <Trophy size={20} />, color: "bg-amber-500", light: "bg-amber-50 text-amber-700" },
-    { label: "النقاط المكتسبة", value: CURRENT_STUDENT.totalPoints.toLocaleString("ar-EG"), icon: <Star size={20} />, color: "bg-emerald-500", light: "bg-emerald-50 text-emerald-700" },
-  ];
+useEffect(() => {
+  if (user?.id) {
+    loadStudentCourses();
+  }
+}, [user]);
 
-  const topThree = LEADERBOARD.slice(0, 3);
+const loadAnnouncements = async () => {
+  const { data } = await supabase
+    .from("announcements")
+    .select("*")
+    .order("created_at", { ascending: false });
 
+  setAnnouncements(data || []);
+};
+const loadHomeworks = async () => {
+  const { data, error } = await supabase
+    .from("homeworks")
+    .select("*")
+    .order("due_date", { ascending: true });
+
+  console.log("HOMEWORKS ERROR:", error);
+  console.log("HOMEWORKS DATA:", data);
+
+  if (!error && data) {
+    setHomeworks(data);
+  }
+};
+useEffect(() => {
+  loadHomeworks();
+}, []);
+useEffect(() => {
+  console.log("STATE HOMEWORKS:", homeworks);
+}, [homeworks]);
+const loadStudentCourses = async () => {
+  if (!user?.id) return;
+
+  const { data: enrollments, error } = await supabase
+    .from("student_courses")
+    .select("course_id")
+    .eq("student_id", Number(user.id))
+    .eq("active", true);
+    console.log("USER ID:", user.id);
+console.log("ENROLLMENTS:", enrollments);
+
+  if (error || !enrollments) return;
+
+  const courseIds = enrollments.map((c: any) => c.course_id);
+
+  const { data: courses, error: coursesError } = await supabase
+  .from("courses")
+  .select("*");
+
+console.log("COURSES ERROR:", coursesError);
+console.log("ALL COURSES:", courses);
+  setStudentCourses(courses || []);
+};
+
+const stats = [
+  {
+    label: "الكورسات المشترك بها",
+    value: studentCourses.length.toString(),
+    icon: <BookOpen size={20} />,
+    color: "bg-blue-500",
+    light: "bg-blue-50 text-blue-700",
+  },
+  {
+    label: "نسبة الإكمال",
+    value: "0%",
+    icon: <TrendingUp size={20} />,
+    color: "bg-violet-500",
+    light: "bg-violet-50 text-violet-700",
+  },
+  {
+    label: "الترتيب في الصف",
+    value: "#--",
+    icon: <Trophy size={20} />,
+    color: "bg-amber-500",
+    light: "bg-amber-50 text-amber-700",
+  },
+  {
+    label: "النقاط المكتسبة",
+    value: "0",
+    icon: <Star size={20} />,
+    color: "bg-emerald-500",
+    light: "bg-emerald-50 text-emerald-700",
+  },
+];
+
+const topThree = LEADERBOARD.slice(0, 3);
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden" dir="rtl">
       {/* Sidebar */}
@@ -120,8 +202,8 @@ export function StudentDashboard() {
                   عرض الكل <ChevronRight size={14} />
                 </button>
               </div>
-              {enrolledCourses.map(({ course, progress, lastLesson }) => course && (
-                <Card key={course.id} hover onClick={() => navigate(`/courses/${course.slug}`)}>
+              {studentCourses.map((course: any) => (
+                <Card key={course.id}>
                   <CardContent className="flex gap-4">
                     <img
                       src={course.thumbnail}
@@ -132,12 +214,14 @@ export function StudentDashboard() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <h3 className="font-bold text-slate-900 text-sm leading-tight">{course.title}</h3>
-                        <Badge variant={progress === 100 ? "emerald" : "blue"} className="flex-shrink-0">
-                          {progress === 100 ? "مكتمل" : `${progress}%`}
-                        </Badge>
+                        <Badge variant="blue" className="flex-shrink-0">
+  0%
+</Badge>
                       </div>
-                      <p className="text-xs text-slate-500 mb-3 truncate">آخر درس: {lastLesson}</p>
-                      <ProgressBar value={progress} size="sm" />
+                      <p className="text-xs text-slate-500 mb-3 truncate">
+ وصف الكورس: {course.description}
+</p>
+                      <ProgressBar value={0} size="sm" />
                       <div className="mt-3 flex items-center justify-between">
                         <button
                           onClick={e => { e.stopPropagation(); navigate("/dashboard/lesson/l1"); }}
@@ -145,7 +229,7 @@ export function StudentDashboard() {
                         >
                           <Play size={12} /> متابعة
                         </button>
-                        <span className="text-xs text-slate-400">{course.lessonsCount} درس</span>
+                        <span className="text-xs text-slate-400">0 درس</span>
                       </div>
                     </div>
                   </CardContent>
@@ -169,21 +253,26 @@ export function StudentDashboard() {
                     المهام القادمة
                   </h3>
                   <div className="space-y-3">
-                    {[
-                      { type: "exam", text: "امتحان الوحدة الأولى", date: "السبت 10 صباحاً", color: "bg-rose-100 text-rose-600" },
-                      { type: "homework", text: "واجب الكيمياء الحرارية", date: "غداً", color: "bg-amber-100 text-amber-600" },
-                      { type: "quiz", text: "اختبار الهيدروكربونات", date: "بعد غد", color: "bg-violet-100 text-violet-600" },
-                    ].map((task, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-xl ${task.color} flex items-center justify-center flex-shrink-0`}>
-                          <FileText size={14} />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-slate-700 truncate">{task.text}</p>
-                          <p className="text-xs text-slate-400">{task.date}</p>
-                        </div>
-                      </div>
-                    ))}
+                    {homeworks.map((hw) => (
+  <div key={hw.id} className="flex items-center gap-3">
+    <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0">
+      <FileText size={14} />
+    </div>
+
+    <div className="min-w-0">
+      <p className="text-sm font-medium text-slate-700 truncate">
+        {hw.title}
+      </p>
+
+      <p className="text-xs text-slate-400">
+        {new Date(hw.due_date).toLocaleDateString("ar-EG", {
+  day: "numeric",
+  month: "short",
+})}
+      </p>
+    </div>
+  </div>
+))}
                   </div>
                 </CardContent>
               </Card>
@@ -246,28 +335,44 @@ export function StudentDashboard() {
               <div className="flex items-center justify-between mb-5">
                 <h2 className="font-black text-slate-900 flex items-center gap-2">
                   <Bell size={18} className="text-blue-500" />
-                  آخر الإعلانات
+                  آخر الإشعارات
                 </h2>
                 <button onClick={() => navigate("/dashboard/announcements")} className="text-blue-600 text-sm font-bold">عرض الكل</button>
               </div>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {ANNOUNCEMENTS.slice(0, 4).map(ann => (
-                  <div key={ann.id} className={`p-4 rounded-xl border-r-4 ${
-                    ann.type === "exam" ? "border-rose-500 bg-rose-50" :
-                    ann.type === "lesson" ? "border-blue-500 bg-blue-50" :
-                    ann.type === "homework" ? "border-amber-500 bg-amber-50" :
-                    "border-slate-300 bg-slate-50"
-                  }`}>
-                    <div className="flex items-start gap-2">
-                      {ann.isNew && <span className="text-[10px] font-bold bg-blue-600 text-white px-1.5 py-0.5 rounded-full flex-shrink-0 mt-0.5">جديد</span>}
-                      <div>
-                        <p className="text-sm font-bold text-slate-900 mb-1 leading-tight">{ann.title}</p>
-                        <p className="text-xs text-slate-500">{ann.publishedAt}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+             <div className="grid sm:grid-cols-2 gap-3">
+  {announcements.slice(0, 4).map((ann: any) => (
+    <div
+      key={ann.id}
+      className={`p-4 rounded-xl border-r-4 ${
+        ann.type === "exam"
+          ? "border-rose-500 bg-rose-50"
+          : ann.type === "lesson"
+          ? "border-blue-500 bg-blue-50"
+          : ann.type === "homework"
+          ? "border-amber-500 bg-amber-50"
+          : "border-slate-300 bg-slate-50"
+      }`}
+    >
+      <div className="flex items-start gap-2">
+        {ann.is_new && (
+          <span className="text-[10px] font-bold bg-blue-600 text-white px-1.5 py-0.5 rounded-full flex-shrink-0 mt-0.5">
+            جديد
+          </span>
+        )}
+
+        <div>
+          <p className="text-sm text-slate-600 mt-2">
+  {ann.content}
+</p>
+
+          <p className="text-xs text-slate-500">
+            {new Date(ann.created_at).toLocaleDateString("ar-EG")}
+          </p>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
             </CardContent>
           </Card>
         </div>

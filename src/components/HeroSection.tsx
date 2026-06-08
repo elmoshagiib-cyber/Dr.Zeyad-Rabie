@@ -6,13 +6,15 @@ interface HeroSectionProps {
 
 const HeroSection: React.FC<HeroSectionProps> = ({ image }) => {
   return (
-    <div className="w-full h-full">
-      <img
-        src={image}
-        alt="Hero"
-        className="w-full h-auto block"
-      />
-    </div>
+    <div
+      className="w-full h-full min-h-full"
+      style={{
+        backgroundImage: `url(${image})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center top",
+        backgroundRepeat: "no-repeat",
+      }}
+    />
   );
 };
 
