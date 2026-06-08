@@ -461,7 +461,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-{<HeroSection />}
+<HeroSection image="/images/login-image.png" />
           </motion.div>
         </div>
       </div>
