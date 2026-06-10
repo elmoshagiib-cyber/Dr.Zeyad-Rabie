@@ -46,7 +46,7 @@ export function Footer() {
                 { label: "إنشاء حساب", path: "/register" },
                 { label: "تسجيل الدخول", path: "/login" },
               ].map(link => (
-                <li key={link.path}>
+                <li key={`${link.label}-${link.path}`}>
                   <button
                     onClick={() => navigate(link.path)}
                     className="text-sm text-slate-400 hover:text-white transition-colors hover:translate-x-1 inline-flex items-center gap-1"

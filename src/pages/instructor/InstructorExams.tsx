@@ -6,6 +6,8 @@ import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Input } from "../../components/ui/Input";
 import { useState } from "react";
+import { useEffect } from "react";
+import { supabase } from "../../lib/supabase";
 
 export function InstructorExams() {
   const navigate = useNavigate();
@@ -13,102 +15,129 @@ export function InstructorExams() {
   const [examTitle, setExamTitle] = useState("");
   const [examDuration, setExamDuration] = useState("");
   const [examPassMark, setExamPassMark] = useState("");
-const [exams, setExams] = useState<any[]>([  
-   {
-  id: 1,
-  title: "اختبار الكيمياء العضوية",
-  questions: [],
-  duration: 20,
-  passMark: 60,
-  status: "published",
-},
-{
-  id: 2,
-  title: "اختبار الهيدروكربونات",
-  questions: [],
-  duration: 30,
-  passMark: 70,
-  status: "draft",
-},
-    
- ]);
-const createExam = () => {
+const [exams, setExams] = useState<any[]>([]);
+useEffect(() => {
+  loadExams();
+}, []);
+
+const loadExams = async () => {
+  const { data, error } = await supabase
+    .from("exams")
+    .select(`
+      *,
+      exam_questions (*)
+    `)
+    .order("id", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setExams(data || []);
+};
+
+const createExam = async () => {
   if (!examTitle.trim()) return;
 
-  setExams([
-    ...exams,
-    {
-  id: Date.now(),
-  title: examTitle,
-  questions: [],
-  duration: Number(examDuration),
-  passMark: Number(examPassMark),
-  status: "draft",
-}
-  ]);
+  const { error } = await supabase
+    .from("exams")
+    .insert({
+      title: examTitle,
+      duration: Number(examDuration),
+      passing_grade: Number(examPassMark),
+    });
+
+  if (error) {
+    console.error(error);
+    alert(error.message);
+    return;
+  }
 
   setExamTitle("");
   setExamDuration("");
   setExamPassMark("");
+setQuestionText("");
+setOptionA("");
+setOptionB("");
+setOptionC("");
+setOptionD("");
+setCorrectAnswer("A");
+
+await loadExams();
+
+alert("تم إضافة السؤال");
+  await loadExams();
 };
-const deleteExam = (examId: number) => {
-  setExams(
-    exams.filter((exam) => exam.id !== examId)
-  );
-};
-const addQuestion = (examId: number) => {
+
+const addQuestion = async (examId: number) => {
   if (!questionText.trim()) return;
 
-  setExams(
-    exams.map((exam) =>
-      exam.id === examId
-        ? {
-            ...exam,
-            questions: [
-              ...exam.questions,
-              {
-                question: questionText,
-                options: {
-                  A: optionA,
-                  B: optionB,
-                  C: optionC,
-                  D: optionD,
-                },
-                correctAnswer,
-              },
-            ],
-          }
-        : exam
-    )
-  );
+  const { error } = await supabase
+    .from("exam_questions")
+    .insert({
+      exam_id: examId,
+      question: questionText,
+      option_a: optionA,
+      option_b: optionB,
+      option_c: optionC,
+      option_d: optionD,
+      correct_answer: correctAnswer,
+    });
 
-  setQuestionText("");
-  setOptionA("");
-  setOptionB("");
-  setOptionC("");
-  setOptionD("");
-  setCorrectAnswer("A");
-};
+  if (error) {
+  console.error("QUESTION ERROR:", error);
+  alert(JSON.stringify(error));
+  return;
+}
 
-const deleteQuestion = (
-  examId: number,
-  questionIndex: number
-) => {
-  setExams(
-    exams.map((exam) =>
-      exam.id === examId
-        ? {
-            ...exam,
-            questions: exam.questions.filter(
-              (_: any, index: number) =>
-                index !== questionIndex
-            ),
-          }
-        : exam
-    )
-  );
+console.log("QUESTION ADDED");
+
+setQuestionText("");
+setOptionA("");
+setOptionB("");
+setOptionC("");
+setOptionD("");
+setCorrectAnswer("A");
+
+await loadExams();
+
+alert("تم إضافة السؤال");
 };
+const deleteQuestion = async (questionId: number) => {
+  const { error } = await supabase
+    .from("exam_questions")
+    .delete()
+    .eq("id", questionId);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  await loadExams();
   
+};
+  const deleteExam = async (examId: number) => {
+  console.log("DELETE EXAM:", examId);
+
+  const { data, error } = await supabase
+  .from("exams")
+  .delete()
+  .eq("id", examId)
+  .select();
+
+console.log(data);
+console.log(error);
+
+  if (error) {
+    console.error(error);
+    alert(error.message);
+    return;
+  }
+
+  await loadExams();
+};
 const [questionText, setQuestionText] = useState("");
 const [optionA, setOptionA] = useState("");
 const [optionB, setOptionB] = useState("");
@@ -183,10 +212,10 @@ const [correctAnswer, setCorrectAnswer] = useState("A");
 
                     <div className="flex flex-wrap gap-4 text-sm text-slate-500">
 
-                      <span className="flex items-center gap-1">
-                        <FileText size={14} />
-                        {exam.questions.length} سؤال
-                      </span>
+                     <span className="flex items-center gap-1">
+ <FileText size={14} />
+{exam.exam_questions?.length || 0} سؤال
+</span>
 
                       <span className="flex items-center gap-1">
                         <Clock size={14} />
@@ -194,23 +223,15 @@ const [correctAnswer, setCorrectAnswer] = useState("A");
                       </span>
 
                       <span>
-                        النجاح: {exam.passMark}%
+                      النجاح: {exam?.passing_grade ?? 0}%
                       </span>
 
                     </div>
                   </div>
 
-                  <Badge
-                    variant={
-                      exam.status === "published"
-                        ? "emerald"
-                        : "blue"
-                    }
-                  >
-                    {exam.status === "published"
-                      ? "منشور"
-                      : "مسودة"}
-                  </Badge>
+                  <Badge variant="blue">
+  منشور
+</Badge>
                 </div>
 <div className="mt-6 space-y-3 border-t pt-4">
 
@@ -265,10 +286,11 @@ const [correctAnswer, setCorrectAnswer] = useState("A");
 
 </div>
 
-{exam.questions.length > 0 && (
+{(exam.exam_questions?.length || 0) > 0 && (
   <div className="mt-5 space-y-3">
 
-{exam.questions.map((question: any, index: number) => (      <div
+{exam.exam_questions?.map((question: any, index: number) => (
+     <div
         key={index}
         className="border rounded-xl p-4 bg-slate-50"
       >
@@ -278,26 +300,24 @@ const [correctAnswer, setCorrectAnswer] = useState("A");
 
         <div className="space-y-1 text-sm">
 
-          <p>A) {question.options.A}</p>
+          <p>A) {question.option_a}</p>
 
-          <p>B) {question.options.B}</p>
+          <p>B) {question.option_b}</p>
 
-          <p>C) {question.options.C}</p>
+          <p>C) {question.option_c}</p>
 
-          <p>D) {question.options.D}</p>
+          <p>D) {question.option_d}</p>
 
         </div>
 
         <p className="mt-3 text-emerald-600 font-semibold">
-          الإجابة الصحيحة: {question.correctAnswer}
+          الإجابة الصحيحة: {question.correct_answer}
         </p>
         <Button
   size="sm"
   variant="danger"
   className="mt-3"
-  onClick={() =>
-    deleteQuestion(exam.id, index)
-  }
+  onClick={() => deleteQuestion(question.id)}
 >
   <Trash2 size={14} />
   حذف السؤال
@@ -314,11 +334,14 @@ const [correctAnswer, setCorrectAnswer] = useState("A");
                     <Edit size={14} />
                     تعديل
                   </Button>
-
-                  <Button size="sm" variant="danger">
-                    <Trash2 size={14} />
-                    حذف
-                  </Button>
+<Button
+  size="sm"
+  variant="danger"
+  onClick={() => deleteExam(exam.id)}
+>
+  <Trash2 size={14} />
+  حذف
+</Button>
 
                 </div>
               </CardContent>

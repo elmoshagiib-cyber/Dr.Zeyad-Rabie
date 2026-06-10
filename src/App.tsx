@@ -4,7 +4,7 @@ import { HomePage } from "./pages/HomePage";
 import { CoursesPage } from "./pages/CoursesPage";
 import { CourseDetailPage } from "./pages/CourseDetailPage";
 import { ThemeProvider } from "./context/ThemeContext";
-
+import { InstructorHomeworkSubmissions } from "./pages/instructor/InstructorHomeworkSubmissions";
 import StudentLoginPage from "./pages/StudentLoginPage";
 import StudentRegisterPage from "./pages/StudentRegisterPage";
 
@@ -232,6 +232,14 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+  path="/instructor/submissions"
+  element={
+    <ProtectedRoute roles={["instructor"]}>
+      <InstructorHomeworkSubmissions />
+    </ProtectedRoute>
+  }
+/>
 
       <Route
         path="/instructor/exams"

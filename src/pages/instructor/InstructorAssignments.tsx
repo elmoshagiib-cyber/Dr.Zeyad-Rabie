@@ -5,14 +5,25 @@ import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Input } from "../../components/ui/Input";
 import { useState } from "react";
+import { useEffect } from "react";
+import { supabase } from "../../lib/supabase";
 
 export function InstructorAssignments() {
 
   const [assignmentTitle, setAssignmentTitle] = useState("");
   const [assignmentGrade, setAssignmentGrade] = useState("");
   const [assignmentDueDate, setAssignmentDueDate] = useState("");
+const loadAssignments = async () => {
 
+  const { data } = await supabase
+    .from("homeworks")
+    .select("*")
+    .order("id", { ascending: false });
+
+  setAssignments(data || []);
+};
   const [assignments, setAssignments] = useState<any[]>([
+    
     {
       id: 1,
       title: "واجب الكيمياء العضوية",
@@ -30,31 +41,36 @@ export function InstructorAssignments() {
       status: "draft",
     },
   ]);
-  const createAssignment = () => {
-  console.log("createAssignment fired");
+  useEffect(() => {
+  loadAssignments();
+}, []);
 
-  if (!assignmentTitle.trim()) {
-    console.log("title empty");
+  const createAssignment = async () => {
+
+  if (!assignmentTitle.trim()) return;
+
+  const { error } = await supabase
+    .from("homeworks")
+    .insert({
+      title: assignmentTitle,
+      description: "",
+      course_id: "c1",
+      due_date: assignmentDueDate
+    });
+
+  if (error) {
+    console.error(error);
+    alert(error.message);
     return;
   }
 
-  setAssignments([
-    ...assignments,
-    {
-      id: Date.now(),
-      title: assignmentTitle,
-      type: "pdf",
-      dueDate: assignmentDueDate,
-      grade: Number(assignmentGrade),
-      status: "draft",
-    },
-  ]);
-
-  console.log("assignment added");
+  alert("تم إنشاء الواجب");
 
   setAssignmentTitle("");
   setAssignmentGrade("");
   setAssignmentDueDate("");
+
+  loadAssignments();
 };
 const deleteAssignment = (id: number) => {
   setAssignments(
@@ -136,7 +152,7 @@ const deleteAssignment = (id: number) => {
                       </span>
 
                       <span>
-                        الدرجة: {assignment.grade}
+                        الدرجة: {0}
                       </span>
 
                       <span className="flex items-center gap-1">

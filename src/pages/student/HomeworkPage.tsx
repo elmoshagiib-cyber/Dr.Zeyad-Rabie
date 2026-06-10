@@ -229,11 +229,23 @@ return (
                       </p>
                       {hw.submission && (
   <div className="mt-2 flex gap-3">
-
+{hw.submission?.grade !== null &&
+ hw.submission?.grade !== undefined && (
+  <div className="mt-2">
+    <span className="text-blue-600 font-bold">
+      الدرجة: {hw.submission.grade}
+    </span>
+  </div>
+)}
     <span className="text-green-600 text-sm font-bold">
   {hw.submission.answer.split("/").pop()}
 </span>
-
+{hw.submission.grade !== null &&
+ hw.submission.grade !== undefined && (
+  <span className="text-blue-600 text-sm font-bold">
+    الدرجة: {hw.submission.grade}
+  </span>
+)}
     <a
       href={hw.submission.answer}
       target="_blank"

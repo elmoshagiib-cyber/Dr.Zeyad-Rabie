@@ -31,7 +31,11 @@ const instructorNav: NavItem[] = [
   { label: "الاختبارات", path: "/instructor/exams", icon: <ClipboardList size={18} /> },
 
   { label: "الواجبات", path: "/instructor/assignments", icon: <FileText size={18} /> },
-
+  {
+  label: "تسليمات الطلاب",
+  path: "/instructor/submissions",
+  icon: <CheckCircle size={18} />
+},
   { label: "الإشعارات", path: "/instructor/notifications", icon: <Bell size={18} /> },
 
   { label: "الطلاب", path: "/instructor/students", icon: <Users size={18} /> },
