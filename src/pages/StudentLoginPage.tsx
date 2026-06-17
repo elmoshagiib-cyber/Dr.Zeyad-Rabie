@@ -27,66 +27,114 @@ const LoginPage = () => {  const navigate = useNavigate();
 
   const inputClass = `w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none border transition-all duration-300 ${
     isDark
-      ? 'bg-white/[0.045] border-white/[0.09] text-white placeholder-white/25 focus:border-purple-500 focus:bg-white/[0.07]'
-      : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:border-purple-500 focus:bg-white'
+      ? 'bg-white dark:bg-[#130726]/[0.045] border-white/[0.09] text-white placeholder-white/25 focus:border-purple-500 focus:bg-white dark:bg-[#130726]/[0.07]'
+      : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:border-purple-500 focus:bg-white dark:bg-[#130726]'
   }`;
 
   const focusShadow = { boxShadow: '0 0 0 3px rgba(139,92,246,0.18)' };
-const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (
+  e: React.FormEvent
+) => {
+
   e.preventDefault();
 
   setLoading(true);
 
   try {
-    const phone =
-      tab === "online"
-        ? onlineForm.phone
-        : centerForm.code;
 
-    const password =
-      tab === "online"
-        ? onlineForm.password
-        : centerForm.password;
-
-    const { data, error } = await supabase
+    let query = supabase
       .from("students")
-      .select("*")
-      .eq("phone", phone)
-      .eq("password", password);
+      .select("*");
 
-    if (error) {
-      alert(error.message);
+    if (tab === "online") {
+
+      query = query
+  .eq("phone", onlineForm.phone)
+  .eq("password", onlineForm.password)
+  .eq("type", "اونلاين");
+
+    } else {
+
+      query = query
+        .eq(
+  "student_code",
+  centerForm.code.trim().toUpperCase()
+)
+        .eq(
+          "password",
+          centerForm.password
+        )
+        .eq(
+          "is_activated",
+          true
+        );
+
+    }
+
+    const { data, error } =
+      await query.single();
+
+    if (error || !data) {
+
       setLoading(false);
+
+      alert(
+        tab === "online"
+          ? "رقم الهاتف أو كلمة المرور غير صحيحة"
+          : "كود الطالب أو كلمة المرور غير صحيحة"
+      );
+
       return;
     }
 
-    if (!data || data.length === 0) {
+    if (
+      data.status === "موقوف"
+    ) {
+
       setLoading(false);
-      alert("رقم الهاتف أو كلمة المرور غير صحيحة");
+
+      alert(
+        "تم إيقاف هذا الحساب"
+      );
+
       return;
     }
 
-    const student = data[0];
+    await supabase
+      .from("students")
+      .update({
+        last_login:
+          new Date().toISOString(),
+      })
+      .eq("id", data.id);
 
     login({
-      id: String(student.id),
-      name: student.full_name,
+      id: String(data.id),
+      name: data.full_name,
       role: "student",
-      grade: student.grade,
-      gradeLabel: student.grade,
-      code: student.student_code,
-      governorate: student.governorate,
-      phone: student.phone,
+      grade: data.grade,
+      gradeLabel: data.grade,
+      code: data.student_code,
+      governorate:
+        data.governorate,
+      phone: data.phone,
       status: "approved",
     });
 
     setLoading(false);
+
     navigate("/dashboard");
 
   } catch (err) {
+
     console.error(err);
+
     setLoading(false);
-    alert("حدث خطأ أثناء تسجيل الدخول");
+
+    alert(
+      "حدث خطأ أثناء تسجيل الدخول"
+    );
+
   }
 };
   const cardShadow = isDark
@@ -259,7 +307,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                             <KeyRound className="absolute top-1/2 -translate-y-1/2 right-4 w-[18px] h-[18px] text-purple-500" />
                             <input
                               type="text"
-                              placeholder="ST-2026-0001"
+                              placeholder="ZR-000001"
                               value={centerForm.code}
                               onChange={e => setCenterForm(p => ({ ...p, code: e.target.value }))}
                               className={`${inputClass} pr-11`}
@@ -270,7 +318,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                             />
                           </div>
                           <p className="text-[11px]" style={{ color: isDark ? 'rgba(255,255,255,0.28)' : '#94A3B8' }}>
-                            مثال: ST-2026-8547
+                            مثال: ZR-000001
                           </p>
                         </div>
 

@@ -74,7 +74,7 @@ export function ProfilePage() {
                     <input
                       value={editName}
                       onChange={e => setEditName(e.target.value)}
-                      className="bg-white/20 border border-white/30 rounded-xl px-4 py-2 text-white text-xl font-black focus:outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-auto"
+                      className="bg-white dark:bg-[#130726]/20 border border-white/30 rounded-xl px-4 py-2 text-white text-xl font-black focus:outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-auto"
                     />
                   </div>
                 ) : (
@@ -98,11 +98,11 @@ export function ProfilePage() {
               <div className="flex gap-2">
                 {editing ? (
                   <>
-                    <button onClick={() => setEditing(false)} className="px-4 py-2 rounded-xl bg-white/10 text-white text-sm hover:bg-white/20 transition-colors">إلغاء</button>
+                    <button onClick={() => setEditing(false)} className="px-4 py-2 rounded-xl bg-white dark:bg-[#130726]/10 text-white text-sm hover:bg-white dark:bg-[#130726]/20 transition-colors">إلغاء</button>
                     <button onClick={handleSave} className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700 transition-colors">حفظ</button>
                   </>
                 ) : (
-                  <button onClick={() => setEditing(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white text-sm hover:bg-white/20 transition-colors border border-white/20">
+                  <button onClick={() => setEditing(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-[#130726]/10 text-white text-sm hover:bg-white dark:bg-[#130726]/20 transition-colors border border-white/20">
                     <Edit2 size={14} />
                     تعديل
                   </button>

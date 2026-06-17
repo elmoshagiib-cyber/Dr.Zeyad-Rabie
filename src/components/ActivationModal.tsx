@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Eye, EyeOff, Phone, KeyRound, Lock, CheckCircle2, Loader2, ShieldCheck } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { supabase } from "../lib/supabase";
 
 interface ActivationModalProps {
   isOpen: boolean;
@@ -44,20 +45,98 @@ newErrors.studentCode =
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 2000));
+
+try {
+
+  const { data, error } = await supabase
+    .from("students")
+    .select("*")
+    .eq(
+  "student_code",
+  form.studentCode.trim().toUpperCase()
+)
+    .eq("phone", form.phone)
+    .single();
+
+  if (error || !data) {
+
+    alert(
+      "كود الطالب أو رقم الهاتف غير صحيح"
+    );
+
     setLoading(false);
-    setSuccess(true);
-    setTimeout(() => {
-      onClose();
-      setSuccess(false);
-      setForm({ studentCode: '', phone: '', password: '', confirmPassword: '' });
-    }, 2500);
+    return;
+  }
+
+  if (data.type !== "سنتر") {
+
+  alert(
+    "هذا الكود ليس لطالب سنتر"
+  );
+
+  setLoading(false);
+  return;
+}
+
+  if (data.is_activated) {
+
+    alert(
+      "تم تفعيل هذا الحساب بالفعل"
+    );
+
+    setLoading(false);
+    return;
+  }
+
+  const { error: updateError } =
+    await supabase
+      .from("students")
+      .update({
+        password: form.password,
+        is_activated: true,
+      })
+      .eq("id", data.id);
+
+  if (updateError) {
+
+    alert(updateError.message);
+
+    setLoading(false);
+    return;
+  }
+
+  setLoading(false);
+  setSuccess(true);
+
+  setTimeout(() => {
+
+    onClose();
+
+    setSuccess(false);
+
+    setForm({
+      studentCode: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+    });
+
+  }, 2500);
+
+} catch (err) {
+
+  console.log(err);
+
+  alert("حدث خطأ");
+
+  setLoading(false);
+}
   };
 
   const inputBase = `w-full rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 outline-none border ${
     isDark
-      ? 'bg-white/5 border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:bg-white/8'
-      : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400 focus:border-purple-500 focus:bg-white'
+      ? 'bg-white dark:bg-[#130726]/5 border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:bg-white dark:bg-[#130726]/8'
+      : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400 focus:border-purple-500 focus:bg-white dark:bg-[#130726]'
   } focus:shadow-[0_0_0_3px_rgba(139,92,246,0.15)]`;
 
   return (
@@ -83,7 +162,7 @@ newErrors.studentCode =
             className={`relative w-full max-w-md rounded-3xl overflow-hidden shadow-2xl ${
               isDark
                 ? 'bg-[#100d1f] border border-white/10'
-                : 'bg-white border border-purple-100'
+                : 'bg-white dark:bg-[#130726] border border-purple-100'
             }`}
             initial={{ opacity: 0, scale: 0.85, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -101,13 +180,13 @@ newErrors.studentCode =
                 <div className="flex items-center justify-between mb-4">
                   <motion.button
                     onClick={onClose}
-                    className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all"
+                    className="w-8 h-8 rounded-xl bg-white dark:bg-[#130726]/10 hover:bg-white dark:bg-[#130726]/20 flex items-center justify-center text-white/80 hover:text-white transition-all"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
                     <X className="w-4 h-4" />
                   </motion.button>
-                  <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-2xl bg-white dark:bg-[#130726]/15 backdrop-blur-sm border border-white/20 flex items-center justify-center">
                     <ShieldCheck className="w-5 h-5 text-purple-300" />
                   </div>
                 </div>

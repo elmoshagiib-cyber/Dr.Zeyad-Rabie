@@ -11,7 +11,7 @@ export const TEACHER = {
   experience: "15+ سنة خبرة",
   university: "دكتوراه كيمياء عضوية — جامعة القاهرة",
   achievements: ["أكثر من 2,400 طالب", "معدل نجاح 98%", "أفضل مدرس كيمياء 2023"],
-  image: "/images/teacher-hero.jpg",
+  image: "/images/teacher-zeyad.png",
 };
 
 export const STATS = [
@@ -31,8 +31,8 @@ export const GRADES = [
 export const COURSES = [
   {
     id: "c1",
-    slug: "chemistry-grade-3-2024",
-    title: "كيمياء الصف الثالث الثانوي 2024",
+    slug: "chemistry-grade-3-2027",
+    title: "كيمياء الصف الثالث الثانوي 2027",
     titleEn: "Chemistry — Grade 3 Secondary",
     description: "كورس شامل ومتكامل لمنهج كيمياء الصف الثالث الثانوي، يغطي جميع أبواب المنهج مع حل مسائل وتدريبات متنوعة.",
     grade: "third_sec",
@@ -86,7 +86,7 @@ export const COURSES = [
   },
   {
     id: "c2",
-    slug: "chemistry-grade-2-2024",
+    slug: "chemistry-grade-2-2027",
     title: "كيمياء الصف الثاني الثانوي 2024",
     titleEn: "Chemistry — Grade 2 Secondary",
     description: "منهج كيمياء الصف الثاني الثانوي كامل مع شرح مفصل وأمثلة عملية وتدريبات متنوعة لضمان الفهم الكامل.",

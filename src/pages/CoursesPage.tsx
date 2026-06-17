@@ -7,7 +7,10 @@ import { Card, CardContent } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 
 import { Button } from "../components/ui/Button";
-import { COURSES } from "../data/mockData";
+import { supabase } from "../lib/supabase";
+import { useEffect } from "react";
+
+
 
 const gradeColors: Record<string, string> = {
   third_sec: "rose",
@@ -34,27 +37,48 @@ const typeOptions = [
 
 export function CoursesPage() {
   const navigate = useNavigate();
+
+  const [courses, setCourses] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [grade, setGrade] = useState("");
   const [type, setType] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
-  const filtered = COURSES.filter(c => {
-    const matchSearch = c.title.includes(search) || c.description.includes(search);
-    const matchGrade = !grade || c.grade === grade;
-    const matchType = !type || (type === "free" ? c.isFree : c.type === type);
-    return matchSearch && matchGrade && matchType;
-  });
+  useEffect(() => {
+    loadCourses();
+  }, []);
 
+  const loadCourses = async () => {
+    const { data, error } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("active", true)
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+  console.log(data);
+  setCourses(data);
+}
+  };
+  const filtered = courses.filter((c) => {
+  const matchSearch =
+    c.title?.includes(search) ||
+    c.description?.includes(search);
+
+  const matchGrade =
+    !grade || c.grade === grade;
+
+  return matchSearch && matchGrade;
+});
   return (
-    <div className="min-h-screen bg-slate-50" dir="rtl">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0715]" dir="rtl">
       <Navbar />
       <div className="pt-16">
         {/* Hero */}
-        <div className="bg-gradient-to-br from-slate-900 to-blue-900 py-16">
+        <div className="bg-gradient-to-br from-slate-900 to-blue-900 dark:from-[#0b0715] dark:to-[#1a0930] py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <Badge variant="blue" className="mb-4 bg-blue-500/20 text-blue-300 border-blue-500/30">الكورسات</Badge>
-            <h1 className="text-4xl font-black text-white mb-4">اختر كورسك وابدأ رحلتك</h1>
+            <h2 className="font-hala text-5xl md:text-6xl">أحدث الكروسات</h2>
             <p className="text-slate-300 text-lg max-w-2xl mx-auto mb-8">
               كورسات متخصصة لجميع المراحل الدراسية مع شرح شامل وتدريبات متنوعة
             </p>
@@ -65,7 +89,7 @@ export function CoursesPage() {
                 placeholder="ابحث عن كورس..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full pr-12 pl-4 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white/20 text-sm"
+                className="w-full pr-12 pl-4 py-4 rounded-2xl bg-white dark:bg-[#130726]/10 backdrop-blur-sm border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:bg-[#130726]/20 text-sm"
               />
             </div>
           </div>
@@ -85,7 +109,7 @@ export function CoursesPage() {
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                   grade === opt.value
                     ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
-                    : "bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:text-blue-600"
+                    : "bg-white dark:bg-[#130726] text-slate-600 border border-slate-200 hover:border-blue-300 hover:text-blue-600"
                 }`}
               >
                 {opt.label}
@@ -94,7 +118,7 @@ export function CoursesPage() {
             <div className="mr-auto flex items-center gap-2">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:border-blue-300"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium  bg-whitedark:bg-[#130726] text-slate-600 border border-slate-200 hover:border-blue-300"
               >
                 <SlidersHorizontal size={16} />
                 فلاتر أخرى
@@ -103,7 +127,7 @@ export function CoursesPage() {
           </div>
 
           {showFilters && (
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 mb-6 grid sm:grid-cols-3 gap-4">
+            <div className="bg-white dark:bg-[#130726] rounded-2xl border border-slate-200 p-5 mb-6 grid sm:grid-cols-3 gap-4">
               <div>
                 <label className="text-xs font-bold text-slate-600 mb-2 block">نوع الكورس</label>
                 <div className="flex flex-wrap gap-2">
@@ -125,8 +149,8 @@ export function CoursesPage() {
 
           {/* Results info */}
           <div className="flex items-center justify-between mb-6">
-            <p className="text-slate-500 text-sm">
-              عرض <span className="font-bold text-slate-900">{filtered.length}</span> كورس
+            <p className="text-slate-500 dark:text-slate-300 text-sm">
+              عرض <span className="font-bold text-slate-900 dark:text-white">{filtered.length}</span> كورس
             </p>
           </div>
 
@@ -135,26 +159,48 @@ export function CoursesPage() {
             <div className="text-center py-20">
               <div className="text-6xl mb-4">🔍</div>
               <p className="text-xl font-bold text-slate-700 mb-2">لا توجد نتائج</p>
-              <p className="text-slate-500">جرب كلمات بحث مختلفة أو غيّر الفلاتر</p>
+              <p className="text-slate-500 dark:text-slate-300">جرب كلمات بحث مختلفة أو غيّر الفلاتر</p>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map(course => (
-                <Card key={course.id} hover onClick={() => navigate(`/courses/${course.slug}`)}>
+                <Card
+  key={course.id}
+  hover
+  className="
+  overflow-hidden
+  bg-white
+  dark:bg-[#130726]
+  border
+  dark:border-purple-500/20
+  "
+>
+  
                   <div className="relative overflow-hidden rounded-t-2xl">
-                    <img
-                      src={course.thumbnail}
-                      alt={course.title}
-                      className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=400&h=250&fit=crop`;
-                      }}
-                    />
+                   <img
+  src={
+    course.thumbnail ||
+    "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=400&h=250&fit=crop"
+  }
+  alt={course.title}
+  className="
+w-full
+aspect-video
+object-cover
+hover:scale-105
+transition-all
+duration-500
+"
+/>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                     <div className="absolute top-3 right-3">
-                      <Badge variant={gradeColors[course.grade] as any}>{course.gradeLabel}</Badge>
+                      <Badge variant="blue">
+  {gradeOptions.find(
+    g => g.value === course.grade
+  )?.label}
+</Badge>
                     </div>
-                    {course.isFree && (
+                    {course.price === 0 && (
                       <div className="absolute top-3 left-3">
                         <Badge variant="emerald">مجاني</Badge>
                       </div>
@@ -162,19 +208,27 @@ export function CoursesPage() {
                     <div className="absolute bottom-3 left-3 flex items-center gap-2">
                       <div className="bg-black/60 backdrop-blur-sm rounded-lg px-2.5 py-1 flex items-center gap-1.5">
                         <Star size={12} className="text-amber-400 fill-amber-400" />
-                        <span className="text-white text-xs font-bold">{course.rating}</span>
+                        <span className="text-white text-xs font-bold">{5}</span>
                       </div>
                     </div>
                   </div>
                   <CardContent>
                     <div className="mb-2">
-                      <Badge variant="slate" className="mb-2">{course.typeLabel}</Badge>
+                     <Badge variant="slate" className="mb-2">
+  كورس
+</Badge>
                     </div>
-                    <h3 className="font-bold text-slate-900 mb-2 leading-tight">{course.title}</h3>
+                    <h3 className="font-bold text-slate-900 dark:text-white mb-2 leading-tight">{course.title}</h3>
                     <p className="text-sm text-slate-500 mb-4 line-clamp-2">{course.description}</p>
                     <div className="flex items-center gap-4 text-xs text-slate-500 mb-4">
-                      <span className="flex items-center gap-1.5"><BookOpen size={13} />{course.lessonsCount} درس</span>
-                      <span className="flex items-center gap-1.5"><Users size={13} />{course.studentsCount.toLocaleString("ar-EG")} طالب</span>
+                      <span className="flex items-center gap-1.5">
+  <Users size={13} />
+  0 طالب
+</span>
+                     <span className="flex items-center gap-1.5">
+  <BookOpen size={13} />
+  لا يوجد دروس
+</span>
                     </div>
                     <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
                       <div>
@@ -184,10 +238,12 @@ export function CoursesPage() {
                           <span className="text-xl font-black text-slate-900">{course.price} <span className="text-sm font-medium text-slate-500">جنيه</span></span>
                         )}
                       </div>
-                      <Button size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/courses/${course.slug}`); }}>
-                        عرض الكورس
-                        <ChevronRight size={14} />
-                      </Button>
+                     <Button
+  size="sm"
+  onClick={() => navigate(`/courses/${course.id}`)}
+>
+  عرض الكورس
+</Button>
                     </div>
                   </CardContent>
                 </Card>

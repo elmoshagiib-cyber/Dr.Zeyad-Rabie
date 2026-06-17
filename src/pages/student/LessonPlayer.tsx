@@ -78,7 +78,7 @@ export function LessonPlayer() {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setPlaying(!playing)}
-                      className="w-9 h-9 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                      className="w-9 h-9 bg-white dark:bg-[#130726] rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                     >
                       {playing ? <Pause size={16} className="text-slate-900" /> : <Play size={16} className="text-slate-900 mr-[-2px]" />}
                     </button>
@@ -96,14 +96,14 @@ export function LessonPlayer() {
                 onClick={() => setPlaying(!playing)}
                 className="absolute inset-0 flex items-center justify-center group/play"
               >
-                <div className={`w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-white/40 hover:bg-white/30 transition-all ${playing ? "opacity-0" : "opacity-100"}`}>
+                <div className={`w-16 h-16 bg-white dark:bg-[#130726]/20 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-white/40 hover:bg-white dark:bg-[#130726]/30 transition-all ${playing ? "opacity-0" : "opacity-100"}`}>
                   <Play size={24} className="text-white mr-[-2px]" />
                 </div>
               </button>
             </div>
 
             {/* Lesson Info */}
-            <div className="p-6 bg-white border-b border-slate-200">
+            <div className="p-6 bg-white dark:bg-[#130726] border-b border-slate-200">
               <div className="max-w-3xl mx-auto">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div>
@@ -183,7 +183,7 @@ export function LessonPlayer() {
 
           {/* Right: Lesson List */}
           {showSidebar && (
-            <div className="w-80 bg-white border-r border-slate-200 overflow-y-auto flex-shrink-0">
+            <div className="w-80 bg-white dark:bg-[#130726] border-r border-slate-200 overflow-y-auto flex-shrink-0">
               <div className="p-4 border-b border-slate-200 flex items-center justify-between">
                 <h3 className="font-black text-slate-900 text-sm">محتوى الكورس</h3>
                 <button onClick={() => setShowSidebar(false)} className="text-slate-400 hover:text-slate-600 lg:hidden">

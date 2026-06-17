@@ -7,7 +7,16 @@ import {
 } from "lucide-react";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { Card, CardContent } from "../../components/ui/Card";
-
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  BarChart,
+  Bar,
+} from "recharts";
 export function InstructorAnalytics() {
   const stats = [
     {
@@ -49,7 +58,21 @@ export function InstructorAnalytics() {
       completion: "80%",
     },
   ];
+const weeklyActivity = [
+  { day: "السبت", views: 120 },
+  { day: "الأحد", views: 180 },
+  { day: "الإثنين", views: 250 },
+  { day: "الثلاثاء", views: 220 },
+  { day: "الأربعاء", views: 300 },
+  { day: "الخميس", views: 270 },
+  { day: "الجمعة", views: 350 },
+];
 
+const studentsPerCourse = [
+  { name: "عضوية", students: 120 },
+  { name: "هيدرو", students: 95 },
+  { name: "أحماض", students: 78 },
+];
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden" dir="rtl">
       <div className="hidden lg:block flex-shrink-0">
@@ -58,7 +81,7 @@ export function InstructorAnalytics() {
 
       <main className="flex-1 overflow-y-auto">
         {/* Header */}
-        <div className="bg-white border-b border-slate-200 px-6 py-5">
+        <div className="bg-white dark:bg-[#130726] border-b border-slate-200 px-6 py-5">
           <h1 className="text-2xl font-black text-slate-900">
             التحليلات
           </h1>
@@ -90,6 +113,49 @@ export function InstructorAnalytics() {
               </Card>
             ))}
           </div>
+
+<div className="grid xl:grid-cols-2 gap-6">
+
+  <Card>
+    <CardContent className="h-[320px]">
+      <h2 className="font-black mb-4">
+        نشاط المشاهدات
+      </h2>
+
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={weeklyActivity}>
+          <XAxis dataKey="day" />
+          <YAxis />
+          <Tooltip />
+          <Line
+            type="monotone"
+            dataKey="views"
+            stroke="#2563eb"
+            strokeWidth={3}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </CardContent>
+  </Card>
+
+  <Card>
+    <CardContent className="h-[320px]">
+      <h2 className="font-black mb-4">
+        الطلاب لكل كورس
+      </h2>
+
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={studentsPerCourse}>
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey="students" fill="#10b981" />
+        </BarChart>
+      </ResponsiveContainer>
+    </CardContent>
+  </Card>
+
+</div>
 
           {/* Top Courses */}
           <Card>

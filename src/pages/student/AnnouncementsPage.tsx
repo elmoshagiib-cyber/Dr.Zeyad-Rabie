@@ -34,7 +34,7 @@ export function AnnouncementsPage() {
       </div>
       <main className="flex-1 overflow-y-auto">
         {/* Header */}
-        <div className="bg-white border-b border-slate-200 px-6 py-5">
+        <div className="bg-white dark:bg-[#130726] border-b border-slate-200 px-6 py-5">
           <div className="flex items-center gap-3 mb-1">
             <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
               <Bell size={20} className="text-blue-600" />
@@ -56,7 +56,7 @@ export function AnnouncementsPage() {
                 className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                   filter === f.key
                     ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
-                    : "bg-white text-slate-600 border border-slate-200 hover:border-blue-300"
+                    : "bg-white dark:bg-[#130726] text-slate-600 border border-slate-200 hover:border-blue-300"
                 }`}
               >
                 {f.label}
@@ -72,7 +72,7 @@ export function AnnouncementsPage() {
               return (
                 <div
                   key={ann.id}
-                  className={`bg-white rounded-2xl border border-slate-200 overflow-hidden transition-shadow hover:shadow-md ${ann.isNew ? "ring-2 ring-blue-200" : ""}`}
+                  className={`bg-white dark:bg-[#130726] rounded-2xl border border-slate-200 overflow-hidden transition-shadow hover:shadow-md ${ann.isNew ? "ring-2 ring-blue-200" : ""}`}
                 >
                   <button
                     onClick={() => setExpanded(isExpanded ? null : ann.id)}

@@ -57,7 +57,7 @@ return;
     </div>
 
     <main className="flex-1 overflow-y-auto">
-      <div className="bg-white border-b border-slate-200 px-6 py-5">
+      <div className="bg-white dark:bg-[#130726] border-b border-slate-200 px-6 py-5">
       <h1 className="text-2xl font-bold mb-5">
   تسليمات الطلاب
 </h1>

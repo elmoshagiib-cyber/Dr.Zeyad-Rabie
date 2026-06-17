@@ -86,7 +86,7 @@ const deleteAssignment = (id: number) => {
       </div>
 
       <main className="flex-1 overflow-y-auto">
-        <div className="bg-white border-b border-slate-200 px-6 py-5 flex items-center justify-between">
+        <div className="bg-white dark:bg-[#130726] border-b border-slate-200 px-6 py-5 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-black text-slate-900">
               الواجبات

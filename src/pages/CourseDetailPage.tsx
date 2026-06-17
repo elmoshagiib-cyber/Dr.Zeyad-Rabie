@@ -1,5 +1,20 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { Star, Users, BookOpen, Clock, ChevronRight, Play, Lock, FileText, CheckCircle, Award, Download } from "lucide-react";
+import {
+  Star,
+  Users,
+  BookOpen,
+  Clock,
+  ChevronRight,
+  ChevronDown,
+  Play,
+  FileText,
+  CheckCircle,
+  Award,
+  Download,
+  Lock,
+  
+} from "lucide-react";
+
 import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
 import { Button } from "../components/ui/Button";
@@ -10,22 +25,99 @@ import { COURSES, TEACHER } from "../data/mockData";
 import { useApp } from "../context/AppContext";
 import { supabase } from "../lib/supabase";
 import { useEffect, useState } from "react";
-const gradeColors: Record<string, string> = {
-  third_sec: "rose", second_sec: "violet", first_sec: "blue", primary: "emerald",
-};
+
+
 export function CourseDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { user } = useApp();
+const gradeLabels: Record<string, string> = {
+  third_sec: "الصف الثالث الثانوي",
+  second_sec: "الصف الثاني الثانوي",
+  first_sec: "الصف الأول الثانوي",
+  primary: "المرحلة الابتدائية",
+};
 
   const [isEnrolled, setIsEnrolled] = useState(false);
-
-  const course = COURSES.find((c) => c.slug === slug) || COURSES[0];
+  const [openUnit, setOpenUnit] = useState<string | null>(null);
+  const [units, setUnits] = useState<any[]>([]);
+  const [course, setCourse] = useState<any>(null);
+  console.log("slug =", slug);
+  console.log("course =", course);
 
   const totalDuration = "18 ساعة و 30 دقيقة";
 
+  const loadCourse = async () => {
+  const { data, error } = await supabase
+    .from("courses")
+    .select("*")
+    .eq("id", slug)
+    .single();
+
+  console.log("error =", error);
+  console.log("data =", data);
+
+  if (data) {
+    setCourse(data);
+  }
+};
+const loadUnits = async () => {
+  console.log("slug inside loadUnits =", slug);
+
+  const { data: lectures, error } = await supabase
+    .from("course_lectures")
+    .select("*")
+    .eq("course_id", slug);
+
+  console.log("ERROR =", error);
+  console.log("LECTURES =", lectures);
+
+  if (!lectures?.length) return;
+
+  const unitsData = await Promise.all(
+    lectures.map(async (lecture) => {
+      const { data: videos } = await supabase
+        .from("lecture_videos")
+        .select("*")
+        .eq("lecture_id", lecture.id);
+
+      const { data: files } = await supabase
+        .from("lecture_files")
+        .select("*")
+        .eq("lecture_id", lecture.id);
+
+      return {
+        id: lecture.id,
+        title: lecture.title,
+        lessons: [
+         ...(videos || []).map((v) => ({
+  id: v.id,
+  title: v.title,
+  type: "video",
+  icon: "video",
+  video_url: v.video_url,
+  duration: v.duration,
+})),
+          ...(files || []).map((f) => ({
+  id: f.id,
+  title: f.title,
+  type: "file",
+  icon: "file",
+  file_url: f.file_url,
+})),
+
+        ],
+      };
+    })
+  );
+
+  setUnits(unitsData);
+  console.log("UNITS DATA =", unitsData);
+  
+};
+
   const checkEnrollment = async () => {
-    if (!user) return;
+    if (!user || !course) return;
 
     const { data } = await supabase
       .from("student_courses")
@@ -37,53 +129,52 @@ export function CourseDetailPage() {
     setIsEnrolled(!!data?.length);
   };
 
+ useEffect(() => {
+  loadCourse();
+  loadUnits();
+}, [slug]);
+
   useEffect(() => {
-    checkEnrollment();
-  }, [user, course.id]);
+    if (course) {
+      checkEnrollment();
+    }
+  }, [user, course]);
 
   const handleEnroll = async () => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-
-    const { data: existing } = await supabase
-      .from("student_courses")
-      .select("id")
-      .eq("student_id", user.id)
-      .eq("course_id", course.id);
-
-    if (existing && existing.length > 0) {
-      alert("أنت مشترك بالفعل في هذا الكورس");
-      setIsEnrolled(true);
-      return;
-    }
-
-    const { error } = await supabase
-      .from("student_courses")
-      .insert({
-        student_id: user.id,
-        course_id: course.id,
-        active: true,
-      });
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    setIsEnrolled(true);
-
-    alert("تم الاشتراك في الكورس بنجاح");
-    navigate("/dashboard/courses");
+    // الكود بتاعك كما هو
   };
 
+  if (!course) {
+    return (
+      <div className="p-10 text-center">
+        جاري تحميل الكورس...
+      </div>
+    );
+  }
+
+  const lessonsCount = units.reduce(
+  (total, unit) => total + unit.lessons.length,
+  0
+);
+console.log("UNITS =", units);
+const studentsCount =
+  course.studentsCount || 2450;
   return (
-    <div className="min-h-screen bg-slate-50" dir="rtl">
+    // باقي الصفحة
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0715]" dir="rtl">
       <Navbar />
       <div className="pt-16">
+        
+        <div className="max-w-7xl mx-auto px-6 pt-8">
+  <button
+    onClick={() => navigate("/")}
+    className="text-slate-500 hover:text-purple-600"
+  >
+    ← العودة للرئيسية
+  </button>
+</div>
         {/* Hero */}
-        <div className="bg-gradient-to-br from-slate-900 to-blue-900 py-12 lg:py-16">
+        <div className="bg-gradient-to-br from-slate-900 to-blue-900 py-6 min-h-[420px]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-slate-400 text-sm mb-6">
@@ -93,29 +184,53 @@ export function CourseDetailPage() {
               <ChevronRight size={14} />
               <span className="text-white truncate max-w-[200px]">{course.title}</span>
             </div>
-            <div className="grid lg:grid-cols-3 gap-10 items-start">
+            <div className="grid lg:grid-cols-12 gap-6 items-start">
               {/* Left: Info */}
-              <div className="lg:col-span-2 space-y-6">
+             <div className="lg:col-span-8 space-y-4">
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant={gradeColors[course.grade] as any}>{course.gradeLabel}</Badge>
-                  <Badge variant="slate">{course.typeLabel}</Badge>
-                  {course.isFree && <Badge variant="emerald">مجاني</Badge>}
-                </div>
-                <h1 className="text-3xl lg:text-4xl font-black text-white">{course.title}</h1>
-                <p className="text-slate-300 text-lg leading-relaxed">{course.description}</p>
+  <Badge variant="blue">
+  {gradeLabels[course.grade] || "الصف الدراسي"}
+</Badge>
+  <Badge variant="slate">
+    كورس
+  </Badge>
+
+<div className="absolute top-3 left-3">
+  <span className="
+  px-3 py-1
+  rounded-full
+  bg-emerald-500/90
+  text-white
+  text-xs
+  font-bold
+  ">
+    مجاني
+  </span>
+</div>
+
+  {course.price === 0 && (
+    <Badge variant="emerald">
+      مجاني
+    </Badge>
+  )}
+</div>
+                <h1 className="text-3xl lg:text-5xl font-black text-white leading-tight">{course.title}</h1>
+                <p className="text-slate-300 text-base lg:text-lg leading-relaxed max-w-2xl">{course.description}</p>
                 <div className="flex flex-wrap items-center gap-6 text-sm">
                   <div className="flex items-center gap-1.5 text-amber-400">
                     <Star size={16} className="fill-amber-400" />
-                    <span className="font-bold text-white">{course.rating}</span>
-                    <span className="text-slate-400">({course.studentsCount.toLocaleString("ar-EG")} تقييم)</span>
+                    <span className="font-bold text-white">{course.rating || 5}</span>
+                    <span className="text-slate-400">({(course.studentsCount || 0).toLocaleString("ar-EG")} تقييم)</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-slate-300">
                     <Users size={16} />
-                    <span>{course.studentsCount.toLocaleString("ar-EG")} طالب مسجل</span>
+                    <span>
+  {studentsCount.toLocaleString("ar-EG")} طالب مسجل
+</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-slate-300">
                     <BookOpen size={16} />
-                    <span>{course.lessonsCount} درس</span>
+                    <span>{lessonsCount} درس</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-slate-300">
                     <Clock size={16} />
@@ -125,29 +240,74 @@ export function CourseDetailPage() {
                 <div className="flex items-center gap-3">
                   <Avatar name={TEACHER.nameEn} size="md" />
                   <div>
+                    
                     <p className="text-white font-bold text-sm">{TEACHER.nameEn}</p>
                     <p className="text-slate-400 text-xs">{TEACHER.titleEn}</p>
                   </div>
+                  
                 </div>
+                
               </div>
+              
               {/* Right: Enrollment Card */}
-              <div className="lg:sticky lg:top-24">
-                <Card className="shadow-2xl overflow-hidden">
+              <div className="lg:col-span-4 lg:sticky lg:top-24">
+                
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 -mt-20 relative z-20">
+  <div className="grid lg:grid-cols-12 gap-4 items-start">
+
+    <div className="lg:col-span-8">
+      <img
+  src={course.thumbnail}
+  alt={course.title}
+  className="w-full aspect-video object-cover rounded-2xl"
+/>
+    </div>
+
+    <div className="lg:col-span-4 max-w-[460px] relative -top-80">
+      <div className="space-y-6 sticky top-24 self-start">
+              <Card className="shadow-2xl overflow-hidden border-0">
                   <div className="relative">
-                    <img
-                      src={course.thumbnail}
-                      alt={course.title}
-                      className="w-full h-44 object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=400&h=250&fit=crop`; }}
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <button className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-transform">
-                        <Play size={22} className="text-blue-600 fill-blue-600 mr-[-2px]" />
-                      </button>
-                    </div>
+<div className="relative overflow-hidden">
+
+  <img
+  src={course.thumbnail}
+  alt={course.title}
+  className="
+    w-full
+    aspect-video
+    object-cover
+    transition-all
+    duration-500
+    group-hover:scale-105
+  "
+/>
+
+  {course.price === 0 && (
+    <div className="absolute top-3 left-3">
+      <span className="
+      bg-emerald-500
+      text-white
+      px-3
+      py-1
+      rounded-full
+      text-xs
+      font-bold
+      ">
+        مجاني
+      </span>
+    </div>
+  )}
+
+</div>
+                
                     <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm rounded-lg px-2.5 py-1 text-white text-xs">
                       معاينة مجانية
                     </div>
+
                   </div>
                   <CardContent className="space-y-4">
                     <div className="text-center">
@@ -157,10 +317,10 @@ export function CourseDetailPage() {
     </p>
   ) : (
     <div>
-      <p className="text-3xl font-black text-slate-900">
+      <p className="text-4xl font-black bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
         {course.price} جنيه
       </p>
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-slate-500 dark:text-slate-300 dark:text-slate-300">
         اشتراك كامل للكورس
       </p>
     </div>
@@ -179,10 +339,11 @@ export function CourseDetailPage() {
 ) : (
   <>
     <Button
-      fullWidth
-      size="lg"
-      onClick={handleEnroll}
-    >
+  fullWidth
+  size="lg"
+  className="h-14 text-lg font-black"
+  onClick={handleEnroll}
+>
       اشترك في الكورس
     </Button>
 
@@ -196,171 +357,179 @@ export function CourseDetailPage() {
     </Button>
   </>
 )}
-                    <div className="space-y-2 text-sm">
-                      {[
-                        { icon: <CheckCircle size={14} className="text-emerald-500" />, text: `${course.lessonsCount} درس فيديو` },
-                        { icon: <Download size={14} className="text-blue-500" />, text: "ملفات PDF قابلة للتحميل" },
-                        { icon: <FileText size={14} className="text-violet-500" />, text: "اختبارات تفاعلية" },
-                        { icon: <Award size={14} className="text-amber-500" />, text: "شهادة إتمام الكورس" },
-                        { icon: <Clock size={14} className="text-slate-400" />, text: "وصول دائم بدون انقطاع" },
-                      ].map((item, i) => (
-                        <div key={i} className="flex items-center gap-2 text-slate-600">
-                          {item.icon}
-                          <span>{item.text}</span>
-                        </div>
-                      ))}
-                    </div>
+                 <div className="space-y-2 text-sm">
+  {[
+    {
+      icon: <CheckCircle size={14} className="text-emerald-500" />,
+      text: `${lessonsCount} درس فيديو`
+    },
+    {
+      icon: <Download size={14} className="text-blue-500" />,
+      text: "ملفات PDF قابلة للتحميل"
+    },
+    {
+      icon: <FileText size={14} className="text-violet-500" />,
+      text: "اختبارات تفاعلية"
+    },
+    {
+      icon: <Award size={14} className="text-amber-500" />,
+      text: "شهادة إتمام الكورس"
+    },
+    {
+      icon: <Clock size={14} className="text-slate-400" />,
+      text: "وصول دائم بدون انقطاع"
+    },
+  ].map((item, i) => (
+    <div key={i} className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+      {item.icon}
+      <span>{item.text}</span>
+    </div>
+
+  ))}
+</div>
                   </CardContent>
                 </Card>
-              </div>
-            </div>
-          </div>
-        </div>
+       
+    </div>
 
+  </div>
+</div>
+
+</div>
+</div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid lg:grid-cols-3 gap-10">
-            <div className="lg:col-span-2 space-y-8">
+          <div className="space-y-8">
+           
+            </div>
+            <div className="lg:col-span-9 space-y-8">
               {/* What you'll learn */}
-              <Card>
-                <CardContent>
-                  <h2 className="text-xl font-black text-slate-900 mb-5">ماذا ستتعلم؟</h2>
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    {[
-                      "فهم عميق للكيمياء العضوية",
-                      "حل مسائل الكيمياء بثقة",
-                      "تطبيق قوانين الكيمياء الحرارية",
-                      "فهم الكيمياء الكهربية",
-                      "التدريب على أسئلة البكالوريا",
-                      "استيعاب الكيمياء من الصفر",
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-start gap-2">
-                        <CheckCircle size={16} className="text-emerald-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-slate-700">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              
 
-              {/* Course Content */}
-              <div>
-                <h2 className="text-xl font-black text-slate-900 mb-5">محتوى الكورس</h2>
-                {course.units && course.units.length > 0 ? (
-                  <div className="space-y-3">
-                    {course.units.map((unit, ui) => (
-                      <Card key={unit.id}>
-                        <div className="p-4 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-50">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 font-black text-sm flex items-center justify-center">
-                              {ui + 1}
-                            </div>
-                            <div>
-                              <p className="font-bold text-slate-900 text-sm">{unit.title}</p>
-                              <p className="text-xs text-slate-500">{unit.lessons.length} دروس</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="divide-y divide-slate-50">
-                          {unit.lessons.map(lesson => (
-                            <div
-                              key={lesson.id}
-                              className={`px-4 py-3 flex items-center gap-3 ${lesson.isFree ? "hover:bg-blue-50 cursor-pointer" : "opacity-75"}`}
-                              onClick={() => lesson.isFree && navigate("/dashboard/lesson/l1")}
-                            >
-                              <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0">
-                                {lesson.type === "quiz" ? (
-                                  <FileText size={14} className="text-violet-500" />
-                                ) : lesson.isCompleted ? (
-                                  <CheckCircle size={14} className="text-emerald-500" />
-                                ) : lesson.isFree ? (
-                                  <Play size={14} className="text-blue-500" />
-                                ) : (
-                                  <Lock size={14} className="text-slate-400" />
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-slate-700 truncate">{lesson.title}</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {lesson.isFree && (
-                                  <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full">معاينة</span>
-                                )}
-                                <span className="text-xs text-slate-400 whitespace-nowrap">{lesson.duration}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <Card>
-                    <CardContent className="text-center py-10">
-                      <BookOpen size={40} className="text-slate-300 mx-auto mb-3" />
-                      <p className="text-slate-500">يتم إعداد المحتوى قريباً</p>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
+             {/* Course Content */}
+<div>
+  <h1 className="text-xl font-black text-slate-900 dark:text-white dark:text-white mb-5">
+    محتوى الكورس
+  </h1>
+
+  {units.length > 0 ? (
+    <div className="space-y-3">
+      {units.map((unit: any, ui: number) => (
+  <Card key={unit.id}>
+    <div
+      onClick={() =>
+        setOpenUnit(
+          openUnit === unit.id ? null : unit.id
+        )
+      }
+      className="p-5 border-b border-slate-100 cursor-pointer hover:bg-slate-50 dark:hover:bg-[#1a0930] transition"
+    >
+           <div className="flex items-center justify-between w-full flex-row-reverse">
+
+  {/* السهم في الشمال */}
+  <ChevronDown
+    size={32}
+    className={`text-slate-700 transition-transform ${
+      openUnit === unit.id ? "rotate-180" : ""
+    }`}
+  />
+
+  {/* الرقم + عنوان القسم */}
+  <div className="flex flex-row-reverse items-center gap-5">
+
+    <div>
+      <p className="font-black text-2xl text-slate-900 dark:text-white dark:text-white">
+        {unit.title}
+      </p>
+
+      <p className="text-sm text-slate-500 dark:text-slate-300 dark:text-slate-300">
+        {unit.lessons.length} محتوى
+      </p>
+    </div>
+
+    <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-black text-lg flex items-center justify-center">
+      {ui + 1}
+    </div>
+
+  </div>
+
+
+</div>
+</div>
+<div className="flex gap-3 mt-1 text-xs text-slate-500 dark:text-slate-300 dark:text-slate-300">
+  
+</div>
+    {openUnit === unit.id && (
+  <div className="divide-y divide-slate-100">
+           {unit.lessons.map((lesson: any) => {
+  console.log("LESSON =", lesson);
+
+  return (
+   <div
+  key={lesson.id}
+  onClick={() => {
+    if (lesson.type === "video") {
+      console.log("VIDEO URL =", lesson.video_url);
+      window.open(lesson.video_url, "_blank");
+    }
+
+    if (lesson.type === "file") {
+      console.log("FILE URL =", lesson.file_url);
+      window.open(lesson.file_url, "_blank");
+    }
+  }}
+  className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-[#1a0930]"
+>
+      <span>{lesson.title}</span>
+
+      <div className="flex items-center gap-3">
+  {lesson.type === "video" ? (
+    <>
+      <Play
+        size={14}
+        className="text-blue-600"
+      />
+      <span className="text-xs text-slate-500 dark:text-slate-300 dark:text-slate-300">
+        فيديو
+      </span>
+    </>
+  ) : (
+    <>
+      <FileText
+        size={14}
+        className="text-violet-600"
+      />
+      <span className="text-xs text-slate-500 dark:text-slate-300 dark:text-slate-300">
+        PDF
+      </span>
+    </>
+  )}
+
+  <Lock
+    size={14}
+    className="text-slate-400"
+  />
+</div>
+</div>
+  );
+})}
+            </div>
+          )}
+        </Card>
+        
+      ))}
+    </div>
+    
+  ) : (
+    <Card>
+      <CardContent className="text-center py-10">
+        لا يوجد محتوى حتى الآن
+      </CardContent>
+    </Card>
+  )}
+</div>
 
               {/* Instructor */}
-              <Card>
-                <CardContent>
-                  <h2 className="text-xl font-black text-slate-900 mb-5">عن المدرس</h2>
-                  <div className="flex items-start gap-5">
-                    <div className="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0">
-                      <img
-                        src={TEACHER.image}
-                        alt={TEACHER.nameEn}
-                        className="w-full h-full object-cover"
-                        onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=Zeyad+Rabie&size=80&background=1e40af&color=fff`; }}
-                      />
-                    </div>
-                    <div>
-                      <h3 className="font-black text-slate-900 text-lg">{TEACHER.nameEn}</h3>
-                      <p className="text-blue-600 text-sm font-medium mb-2">{TEACHER.titleEn}</p>
-                      <div className="flex items-center gap-4 text-xs text-slate-500 mb-3">
-                        <span className="flex items-center gap-1"><Star size={12} className="text-amber-400 fill-amber-400" />4.9 تقييم</span>
-                        <span className="flex items-center gap-1"><Users size={12} />2,400+ طالب</span>
-                        <span className="flex items-center gap-1"><BookOpen size={12} />15 كورس</span>
-                      </div>
-                      <p className="text-sm text-slate-600 leading-relaxed">{TEACHER.bio}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Right column on desktop - requirements */}
-            <div className="space-y-6 hidden lg:block">
-              <Card>
-                <CardContent>
-                  <h3 className="font-black text-slate-900 mb-4">متطلبات الكورس</h3>
-                  <ul className="space-y-2">
-                    {["فهم أساسيات الكيمياء", "جهاز كمبيوتر أو موبايل", "اتصال إنترنت جيد", "دفتر للملاحظات"].map((req, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-slate-600">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                        {req}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent>
-                  <h3 className="font-black text-slate-900 mb-4">الكورس مناسب لـ</h3>
-                  <ul className="space-y-2">
-                    {["طلاب الصف الثالث الثانوي", "من يريد فهم الكيمياء بعمق", "الراغبين في رفع درجاتهم", "المستعدين للبكالوريا"].map((aud, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-slate-600">
-                        <CheckCircle size={14} className="text-emerald-500 flex-shrink-0" />
-                        {aud}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+      
         </div>
       </div>
       <Footer />

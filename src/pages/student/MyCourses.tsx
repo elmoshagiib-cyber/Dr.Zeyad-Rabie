@@ -29,7 +29,7 @@ const enrolledCourses = studentCourses
         <DashboardSidebar type="student" />
       </div>
       <main className="flex-1 overflow-y-auto">
-        <div className="bg-white border-b border-slate-200 px-6 py-5">
+        <div className="bg-white dark:bg-[#130726] border-b border-slate-200 px-6 py-5">
           <h1 className="text-xl font-black text-slate-900">كورساتي</h1>
           <p className="text-slate-500 text-sm">{enrolledCourses.length} كورسات مشترك بها</p>
         </div>

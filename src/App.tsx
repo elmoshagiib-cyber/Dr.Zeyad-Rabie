@@ -20,6 +20,7 @@ import { LeaderboardPage } from "./pages/student/LeaderboardPage";
 import { MyCoursesPage } from "./pages/student/MyCourses";
 import { HomeworkPage } from "./pages/student/HomeworkPage";
 import { ExamsPage } from "./pages/student/ExamsPage";
+import GradeCoursesPage from "./pages/GradeCoursesPage";
 
 /* Instructor */
 import { InstructorDashboard } from "./pages/instructor/InstructorDashboard";
@@ -136,13 +137,13 @@ function AppRoutes() {
       />
 
       <Route
-        path="/dashboard/quiz"
-        element={
-          <ProtectedRoute roles={["student"]}>
-            <QuizPage />
-          </ProtectedRoute>
-        }
-      />
+  path="/dashboard/exams/:id"
+  element={
+    <ProtectedRoute roles={["student"]}>
+      <QuizPage />
+    </ProtectedRoute>
+  }
+/>
 
       <Route
         path="/dashboard/announcements"
@@ -170,7 +171,10 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-
+<Route
+  path="/grade/:grade"
+  element={<GradeCoursesPage />}
+/>
       {/* Instructor */}
 
       <Route

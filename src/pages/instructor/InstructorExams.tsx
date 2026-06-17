@@ -10,7 +10,19 @@ import { useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 
 export function InstructorExams() {
+  const [editingExamId, setEditingExamId] = useState<number | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDuration, setEditDuration] = useState("");
+  const [editPassMark, setEditPassMark] = useState("");
   const navigate = useNavigate();
+  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
+
+const [editQuestionText, setEditQuestionText] = useState("");
+const [editOptionA, setEditOptionA] = useState("");
+const [editOptionB, setEditOptionB] = useState("");
+const [editOptionC, setEditOptionC] = useState("");
+const [editOptionD, setEditOptionD] = useState("");
+const [editCorrectAnswer, setEditCorrectAnswer] = useState("A");
 
   const [examTitle, setExamTitle] = useState("");
   const [examDuration, setExamDuration] = useState("");
@@ -144,15 +156,67 @@ const [optionB, setOptionB] = useState("");
 const [optionC, setOptionC] = useState("");
 const [optionD, setOptionD] = useState("");
 const [correctAnswer, setCorrectAnswer] = useState("A");
+const updateExam = async (examId: number) => {
+  console.log("UPDATE START");
 
+const { error } = await supabase
+  .from("exams")
+  .update({
+    title: editTitle,
+    duration: Number(editDuration),
+    passing_grade: Number(editPassMark),
+  })
+  .eq("id", examId);
+
+console.log("UPDATE ERROR:", error);
+
+if (error) {
+  alert(error.message);
+  return;
+}
+
+alert("UPDATE SUCCESS");
+
+
+  setEditingExamId(null);
+
+  await loadExams();
+
+  alert("تم تعديل الامتحان");
+};
+const updateQuestion = async (questionId: number) => {
+  const { error } = await supabase
+    .from("exam_questions")
+    .update({
+      question: editQuestionText,
+      option_a: editOptionA,
+      option_b: editOptionB,
+      option_c: editOptionC,
+      option_d: editOptionD,
+      correct_answer: editCorrectAnswer,
+    })
+    .eq("id", questionId);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  setEditingQuestionId(null);
+
+  await loadExams();
+
+  alert("تم تعديل السؤال");
+};
   return (
+    
     <div className="flex h-screen bg-slate-50 overflow-hidden" dir="rtl">
       <div className="hidden lg:block flex-shrink-0">
         <DashboardSidebar type="instructor" />
       </div>
 
       <main className="flex-1 overflow-y-auto">
-        <div className="bg-white border-b border-slate-200 px-6 py-5 flex items-center justify-between">
+        <div className="bg-white dark:bg-[#130726] border-b border-slate-200 px-6 py-5 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-black text-slate-900">
               الاختبارات
@@ -234,7 +298,37 @@ const [correctAnswer, setCorrectAnswer] = useState("A");
 </Badge>
                 </div>
 <div className="mt-6 space-y-3 border-t pt-4">
+<p className="text-red-500">
+  editingExamId = {editingExamId} | exam.id = {exam.id}
+</p>
+{editingExamId === exam.id && (
 
+  <div className="space-y-3 mt-4">
+
+    <Input
+      value={editTitle}
+      onChange={(e) => setEditTitle(e.target.value)}
+      placeholder="اسم الامتحان"
+    />
+
+    <Input
+      value={editDuration}
+      onChange={(e) => setEditDuration(e.target.value)}
+      placeholder="مدة الامتحان"
+    />
+
+    <Input
+      value={editPassMark}
+      onChange={(e) => setEditPassMark(e.target.value)}
+      placeholder="درجة النجاح"
+    />
+
+    <Button onClick={() => updateExam(exam.id)}>
+      حفظ التعديلات
+    </Button>
+
+  </div>
+)}
   <Input
     placeholder="اكتب السؤال"
     value={questionText}
@@ -322,6 +416,78 @@ const [correctAnswer, setCorrectAnswer] = useState("A");
   <Trash2 size={14} />
   حذف السؤال
 </Button>
+<Button
+  size="sm"
+  variant="outline"
+  className="mt-3 mr-2"
+  onClick={() => {
+    setEditingQuestionId(question.id);
+
+    setEditQuestionText(question.question);
+    setEditOptionA(question.option_a);
+    setEditOptionB(question.option_b);
+    setEditOptionC(question.option_c);
+    setEditOptionD(question.option_d);
+    setEditCorrectAnswer(question.correct_answer);
+  }}
+>
+  <Edit size={14} />
+  تعديل السؤال
+</Button>
+{editingQuestionId === question.id && (
+  <div className="space-y-3 mt-4">
+
+    <Input
+      value={editQuestionText}
+      onChange={(e) => setEditQuestionText(e.target.value)}
+      placeholder="السؤال"
+    />
+
+    <Input
+      value={editOptionA}
+      onChange={(e) => setEditOptionA(e.target.value)}
+      placeholder="الإجابة A"
+    />
+
+    <Input
+      value={editOptionB}
+      onChange={(e) => setEditOptionB(e.target.value)}
+      placeholder="الإجابة B"
+    />
+
+    <Input
+      value={editOptionC}
+      onChange={(e) => setEditOptionC(e.target.value)}
+      placeholder="الإجابة C"
+    />
+
+    <Input
+      value={editOptionD}
+      onChange={(e) => setEditOptionD(e.target.value)}
+      placeholder="الإجابة D"
+    />
+
+    <select
+      value={editCorrectAnswer}
+      onChange={(e) =>
+        setEditCorrectAnswer(e.target.value)
+      }
+      className="w-full rounded-xl border border-slate-200 px-4 py-3"
+    >
+      <option value="A">A</option>
+      <option value="B">B</option>
+      <option value="C">C</option>
+      <option value="D">D</option>
+    </select>
+
+    <Button
+      onClick={() => updateQuestion(question.id)}
+    >
+      حفظ تعديل السؤال
+    </Button>
+
+  </div>
+)}
       </div>
     ))}
 
@@ -330,10 +496,21 @@ const [correctAnswer, setCorrectAnswer] = useState("A");
 )}
                 <div className="flex gap-2 mt-5">
 
-                  <Button size="sm" variant="outline">
-                    <Edit size={14} />
-                    تعديل
-                  </Button>
+                  <Button
+  size="sm"
+  variant="outline"
+  onClick={() => {
+    console.log("EDIT CLICKED", exam.id);
+
+    setEditingExamId(exam.id);
+    setEditTitle(exam.title);
+    setEditDuration(String(exam.duration));
+    setEditPassMark(String(exam.passing_grade));
+  }}
+>
+  <Edit size={14} />
+  تعديل
+</Button>
 <Button
   size="sm"
   variant="danger"

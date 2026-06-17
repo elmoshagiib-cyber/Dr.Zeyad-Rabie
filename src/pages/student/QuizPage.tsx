@@ -4,35 +4,68 @@ import { Clock, CheckCircle, XCircle, AlertCircle, ChevronRight, ChevronLeft, Tr
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { Button } from "../../components/ui/Button";
 import { ProgressBar } from "../../components/ui/ProgressBar";
-import { QUIZ_DATA } from "../../data/mockData";
+import { useParams } from "react-router-dom";
+import { supabase } from "../../lib/supabase";
 
 type QuizState = "intro" | "active" | "submitted" | "result";
 
 export function QuizPage() {
+  console.log("QUIZ PAGE LOADED");
   const navigate = useNavigate();
+  const { id } = useParams();
+
+const [quiz, setQuiz] = useState<any>(null);
+const [questions, setQuestions] = useState<any[]>([]);
   const [state, setState] = useState<QuizState>("intro");
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [timeLeft, setTimeLeft] = useState(QUIZ_DATA.timeLimit);
+  const [timeLeft, setTimeLeft] = useState(0);
   const [score, setScore] = useState(0);
 
-  const quiz = QUIZ_DATA;
-  const questions = quiz.questions;
+  useEffect(() => {
+  loadExam();
+}, []);
+
+const loadExam = async () => {
+  const { data, error } = await supabase
+    .from("exams")
+    .select(`
+      *,
+      exam_questions (*)
+    `)
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+ setQuiz(data);
+setQuestions(data.exam_questions || []);
+setTimeLeft((data.duration || 0) * 60);
+};
 
   const calcScore = useCallback(() => {
-    let correct = 0;
-    questions.forEach(q => {
-      const selected = answers[q.id];
-      const correctOpt = q.options.find(o => o.isCorrect);
-      if (selected === correctOpt?.id) correct++;
-    });
-    return Math.round((correct / questions.length) * 100);
-  }, [answers, questions]);
+  let correct = 0;
+
+  questions.forEach((q) => {
+    const selected = answers[String(q.id)];
+
+    if (selected === q.correct_answer) {
+      correct++;
+    }
+  });
+
+  return Math.round(
+    (correct / questions.length) * 100
+  );
+}, [answers, questions]);
 
   useEffect(() => {
     if (state !== "active") return;
     const timer = setInterval(() => {
-      setTimeLeft(t => {
+      setTimeLeft((t: number) => {
         if (t <= 1) { clearInterval(timer); setState("submitted"); return 0; }
         return t - 1;
       });
@@ -59,6 +92,9 @@ export function QuizPage() {
   const q = questions[currentQ];
   const answeredCount = Object.keys(answers).length;
 
+if (!quiz) {
+  return <div>Loading...</div>;
+}
   // Intro Screen
   if (state === "intro") {
     return (
@@ -66,7 +102,7 @@ export function QuizPage() {
         <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
         <main className="flex-1 overflow-y-auto flex items-center justify-center p-6">
           <div className="max-w-lg w-full">
-            <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+            <div className="bg-white dark:bg-[#130726] rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
               <div className="bg-gradient-to-br from-violet-600 to-blue-600 p-8 text-center">
                 <div className="text-6xl mb-4">🧪</div>
                 <h1 className="text-2xl font-black text-white mb-2">{quiz.title}</h1>
@@ -75,15 +111,15 @@ export function QuizPage() {
               <div className="p-8 space-y-4">
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div className="bg-slate-50 rounded-2xl p-4">
-                    <p className="text-2xl font-black text-slate-900">{quiz.totalQuestions}</p>
+                    <p className="text-2xl font-black text-slate-900">{questions.length}</p>
                     <p className="text-xs text-slate-500 mt-1">سؤال</p>
                   </div>
                   <div className="bg-slate-50 rounded-2xl p-4">
-                    <p className="text-2xl font-black text-slate-900">{quiz.timeLimit / 60}</p>
+                    <p className="text-2xl font-black text-slate-900">{quiz.duration * 60 / 60}</p>
                     <p className="text-xs text-slate-500 mt-1">دقيقة</p>
                   </div>
                   <div className="bg-slate-50 rounded-2xl p-4">
-                    <p className="text-2xl font-black text-slate-900">{quiz.passingScore}%</p>
+                    <p className="text-2xl font-black text-slate-900">{quiz.passing_grade}%</p>
                     <p className="text-xs text-slate-500 mt-1">للنجاح</p>
                   </div>
                 </div>
@@ -92,8 +128,8 @@ export function QuizPage() {
                   <ul className="space-y-1 text-xs">
                     <li>• لا يمكنك إيقاف المؤقت بعد بدء الاختبار</li>
                     <li>• يمكنك التنقل بين الأسئلة بحرية</li>
-                    <li>• لديك {Math.floor(quiz.timeLimit / 60)} دقيقة للإجابة</li>
-                    <li>• درجة النجاح {quiz.passingScore}%</li>
+                    <li>• لديك {Math.floor(quiz.duration * 60 / 60)} دقيقة للإجابة</li>
+                    <li>• درجة النجاح {quiz.passing_grade}%</li>
                   </ul>
                 </div>
                 <Button fullWidth size="lg" onClick={() => setState("active")}>
@@ -112,13 +148,13 @@ export function QuizPage() {
 
   // Result Screen
   if (state === "result") {
-    const passed = score >= quiz.passingScore;
+    const passed = score >= quiz.passing_grade;
     return (
       <div className="flex h-screen bg-slate-50 overflow-hidden" dir="rtl">
         <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
         <main className="flex-1 overflow-y-auto flex items-center justify-center p-6">
           <div className="max-w-lg w-full">
-            <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+            <div className="bg-white dark:bg-[#130726] rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
               <div className={`p-8 text-center ${passed ? "bg-gradient-to-br from-emerald-500 to-emerald-600" : "bg-gradient-to-br from-rose-500 to-rose-600"}`}>
                 <div className="text-6xl mb-3">{passed ? "🏆" : "😔"}</div>
                 <h2 className="text-2xl font-black text-white mb-1">{passed ? "أحسنت! نجحت!" : "لم تنجح هذه المرة"}</h2>
@@ -154,13 +190,13 @@ export function QuizPage() {
                   <h3 className="font-black text-slate-900 mb-3 text-sm">مراجعة الإجابات</h3>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {questions.map((q, i) => {
-                      const selected = answers[q.id];
-                      const correctOpt = q.options.find(o => o.isCorrect);
-                      const isRight = selected === correctOpt?.id;
+                      const selected = answers[String(q.id)]
+                      const isRight =
+                      selected === q.correct_answer;
                       return (
                         <div key={q.id} className={`flex items-center gap-3 p-3 rounded-xl ${isRight ? "bg-emerald-50" : "bg-rose-50"}`}>
                           {isRight ? <CheckCircle size={15} className="text-emerald-500 flex-shrink-0" /> : <XCircle size={15} className="text-rose-500 flex-shrink-0" />}
-                          <p className="text-xs text-slate-700 flex-1 truncate">س{i + 1}: {q.text.substring(0, 50)}...</p>
+                          <p className="text-xs text-slate-700 flex-1 truncate">س{i + 1}: {q.question.substring(0, 50)}...</p>
                           <span className={`text-xs font-bold ${isRight ? "text-emerald-600" : "text-rose-600"}`}>
                             {isRight ? "✓" : "✗"}
                           </span>
@@ -171,7 +207,7 @@ export function QuizPage() {
                 </div>
 
                 <div className="flex gap-3">
-                  <Button variant="outline" fullWidth onClick={() => { setAnswers({}); setCurrentQ(0); setTimeLeft(quiz.timeLimit); setState("intro"); }}>
+                  <Button variant="outline" fullWidth onClick={() => { setAnswers({}); setCurrentQ(0); setTimeLeft(quiz.duration * 60); setState("intro"); }}>
                     <RotateCcw size={16} />
                     إعادة الاختبار
                   </Button>
@@ -194,7 +230,7 @@ export function QuizPage() {
       <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
       <main className="flex-1 overflow-y-auto">
         {/* Quiz Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4">
+        <div className="sticky top-0 z-10 bg-white dark:bg-[#130726] border-b border-slate-200 px-6 py-4">
           <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center justify-between mb-2">
@@ -214,106 +250,117 @@ export function QuizPage() {
 
         <div className="max-w-3xl mx-auto p-6 space-y-6">
           {/* Question */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+          <div className="bg-white dark:bg-[#130726] rounded-2xl border border-slate-200 shadow-sm p-8">
             <div className="flex items-start gap-3 mb-6">
               <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-black text-sm flex items-center justify-center flex-shrink-0">
                 {currentQ + 1}
               </div>
               <div>
-                <p className="text-xs text-slate-400 mb-1">{q.type === "mcq" ? "اختيار من متعدد" : "صح أو خطأ"}</p>
-                <h2 className="text-lg font-bold text-slate-900 leading-relaxed">{q.text}</h2>
+                <p className="text-xs text-slate-400 mb-1">اختيار من متعدد</p>
+                <h2 className="text-lg font-bold text-slate-900 leading-relaxed">{q.question}</h2>
               </div>
-            </div>
+           </div>
 
-            <div className="space-y-3">
-              {q.options.map(option => {
-                const selected = answers[q.id] === option.id;
-                return (
-                  <button
-                    key={option.id}
-                    onClick={() => handleAnswer(q.id, option.id)}
-                    className={`w-full text-right p-4 rounded-xl border-2 transition-all font-medium text-sm ${
-                      selected
-                        ? "border-blue-600 bg-blue-50 text-blue-900"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50/50"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-                        selected ? "border-blue-600 bg-blue-600" : "border-slate-300"
-                      }`}>
-                        {selected && <div className="w-2 h-2 bg-white rounded-full"></div>}
-                      </div>
-                      {option.text}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+           <div className="space-y-3">
+  {[
+    { id: "A", text: q.option_a },
+    { id: "B", text: q.option_b },
+    { id: "C", text: q.option_c },
+    { id: "D", text: q.option_d },
+  ].map((option) => {
+    const selected = answers[String(q.id)] === option.id;
 
-          {/* Navigation */}
-          <div className="flex items-center justify-between gap-4">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentQ(Math.max(0, currentQ - 1))}
-              disabled={currentQ === 0}
-            >
-              <ChevronRight size={16} />
-              السابق
-            </Button>
-
-            <div className="flex items-center gap-1">
-              {questions.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentQ(i)}
-                  className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
-                    i === currentQ ? "bg-blue-600 text-white" :
-                    answers[questions[i].id] ? "bg-emerald-100 text-emerald-700" :
-                    "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-
-            {currentQ < questions.length - 1 ? (
-              <Button onClick={() => setCurrentQ(currentQ + 1)}>
-                التالي
-                <ChevronLeft size={16} />
-              </Button>
-            ) : (
-              <Button
-                variant="success"
-                onClick={handleSubmit}
-                className="relative"
-              >
-                {answeredCount < questions.length && (
-                  <AlertCircle size={15} className="text-amber-300" />
-                )}
-                تسليم الاختبار
-              </Button>
+    return (
+      <button
+        key={option.id}
+        onClick={() => handleAnswer(String(q.id), option.id)}
+        className={`w-full text-right p-4 rounded-xl border-2 transition-all font-medium text-sm ${
+          selected
+            ? "border-blue-600 bg-blue-50 text-blue-900"
+            : "border-slate-200 bg-white dark:bg-[#130726] text-slate-700 hover:border-blue-300 hover:bg-blue-50/50"
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
+              selected
+                ? "border-blue-600 bg-blue-600"
+                : "border-slate-300"
+            }`}
+          >
+            {selected && (
+              <div className="w-2 h-2 bg-white dark:bg-[#130726] rounded-full"></div>
             )}
           </div>
 
-          {/* Answer progress */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-4">
-            <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-slate-600">تقدم الإجابات</span>
-              <span className="font-bold text-slate-900">{answeredCount} / {questions.length}</span>
-            </div>
-            <ProgressBar value={answeredCount} max={questions.length} size="sm" barClassName="from-emerald-400 to-emerald-500" />
-            {answeredCount < questions.length && (
-              <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
-                <AlertCircle size={12} />
-                لديك {questions.length - answeredCount} أسئلة لم تُجب عليها
-              </p>
-            )}
-          </div>
+          <span>{option.text}</span>
         </div>
-      </main>
-    </div>
-  );
+      </button>
+    );
+  })}
+</div>
+</div>
+{/* Navigation */}
+<div className="flex items-center justify-between gap-4">
+  <Button
+  variant="outline"
+  onClick={() => setCurrentQ(Math.max(0, currentQ - 1))}
+  disabled={currentQ === 0}
+>
+  <ChevronRight size={16} />
+  السابق
+</Button>
+<div className="flex items-center gap-1">
+  {questions.map((_: any, i: number) => (
+    <button
+      key={i}
+      onClick={() => setCurrentQ(i)}
+      className={`w-8 h-8 rounded-lg text-xs font-bold ${
+        i === currentQ
+          ? "bg-blue-600 text-white"
+          : answers[String(questions[i].id)]
+          ? "bg-emerald-100 text-emerald-700"
+          : "bg-slate-100 text-slate-500"
+      }`}
+    >
+      {i + 1}
+    </button>
+  ))}
+</div>
+
+{currentQ < questions.length - 1 ? (
+  <Button onClick={() => setCurrentQ(currentQ + 1)}>
+    التالي
+    <ChevronLeft size={16} />
+  </Button>
+) : (
+  <Button
+    variant="success"
+    onClick={handleSubmit}
+  >
+    تسليم الاختبار
+  </Button>
+)}
+</div>
+
+<div className="bg-white dark:bg-[#130726] rounded-2xl border border-slate-200 p-4">
+  <div className="flex items-center justify-between text-sm mb-2">
+    <span>تقدم الإجابات</span>
+
+    <span className="font-bold">
+      {answeredCount} / {questions.length}
+    </span>
+  </div>
+
+  <ProgressBar
+    value={answeredCount}
+    max={questions.length}
+    size="sm"
+  />
+</div>
+
+</div>
+</main>
+</div>
+);
 }

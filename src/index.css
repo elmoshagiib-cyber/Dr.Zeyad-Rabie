@@ -8,16 +8,36 @@
   --color-violet-brand: #8B5CF6;
   --color-purple-light: #A78BFA;
 }
-
+.test-hala {
+  font-family: 'Hala' !important;
+  font-size: 80px !important;
+}
+.test-hala {
+  font-family: 'Hala' !important;
+  font-size: 100px !important;
+  color: red !important;
+}
 * {
   font-family: 'Cairo', 'Tajawal', sans-serif;
   box-sizing: border-box;
 }
-
+.font-hala {
+  font-family: "Hala", sans-serif;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
 html {
   direction: rtl;
 }
+body {
+  background: #ffffff;
+  color: #0f172a;
+}
 
+.dark body {
+  background: #070312;
+  color: #ffffff;
+}
 body {
   direction: rtl;
   text-align: right;
@@ -204,4 +224,26 @@ body {
 /* Input transition */
 input, select, textarea {
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.dark body {
+  background: #0b0715;
+  color: white;
+}
+@font-face {
+  font-family: 'Hala';
+  src: url('/fonts/ArbFONTS-VIP-Hala-Bold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }

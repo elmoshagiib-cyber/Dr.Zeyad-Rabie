@@ -5,13 +5,20 @@ export function Footer() {
   const navigate = useNavigate();
 
   return (
-    <footer className="bg-slate-900 text-slate-300">
+    <footer className="
+bg-slate-900
+dark:bg-[#0b0715]
+text-slate-300
+border-t
+border-slate-800
+dark:border-purple-500/10
+">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-600 to-violet-500 flex items-center justify-center">
                 <GraduationCap size={22} className="text-white" />
               </div>
               <div>

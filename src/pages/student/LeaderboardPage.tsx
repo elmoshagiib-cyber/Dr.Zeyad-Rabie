@@ -37,7 +37,7 @@ export function LeaderboardPage() {
           </div>
 
           {/* My rank banner */}
-          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 flex items-center gap-4">
+          <div className="bg-white dark:bg-[#130726]/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-blue-500/30 flex items-center justify-center">
               <Star size={24} className="text-blue-300" />
             </div>
@@ -55,7 +55,7 @@ export function LeaderboardPage() {
         <div className="p-6 space-y-5">
           {/* Filters */}
           <div className="flex flex-wrap gap-3">
-            <div className="flex gap-1 bg-white border border-slate-200 p-1 rounded-xl">
+            <div className="flex gap-1 bg-white dark:bg-[#130726] border border-slate-200 p-1 rounded-xl">
               {[
                 { key: "weekly", label: "أسبوعي" },
                 { key: "monthly", label: "شهري" },
@@ -72,7 +72,7 @@ export function LeaderboardPage() {
                 </button>
               ))}
             </div>
-            <div className="flex gap-1 bg-white border border-slate-200 p-1 rounded-xl">
+            <div className="flex gap-1 bg-white dark:bg-[#130726] border border-slate-200 p-1 rounded-xl">
               {[
                 { key: "all", label: "جميع الصفوف" },
                 { key: "third_sec", label: "تالتة ثانوي" },
