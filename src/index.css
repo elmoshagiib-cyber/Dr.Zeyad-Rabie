@@ -1,9 +1,51 @@
+
+
+@font-face {
+  font-family: "Thmanyah";
+  src: url("/fonts/thmanyahsans-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah";
+  src: url("/fonts/thmanyahsans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah";
+  src: url("/fonts/thmanyahsans-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah";
+  src: url("/fonts/thmanyahsans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah";
+  src: url("/fonts/thmanyahsans-Black.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-family-sans: 'Cairo', 'Tajawal', ui-sans-serif, system-ui, sans-serif;
+  --font-family-sans: 'Thmanyah', sans-serif;
   --color-purple-brand: #6D28D9;
   --color-violet-brand: #8B5CF6;
   --color-purple-light: #A78BFA;
@@ -18,14 +60,43 @@
   color: red !important;
 }
 * {
-  font-family: 'Cairo', 'Tajawal', sans-serif;
+  font-family: 'Thmanyah', sans-serif;
   box-sizing: border-box;
+  letter-spacing: -0.3px;
 }
-.font-hala {
-  font-family: "Hala", sans-serif;
+.font-thmanyah {
+  font-family: "Thmanyah", sans-serif;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Thmanyah", sans-serif;
   font-weight: 700;
-  letter-spacing: -1px;
 }
+
+.font-black {
+  font-weight: 900 !important;
+}
+
+.font-bold {
+  font-weight: 700 !important;
+}
+
+.font-medium {
+  font-weight: 500 !important;
+}
+
+.font-normal {
+  font-weight: 400 !important;
+}
+
+.font-light {
+  font-weight: 300 !important;
+}
+
 html {
   direction: rtl;
 }
@@ -221,6 +292,34 @@ body {
   50% { opacity: 1; transform: scale(1.4); }
 }
 
+@keyframes floatPremium {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  25% {
+    transform: translateY(-8px) rotate(-1deg);
+  }
+
+  50% {
+    transform: translateY(-16px) rotate(0deg);
+  }
+
+  75% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+.animate-float {
+  animation: floatPremium 6s ease-in-out infinite;
+  transform-origin: center center;
+  will-change: transform;
+}
+
 /* Input transition */
 input, select, textarea {
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
@@ -240,10 +339,64 @@ body {
   background: #0b0715;
   color: white;
 }
-@font-face {
-  font-family: 'Hala';
-  src: url('/fonts/ArbFONTS-VIP-Hala-Bold.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+
+@keyframes floatPremium {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  25% {
+    transform: translateY(-8px) rotate(-1deg);
+  }
+
+  50% {
+    transform: translateY(-16px) rotate(0deg);
+  }
+
+  75% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+.animate-float {
+  animation: floatPremium 6s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+@keyframes moveGlow {
+  0% {
+    transform: translateX(-150%);
+  }
+
+  100% {
+    transform: translateX(150%);
+  }
+}
+
+.hero-light {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hero-light::before {
+  content: "";
+
+  position: absolute;
+
+  width: 300px;
+  height: 100%;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(168, 85, 247, 0.12),
+    transparent
+  );
+
+  animation: moveGlow 10s linear infinite;
 }

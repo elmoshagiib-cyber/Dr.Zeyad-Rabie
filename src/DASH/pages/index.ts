@@ -1,0 +1,11 @@
+export { Dashboard } from './Dashboard';
+export { Students } from './Students';
+export { Courses } from './Courses';
+export { Lessons } from './Lessons';
+export { Exams } from './Exams';
+export { Subscriptions } from './Subscriptions';
+export { AccessCodes } from './AccessCodes';
+export { Financial } from './Financial';
+export { Payments } from './Payments';
+export { Notifications } from './Notifications';
+export { Settings } from './Settings';

@@ -1,5 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { Plus, Clock, FileText, Edit, Trash2 } from "lucide-react";
+import {
+Plus,
+Clock,
+FileText,
+Edit,
+Trash2,
+ClipboardList,
+BarChart3,
+CheckCircle
+} from "lucide-react";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
@@ -15,6 +24,7 @@ export function InstructorExams() {
   const [editDuration, setEditDuration] = useState("");
   const [editPassMark, setEditPassMark] = useState("");
   const navigate = useNavigate();
+  const [openedExamId, setOpenedExamId] = useState<number | null>(null);
   const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
 
 const [editQuestionText, setEditQuestionText] = useState("");
@@ -215,28 +225,101 @@ const updateQuestion = async (questionId: number) => {
         <DashboardSidebar type="instructor" />
       </div>
 
-      <main className="flex-1 overflow-y-auto">
-        <div className="bg-white dark:bg-[#130726] border-b border-slate-200 px-6 py-5 flex items-center justify-between">
+      <main className="flex-1 overflow-y-auto p-6">
+        <div
+className="
+relative
+overflow-hidden
+rounded-[32px]
+bg-gradient-to-l
+from-blue-600
+via-blue-700
+to-violet-600
+px-10
+py-12
+shadow-[0_10px_40px_rgba(37,99,235,0.25)]
+mb-8
+"
+>
           <div>
-            <h1 className="text-2xl font-black text-slate-900">
+            <h1 className="text-6xl font-black text-slate-900 text-white">
               الاختبارات
             </h1>
-            <p className="text-slate-500 text-sm">
+            <p className="text-blue-100 text-xl mt-2">
               إدارة جميع الاختبارات الخاصة بك
             </p>
           </div>
 
- <Button>
+ <Button
+className="
+bg-white
+mt-6
+text-blue-600
+hover:bg-blue-50
+rounded-2xl
+h-14
+px-8
+font-bold
+shadow-xl
+border-0
+"
+>
   <Plus size={16} />
   اختبار جديد
 </Button>
         </div>
-<Card>
+
+        <div className="grid md:grid-cols-3 gap-5 mb-6">
+
+<Card className="rounded-3xl border border-blue-100">
+<CardContent className="p-6">
+  <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center">
+  <ClipboardList className="text-blue-600" />
+</div>
+<p className="text-slate-500">إجمالي الاختبارات</p>
+<p className="text-6xl font-black text-slate-900 mt-2">
+{exams.length}
+</p>
+</CardContent>
+</Card>
+
+<Card className="rounded-3xl border border-violet-100">
+<CardContent className="p-6">
+<p className="text-slate-500">إجمالي الأسئلة</p>
+<p className="text-6xl font-black text-slate-900 mt-2">
+{exams.reduce((acc,e)=>acc+(e.exam_questions?.length||0),0)}
+</p>
+</CardContent>
+</Card>
+
+<Card className="rounded-3xl border border-emerald-100">
+<CardContent className="p-6">
+<p className="text-slate-500">الاختبارات المنشورة</p>
+<p className="text-6xl font-black text-slate-900 mt-2">
+{exams.length}
+</p>
+</CardContent>
+</Card>
+
+</div>
+
+<Card
+className="
+rounded-3xl
+border
+border-slate-200
+mb-6
+"
+>
   <CardContent className="space-y-4">
 
-    <h2 className="font-black text-lg">
+    <h2 className="text-3xl font-black">
       إنشاء اختبار جديد
     </h2>
+
+<p className="text-slate-500 mt-2">
+إنشاء اختبار جديد وإضافة الأسئلة للطلاب
+</p>
 
     <Input
       placeholder="اسم الاختبار"
@@ -244,17 +327,22 @@ const updateQuestion = async (questionId: number) => {
       onChange={(e) => setExamTitle(e.target.value)}
     />
 
-    <Input
-      placeholder="مدة الاختبار بالدقائق"
-      value={examDuration}
-      onChange={(e) => setExamDuration(e.target.value)}
-    />
+    <div className="grid md:grid-cols-2 gap-4">
 
-    <Input
-      placeholder="درجة النجاح %"
-      value={examPassMark}
-      onChange={(e) => setExamPassMark(e.target.value)}
-    />
+<Input
+placeholder="مدة الاختبار بالدقائق"
+value={examDuration}
+onChange={(e) => setExamDuration(e.target.value)}
+/>
+
+<Input
+placeholder="درجة النجاح %"
+value={examPassMark}
+onChange={(e) => setExamPassMark(e.target.value)}
+/>
+
+</div>
+
 
    <Button onClick={createExam}>
   <Plus size={16} />
@@ -265,7 +353,18 @@ const updateQuestion = async (questionId: number) => {
 </Card>
         <div className="p-6 space-y-4">
           {exams.map((exam) => (
-            <Card key={exam.id}>
+            <Card
+key={exam.id}
+className="
+rounded-3xl
+border
+border-slate-200
+shadow-none
+hover:shadow-lg
+transition-all
+duration-300
+"
+>
               <CardContent>
                 <div className="flex justify-between items-start">
 
@@ -293,14 +392,19 @@ const updateQuestion = async (questionId: number) => {
                     </div>
                   </div>
 
-                  <Badge variant="blue">
+                  <Badge
+className="
+bg-blue-100
+text-blue-700
+border-0
+"
+>
   منشور
 </Badge>
                 </div>
+{openedExamId === exam.id && (
 <div className="mt-6 space-y-3 border-t pt-4">
-<p className="text-red-500">
-  editingExamId = {editingExamId} | exam.id = {exam.id}
-</p>
+
 {editingExamId === exam.id && (
 
   <div className="space-y-3 mt-4">
@@ -379,6 +483,7 @@ const updateQuestion = async (questionId: number) => {
   </Button>
 
 </div>
+)}
 
 {(exam.exam_questions?.length || 0) > 0 && (
   <div className="mt-5 space-y-3">
@@ -508,6 +613,19 @@ const updateQuestion = async (questionId: number) => {
     setEditPassMark(String(exam.passing_grade));
   }}
 >
+  <Button
+size="sm"
+onClick={() =>
+setOpenedExamId(
+openedExamId === exam.id
+? null
+: exam.id
+)
+}
+>
+إدارة الأسئلة
+</Button>
+
   <Edit size={14} />
   تعديل
 </Button>

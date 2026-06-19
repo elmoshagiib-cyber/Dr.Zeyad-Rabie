@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Bell, ChevronDown, GraduationCap } from "lucide-react";
-import { Button } from "../ui/Button";
-import { Avatar } from "../ui/Avatar";
+import { Menu, X, Bell } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
@@ -46,75 +44,116 @@ const loadNotifications = async () => {
 
   return (
     <nav className="
-fixed top-0 left-0 right-0 z-50
+fixed
+top-8
+left-14
+right-14
+z-50
+bg-white/95
 backdrop-blur-md
-bg-white/90
-dark:bg-[#0b0715]/90
+rounded-[28px]
+ring-2
+ring-white/20
+shadow-[0_10px_40px_rgba(15,23,42,0.08)]
+dark:bg-[#0b0715]
 border-b
 border-slate-200
 dark:border-white/5
 ">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <button onClick={() => navigate("/")} className="flex items-center gap-3 group">
-            <div className="
-w-12 h-12
-rounded-2xl
-bg-gradient-to-br
-from-violet-600
-to-cyan-500
-flex items-center justify-center
-shadow-[0_0_30px_rgba(139,92,246,.35)]
-">
-  <GraduationCap size={20} className="text-white" />
-</div>
+      <div className="max-w-[1600px] mx-auto px-6">
+        <div className="flex items-center justify-between h-28">
+          <div className="flex items-center gap-4">
 
-<div className="text-right hidden sm:block">
-  <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
-    د. زياد ربيع
-  </p>
-  <p className="text-[10px] text-slate-500 dark:text-slate-300 leading-tight">
-    منصة تعليمية
-  </p>
-</div>
-</button>
+  {/* Logo */}
+  <button
+    onClick={() => navigate("/")}
+    className="flex items-center justify-center group"
+  >
+    <img
+      src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
+      alt="د. زياد ربيع"
+      className="h-20 w-auto object-contain"
+    />
+  </button>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map(link => (
-              <button
-                key={link.path}
-                onClick={() => navigate(link.path)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive(link.path)
-                    ? "text-blue-600 bg-purple-600/20 text-cyan-300 border border-purple-500/30"
-                    : "text-slate-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-white"
-                }`}
-              >
-                {link.label}
-              </button>
-            ))}
-          </div>
+  {/* Theme Button */}
+  <button
+    onClick={toggleTheme}
+    className="
+    relative
+    w-[120px]
+    h-[52px]
+    rounded-full
+    bg-gradient-to-r
+    from-[#2E1065]
+    via-[#6D28D9]
+    to-[#A855F7]
+    shadow-[0_10px_25px_rgba(124,58,237,.35)]
+    transition-all
+    duration-300
+    hover:scale-105
+    "
+  >
+    
+  {/* Circle */}
 
-          {/* Right Side */}
-          <div className="flex items-center gap-3">
-           <button
-  onClick={toggleTheme}
+  <div
+    className={`
+      absolute
+      top-[4px]
+      w-[44px]
+      h-[44px]
+      rounded-full
+      bg-white
+      shadow-lg
+      flex
+      items-center
+      justify-center
+      transition-all
+      duration-300
+      ease-in-out
+      ${isDark ? "left-[4px]" : "right-[4px]"}
+    `}
+  >
+    {isDark ? (
+      <Moon
+        size={18}
+        className="text-[#6D28D9]"
+      />
+    ) : (
+      <Sun
+        size={18}
+        className="text-[#6D28D9]"
+      />
+    )}
+  </div>
+
+  <Moon
+    size={16}
   className="
-p-2
-rounded-xl
-border
-border-slate-300
-dark:border-white/20
-text-slate-800
-dark:text-white
-hover:bg-slate-100
-dark:hover:bg-white dark:bg-[#130726]/10
-"
->
-  {isDark ? <Sun size={18} /> : <Moon size={18} />}
+  absolute
+  right-5
+    top-1/2
+    -translate-y-1/2
+    text-white/70
+    "
+  />
+
+  <Sun
+    size={16}
+  className="
+  absolute
+  left-5
+    top-1/2
+    -translate-y-1/2
+    text-white/70
+    "
+  />
 </button>
+</div>
+          {/* Right Side */}
+          <div className="flex items-center gap-6">
+           
             {user ? (
               <>
                 
@@ -134,7 +173,7 @@ dark:hover:bg-white dark:bg-[#130726]/10
   
 <button
   onClick={logout}
-  className="px-4 py-2 bg-red-500 text-white rounded-xl"
+  className="px-5 py-3 bg-red-500 text-white rounded-xl"
 >
   تسجيل الخروج
 </button>
@@ -204,15 +243,38 @@ dark:hover:bg-white dark:bg-[#130726]/10
              <>
   <button
     onClick={() => navigate("/login")}
-    className="px-5 py-2.5 rounded-xl font-semibold text-slate-700 dark:text-slate-300 hover:text-purple-600 transition-all"
+    className="
+px-12
+h-12
+rounded-2xl
+border-2
+border-violet-500
+text-violet-600
+font-black
+bg-white
+hover:bg-violet-50
+transition-all
+"
   >
     تسجيل الدخول
   </button>
 
   <button
     onClick={() => navigate("/register")}
-    className="px-6 py-2.5 rounded-xl text-white font-bold bg-gradient-to-r from-purple-700 to-violet-500 hover:scale-105 transition-all shadow-lg shadow-purple-500/25"
-  >
+className="
+px-12
+h-12
+rounded-2xl
+font-black
+text-white
+bg-gradient-to-r
+from-violet-700
+to-purple-500
+shadow-lg
+shadow-violet-500/20
+hover:scale-105
+transition-all
+"  >
     إنشاء حساب
   </button>
 </>

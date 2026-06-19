@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Users, TrendingUp, Star, Plus, Eye, Edit, Trash2, BarChart2, MessageSquare, Bell, ChevronRight, Play, FileText } from "lucide-react";
+import {   Menu, BookOpen, Users, TrendingUp, Star, Plus, Eye, Edit, Trash2, BarChart2, MessageSquare, Bell, ChevronRight, Play, FileText } from "lucide-react";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
@@ -15,6 +15,7 @@ export function InstructorDashboard() {
   const { user } = useApp();
   const [activeTab, setActiveTab] = useState<"overview" | "students" | "analytics">("overview");
 const [notificationsOpen, setNotificationsOpen] = useState(false);
+const [sidebarOpen, setSidebarOpen] = useState(false);
 const [courses, setCourses] = useState<any[]>([]);
 const [students, setStudents] = useState<any[]>([]);
 const [announcements, setAnnouncements] = useState<any[]>([]);
@@ -111,133 +112,163 @@ const deleteCourse = async (id: string) => {
   }
 };
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden" dir="rtl">
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="instructor" />
-      </div>
-      <main className="flex-1 overflow-y-auto">
-        {/* Top Bar */}
-        <div className="sticky top-0 z-10 bg-white dark:bg-[#130726]/95 backdrop-blur-sm border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="font-black text-slate-900 text-lg">لوحة تحكم المدرس</h1>
-            <p className="text-slate-500 text-xs">مرحباً {user?.name || "د. زياد ربيع"}</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-  <button
-    onClick={() => setNotificationsOpen(!notificationsOpen)}
-    className="relative p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
+  <div
+    className="
+    flex
+    min-h-screen
+    bg-[#f5f7fb]
+    "
+    dir="rtl"
   >
-    <Bell size={18} className="text-slate-600" />
 
-    {announcements.length > 0 && (
-      <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-    )}
-  </button>
+    <DashboardSidebar type="instructor" />
 
-  {notificationsOpen && (
-    <div
-      className="
-      absolute left-0 top-full mt-3
-      w-96
-      bg-white
-      rounded-3xl
-      shadow-2xl
-      border border-slate-200
-      overflow-hidden
-      z-50
-      "
-    >
-      <div className="p-4 border-b">
-        <h3 className="font-black">
-          الإشعارات
-        </h3>
-      </div>
-
-      <div className="max-h-[400px] overflow-y-auto">
-        {announcements.length === 0 ? (
-          <div className="p-6 text-center text-slate-400">
-            لا توجد إشعارات
-          </div>
-        ) : (
-          announcements.map((item) => (
-            <div
-  key={item.id}
+<main
   className="
-    p-4
-    border-b border-slate-100
-    hover:bg-slate-50
-    transition-colors
-    cursor-pointer
+  flex-1
+  overflow-y-auto
+  px-3
+  py-4
+  "
+    >
+        {/* Header */}
+<div
+  className="
+  relative
+  overflow-hidden
+  rounded-[32px]
+  bg-gradient-to-r
+  from-blue-700
+  via-blue-600
+  to-blue-500
+  px-10
+  py-6
+  text-white
+  shadow-[0_10px_40px_rgba(37,99,235,0.25)]
+  mb-8
   "
 >
-  <div className="flex items-start justify-between">
-    <div>
-      <h4 className="font-bold text-sm text-slate-900">
-        {item.title}
-      </h4>
+  <div className="relative z-10 flex items-center justify-between">
 
-      <p className="text-xs text-slate-500 mt-1">
-        {item.content}
-      </p>
-
-      <p className="text-[11px] text-slate-400 mt-2">
-        {new Date(item.created_at).toLocaleDateString("ar-EG")}
-      </p>
-    </div>
-
-    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
-  </div>
-</div>
-          ))
-        )}
-      </div>
-    </div>
-    
-  )}
-</div>
-<div className="p-3 border-t border-slate-100">
-  <button
-    onClick={() => navigate("/instructor/notifications")}
-    className="
-      w-full
-      py-2
-      rounded-xl
-      bg-blue-50
-      text-blue-600
+    <Button
+      onClick={() =>
+        navigate("/instructor/courses/create")
+      }
+      className="
+      bg-white
+      text-blue-700
+      hover:bg-blue-50
+      rounded-[28px]
+      px-8
+      h-16
+      min-w-[200px]
       font-bold
-      hover:bg-blue-100
-      transition-all
+      shadow-lg
+      "
+    >
+      <Plus size={18} />
+      إنشاء كورس
+    </Button>
+
+    <div className="flex flex-row-reverse items-center gap-6">
+
+      <div className="text-right">
+
+        <h1 className="text-5xl font-black">
+          لوحة التحكم
+        </h1>
+
+        <p className="text-blue-100 text-base mt-2">
+          مرحباً {user?.name || "د. زياد ربيع"}
+        </p>
+
+      </div>
+
+      <div
+        className="
+        w-16
+        h-16
+        rounded-[24px]
+        bg-white/10
+        backdrop-blur-md
+        flex
+        items-center
+        justify-center
+        "
+      >
+        <BarChart2
+          size={30}
+          className="text-white"
+        />
+      </div>
+
+    </div>
+
+  </div>
+
+  <div
+    className="
+    absolute
+    -top-20
+    -left-20
+    w-72
+    h-72
+    bg-white/10
+    rounded-full
+    blur-3xl
     "
-  >
-    عرض جميع الإشعارات
-  </button>
+  />
+
+  <div
+    className="
+    absolute
+    -bottom-20
+    right-0
+    w-80
+    h-80
+    bg-blue-300/20
+    rounded-full
+    blur-3xl
+    "
+  />
 </div>
 
-            <Button size="sm" onClick={() => navigate("/instructor/courses/create")}>
-              <Plus size={16} />
-              إنشاء كورس
-            </Button>
-          </div>
-        </div>
-
-        <div className="p-6 space-y-6">
+<div className="space-y-8">
+</div>
+        <div className="pt-2 space-y-5">
           {/* Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 gap-6">
             {stats.map((stat, i) => (
-              <Card key={i} className="p-5">
-                <div className={`w-11 h-11 rounded-xl ${stat.color} flex items-center justify-center mb-4`}>
+              <Card
+  key={i}
+  className="
+  rounded-[32px]
+  border-slate-100
+  shadow-[0_4px_20px_rgba(15,23,42,0.05)]
+  "
+>
+                <div className={`w-14 h-14 rounded-xl ${stat.color} flex items-center justify-center mb-4`}>
                   <div className="text-white">{stat.icon}</div>
                 </div>
-                <p className="text-3xl font-black text-slate-900 mb-0.5">{stat.value}</p>
-                <p className="text-slate-500 text-xs mb-2">{stat.label}</p>
+                <p className="text-4xl font-black text-slate-900 mb-0.5">{stat.value}</p>
+                <p className="text-slate-500 text-sm mb-2">{stat.label}</p>
                 <p className="text-emerald-600 text-xs font-medium">{stat.change}</p>
               </Card>
             ))}
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-1 bg-slate-100 p-1 rounded-2xl w-fit">
+          <div className="
+flex
+gap-2
+bg-white
+border
+border-slate-200
+p-1.5
+rounded-2xl
+w-fit
+shadow-sm
+">
             {[
               { key: "overview", label: "نظرة عامة" },
               { key: "students", label: "الطلاب" },
@@ -261,28 +292,53 @@ const deleteCourse = async (id: string) => {
             <div className="grid lg:grid-cols-3 gap-6">
               {/* My Courses */}
               <div className="lg:col-span-2 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="font-black text-slate-900">كورساتي</h2>
+                <div className="flex items-center justify-between mb-2">
+
+  <div>
+    <h2 className="text-3xl font-black text-slate-900">
+      كورساتي
+    </h2>
+
+    <p className="text-slate-500 text-sm mt-1">
+      إدارة ومتابعة جميع الكورسات
+    </p>
+  </div>
                   <Button size="sm" variant="outline" onClick={() => navigate("/instructor/courses")}>
                     إدارة الكورسات
                   </Button>
                 </div>
                 
                 {myCourses.map(course => (
-                  <Card key={course.id}>
-                    <CardContent className="flex gap-4">
+                  <Card
+  key={course.id}
+  className="
+  rounded-[28px]
+  border-slate-100
+  shadow-[0_4px_20px_rgba(15,23,42,0.05)]
+  hover:shadow-[0_10px_30px_rgba(15,23,42,0.08)]
+  transition-all
+  duration-300
+  "
+>
+                    <CardContent className="p-4 flex gap-4 items-center">
                       <img
                         src={
   course.thumbnail ||
   "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=200"
 }
                         alt={course.title}
-                        className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+                        className="
+w-16
+h-16
+rounded-xl
+object-cover
+flex-shrink-0
+"
                         onError={e => { (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=80&h=80&fit=crop`; }}
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <p className="font-bold text-slate-900 text-sm truncate">{course.title}</p>
+                          <p className="font-black text-slate-900 text-base truncate">{course.title}</p>
                           <Badge variant={course.active ? "emerald" : "slate"}>
                             {course.active ? "نشط" : "مغلق"}
                           </Badge>
@@ -298,29 +354,66 @@ const deleteCourse = async (id: string) => {
     مجاني
   </span>
 </div>
-                        <div className="flex items-center gap-3">
-                          <button onClick={() => navigate(`/course/${course.id}`)} className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:text-blue-700">
-                            <Eye size={12} /> عرض
-                          </button>
-                          <button
-  onClick={() => navigate(`/instructor/courses/edit/${course.id}`)}
-  className="text-slate-500 text-xs font-bold flex items-center gap-1 hover:text-slate-700"
->
-  <Edit size={12} /> تعديل
-</button>
-                          
-                          <button
-  onClick={() => {
-    console.log("COURSE ID =", course.id);
-    deleteCourse(course.id);
-  }}
->
-  حذف
-</button>
-                          <span className="mr-auto text-sm font-black text-emerald-600">
-                            {course.price.toLocaleString("ar-EG")} ج
-                          </span>
-                        </div>
+                        <div className="flex items-center gap-2 mt-4">
+
+  <Button
+    size="sm"
+    className="
+    bg-blue-50
+    text-blue-600
+    hover:bg-blue-100
+    border-0
+    shadow-none
+    rounded-xl
+    "
+    onClick={() =>
+      navigate(`/course/${course.id}`)
+    }
+  >
+    <Eye size={14} />
+  </Button>
+
+  <Button
+    size="sm"
+    className="
+    bg-amber-50
+    text-amber-600
+    hover:bg-amber-100
+    border-0
+    shadow-none
+    rounded-xl
+    "
+    onClick={() =>
+      navigate(
+        `/instructor/courses/edit/${course.id}`
+      )
+    }
+  >
+    <Edit size={14} />
+  </Button>
+
+  <Button
+    size="sm"
+    className="
+    bg-red-50
+    text-red-600
+    hover:bg-red-100
+    border-0
+    shadow-none
+    rounded-xl
+    "
+    onClick={() =>
+      deleteCourse(course.id)
+    }
+  >
+    <Trash2 size={14} />
+  </Button>
+
+  <span className="mr-auto text-base font-black text-emerald-600">
+    {course.price.toLocaleString("ar-EG")} ج
+  </span>
+
+</div>
                       </div>
                     </CardContent>
                   </Card>
@@ -330,9 +423,15 @@ const deleteCourse = async (id: string) => {
               {/* Right sidebar */}
               <div className="space-y-5">
                 {/* Quick Actions */}
-                <Card>
+                <Card
+  className="
+  rounded-[28px]
+  border-slate-100
+  shadow-[0_4px_20px_rgba(15,23,42,0.05)]
+  "
+>
                   <CardContent>
-                    <h3 className="font-black text-slate-900 mb-4">الإجراءات السريعة</h3>
+                    <h3 className="text-lg font-black text-slate-900 mb-5">الإجراءات السريعة</h3>
                     <div className="space-y-2">
                       {[
                         { label: "إنشاء كورس جديد", icon: <BookOpen size={15} />, color: "text-blue-600 bg-blue-50", action: () => navigate("/instructor/courses/create") },
@@ -357,9 +456,15 @@ const deleteCourse = async (id: string) => {
                 </Card>
 
                 {/* Latest Announcements */}
-                <Card>
+                <Card
+  className="
+  rounded-[28px]
+  border-slate-100
+  shadow-[0_4px_20px_rgba(15,23,42,0.05)]
+  "
+>
                   <CardContent>
-                    <h3 className="font-black text-slate-900 mb-4">إشعاراتي الأخيرة</h3>
+                    <h3 className="text-lg font-black text-slate-900 mb-5">إشعاراتي الأخيرة</h3>
                     <div className="space-y-3">
                       {announcements.slice(0,3).map(ann => (
                         <div key={ann.id} className="border-r-2 border-blue-500 pr-3">

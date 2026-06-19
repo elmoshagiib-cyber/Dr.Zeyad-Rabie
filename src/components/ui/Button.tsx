@@ -57,7 +57,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 cursor-pointer",
+        "inline-flex items-center justify-center font-bold rounded-2xl transition-all duration-200 cursor-pointer",
         variants[variant],
         sizes[size],
         fullWidth && "w-full",

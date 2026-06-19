@@ -36,7 +36,7 @@ export function InstructorStudents() {
 const [students, setStudents] = useState<any[]>([]);
 const [addStudentOpen, setAddStudentOpen] =
   useState(false);
-
+const [sidebarOpen, setSidebarOpen] = useState(false);
 useEffect(() => {
   loadStudents();
 }, []);
@@ -255,214 +255,305 @@ const toggleStudentStatus = async (
   });
   
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden" dir="rtl">
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="instructor" />
-      </div>
+  <div
+    className="
+    flex
+    min-h-screen
+    bg-[#f5f7fb]
+    "
+    dir="rtl"
+  >
 
-      <main className="flex-1 overflow-y-auto">
-        {/* Header */}
-        <div
-className="
-relative
-overflow-hidden
-rounded-3xl
-bg-gradient-to-l
-from-blue-700
-via-blue-600
-to-blue-500
-p-8
-text-white
-shadow-lg
-mb-6
-"
+    <DashboardSidebar type="instructor" />
+
+    <main
+  className="
+  flex-1
+  overflow-y-auto
+  px-4
+  py-4
+  "
 >
 
-  <div className="flex items-center justify-between">
+{/* Header */}
+<div
+  className="
+  relative
+  overflow-hidden
+  rounded-[36px]
+  bg-gradient-to-r
+  from-blue-700
+  via-blue-600
+  to-blue-500
+  px-10
+  py-6
+  text-white
+  shadow-[0_10px_40px_rgba(37,99,235,0.25)]
+  mb-8
+  "
+>
+  <div className="relative z-10 flex flex-row-reverse items-center justify-between">
 
-    <div className="flex items-center gap-4">
+    {/* زر إضافة طالب */}
+    <Button
+      onClick={() => setAddStudentOpen(!addStudentOpen)}
+      className="
+      bg-white
+      text-blue-700
+      hover:bg-blue-50
+      rounded-[28px]
+      px-8
+      h-20
+      min-w-[210px]
+      font-bold
+      shadow-lg
+      border-0
+      "
+    >
+      <Plus size={18} />
+
+      {
+        addStudentOpen
+          ? "إغلاق النموذج"
+          : "إضافة طالب"
+      }
+    </Button>
+
+    {/* العنوان */}
+    <div className="flex flex-row-reverse items-center gap-6">
+
+      <div className="text-right">
+
+        <h1 className="text-6xl font-black leading-none">
+          الطلاب
+        </h1>
+
+        <p className="text-blue-100 mt-3 text-2xl">
+          إدارة ومتابعة جميع الطلاب بالمنصة
+        </p>
+
+      </div>
+
+      <div
+        className="
+        w-16
+h-16
+        rounded-[28px]
+        bg-white/10
+        backdrop-blur-md
+        flex
+        items-center
+        justify-center
+        "
+      >
+        <UsersRound
+          size={32}
+          className="text-white"
+        />
+      </div>
+
+    </div>
+
+  </div>
+
+  {/* تأثيرات الخلفية */}
+  <div
+    className="
+    absolute
+    -top-20
+    -left-20
+    w-72
+    h-72
+    bg-white/10
+    rounded-full
+    blur-3xl
+    "
+  />
 
   <div
     className="
-    w-14 h-14
-    rounded-2xl
-    bg-white/10
-    backdrop-blur-sm
-    flex
-    items-center
-    justify-center
+    absolute
+    -bottom-20
+    right-0
+    w-80
+    h-80
+    bg-blue-300/20
+    rounded-full
+    blur-3xl
+    "
+  />
+</div>
+
+<div className="space-y-8">
+          {/* Stats */}
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+  {/* إجمالي الطلاب */}
+  <Card
+    className="
+    bg-white
+    rounded-[32px]
+    border
+    border-slate-100
+    shadow-[0_4px_20px_rgba(15,23,42,0.05)]
+    hover:shadow-[0_10px_30px_rgba(15,23,42,0.08)]
+    transition-all
+    duration-300
     "
   >
-    <UsersRound size={28} />
-  </div>
+    <CardContent className="px-7 py-5 flex items-center justify-between">
 
-  <div>
-    <h1 className="text-4xl font-black">
-      الطلاب
-    </h1>
+      <div
+        className="
+        w-16
+        h-16
+        rounded-[24px]
+        bg-violet-100
+        flex
+        items-center
+        justify-center
+        "
+      >
+        <Users
+          size={30}
+          className="text-violet-600"
+        />
+      </div>
 
-    <p className="text-blue-100 mt-1">
-      إدارة ومتابعة جميع الطلاب بالمنصة
-    </p>
-  </div>
+      <div className="text-right">
+
+        <p className="text-slate-500 text-sm mb-2">
+          إجمالي الطلاب
+        </p>
+
+        <p className="text-6xl font-black leading-none">
+          {students.length}
+        </p>
+
+        <p className="text-slate-400 text-sm mt-3">
+          جميع الطلاب المسجلين
+        </p>
+
+      </div>
+
+    </CardContent>
+  </Card>
+
+  {/* الطلاب النشطون */}
+  <Card
+    className="
+    bg-white
+    rounded-[32px]
+    border
+    border-slate-100
+    shadow-[0_4px_20px_rgba(15,23,42,0.05)]
+    hover:shadow-[0_10px_30px_rgba(15,23,42,0.08)]
+    transition-all
+    duration-300
+    "
+  >
+    <CardContent className="px-7 py-5 flex items-center justify-between">
+
+      <div
+        className="
+        w-20
+h-20
+        rounded-[24px]
+        bg-emerald-100
+        flex
+        items-center
+        justify-center
+        "
+      >
+        <UserCheck
+          size={30}
+          className="text-emerald-600"
+        />
+      </div>
+
+      <div className="text-right">
+
+        <p className="text-slate-500 text-sm mb-2">
+          الطلاب النشطون
+        </p>
+
+        <p className="text-6xl font-black leading-none">
+          {
+            students.filter(
+              (student) =>
+                student.status === "نشط" ||
+                student.status === "active"
+            ).length
+          }
+        </p>
+
+        <p className="text-emerald-500 text-sm mt-3">
+          100% من إجمالي الطلاب
+        </p>
+
+      </div>
+
+    </CardContent>
+  </Card>
+
+  {/* طلاب هذا الشهر */}
+  <Card
+    className="
+    bg-white
+    rounded-[32px]
+    border
+    border-slate-100
+    shadow-[0_4px_20px_rgba(15,23,42,0.05)]
+    hover:shadow-[0_10px_30px_rgba(15,23,42,0.08)]
+    transition-all
+    duration-300
+    "
+  >
+    <CardContent className="px-7 py-5 flex items-center justify-between">
+
+      <div
+        className="
+        w-20
+        h-20
+        rounded-[24px]
+        bg-orange-100
+        flex
+        items-center
+        justify-center
+        "
+      >
+        <GraduationCap
+          size={30}
+          className="text-orange-500"
+        />
+      </div>
+
+      <div className="text-right">
+
+        <p className="text-slate-500 text-sm mb-2">
+          طلاب هذا الشهر
+        </p>
+
+        <p className="text-6xl font-black leading-none">
+          {newStudentsThisMonth}
+        </p>
+
+        <p className="text-emerald-500 text-sm mt-3">
+          +100% عن الشهر الماضي
+        </p>
+
+      </div>
+
+    </CardContent>
+  </Card>
 
 </div>
-
-    <Button
-onClick={() =>
-  setAddStudentOpen(!addStudentOpen)
-}
-className="
-bg-white
-text-blue-700
-hover:bg-blue-50
-rounded-xl
-px-5
-h-12
-font-bold
-"
->
-<Plus size={18}/>
-{
-addStudentOpen
-? "إغلاق النموذج"
-: "إضافة طالب"
-}
-</Button>
-
-  </div>
-
-<div
-className="
-absolute
-top-0
-left-0
-w-72
-h-72
-bg-white/10
-rounded-full
-blur-3xl
-"
-/>
-
-<div
-className="
-absolute
-bottom-0
-right-0
-w-80
-h-80
-bg-blue-400/20
-rounded-full
-blur-3xl
-"
-/>
-
-</div>
-        <div className="p-6 space-y-6">
-
-          {/* Stats */}
-          <div className="grid md:grid-cols-3 gap-4">
-
-           <Card
-className="
-group
-bg-white
-border
-border-slate-200
-rounded-3xl
-shadow-sm
-hover:shadow-lg
-hover:-translate-y-1
-transition-all
-duration-300
-"
->
-              <CardContent className="
-flex
-items-center
-justify-between
-p-6
-group
-">
-                <Users size={32} className="text-blue-600" />
-                <div>
-                  <p className="text-sm text-slate-500">
-                    إجمالي الطلاب
-                  </p>
-                  <p className="text-2xl font-black">
-                    {students.length}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card
-className="
-group
-border
-border-slate-200
-rounded-3xl
-hover:border-emerald-200
-hover:-translate-y-1
-transition-all
-duration-300
-"
->
-              <CardContent className="flex items-center gap-4">
-                <UserCheck size={32} className="text-emerald-600" />
-                <div>
-                  <p className="text-sm text-slate-500">
-                    الطلاب النشطون
-                  </p>
-                  <p className="text-2xl font-black">
-                    {
-  students.filter(
-  (student) =>
-    student.status === "نشط" ||
-    student.status === "active"
-).length
-}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card
-className="
-border
-border-slate-200
-rounded-3xl
-shadow-none
-hover:border-violet-200
-transition-all
-duration-300
-"
->
-              <CardContent className="
-flex
-items-center
-justify-between
-p-6
-">
-                <GraduationCap size={32} className="text-orange-500" />
-                <div>
-                  <p className="text-sm text-slate-500">
-                    طلاب هذا الشهر
-                  </p>
-                  <p className="text-2xl font-black">
-                    {newStudentsThisMonth}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-          </div>
+          
 <Card
 className={`
 border
 border-slate-200
-rounded-3xl
+rounded-[28px]
 bg-gradient-to-b
 from-white
 to-slate-50
@@ -530,7 +621,7 @@ ${!addStudentOpen ? "hidden" : ""}
       />
 
      <select
-  className="w-full border rounded-xl px-4 py-3"
+  className="w-full border rounded-2xl px-5 py-4"
   value={studentGrade}
   onChange={(e) =>
     setStudentGrade(e.target.value)
@@ -550,7 +641,7 @@ ${!addStudentOpen ? "hidden" : ""}
   ))}
 </select>
 <select
-  className="w-full border rounded-xl px-4 py-3"
+  className="w-full border rounded-2xl px-5 py-4"
   value={studentType}
   onChange={(e) =>
     setStudentType(e.target.value)
@@ -571,7 +662,7 @@ border
 border-violet-100
 rounded-2xl
 p-5
-bg-violet-50/40
+bg-gradient-to-r from-violet-100 to-fuchsia-100/40
 "
 >
 
@@ -579,7 +670,7 @@ bg-violet-50/40
     كود الطالب
   </p>
 
-  <div className="flex items-center justify-between">
+  <div className="flex items-center justify-between flex-row-reverse">
 
     <span className="font-black text-lg">
       {generatedCode}
@@ -609,29 +700,28 @@ bg-violet-50/40
 </Card>
           {/* Search */}
 <Card
-className="
-bg-white/80
-backdrop-blur-xl
-border
-border-slate-200
-rounded-3xl
-shadow-sm
-hover:shadow-md
-transition-all
-duration-300
-"
+  className="
+  bg-white
+  rounded-[32px]
+  border
+  border-slate-100
+  shadow-[0_4px_20px_rgba(15,23,42,0.05)]
+  "
 >
-  <CardContent className="space-y-5 p-6">
+  <CardContent className="p-8">
 
-    <div className="flex items-center justify-between">
-      <div>
-        <h3 className="font-black text-lg">
+    <div className="flex items-start justify-between mb-6">
+
+      <div className="text-right">
+
+        <h3 className="text-2xl font-black mb-1">
           البحث والفلاتر
         </h3>
 
-        <p className="text-sm text-slate-500">
-          ابحث عن الطلاب وقم بتصفية النتائج
+        <p className="text-slate-500">
+          ابحث عن طالب معين أو استخدم الفلاتر
         </p>
+
       </div>
 
       <Button
@@ -642,30 +732,46 @@ duration-300
           setStatusFilter("");
           setTypeFilter("");
         }}
+        className="
+        h-12
+        px-6
+        rounded-2xl
+        "
       >
         إعادة تعيين
       </Button>
+
     </div>
 
-    <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-3">
+    <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-4">
 
       <Input
-        placeholder="اسم الطالب أو الكود"
+        placeholder="اسم الطالب أو الكود..."
         value={searchTerm}
         onChange={(e) =>
           setSearchTerm(e.target.value)
         }
-        icon={<Search size={18} />}
+        icon={<Search size={20} />}
       />
 
       <select
-        className="border rounded-xl px-4 py-3"
+        className="
+        w-full
+        border
+        border-slate-200
+        rounded-2xl
+        px-5
+        py-4
+        bg-white
+        "
         value={gradeFilter}
         onChange={(e) =>
           setGradeFilter(e.target.value)
         }
       >
-        <option value="">كل الصفوف</option>
+        <option value="">
+          كل الصفوف
+        </option>
 
         {grades.map((grade) => (
           <option
@@ -678,356 +784,342 @@ duration-300
       </select>
 
       <select
-        className="border rounded-xl px-4 py-3"
+        className="
+        w-full
+        border
+        border-slate-200
+        rounded-2xl
+        px-5
+        py-4
+        bg-white
+        "
         value={statusFilter}
         onChange={(e) =>
           setStatusFilter(e.target.value)
         }
       >
-        <option value="">جميع الحالات</option>
-        <option value="نشط">نشط</option>
-        <option value="موقوف">موقوف</option>
+        <option value="">
+          جميع الحالات
+        </option>
+
+        <option value="نشط">
+          نشط
+        </option>
+
+        <option value="موقوف">
+          موقوف
+        </option>
+
       </select>
 
       <select
-        className="border rounded-xl px-4 py-3"
+        className="
+        w-full
+        border
+        border-slate-200
+        rounded-2xl
+        px-5
+        py-4
+        bg-white
+        "
         value={typeFilter}
         onChange={(e) =>
           setTypeFilter(e.target.value)
         }
       >
-        <option value="">جميع الأنواع</option>
-        <option value="سنتر">سنتر</option>
-        <option value="أونلاين">أونلاين</option>
+        <option value="">
+          جميع الأنواع
+        </option>
+
+        <option value="سنتر">
+          سنتر
+        </option>
+
+        <option value="أونلاين">
+          أونلاين
+        </option>
+
       </select>
 
     </div>
 
   </CardContent>
 </Card>
-<div className="flex items-end justify-between">
+
+<div className="flex items-center justify-between mt-8">
 
   <div className="flex items-center gap-3">
 
-<h2 className="text-xl font-black">
-قائمة الطلاب
-</h2>
+    <h2 className="text-4xl font-black">
+      قائمة الطلاب
+    </h2>
 
-<span
-className="
-px-3
-py-1
-rounded-full
-bg-blue-50
-text-blue-600
-text-xs
-font-bold
-"
->
-{students.length} طالب
-</span>
+    <span
+      className="
+      px-3
+      py-1
+      rounded-full
+      bg-blue-50
+      text-blue-600
+      text-sm
+      font-bold
+      "
+    >
+      {students.length} طالب
+    </span>
 
-</div>
-
-  <div
-className="
-flex items-center gap-3
-px-5 py-4
-rounded-2xl
-bg-white
-border
-border-slate-200
-shadow-sm
-"
->
-    <div className="flex items-center gap-2">
-
-  <div
-className="
-w-14
-h-14
-rounded-2xl
-bg-blue-50
-flex
-items-center
-justify-center
-"
->
-<Users
-size={28}
-className="text-blue-600"
-/>
-</div>
-
-  <div>
-    <p className="font-black text-lg">
-      {filteredStudents.length}
-    </p>
-
-    <p className="text-slate-500">
-عرض {filteredStudents.length} طالب
-</p>
   </div>
 
 </div>
-  </div>
+        {/* Students List */}
+<div className="space-y-4">
 
-</div>
-          {/* Students List */}
-          <div className="space-y-4">
-             <Card
-className="
-bg-white
-border
-border-slate-200
-rounded-3xl
-overflow-hidden
-shadow-sm
-hover:shadow-md
-transition-all
-duration-300
-"
->
-  <CardContent className="p-0 overflow-hidden">
+  <Card
+    className="
+    bg-white
+    border
+    border-slate-100
+    rounded-[32px]
+    overflow-hidden
+    shadow-[0_4px_20px_rgba(15,23,42,0.05)]
+    "
+  >
+    <CardContent className="p-0 overflow-hidden">
 
-    <div className="overflow-x-auto">
+      <div className="overflow-x-auto">
 
-      <table className="w-full">
+        <table className="w-full">
 
-        <thead>
-  <tr className="bg-slate-50 border-b border-slate-200">
+          <thead>
 
-    <th className="
-px-6
-py-5
-text-xs
-font-bold
-text-slate-500
-">
-      الطالب
-    </th>
+            <tr className="bg-[#f8f9fc] border-b border-slate-100">
 
-    <th className="px-6 py-4 text-right text-xs font-black text-slate-500 uppercase">
-      الكود
-    </th>
+              <th className="px-8 py-4 text-right text-sm font-bold text-slate-500">
+                الطالب
+              </th>
 
-    <th className="px-6 py-4 text-right text-xs font-black text-slate-500 uppercase">
-      الصف الدراسي
-    </th>
+              <th className="px-6 py-4 text-right text-sm font-bold text-slate-500">
+                الكود
+              </th>
 
-    <th className="px-6 py-4 text-right text-xs font-black text-slate-500 uppercase">
-      النوع
-    </th>
+              <th className="px-6 py-4 text-right text-sm font-bold text-slate-500">
+                الصف الدراسي
+              </th>
 
-    <th className="px-6 py-4 text-right text-xs font-black text-slate-500 uppercase">
-      الحالة
-    </th>
+              <th className="px-6 py-4 text-right text-sm font-bold text-slate-500">
+                النوع
+              </th>
 
-    <th className="px-6 py-4 text-right text-xs font-black text-slate-500 uppercase">
-      الكورسات
-    </th>
+              <th className="px-6 py-4 text-right text-sm font-bold text-slate-500">
+                الحالة
+              </th>
 
-    <th className="px-6 py-4 text-center text-xs font-black text-slate-500 uppercase">
-      الإجراءات
-    </th>
+              <th className="px-6 py-4 text-right text-sm font-bold text-slate-500">
+                الكورسات
+              </th>
 
-  </tr>
-</thead>
+              <th className="px-6 py-4 text-center text-sm font-bold text-slate-500">
+                الإجراءات
+              </th>
 
-<tbody>
+            </tr>
 
-{filteredStudents.map((student) => (
+          </thead>
 
+          <tbody>
 
-           <tr
-  key={student.id}
-  className="
-border-b
-border-slate-100
-hover:bg-slate-50
-transition-all
-duration-200
-"
->
+            {filteredStudents.map((student) => (
 
-  {/* الطالب */}
-  <td className="px-6 py-4">
-    <div className="flex items-center gap-3">
+              <tr
+                key={student.id}
+                className="
+                border-b
+                border-slate-100
+                hover:bg-[#f8fbff]
+                transition-all
+                duration-200
+                "
+              >
 
-      <Avatar
-        name={student.full_name || student.name}
-        size="sm"
-      />
+                {/* الطالب */}
+                <td className="px-8 py-5">
 
-      <div>
+                  <div className="flex items-center gap-4">
 
-        <p className="
-font-black
-text-slate-900
-tracking-tight
-whitespace-nowrap
-">
-          {student.full_name || student.name}
-        </p>
+                    <Avatar
+                      name={student.full_name || student.name}
+                      size="sm"
+                    />
 
-        <p className="text-xs text-slate-400">
-          {student.phone || "لا يوجد رقم"}
-        </p>
+                    <div>
+
+                      <p className="font-semibold text-slate-900 text-[17px]">
+                        {student.full_name || student.name}
+                      </p>
+
+                      <p className="text-xs text-slate-400 mt-1">
+                        {student.phone || "لا يوجد رقم"}
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+                {/* الكود */}
+                <td className="px-6 py-5 text-slate-700 font-medium whitespace-nowrap">
+                  {student.student_code}
+                </td>
+
+                {/* الصف */}
+                <td className="px-6 py-5">
+
+                  <span className="px-4 py-1.5 rounded-full bg-slate-100 text-slate-700 text-sm font-medium">
+                    {student.grade}
+                  </span>
+
+                </td>
+
+                {/* النوع */}
+                <td className="px-6 py-5">
+
+                  <span
+                    className={`px-3 py-2 rounded-full text-sm font-medium ${
+                      student.type === "أونلاين"
+                        ? "bg-violet-100 text-violet-700"
+                        : "bg-orange-100 text-orange-700"
+                    }`}
+                  >
+                    {student.type || "سنتر"}
+                  </span>
+
+                </td>
+
+                {/* الحالة */}
+                <td className="px-6 py-5">
+
+                  <span
+                    className={`px-3 py-2 rounded-full text-sm font-medium ${
+                      student.status === "نشط" ||
+                      student.status === "active"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {student.status === "نشط" ||
+                    student.status === "active"
+                      ? "نشط"
+                      : "موقوف"}
+                  </span>
+
+                </td>
+
+                {/* الكورسات */}
+                <td className="px-6 py-5">
+
+                  <span className="px-4 py-1.5 rounded-full bg-slate-100 text-slate-700 text-sm font-medium">
+                    {student.courses || 0} كورس
+                  </span>
+
+                </td>
+
+                {/* الإجراءات */}
+                <td className="px-6 py-5">
+
+                  <div className="flex justify-center gap-2 flex-row-reverse">
+
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        navigate(
+                          `/instructor/students/${student.id}`
+                        )
+                      }
+                      className="
+                      w-10
+                      h-10
+                      rounded-2xl
+bg-violet-100
+text-violet-600
+hover:bg-violet-200
+                      border-0
+                      shadow-none
+                      "
+                    >
+                      <Eye size={15} />
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        toggleStudentStatus(
+                          student.id,
+                          student.status
+                        )
+                      }
+                      className="
+                      w-10
+                      h-10
+                      rounded-2xl
+bg-orange-100
+text-orange-600
+hover:bg-orange-200
+                      border-0
+                      shadow-none
+                      "
+                    >
+                      <Power size={15} />
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      className="
+                      w-10
+                      h-10
+                      rounded-2xl
+bg-red-100
+text-red-600
+hover:bg-red-200
+                      border-0
+                      shadow-none
+                      "
+                      onClick={() => {
+                        if (
+                          confirm(
+                            "هل أنت متأكد من حذف الطالب؟"
+                          )
+                        ) {
+                          deleteStudent(student.id);
+                        }
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </Button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            ))}
+
+          </tbody>
+
+        </table>
 
       </div>
 
-    </div>
+    </CardContent>
+  </Card>
 
-  </td>
-
-  {/* الكود */}
-  <td className="px-6 py-4 font-medium text-slate-700 whitespace-nowrap">
-  {student.student_code}
-</td>
-
-  {/* الصف */}
-  <td className="px-6 py-4">
-
-    <span className="inline-flex px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
-  {student.grade}
-</span>
-
-  </td>
-
-  {/* النوع */}
-  <td className="px-6 py-4">
-
-    <span
-  className={`px-3 py-1 rounded-full text-xs font-bold ${
-    student.type === "أونلاين"
-      ? "bg-violet-100 text-violet-700"
-      : "bg-orange-100 text-orange-700"
-  }`}
->
-  {student.type || "سنتر"}
-</span>
-
-  </td>
-
-  {/* الحالة */}
-  <td className="px-6 py-4">
-
-    <span
-      className={`px-3 py-1 rounded-full text-xs font-bold ${
-        student.status === "نشط" ||
-        student.status === "active"
-          ? "bg-emerald-100 text-emerald-700"
-          : "bg-red-100 text-red-700"
-      }`}
-    >
-      {student.status === "نشط" ||
-      student.status === "active"
-        ? "نشط"
-        : "موقوف"}
-    </span>
-
-  </td>
-
-  {/* الكورسات */}
-  <td className="px-6 py-4">
-
-    <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
-      {student.courses || 0} كورس
-    </span>
-
-  </td>
-
-  {/* الإجراءات */}
-  <td className="px-6 py-4">
-
-    <div className="flex justify-center gap-2">
-
-      <Button
-size="sm"
-onClick={() =>
-  navigate(
-    `/instructor/students/${student.id}`
-  )
-}
-className="
-w-10
-h-10
-rounded-xl
-bg-violet-50
-text-violet-600
-hover:bg-violet-100
-border-0
-shadow-none
-transition-all
-duration-200
-hover:scale-105
-"
->
-
-<Eye size={15}/>
-</Button>
-
-      <Button
-size="sm"
-onClick={() =>
-  toggleStudentStatus(
-    student.id,
-    student.status
-  )
-}
-className="
-w-10
-h-10
-rounded-xl
-bg-orange-50
-text-orange-600
-hover:bg-orange-100
-border-0
-shadow-none
-transition-all
-duration-200
-hover:scale-105
-"
->
-<Power size={15}/>
-</Button>
-
-      <Button
-        size="sm"
-        variant="danger"
-        onClick={() => {
-  if (
-    confirm(
-      "هل أنت متأكد من حذف الطالب؟"
-    )
-  ) {
-    deleteStudent(student.id);
-  }
-}}
-      >
-        <Trash2 size={14} />
-      </Button>
-
-    </div>
-
-  </td>
-
-</tr>
-
-          ))}
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-  </CardContent>
-</Card>
           </div>
 
         </div>
+        
       </main>
+      
     </div>
   );
 }

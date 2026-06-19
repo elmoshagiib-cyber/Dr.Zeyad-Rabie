@@ -12,45 +12,45 @@ interface NavItem {
 }
 
 const studentNav: NavItem[] = [
-  { label: "لوحة التحكم", path: "/dashboard", icon: <LayoutDashboard size={18} /> },
-  { label: "كورساتي", path: "/dashboard/courses", icon: <BookOpen size={18} /> },
-  { label: "الواجبات", path: "/dashboard/homework", icon: <FileText size={18} />, badge: 2 },
-  { label: "الامتحانات", path: "/dashboard/exams", icon: <ClipboardList size={18} /> },
-  { label: "المتصدرون", path: "/dashboard/leaderboard", icon: <Trophy size={18} /> },
-  { label: "الإعلانات", path: "/dashboard/announcements", icon: <Bell size={18} />, badge: 3 },
-  { label: "ملفي الشخصي", path: "/profile", icon: <User size={18} /> },
+  { label: "لوحة التحكم", path: "/dashboard", icon: <LayoutDashboard size={20} /> },
+  { label: "كورساتي", path: "/dashboard/courses", icon: <BookOpen size={20} /> },
+  { label: "الواجبات", path: "/dashboard/homework", icon: <FileText size={20} />, badge: 2 },
+  { label: "الامتحانات", path: "/dashboard/exams", icon: <ClipboardList size={20} /> },
+  { label: "المتصدرون", path: "/dashboard/leaderboard", icon: <Trophy size={20} /> },
+  { label: "الإعلانات", path: "/dashboard/announcements", icon: <Bell size={20} />, badge: 3 },
+  { label: "ملفي الشخصي", path: "/profile", icon: <User size={20} /> },
 ];
 
 const instructorNav: NavItem[] = [
-  { label: "لوحة التحكم", path: "/instructor", icon: <LayoutDashboard size={18} /> },
+  { label: "لوحة التحكم", path: "/instructor", icon: <LayoutDashboard size={20} /> },
 
-  { label: "كورساتي", path: "/instructor/courses", icon: <BookOpen size={18} /> },
+  { label: "كورساتي", path: "/instructor/courses", icon: <BookOpen size={20} /> },
 
-{ label: "إنشاء كورس", path: "/instructor/courses/create", icon: <PlusCircle size={18} /> },
+{ label: "إنشاء كورس", path: "/instructor/courses/create", icon: <PlusCircle size={20} /> },
 
-  { label: "الاختبارات", path: "/instructor/exams", icon: <ClipboardList size={18} /> },
+  { label: "الاختبارات", path: "/instructor/exams", icon: <ClipboardList size={20} /> },
 
-  { label: "الواجبات", path: "/instructor/assignments", icon: <FileText size={18} /> },
+  { label: "الواجبات", path: "/instructor/assignments", icon: <FileText size={20} /> },
   {
   label: "تسليمات الطلاب",
   path: "/instructor/submissions",
-  icon: <CheckCircle size={18} />
+  icon: <CheckCircle size={20} />
 },
-  { label: "الإشعارات", path: "/instructor/notifications", icon: <Bell size={18} /> },
+  { label: "الإشعارات", path: "/instructor/notifications", icon: <Bell size={20} /> },
 
-  { label: "الطلاب", path: "/instructor/students", icon: <Users size={18} /> },
+  { label: "الطلاب", path: "/instructor/students", icon: <Users size={20} /> },
 
-  { label: "التحليلات", path: "/instructor/analytics", icon: <BarChart2 size={18} /> },
+  { label: "التحليلات", path: "/instructor/analytics", icon: <BarChart2 size={20} /> },
 ];
 
 const adminNav: NavItem[] = [
-  { label: "لوحة التحكم", path: "/admin", icon: <LayoutDashboard size={18} /> },
-  { label: "المستخدمون", path: "/admin/users", icon: <Users size={18} /> },
-  { label: "الموافقات", path: "/admin/approvals", icon: <CheckCircle size={18} />, badge: 47 },
-  { label: "الكورسات", path: "/admin/courses", icon: <Video size={18} /> },
-  { label: "الإعلانات", path: "/admin/announcements", icon: <MessageSquare size={18} /> },
-  { label: "التحليلات", path: "/admin/analytics", icon: <BarChart2 size={18} /> },
-  { label: "الإعدادات", path: "/admin/settings", icon: <Settings size={18} /> },
+  { label: "لوحة التحكم", path: "/admin", icon: <LayoutDashboard size={20} /> },
+  { label: "المستخدمون", path: "/admin/users", icon: <Users size={20} /> },
+  { label: "الموافقات", path: "/admin/approvals", icon: <CheckCircle size={20} />, badge: 47 },
+  { label: "الكورسات", path: "/admin/courses", icon: <Video size={20} /> },
+  { label: "الإعلانات", path: "/admin/announcements", icon: <MessageSquare size={20} /> },
+  { label: "التحليلات", path: "/admin/analytics", icon: <BarChart2 size={20} /> },
+  { label: "الإعدادات", path: "/admin/settings", icon: <Settings size={20} /> },
 ];
 
 interface DashboardSidebarProps {
@@ -64,11 +64,7 @@ useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useApp();
-  const [collapsed, setCollapsed] = useState(() => {
-  
-  const saved = localStorage.getItem("sidebar-collapsed");
-  return saved === "true";
-});
+  const [collapsed, setCollapsed] = useState(false);
 
 useEffect(() => {
   localStorage.setItem("sidebar-collapsed", String(collapsed));
@@ -84,7 +80,7 @@ useEffect(() => {
   <aside
 className={cn(
 "bg-white border-l border-slate-200 backdrop-blur-xl border-l border-slate-200/70 shadow-sm min-h-screen flex flex-col transition-all duration-200",
-    collapsed ? "w-20" : "w-64"
+    collapsed ? "w-20" : "w-[280px]"
   )}
 >
     {/* Collapse Button */}
@@ -93,15 +89,29 @@ className={cn(
 <div className="p-3 border-b border-slate-200">
 
 <button
+  onClick={() => setCollapsed(!collapsed)}
+  className="
+  w-full
+  mb-2
+  p-2
+  rounded-xl
+  bg-slate-100
+  hover:bg-slate-200
+  "
+>
+  {collapsed ? "→" : "←"}
+</button>
+
+<button
   onClick={() => setProfileOpen(!profileOpen)}
   className="
 w-full
 flex
 items-center
 justify-between
-rounded-2xl
-px-3
-py-2
+rounded-3xl
+px-4
+py-3
 hover:bg-slate-50
 transition-all
 "
@@ -109,29 +119,35 @@ transition-all
 
 <div className="flex items-center gap-3">
 
-<div
-className="
-w-12
-h-12
-rounded-full
-bg-pink-500
-text-white
-font-bold
-flex
-items-center
-justify-center
-"
->
-ذ
+<div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-500 flex items-center justify-center text-white font-bold shadow-md">
+  {user?.name?.charAt(0) || "د"}
 </div>
 
 <div className="text-right">
-<h3 className="font-black text-slate-900">
+<h3 className="font-bold text-[15px] text-slate-900">
 {user?.name || "د. زياد ربيع"}
 </h3>
+<div className="px-4 py-5 border-b border-slate-200">
+  <div className="flex items-center gap-3">
+    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-500 flex items-center justify-center">
+      <GraduationCap size={24} className="text-white" />
+    </div>
 
-<p className="text-xs text-slate-500">
-مدرس
+    {!collapsed && (
+      <div>
+        <h2 className="font-bold text-lg text-slate-900">
+          منصة زياد
+        </h2>
+
+        <p className="text-xs text-slate-500">
+          لوحة التحكم
+        </p>
+      </div>
+    )}
+  </div>
+</div>
+<p className="text-xs text-slate-400">
+مدرس النظام
 </p>
 </div>
 
@@ -238,7 +254,7 @@ transition-colors
 </div>
 
     {/* Nav Items */}
-    <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+    <nav className="flex-1 px-3 py-5 space-y-2 overflow-y-auto">
       {navItems.map((item) => {
         const active = location.pathname === item.path;
 
@@ -251,7 +267,7 @@ transition-colors
   "w-full flex items-center px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-200",
   collapsed && "justify-center",
               active
-? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 rounded-2xl h-11"
+? "bg-blue-600 text-white shadow-lg shadow-blue-500/25"
                 : "text-slate-500 hover:text-blue-600 hover:bg-blue-50 hover:translate-x-[-3px]"
             )}
           >
@@ -305,7 +321,7 @@ transition-colors
     </nav>
 
     {/* Bottom */}
-<div className="mt-auto p-3 border-t border-slate-200">
+<div className="mt-auto p-4 border-t border-slate-200">
   <button
     onClick={() => {
       logout();
@@ -314,7 +330,7 @@ transition-colors
     className="
 w-full flex items-center justify-between
 px-2.5 py-2
-rounded-xl
+rounded-2xl
 text-sm font-medium
 text-slate-500
 hover:text-red-500
@@ -323,7 +339,7 @@ hover:shadow-md
 transition-all duration-200
 "
   >
-    <LogOut size={18} />
+    <LogOut size={20} />
 
     {!collapsed && (
       <span>تسجيل الخروج</span>
