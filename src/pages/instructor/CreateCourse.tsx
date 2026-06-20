@@ -290,6 +290,19 @@ return (
   <option value="third_sec">
     الصف الثالث الثانوي
   </option>
+
+  <option value="first_prep">
+  الصف الأول الإعدادي
+</option>
+
+<option value="second_prep">
+  الصف الثاني الإعدادي
+</option>
+
+<option value="third_prep">
+  الصف الثالث الإعدادي
+</option>
+
 </Select>
 
 </div>

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { supabase } from "../lib/supabase";
 import {
   ChevronRight,
   Play,
@@ -40,9 +40,26 @@ const gradeColors: Record<string, string> = {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const featuredCourses = COURSES.filter(c => c.isFeatured || true).slice(0, 4);
 
+  const [selectedStage, setSelectedStage] =
+    useState<"secondary" | "prep">("secondary");
+
+    const [courses, setCourses] = useState<any[]>([]);
+
+    useEffect(() => {
+  loadCourses();
+}, []);
+
+const loadCourses = async () => {
+  const { data, error } = await supabase
+    .from("courses")
+    .select("*")
+    .eq("active", true);
+
+  if (!error) {
+    setCourses(data || []);
+  }
+};
   return (
     <div className="min-h-screen bg-white dark:bg-[#0b0715]" dir="rtl">
       <Navbar />
@@ -76,11 +93,8 @@ export function HomePage() {
         className="text-center lg:text-right pt-8"
       >
 
-        <Badge className="mb-6 px-5 py-2 text-sm bg-purple-500/20 text-purple-200 border-purple-500/30">
-          ⚛️ المنصة التعليمية الأولى في الكيمياء
-        </Badge>
 
-        <h1 className="
+        <h2 className="
 text-5xl
 lg:text-7xl
 font-black
@@ -89,17 +103,17 @@ mb-6
 text-slate-900
 dark:text-white
 ">
-         أهلا بك في منصة
+         أهلا بك فـي منصة
           <br />
           <div className="relative">
             
-           <> د. زياد ربيع
+           <>مستــر زيــاد ربيــع 
 <br />
 
 </>
 
           </div>
-        </h1>
+        </h2>
 
         <p className="
 text-slate-600
@@ -308,82 +322,50 @@ dark:to-[#1a0930]
 
     <div className="text-center mb-20">
 
-      <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-purple-100 text-purple-700 font-bold mb-6">
-        ✨ مميزات المنصة
-      </div>
-
-      <h2 className="font-hala text-6xl">
-        ليه تختار منصة د. زياد ربيع؟
-      </h2>
-
-      <p className="text-slate-500 text-xl">
-        كل الأدوات اللي محتاجها عشان تحقق أعلى الدرجات في الكيمياء
-      </p>
+      <h1 className="font-hala text-6xl">
+        ليه تختار منصة مستر زياد ربيع؟
+      </h1>
 
     </div>
 
-    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <motion.div
+  initial={{ opacity: 0, y: 40 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  transition={{ duration: 0.7 }}
+  className="mt-16"
+>
+  <div
+  className="
+  relative
+  overflow-hidden
+  rounded-[32px]
+  "
+>
+  <img
+    src="/images/features-banner.png"
+    alt="مميزات المنصة"
+    className="
+    w-full
+    transition-all
+    duration-700
+    hover:scale-[1.03]
+    "
+  />
 
-      <div className="bg-white dark:bg-[#130726] rounded-[28px] p-8 shadow-xl hover:-translate-y-2 transition-all duration-300">
-        <div className="w-20 h-20 rounded-3xl bg-purple-100 flex items-center justify-center text-5xl font-black mb-6 mx-auto">
-          🎥
-        </div>
-
-        <h3 className="text-2xl font-black text-center text-slate-900 dark:text-white mb-4">
-          فيديوهات عالية الجودة
-        </h3>
-
-        <p className="text-slate-500 text-center leading-relaxed">
-          شرح احترافي وصوت وصورة بأعلى جودة لضمان أفضل تجربة تعليمية.
-        </p>
-      </div>
-
-      <div className="bg-white dark:bg-[#130726] rounded-[28px] p-8 shadow-xl hover:-translate-y-2 transition-all duration-300">
-        <div className="w-20 h-20 rounded-3xl bg-cyan-100 flex items-center justify-center text-5xl font-black mb-6 mx-auto">
-          📊
-        </div>
-
-        <h3 className="text-2xl font-black text-center text-slate-900 dark:text-white mb-4">
-          امتحانات تفاعلية
-        </h3>
-
-        <p className="text-slate-500 text-center leading-relaxed">
-          اختبارات بعد كل درس مع تصحيح فوري وتحليل للنتائج.
-        </p>
-      </div>
-
-      <div className="bg-white dark:bg-[#130726] rounded-[28px] p-8 shadow-xl hover:-translate-y-2 transition-all duration-300">
-        <div className="w-20 h-20 rounded-3xl bg-violet-100 flex items-center justify-center text-5xl font-black mb-6 mx-auto">
-          📚
-        </div>
-
-        <h3 className="text-2xl font-black text-center text-slate-900 dark:text-white mb-4">
-          مراجعات شاملة
-        </h3>
-
-        <p className="text-slate-500 text-center leading-relaxed">
-          مراجعات نهائية وأهم الأسئلة المتوقعة قبل الامتحانات.
-        </p>
-      </div>
-
-      <div className="bg-white dark:bg-[#130726] rounded-[28px] p-8 shadow-xl hover:-translate-y-2 transition-all duration-300">
-        <div className="w-20 h-20 rounded-3xl bg-green-100 flex items-center justify-center text-5xl font-black mb-6 mx-auto">
-          🎯
-        </div>
-
-        <h3 className="text-2xl font-black text-center text-slate-900 dark:text-white mb-4">
-          متابعة مستمرة
-        </h3>
-
-        <p className="text-slate-500 text-center leading-relaxed">
-          متابعة الأداء والواجبات والتقدم الدراسي أولاً بأول.
-        </p>
-      </div>
-
-    </div>
-
-  </div>
-
+  <div
+    className="
+    absolute
+    inset-0
+    bg-gradient-to-t
+    from-purple-500/5
+    to-transparent
+    pointer-events-none
+    "
+  />
+</div>
+</motion.div>
+</div>
 </section>
 {/* ================= GRADES SECTION ================= */}
 
@@ -398,10 +380,6 @@ dark:to-[#130726]
   <div className="max-w-[1600px] mx-auto px-6">
 
     <div className="text-center mb-20">
-
-      <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-purple-100 text-purple-700 font-bold mb-6">
-        🎓 اختر مرحلتك الدراسية
-      </div>
 
       <h2 className="font-hala text-6xl">
   الصفوف الدراسية
@@ -423,99 +401,98 @@ dark:to-[#130726]
 
     </div>
 
-   <div
-  className="
-    flex
-    gap-10
-    overflow-x-auto
-    pb-24
-    px-4
-    mt-24
-    scrollbar-hide
-  "
-  
->
-  
-<div
-  className="
-  absolute
-  w-[700px]
-  h-[700px]
-  rounded-full
-  bg-violet-600/20
-  blur-[140px]
-  "
-/>
-  {GRADES
-    .filter((g) =>
-      ["first_sec", "second_sec", "third_sec"].includes(g.id)
-    )
-    .map((grade) => {
+<div className="grid lg:grid-cols-2 gap-10 mt-20">
 
-      const course = COURSES.find(
-        (c) => c.grade === grade.id && c.type === "yearly"
-      );
+  <div
+    onClick={() => navigate("/stage/secondary")}
+    className="
+      group
+      cursor-pointer
+      bg-white
+      rounded-[32px]
+      p-10
+      shadow-xl
+      hover:-translate-y-2
+      transition-all
+    "
+  >
+    <div className="flex items-center justify-between">
 
-      if (!course) return null;
+      <div>
+        <h3 className="text-4xl font-black mb-4">
+          المراحل الثانوية
+        </h3>
 
-      return (
+        <p className="text-slate-500 text-lg">
+          الصف الأول الثانوي - الصف الثاني الثانوي - الصف الثالث الثانوي
+        </p>
 
-       <div
-  key={grade.id}
-  onClick={() => navigate(`/grade/${grade.id}`)}
-  className="group relative cursor-pointer w-[620px]"
->
+        <button
+          className="
+            mt-8
+            bg-violet-600
+            text-white
+            px-8
+            py-3
+            rounded-2xl
+          "
+        >
+          عرض الصفوف
+        </button>
+      </div>
 
-          {/* Image */}
-          <div className="overflow-hidden rounded-[20px] shadow-2xl">
+      <img
+        src="/images/secondary-stage.png"
+        className="w-52"
+      />
+    </div>
+  </div>
 
-            <img
-              src={course.thumbnail}
-              alt={course.title}
-              className="
-                w-full
-                h-[280px]
-                object-cover
-                transition-all
-                duration-500
-                group-hover:scale-105
-              "
-            />
+  <div
+    onClick={() => navigate("/stage/prep")}
+    className="
+      group
+      cursor-pointer
+      bg-white
+      rounded-[32px]
+      p-10
+      shadow-xl
+      hover:-translate-y-2
+      transition-all
+    "
+  >
+    <div className="flex items-center justify-between">
 
-          </div>
+      <div>
+        <h3 className="text-4xl font-black mb-4">
+          المراحل الإعدادية
+        </h3>
 
-          {/* Floating Card */}
-          <div
-            className="
-              absolute
-              left-1/2
-              -translate-x-1/2
-              -bottom-16
-              w-[85%]
-              bg-white dark:bg-[#130726]
-              rounded-[12px]
-              shadow-xl
-              p-6
-              text-center
-            "
-          >
+        <p className="text-slate-500 text-lg">
+          الصف الأول الإعدادي - الصف الثاني الإعدادي - الصف الثالث الإعدادي
+        </p>
 
-            <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-5">
-              {course.gradeLabel}
-            </h3>
+        <button
+          className="
+            mt-8
+            bg-violet-600
+            text-white
+            px-8
+            py-3
+            rounded-2xl
+          "
+        >
+          عرض الصفوف
+        </button>
+      </div>
 
-            <div className="w-full h-[2px] bg-cyan-400 mb-5"></div>
-
-            <p className="text-slate-500 dark:text-slate-300">
-              جميع كورسات {course.gradeLabel}
-            </p>
-
-          </div>
-
-        </div>
-
-      );
-        })}
+      <img
+        src="/images/prep-stage.png"
+        className="w-52"
+      />
+    </div>
+  </div>
+   
 </div>
 
     </div>

@@ -7,7 +7,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { InstructorHomeworkSubmissions } from "./pages/instructor/InstructorHomeworkSubmissions";
 import StudentLoginPage from "./pages/StudentLoginPage";
 import StudentRegisterPage from "./pages/StudentRegisterPage";
-
+import GradesPage from "./pages/student/GradesPage";
 import { StaffLoginPage } from "./pages/StaffLoginPage";
 
 /* Student */
@@ -175,6 +175,12 @@ function AppRoutes() {
   path="/grade/:grade"
   element={<GradeCoursesPage />}
 />
+
+<Route
+  path="/stage/:stage"
+  element={<GradesPage />}
+/>
+
       {/* Instructor */}
 
       <Route

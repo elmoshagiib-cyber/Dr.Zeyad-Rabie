@@ -256,7 +256,7 @@ hover:bg-violet-50
 transition-all
 "
   >
-    تسجيل الدخول
+   خش سجل يلا @
   </button>
 
   <button
@@ -275,7 +275,7 @@ shadow-violet-500/20
 hover:scale-105
 transition-all
 "  >
-    إنشاء حساب
+   خش اعمل اكونت
   </button>
 </>
             )}

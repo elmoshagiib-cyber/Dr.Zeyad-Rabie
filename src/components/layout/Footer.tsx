@@ -1,127 +1,196 @@
 import { useNavigate } from "react-router-dom";
-import { GraduationCap, Phone, Mail, MapPin, Tv, Star } from "lucide-react";
+import {
+  FaFacebookF,
+  FaYoutube,
+  FaTiktok,
+  FaInstagram
+} from "react-icons/fa";
 
 export function Footer() {
   const navigate = useNavigate();
 
   return (
-    <footer className="
-bg-slate-900
-dark:bg-[#0b0715]
-text-slate-300
-border-t
-border-slate-800
-dark:border-purple-500/10
+<footer
+  className="
+  relative
+  overflow-hidden
+  bg-[#050312]
+  py-16
+  "
+>
+  {/* Background Image */}
+  <div className="absolute inset-0 opacity-30">
+    <img
+      src="/images/footer-bg.png"
+      alt=""
+      className="w-full h-full object-cover"
+    />
+  </div>
+
+  {/* Overlay */}
+  <div className="absolute inset-0 bg-gradient-to-b from-[#0b0715] to-[#050312]" />
+
+  <div className="relative max-w-6xl mx-auto px-6 text-center">
+
+    {/* Logo */}
+    <img
+      src="/images/logo-dark.png"
+      alt="زياد ربيع"
+      className="h-40 mx-auto mb-8 drop-shadow-[0_0_30px_rgba(168,85,247,.4)]"
+    />
+
+    <h2 className="
+text-4xl
+font-black
+text-white
+mb-4
 ">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Brand */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-600 to-violet-500 flex items-center justify-center">
-                <GraduationCap size={22} className="text-white" />
-              </div>
-              <div>
-                <p className="font-bold text-white text-base">د. زياد ربيع</p>
-                <p className="text-xs text-slate-400">منصة تعليمية متخصصة</p>
-              </div>
-            </div>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              منصة تعليمية متخصصة في الكيمياء والعلوم للمرحلة الابتدائية والثانوية. نهدف إلى تبسيط العلوم وجعلها ممتعة لكل طالب.
-            </p>
-            <div className="flex items-center gap-3">
-              <a href="#" className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors">
-                <span className="text-xs font-bold">f</span>
-              </a>
-              <a href="#" className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-red-600 flex items-center justify-center transition-colors">
-                <Tv size={16} />
-              </a>
-              <a href="#" className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-pink-600 flex items-center justify-center transition-colors">
-                <Star size={16} />
-              </a>
-            </div>
-          </div>
+منصة د. زياد ربيع
+</h2>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-white font-bold mb-5">روابط سريعة</h4>
-            <ul className="space-y-3">
-              {[
-                { label: "الرئيسية", path: "/" },
-                { label: "الكورسات", path: "/courses" },
-                { label: "الطلاب المتميزون", path: "/courses" },
-                { label: "إنشاء حساب", path: "/register" },
-                { label: "تسجيل الدخول", path: "/login" },
-              ].map(link => (
-                <li key={`${link.label}-${link.path}`}>
-                  <button
-                    onClick={() => navigate(link.path)}
-                    className="text-sm text-slate-400 hover:text-white transition-colors hover:translate-x-1 inline-flex items-center gap-1"
-                  >
-                    {link.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+<p className="
+text-slate-300
+text-xl
+max-w-4xl
+mx-auto
+leading-loose
+">
+تعلم الكيمياء بطريقة مختلفة • شرح مبسط • مراجعات شاملة • اختبارات تفاعلية
+</p>
 
-          {/* Courses */}
-          <div>
-            <h4 className="text-white font-bold mb-5">الكورسات</h4>
-            <ul className="space-y-3">
-              {[
-                "كيمياء الصف الثالث الثانوي",
-                "كيمياء الصف الثاني الثانوي",
-                "علوم متكاملة أولى ثانوي",
-                "علوم المرحلة الابتدائية",
-                "مراجعات نهائية",
-              ].map(course => (
-                <li key={course}>
-                  <button
-                    onClick={() => navigate("/courses")}
-                    className="text-sm text-slate-400 hover:text-white transition-colors text-right"
-                  >
-                    {course}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+    {/* Social */}
+    <div className="flex justify-center gap-5 mt-10">
 
-          {/* Contact */}
-          <div>
-            <h4 className="text-white font-bold mb-5">تواصل معنا</h4>
-            <ul className="space-y-4">
-              <li className="flex items-center gap-3 text-sm text-slate-400">
-                <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center flex-shrink-0">
-                  <Phone size={14} />
-                </div>
-                <span>01012345678</span>
-              </li>
-              <li className="flex items-center gap-3 text-sm text-slate-400">
-                <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center flex-shrink-0">
-                  <Mail size={14} />
-                </div>
-                <span>dr.zeyad@platform.com</span>
-              </li>
-              <li className="flex items-start gap-3 text-sm text-slate-400">
-                <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <MapPin size={14} />
-                </div>
-                <span>القاهرة، جمهورية مصر العربية</span>
-              </li>
-            </ul>
-          </div>
-        </div>
+      <a
+        href="#"
+        className="
+w-16
+h-16
+rounded-3xl
+bg-white/10
+text-white
+border
+border-purple-500/20
+flex
+items-center
+justify-center
+hover:bg-purple-600
+hover:scale-110
+hover:-translate-y-2
+hover:bg-purple-600
+hover:shadow-[0_0_25px_rgba(168,85,247,.5)]
+duration-300
+"
+      >
+        <FaFacebookF size={24} />
 
-        <div className="border-t border-slate-800 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-slate-500">© 2024 منصة د. زياد ربيع التعليمية. جميع الحقوق محفوظة.</p>
-          <div className="flex items-center gap-6">
-            <button className="text-sm text-slate-500 hover:text-white transition-colors">سياسة الخصوصية</button>
-            <button className="text-sm text-slate-500 hover:text-white transition-colors">شروط الاستخدام</button>
-          </div>
-        </div>
-      </div>
-    </footer>
+      </a>
+
+      <a
+        href="#"
+        className="
+w-16
+h-16
+rounded-3xl
+bg-white/10
+text-white
+border
+border-purple-500/20
+flex
+items-center
+justify-center
+hover:bg-purple-600
+hover:scale-110
+hover:shadow-[0_0_25px_rgba(168,85,247,.5)]
+transition-all
+duration-300
+"
+      >
+        <FaYoutube size={24} />
+
+      </a>
+
+      <a
+        href="#"
+        className="
+w-16
+h-16
+rounded-3xl
+bg-white/10
+text-white
+border
+border-purple-500/20
+flex
+items-center
+justify-center
+hover:bg-purple-600
+hover:scale-110
+hover:shadow-[0_0_25px_rgba(168,85,247,.5)]
+transition-all
+duration-300
+"
+      >
+      <FaInstagram size={24} />
+      </a>
+
+    </div>
+
+    {/* Line */}
+    <div className="relative my-14">
+      <div className="h-[1px] bg-purple-500/30" />
+      <div className="w-3 h-3 bg-purple-500 rounded-full absolute left-1/2 -translate-x-1/2 -top-[5px]" />
+    </div>
+
+    {/* Text */}
+    <p className="text-xl text-white">
+      تم صنع هذه المنصة بهدف تمكين الطالب وتحقيق أفضل النتائج
+    </p>
+
+    {/* Credits */}
+    <div className="flex flex-wrap justify-center gap-4 mt-10">
+
+      <div className="
+px-8
+py-3
+rounded-2xl
+bg-purple-500/10
+border
+border-purple-500/30
+text-purple-300
+">
+Developed By
+</div>
+
+      <div className="
+px-8
+py-3
+rounded-2xl
+bg-gradient-to-r
+from-violet-600
+to-purple-500
+text-white
+font-black
+shadow-lg
+shadow-violet-500/20
+">
+Ahmed Cysec
+</div>
+
+      <div className="
+px-8
+py-3
+rounded-2xl
+bg-white/10
+border
+border-white/10
+text-slate-300
+">
+© 2026 All Rights Reserved
+</div>
+
+    </div>
+
+  </div>
+</footer>
   );
 }

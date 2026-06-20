@@ -22,11 +22,46 @@ export const STATS = [
 ];
 
 export const GRADES = [
-  { id: "primary", label: "المرحلة الابتدائية", labelEn: "Primary School", color: "emerald" },
-  { id: "first_sec", label: "الصف الأول الثانوي", labelEn: "First Secondary", color: "blue" },
-  { id: "second_sec", label: "الصف الثاني الثانوي", labelEn: "Second Secondary", color: "violet" },
-  { id: "third_sec", label: "الصف الثالث الثانوي", labelEn: "Third Secondary", color: "rose" },
+  {
+    id: "first_sec",
+    label: "الصف الأول الثانوي",
+    labelEn: "First Secondary",
+    color: "blue",
+  },
+  {
+    id: "second_sec",
+    label: "الصف الثاني الثانوي",
+    labelEn: "Second Secondary",
+    color: "violet",
+  },
+  {
+    id: "third_sec",
+    label: "الصف الثالث الثانوي",
+    labelEn: "Third Secondary",
+    color: "rose",
+  },
+
+  {
+    id: "first_prep",
+    label: "الصف الأول الإعدادي",
+    labelEn: "First Preparatory",
+    color: "emerald",
+  },
+  {
+    id: "second_prep",
+    label: "الصف الثاني الإعدادي",
+    labelEn: "Second Preparatory",
+    color: "cyan",
+  },
+  {
+    id: "third_prep",
+    label: "الصف الثالث الإعدادي",
+    labelEn: "Third Preparatory",
+    color: "orange",
+  },
 ];
+
+
 
 export const COURSES = [
   {
@@ -543,4 +578,6 @@ export const EXAMS = [
     correctAnswers: null,
     wrongAnswers: null,
   },
+
+  
 ];
