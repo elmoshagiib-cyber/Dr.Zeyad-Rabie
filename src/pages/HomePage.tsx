@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { GraduationCap } from "lucide-react";
 import {
   ChevronRight,
   Play,
@@ -322,9 +323,17 @@ dark:to-[#1a0930]
 
     <div className="text-center mb-20">
 
-      <h1 className="font-hala text-6xl">
-        ليه تختار منصة مستر زياد ربيع؟
-      </h1>
+       <h2 className="
+text-5xl
+lg:text-7xl
+font-black
+leading-tight
+mb-6
+text-slate-900
+dark:text-white
+">
+        ليه تختار مستر زياد ربيع؟
+      </h2>
 
     </div>
 
@@ -369,136 +378,206 @@ dark:to-[#1a0930]
 </section>
 {/* ================= GRADES SECTION ================= */}
 
-<section className="
-py-28
-bg-slate-50
-dark:bg-gradient-to-b
-dark:from-[#0b0715]
-dark:to-[#130726]
-">
-
+<section
+  className="
+  py-28
+  bg-slate-50
+  dark:bg-gradient-to-b
+  dark:from-[#0b0715]
+  dark:to-[#130726]
+"
+>
   <div className="max-w-[1600px] mx-auto px-6">
 
+<div
+  className="
+  absolute
+  left-1/2
+  top-1/2
+  -translate-x-1/2
+  -translate-y-1/2
+  w-[1000px]
+  h-[1000px]
+  bg-violet-500/10
+  rounded-full
+  blur-[180px]
+  pointer-events-none
+  "
+/>
+
     <div className="text-center mb-20">
+       <h2 className="
+text-5xl
+lg:text-7xl
+font-black
+leading-tight
+mb-6
+text-slate-900
+dark:text-white
+">
+        الصفوف الدراسية
+      </h2>
 
-      <h2 className="font-hala text-6xl">
-  الصفوف الدراسية
-</h2>
 
-      <p className="text-slate-500 text-xl mb-10">
-        اختر صفك الدراسي وابدأ رحلتك مع د. زياد ربيع
-      </p>
-
-      <div className="flex justify-center items-center gap-4">
-
+      <div className="flex justify-center items-center gap-4 mt-8">
         <div className="w-52 h-[3px] bg-cyan-800 rounded-full"></div>
-
         <div className="w-5 h-5 rotate-45 bg-cyan-800"></div>
-
         <div className="w-52 h-[3px] bg-cyan-800 rounded-full"></div>
-
       </div>
-
     </div>
 
-<div className="grid lg:grid-cols-2 gap-10 mt-20">
+    <div className="grid lg:grid-cols-2 gap-14 mt-24 relative">
 
-  <div
-    onClick={() => navigate("/stage/secondary")}
-    className="
-      group
-      cursor-pointer
-      bg-white
-      rounded-[32px]
-      p-10
-      shadow-xl
-      hover:-translate-y-2
-      transition-all
-    "
-  >
-    <div className="flex items-center justify-between">
 
-      <div>
-        <h3 className="text-4xl font-black mb-4">
-          المراحل الثانوية
-        </h3>
+      {/* الثانوية */}
+      <div
+        onClick={() => navigate("/stage/secondary")}
+        className="
+        cursor-pointer
+        group
+        relative
+        group-hover:-translate-y-3
+transition-all
+duration-500
+      "
+      >
+        <div className="overflow-hidden rounded-[28px] shadow-2xl">
+         <motion.img
+  whileHover={{
+    scale: 1.08,
+    y: -10
+  }}
+  transition={{
+    duration: 0.5
+  }}
+  src="/images/secondary-stage.jpg"
+  alt=""
+  className="
+  w-full
+  h-[420px]
+  object-cover
+  "
+/>
+        </div>
 
-        <p className="text-slate-500 text-lg">
-          الصف الأول الثانوي - الصف الثاني الثانوي - الصف الثالث الثانوي
-        </p>
-
-        <button
+        <div
           className="
-            mt-8
-            bg-violet-600
-            text-white
-            px-8
-            py-3
-            rounded-2xl
-          "
+          bg-white
+          dark:bg-[#130726]
+          rounded-[24px]
+          shadow-2xl
+          w-[85%]
+          mx-auto
+          -mt-20
+          relative
+          z-10
+          p-8
+          text-center
+        "
         >
-          عرض الصفوف
-        </button>
-      </div>
+          <h3 className="text-4xl font-black mb-5 dark:text-white">
+            المراحل الثانوية
+          </h3>
 
-      <img
-        src="/images/secondary-stage.png"
-        className="w-52"
-      />
-    </div>
-  </div>
+          <div className="h-[3px] bg-cyan-400 mb-5"></div>
 
-  <div
-    onClick={() => navigate("/stage/prep")}
-    className="
-      group
-      cursor-pointer
-      bg-white
-      rounded-[32px]
-      p-10
-      shadow-xl
-      hover:-translate-y-2
-      transition-all
-    "
-  >
-    <div className="flex items-center justify-between">
-
-      <div>
-        <h3 className="text-4xl font-black mb-4">
-          المراحل الإعدادية
-        </h3>
-
-        <p className="text-slate-500 text-lg">
-          الصف الأول الإعدادي - الصف الثاني الإعدادي - الصف الثالث الإعدادي
-        </p>
-
-        <button
-          className="
-            mt-8
-            bg-violet-600
-            text-white
-            px-8
-            py-3
-            rounded-2xl
-          "
-        >
-          عرض الصفوف
-        </button>
-      </div>
-
-      <img
-        src="/images/prep-stage.png"
-        className="w-52"
-      />
-    </div>
-  </div>
-   
+          <p className="text-slate-500 dark:text-slate-300 text-lg">
+            الصف الأول الثانوي - الصف الثاني الثانوي - الصف الثالث الثانوي
+          </p>
+          <div
+  className="
+  mt-6
+  inline-flex
+  items-center
+  gap-2
+  text-violet-600
+  font-black
+  "
+>
+  عرض الصفوف
+  <ArrowLeft size={18} />
 </div>
+        </div>
+
+
+
+      </div>
+
+      {/* الإعدادي */}
+      <div
+        onClick={() => navigate("/stage/prep")}
+        className="
+        cursor-pointer
+        group
+        relative
+        group-hover:-translate-y-3
+transition-all
+duration-500
+      "
+      >
+        <div className="overflow-hidden rounded-[28px] shadow-2xl">
+          <motion.img
+  whileHover={{
+    scale: 1.08,
+    y: -10
+  }}
+  transition={{
+    duration: 0.5
+  }}
+  src="/images/prep-stage.jpg"
+  alt=""
+  className="
+  w-full
+  h-[420px]
+  object-cover
+  "
+/>
+        </div>
+
+        <div
+          className="
+          bg-white
+          dark:bg-[#130726]
+          rounded-[24px]
+          shadow-2xl
+          w-[85%]
+          mx-auto
+          -mt-20
+          relative
+          z-10
+          p-8
+          text-center
+        "
+        >
+          <h3 className="text-4xl font-black mb-5 dark:text-white">
+            المراحل الإعدادية
+          </h3>
+
+          <div className="h-[3px] bg-cyan-400 mb-5"></div>
+
+          <p className="text-slate-500 dark:text-slate-300 text-lg">
+            الصف الأول الإعدادي - الصف الثاني الإعدادي - الصف الثالث الإعدادي
+          </p>
+          <div
+  className="
+  mt-6
+  inline-flex
+  items-center
+  gap-2
+  text-violet-600
+  font-black
+  "
+>
+  عرض الصفوف
+  <ArrowLeft size={18} />
+</div>
+        </div>
+      </div>
 
     </div>
 
+  </div>
 </section>
-
 <Footer />
 
 </div>

@@ -9,7 +9,8 @@ import StudentLoginPage from "./pages/StudentLoginPage";
 import StudentRegisterPage from "./pages/StudentRegisterPage";
 import GradesPage from "./pages/student/GradesPage";
 import { StaffLoginPage } from "./pages/StaffLoginPage";
-
+import { useState } from "react";
+import SplashScreen from "./components/SplashScreen";
 /* Student */
 import { StudentDashboard } from "./pages/student/StudentDashboard";
 import { LessonPlayer } from "./pages/student/LessonPlayer";
@@ -307,10 +308,18 @@ function AppRoutes() {
 }
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
   return (
     <AppProvider>
       <BrowserRouter>
-        <AppRoutes />
+        {showSplash ? (
+          <SplashScreen
+            onFinish={() => setShowSplash(false)}
+          />
+        ) : (
+          <AppRoutes />
+        )}
       </BrowserRouter>
     </AppProvider>
   );
