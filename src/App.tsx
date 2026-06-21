@@ -306,7 +306,7 @@ function AppRoutes() {
     </Routes>
   );
 }
-
+<main className="pt-[80px]"></main>
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
 

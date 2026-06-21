@@ -5,13 +5,28 @@ import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
 import { Card, CardContent } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
-
+import { ArrowLeft, ArrowRight } from "lucide-react";
 export default function GradeCoursesPage() {
 
   const { grade } = useParams();
   const navigate = useNavigate();
 
   const [courses, setCourses] = useState<any[]>([]);
+const term1Courses = courses.filter(
+  (course) => course.category === "term1"
+);
+
+const term2Courses = courses.filter(
+  (course) => course.category === "term2"
+);
+
+const revisionCourses = courses.filter(
+  (course) => course.category === "revision"
+);
+
+const freeCourses = courses.filter(
+  (course) => course.category === "free"
+);
 
   const gradeNames: Record<string, string> = {
     first_sec: "الصف الأول الثانوي",
@@ -25,15 +40,141 @@ export default function GradeCoursesPage() {
   }, [grade]);
 
   const loadCourses = async () => {
-    const { data } = await supabase
-      .from("courses")
-      .select("*")
-      .eq("active", true)
-      .eq("grade", grade);
+  const { data } = await supabase
+    .from("courses")
+    .select("*")
+    .eq("active", true)
+    .eq("grade", grade)
+    .order("sort_order", { ascending: true });
 
-    setCourses(data || []);
-    console.log(data);
-  };
+  setCourses(data || []);
+};
+
+const renderCourseCards = (courseList: any[]) => (
+  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+    {courseList.map((course) => (
+      <Card
+        key={course.id}
+        hover
+        className="
+        overflow-hidden
+        rounded-[24px]
+        border
+        border-slate-200
+        bg-white
+        shadow-lg
+        min-h-[620px]
+        flex
+        flex-col
+        "
+      >
+        <div className="relative">
+
+          <img
+            src={
+              course.thumbnail ||
+              "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=1200"
+            }
+            alt={course.title}
+            className="
+            w-full
+            h-[220px]
+            object-cover
+            "
+          />
+
+          {course.price === 0 && (
+            <div className="absolute top-4 right-4">
+              <span
+                className="
+                bg-blue-500
+                text-white
+                px-4
+                py-2
+                rounded-xl
+                text-sm
+                font-bold
+                "
+              >
+                هذا الكورس مجاني
+              </span>
+            </div>
+          )}
+
+        </div>
+
+        <CardContent className="p-6 flex flex-col flex-1">
+
+          <h3
+            className="
+            text-xl
+            font-black
+            text-slate-900
+            mb-2
+            line-clamp-2
+            "
+          >
+            {course.title}
+          </h3>
+
+          <p
+            className="
+            text-slate-500
+            text-base
+            mb-6
+            line-clamp-2
+            "
+          >
+            {course.description}
+          </p>
+
+          <div
+            className="
+            flex
+            items-center
+            justify-between
+            text-slate-500
+            text-sm
+            mb-6
+            "
+          >
+            <span>17 أبريل 2026</span>
+            <span>5 مايو 2026</span>
+          </div>
+
+          <hr className="mb-6 border-slate-200" />
+
+          <div className="mt-auto" />
+
+          <div className="flex gap-3">
+
+            <Button
+              className="
+              flex-1
+              bg-[#6b6d52]
+              hover:bg-[#5b5d45]
+              text-white
+              "
+            >
+              اشترك الآن
+            </Button>
+
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => navigate(`/courses/${course.id}`)}
+            >
+              تفاصيل الكورس
+            </Button>
+
+          </div>
+
+        </CardContent>
+
+      </Card>
+    ))}
+  </div>
+);
 
  return (
   <div
@@ -44,50 +185,9 @@ export default function GradeCoursesPage() {
 
     <div className="pt-16">
 
-  <div className="
-  bg-gradient-to-br
-  from-slate-900
-  to-blue-900
-  dark:from-[#0b0715]
-  dark:to-[#1a0930]
-  py-20
-  ">
+  
 
-    <div className="max-w-7xl mx-auto px-6 text-center">
 
-      <div className="
-      inline-flex
-      px-5 py-2
-      rounded-full
-      bg-blue-500/20
-      text-blue-300
-      border
-      border-blue-500/30
-      mb-5
-      ">
-        الصف الدراسي
-      </div>
-
-      <h1 className="
-      font-hala
-      text-5xl
-      md:text-7xl
-      text-white
-      mb-6
-      ">
-        {gradeNames[grade as string]}
-      </h1>
-
-      <p className="text-slate-300 text-xl">
-        عدد الكورسات المتاحة:
-        <span className="font-black mr-2">
-          {courses.length}
-        </span>
-      </p>
-
-    </div>
-
-  </div>
 
       
       {/* Courses */}
@@ -118,94 +218,152 @@ export default function GradeCoursesPage() {
   key={course.id}
   hover
   className="
-  overflow-hidden
-  group
-  bg-white
-  dark:bg-[#130726]
-  "
+group
+overflow-hidden
+rounded-[24px]
+border
+border-slate-200
+bg-white
+shadow-lg
+min-h-[620px]
+flex
+flex-col
+transition-all
+duration-500
+hover:-translate-y-2
+hover:shadow-2xl
+"
 >
-<div className="relative overflow-hidden">
+
+  <div className="relative">
 
   <img
-    src={
-      course.thumbnail ||
-      "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=400"
-    }
-    alt={course.title}
-    className="
-    w-full
-    h-56
-    object-cover
-    transition-all
-    duration-500
-    group-hover:scale-105
-    "
-  />
+  src={
+    course.thumbnail ||
+    "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=1200"
+  }
+  alt={course.title}
+  className="
+w-full
+h-[220px]
+object-cover
+transition-all
+duration-700
+ease-out
+brightness-95
+saturate-75
+group-hover:scale-110
+group-hover:saturate-125
+group-hover:brightness-105
+"
+/>
 
-  {course.price === 0 && (
-    <div className="absolute top-3 left-3">
-      <span
-        className="
-        bg-emerald-500
-        text-white
-        px-3
-        py-1
-        rounded-full
-        text-xs
-        font-bold
-      "
-      >
-        مجاني
-      </span>
-    </div>
-  )}
-
+<div
+  className="
+  absolute
+  inset-0
+  opacity-0
+  group-hover:opacity-100
+  transition-all
+  duration-700
+  bg-gradient-to-r
+  from-transparent
+  via-white/20
+  to-transparent
+  -translate-x-full
+  group-hover:translate-x-full
+  "
+/>
 </div>
+<CardContent className="p-6 flex flex-col flex-1">
 
-                <CardContent>
+  <h3
+    
+  className="
+  text-xl
+  font-black
+  text-slate-900
+  mb-2
+  line-clamp-2
+  transition-all
+  duration-300
+  group-hover:text-violet-600
+  "
 
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white mb-3">
-                    {course.title}
-                  </h3>
+  >
+    {course.title}
+  </h3>
 
-                  <p className="text-slate-500 mb-5 line-clamp-2">
-                    {course.description}
-                  </p>
+  <p
+    className="
+    text-slate-500
+    text-base
+    mb-6
+    line-clamp-2
+    "
+  >
+    {course.description}
+  </p>
 
-                  <div className="flex items-center justify-between">
+  <div
+    className="
+    flex
+    items-center
+    justify-between
+    text-slate-500
+    text-sm
+    mb-6
+    "
+  >
+    <span>17 أبريل 2026</span>
+    <span>5 مايو 2026</span>
+  </div>
 
-                    <span className="font-black text-emerald-500">
-                      {course.price === 0
-                        ? "مجاني"
-                        : `${course.price} جنيه`}
-                    </span>
+  <hr className="mb-6 border-slate-200" />
+<div className="mt-auto">
+  
+</div>
+  <div className="flex gap-3">
 
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        navigate(`/courses/${course.id}`)
-                      }
-                    >
-                      عرض الكورس
-                    </Button>
+    <Button
+  className="
+  flex-1
+  bg-[#6b6d52]
+  hover:bg-[#5b5d45]
+  text-white
+  transition-all
+  duration-300
+  hover:scale-105
+  "
+    >
+      اشترك الآن
+    </Button>
 
-                  </div>
+    <Button
+      variant="outline"
+      className="flex-1"
+      onClick={() => navigate(`/courses/${course.id}`)}
+    >
+      تفاصيل الكورس
+    </Button>
 
-                </CardContent>
+    </div>
 
-              </Card>
+</CardContent>
+
+</Card>
 
             ))}
 
           </div>
 
-        )}
+)}
 
-      </div>
+</div>
 
-    </div>
+</div>
 
-    <Footer />
-  </div>
+<Footer />
+</div>
 );
 }

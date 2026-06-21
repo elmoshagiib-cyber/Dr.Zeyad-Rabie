@@ -159,9 +159,10 @@ const loadUnits = async () => {
 console.log("UNITS =", units);
 const studentsCount =
   course.studentsCount || 2450;
+  console.log(course.thumbnail);
   return (
     // باقي الصفحة
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0715]" dir="rtl">
+   <div className="min-h-screen bg-white dark:bg-[#0b0715]">
       <Navbar />
       <div className="pt-16">
         
@@ -173,9 +174,46 @@ const studentsCount =
     ← العودة للرئيسية
   </button>
 </div>
-        {/* Hero */}
-        <div className="bg-gradient-to-br from-slate-900 to-blue-900 py-6 min-h-[420px]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div className="relative overflow-hidden bg-[#12081f] min-h-[500px]">
+
+  <img
+    src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200"
+    alt=""
+    className="
+    absolute
+    inset-0
+    w-full
+    h-full
+    object-cover
+    opacity-20
+    "
+  />
+
+  <div
+    className="
+    absolute
+    inset-0
+    bg-gradient-to-r
+    from-[#12081f]
+    via-[#12081f]/90
+    to-[#12081f]/70
+    "
+  />
+
+  <div
+    className="
+    relative
+    z-10
+    max-w-7xl
+    mx-auto
+    px-4
+    sm:px-6
+    lg:px-8
+    py-20
+    "
+  >
+    {/* المحتوى */}
+
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-slate-400 text-sm mb-6">
               <button onClick={() => navigate("/")} className="hover:text-white">الرئيسية</button>
@@ -214,15 +252,39 @@ const studentsCount =
     </Badge>
   )}
 </div>
-                <h1 className="text-3xl lg:text-5xl font-black text-white leading-tight">{course.title}</h1>
+                <h1
+className="
+text-5xl
+lg:text-7xl
+font-black
+text-white
+leading-tight
+"
+>{course.title}</h1>
                 <p className="text-slate-300 text-base lg:text-lg leading-relaxed max-w-2xl">{course.description}</p>
-                <div className="flex flex-wrap items-center gap-6 text-sm">
+                <div className="flex flex-wrap gap-3 mt-8">
+
+  <div className="bg-white/10 backdrop-blur-md rounded-xl px-5 py-3 flex items-center gap-2">
+    <Users size={16} />
+    <span>{studentsCount} طالب</span>
+  </div>
+
+  <div className="bg-white/10 backdrop-blur-md rounded-xl px-5 py-3 flex items-center gap-2">
+    <BookOpen size={16} />
+    <span>{lessonsCount} درس</span>
+  </div>
+
+  <div className="bg-white/10 backdrop-blur-md rounded-xl px-5 py-3 flex items-center gap-2">
+    <Clock size={16} />
+    <span>{totalDuration}</span>
+  </div>
+
                   <div className="flex items-center gap-1.5 text-amber-400">
                     <Star size={16} className="fill-amber-400" />
                     <span className="font-bold text-white">{course.rating || 5}</span>
                     <span className="text-slate-400">({(course.studentsCount || 0).toLocaleString("ar-EG")} تقييم)</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-slate-300">
+                <div className="flex items-center gap-1.5 text-slate-300">
                     <Users size={16} />
                     <span>
   {studentsCount.toLocaleString("ar-EG")} طالب مسجل
@@ -256,20 +318,36 @@ const studentsCount =
             </div>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 -mt-20 relative z-20">
-  <div className="grid lg:grid-cols-12 gap-4 items-start">
+        <div className="max-w-7xl mx-auto px-4 relative z-20">
+  <div
+className="
+w-full
+max-w-[500px]
+lg:-mt-32
+relative
+z-30
+"
+>
 
-    <div className="lg:col-span-8">
-      <img
-  src={course.thumbnail}
-  alt={course.title}
-  className="w-full aspect-video object-cover rounded-2xl"
-/>
-    </div>
-
-    <div className="lg:col-span-4 max-w-[460px] relative -top-80">
+    <div className="
+lg:col-span-4
+lg:-mt-32
+relative
+z-30
+">
       <div className="space-y-6 sticky top-24 self-start">
-              <Card className="shadow-2xl overflow-hidden border-0">
+              <Card
+className="
+overflow-hidden
+rounded-[32px]
+border
+border-violet-200
+dark:border-violet-500/20
+shadow-[0_20px_60px_rgba(0,0,0,0.15)]
+bg-white
+dark:bg-[#130726]
+"
+>
                   <div className="relative">
 <div className="relative overflow-hidden">
 
@@ -317,7 +395,7 @@ const studentsCount =
     </p>
   ) : (
     <div>
-      <p className="text-4xl font-black bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
+      <p className="text-4xl font-black bg-gradient-to-r from-violet-600 to-violet-600 bg-clip-text text-transparent">
         {course.price} جنيه
       </p>
       <p className="text-sm text-slate-500 dark:text-slate-300 dark:text-slate-300">
@@ -364,7 +442,7 @@ const studentsCount =
       text: `${lessonsCount} درس فيديو`
     },
     {
-      icon: <Download size={14} className="text-blue-500" />,
+      icon: <Download size={14} className="text-violet-500" />,
       text: "ملفات PDF قابلة للتحميل"
     },
     {
@@ -402,19 +480,33 @@ const studentsCount =
            
             </div>
             <div className="lg:col-span-9 space-y-8">
-              {/* What you'll learn */}
+              
               
 
              {/* Course Content */}
 <div>
-  <h1 className="text-xl font-black text-slate-900 dark:text-white dark:text-white mb-5">
+  <div className="mb-10 text-center">
+  <h2 className="text-6xl font-black text-[#3d285f]">
     محتوى الكورس
-  </h1>
+  </h2>
+
+  <div className="w-52 h-1 bg-[#7c3aed] mx-auto mt-4 rounded-full" />
+</div>
 
   {units.length > 0 ? (
     <div className="space-y-3">
       {units.map((unit: any, ui: number) => (
-  <Card key={unit.id}>
+  <Card
+key={unit.id}
+className="
+rounded-3xl
+overflow-hidden
+border
+border-slate-200
+dark:border-purple-500/20
+shadow-lg
+"
+>
     <div
       onClick={() =>
         setOpenUnit(
@@ -446,7 +538,7 @@ const studentsCount =
       </p>
     </div>
 
-    <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-black text-lg flex items-center justify-center">
+    <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-violet-900/40 text-blue-700 dark:text-blue-300 font-black text-lg flex items-center justify-center">
       {ui + 1}
     </div>
 
@@ -486,7 +578,7 @@ const studentsCount =
     <>
       <Play
         size={14}
-        className="text-blue-600"
+        className="text-violet-600"
       />
       <span className="text-xs text-slate-500 dark:text-slate-300 dark:text-slate-300">
         فيديو

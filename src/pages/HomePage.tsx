@@ -1,7 +1,20 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+
 import { supabase } from "../lib/supabase";
-import { GraduationCap } from "lucide-react";
+
+import { Navbar } from "../components/layout/Navbar";
+import { Footer } from "../components/layout/Footer";
+import { ScrollingBanner } from "../components/layout/ScrollingBanner";
+import { FaqSection } from "../components/home/FaqSection";
+
+import { Button } from "../components/ui/Button";
+import { Card, CardContent } from "../components/ui/Card";
+import { Badge } from "../components/ui/Badge";
+import { Avatar } from "../components/ui/Avatar";
+
 import {
   ChevronRight,
   Play,
@@ -13,13 +26,9 @@ import {
   ArrowLeft,
   Atom,
   FlaskConical,
+  GraduationCap,
 } from "lucide-react";
-import { Navbar } from "../components/layout/Navbar";
-import { Footer } from "../components/layout/Footer";
-import { Button } from "../components/ui/Button";
-import { Card, CardContent } from "../components/ui/Card";
-import { Badge } from "../components/ui/Badge";
-import { Avatar } from "../components/ui/Avatar";
+
 import {
   TEACHER,
   STATS,
@@ -29,8 +38,6 @@ import {
   ANNOUNCEMENTS,
   GRADES,
 } from "../data/mockData";
-import { motion } from "framer-motion";
-
 
 const gradeColors: Record<string, string> = {
   third_sec: "rose",
@@ -71,27 +78,28 @@ const loadCourses = async () => {
   className="
   relative
   overflow-hidden
-  min-h-[92vh]
+  min-h-[calc(100vh-96px)]
   flex
   items-center
-  pt-32
-  lg:mt-24
-  bg-gradient-to-br
+  bg-white
+  dark:bg-[#09090B]
   "
+
 >
 
   {/* Chemistry Icons */}
 
-  <div className="max-w-[1400px] mx-auto px-6 w-full mt-10">
+  <div className="max-w-[1400px] mx-auto px-6 w-full">
 
     <div className="grid lg:grid-cols-2 gap-4 items-center">
+
 
       {/* TEXT */}
       <motion.div
         initial={{ opacity: 0, x: 80 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.7 }}
-        className="text-center lg:text-right pt-8"
+        className="text-center lg:text-right"
       >
 
 
@@ -104,21 +112,20 @@ mb-6
 text-slate-900
 dark:text-white
 ">
-         أهلا بك فـي منصة
+         أهـلا بـك فـي منصة
           <br />
           <div className="relative">
             
-           <>مستــر زيــاد ربيــع 
-<br />
-
-</>
+          <span className="text-[#7C3AED]">
+  مستــر زيــاد ربيــع
+</span>
 
           </div>
         </h2>
 
         <p className="
-text-slate-600
-dark:text-slate-300
+text-slate-500
+dark:text-slate-400
 text-2xl
 leading-relaxed
 max-w-2xl
@@ -142,18 +149,14 @@ max-w-2xl
             onClick={() => navigate("/register")}
             className="
 border-2
-border-violet-400
-text-violet-700
+border-[#7C3AED]
+text-[#7C3AED]
 bg-white
-hover:bg-violet-50
+hover:bg-[#7C3AED]/5
 "
           >
             سجل الآن مجاناً
           </Button>
-
-        </div>
-
-        <div className="flex gap-24 mt-20 justify-center lg:justify-start mt-16 border-t border-slate-200 pt-10">
 
         </div>
 
@@ -164,7 +167,7 @@ hover:bg-violet-50
         initial={{ opacity: 0, x: -80 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.7 }}
-        className="relative flex justify-center items-end mt-28"
+        className="relative flex justify-center items-end -mt-8"
       >
 
         <div className="relative">
@@ -179,7 +182,7 @@ hover:bg-violet-50
 h-[600px]
   lg:w-[520px]
   lg:h-[520px]
-  bg-violet-500/15
+  bg-[#7C3AED]/20
   rounded-full
   blur-[120px]
   z-0
@@ -199,64 +202,12 @@ animate-float
 "
 />
 
-          {/* CARD 1 */}
-          <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ repeat: Infinity, duration: 9 }}
-            className="
-absolute
-top-14
-right-[-40px]
-bg-white
-rounded-[28px]
-p-6
-shadow-[0_20px_60px_rgba(15,23,42,0.15)]
-"
-          >
-            <div className="flex items-center gap-2">
-              <Users className="text-purple-600" size={20} />
-              <span className="font-bold">2400+</span>
-            </div>
-            <p className="text-sm text-slate-500">
-              طالب مسجل
-            </p>
-          </motion.div>
-
-          {/* CARD 2 */}
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ repeat: Infinity, duration: 7 }}
-className="
-absolute
-top-32
-left-[-30px]
-bg-white
-rounded-[28px]
-p-6
-shadow-[0_20px_60px_rgba(15,23,42,0.15)]
-"
-          >
-            <div className="flex items-center gap-2">
-              <TrendingUp className="text-green-600" size={20} />
-              <span className="font-bold">98%</span>
-            </div>
-            <p className="text-sm text-slate-500">
-              معدل النجاح
-            </p>
-          </motion.div>
 <motion.div
   animate={{ y: [0, -8, 0] }}
   transition={{ repeat: Infinity, duration: 9 }}
   className="absolute bottom-16 -right-8 bg-white dark:bg-white rounded-3xl p-5 shadow-2xl"
 >
-  <div className="flex items-center gap-2">
-    <span className="text-purple-600 text-xl">🎓</span>
-    <span className="font-bold">15+</span>
-  </div>
-
-  <p className="text-sm text-slate-500">
-    سنة خبرة
-  </p>
+  
 </motion.div>
         </div>
 
@@ -267,18 +218,16 @@ shadow-[0_20px_60px_rgba(15,23,42,0.15)]
   </div>
 
 </section>
+
+<ScrollingBanner />
+
 {/* FEATURES */}
 
 <section className="
 py-28
-bg-gradient-to-b
-from-white
-via-slate-50
-to-purple-50
+bg-white
 
-dark:from-[#0b0715]
-dark:via-[#130726]
-dark:to-[#1a0930]
+dark:bg-[#09090B]
 ">
 
 {/* Chemistry Background */}
@@ -291,7 +240,7 @@ dark:to-[#1a0930]
     absolute
     top-20
     right-32
-    text-violet-500/10
+    text-[#7C3AED]/10
     animate-spin
     "
     style={{ animationDuration: "30s" }}
@@ -303,7 +252,7 @@ dark:to-[#1a0930]
     absolute
     bottom-24
     left-24
-    text-purple-400/10
+    text-[#A855F7]/10
     animate-pulse
     "
   />
@@ -332,8 +281,11 @@ mb-6
 text-slate-900
 dark:text-white
 ">
-        ليه تختار مستر زياد ربيع؟
-      </h2>
+  ليه تختار
+  <span className="text-[#7C3AED]">
+    {" "}مستر زياد ربيع؟
+  </span>
+</h2>
 
     </div>
 
@@ -381,27 +333,25 @@ dark:text-white
 <section
   className="
   py-28
-  bg-slate-50
-  dark:bg-gradient-to-b
-  dark:from-[#0b0715]
-  dark:to-[#130726]
+  bg-white
+dark:bg-[#09090B]
 "
 >
-  <div className="max-w-[1600px] mx-auto px-6">
+  <div className="max-w-[1150px] mx-auto px-6">
 
 <div
   className="
   absolute
-  left-1/2
   top-1/2
+  left-1/2
   -translate-x-1/2
   -translate-y-1/2
-  w-[1000px]
-  h-[1000px]
-  bg-violet-500/10
+  w-[600px]
+  h-[600px]
+  bg-violet-500/15
   rounded-full
-  blur-[180px]
-  pointer-events-none
+  blur-[120px]
+  z-0
   "
 />
 
@@ -420,9 +370,9 @@ dark:text-white
 
 
       <div className="flex justify-center items-center gap-4 mt-8">
-        <div className="w-52 h-[3px] bg-cyan-800 rounded-full"></div>
-        <div className="w-5 h-5 rotate-45 bg-cyan-800"></div>
-        <div className="w-52 h-[3px] bg-cyan-800 rounded-full"></div>
+        <div className="w-52 h-[3px] bg-[#7C3AED] rounded-full"></div>
+        <div className="w-5 h-5 rotate-45 bg-[#7C3AED]"></div>
+        <div className="w-52 h-[3px] bg-[#7C3AED] rounded-full"></div>
       </div>
     </div>
 
@@ -433,18 +383,18 @@ dark:text-white
       <div
         onClick={() => navigate("/stage/secondary")}
         className="
-        cursor-pointer
-        group
-        relative
-        group-hover:-translate-y-3
+cursor-pointer
+group
+relative
+group-hover:-translate-y-4
 transition-all
 duration-500
-      "
+"
       >
-        <div className="overflow-hidden rounded-[28px] shadow-2xl">
+        <div className="relative overflow-hidden rounded-[28px] shadow-2xl">
          <motion.img
   whileHover={{
-    scale: 1.08,
+    scale: 1.1,
     y: -10
   }}
   transition={{
@@ -453,11 +403,17 @@ duration-500
   src="/images/secondary-stage.jpg"
   alt=""
   className="
-  w-full
-  h-[420px]
-  object-cover
-  "
+w-full
+h-[320px]
+object-cover
+transition-all
+duration-700
+saturate-110
+group-hover:saturate-150
+group-hover:brightness-110
+"
 />
+
         </div>
 
         <div
@@ -466,23 +422,23 @@ duration-500
           dark:bg-[#130726]
           rounded-[24px]
           shadow-2xl
-          w-[85%]
-          mx-auto
-          -mt-20
+          w-[75%]
+mx-auto
+-mt-10
           relative
           z-10
-          p-8
+          py-5 px-6
           text-center
         "
         >
-          <h3 className="text-4xl font-black mb-5 dark:text-white">
+          <h3 className="text-3xl font-black mb-5 dark:text-white">
             المراحل الثانوية
           </h3>
 
-          <div className="h-[3px] bg-cyan-400 mb-5"></div>
+          <div className="h-[3px] bg-[#7C3AED] mb-5"></div>
 
-          <p className="text-slate-500 dark:text-slate-300 text-lg">
-            الصف الأول الثانوي - الصف الثاني الثانوي - الصف الثالث الثانوي
+          <p className="text-slate-500 dark:text-slate-300 text-base">
+            الصف الأول والثاني والثالث الثانوي
           </p>
           <div
   className="
@@ -490,12 +446,11 @@ duration-500
   inline-flex
   items-center
   gap-2
-  text-violet-600
+  text-[#7C3AED]
   font-black
   "
 >
-  عرض الصفوف
-  <ArrowLeft size={18} />
+ 
 </div>
         </div>
 
@@ -506,19 +461,19 @@ duration-500
       {/* الإعدادي */}
       <div
         onClick={() => navigate("/stage/prep")}
-        className="
-        cursor-pointer
-        group
-        relative
-        group-hover:-translate-y-3
+       className="
+cursor-pointer
+group
+relative
+group-hover:-translate-y-4
 transition-all
 duration-500
-      "
+"
       >
-        <div className="overflow-hidden rounded-[28px] shadow-2xl">
+        <div className="relative overflow-hidden rounded-[28px] shadow-2xl">
           <motion.img
   whileHover={{
-    scale: 1.08,
+    scale: 1.1,
     y: -10
   }}
   transition={{
@@ -527,11 +482,17 @@ duration-500
   src="/images/prep-stage.jpg"
   alt=""
   className="
-  w-full
-  h-[420px]
-  object-cover
-  "
+w-full
+h-[320px]
+object-cover
+transition-all
+duration-700
+saturate-110
+group-hover:saturate-150
+group-hover:brightness-110
+"
 />
+
         </div>
 
         <div
@@ -540,23 +501,23 @@ duration-500
           dark:bg-[#130726]
           rounded-[24px]
           shadow-2xl
-          w-[85%]
-          mx-auto
-          -mt-20
+          w-[75%]
+mx-auto
+-mt-10
           relative
           z-10
-          p-8
+          py-5 px-6
           text-center
         "
         >
-          <h3 className="text-4xl font-black mb-5 dark:text-white">
+          <h3 className="text-3xl font-black mb-5 dark:text-white">
             المراحل الإعدادية
           </h3>
 
-          <div className="h-[3px] bg-cyan-400 mb-5"></div>
+          <div className="h-[3px] bg-[#7C3AED] mb-5"></div>
 
-          <p className="text-slate-500 dark:text-slate-300 text-lg">
-            الصف الأول الإعدادي - الصف الثاني الإعدادي - الصف الثالث الإعدادي
+          <p className="text-slate-500 dark:text-slate-300 text-base">
+           الصف الأول والثاني والثالث الإعدادي
           </p>
           <div
   className="
@@ -564,12 +525,11 @@ duration-500
   inline-flex
   items-center
   gap-2
-  text-violet-600
+  text-[#7C3AED]
   font-black
   "
 >
-  عرض الصفوف
-  <ArrowLeft size={18} />
+ 
 </div>
         </div>
       </div>
@@ -578,6 +538,7 @@ duration-500
 
   </div>
 </section>
+<FaqSection />
 <Footer />
 
 </div>

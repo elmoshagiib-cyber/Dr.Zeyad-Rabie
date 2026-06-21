@@ -7,9 +7,12 @@ import { useTheme } from "../../context/ThemeContext";
 import { supabase } from "../../lib/supabase";
 
 export function Navbar() {
+const [scrollProgress, setScrollProgress] = useState(0);
+
+
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  
+  const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useApp();
@@ -32,68 +35,112 @@ const loadNotifications = async () => {
     setNotifications(data);
   }
 };
+useEffect(() => {
+  const handleNavbarScroll = () => {
+    setIsScrolled(window.scrollY > 20);
+  };
 
-  const navLinks = [
-    { label: "الرئيسية", path: "/" },
-    { label: "الكورسات", path: "/courses" },
-    { label: "من نحن", path: "/#about" },
-    { label: "تواصل معنا", path: "/#contact" },
-  ];
+  window.addEventListener("scroll", handleNavbarScroll);
+
+  return () =>
+    window.removeEventListener(
+      "scroll",
+      handleNavbarScroll
+    );
+}, []);
+
+useEffect(() => {
+  const handleScroll = () => {
+
+  setIsScrolled(window.scrollY > 20);
+
+  const totalHeight =
+    document.documentElement.scrollHeight -
+    document.documentElement.clientHeight;
+
+  const progress =
+    (window.scrollY / totalHeight) * 100;
+
+  setScrollProgress(progress);
+};
+
+  window.addEventListener("scroll", handleScroll);
+
+  return () =>
+    window.removeEventListener("scroll", handleScroll);
+}, []);
+
 
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="
-fixed
-top-8
-left-14
-right-14
+   <nav
+  className={`
+sticky
+top-0
 z-50
-bg-white/95
-backdrop-blur-md
-rounded-[28px]
-ring-2
-ring-white/20
-shadow-[0_10px_40px_rgba(15,23,42,0.08)]
-dark:bg-[#0b0715]
+bg-white/90
+dark:bg-[#0b0715]/90
+backdrop-blur-xl
 border-b
 border-slate-200
-dark:border-white/5
-">
-      <div className="max-w-[1600px] mx-auto px-6">
-        <div className="flex items-center justify-between h-28">
+dark:border-white/10
+transition-all
+duration-300
+${isScrolled
+  ? "shadow-[0_10px_40px_rgba(0,0,0,0.08)]"
+  : "shadow-none"}
+`}
+>
+
+      <div className="max-w-[1500px] mx-auto px-8">
+        <div className="flex items-center justify-between h-[100px]">
           <div className="flex items-center gap-4">
 
   {/* Logo */}
   <button
     onClick={() => navigate("/")}
-    className="flex items-center justify-center group"
+    className="
+h-12
+md:h-24
+transition-all
+duration-300
+group-hover:scale-105
+"
   >
+    
     <img
       src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
       alt="د. زياد ربيع"
-      className="h-20 w-auto object-contain"
+      className="
+h-14
+md:h-16
+object-contain
+transition-all
+duration-300
+group-hover:scale-105
+"
     />
   </button>
 
   {/* Theme Button */}
   <button
-    onClick={toggleTheme}
-    className="
-    relative
-    w-[120px]
-    h-[52px]
-    rounded-full
-    bg-gradient-to-r
-    from-[#2E1065]
-    via-[#6D28D9]
-    to-[#A855F7]
-    shadow-[0_10px_25px_rgba(124,58,237,.35)]
-    transition-all
-    duration-300
-    hover:scale-105
-    "
-  >
+  onClick={toggleTheme}
+  className="
+  relative
+  hidden md:block
+  w-[90px]
+  h-[48px]
+  rounded-full
+  bg-gradient-to-r
+from-violet-700
+to-fuchsia-500
+  transition-all
+  duration-300
+  
+  "
+>
+  
     
   {/* Circle */}
 
@@ -101,8 +148,8 @@ dark:border-white/5
     className={`
       absolute
       top-[4px]
-      w-[44px]
-      h-[44px]
+      w-[40px]
+      h-[40px]
       rounded-full
       bg-white
       shadow-lg
@@ -244,16 +291,18 @@ dark:border-white/5
   <button
     onClick={() => navigate("/login")}
     className="
-px-12
-h-12
+h-14
+px-10
 rounded-2xl
 border-2
-border-violet-500
-text-violet-600
-font-black
+border-violet-300
 bg-white
+text-violet-700
+font-black
 hover:bg-violet-50
+hover:border-violet-500
 transition-all
+duration-300
 "
   >
    خش سجل يلا @
@@ -262,19 +311,23 @@ transition-all
   <button
     onClick={() => navigate("/register")}
 className="
-px-12
-h-12
+h-[52px]
+px-8
 rounded-2xl
 font-black
 text-white
 bg-gradient-to-r
 from-violet-700
-to-purple-500
+via-purple-600
+to-fuchsia-500
 shadow-lg
 shadow-violet-500/20
-hover:scale-105
+bg-[#7C3AED]
+hover:bg-[#6D28D9]
 transition-all
-"  >
+duration-300
+"
+>
    خش اعمل اكونت
   </button>
 </>
@@ -291,20 +344,31 @@ transition-all
             {mobileOpen && (
         <div className="md:hidden bg-white dark:bg-[#130726] border-t border-slate-100 p-4">
           <div className="space-y-1">
-            {navLinks.map(link => (
-  <button
-    key={link.path}
-    onClick={() => {
-      navigate(link.path);
-      setMobileOpen(false);
-    }}
-  >
-    {link.label}
-  </button>
-))}
+
           </div>
         </div>
       )}
+     <div className="h-[4px] w-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+
+  <div
+    className="
+    h-full
+    rounded-full
+    bg-gradient-to-r
+    from-violet-600
+    via-fuchsia-500
+    to-violet-400
+    shadow-[0_0_15px_rgba(168,85,247,.8)]
+    transition-all
+    duration-300
+    ease-out
+    "
+    style={{
+      width: `${scrollProgress}%`,
+    }}
+  />
+
+</div>
     </nav>
   );
 }
