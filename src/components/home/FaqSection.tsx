@@ -2,9 +2,6 @@ import { useState } from "react";
 import {
   Plus,
   Minus,
-  Atom,
-  FlaskConical,
-  Heart,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -42,43 +39,27 @@ export function FaqSection() {
   return (
     <section
       className="
-      relative
-      overflow-hidden
-      py-32
-      bg-gradient-to-br
-      from-slate-50
-      via-white
-      to-violet-50
-      dark:from-[#0b0715]
-      dark:via-[#130726]
-      dark:to-[#1a0930]
-      "
+relative
+overflow-hidden
+py-24
+bg-slate-50
+dark:bg-[#09090B]
+"
     >
-      {/* Background Effects */}
-
-      <Atom
-        size={220}
-        className="
-        absolute
-        top-10
-        right-10
-        text-violet-500/10
-        animate-spin
-        "
-        style={{
-          animationDuration: "40s",
-        }}
-      />
-
-      <FlaskConical
-        size={140}
-        className="
-        absolute
-        bottom-20
-        left-10
-        text-purple-400/10
-        "
-      />
+      <div
+  className="
+  absolute
+  top-0
+  left-1/2
+  -translate-x-1/2
+  w-[900px]
+  h-[500px]
+  bg-[#A52DFF]/15
+  blur-[180px]
+  rounded-full
+  pointer-events-none
+  "
+/>
 
       <div className="max-w-6xl mx-auto px-6 relative z-10">
 
@@ -90,33 +71,63 @@ export function FaqSection() {
             
           </div>
 
-          <h2
-            className="
-            text-5xl
-            lg:text-7xl
-            font-black
-            text-slate-900
-            dark:text-white
-            "
-          >
-            نحن هنا لتحقيق حلمك
-          </h2>
+          <h1
+className="
+text-5xl
+lg:text-7xl
+font-black
+text-slate-900
+dark:text-white
+"
+>
+الأسئلة الشائعة
+</h1>
 
-          <h3
-            className="
-            mt-4
-            text-3xl
-            lg:text-5xl
-            font-black
-            text-[#7C3AED]
-            "
-          >
-            أسئلة وأجوبة شائعة
-          </h3>
+<p className="text-slate-600
+dark:text-slate-400 text-xl max-w-2xl mx-auto">
+كل ما تحتاج معرفته عن المنصة
+</p>
 
-          <p className="mt-6 text-slate-500 text-xl">
-            كل ما تحتاج معرفته عن منصة مستر زياد ربيع
-          </p>
+<div className="flex justify-center items-center gap-4 mt-10">
+
+  <div
+    className="
+    w-40
+    h-[3px]
+    rounded-full
+    bg-gradient-to-r
+    from-[#7C1DCC]
+    via-[#A52DFF]
+    to-[#D900A8]
+    "
+  />
+
+  <div
+    className="
+    w-4
+    h-4
+    rotate-45
+    bg-gradient-to-r
+    from-[#7C1DCC]
+    via-[#A52DFF]
+    to-[#D900A8]
+    "
+  />
+
+  <div
+    className="
+    w-40
+    h-[3px]
+    rounded-full
+    bg-gradient-to-r
+    from-[#7C1DCC]
+    via-[#A52DFF]
+    to-[#D900A8]
+    "
+  />
+
+</div>
+
         </div>
 
         {/* FAQ */}
@@ -130,16 +141,19 @@ export function FaqSection() {
                 y: -3,
               }}
               className="
-              overflow-hidden
-              rounded-[28px]
-              bg-white/80
-              backdrop-blur-md
-              border
-              border-slate-200
-              dark:bg-[#130726]/80
-              dark:border-white/10
-              shadow-lg
-              "
+overflow-hidden
+rounded-[28px]
+bg-white
+dark:bg-[#130726]
+border
+border-slate-200
+dark:border-white/10
+shadow-lg
+dark:shadow-[0_20px_50px_rgba(124,29,204,0.18)]
+hover:-translate-y-1
+transition-all
+duration-500
+"
             >
               <button
                 onClick={() =>
@@ -175,7 +189,7 @@ export function FaqSection() {
                     text-xl
                     lg:text-2xl
                     font-black
-                    text-slate-800
+                    text-slate-900
                     dark:text-white
                     "
                   >
@@ -189,7 +203,11 @@ export function FaqSection() {
                   w-12
                   h-12
                   rounded-full
-                  bg-violet-100
+                  bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+text-white
                   flex
                   items-center
                   justify-center
@@ -229,12 +247,14 @@ export function FaqSection() {
                       pb-8
                       text-lg
                       leading-relaxed
-                      text-slate-600
-                      dark:text-slate-300
+                      text-slate-700
+                      dark:text-slate-300 
                       "
                     >
                       {faq.answer}
                     </div>
+                    <div className="mx-8 border-t border-slate-200
+dark:border-white/10 mb-6" />
                   </motion.div>
                 )}
               </AnimatePresence>

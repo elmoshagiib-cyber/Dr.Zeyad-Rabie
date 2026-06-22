@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from "../components/layout/Navbar";
 import { useApp } from "../context/AppContext";
 import { supabase } from "../lib/supabase";
+import { Footer } from "../components/layout/Footer";
 import {
   Eye, EyeOff, Phone, Lock, KeyRound, Wifi, Building2,
   ChevronLeft, Loader2, ShieldCheck, CheckCircle2
@@ -24,12 +25,22 @@ const LoginPage = () => {  const navigate = useNavigate();
   const [rememberMe, setRememberMe] = useState(false);
   const [onlineForm, setOnlineForm] = useState({ phone: '', password: '' });
   const [centerForm, setCenterForm] = useState({ code: '', password: '' });
-
-  const inputClass = `w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none border transition-all duration-300 ${
-    isDark
-      ? 'bg-white dark:bg-[#130726]/[0.045] border-white/[0.09] text-white placeholder-white/25 focus:border-purple-500 focus:bg-white dark:bg-[#130726]/[0.07]'
-      : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:border-purple-500 focus:bg-white dark:bg-[#130726]'
-  }`;
+const [isCenterStudent, setIsCenterStudent] = useState(false);
+  const inputClass = `
+w-full
+bg-transparent
+border-0
+border-b
+border-slate-300
+rounded-none
+px-0
+py-4
+text-lg
+text-slate-700
+outline-none
+focus:border-purple-500
+focus:ring-0
+`;
 
   const focusShadow = { boxShadow: '0 0 0 3px rgba(139,92,246,0.18)' };
 const handleSubmit = async (
@@ -158,7 +169,7 @@ const handleSubmit = async (
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="max-w-[420px] mx-auto w-full">
+            <div className="max-w-[680px] mx-auto w-full">
 
               {/* Page heading */}
               <motion.div
@@ -168,65 +179,58 @@ const handleSubmit = async (
                 transition={{ delay: 0.15, duration: 0.6 }}
               >
                 <div className="flex items-center gap-3 mb-2.5">
-                  <div
-                    className="w-11 h-11 rounded-[15px] bg-gradient-to-br from-purple-700 to-violet-500 flex items-center justify-center flex-shrink-0"
-                    style={{ boxShadow: '0 6px 20px rgba(109,40,217,0.45)' }}
-                  >
-                    <span className="text-xl">🔐</span>
-                  </div>
+                  
                   <div>
                     <h1
-                      className="text-2xl sm:text-[28px] font-black leading-tight"
+                      className="text-[56px] font-black leading-none"
                       style={{ color: isDark ? '#fff' : '#0F172A' }}
                     >
-                      تسجيل الدخول
+                     مرحباً بعودتك
                     </h1>
                   </div>
                 </div>
                 <p className="text-sm leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.48)' : '#64748B' }}>
-                  مرحباً بعودتك، سجل الدخول لمتابعة تقدمك الدراسي
+                 سجل الدخول للوصول إلى الدروس والواجبات ونتائج الاختبارات.
                 </p>
               </motion.div>
 
               {/* ── Main Card ── */}
               <motion.div
-                className="rounded-3xl p-6 sm:p-7 mb-4"
-                style={{
-                  background: isDark ? 'rgba(16, 10, 35, 0.9)' : '#FFFFFF',
-                  border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid #E2E8F0',
-                  boxShadow: cardShadow,
-                }}
-                initial={{ opacity: 0, y: 28 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25, duration: 0.65 }}
-              >
+  className="mb-4"
+>
 
                 {/* Login Type Tabs */}
-                <div
-                  className="flex rounded-2xl p-1 mb-6"
-                  style={{ background: isDark ? 'rgba(255,255,255,0.04)' : '#F1F5F9' }}
-                >
-                  {[
-                    { id: 'online' as LoginTab, label: 'طالب أونلاين', icon: Wifi },
-                    { id: 'center' as LoginTab, label: 'طالب سنتر', icon: Building2 },
-                  ].map(({ id, label, icon: Icon }) => (
-                    <motion.button
-                      key={id}
-                      type="button"
-                      onClick={() => { setTab(id); setShowPassword(false); }}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all duration-300"
-                      style={
-                        tab === id
-                          ? { background: 'linear-gradient(135deg,#6D28D9,#8B5CF6)', color: '#fff', boxShadow: '0 4px 16px rgba(109,40,217,0.38)' }
-                          : { color: isDark ? 'rgba(255,255,255,0.38)' : '#94A3B8' }
-                      }
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      <Icon className="w-4 h-4" />
-                      {label}
-                    </motion.button>
-                  ))}
-                </div>
+                <div className="flex items-center justify-between mb-12">
+
+  <div>
+    <h3 className="font-bold text-slate-800">
+      طالب سنتر
+    </h3>
+
+    <p className="text-sm text-slate-500">
+      فعل الزر لو معاك كود الطالب
+    </p>
+  </div>
+
+  <button
+    type="button"
+    onClick={() => setIsCenterStudent(!isCenterStudent)}
+    className={`relative w-14 h-8 rounded-full transition-all duration-300 ${
+      isCenterStudent
+        ? "bg-purple-600"
+        : "bg-slate-200"
+    }`}
+  >
+    <span
+      className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all duration-300 ${
+        isCenterStudent
+          ? "right-1"
+          : "left-1"
+      }`}
+    />
+  </button>
+
+</div>
 
                 {/* Animated Form Body */}
                 <AnimatePresence mode="wait">
@@ -239,7 +243,7 @@ const handleSubmit = async (
                     exit={{ opacity: 0, y: -12 }}
                     transition={{ duration: 0.28 }}
                   >
-                    {tab === 'online' ? (
+                    {!isCenterStudent ? (
                       <>
                         {/* Phone */}
                         <div className="space-y-1.5">
@@ -307,7 +311,8 @@ const handleSubmit = async (
                             <KeyRound className="absolute top-1/2 -translate-y-1/2 right-4 w-[18px] h-[18px] text-purple-500" />
                             <input
                               type="text"
-                              placeholder="ZR-000001"
+                              placeholder="دخل الكود بتاعك"
+                              
                               value={centerForm.code}
                               onChange={e => setCenterForm(p => ({ ...p, code: e.target.value }))}
                               className={`${inputClass} pr-11`}
@@ -317,9 +322,9 @@ const handleSubmit = async (
                               required
                             />
                           </div>
-                          <p className="text-[11px]" style={{ color: isDark ? 'rgba(255,255,255,0.28)' : '#94A3B8' }}>
-                            مثال: ZR-000001
-                          </p>
+                          <p className="text-xs text-slate-400 mt-2">
+مثال: ZR-xxxxxx
+</p>
                         </div>
 
                         {/* Password */}
@@ -395,7 +400,7 @@ const handleSubmit = async (
                     <motion.button
                       type="submit"
                       disabled={loading || success}
-                      className="w-full py-3.5 rounded-2xl text-white font-bold text-sm flex items-center justify-center gap-2 mt-1.5 disabled:opacity-70"
+                      className="w-full py-4 rounded-3xl text-white font-bold text-sm flex items-center justify-center gap-2 mt-1.5 disabled:opacity-70"
                       style={{
                         background: success
                           ? 'linear-gradient(135deg, #16a34a, #22c55e)'
@@ -433,7 +438,7 @@ const handleSubmit = async (
 
               {/* ── Center Student Activation Card ── */}
               <AnimatePresence>
-                {tab === 'center' && (
+                {isCenterStudent && (
                   <motion.div
                     initial={{ opacity: 0, y: 18, scale: 0.97 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -441,12 +446,10 @@ const handleSubmit = async (
                     transition={{ duration: 0.35 }}
                     className="rounded-3xl p-5 mb-4"
                     style={{
-                      background: isDark
-                        ? 'linear-gradient(135deg, rgba(109,40,217,0.12), rgba(139,92,246,0.06))'
-                        : 'linear-gradient(135deg, rgba(245,243,255,1), rgba(237,233,254,0.8))',
-                      border: isDark ? '1px solid rgba(109,40,217,0.28)' : '1px solid rgba(167,139,250,0.4)',
-                      boxShadow: isDark ? '0 8px 30px rgba(109,40,217,0.12)' : '0 4px 20px rgba(109,40,217,0.08)',
-                    }}
+  background: '#FFFFFF',
+  border: '1px solid #EEF2F7',
+  boxShadow: '0 10px 40px rgba(15,23,42,.06)'
+}}
                   >
                     <div className="flex items-start gap-3.5">
                       <div
@@ -512,6 +515,7 @@ const handleSubmit = async (
 <HeroSection image="/images/login-image.png" />
           </motion.div>
         </div>
+        <Footer />
       </div>
 
       <ActivationModal isOpen={activationOpen} onClose={() => setActivationOpen(false)} />

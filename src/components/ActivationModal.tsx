@@ -240,7 +240,7 @@ try {
                         <KeyRound className={`absolute top-1/2 -translate-y-1/2 right-3.5 w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-500'}`} />
                         <input
                           type="text"
-                          placeholder="ST-2026-0001"
+                          placeholder="ZR-xxxxxx"
                           value={form.studentCode}
                           onChange={e => setForm(p => ({ ...p, studentCode: e.target.value }))}
                           className={`${inputBase} pr-10`}

@@ -5,7 +5,7 @@ import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
 import { Card, CardContent } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
-
+import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "../components/ui/Button";
 import { supabase } from "../lib/supabase";
 import { useEffect } from "react";
@@ -21,10 +21,14 @@ const gradeColors: Record<string, string> = {
 
 const gradeOptions = [
   { value: "", label: "جميع المراحل" },
-  { value: "primary", label: "المرحلة الابتدائية" },
+
   { value: "first_sec", label: "الصف الأول الثانوي" },
   { value: "second_sec", label: "الصف الثاني الثانوي" },
   { value: "third_sec", label: "الصف الثالث الثانوي" },
+
+  { value: "first_prep", label: "الصف الأول الإعدادي" },
+  { value: "second_prep", label: "الصف الثاني الإعدادي" },
+  { value: "third_prep", label: "الصف الثالث الإعدادي" },
 ];
 
 const typeOptions = [
@@ -68,89 +72,344 @@ export function CoursesPage() {
   const matchGrade =
     !grade || c.grade === grade;
 
-  return matchSearch && matchGrade;
+  const matchType =
+    !type || c.type === type;
+
+  return matchSearch && matchGrade && matchType;
 });
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0715]" dir="rtl">
+    <div
+className="
+min-h-screen
+bg-white
+dark:bg-[#09090B]
+"
+dir="rtl"
+>
       <Navbar />
-      <div className="pt-16">
+      <div className="pt-4">
         {/* Hero */}
-        <div className="bg-gradient-to-br from-slate-900 to-blue-900 dark:from-[#0b0715] dark:to-[#1a0930] py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <Badge variant="blue" className="mb-4 bg-blue-500/20 text-blue-300 border-blue-500/30">الكورسات</Badge>
-            <h2 className="font-hala text-5xl md:text-6xl">أحدث الكروسات</h2>
-            <p className="text-slate-300 text-lg max-w-2xl mx-auto mb-8">
-              كورسات متخصصة لجميع المراحل الدراسية مع شرح شامل وتدريبات متنوعة
-            </p>
-            <div className="max-w-xl mx-auto relative">
-              <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-              <input
-                type="text"
-                placeholder="ابحث عن كورس..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="w-full pr-12 pl-4 py-4 rounded-2xl bg-white dark:bg-[#130726]/10 backdrop-blur-sm border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:bg-[#130726]/20 text-sm"
-              />
-            </div>
-          </div>
-        </div>
+        <section
+className="
+relative
+py-24
+lg:py-32
+overflow-hidden
+"
+>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div
+className="
+absolute
+top-0
+left-1/2
+-translate-x-1/2
+w-[900px]
+h-[500px]
+bg-[#A52DFF]/15
+blur-[180px]
+rounded-full
+pointer-events-none
+"
+/>
+
+<div className="max-w-7xl mx-auto px-6 text-center relative z-10">
+
+
+<h1
+className="
+text-5xl
+lg:text-7xl
+font-black
+text-white
+mb-6
+"
+>
+الكورسات
+</h1>
+
+<p
+className="
+text-slate-400
+text-xl
+max-w-2xl
+mx-auto
+"
+>
+اختر الكورس المناسب وابدأ رحلة التعلم
+</p>
+
+<div className="flex justify-center items-center gap-4 mt-10">
+
+<div
+className="
+w-40
+h-[3px]
+rounded-full
+bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+"
+/>
+
+<div
+className="
+w-4
+h-4
+rotate-45
+bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+"
+/>
+
+<div
+className="
+w-40
+h-[3px]
+rounded-full
+bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+"
+/>
+
+</div>
+<div className="max-w-xl mx-auto relative mt-12">
+  <Search
+    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+    size={20}
+  />
+
+  <input
+    type="text"
+    placeholder="ابحث عن كورس..."
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    className="
+    w-full
+    pr-12
+    pl-4
+    py-4
+    rounded-2xl
+    bg-white/5
+    backdrop-blur-xl
+    border
+    border-white/10
+    text-white
+    placeholder-slate-400
+    focus:outline-none
+    focus:ring-2
+    focus:ring-[#A52DFF]
+    "
+  />
+</div>
+</div>
+
+</section>
+          
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-12">
           {/* Filter Bar */}
-          <div className="flex flex-wrap items-center gap-3 mb-8">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
+          <div
+className="
+mb-10
+rounded-3xl
+border
+border-white/10
+bg-white/5
+backdrop-blur-xl
+p-5
+flex
+flex-wrap
+items-center
+gap-3
+"
+>
+            <div className="flex items-center gap-2 text-sm text-slate-300">
               <Filter size={16} />
               <span>تصفية:</span>
             </div>
-            {gradeOptions.map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => setGrade(opt.value)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  grade === opt.value
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
-                    : "bg-white dark:bg-[#130726] text-slate-600 border border-slate-200 hover:border-blue-300 hover:text-blue-600"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
+            <div className="flex flex-wrap items-center gap-3">
+
+  {/* جميع المراحل */}
+  <button
+    onClick={() => setGrade("")}
+    className={`px-5 py-2 rounded-xl text-sm font-medium transition-all ${
+      grade === ""
+        ? "bg-gradient-to-r from-[#7C1DCC] via-[#A52DFF] to-[#D900A8] text-white"
+        : "bg-white/5 border border-white/10 text-slate-300"
+    }`}
+  >
+    جميع المراحل
+  </button>
+
+  {/* فاصل */}
+  <div className="w-px h-8 bg-white/10 mx-2" />
+
+  {/* الثانوية */}
+  <span className="px-3 py-1 rounded-full bg-violet-500/10 text-violet-300 text-xs font-bold">
+  الثانوية
+</span>
+
+  <button
+    onClick={() => setGrade("first_sec")}
+    className={`px-4 py-2 rounded-xl text-sm ${
+      grade === "first_sec"
+        ? "bg-gradient-to-r from-[#7C1DCC] via-[#A52DFF] to-[#D900A8] text-white"
+        : "bg-white/5 border border-white/10 text-slate-300"
+    }`}
+  >
+    أولى ثانوي
+  </button>
+
+  <button
+    onClick={() => setGrade("second_sec")}
+    className={`px-4 py-2 rounded-xl text-sm ${
+      grade === "second_sec"
+        ? "bg-gradient-to-r from-[#7C1DCC] via-[#A52DFF] to-[#D900A8] text-white"
+        : "bg-white/5 border border-white/10 text-slate-300"
+    }`}
+  >
+    ثانية ثانوي
+  </button>
+
+  <button
+    onClick={() => setGrade("third_sec")}
+    className={`px-4 py-2 rounded-xl text-sm ${
+      grade === "third_sec"
+        ? "bg-gradient-to-r from-[#7C1DCC] via-[#A52DFF] to-[#D900A8] text-white"
+        : "bg-white/5 border border-white/10 text-slate-300"
+    }`}
+  >
+    ثالثة ثانوي
+  </button>
+
+  {/* فاصل */}
+  <div className="w-px h-8 bg-white/10 mx-2" />
+
+  {/* الإعدادي */}
+  <span className="px-3 py-1 rounded-full bg-fuchsia-500/10 text-fuchsia-300 text-xs font-bold">
+  الإعدادي
+</span>
+
+  <button
+    onClick={() => setGrade("first_prep")}
+    className={`px-4 py-2 rounded-xl text-sm ${
+      grade === "first_prep"
+        ? "bg-gradient-to-r from-[#7C1DCC] via-[#A52DFF] to-[#D900A8] text-white"
+        : "bg-white/5 border border-white/10 text-slate-300"
+    }`}
+  >
+    أولى إعدادي
+  </button>
+
+  <button
+    onClick={() => setGrade("second_prep")}
+    className={`px-4 py-2 rounded-xl text-sm ${
+      grade === "second_prep"
+        ? "bg-gradient-to-r from-[#7C1DCC] via-[#A52DFF] to-[#D900A8] text-white"
+        : "bg-white/5 border border-white/10 text-slate-300"
+    }`}
+  >
+    ثانية إعدادي
+  </button>
+
+  <button
+    onClick={() => setGrade("third_prep")}
+    className={`px-4 py-2 rounded-xl text-sm ${
+      grade === "third_prep"
+        ? "bg-gradient-to-r from-[#7C1DCC] via-[#A52DFF] to-[#D900A8] text-white"
+        : "bg-white/5 border border-white/10 text-slate-300"
+    }`}
+  >
+    ثالثة إعدادي
+  </button>
+
+</div>
             <div className="mr-auto flex items-center gap-2">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium  bg-whitedark:bg-[#130726] text-slate-600 border border-slate-200 hover:border-blue-300"
+                className="
+flex
+items-center
+gap-2
+px-4
+py-2
+rounded-xl
+text-sm
+font-medium
+bg-white/5
+border
+border-white/10
+text-slate-300
+hover:border-violet-500/40
+transition-all
+"
               >
-                <SlidersHorizontal size={16} />
+                <SlidersHorizontal
+  className={`
+    transition-all
+    duration-300
+    ${showFilters ? "rotate-180" : ""}
+  `}
+/>
                 فلاتر أخرى
               </button>
             </div>
           </div>
 
-          {showFilters && (
-            <div className="bg-white dark:bg-[#130726] rounded-2xl border border-slate-200 p-5 mb-6 grid sm:grid-cols-3 gap-4">
-              <div>
-                <label className="text-xs font-bold text-slate-600 mb-2 block">نوع الكورس</label>
-                <div className="flex flex-wrap gap-2">
-                  {typeOptions.map(opt => (
-                    <button
-                      key={opt.value}
-                      onClick={() => setType(opt.value)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                        type === opt.value ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+          <AnimatePresence>
+  {showFilters && (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: "auto" }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.3 }}
+      className="
+      overflow-hidden
+      mt-4
+      rounded-3xl
+      border
+      border-white/10
+      bg-[#130726]
+      p-6
+      "
+    >
+      <div className="bg-[#10051f] rounded-2xl border border-white/10 p-5">
+
+        <label className="text-xs font-bold text-slate-400 mb-3 block">
+          نوع الكورس
+        </label>
+
+        <div className="flex flex-wrap gap-2">
+          {typeOptions.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setType(opt.value)}
+              className={`px-4 py-2 rounded-xl text-sm transition-all ${
+                type === opt.value
+                  ? "bg-gradient-to-r from-[#7C1DCC] via-[#A52DFF] to-[#D900A8] text-white"
+                  : "bg-white/5 text-slate-400 border border-white/10 hover:border-violet-500/30"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
           {/* Results info */}
           <div className="flex items-center justify-between mb-6">
-            <p className="text-slate-500 dark:text-slate-300 text-sm">
-              عرض <span className="font-bold text-slate-900 dark:text-white">{filtered.length}</span> كورس
+           <p className="text-slate-300 text-base font-semibold">
+              عرض <span className="font-bold text-slate-300 dark:text-white">{filtered.length}</span> كورس
             </p>
           </div>
 
@@ -159,21 +418,25 @@ export function CoursesPage() {
             <div className="text-center py-20">
               <div className="text-6xl mb-4">🔍</div>
               <p className="text-xl font-bold text-slate-700 mb-2">لا توجد نتائج</p>
-              <p className="text-slate-500 dark:text-slate-300">جرب كلمات بحث مختلفة أو غيّر الفلاتر</p>
+              <p className="text-slate-300 dark:text-slate-300">جرب كلمات بحث مختلفة أو غيّر الفلاتر</p>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map(course => (
                 <Card
-  key={course.id}
-  hover
-  className="
-  overflow-hidden
-  bg-white
-  dark:bg-[#130726]
-  border
-  dark:border-purple-500/20
-  "
+key={course.id}
+className="
+overflow-hidden
+rounded-[32px]
+bg-[#130726]
+border
+border-white/10
+shadow-[0_20px_50px_rgba(124,29,204,0.18)]
+hover:shadow-[0_25px_70px_rgba(217,0,168,0.30)]
+hover:-translate-y-2
+transition-all
+duration-500
+"
 >
   
                   <div className="relative overflow-hidden rounded-t-2xl">
@@ -194,7 +457,13 @@ duration-500
 />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                     <div className="absolute top-3 right-3">
-                      <Badge variant="blue">
+                      <Badge
+className="
+bg-violet-500/20
+text-violet-300
+border-violet-500/30
+"
+>
   {gradeOptions.find(
     g => g.value === course.grade
   )?.label}
@@ -218,9 +487,9 @@ duration-500
   كورس
 </Badge>
                     </div>
-                    <h3 className="font-bold text-slate-900 dark:text-white mb-2 leading-tight">{course.title}</h3>
-                    <p className="text-sm text-slate-500 mb-4 line-clamp-2">{course.description}</p>
-                    <div className="flex items-center gap-4 text-xs text-slate-500 mb-4">
+                    <h3 className="font-bold text-white dark:text-white mb-2 leading-tight">{course.title}</h3>
+                    <p className="text-sm text-slate-300 mb-4 line-clamp-2">{course.description}</p>
+                    <div className="flex items-center gap-4 text-xs text-slate-300 mb-4">
                       <span className="flex items-center gap-1.5">
   <Users size={13} />
   0 طالب
@@ -235,14 +504,22 @@ duration-500
                         {course.isFree ? (
                           <span className="text-xl font-black text-emerald-600">مجاني</span>
                         ) : (
-                          <span className="text-xl font-black text-slate-900">{course.price} <span className="text-sm font-medium text-slate-500">جنيه</span></span>
+                          <span className="text-xl font-black text-white">{course.price} <span className="text-sm font-medium text-slate-300">جنيه</span></span>
                         )}
                       </div>
+                      
                      <Button
-  size="sm"
-  onClick={() => navigate(`/courses/${course.id}`)}
+size="sm"
+onClick={() => navigate(`/courses/${course.id}`)}
+className="
+bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+text-white
+"
 >
-  عرض الكورس
+عرض الكورس
 </Button>
                     </div>
                   </CardContent>
@@ -251,8 +528,10 @@ duration-500
             </div>
           )}
         </div>
+        
       </div>
       <Footer />
     </div>
+    
   );
 }

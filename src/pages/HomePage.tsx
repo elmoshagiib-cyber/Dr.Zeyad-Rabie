@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 import { supabase } from "../lib/supabase";
-
+import { ScrollReveal } from "../components/layout/ScrollReveal";
 import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
 import { ScrollingBanner } from "../components/layout/ScrollingBanner";
@@ -75,16 +75,12 @@ const loadCourses = async () => {
       
 
       <section
-  className="
-  relative
-  overflow-hidden
-  min-h-[calc(100vh-96px)]
-  flex
-  items-center
-  bg-white
-  dark:bg-[#09090B]
-  "
-
+className="
+relative
+py-28
+bg-white
+dark:bg-[#09090B]
+"
 >
 
   {/* Chemistry Icons */}
@@ -96,14 +92,23 @@ const loadCourses = async () => {
 
       {/* TEXT */}
       <motion.div
-        initial={{ opacity: 0, x: 80 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.7 }}
-        className="text-center lg:text-right"
-      >
+  initial="hidden"
+  whileInView="show"
+  viewport={{ once: true }}
+  variants={{
+    hidden: {},
+    show: {
+      transition: {
+        staggerChildren: 0.15,
+      },
+    },
+  }}
+  className="mt-16"
+>
 
 
-        <h2 className="
+        <h2
+className="
 text-5xl
 lg:text-7xl
 font-black
@@ -111,27 +116,33 @@ leading-tight
 mb-6
 text-slate-900
 dark:text-white
-">
-         أهـلا بـك فـي منصة
-          <br />
-          <div className="relative">
-            
-          <span className="text-[#7C3AED]">
-  مستــر زيــاد ربيــع
-</span>
+"
+>
+أهـلا بـك فـي منصة
+<br />
 
-          </div>
-        </h2>
+<span
+className="
+bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+bg-clip-text
+text-transparent
+"
+>
+مستــر زيــاد ربيــع
+</span>
+</h2>
 
         <p className="
-text-slate-500
+text-slate-600
 dark:text-slate-400
 text-2xl
 leading-relaxed
 max-w-2xl
 ">
-          شرح مبسط، مراجعات شاملة، امتحانات تفاعلية، ومتابعة مستمرة تساعدك
-          تحقق أعلى الدرجات في الكيمياء.
+         رحلة تعليمية متكاملة تشمل الشرح، الواجبات، المراجعات، والامتحانات التفاعلية لمساعدتك على تحقيق أعلى الدرجات.
         </p>
 
         <div className="flex flex-wrap justify-center lg:justify-start gap-4 mt-10">
@@ -139,36 +150,60 @@ max-w-2xl
           <Button
   size="lg"
   onClick={() => navigate("/courses")}
+  className="
+bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+text-white
+font-black
+shadow-[0_12px_35px_rgba(165,45,255,0.35)]
+hover:scale-105
+transition-all
+duration-300
+"
 >
   <BookOpen size={20} />
   تصفح الكورسات
 </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => navigate("/register")}
-            className="
-border-2
-border-[#7C3AED]
-text-[#7C3AED]
-bg-white
-hover:bg-[#7C3AED]/5
-"
-          >
-            سجل الآن مجاناً
-          </Button>
 
+<Button
+  size="lg"
+  variant="outline"
+  onClick={() => navigate("/register")}
+  className="
+border-2
+border-[#A52DFF]
+text-[#A52DFF]
+bg-transparent
+hover:bg-[#A52DFF]
+hover:text-white
+transition-all
+duration-300
+"
+>
+  سجل الآن مجاناً
+</Button>
+          
         </div>
 
       </motion.div>
 
       {/* IMAGE */}
       <motion.div
-        initial={{ opacity: 0, x: -80 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.7 }}
-        className="relative flex justify-center items-end -mt-8"
-      >
+  initial="hidden"
+  whileInView="show"
+  viewport={{ once: true }}
+  variants={{
+    hidden: {},
+    show: {
+      transition: {
+        staggerChildren: 0.15,
+      },
+    },
+  }}
+  className="mt-16"
+>
 
         <div className="relative">
 <div
@@ -182,7 +217,10 @@ hover:bg-[#7C3AED]/5
 h-[600px]
   lg:w-[520px]
   lg:h-[520px]
-  bg-[#7C3AED]/20
+  bg-gradient-to-r
+from-[#7C1DCC]/30
+via-[#D900A8]/25
+to-[#FF6AD5]/20
   rounded-full
   blur-[120px]
   z-0
@@ -222,13 +260,15 @@ animate-float
 <ScrollingBanner />
 
 {/* FEATURES */}
-
-<section className="
+<ScrollReveal>
+<section
+className="
+relative
 py-28
 bg-white
-
 dark:bg-[#09090B]
-">
+"
+>
 
 {/* Chemistry Background */}
 
@@ -240,7 +280,7 @@ dark:bg-[#09090B]
     absolute
     top-20
     right-32
-    text-[#7C3AED]/10
+    text-[#A52DFF]/10
     animate-spin
     "
     style={{ animationDuration: "30s" }}
@@ -282,7 +322,12 @@ text-slate-900
 dark:text-white
 ">
   ليه تختار
-  <span className="text-[#7C3AED]">
+  <span className="bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+bg-clip-text
+text-transparent">
     {" "}مستر زياد ربيع؟
   </span>
 </h2>
@@ -290,50 +335,152 @@ dark:text-white
     </div>
 
     <motion.div
-  initial={{ opacity: 0, y: 40 }}
-  whileInView={{ opacity: 1, y: 0 }}
+  initial="hidden"
+  whileInView="show"
   viewport={{ once: true }}
-  transition={{ duration: 0.7 }}
+  variants={{
+    hidden: {},
+    show: {
+      transition: {
+        staggerChildren: 0.15,
+      },
+    },
+  }}
   className="mt-16"
 >
   <div
-  className="
-  relative
-  overflow-hidden
-  rounded-[32px]
-  "
->
-  <img
-    src="/images/features-banner.png"
-    alt="مميزات المنصة"
     className="
-    w-full
-    transition-all
-    duration-700
-    hover:scale-[1.03]
+    grid
+    grid-cols-1
+    sm:grid-cols-2
+    lg:grid-cols-4
+    gap-8
     "
-  />
+  >
 
-  <div
-    className="
-    absolute
-    inset-0
-    bg-gradient-to-t
-    from-purple-500/5
-    to-transparent
-    pointer-events-none
-    "
-  />
-</div>
+    {/* Card 1 */}
+    <div
+      className="
+      group
+      overflow-hidden
+      rounded-[36px]
+      shadow-[0_20px_50px_rgba(0,0,0,0.15)]
+      hover:shadow-2xl
+      transition-all
+      duration-500
+      hover:-translate-y-4
+      "
+    >
+      <img
+        src="/images/card1.jpg"
+        alt=""
+        className="
+        w-full
+        aspect-[3/4]
+        object-cover
+        transition-transform
+        duration-700
+        group-hover:scale-110
+will-change-transform
+        "
+      />
+    </div>
+
+    {/* Card 2 */}
+    <div
+      className="
+      group
+      overflow-hidden
+      rounded-[36px]
+      shadow-[0_20px_50px_rgba(0,0,0,0.15)]
+      hover:shadow-2xl
+      transition-all
+      duration-500
+      hover:-translate-y-4
+      "
+    >
+      <img
+        src="/images/card2.jpg"
+        alt=""
+        className="
+        w-full
+        aspect-[3/4]
+        object-cover
+        transition-transform
+        duration-700
+        group-hover:scale-110
+will-change-transform
+        "
+      />
+    </div>
+
+    {/* Card 3 */}
+    <div
+      className="
+      group
+      overflow-hidden
+      rounded-[36px]
+      shadow-[0_20px_50px_rgba(0,0,0,0.15)]
+      hover:shadow-2xl
+      transition-all
+      duration-500
+      hover:-translate-y-4
+      "
+    >
+      <img
+        src="/images/card3.jpg"
+        alt=""
+        className="
+        w-full
+        aspect-[3/4]
+        object-cover
+        transition-transform
+        duration-700
+        group-hover:scale-110
+will-change-transform
+        "
+      />
+    </div>
+
+    {/* Card 4 */}
+    <div
+      className="
+      group
+      overflow-hidden
+      rounded-[36px]
+      shadow-[0_20px_50px_rgba(0,0,0,0.15)]
+      hover:shadow-2xl
+      transition-all
+      duration-500
+      hover:-translate-y-4
+      "
+    >
+      <img
+        src="/images/card4.jpg"
+        alt=""
+        className="
+        w-full
+        aspect-[3/4]
+        object-cover
+        transition-transform
+        duration-700
+        group-hover:scale-105
+        "
+      />
+    </div>
+
+  </div>
 </motion.div>
 </div>
 </section>
+</ScrollReveal>
 {/* ================= GRADES SECTION ================= */}
-
+<ScrollReveal>
 <section
-  className="
-  py-28
-  bg-white
+className="
+relative
+py-28
+bg-white
 dark:bg-[#09090B]
 "
 >
@@ -348,7 +495,7 @@ dark:bg-[#09090B]
   -translate-y-1/2
   w-[600px]
   h-[600px]
-  bg-violet-500/15
+  bg-[#A52DFF]/15
   rounded-full
   blur-[120px]
   z-0
@@ -365,14 +512,31 @@ mb-6
 text-slate-900
 dark:text-white
 ">
-        الصفوف الدراسية
-      </h2>
+ الصفوف
+  <span className="bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+bg-clip-text
+text-transparent">
+    {" "}الدراسية 
+  </span>
+</h2>
 
 
       <div className="flex justify-center items-center gap-4 mt-8">
-        <div className="w-52 h-[3px] bg-[#7C3AED] rounded-full"></div>
-        <div className="w-5 h-5 rotate-45 bg-[#7C3AED]"></div>
-        <div className="w-52 h-[3px] bg-[#7C3AED] rounded-full"></div>
+        <div className="w-64 h-[3px] bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8] rounded-full"></div>
+        <div className="w-5 h-5 rotate-45 bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]"></div>
+        <div className="w-52 h-[3px] bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8] rounded-full"></div>
       </div>
     </div>
 
@@ -435,7 +599,10 @@ mx-auto
             المراحل الثانوية
           </h3>
 
-          <div className="h-[3px] bg-[#7C3AED] mb-5"></div>
+          <div className="h-[3px] bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8] mb-5"></div>
 
           <p className="text-slate-500 dark:text-slate-300 text-base">
             الصف الأول والثاني والثالث الثانوي
@@ -446,7 +613,12 @@ mx-auto
   inline-flex
   items-center
   gap-2
-  text-[#7C3AED]
+  bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+bg-clip-text
+text-transparent
   font-black
   "
 >
@@ -514,7 +686,10 @@ mx-auto
             المراحل الإعدادية
           </h3>
 
-          <div className="h-[3px] bg-[#7C3AED] mb-5"></div>
+          <div className="h-[3px] bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8] mb-5"></div>
 
           <p className="text-slate-500 dark:text-slate-300 text-base">
            الصف الأول والثاني والثالث الإعدادي
@@ -525,7 +700,12 @@ mx-auto
   inline-flex
   items-center
   gap-2
-  text-[#7C3AED]
+  bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+bg-clip-text
+text-transparent
   font-black
   "
 >
@@ -537,7 +717,9 @@ mx-auto
     </div>
 
   </div>
+
 </section>
+</ScrollReveal>
 <FaqSection />
 <Footer />
 

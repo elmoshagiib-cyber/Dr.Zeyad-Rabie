@@ -11,7 +11,6 @@ const [scrollProgress, setScrollProgress] = useState(0);
 
 
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,48 +20,18 @@ const [scrollProgress, setScrollProgress] = useState(0);
 const [notificationsOpen, setNotificationsOpen] = useState(false);
 
 useEffect(() => {
-  loadNotifications();
-}, []);
-
-const loadNotifications = async () => {
-  const { data } = await supabase
-    .from("announcements")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(10);
-
-  if (data) {
-    setNotifications(data);
-  }
-};
-useEffect(() => {
-  const handleNavbarScroll = () => {
-    setIsScrolled(window.scrollY > 20);
-  };
-
-  window.addEventListener("scroll", handleNavbarScroll);
-
-  return () =>
-    window.removeEventListener(
-      "scroll",
-      handleNavbarScroll
-    );
-}, []);
-
-useEffect(() => {
   const handleScroll = () => {
+    setIsScrolled(window.scrollY > 20);
 
-  setIsScrolled(window.scrollY > 20);
+    const totalHeight =
+      document.documentElement.scrollHeight -
+      document.documentElement.clientHeight;
 
-  const totalHeight =
-    document.documentElement.scrollHeight -
-    document.documentElement.clientHeight;
+    const progress =
+      (window.scrollY / totalHeight) * 100;
 
-  const progress =
-    (window.scrollY / totalHeight) * 100;
-
-  setScrollProgress(progress);
-};
+    setScrollProgress(progress);
+  };
 
   window.addEventListener("scroll", handleScroll);
 
@@ -70,8 +39,6 @@ useEffect(() => {
     window.removeEventListener("scroll", handleScroll);
 }, []);
 
-
-  const isActive = (path: string) => location.pathname === path;
 
   return (
    <nav
@@ -88,13 +55,13 @@ dark:border-white/10
 transition-all
 duration-300
 ${isScrolled
-  ? "shadow-[0_10px_40px_rgba(0,0,0,0.08)]"
+  ? "shadow-[0_15px_50px_rgba(124,29,204,0.10)]"
   : "shadow-none"}
 `}
 >
 
-      <div className="max-w-[1500px] mx-auto px-8">
-        <div className="flex items-center justify-between h-[100px]">
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-[75px] lg:h-[100px]">
           <div className="flex items-center gap-4">
 
   {/* Logo */}
@@ -113,12 +80,10 @@ group-hover:scale-105
       src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
       alt="د. زياد ربيع"
       className="
-h-14
-md:h-16
+h-8
+sm:h-10
+lg:h-16
 object-contain
-transition-all
-duration-300
-group-hover:scale-105
 "
     />
   </button>
@@ -127,20 +92,17 @@ group-hover:scale-105
   <button
   onClick={toggleTheme}
   className="
-  relative
-  hidden md:block
-  w-[90px]
-  h-[48px]
-  rounded-full
-  bg-gradient-to-r
+relative
+w-[90px]
+h-[48px]
+rounded-full
+bg-gradient-to-r
 from-violet-700
 to-fuchsia-500
-  transition-all
-  duration-300
-  
-  "
+transition-all
+duration-300
+"
 >
-  
     
   {/* Circle */}
 
@@ -199,7 +161,7 @@ to-fuchsia-500
 </button>
 </div>
           {/* Right Side */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 md:gap-6">
            
             {user ? (
               <>
@@ -220,7 +182,10 @@ to-fuchsia-500
   
 <button
   onClick={logout}
-  className="px-5 py-3 bg-red-500 text-white rounded-xl"
+  className="px-5 py-3 bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8] text-white rounded-xl"
 >
   تسجيل الخروج
 </button>
@@ -228,7 +193,9 @@ to-fuchsia-500
     <div
       className="
       absolute left-0 top-full mt-3
-      w-[380px]
+      w-[280px]
+sm:w-[380px]
+lg:w-[420px]
       bg-white
       rounded-3xl
       shadow-2xl
@@ -291,6 +258,9 @@ to-fuchsia-500
   <button
     onClick={() => navigate("/login")}
     className="
+hidden md:flex
+items-center
+justify-center
 h-14
 px-10
 rounded-2xl
@@ -311,7 +281,10 @@ duration-300
   <button
     onClick={() => navigate("/register")}
 className="
-h-[52px]
+hidden md:flex
+items-center
+justify-center
+h-14
 px-8
 rounded-2xl
 font-black
@@ -322,7 +295,7 @@ via-purple-600
 to-fuchsia-500
 shadow-lg
 shadow-violet-500/20
-bg-[#7C3AED]
+bg-[#A52DFF]
 hover:bg-[#6D28D9]
 transition-all
 duration-300
@@ -344,6 +317,35 @@ duration-300
             {mobileOpen && (
         <div className="md:hidden bg-white dark:bg-[#130726] border-t border-slate-100 p-4">
           <div className="space-y-1">
+            <button
+onClick={() => navigate("/login")}
+className="
+w-full
+h-12
+rounded-xl
+border
+border-violet-300
+mb-3
+"
+>
+تسجيل الدخول
+</button>
+
+<button
+onClick={() => navigate("/register")}
+className="
+w-full
+h-12
+rounded-xl
+text-white
+bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+"
+>
+إنشاء حساب
+</button>
 
           </div>
         </div>

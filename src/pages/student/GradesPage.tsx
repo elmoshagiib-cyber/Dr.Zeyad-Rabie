@@ -1,6 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { Navbar } from "../../components/layout/Navbar";
+import { Footer } from "../../components/layout/Footer";
 export default function GradesPage() {
 const { stage } = useParams();
 const navigate = useNavigate();
@@ -42,18 +44,102 @@ image: "/images/prep3.jpg",
 },
 ];
 
-return ( <div className="max-w-[1600px] mx-auto py-20 px-6 relative">
+return (
+  <>
+    <Navbar />
+
+  <div
+    className="
+    min-h-screen
+    bg-white
+    dark:bg-[#09090B]
+    relative
+    overflow-hidden
+    "
+  >
+
+<div
+className="
+absolute
+top-0
+left-1/2
+-translate-x-1/2
+w-[900px]
+h-[500px]
+bg-[#A52DFF]/8
+blur-[180px]
+rounded-full
+pointer-events-none
+"
+/>
+
+<div
+className="
+absolute
+bottom-0
+right-0
+w-[500px]
+h-[500px]
+bg-fuchsia-500/10
+blur-[180px]
+rounded-full
+pointer-events-none
+"
+/>
 
 
-<h1 className="text-6xl font-black text-center">
-    {stage === "secondary"
-      ? "المرحلة الثانوية"
-      : "المرحلة الإعدادية"}
+<div className="max-w-[1600px] mx-auto py-28 px-6 relative z-10">
+
+<h1
+className="
+text-6xl
+font-black
+text-center
+text-slate-900
+dark:text-white
+"
+>
+    {stage === "secondary" ? (
+<>
+المرحلة
+
+<span
+className="
+bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+bg-clip-text
+text-transparent
+"
+>
+ الثانوية
+</span>
+</>
+) : (
+<>
+المرحلة
+
+<span
+className="
+bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+bg-clip-text
+text-transparent
+"
+>
+ الإعدادية
+</span>
+</>
+)}
   </h1>
 
 <p
  className="
- text-slate-500
+text-slate-300
+dark:text-slate-400
  text-xl
  text-center
  mt-5
@@ -63,22 +149,48 @@ return ( <div className="max-w-[1600px] mx-auto py-20 px-6 relative">
 اختر صفك الدراسي وابدأ رحلتك التعليمية
 </p>
 
-<div
-  className="
-  absolute
-  top-0
-  left-1/2
-  -translate-x-1/2
-  w-[900px]
-  h-[500px]
-  bg-pink-500/10
-  blur-[180px]
-  rounded-full
-  pointer-events-none
-  "
-/>
+<div className="flex justify-center items-center gap-4 mt-8 mb-20">
 
-  <div className="grid lg:grid-cols-3 gap-10 max-w-[1800px] mx-auto">
+  <div
+    className="
+    w-40
+    h-[3px]
+    rounded-full
+    bg-gradient-to-r
+    from-[#7C1DCC]
+    via-[#A52DFF]
+    to-[#D900A8]
+    "
+  />
+
+  <div
+    className="
+    w-4
+    h-4
+    rotate-45
+    bg-gradient-to-r
+    from-[#7C1DCC]
+    via-[#A52DFF]
+    to-[#D900A8]
+    "
+  />
+
+  <div
+    className="
+    w-40
+    h-[3px]
+    rounded-full
+    bg-gradient-to-r
+    from-[#7C1DCC]
+    via-[#A52DFF]
+    to-[#D900A8]
+    "
+  />
+
+</div>
+
+
+  <div className="grid lg:grid-cols-3 gap-11 max-w-[1800px] mx-auto">
 
     {grades.map((grade) => (
 <motion.div
@@ -93,12 +205,13 @@ return ( <div className="max-w-[1600px] mx-auto py-20 px-6 relative">
   onClick={() => navigate(`/grade/${grade.id}`)}
   className="
   bg-white
+dark:bg-[#130726]
   rounded-[32px]
   overflow-hidden
   cursor-pointer
   group
-  shadow-xl
-  hover:shadow-2xl
+  shadow-[0_20px_50px_rgba(124,29,204,0.18)]
+hover:shadow-[0_25px_70px_rgba(217,0,168,0.30)]
   transition-all
   duration-500
   "
@@ -165,24 +278,32 @@ group-hover:brightness-110
     text-3xl
     font-black
     text-slate-900
+dark:text-white
     "
   >
     {grade.title}
   </h3>
 
   <button
-    className="
-    bg-red-500
-    text-white
-    px-6
-    py-3
-    rounded-2xl
-    font-bold
-    flex
-    items-center
-    gap-2
-    "
-  >
+  className="
+  bg-gradient-to-r
+  from-[#7C1DCC]
+  via-[#A52DFF]
+  to-[#D900A8]
+  text-white
+  px-6
+  py-3
+  rounded-2xl
+  font-bold
+  flex
+  items-center
+  gap-2
+  shadow-[0_10px_30px_rgba(165,45,255,0.35)]
+  transition-all
+  duration-300
+  group-hover:scale-105
+  "
+>
     ابدأ الآن
     <ArrowLeft size={18} />
   </button>
@@ -194,7 +315,11 @@ group-hover:brightness-110
     ))}
 
   </div>
-</div>
+     </div> {/* grid */}
 
+    </div> {/* container */}
+
+    <Footer />
+  </>
 );
 }
