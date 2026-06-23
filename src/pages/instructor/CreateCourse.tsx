@@ -415,17 +415,15 @@ return (
     onChange={(e) => setNewLessonTitle(e.target.value)}
   />
 
-  <Input
-    placeholder="رابط الفيديو"
-    value={newVideoUrl}
-    onChange={(e) => setNewVideoUrl(e.target.value)}
-  />
+  <input
+ type="file"
+ accept="video/*"
+/>
 
-  <Input
-    placeholder="رابط PDF"
-    value={newPdfUrl}
-    onChange={(e) => setNewPdfUrl(e.target.value)}
-  />
+<input
+ type="file"
+ accept=".pdf"
+/>
 
   <Button
     size="sm"

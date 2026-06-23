@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider, useApp } from "./context/AppContext";
 import { HomePage } from "./pages/HomePage";
-import { CoursesPage } from "./pages/CoursesPage";
 import { CourseDetailPage } from "./pages/CourseDetailPage";
 import { ThemeProvider } from "./context/ThemeContext";
 import { InstructorHomeworkSubmissions } from "./pages/instructor/InstructorHomeworkSubmissions";
@@ -71,7 +70,6 @@ function AppRoutes() {
     <Routes>
       {/* Public */}
       <Route path="/" element={<HomePage />} />
-<Route path="/courses" element={<CoursesPage />} />
 <Route path="/courses/:slug" element={<CourseDetailPage />} />
 
 <Route path="/login" element={<StudentLoginPage />} />

@@ -275,7 +275,7 @@ transition-all
 duration-300
 "
   >
-   خش سجل يلا @
+  ادخل سجل يلا @
   </button>
 
   <button
@@ -301,7 +301,7 @@ transition-all
 duration-300
 "
 >
-   خش اعمل اكونت
+   ادخل اعمل اكونت
   </button>
 </>
             )}

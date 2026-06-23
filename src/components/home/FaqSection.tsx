@@ -38,14 +38,14 @@ export function FaqSection() {
 
   return (
     <section
-      className="
-relative
-overflow-hidden
-py-24
-bg-slate-50
-dark:bg-[#09090B]
-"
-    >
+  className="
+  relative
+  overflow-hidden
+  py-24
+  bg-white
+  dark:bg-[#09090B]
+  "
+>
       <div
   className="
   absolute
@@ -71,16 +71,32 @@ dark:bg-[#09090B]
             
           </div>
 
-          <h1
-className="
-text-5xl
-lg:text-7xl
-font-black
-text-slate-900
-dark:text-white
-"
+<h1
+  className="
+  text-5xl
+  lg:text-7xl
+  font-black
+  leading-tight
+  "
 >
-الأسئلة الشائعة
+  <span className="text-slate-900 dark:text-white">
+    الأسئلة
+  </span>
+
+  <span
+    className="
+    mr-3
+    inline-block
+    bg-gradient-to-r
+    from-[#7C1DCC]
+    via-[#A52DFF]
+    to-[#D900A8]
+    bg-clip-text
+    text-transparent
+    "
+  >
+    الشائعة
+  </span>
 </h1>
 
 <p className="text-slate-600

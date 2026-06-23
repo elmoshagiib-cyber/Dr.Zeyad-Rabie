@@ -62,6 +62,7 @@ const renderCourseCards = (courseList: any[]) => (
         border
         border-slate-200
         bg-white
+        dark:bg-[#130726]
         shadow-lg
         min-h-[620px]
         flex
@@ -110,6 +111,7 @@ const renderCourseCards = (courseList: any[]) => (
             text-xl
             font-black
             text-slate-900
+            dark:text-white
             mb-2
             line-clamp-2
             "
@@ -120,6 +122,7 @@ const renderCourseCards = (courseList: any[]) => (
           <p
             className="
             text-slate-500
+dark:text-slate-400
             text-base
             mb-6
             line-clamp-2
@@ -134,6 +137,7 @@ const renderCourseCards = (courseList: any[]) => (
             items-center
             justify-between
             text-slate-500
+dark:text-slate-400
             text-sm
             mb-6
             "
@@ -151,7 +155,10 @@ const renderCourseCards = (courseList: any[]) => (
             <Button
               className="
               flex-1
-              bg-[#6b6d52]
+              bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
               hover:bg-[#5b5d45]
               text-white
               "
@@ -185,10 +192,85 @@ const renderCourseCards = (courseList: any[]) => (
 
     <div className="pt-16">
 
-  
+<div className="relative overflow-hidden">
 
+  <div
+    className="
+    absolute
+    left-1/2
+    top-0
+    -translate-x-1/2
+    w-[900px]
+    h-[400px]
+    bg-[#A52DFF]/10
+    blur-[180px]
+    rounded-full
+    "
+  />
 
+  <div className="max-w-7xl mx-auto px-6 py-24 text-center">
 
+    <h1
+      className="
+      text-5xl
+      lg:text-7xl
+      font-black
+      text-slate-900
+dark:text-white
+      dark:text-white
+      "
+    >
+      كورسات
+
+      <span
+        className="
+        mr-4
+        bg-gradient-to-r
+        from-[#7C1DCC]
+        via-[#A52DFF]
+        to-[#D900A8]
+        bg-clip-text
+        text-transparent
+        "
+      >
+        {gradeNames[grade || ""]}
+      </span>
+
+    </h1>
+
+    <p
+      className="
+      mt-6
+      text-lg
+      text-slate-500
+      dark:text-slate-400
+      "
+    >
+      اختر الكورس المناسب وابدأ رحلتك التعليمية
+    </p>
+
+    <div className="flex justify-center items-center gap-4 mt-10">
+
+      <div className="w-40 h-[3px] bg-gradient-to-r from-[#7C1DCC] to-[#D900A8]" />
+
+      <div
+        className="
+        w-4
+        h-4
+        rotate-45
+        bg-gradient-to-r
+        from-[#7C1DCC]
+        to-[#D900A8]
+        "
+      />
+
+      <div className="w-40 h-[3px] bg-gradient-to-r from-[#7C1DCC] to-[#D900A8]" />
+
+    </div>
+
+  </div>
+
+</div>
       
       {/* Courses */}
 
@@ -224,6 +306,7 @@ rounded-[24px]
 border
 border-slate-200
 bg-white
+dark:bg-[#130726]
 shadow-lg
 min-h-[620px]
 flex
@@ -283,6 +366,7 @@ group-hover:brightness-105
   text-xl
   font-black
   text-slate-900
+dark:text-white
   mb-2
   line-clamp-2
   transition-all
@@ -297,6 +381,7 @@ group-hover:brightness-105
   <p
     className="
     text-slate-500
+dark:text-slate-400
     text-base
     mb-6
     line-clamp-2
@@ -311,6 +396,7 @@ group-hover:brightness-105
     items-center
     justify-between
     text-slate-500
+dark:text-slate-400
     text-sm
     mb-6
     "
@@ -328,7 +414,10 @@ group-hover:brightness-105
     <Button
   className="
   flex-1
-  bg-[#6b6d52]
+  bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
   hover:bg-[#5b5d45]
   text-white
   transition-all

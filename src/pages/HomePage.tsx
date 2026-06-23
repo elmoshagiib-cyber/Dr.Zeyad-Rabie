@@ -7,7 +7,7 @@ import { supabase } from "../lib/supabase";
 import { ScrollReveal } from "../components/layout/ScrollReveal";
 import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
-import { ScrollingBanner } from "../components/layout/ScrollingBanner";
+
 import { FaqSection } from "../components/home/FaqSection";
 
 import { Button } from "../components/ui/Button";
@@ -112,7 +112,8 @@ className="
 text-5xl
 lg:text-7xl
 font-black
-leading-tight
+leading-[1.2]
+pb-2
 mb-6
 text-slate-900
 dark:text-white
@@ -123,6 +124,8 @@ dark:text-white
 
 <span
 className="
+inline-block
+pb-3
 bg-gradient-to-r
 from-[#7C1DCC]
 via-[#A52DFF]
@@ -147,9 +150,11 @@ max-w-2xl
 
         <div className="flex flex-wrap justify-center lg:justify-start gap-4 mt-10">
 
-          <Button
+
+<Button
   size="lg"
-  onClick={() => navigate("/courses")}
+  variant="outline"
+  onClick={() => navigate("/register")}
   className="
 bg-gradient-to-r
 from-[#7C1DCC]
@@ -159,25 +164,6 @@ text-white
 font-black
 shadow-[0_12px_35px_rgba(165,45,255,0.35)]
 hover:scale-105
-transition-all
-duration-300
-"
->
-  <BookOpen size={20} />
-  تصفح الكورسات
-</Button>
-
-<Button
-  size="lg"
-  variant="outline"
-  onClick={() => navigate("/register")}
-  className="
-border-2
-border-[#A52DFF]
-text-[#A52DFF]
-bg-transparent
-hover:bg-[#A52DFF]
-hover:text-white
 transition-all
 duration-300
 "
@@ -257,7 +243,6 @@ animate-float
 
 </section>
 
-<ScrollingBanner />
 
 {/* FEATURES */}
 <ScrollReveal>
@@ -312,23 +297,32 @@ dark:bg-[#09090B]
 
     <div className="text-center mb-20">
 
-       <h2 className="
-text-5xl
-lg:text-7xl
-font-black
-leading-tight
-mb-6
-text-slate-900
-dark:text-white
-">
-  ليه تختار
-  <span className="bg-gradient-to-r
-from-[#7C1DCC]
-via-[#A52DFF]
-to-[#D900A8]
-bg-clip-text
-text-transparent">
-    {" "}مستر زياد ربيع؟
+<h2
+  className="
+  text-5xl
+  lg:text-7xl
+  font-black
+  leading-[1.25]
+  mb-6
+  text-slate-900
+  dark:text-white
+  "
+>
+  ليه تختار{" "}
+
+  <span
+    className="
+    inline-block
+    pb-3
+    bg-gradient-to-r
+    from-[#7C1DCC]
+    via-[#A52DFF]
+    to-[#D900A8]
+    bg-clip-text
+    text-transparent
+    "
+  >
+    مستر زياد ربيع؟
   </span>
 </h2>
 

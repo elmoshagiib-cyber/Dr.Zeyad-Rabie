@@ -138,7 +138,7 @@ text-transparent
 
 <p
  className="
-text-slate-300
+text-slate-500
 dark:text-slate-400
  text-xl
  text-center
@@ -225,32 +225,16 @@ hover:shadow-[0_25px_70px_rgba(217,0,168,0.30)]
       alt={grade.title}
       className="
 w-full
-h-[280px]
+h-[220px]
 object-cover
-saturate-[1.05]
 transition-all
 duration-700
-group-hover:scale-110
-group-hover:saturate-[1.4]
-group-hover:brightness-110
+ease-out
+group-hover:scale-105
+group-hover:brightness-105
 "
     />
-<div
-  className="
-  absolute
-  inset-0
-  opacity-0
-  group-hover:opacity-100
-  transition-all
-  duration-700
-  bg-gradient-to-r
-  from-transparent
-  via-white/20
-  to-transparent
-  -translate-x-full
-  group-hover:translate-x-full
-  "
-/>
+
     {/* Light Effect */}
     <div
       className="
@@ -272,6 +256,7 @@ group-hover:brightness-110
 
   {/* Content */}
  <div className="p-6 flex items-center justify-between">
+
 
   <h3
     className="
