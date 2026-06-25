@@ -32,7 +32,6 @@ const freeCourses = courses.filter(
     first_sec: "الصف الأول الثانوي",
     second_sec: "الصف الثاني الثانوي",
     third_sec: "الصف الثالث الثانوي",
-    primary: "المرحلة الابتدائية",
   };
 
   useEffect(() => {
@@ -46,7 +45,7 @@ const freeCourses = courses.filter(
     .eq("active", true)
     .eq("grade", grade)
     .order("sort_order", { ascending: true });
-
+console.log(JSON.stringify(data, null, 2));
   setCourses(data || []);
 };
 

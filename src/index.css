@@ -401,3 +401,14 @@ body {
   animation: moveGlow 10s linear infinite;
 }
 
+@keyframes shine {
+
+0%{
+transform:translateX(-150%) rotate(12deg);
+}
+
+100%{
+transform:translateX(350%) rotate(12deg);
+}
+
+}

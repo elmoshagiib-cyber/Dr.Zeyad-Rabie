@@ -147,9 +147,14 @@ const lessonsCount = units.reduce(
   0
 );
 
-const studentsCount =
-  course.studentsCount || 2450;
-
+const studentsCount = 2450;
+if (!course) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      جاري تحميل الكورس...
+    </div>
+  );
+}
 return (
   <div className="min-h-screen bg-white dark:bg-[#0b0715]">
     

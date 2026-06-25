@@ -27,12 +27,11 @@ import { InstructorDashboard } from "./pages/instructor/InstructorDashboard";
 import { InstructorCourses } from "./pages/instructor/InstructorCourses";
 import { CreateCourse } from "./pages/instructor/CreateCourse";
 import { InstructorStudents } from "./pages/instructor/InstructorStudents";
-import { InstructorAssignments } from "./pages/instructor/InstructorAssignments";
-import { InstructorExams } from "./pages/instructor/InstructorExams";
 import { InstructorNotifications } from "./pages/instructor/InstructorNotifications";
 import { InstructorAnalytics } from "./pages/instructor/InstructorAnalytics";
 import { StudentDetails } from "./pages/instructor/StudentDetails";
 import { EditStudent } from "./pages/instructor/EditStudent";
+import { InstructorAttendance } from "./pages/instructor/InstructorAttendance";
 
 /* Admin */
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
@@ -233,14 +232,7 @@ function AppRoutes() {
     </ProtectedRoute>
   }
 />
-      <Route
-        path="/instructor/assignments"
-        element={
-          <ProtectedRoute roles={["instructor"]}>
-            <InstructorAssignments />
-          </ProtectedRoute>
-        }
-      />
+      
       <Route
   path="/instructor/submissions"
   element={
@@ -249,15 +241,6 @@ function AppRoutes() {
     </ProtectedRoute>
   }
 />
-
-      <Route
-        path="/instructor/exams"
-        element={
-          <ProtectedRoute roles={["instructor"]}>
-            <InstructorExams />
-          </ProtectedRoute>
-        }
-      />
 
       <Route
         path="/instructor/notifications"
@@ -276,6 +259,11 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+<Route
+  path="/instructor/attendance"
+  element={<InstructorAttendance />}
+/>
 
       {/* Admin */}
 

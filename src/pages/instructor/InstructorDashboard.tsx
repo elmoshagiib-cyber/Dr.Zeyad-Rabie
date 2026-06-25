@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {   Menu, BookOpen, Users, TrendingUp, Star, Plus, Eye, Edit, Trash2, BarChart2, MessageSquare, Bell, ChevronRight, Play, FileText } from "lucide-react";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
@@ -9,13 +8,36 @@ import { Avatar } from "../../components/ui/Avatar";
 import { ProgressBar } from "../../components/ui/ProgressBar";
 import { useApp } from "../../context/AppContext";
 import { supabase } from "../../lib/supabase";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  CartesianGrid,
+  XAxis,
+  Tooltip,
+} from "recharts";
+import {
+  Star,
+  Plus,
+  BarChart2,
+  MessageSquare,
+  FileText,
+  Bell,
+  Users,
+  ClipboardList,
+  PlusCircle,
+  GraduationCap,
+  Monitor,
+  Trophy,
+  BookOpen,
+  QrCode,
+} from "lucide-react";
 
 export function InstructorDashboard() {
   const navigate = useNavigate();
   const { user } = useApp();
   const [activeTab, setActiveTab] = useState<"overview" | "students" | "analytics">("overview");
-const [notificationsOpen, setNotificationsOpen] = useState(false);
-const [sidebarOpen, setSidebarOpen] = useState(false);
+
 const [courses, setCourses] = useState<any[]>([]);
 const [students, setStudents] = useState<any[]>([]);
 const [announcements, setAnnouncements] = useState<any[]>([]);
@@ -25,21 +47,37 @@ const [studentCourses, setStudentCourses] = useState<any[]>([]);
 useEffect(() => {
   loadData();
 }, []);
-
-const loadData = async () => {
+  const loadData = async () => {
   const [
-  coursesRes,
-  studentsRes,
-  announcementsRes,
-  examsRes,
-  studentCoursesRes
-] = await Promise.all([
-    supabase.from("courses").select("*"),
-    supabase.from("students").select("*"),
-    supabase.from("announcements").select("*"),
-    supabase.from("exams").select("*")
-    ,
-supabase.from("student_courses").select("*")
+    coursesRes,
+    studentsRes,
+    announcementsRes,
+    examsRes,
+    studentCoursesRes,
+  ] = await Promise.all([
+    supabase
+      .from("courses")
+      .select("*")
+      .order("created_at", { ascending: false }),
+
+    supabase
+      .from("students")
+      .select("*")
+      .order("created_at", { ascending: false }),
+
+    supabase
+      .from("announcements")
+      .select("*")
+      .order("created_at", { ascending: false }),
+
+    supabase
+      .from("exams")
+      .select("*")
+      .order("created_at", { ascending: false }),
+
+    supabase
+      .from("student_courses")
+      .select("*"),
   ]);
 
   setCourses(coursesRes.data || []);
@@ -48,10 +86,63 @@ supabase.from("student_courses").select("*")
   setExams(examsRes.data || []);
   setStudentCourses(studentCoursesRes.data || []);
 };
+const recentActivities = [
+  ...announcements.slice(0, 4).map((a) => ({
+    title: "تم نشر إعلان",
+    description: a.title,
+    time: "الآن",
+    color: "bg-violet-500",
+  })),
+
+  ...courses.slice(0, 4).map((c) => ({
+    title: "تم إنشاء كورس",
+    description: c.title,
+    time: "الآن",
+    color: "bg-blue-500",
+  })),
+
+  ...exams.slice(0, 4).map((e) => ({
+    title: "تم إنشاء اختبار",
+    description: e.title,
+    time: "الآن",
+    color: "bg-emerald-500",
+  })),
+].slice(0, 6);
+
+const performanceData = courses.map(course => ({
+  course: course.title,
+  completion: 100,
+  students: studentCourses.filter(
+    s => s.course_id === course.id
+  ).length,
+  rating: 5,
+  revenue: course.price
+    ? course.price *
+      studentCourses.filter(
+        s => s.course_id === course.id
+      ).length
+    : 0,
+}));
+const activeCourses = courses.filter(c => c.active);
+
+const totalStudents = students.length;
+
+const totalCourses = courses.length;
+
+const totalAnnouncements = announcements.length;
+
+const totalExams = exams.length;
+
+const totalSubscriptions = studentCourses.length;
+
+const averageStudents =
+  totalCourses === 0
+    ? 0
+    : Math.round(totalSubscriptions / totalCourses);
   const stats = [
   {
     label: "إجمالي الطلاب",
-    value: students.length,
+    value: totalStudents,
     color: "bg-blue-500",
     icon: <Users size={20} />,
     change: ""
@@ -65,7 +156,7 @@ supabase.from("student_courses").select("*")
   },
   {
     label: "الاختبارات",
-    value: exams.length,
+    value: totalExams,
     color: "bg-amber-500",
     icon: <FileText size={20} />,
     change: ""
@@ -78,39 +169,110 @@ supabase.from("student_courses").select("*")
     change: ""
   }
 ];
-  const performanceData = [
-    { course: "كيمياء ت.3", students: 980, completion: 67, rating: 4.9, revenue: 441000 },
-    { course: "كيمياء ت.2", students: 720, completion: 54, rating: 4.8, revenue: 273600 },
-    { course: "علوم أولى", students: 560, completion: 71, rating: 4.7, revenue: 179200 },
-    { course: "علوم ابتدائي", students: 340, completion: 82, rating: 4.9, revenue: 68000 },
-  ];
-const myCourses = courses.slice(0, 4);
+
+
 const recentStudents = students.slice(0, 10);
 
-const deleteCourse = async (id: string) => {
-  console.log("Deleting course:", id);
 
-  await supabase
-    .from("course_lectures")
-    .delete()
-    .eq("course_id", id);
+const quickActions = [
+  {
+    title: "إنشاء كورس",
+    subtitle: "أضف كورس جديد",
+    icon: PlusCircle,
+    color: "from-blue-500 to-cyan-500",
+    path: "/instructor/courses/create",
+  },
+  {
+    title: "إضافة اختبار",
+    subtitle: "إنشاء امتحان",
+    icon: ClipboardList,
+    color: "from-orange-500 to-amber-500",
+    path: "/instructor/exams",
+  },
+  {
+    title: "نشر إعلان",
+    subtitle: "إرسال إشعار",
+    icon: Bell,
+    color: "from-violet-500 to-fuchsia-500",
+    path: "/instructor/announcements",
+  },
+  {
+    title: "الحضور",
+    subtitle: "QR Code",
+    icon: QrCode,
+    color: "from-emerald-500 to-green-500",
+    path: "/instructor/attendance",
+  },
+  {
+    title: "الطلاب",
+    subtitle: "إدارة الطلاب",
+    icon: Users,
+    color: "from-pink-500 to-rose-500",
+    path: "/instructor/students",
+  },
+  {
+    title: "التحليلات",
+    subtitle: "عرض التقارير",
+    icon: BarChart2,
+    color: "from-indigo-500 to-violet-600",
+    path: "/instructor/analytics",
+  },
+];
 
-  await supabase
-    .from("student_courses")
-    .delete()
-    .eq("course_id", id);
+const overviewCards = [
+  {
+    title: "إجمالي الطلاب",
+    value: totalStudents,
+    subtitle: "طالب مسجل",
+    icon: Users,
+    color: "bg-blue-50 text-blue-600",
+  },
+  {
+    title: "الكورسات النشطة",
+    value: courses.filter(course => course.active).length,
+    subtitle: "كورس منشور",
+    icon: BookOpen,
+    color: "bg-violet-50 text-violet-600",
+  },
+  {
+    title: "الاختبارات",
+    value: totalExams,
+    subtitle: "اختبار منشور",
+    icon: ClipboardList,
+    color: "bg-orange-50 text-orange-600",
+  },
+  {
+    title: "الإعلانات",
+    value: totalAnnouncements,
+    subtitle: "إعلان منشور",
+    icon: Bell,
+    color: "bg-emerald-50 text-emerald-600",
+  },
+  {
+    title: "اشتراكات الطلاب",
+    value: totalSubscriptions,
+    subtitle: "اشتراك بالكورسات",
+    icon: GraduationCap,
+    color: "bg-pink-50 text-pink-600",
+  },
+  {
+    title: "متوسط الطلاب",
+    value:
+      courses.length > 0
+        ? Math.round(studentCourses.length / courses.length)
+        : 0,
+    subtitle: "لكل كورس",
+    icon: BarChart2,
+    color: "bg-yellow-50 text-yellow-600",
+  },
+];
+const analyticsData = [
+  {
+    day: "اليوم",
+    students: totalStudents,
+  },
+];
 
-  const { error } = await supabase
-    .from("courses")
-    .delete()
-    .eq("id", id);
-
-  console.log(error);
-
-  if (!error) {
-    loadData();
-  }
-};
   return (
   <div
     className="
@@ -131,6 +293,7 @@ const deleteCourse = async (id: string) => {
   py-4
   "
     >
+      
         {/* Header */}
 <div
   className="
@@ -138,9 +301,10 @@ const deleteCourse = async (id: string) => {
   overflow-hidden
   rounded-[32px]
   bg-gradient-to-r
-  from-blue-700
-  via-blue-600
-  to-blue-500
+from-blue-700
+via-blue-600
+to-blue-500
+shadow-[0_25px_60px_rgba(37,99,235,.35)]
   px-10
   py-6
   text-white
@@ -148,6 +312,9 @@ const deleteCourse = async (id: string) => {
   mb-8
   "
 >
+  <div className="absolute -top-20 -left-16 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse" />
+
+<div className="absolute bottom-[-120px] right-[-80px] w-80 h-80 bg-cyan-300/10 rounded-full blur-3xl" />
   <div className="relative z-10 flex items-center justify-between">
 
     <Button
@@ -182,6 +349,7 @@ const deleteCourse = async (id: string) => {
           مرحباً {user?.name || "د. زياد ربيع"}
         </p>
 
+
       </div>
 
       <div
@@ -203,7 +371,21 @@ const deleteCourse = async (id: string) => {
       </div>
 
     </div>
-
+<div
+className="
+absolute
+top-0
+-left-1/2
+w-1/2
+h-full
+bg-gradient-to-r
+from-transparent
+via-white/10
+to-transparent
+rotate-12
+animate-[shine_5s_linear_infinite]
+"
+/>
   </div>
 
   <div
@@ -233,27 +415,82 @@ const deleteCourse = async (id: string) => {
   />
 </div>
 
-<div className="space-y-8">
+<div className="space-y-4">
 </div>
         <div className="pt-2 space-y-5">
           {/* Stats */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             {stats.map((stat, i) => (
-              <Card
+<Card
   key={i}
   className="
-  rounded-[32px]
-  border-slate-100
-  shadow-[0_4px_20px_rgba(15,23,42,0.05)]
+  group
+  rounded-[28px]
+  border-0
+  bg-white
+  shadow-[0_8px_30px_rgba(15,23,42,.05)]
+  hover:-translate-y-2
+  hover:scale-[1.02]
+  hover:shadow-[0_20px_45px_rgba(37,99,235,.12)]
+  transition-all
+  duration-300
+  overflow-hidden
   "
 >
-                <div className={`w-14 h-14 rounded-xl ${stat.color} flex items-center justify-center mb-4`}>
-                  <div className="text-white">{stat.icon}</div>
-                </div>
-                <p className="text-4xl font-black text-slate-900 mb-0.5">{stat.value}</p>
-                <p className="text-slate-500 text-sm mb-2">{stat.label}</p>
-                <p className="text-emerald-600 text-xs font-medium">{stat.change}</p>
-              </Card>
+
+  <CardContent className="p-6">
+
+    <div className="flex items-start justify-between mb-8">
+
+      <div>
+
+        <p className="text-sm font-semibold text-slate-500">
+          {stat.label}
+        </p>
+
+        <h2 className="text-5xl font-black text-slate-900 mt-3">
+          {stat.value}
+        </h2>
+
+      </div>
+
+      <div
+        className={`
+        w-16
+        h-16
+        rounded-2xl
+        ${stat.color}
+        flex
+        items-center
+        justify-center
+        text-white
+        shadow-lg
+        group-hover:rotate-6
+        group-hover:scale-110
+        transition-all
+        duration-300
+        `}
+      >
+        {stat.icon}
+      </div>
+
+    </div>
+
+    <div className="flex items-center justify-between">
+
+      <span className="text-xs text-slate-400">
+        مقارنة بالشهر الماضي
+      </span>
+
+      <span className="text-emerald-600 text-sm font-bold">
+        ↑ 12%
+      </span>
+
+    </div>
+
+  </CardContent>
+
+</Card>
             ))}
           </div>
 
@@ -288,197 +525,420 @@ shadow-sm
             ))}
           </div>
 
-          {activeTab === "overview" && (
-            <div className="grid lg:grid-cols-3 gap-6">
-              {/* My Courses */}
-              <div className="lg:col-span-2 space-y-4">
-                <div className="flex items-center justify-between mb-2">
+<div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
 
-  <div>
-    <h2 className="text-3xl font-black text-slate-900">
-      كورساتي
-    </h2>
+  {overviewCards.map((card,index)=>{
 
-    <p className="text-slate-500 text-sm mt-1">
-      إدارة ومتابعة جميع الكورسات
-    </p>
-  </div>
-                  <Button size="sm" variant="outline" onClick={() => navigate("/instructor/courses")}>
-                    إدارة الكورسات
-                  </Button>
-                </div>
-                
-                {myCourses.map(course => (
-                  <Card
-  key={course.id}
-  className="
-  rounded-[28px]
-  border-slate-100
-  shadow-[0_4px_20px_rgba(15,23,42,0.05)]
-  hover:shadow-[0_10px_30px_rgba(15,23,42,0.08)]
-  transition-all
-  duration-300
-  "
->
-                    <CardContent className="p-4 flex gap-4 items-center">
-                      <img
-                        src={
-  course.thumbnail ||
-  "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=200"
-}
-                        alt={course.title}
-                        className="
-w-16
-h-16
-rounded-xl
-object-cover
-flex-shrink-0
+const Icon=card.icon;
+
+return(
+
+<Card
+key={index}
+className="
+group
+rounded-[28px]
+border
+border-slate-100
+hover:border-blue-200
+hover:shadow-xl
+transition-all
+duration-300
 "
-                        onError={e => { (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=80&h=80&fit=crop`; }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2 mb-1">
-                          <p className="font-black text-slate-900 text-base truncate">{course.title}</p>
-                          <Badge variant={course.active ? "emerald" : "slate"}>
-                            {course.active ? "نشط" : "مغلق"}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-4 text-xs text-slate-500 mb-3">
-  <span>
-    <BookOpen size={11} className="inline mr-1" />
-    {course.grade}
-  </span>
+>
 
-  <span>
-    <Star size={11} className="inline mr-1" />
-    مجاني
-  </span>
-</div>
-                        <div className="flex items-center gap-2 mt-4">
+<CardContent className="p-6">
 
-  <Button
-    size="sm"
-    className="
-    bg-blue-50
-    text-blue-600
-    hover:bg-blue-100
-    border-0
-    shadow-none
-    rounded-xl
-    "
-    onClick={() =>
-      navigate(`/course/${course.id}`)
-    }
-  >
-    <Eye size={14} />
-  </Button>
+<div className="flex justify-between items-start">
 
-  <Button
-    size="sm"
-    className="
-    bg-amber-50
-    text-amber-600
-    hover:bg-amber-100
-    border-0
-    shadow-none
-    rounded-xl
-    "
-    onClick={() =>
-      navigate(
-        `/instructor/courses/edit/${course.id}`
-      )
-    }
-  >
-    <Edit size={14} />
-  </Button>
+<div>
 
-  <Button
-    size="sm"
-    className="
-    bg-red-50
-    text-red-600
-    hover:bg-red-100
-    border-0
-    shadow-none
-    rounded-xl
-    "
-    onClick={() =>
-      deleteCourse(course.id)
-    }
-  >
-    <Trash2 size={14} />
-  </Button>
+<div
+className={`
+w-14
+h-14
+rounded-2xl
+flex
+items-center
+justify-center
+${card.color}
+`}
+>
 
-  <span className="mr-auto text-base font-black text-emerald-600">
-    {course.price.toLocaleString("ar-EG")} ج
-  </span>
+<Icon size={26}/>
 
 </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
 
-              {/* Right sidebar */}
-              <div className="space-y-5">
-                {/* Quick Actions */}
-                <Card
-  className="
-  rounded-[28px]
-  border-slate-100
-  shadow-[0_4px_20px_rgba(15,23,42,0.05)]
-  "
->
-                  <CardContent>
-                    <h3 className="text-lg font-black text-slate-900 mb-5">الإجراءات السريعة</h3>
-                    <div className="space-y-2">
-                      {[
-                        { label: "إنشاء كورس جديد", icon: <BookOpen size={15} />, color: "text-blue-600 bg-blue-50", action: () => navigate("/instructor/courses/create") },
-                        { label: "إضافة اختبار", icon: <FileText size={15} />, color: "text-violet-600 bg-violet-50", action: () => {} },
-                        { label: "نشر إعلان", icon: <MessageSquare size={15} />, color: "text-amber-600 bg-amber-50", action: () => {} },
-                        { label: "عرض التحليلات", icon: <BarChart2 size={15} />, color: "text-emerald-600 bg-emerald-50", action: () => setActiveTab("analytics") },
-                      ].map((action, i) => (
-                        <button
-                          key={i}
-                          onClick={action.action}
-                          className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors text-right"
-                        >
-                          <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center flex-shrink-0`}>
-                            {action.icon}
-                          </div>
-                          <span className="text-sm font-medium text-slate-700">{action.label}</span>
-                          <ChevronRight size={14} className="text-slate-400 mr-auto" />
-                        </button>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+</div>
 
-                {/* Latest Announcements */}
-                <Card
-  className="
-  rounded-[28px]
-  border-slate-100
-  shadow-[0_4px_20px_rgba(15,23,42,0.05)]
-  "
+<div className="text-right">
+
+<h4 className="text-slate-500 text-sm">
+
+{card.title}
+
+</h4>
+
+<h2 className="text-5xl font-black mt-3">
+
+{card.value}
+
+</h2>
+
+</div>
+
+</div>
+
+<p className="text-slate-400 mt-6">
+
+{card.subtitle}
+
+</p>
+
+</CardContent>
+
+</Card>
+
+)
+
+})}
+</div>
+{activeTab === "overview" && (
+
+<div className="space-y-8">
+<section>
+
+<div className="flex items-end justify-between mb-7">
+
+<div className="text-right">
+
+<h2 className="text-4xl font-black text-slate-900">
+إحصائيات الأداء
+</h2>
+
+<p className="text-slate-500 mt-2">
+ملخص أداء المنصة التعليمية
+</p>
+
+</div>
+
+<div className="
+px-5
+py-4
+rounded-2xl
+bg-violet-100
+text-violet-600
+font-bold
+">
+آخر تحديث الآن
+</div>
+
+</div>
+
+<div className="grid grid-cols-5 gap-5">
+
+
+
+</div>
+
+</section>
+  {/* Performance */}
+<Card className="rounded-[32px] border-0 shadow-xl shadow-slate-200/50">
+
+<CardContent className="p-8">
+
+<div className="flex items-center justify-between mb-8">
+
+<div>
+
+<h2 className="text-2xl font-black">
+تحليل النشاط
+</h2>
+
+<p className="text-slate-500">
+متابعة أداء المنصة خلال الأسبوع
+</p>
+
+</div>
+
+<Button
+variant="outline"
+className="rounded-xl"
 >
-                  <CardContent>
-                    <h3 className="text-lg font-black text-slate-900 mb-5">إشعاراتي الأخيرة</h3>
-                    <div className="space-y-3">
-                      {announcements.slice(0,3).map(ann => (
-                        <div key={ann.id} className="border-r-2 border-blue-500 pr-3">
-                          <p className="text-xs font-bold text-slate-800 leading-tight mb-0.5">{ann.title}</p>
-                          <p className="text-[10px] text-slate-400">{new Date(ann.created_at).toLocaleDateString("ar-EG")}</p>
-                        </div>
-                      ))}
-                    </div>
-                    <button className="mt-4 text-blue-600 text-xs font-bold">+ نشر إشعار جديد</button>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          )}
+هذا الأسبوع
+</Button>
+
+</div>
+
+<div className="h-[360px]">
+
+<ResponsiveContainer width="100%" height="100%">
+
+<AreaChart data={analyticsData}>
+
+<CartesianGrid
+strokeDasharray="5 5"
+stroke="#E2E8F0"
+/>
+
+<XAxis
+dataKey="day"
+tick={{ fill: "#64748B" }}
+axisLine={false}
+tickLine={false}
+/>
+
+<Tooltip />
+
+<Area
+type="monotone"
+dataKey="students"
+stroke="#2563EB"
+fill="#2563EB22"
+strokeWidth={4}
+/>
+
+</AreaChart>
+
+</ResponsiveContainer>
+
+</div>
+
+</CardContent>
+
+</Card>
+<div className="grid grid-cols-3 gap-5 mt-8">
+
+<Card>
+<CardContent className="p-6">
+<p className="text-slate-500">
+طلاب جدد
+{students.length}
+</p>
+
+<h2 className="text-3xl font-black">
+{totalStudents}
+</h2>
+
+</CardContent>
+</Card>
+
+<Card>
+<CardContent className="p-6">
+<p className="text-slate-500">
+كورسات جديدة
+</p>
+
+<h2 className="text-3xl font-black">
+{totalCourses}
+</h2>
+
+</CardContent>
+</Card>
+
+<Card>
+<CardContent className="p-6">
+<p className="text-slate-500">
+معدل النشاط
+</p>
+
+<h2 className="text-3xl font-black text-emerald-600">
+{courses.length === 0 ? "0%" : `${Math.round((activeCourses.length / totalCourses) * 100)}%`}
+</h2>
+
+</CardContent>
+</Card>
+
+</div>
+  {/* Charts */}
+<section>
+
+<Card className="rounded-[32px] border-0 shadow-xl">
+
+<CardContent className="p-8">
+
+<div className="flex items-center justify-between mb-8">
+
+<div>
+
+<h2 className="text-3xl font-black">
+آخر النشاطات
+</h2>
+
+<p className="text-slate-500">
+كل ما يحدث داخل المنصة
+</p>
+
+</div>
+
+<Button variant="outline">
+عرض الكل
+</Button>
+
+</div>
+
+<div className="space-y-6">
+
+{recentActivities.map((item,index)=>(
+
+<div
+key={index}
+className="
+flex
+items-start
+gap-5
+group
+"
+>
+
+<div
+className={`
+w-4
+h-4
+rounded-full
+mt-2
+${item.color}
+group-hover:scale-125
+transition-all
+`}
+/>
+
+<div className="flex-1 border-r-2 border-slate-100 pr-5">
+
+<h3 className="font-bold text-lg">
+{item.title}
+</h3>
+
+<p className="text-slate-500 mt-1">
+{item.description}
+</p>
+
+<span className="text-xs text-slate-400 mt-2 block">
+{item.time}
+</span>
+
+</div>
+
+</div>
+
+))}
+
+</div>
+
+</CardContent>
+
+</Card>
+
+</section>
+
+<section>
+
+<div className="flex items-center justify-between mb-8">
+
+<div>
+
+<h2 className="text-3xl font-black">
+الإجراءات السريعة
+</h2>
+
+<p className="text-slate-500">
+كل الأدوات في مكان واحد
+</p>
+
+</div>
+
+</div>
+
+<div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
+
+{quickActions.map((item,index)=>{
+
+const Icon=item.icon;
+
+return(
+
+<Card
+key={index}
+onClick={()=>navigate(item.path)}
+className="
+group
+cursor-pointer
+overflow-hidden
+rounded-[28px]
+border-0
+shadow-lg
+hover:shadow-2xl
+hover:-translate-y-3
+transition-all
+duration-300
+"
+>
+
+<CardContent className="p-0">
+
+<div
+className={`
+bg-gradient-to-br
+${item.color}
+p-7
+text-white
+relative
+overflow-hidden
+`}
+>
+
+<div
+className="
+absolute
+-left-10
+-top-10
+w-36
+h-36
+rounded-full
+bg-white/10
+group-hover:scale-150
+transition-all
+duration-500
+"
+/>
+
+<Icon
+size={36}
+className="relative z-10"
+/>
+
+<h3 className="relative z-10 mt-8 text-xl font-black">
+
+{item.title}
+
+</h3>
+
+<p className="relative z-10 opacity-80 mt-2">
+
+{item.subtitle}
+
+</p>
+
+</div>
+
+</CardContent>
+
+</Card>
+
+)
+
+})}
+
+</div>
+
+</section>
+
+  {/* Bottom */}
+
+</div>
+
+)}
+
 
           {activeTab === "students" && (
             <Card>

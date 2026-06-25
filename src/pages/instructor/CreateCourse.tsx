@@ -3,27 +3,22 @@ import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Input, Select } from "../../components/ui/Input";
-import { Plus, BookOpen, Save, Upload } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { useNavigate } from "react-router-dom";
-
+import {
+  Plus,
+  Trash2,
+  Save,
+  Upload,
+  BookOpen,
+  FileVideo,
+  FileText
+} from "lucide-react";
 export function CreateCourse() {
   const navigate = useNavigate();
- const [sections, setSections] = useState([
-  
-  {
-    id: 1,
-    title: "القسم الأول",
-    lessons: [
-      {
-        title: "الدرس الأول",
-        videoUrl: "",
-        pdfUrl: "",
-      },
-    ],
-  },
-]);
-
+const [sections, setSections] = useState<any[]>([]);
+const [newVideoFile, setNewVideoFile] = useState<File | null>(null);
+const [newPdfFile, setNewPdfFile] = useState<File | null>(null);
 const [newSectionTitle, setNewSectionTitle] = useState("");
 const [newLessonTitle, setNewLessonTitle] = useState("");
 const [newVideoUrl, setNewVideoUrl] = useState("");
@@ -33,8 +28,16 @@ const [courseDescription, setCourseDescription] = useState("");
 const [coursePrice, setCoursePrice] = useState("");
 const [courseGrade, setCourseGrade] = useState("");
 const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const addSection = () => {
-  if (!newSectionTitle.trim()) return;
+const addSection = () => {
+  console.log("VALUE =", newSectionTitle);
+  console.log("SECTIONS =", sections);
+
+  if (!newSectionTitle.trim()) {
+    console.log("EMPTY");
+    return;
+  }
+
+  console.log("ADDING SECTION");
 
   setSections([
     ...sections,
@@ -59,8 +62,8 @@ const addLesson = (sectionId: number) => {
               ...section.lessons,
               {
                 title: newLessonTitle,
-                videoUrl: newVideoUrl,
-                pdfUrl: newPdfUrl,
+                videoFile: newVideoFile,
+                pdfFile: newPdfFile,
               },
             ],
           }
@@ -69,9 +72,10 @@ const addLesson = (sectionId: number) => {
   );
 
   setNewLessonTitle("");
-  setNewVideoUrl("");
-  setNewPdfUrl("");
+  setNewVideoFile(null);
+  setNewPdfFile(null);
 };
+        
 const deleteLesson = (sectionId: number, lessonIndex: number) => {
   setSections(
     sections.map((section) =>
@@ -79,8 +83,9 @@ const deleteLesson = (sectionId: number, lessonIndex: number) => {
         ? {
             ...section,
             lessons: section.lessons.filter(
-              (_, index) => index !== lessonIndex
-            ),
+  (_: any, index: number) => index !== lessonIndex
+)
+            
           }
         : section
     )
@@ -125,7 +130,11 @@ if (thumbnailFile) {
       .getPublicUrl(fileName);
 
     thumbnailUrl = data.publicUrl;
-    console.log("IMAGE URL =", thumbnailUrl);
+    console.log("COURSE DATA =", {
+  id: courseId,
+  title: courseTitle,
+  thumbnail: thumbnailUrl,
+});
   }
 }
 const { error: courseError } = await supabase
@@ -138,12 +147,15 @@ const { error: courseError } = await supabase
     grade: courseGrade,
     price: Number(coursePrice),
   });
+  
 
 if (courseError) {
   console.log("COURSE ERROR", courseError);
   alert(courseError.message);
   return;
+  
 }
+
     // 2- حفظ الأقسام والدروس
     for (let i = 0; i < sections.length; i++) {
       const section = sections[i];
@@ -169,40 +181,74 @@ if (courseError) {
 
       // حفظ الدروس
       for (const lesson of section.lessons) {
+let videoUrl = "";
+let fileUrl = "";
 
-        if (lesson.videoUrl) {
-  const { error: videoError } = await supabase
+if (lesson.videoFile) {
+  const ext =
+    lesson.videoFile.name.split(".").pop();
+
+  const fileName =
+    `${Date.now()}-${Math.random()}.${ext}`;
+
+  const { error: uploadError } =
+    await supabase.storage
+      .from("course-videos")
+      .upload(fileName, lesson.videoFile);
+
+  if (uploadError) {
+    console.log(uploadError);
+    continue;
+  }
+
+  const { data } = supabase.storage
+    .from("course-videos")
+    .getPublicUrl(fileName);
+
+  videoUrl = data.publicUrl;
+
+  await supabase
     .from("lecture_videos")
     .insert({
       lecture_id: lectureId,
       title: lesson.title,
-      video_url: lesson.videoUrl,
+      video_url: videoUrl,
     });
+}
 
-  if (videoError) {
-    console.log("VIDEO ERROR", videoError);
-    alert(JSON.stringify(videoError));
-    return;
+if (lesson.pdfFile) {
+  const ext =
+    lesson.pdfFile.name.split(".").pop();
+
+  const fileName =
+    `${Date.now()}-${Math.random()}.${ext}`;
+
+  const { error: uploadError } =
+    await supabase.storage
+      .from("course-files")
+      .upload(fileName, lesson.pdfFile);
+
+  if (uploadError) {
+    console.log(uploadError);
+    continue;
   }
-} // <-- القوس ده ناقص
 
-if (lesson.pdfUrl) {
-  const { error: fileError } = await supabase
+  const { data } = supabase.storage
+    .from("course-files")
+    .getPublicUrl(fileName);
+
+  fileUrl = data.publicUrl;
+
+  await supabase
     .from("lecture_files")
     .insert({
       lecture_id: lectureId,
       title: lesson.title,
-      file_url: lesson.pdfUrl,
+      file_url: fileUrl,
     });
-
-  if (fileError) {
-  console.log("FILE ERROR", fileError);
-  alert(JSON.stringify(fileError));
-  return;
 }
-
-        }
       }
+      
     }
 
     alert("تم إنشاء الكورس بنجاح");
@@ -234,11 +280,27 @@ return (
 
         <div className="p-6 space-y-6">
           {/* Basic Info */}
-          <Card>
+          <Card className="
+overflow-hidden
+border-0
+shadow-[0_20px_50px_rgba(124,58,237,0.12)]
+rounded-3xl
+bg-white
+dark:bg-[#130726]
+">
             <CardContent className="space-y-4">
-              <h2 className="font-black text-lg">
-                بيانات الكورس
-              </h2>
+              <h2 className="
+text-2xl
+font-black
+text-slate-900
+dark:text-white
+flex
+items-center
+gap-2
+">
+📚 بيانات الكورس
+</h2>
+
 
               <Input
   label="اسم الكورس"
@@ -313,21 +375,9 @@ return (
   </label>
 
   <input
-    type="file"
-    accept="image/*"
-    id="thumbnail-upload"
-    className="hidden"
-    onChange={(e) => {
-      if (e.target.files?.[0]) {
-        setThumbnailFile(e.target.files[0]);
-      }
-    }}
-  />
-
-  <input
+  id="thumbnail-upload"
   type="file"
   accept="image/*"
-  id="thumbnail-upload"
   className="hidden"
   onChange={(e) => {
     if (e.target.files?.[0]) {
@@ -335,76 +385,163 @@ return (
     }
   }}
 />
+<div className="mt-2">
 
-<label
-  htmlFor="thumbnail-upload"
-  className="
-    inline-flex
+  <label
+    htmlFor="thumbnail-upload"
+    className="
+    flex
+    flex-col
     items-center
-    gap-2
-    px-4
-    py-2
-    border
-    rounded-xl
+    justify-center
+    h-48
+    border-2
+    border-dashed
+    border-violet-300
+    rounded-3xl
     cursor-pointer
-  "
->
-  <Upload size={16} />
-  
-  رفع صورة
-</label>
+    hover:border-violet-500
+    hover:bg-violet-50
+    transition-all
+    "
+  >
+
+    <Upload size={40} className="text-violet-600 mb-3" />
+
+    <span className="font-bold text-violet-700">
+      اضغط لرفع صورة الكورس
+    </span>
+
+    <span className="text-sm text-slate-500 mt-1">
+      PNG - JPG - WEBP
+    </span>
+
+  </label>
+
+</div>
 
   {thumbnailFile && (
-    <p className="text-sm text-green-600 mt-2">
-      {thumbnailFile.name}
+  <div className="mt-4">
+
+    <img
+      src={URL.createObjectURL(thumbnailFile)}
+      alt=""
+      className="
+      h-52
+      w-full
+      object-cover
+      rounded-2xl
+      border
+      "
+    />
+
+    <p className="text-green-600 text-sm mt-2 font-bold">
+      ✓ {thumbnailFile.name}
     </p>
-  )}
+
+  </div>
+)}
 </div>
 
             </CardContent>
           </Card>
 
           {/* Sections */}
-          <Card>
+          <Card className="
+border-0
+rounded-3xl
+shadow-[0_20px_50px_rgba(124,58,237,0.12)]
+bg-white
+dark:bg-[#130726]
+">
   <CardContent>
 
     <div className="mb-4">
-      <Input
-        placeholder="اكتب اسم القسم..."
-        value={newSectionTitle}
-        onChange={(e) => setNewSectionTitle(e.target.value)}
-      />
+      <input
+  type="text"
+  className="border p-3 w-full"
+  placeholder="اكتب اسم القسم..."
+  value={newSectionTitle}
+  onChange={(e) => {
+    console.log(e.target.value);
+    setNewSectionTitle(e.target.value);
+  }}
+/>
+<p>{newSectionTitle}</p>
+<p className="text-red-500">
+  {newSectionTitle}
+</p>
     </div>
 
-    <div className="flex justify-between items-center mb-5">
+    <div className="
+flex
+items-center
+justify-between
+mb-6
+pb-4
+border-b
+">
       <h2 className="font-black text-lg">
         محتوى الكورس
       </h2>
 
-      <Button onClick={addSection}>
-        <Plus size={16} />
-        إضافة قسم
-      </Button>
+      <Button
+onClick={addSection}
+className="
+bg-gradient-to-r
+from-violet-600
+to-fuchsia-600
+hover:opacity-90
+"
+>
+  <Plus size={16}/>
+  إضافة قسم
+</Button>
     </div>
 
     <div className="space-y-4">
                 {sections.map((section) => (
                   <div
                     key={section.id}
-                    className="border rounded-2xl p-4 bg-slate-50"
+                    className="
+bg-gradient-to-r
+from-slate-50
+to-white
+dark:from-[#18092f]
+dark:to-[#130726]
+border
+border-violet-100
+dark:border-violet-500/20
+rounded-3xl
+p-6
+shadow-sm
+"
                   >
                     <div className="flex justify-between items-center mb-3">
   <div className="flex justify-between items-center w-full">
-  <h3 className="font-bold">
-    {section.title}
-  </h3>
+  <h3 className="
+font-black
+text-lg
+text-slate-900
+dark:text-white
+">
+  {section.title}
+</h3>
 
   <button
-    onClick={() => deleteSection(section.id)}
-    className="text-red-600 font-bold hover:text-red-700"
-  >
-    حذف القسم
-  </button>
+onClick={() => deleteSection(section.id)}
+className="
+px-4
+py-2
+rounded-xl
+bg-red-50
+text-red-600
+font-bold
+hover:bg-red-100
+"
+>
+حذف القسم
+</button>
 </div>
 </div>
 
@@ -416,13 +553,19 @@ return (
   />
 
   <input
- type="file"
- accept="video/*"
+  type="file"
+  accept="video/*"
+  onChange={(e) =>
+    setNewVideoFile(e.target.files?.[0] || null)
+  }
 />
 
 <input
- type="file"
- accept=".pdf"
+  type="file"
+  accept=".pdf"
+  onChange={(e) =>
+    setNewPdfFile(e.target.files?.[0] || null)
+  }
 />
 
   <Button
@@ -435,10 +578,21 @@ return (
                     </div>
 
                     <div className="space-y-2">
-                      {section.lessons.map((lesson, index) => (
+                      {section.lessons.map((lesson: any, index: number) => (
   <div
     key={index}
-    className="bg-white dark:bg-[#130726] rounded-xl border p-4"
+    className="
+bg-white
+dark:bg-[#1a0930]
+rounded-2xl
+border
+border-slate-100
+dark:border-violet-500/20
+p-5
+shadow-sm
+hover:shadow-md
+transition-all
+"
   >
     <div className="flex justify-between items-center mb-2">
   <div className="flex items-center gap-2">
@@ -456,27 +610,23 @@ return (
   </button>
 </div>
 
-    {lesson.videoUrl && (
-  <a
-    href={lesson.videoUrl}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="text-sm text-blue-600 font-semibold"
-  >
-    🎥 مشاهدة الفيديو
-  </a>
-)}
+    <div className="flex flex-col gap-2 mt-3">
 
-    {lesson.pdfUrl && (
-  <a
-    href={lesson.pdfUrl}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="text-sm text-emerald-600 font-semibold block mt-1"
-  >
-    📄 فتح الملف
-  </a>
-)}
+  {lesson.videoFile && (
+    <div className="flex items-center gap-2 text-blue-600 text-sm font-medium">
+      <FileVideo size={16} />
+      <span>{lesson.videoFile.name}</span>
+    </div>
+  )}
+
+  {lesson.pdfFile && (
+    <div className="flex items-center gap-2 text-emerald-600 text-sm font-medium">
+      <FileText size={16} />
+      <span>{lesson.pdfFile.name}</span>
+    </div>
+  )}
+
+</div>
   </div>
 ))}
                     </div>
@@ -500,6 +650,27 @@ return (
             </CardContent>
           </Card>
         </div>
+        <div className="sticky bottom-0 bg-white dark:bg-[#130726] p-6 border-t">
+
+  <Button
+    onClick={publishCourse}
+    className="
+    w-full
+    h-14
+    text-lg
+    font-black
+    rounded-2xl
+    bg-gradient-to-r
+    from-violet-600
+    via-fuchsia-600
+    to-pink-600
+    shadow-lg
+    "
+  >
+    🚀 نشر الكورس الآن
+  </Button>
+
+</div>
       </main>
     </div>
   );
