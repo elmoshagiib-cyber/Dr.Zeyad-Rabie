@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import CountUp from "react-countup";
+import { Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { Card, CardContent } from "../../components/ui/Card";
@@ -29,6 +32,7 @@ import {
   GraduationCap,
   Monitor,
   Trophy,
+  Building2,
   BookOpen,
   QrCode,
 } from "lucide-react";
@@ -43,11 +47,77 @@ const [students, setStudents] = useState<any[]>([]);
 const [announcements, setAnnouncements] = useState<any[]>([]);
 const [exams, setExams] = useState<any[]>([]);
 const [studentCourses, setStudentCourses] = useState<any[]>([]);
+const [sidebarOpen, setSidebarOpen] = useState(false);
+const [currentTime, setCurrentTime] = useState(new Date());
+const [lastUpdate, setLastUpdate] = useState(new Date());
+const [loading, setLoading] = useState(true);
 
 useEffect(() => {
   loadData();
+
+  const channel = supabase
+    .channel("dashboard-live")
+
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "students",
+      },
+      () => loadData()
+      
+    )
+
+    .on(
+      
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "courses",
+      },
+      () => loadData()
+    )
+
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "announcements",
+      },
+      () => loadData()
+    )
+
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "exams",
+      },
+      () => loadData()
+    )
+
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "student_courses",
+      },
+      () => loadData()
+    )
+
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 }, []);
   const loadData = async () => {
+    setLoading(true);
   const [
     coursesRes,
     studentsRes,
@@ -85,12 +155,14 @@ useEffect(() => {
   setAnnouncements(announcementsRes.data || []);
   setExams(examsRes.data || []);
   setStudentCourses(studentCoursesRes.data || []);
+  setLastUpdate(new Date());
+  setLoading(false);
 };
 const recentActivities = [
   ...announcements.slice(0, 4).map((a) => ({
     title: "تم نشر إعلان",
     description: a.title,
-    time: "الآن",
+    time: new Date(a.created_at).toLocaleDateString("ar-EG"),
     color: "bg-violet-500",
   })),
 
@@ -149,7 +221,7 @@ const averageStudents =
   },
   {
     label: "الكورسات النشطة",
-    value: courses.filter(c => c.active).length,
+    value: activeCourses.length,
     color: "bg-violet-500",
     icon: <BookOpen size={20} />,
     change: ""
@@ -219,82 +291,224 @@ const quickActions = [
   },
 ];
 
+
 const overviewCards = [
-  {
+   {
     title: "إجمالي الطلاب",
     value: totalStudents,
-    subtitle: "طالب مسجل",
+    subtitle: "إجمالي الطلاب المسجلين",
     icon: Users,
     color: "bg-blue-50 text-blue-600",
   },
+
   {
-    title: "الكورسات النشطة",
-    value: courses.filter(course => course.active).length,
-    subtitle: "كورس منشور",
-    icon: BookOpen,
+    title: "طلاب السنتر",
+    value: students.filter(s => s.type === "سنتر").length,
+    subtitle: "طلاب داخل السنتر",
+    icon: Building2,
     color: "bg-violet-50 text-violet-600",
   },
+
+  {
+    title: "طلاب الأونلاين",
+    value: students.filter(s => s.type === "اونلاين").length,
+    subtitle: "طلاب المنصة",
+    icon: Monitor,
+    color: "bg-cyan-50 text-cyan-600",
+  },
+
+  {
+    title: "الكورسات النشطة",
+    value: activeCourses.length,
+    subtitle: "الكورسات المنشورة",
+    icon: BookOpen,
+    color: "bg-emerald-50 text-emerald-600",
+  },
+
   {
     title: "الاختبارات",
     value: totalExams,
-    subtitle: "اختبار منشور",
+    subtitle: "الاختبارات المنشورة",
     icon: ClipboardList,
     color: "bg-orange-50 text-orange-600",
   },
+
   {
     title: "الإعلانات",
     value: totalAnnouncements,
-    subtitle: "إعلان منشور",
+    subtitle: "الإعلانات الحالية",
     icon: Bell,
-    color: "bg-emerald-50 text-emerald-600",
-  },
-  {
-    title: "اشتراكات الطلاب",
-    value: totalSubscriptions,
-    subtitle: "اشتراك بالكورسات",
-    icon: GraduationCap,
     color: "bg-pink-50 text-pink-600",
   },
+
+  {
+    title: "الاشتراكات",
+    value: totalSubscriptions,
+    subtitle: "إجمالي الاشتراكات",
+    icon: GraduationCap,
+    color: "bg-green-50 text-green-600",
+  },
+
   {
     title: "متوسط الطلاب",
-    value:
-      courses.length > 0
-        ? Math.round(studentCourses.length / courses.length)
-        : 0,
+    value: averageStudents,
     subtitle: "لكل كورس",
     icon: BarChart2,
     color: "bg-yellow-50 text-yellow-600",
   },
 ];
+
 const analyticsData = [
-  {
-    day: "اليوم",
-    students: totalStudents,
-  },
+  { day: "السبت", students: 12 },
+  { day: "الأحد", students: 18 },
+  { day: "الإثنين", students: 22 },
+  { day: "الثلاثاء", students: 16 },
+  { day: "الأربعاء", students: 28 },
+  { day: "الخميس", students: 25 },
+  { day: "الجمعة", students: 20 },
 ];
 
+const greeting = (() => {
+  const hour = new Date().getHours();
+
+  if (hour < 12) return "🌤 صباح الخير";
+  if (hour < 18) return "☀️ مساء الخير";
+  return "🌙 مساء الخير";
+})();
+
+if (loading) {
+  return (
+    <div className="min-h-screen bg-[#f5f7fb] p-8">
+      <div className="animate-pulse space-y-6">
+
+        <div className="h-32 rounded-3xl bg-slate-200"/>
+
+        <div className="grid grid-cols-4 gap-6">
+          {[...Array(8)].map((_,i)=>(
+            <div
+              key={i}
+              className="h-36 rounded-3xl bg-slate-200"
+            />
+          ))}
+        </div>
+
+      </div>
+    </div>
+  );
+}
   return (
   <div
-    className="
-    flex
-    min-h-screen
-    bg-[#f5f7fb]
-    "
-    dir="rtl"
-  >
+  className="flex min-h-screen bg-[#f5f7fb]"
+  dir="rtl"
+>
 
+  {/* Desktop Sidebar */}
+  <div className="hidden lg:block">
     <DashboardSidebar type="instructor" />
+  </div>
 
-<main
-  className="
-  flex-1
-  overflow-y-auto
-  px-3
-  py-4
-  "
-    >
+  {/* Mobile Overlay */}
+  {sidebarOpen && (
+    <div
+      className="
+      fixed
+      inset-0
+      bg-black/40
+      backdrop-blur-sm
+      z-40
+      lg:hidden
+      "
+      onClick={() => setSidebarOpen(false)}
+    />
+  )}
+
+  {/* Mobile Sidebar */}
+  <div
+    className={`
+      fixed
+      top-0
+      right-0
+      h-screen
+      z-50
+      transition-all
+      duration-300
+      lg:hidden
+      ${
+        sidebarOpen
+          ? "translate-x-0"
+          : "translate-x-full"
+      }
+    `}
+  >
+    <DashboardSidebar
+      type="instructor"
+      onClose={() => setSidebarOpen(false)}
+    />
+  </div>
+
+
+  <main
+    className="
+    flex-1
+    overflow-y-auto
+    px-4
+    sm:px-6
+    lg:px-8
+    py-4
+    "
+
+    
+  >
+    <div className="flex justify-between items-center mb-4 lg:hidden">
+
+  <button
+    onClick={() => setSidebarOpen(true)}
+    className="
+      w-11
+      h-11
+      rounded-xl
+      bg-white
+      border
+      border-slate-200
+      shadow-sm
+      flex
+      items-center
+      justify-center
+      hover:bg-blue-50
+      transition
+    "
+  >
+    <Menu size={22} />
+  </button>
+
+</div>
       
         {/* Header */}
+        <div
+className="
+inline-flex
+items-center
+gap-2
+px-4
+py-2
+rounded-full
+bg-emerald-50
+text-emerald-700
+text-xs
+font-bold
+"
+>
+
+<div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"/>
+
+آخر تحديث
+
+{lastUpdate.toLocaleTimeString("ar-EG",{
+hour:"2-digit",
+minute:"2-digit"
+})}
+
+</div>
 <div
   className="
   relative
@@ -305,8 +519,11 @@ from-blue-700
 via-blue-600
 to-blue-500
 shadow-[0_25px_60px_rgba(37,99,235,.35)]
-  px-10
-  py-6
+  px-5
+sm:px-7
+lg:px-10
+py-5
+lg:py-6
   text-white
   shadow-[0_10px_40px_rgba(37,99,235,0.25)]
   mb-8
@@ -315,43 +532,125 @@ shadow-[0_25px_60px_rgba(37,99,235,.35)]
   <div className="absolute -top-20 -left-16 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse" />
 
 <div className="absolute bottom-[-120px] right-[-80px] w-80 h-80 bg-cyan-300/10 rounded-full blur-3xl" />
-  <div className="relative z-10 flex items-center justify-between">
+  <div
+  className="
+  relative
+  z-10
+  flex
+  flex-col-reverse
+  lg:flex-row
+  items-start
+  lg:items-center
+  justify-between
+  gap-6
+  "
+>
 
     <Button
       onClick={() =>
         navigate("/instructor/courses/create")
       }
-      className="
-      bg-white
-      text-blue-700
-      hover:bg-blue-50
-      rounded-[28px]
-      px-8
-      h-16
-      min-w-[200px]
-      font-bold
-      shadow-lg
-      "
+     className="
+w-full
+sm:w-auto
+
+bg-white
+text-blue-700
+
+hover:bg-blue-50
+
+rounded-[28px]
+
+px-6
+lg:px-8
+
+h-12
+lg:h-16
+
+font-bold
+
+shadow-lg
+
+transition-all
+duration-300
+
+hover:scale-[1.03]
+"
     >
-      <Plus size={18} />
+      <Plus
+size={18}
+className="
+group
+w-full
+transition-transform
+duration-300
+group-hover:rotate-90
+"
+/>
       إنشاء كورس
     </Button>
 
-    <div className="flex flex-row-reverse items-center gap-6">
+    <div
+className="
+flex
+flex-col
+lg:flex-row-reverse
+items-start
+lg:items-center
+gap-5
+w-full
+"
+>
 
       <div className="text-right">
 
-        <h1 className="text-5xl font-black">
+        <h1 className="text-3xl
+md:text-4xl
+lg:text-5xl font-black">
           لوحة التحكم
         </h1>
 
         <p className="text-blue-100 text-base mt-2">
-          مرحباً {user?.name || "د. زياد ربيع"}
+          {greeting} {user?.name || "د. زياد ربيع"}
         </p>
 
 
       </div>
 
+ {/* Tabs */}
+          <div className="
+flex
+w-full
+lg:w-fit
+overflow-x-auto
+gap-2
+no-scrollbar
+bg-white
+border
+border-slate-200
+p-1.5
+rounded-2xl
+w-fit
+shadow-sm
+">
+            {[
+              { key: "overview", label: "نظرة عامة" },
+              { key: "students", label: "الطلاب" },
+              { key: "analytics", label: "التحليلات" },
+            ].map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as any)}
+                className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                  activeTab === tab.key
+                    ? "bg-white dark:bg-[#130726] text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
       <div
         className="
         w-16
@@ -419,8 +718,23 @@ animate-[shine_5s_linear_infinite]
 </div>
         <div className="pt-2 space-y-5">
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <div className="
+grid
+grid-cols-1
+sm:grid-cols-2
+xl:grid-cols-4
+gap-6
+">
             {stats.map((stat, i) => (
+<motion.div
+initial={{ opacity: 0, y: 20 }}
+animate={{ opacity: 1, y: 0 }}
+transition={{
+delay: i * .08,
+duration: .35
+}}
+>
+
 <Card
   key={i}
   className="
@@ -430,7 +744,8 @@ animate-[shine_5s_linear_infinite]
   bg-white
   shadow-[0_8px_30px_rgba(15,23,42,.05)]
   hover:-translate-y-2
-  hover:scale-[1.02]
+  hover:rotate-[0.5deg]
+  hover:scale-[1.03]
   hover:shadow-[0_20px_45px_rgba(37,99,235,.12)]
   transition-all
   duration-300
@@ -448,7 +763,9 @@ animate-[shine_5s_linear_infinite]
           {stat.label}
         </p>
 
-        <h2 className="text-5xl font-black text-slate-900 mt-3">
+        <h2 className="text-2xl
+sm:text-3xl
+lg:text-4xl font-black text-slate-900 mt-3">
           {stat.value}
         </h2>
 
@@ -465,8 +782,8 @@ animate-[shine_5s_linear_infinite]
         justify-center
         text-white
         shadow-lg
-        group-hover:rotate-6
-        group-hover:scale-110
+        group-hover:rotate-12
+        group-hover:scale-125
         transition-all
         duration-300
         `}
@@ -489,49 +806,40 @@ animate-[shine_5s_linear_infinite]
     </div>
 
   </CardContent>
-
 </Card>
+</motion.div>
+
             ))}
           </div>
 
-          {/* Tabs */}
-          <div className="
-flex
-gap-2
-bg-white
-border
-border-slate-200
-p-1.5
-rounded-2xl
-w-fit
-shadow-sm
-">
-            {[
-              { key: "overview", label: "نظرة عامة" },
-              { key: "students", label: "الطلاب" },
-              { key: "analytics", label: "التحليلات" },
-            ].map(tab => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key as any)}
-                className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                  activeTab === tab.key
-                    ? "bg-white dark:bg-[#130726] text-slate-900 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+         
 
-<div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
+<div className="grid
+grid-cols-1
+sm:grid-cols-2
+xl:grid-cols-4
+gap-6">
 
   {overviewCards.map((card,index)=>{
 
 const Icon=card.icon;
 
 return(
+
+<motion.div
+layout
+initial={{
+opacity:0,
+scale:.95
+}}
+animate={{
+opacity:1,
+scale:1
+}}
+transition={{
+duration:.35
+}}
+>
 
 <Card
 key={index}
@@ -579,9 +887,14 @@ ${card.color}
 
 </h4>
 
-<h2 className="text-5xl font-black mt-3">
+<h2 className="text-3xl
+md:text-4xl
+lg:text-5xl font-black mt-3">
 
-{card.value}
+<CountUp
+end={Number(card.value)}
+duration={1.4}
+/>
 
 </h2>
 
@@ -598,6 +911,8 @@ ${card.color}
 </CardContent>
 
 </Card>
+
+</motion.div>
 
 )
 
@@ -670,7 +985,7 @@ className="rounded-xl"
 
 </div>
 
-<div className="h-[360px]">
+<div className="h-[260px] md:h-[320px] lg:h-[360px]">
 
 <ResponsiveContainer width="100%" height="100%">
 
@@ -707,7 +1022,10 @@ strokeWidth={4}
 </CardContent>
 
 </Card>
-<div className="grid grid-cols-3 gap-5 mt-8">
+<div className="grid
+grid-cols-1
+sm:grid-cols-3
+gap-5 mt-8">
 
 <Card>
 <CardContent className="p-6">
@@ -849,7 +1167,10 @@ transition-all
 
 </div>
 
-<div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
+<div className="grid
+grid-cols-2
+lg:grid-cols-3
+gap-5">
 
 {quickActions.map((item,index)=>{
 
@@ -951,7 +1272,7 @@ className="relative z-10"
                   </div>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="min-w-[900px] w-full">
                     <thead>
                       <tr className="border-b border-slate-200">
                         {["الطالب", "الصف", "المحافظة", "الكورسات", "الدرجة", "الحالة"].map(h => (

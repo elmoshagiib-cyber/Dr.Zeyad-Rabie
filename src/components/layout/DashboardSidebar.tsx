@@ -19,6 +19,11 @@ import {
   LogOut,
   Video,
   QrCode,
+  ChevronLeft,
+ChevronRight,
+X,
+PanelRightClose,
+PanelRightOpen,
 LockKeyhole
 } from "lucide-react";
 import { Avatar } from "../ui/Avatar";
@@ -133,35 +138,100 @@ duration-300
   
     {/* Collapse Button */}
     <div>
-<div className="flex items-center justify-between px-3 pb-4 mb-3 border-b border-slate-200">
+<div className="px-5 py-4 border-b border-slate-200">
 
+  {!collapsed ? (
+    <div className="flex items-center justify-between">
 
-  <button
-  onClick={() => setCollapsed(!collapsed)}
-  className="
-    w-10
-    h-10
-    rounded-xl
-    bg-slate-100
-hover:bg-blue-50
-hover:text-blue-600
-shadow-sm
-    hover:bg-blue-50
-    hover:text-blue-600
-    transition-all
-    duration-200
-    flex
-    items-center
-    justify-center
-  "
->
-  {collapsed ? "→" : "←"}
-</button>
+      <div className="flex items-center gap-3">
+
+        <div
+          className="
+          w-12
+          h-12
+          rounded-2xl
+          bg-gradient-to-br
+          from-blue-600
+          to-violet-600
+          flex
+          items-center
+          justify-center
+          shadow-lg
+          text-white
+          "
+        >
+          <GraduationCap size={28} />
+        </div>
+
+        <div>
+
+          <h2 className="font-black text-slate-900">
+            منصة زياد ربيع
+          </h2>
+
+          <p className="text-xs text-slate-500">
+            لوحة تحكم المدرس
+          </p>
+
+        </div>
+
+      </div>
+
+      <button
+        onClick={() => setCollapsed(true)}
+        className="
+        w-10
+        h-10
+        rounded-xl
+        bg-slate-100
+        hover:bg-blue-50
+        hover:text-blue-600
+        transition
+        flex
+        items-center
+        justify-center
+        "
+      >
+        <PanelRightClose size={18} />
+      </button>
+
+    </div>
+
+  ) : (
+
+    <div className="flex justify-center">
+
+      <button
+        onClick={() => setCollapsed(false)}
+        className="
+        w-12
+        h-12
+        rounded-2xl
+        bg-gradient-to-br
+        from-blue-600
+        to-violet-600
+        text-white
+        flex
+        items-center
+        justify-center
+        shadow-lg
+        "
+      >
+        <PanelRightOpen size={22} />
+      </button>
+
+    </div>
+
+  )}
+
 </div>
+
+
+  
 </div>
 
     {/* Nav Items */}
-    <nav className="flex-1 px-4 py-5 space-y-2 overflow-y-auto">
+    <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto scrollbar-hide">
       
       {navItems.map((item) => {
         const active = location.pathname === item.path;
@@ -172,11 +242,11 @@ shadow-sm
             
             onClick={() => handleNav(item.path)}
             className={cn(
-  "group w-full flex items-center px-4 py-3 rounded-[20px] text-sm font-medium transition-all duration-200",
+  "group w-full flex items-center px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-200",
   collapsed && "justify-center",
               active
-? "bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-lg shadow-blue-500/20"
-                : "text-slate-500 hover:text-blue-600 hover:bg-slate-100/70 hover:translate-x-[-3px]"
+? "bg-gradient-to-r from-[#2563EB] via-[#4F46E5] to-[#7C3AED] shadow-blue-500/30 text-white shadow-lg shadow-blue-500/20"
+                : "text-slate-500 hover:text-blue-600 hover:bg-blue-50 hover:scale-[1.03]"
             )}
           >
            {active && (
@@ -209,8 +279,8 @@ shadow-sm
     items-center
     justify-center
     shrink-0
-    w-11
-    h-11
+    w-10
+    h-10
     rounded-2xl
     transition-all
     duration-300
@@ -289,7 +359,7 @@ shadow-sm
     className="
 w-full flex flex-row-reverse items-center justify-between
 px-2.5 py-2
-rounded-2xl
+rounded-xl
 text-sm font-medium
 text-slate-500
 hover:text-red-500
