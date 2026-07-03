@@ -109,40 +109,74 @@ export function InstructorHomeworkSubmissions() {
       <main className="flex-1 overflow-y-auto p-6">
         {/* Hero */}
         <div className="mb-8">
-          <div className="relative overflow-hidden rounded-[36px] bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-10 py-8 text-white shadow-[0_10px_40px_rgba(37,99,235,0.25)]">
-            <div className="absolute left-10 top-1/2 -translate-y-1/2 bg-white/10 p-4 rounded-2xl">
-              <FileText size={36} />
-            </div>
+          <div
+  className="
+  relative
+  overflow-hidden
+  rounded-[32px]
+  bg-[#4C1D95]
+  p-10
+  text-white
+  shadow-xl
+  "
+>
+  {/* Background Blur */}
+  <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
+  <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
 
-            <h1 className="text-4xl font-black">تسليمات الطلاب</h1>
-            <p className="text-blue-100 mt-3 text-lg">
-              مراجعة الواجبات وتقييم أداء الطلاب بسهولة واحترافية
-            </p>
-          </div>
-        </div>
+  <div className="relative z-10 flex items-center justify-between">
 
-        {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <StatCard
-            icon={<FileText className="text-blue-600" />}
-            title="إجمالي التسليمات"
-            value={submissions.length}
-            color="blue"
-          />
-          <StatCard
-            icon={<CheckCircle className="text-green-600" />}
-            title="تم التصحيح"
-            value={gradedCount}
-            color="green"
-          />
-          <StatCard
-            icon={<Clock className="text-orange-600" />}
-            title="بانتظار التصحيح"
-            value={pendingCount}
-            color="orange"
-          />
-        </div>
+    {/* المعلومات */}
+    <div>
 
+      <h1 className="text-5xl font-black">
+        تسليمات الطلاب
+      </h1>
+
+      <div className="mt-4 flex items-center gap-3">
+        <span
+          className="
+          flex
+          items-center
+          gap-2
+          rounded-full
+          bg-emerald-500/20
+          px-3
+          py-1
+          text-sm
+          text-emerald-100
+          "
+        >
+          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+          متصل بقاعدة البيانات
+        </span>
+      </div>
+
+      <p className="mt-4 max-w-xl text-lg text-violet-100">
+        مراجعة جميع تسليمات الطلاب وتصحيح الواجبات ومتابعة الأداء من مكان واحد.
+      </p>
+
+    </div>
+
+    {/* الأيقونة */}
+    <div
+      className="
+      flex
+      h-20
+      w-20
+      items-center
+      justify-center
+      rounded-3xl
+      bg-white/10
+      backdrop-blur
+      "
+    >
+      <FileText size={38} />
+    </div>
+
+  </div>
+</div>
+</div>
         {/* Filters */}
         <Card className="bg-white rounded-[32px] border border-slate-100 shadow-sm mb-8">
           <CardContent className="p-8">

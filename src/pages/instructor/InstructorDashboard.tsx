@@ -11,6 +11,7 @@ import { Avatar } from "../../components/ui/Avatar";
 import { ProgressBar } from "../../components/ui/ProgressBar";
 import { useApp } from "../../context/AppContext";
 import { supabase } from "../../lib/supabase";
+import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -48,7 +49,6 @@ const [announcements, setAnnouncements] = useState<any[]>([]);
 const [exams, setExams] = useState<any[]>([]);
 const [studentCourses, setStudentCourses] = useState<any[]>([]);
 const [sidebarOpen, setSidebarOpen] = useState(false);
-const [currentTime, setCurrentTime] = useState(new Date());
 const [lastUpdate, setLastUpdate] = useState(new Date());
 const [loading, setLoading] = useState(true);
 
@@ -181,12 +181,20 @@ const recentActivities = [
   })),
 ].slice(0, 6);
 
+const courseStudentsMap = new Map<number, number>();
+
+studentCourses.forEach((item) => {
+  courseStudentsMap.set(
+    item.course_id,
+    (courseStudentsMap.get(item.course_id) || 0) + 1
+  );
+});
+
 const performanceData = courses.map(course => ({
   course: course.title,
   completion: 100,
-  students: studentCourses.filter(
-    s => s.course_id === course.id
-  ).length,
+students:
+courseStudentsMap.get(course.id) || 0,
   rating: 5,
   revenue: course.price
     ? course.price *
@@ -211,35 +219,7 @@ const averageStudents =
   totalCourses === 0
     ? 0
     : Math.round(totalSubscriptions / totalCourses);
-  const stats = [
-  {
-    label: "إجمالي الطلاب",
-    value: totalStudents,
-    color: "bg-blue-500",
-    icon: <Users size={20} />,
-    change: ""
-  },
-  {
-    label: "الكورسات النشطة",
-    value: activeCourses.length,
-    color: "bg-violet-500",
-    icon: <BookOpen size={20} />,
-    change: ""
-  },
-  {
-    label: "الاختبارات",
-    value: totalExams,
-    color: "bg-amber-500",
-    icon: <FileText size={20} />,
-    change: ""
-  },
-  {
-    label: "الإعلانات",
-    value: announcements.length,
-    color: "bg-emerald-500",
-    icon: <MessageSquare size={20} />,
-    change: ""
-  }
+  const stats = [ 
 ];
 
 
@@ -379,7 +359,7 @@ const greeting = (() => {
 if (loading) {
   return (
     <div className="min-h-screen bg-[#f5f7fb] p-8">
-      <div className="animate-pulse space-y-6">
+      <div className="animate-pulse divide-y divide-slate-100">
 
         <div className="h-32 rounded-3xl bg-slate-200"/>
 
@@ -396,69 +376,15 @@ if (loading) {
     </div>
   );
 }
+
   return (
-  <div
-  className="flex min-h-screen bg-[#f5f7fb]"
-  dir="rtl"
->
-
-  {/* Desktop Sidebar */}
-  <div className="hidden lg:block">
-    <DashboardSidebar type="instructor" />
-  </div>
-
-  {/* Mobile Overlay */}
-  {sidebarOpen && (
-    <div
-      className="
-      fixed
-      inset-0
-      bg-black/40
-      backdrop-blur-sm
-      z-40
-      lg:hidden
-      "
-      onClick={() => setSidebarOpen(false)}
-    />
-  )}
-
-  {/* Mobile Sidebar */}
-  <div
-    className={`
-      fixed
-      top-0
-      right-0
-      h-screen
-      z-50
-      transition-all
-      duration-300
-      lg:hidden
-      ${
-        sidebarOpen
-          ? "translate-x-0"
-          : "translate-x-full"
-      }
-    `}
+  <DashboardLayout
+    type="instructor"
+    sidebarOpen={sidebarOpen}
+    setSidebarOpen={setSidebarOpen}
   >
-    <DashboardSidebar
-      type="instructor"
-      onClose={() => setSidebarOpen(false)}
-    />
-  </div>
 
 
-  <main
-    className="
-    flex-1
-    overflow-y-auto
-    px-4
-    sm:px-6
-    lg:px-8
-    py-4
-    "
-
-    
-  >
     <div className="flex justify-between items-center mb-4 lg:hidden">
 
   <button
@@ -513,7 +439,8 @@ minute:"2-digit"
   className="
   relative
   overflow-hidden
-  rounded-[32px]
+  rounded-3xl
+lg:rounded-[36px]
   bg-gradient-to-r
 from-blue-700
 via-blue-600
@@ -522,11 +449,12 @@ shadow-[0_25px_60px_rgba(37,99,235,.35)]
   px-5
 sm:px-7
 lg:px-10
-py-5
-lg:py-6
+py-6
+md:py-8
+lg:py-10
   text-white
   shadow-[0_10px_40px_rgba(37,99,235,0.25)]
-  mb-8
+  mb-6
   "
 >
   <div className="absolute -top-20 -left-16 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse" />
@@ -546,49 +474,6 @@ lg:py-6
   "
 >
 
-    <Button
-      onClick={() =>
-        navigate("/instructor/courses/create")
-      }
-     className="
-w-full
-sm:w-auto
-
-bg-white
-text-blue-700
-
-hover:bg-blue-50
-
-rounded-[28px]
-
-px-6
-lg:px-8
-
-h-12
-lg:h-16
-
-font-bold
-
-shadow-lg
-
-transition-all
-duration-300
-
-hover:scale-[1.03]
-"
-    >
-      <Plus
-size={18}
-className="
-group
-w-full
-transition-transform
-duration-300
-group-hover:rotate-90
-"
-/>
-      إنشاء كورس
-    </Button>
 
     <div
 className="
@@ -602,72 +487,71 @@ w-full
 "
 >
 
-      <div className="text-right">
-
-        <h1 className="text-3xl
-md:text-4xl
-lg:text-5xl font-black">
-          لوحة التحكم
-        </h1>
-
-        <p className="text-blue-100 text-base mt-2">
-          {greeting} {user?.name || "د. زياد ربيع"}
-        </p>
-
-
-      </div>
-
- {/* Tabs */}
-          <div className="
+   <div
+className="
 flex
+flex-col
+xl:flex-row
+items-center
+justify-between
+gap-8
 w-full
-lg:w-fit
-overflow-x-auto
-gap-2
-no-scrollbar
-bg-white
-border
-border-slate-200
-p-1.5
-rounded-2xl
-w-fit
-shadow-sm
-">
-            {[
-              { key: "overview", label: "نظرة عامة" },
-              { key: "students", label: "الطلاب" },
-              { key: "analytics", label: "التحليلات" },
-            ].map(tab => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key as any)}
-                className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                  activeTab === tab.key
-                    ? "bg-white dark:bg-[#130726] text-slate-900 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-      <div
-        className="
-        w-16
-        h-16
-        rounded-[24px]
-        bg-white/10
-        backdrop-blur-md
-        flex
-        items-center
-        justify-center
-        "
-      >
-        <BarChart2
-          size={30}
-          className="text-white"
-        />
-      </div>
+"
+>
+
+  {/* اليمين */}
+  <div
+className="
+flex
+items-center
+justify-end
+gap-5
+w-full
+xl:w-auto
+text-right
+"
+>
+
+    <div className="w-16
+h-16
+lg:w-20
+lg:h-20 rounded-3xl bg-white/10 flex items-center justify-center">
+      <BarChart2 className="text-white" size={30} />
+    </div>
+
+    <div className="text-right">
+
+      <h1 className="
+      text-3xl
+sm:text-4xl
+lg:text-5xl
+xl:text-6xl
+leading-none font-black text-white">
+        لوحة التحكم
+      </h1>
+
+      <p
+className="
+mt-2
+text-sm
+sm:text-base
+text-white/80
+"
+>
+        {greeting}، د. {user?.name}
+      </p>
+
+    </div>
+
+  </div>
+
+  {/* الشمال */}
+  <div className="flex items-center gap-4">
+
+{/* Tabs */}
+          
+            
+          
 
     </div>
 <div
@@ -714,105 +598,12 @@ animate-[shine_5s_linear_infinite]
   />
 </div>
 
-<div className="space-y-4">
+  </div>
+
 </div>
+
+ 
         <div className="pt-2 space-y-5">
-          {/* Stats */}
-          <div className="
-grid
-grid-cols-1
-sm:grid-cols-2
-xl:grid-cols-4
-gap-6
-">
-            {stats.map((stat, i) => (
-<motion.div
-initial={{ opacity: 0, y: 20 }}
-animate={{ opacity: 1, y: 0 }}
-transition={{
-delay: i * .08,
-duration: .35
-}}
->
-
-<Card
-  key={i}
-  className="
-  group
-  rounded-[28px]
-  border-0
-  bg-white
-  shadow-[0_8px_30px_rgba(15,23,42,.05)]
-  hover:-translate-y-2
-  hover:rotate-[0.5deg]
-  hover:scale-[1.03]
-  hover:shadow-[0_20px_45px_rgba(37,99,235,.12)]
-  transition-all
-  duration-300
-  overflow-hidden
-  "
->
-
-  <CardContent className="p-6">
-
-    <div className="flex items-start justify-between mb-8">
-
-      <div>
-
-        <p className="text-sm font-semibold text-slate-500">
-          {stat.label}
-        </p>
-
-        <h2 className="text-2xl
-sm:text-3xl
-lg:text-4xl font-black text-slate-900 mt-3">
-          {stat.value}
-        </h2>
-
-      </div>
-
-      <div
-        className={`
-        w-16
-        h-16
-        rounded-2xl
-        ${stat.color}
-        flex
-        items-center
-        justify-center
-        text-white
-        shadow-lg
-        group-hover:rotate-12
-        group-hover:scale-125
-        transition-all
-        duration-300
-        `}
-      >
-        {stat.icon}
-      </div>
-
-    </div>
-
-    <div className="flex items-center justify-between">
-
-      <span className="text-xs text-slate-400">
-        مقارنة بالشهر الماضي
-      </span>
-
-      <span className="text-emerald-600 text-sm font-bold">
-        ↑ 12%
-      </span>
-
-    </div>
-
-  </CardContent>
-</Card>
-</motion.div>
-
-            ))}
-          </div>
-
-         
 
 <div className="grid
 grid-cols-1
@@ -827,35 +618,36 @@ const Icon=card.icon;
 return(
 
 <motion.div
-layout
-initial={{
-opacity:0,
-scale:.95
-}}
-animate={{
-opacity:1,
-scale:1
-}}
-transition={{
-duration:.35
-}}
->
 
+whileHover={{
+y:-8,
+scale:1.03
+}}
+
+whileTap={{
+scale:.98
+}}
+
+>
 <Card
 key={index}
 className="
 group
+cursor-pointer
 rounded-[28px]
 border
 border-slate-100
 hover:border-blue-200
 hover:shadow-xl
+hover:-translate-y-2
+hover:scale-[1.01]
+hover:shadow-2xl
 transition-all
 duration-300
 "
 >
 
-<CardContent className="p-6">
+<CardContent className="p-5">
 
 <div className="flex justify-between items-start">
 
@@ -863,8 +655,8 @@ duration-300
 
 <div
 className={`
-w-14
-h-14
+w-12
+h-12
 rounded-2xl
 flex
 items-center
@@ -873,7 +665,7 @@ ${card.color}
 `}
 >
 
-<Icon size={26}/>
+<Icon size={22}/>
 
 </div>
 
@@ -889,7 +681,8 @@ ${card.color}
 
 <h2 className="text-3xl
 md:text-4xl
-lg:text-5xl font-black mt-3">
+lg:text-4xl
+2xl:text-5xl font-black mt-3">
 
 <CountUp
 end={Number(card.value)}
@@ -920,7 +713,7 @@ duration={1.4}
 </div>
 {activeTab === "overview" && (
 
-<div className="space-y-8">
+<div className="space-y-6">
 <section>
 
 <div className="flex items-end justify-between mb-7">
@@ -958,7 +751,8 @@ font-bold
 
 </section>
   {/* Performance */}
-<Card className="rounded-[32px] border-0 shadow-xl shadow-slate-200/50">
+<Card className="rounded-3xl
+lg:rounded-[36px] border-0 shadow-xl shadow-slate-200/50">
 
 <CardContent className="p-8">
 
@@ -985,7 +779,9 @@ className="rounded-xl"
 
 </div>
 
-<div className="h-[260px] md:h-[320px] lg:h-[360px]">
+<div className="h-[220px]
+sm:h-[280px]
+lg:h-[360px]">
 
 <ResponsiveContainer width="100%" height="100%">
 
@@ -1003,7 +799,13 @@ axisLine={false}
 tickLine={false}
 />
 
-<Tooltip />
+<Tooltip
+contentStyle={{
+borderRadius:20,
+border:"none",
+boxShadow:"0 15px 40px rgba(0,0,0,.08)"
+}}
+/>
 
 <Area
 type="monotone"
@@ -1028,21 +830,21 @@ sm:grid-cols-3
 gap-5 mt-8">
 
 <Card>
-<CardContent className="p-6">
-<p className="text-slate-500">
-طلاب جدد
-{students.length}
-</p>
+  <CardContent className="p-5">
 
-<h2 className="text-3xl font-black">
-{totalStudents}
-</h2>
+    <p className="text-slate-500">
+      إجمالي الطلاب
+    </p>
 
-</CardContent>
+    <h2 className="text-3xl font-black mt-2">
+      {totalStudents}
+    </h2>
+
+  </CardContent>
 </Card>
 
 <Card>
-<CardContent className="p-6">
+<CardContent className="p-5">
 <p className="text-slate-500">
 كورسات جديدة
 </p>
@@ -1055,7 +857,7 @@ gap-5 mt-8">
 </Card>
 
 <Card>
-<CardContent className="p-6">
+<CardContent className="p-5">
 <p className="text-slate-500">
 معدل النشاط
 </p>
@@ -1071,7 +873,8 @@ gap-5 mt-8">
   {/* Charts */}
 <section>
 
-<Card className="rounded-[32px] border-0 shadow-xl">
+<Card className="rounded-3xl
+lg:rounded-[36px] border-0 shadow-xl">
 
 <CardContent className="p-8">
 
@@ -1095,7 +898,7 @@ gap-5 mt-8">
 
 </div>
 
-<div className="space-y-6">
+<div className="divide-y divide-slate-100">
 
 {recentActivities.map((item,index)=>(
 
@@ -1106,13 +909,16 @@ flex
 items-start
 gap-5
 group
+py-5
 "
 >
 
 <div
 className={`
-w-4
-h-4
+w-3
+h-3
+ring-4
+ring-white
 rounded-full
 mt-2
 ${item.color}
@@ -1168,8 +974,9 @@ transition-all
 </div>
 
 <div className="grid
-grid-cols-2
-lg:grid-cols-3
+grid-cols-1
+sm:grid-cols-2
+xl:grid-cols-3
 gap-5">
 
 {quickActions.map((item,index)=>{
@@ -1373,7 +1180,6 @@ className="relative z-10"
             </div>
           )}
         </div>
-      </main>
-    </div>
+     </DashboardLayout>
   );
 }

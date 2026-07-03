@@ -277,20 +277,16 @@ const toggleStudentStatus = async (
 
 {/* Header */}
 <div
-  className="
-  relative
-  overflow-hidden
-  rounded-[36px]
-  bg-gradient-to-r
-  from-blue-700
-  via-blue-600
-  to-blue-500
-  px-10
-  py-6
-  text-white
-  shadow-[0_10px_40px_rgba(37,99,235,0.25)]
-  mb-8
-  "
+className="
+relative
+overflow-hidden
+rounded-[32px]
+bg-[#4C1D95]
+p-10
+text-white
+shadow-xl
+mb-8
+"
 >
   <div className="relative z-10 flex flex-row-reverse items-center justify-between">
 
@@ -299,8 +295,8 @@ const toggleStudentStatus = async (
       onClick={() => setAddStudentOpen(!addStudentOpen)}
       className="
       bg-white
-      text-blue-700
-      hover:bg-blue-50
+text-violet-700
+hover:bg-violet-50
       rounded-[28px]
       px-8
       h-20
@@ -357,31 +353,9 @@ h-16
   </div>
 
   {/* تأثيرات الخلفية */}
-  <div
-    className="
-    absolute
-    -top-20
-    -left-20
-    w-72
-    h-72
-    bg-white/10
-    rounded-full
-    blur-3xl
-    "
-  />
+  <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
 
-  <div
-    className="
-    absolute
-    -bottom-20
-    right-0
-    w-80
-    h-80
-    bg-blue-300/20
-    rounded-full
-    blur-3xl
-    "
-  />
+<div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
 </div>
 
 <div className="space-y-8">
