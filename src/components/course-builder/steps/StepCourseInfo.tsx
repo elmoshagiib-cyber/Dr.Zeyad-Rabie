@@ -32,18 +32,39 @@ export function StepCourseInfo({
   setThumbnailFile,
 }: Props) {
   return (
-    <Card className="rounded-3xl border border-slate-200 shadow-sm">
-      <CardContent className="p-8 space-y-8">
+    <Card
+  className="
+    rounded-[32px]
+    border
+    border-slate-200
+    bg-white
+    shadow-sm
+    hover:shadow-xl
+    transition-all
+    duration-300
+  "
+>
+      <CardContent className="p-10 space-y-10">
 
-        <div>
-          <h2 className="text-2xl font-bold">
-            بيانات الكورس
-          </h2>
+        <div className="flex items-start justify-between border-b border-slate-100 pb-8">
 
-          <p className="text-slate-500 mt-2">
-            أضف المعلومات الأساسية الخاصة بالكورس.
-          </p>
-        </div>
+  <div>
+
+    <h2 className="text-3xl font-black text-slate-900">
+      بيانات الكورس
+    </h2>
+
+    <p className="mt-2 text-slate-500 text-lg">
+      أضف جميع المعلومات الأساسية الخاصة بالكورس قبل البدء بإضافة المحتوى.
+    </p>
+
+  </div>
+
+  <div className="h-14 w-14 rounded-2xl bg-violet-100 flex items-center justify-center text-2xl">
+    📚
+  </div>
+
+</div>
 
         <div className="space-y-2">
           <label>الصف الدراسي</label>
@@ -61,7 +82,9 @@ export function StepCourseInfo({
         </div>
 
         <div className="space-y-2">
-          <label>اسم الكورس</label>
+          <label className="text-sm font-bold text-slate-700">
+  اسم الكورس
+</label>
 
           <Input
             value={courseTitle}

@@ -1,36 +1,48 @@
 
-
 import { useState } from "react";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { supabase } from "../../lib/supabase";
-import { BuilderHeader } from "../../components/course-builder/BuilderHeader";
 import { useNavigate } from "react-router-dom";
-import { StepCourseInfo } from "../../components/course-builder/steps/StepCourseInfo";
-import { StepSections } from "../../components/course-builder/steps/StepSections";
-import { CoursePreview } from "../../components/course-builder/CoursePreview";
-import { BuilderHero } from "../../components/course-builder/BuilderHero";
+import { Section } from "../../types/course";
 
 export function CreateCourse() {
   const navigate = useNavigate();
 const [sections, setSections] = useState<any[]>([]);
 
+const [newVideoFile, setNewVideoFile] = useState<File | null>(null);
+const [newPdfFile, setNewPdfFile] = useState<File | null>(null);
+const [openedSection, setOpenedSection] = useState<number | null>(null);
+const [builderType, setBuilderType] =
+useState<"homework" | "exam" | null>(null);
+type Question = {
+id:number;
+type:"mcq"|"truefalse"|"essay";
+question:string;
+options?:string[];
+correct?:number|boolean;
+};
+const [previewQuestions, setPreviewQuestions] = useState<Question[]>([]);
+const [previewTitle, setPreviewTitle] = useState("");
+const [showPreview, setShowPreview] = useState(false);
+const [savedHomework,setSavedHomework]=useState<any[]>([]);
+const [savedExam,setSavedExam]=useState<any[]>([]);
+const [questions,setQuestions]=useState<Question[]>([
+{
+id:Date.now(),
+type:"mcq",
+question:"",
+options:["","","",""],
+correct:0,
+},
+]);
 
 const [newSectionTitle, setNewSectionTitle] = useState("");
+const [newLessonTitle, setNewLessonTitle] = useState("");
 const [courseTitle, setCourseTitle] = useState("");
 const [courseDescription, setCourseDescription] = useState("");
 const [coursePrice, setCoursePrice] = useState("");
 const [courseGrade, setCourseGrade] = useState("");
 const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-const lessonsCount = sections.reduce(
-  (acc, s) => acc + s.lessons.length,
-  0
-);
-
-const ready =
-  !!courseTitle &&
-  !!courseGrade &&
-  !!coursePrice &&
-  !!thumbnailFile;
 const addSection = () => {
   setSections([
     ...sections,
@@ -100,7 +112,6 @@ const publishCourse = async () => {
     alert("اكمل جميع بيانات الكورس");
     return;
   }
-
 
   try {
     const courseId = `c${Date.now()}`;
@@ -253,73 +264,23 @@ if (lesson.pdfFile) {
 };
 
 return (
-  <div
-    className="flex min-h-screen bg-slate-50"
-    dir="rtl"
-  >
-    <div className="hidden lg:block">
-      <DashboardSidebar type="instructor" />
-    </div>
+<div
+className="flex min-h-screen bg-slate-50"
+dir="rtl"
+>
 
-    <main className="flex-1 overflow-y-auto">
+<div className="hidden lg:block">
+<DashboardSidebar type="instructor" />
+</div>
 
-      <BuilderHeader onPublish={publishCourse} />
+<main className="flex-1 overflow-y-auto">
+  
 
-      <div className="p-8 space-y-8">
 
-        <BuilderHero
-          sections={sections.length}
-          lessons={lessonsCount}
-          price={coursePrice}
-          ready={ready}
-        />
+</main>
 
-        <div className="grid grid-cols-12 gap-8 items-start">
-
-          <div className="col-span-12 xl:col-span-8 space-y-8">
-
-            <StepCourseInfo
-              courseTitle={courseTitle}
-              setCourseTitle={setCourseTitle}
-              courseDescription={courseDescription}
-              setCourseDescription={setCourseDescription}
-              coursePrice={coursePrice}
-              setCoursePrice={setCoursePrice}
-              courseGrade={courseGrade}
-              setCourseGrade={setCourseGrade}
-              thumbnailFile={thumbnailFile}
-              setThumbnailFile={setThumbnailFile}
-            />
-
-            <StepSections
-              sections={sections}
-              addSection={addSection}
-              addLesson={addLesson}
-              deleteSection={deleteSection}
-              deleteLesson={deleteLesson}
-            />
-
-          </div>
-
-          <div className="col-span-12 xl:col-span-4">
-
-            <CoursePreview
-              title={courseTitle}
-              grade={courseGrade}
-              price={coursePrice}
-              thumbnail={thumbnailFile}
-              sections={sections}
-            />
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </main>
-
-  </div>
+</div>
 );
+
 }
     
