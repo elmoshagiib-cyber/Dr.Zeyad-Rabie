@@ -1,5 +1,7 @@
 import { cn } from "../../utils/cn";
-import { ButtonHTMLAttributes } from "react";
+import { ComponentPropsWithoutRef, ReactNode } from "react";
+import { motion } from "framer-motion";
+
 
 type ButtonVariant =
   | "primary"
@@ -39,10 +41,13 @@ const sizes: Record<ButtonSize, string> = {
 };
 
 interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement> {
+  extends ComponentPropsWithoutRef<"button"> {
   variant?: ButtonVariant;
   size?: ButtonSize;
-  children: React.ReactNode;
+  children: ReactNode;
+leftIcon?: ReactNode;
+rightIcon?: ReactNode;
+loading?: boolean;
   fullWidth?: boolean;
 }
 
@@ -50,14 +55,24 @@ export function Button({
   variant = "primary",
   size = "md",
   children,
+  leftIcon,
+  rightIcon,
+  loading = false,
   fullWidth,
   className,
   ...props
 }: ButtonProps) {
   return (
-    <button
+    <motion.button
+    whileHover={{ scale: 1.03 }}
+whileTap={{ scale: 0.97 }}
+transition={{
+  type: "spring",
+  stiffness: 500,
+  damping: 30,
+}}
       className={cn(
-        "inline-flex items-center justify-center font-bold rounded-2xl transition-all duration-200 cursor-pointer",
+        "inline-flex items-center justify-center font-bold rounded-[18px] transition-all duration-200 ease-out cursor-pointer disabled:opacity-60 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-500/20",
         variants[variant],
         sizes[size],
         fullWidth && "w-full",
@@ -65,7 +80,28 @@ export function Button({
       )}
       {...props}
     >
-      {children}
-    </button>
+      <>
+  {loading && (
+    <div
+      className="
+        w-4
+        h-4
+        rounded-full
+        border-2
+        border-white/30
+        border-t-white
+        animate-spin
+      "
+    />
+  )}
+
+  {leftIcon}
+
+  <span>{children}</span>
+
+  {rightIcon}
+</>
+
+    </motion.button>
   );
 }

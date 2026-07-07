@@ -34,24 +34,19 @@ export function InstructorStudents() {
 
   
 const [students, setStudents] = useState<any[]>([]);
-const [addStudentOpen, setAddStudentOpen] =
-  useState(false);
+
 const [sidebarOpen, setSidebarOpen] = useState(false);
 useEffect(() => {
   loadStudents();
 }, []);
 
 const loadStudents = async () => {
+  const { data, error } = await supabase
+    .from("students")
+    .select("*");
 
-  const { data, error } =
-    await supabase
-      .from("students")
-      .select("*")
-      .order("id", {
-        ascending: false,
-      });
-
-  
+  console.log("DATA =", data);
+  console.log("ERROR =", error);
 
   if (!error) {
     setStudents(data || []);
@@ -76,44 +71,8 @@ const loadStudents = async () => {
     );
   }).length;
 
-  const [studentName, setStudentName] = useState("");
-  const [studentPhone, setStudentPhone] = useState("");
-  const [parentPhone, setParentPhone] = useState("");
-  const [studentGrade, setStudentGrade] = useState("");
-
-  const [studentType, setStudentType] =
-    useState("سنتر");
-
-  const generateStudentCode = () => {
-
-  const zrStudents = students.filter(
-    (s) =>
-      s.student_code &&
-      s.student_code.startsWith("ZR-")
-  );
-
-  if (zrStudents.length === 0) {
-    return "ZR-000001";
-  }
-
-  const maxCode = Math.max(
-    ...zrStudents.map((s) =>
-      Number(
-        s.student_code.replace(
-          "ZR-",
-          ""
-        )
-      )
-    )
-  );
-
-  return `ZR-${String(
-    maxCode + 1
-  ).padStart(6, "0")}`;
-};
-
-  const [generatedCode, setGeneratedCode] =
-    useState(generateStudentCode());
+ 
+  
 
 const [searchTerm, setSearchTerm] =
   useState("");
@@ -130,44 +89,6 @@ const [typeFilter, setTypeFilter] =
   const [phoneFilter, setPhoneFilter] =
   useState("");
 
-const createStudent = async () => {
-  if (!studentName.trim()) return;
-
-  const { data, error } = await supabase
-    .from("students")
-    .insert([
-      {
-        full_name: studentName,
-        student_code: generatedCode,
-        phone: studentPhone,
-        parent_phone: parentPhone,
-        grade: studentGrade,
-        type: studentType,
-        status: "نشط",
-        is_activated: false,
-        password: null,
-      },
-    ])
-    .select();
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  await loadStudents();
-
-  // هنا فقط
-  setStudentName("");
-  setStudentPhone("");
-  setParentPhone("");
-  setStudentGrade("");
-  setStudentType("سنتر");
-
-  setGeneratedCode(
-    generateStudentCode()
-  );
-};
 
   const deleteStudent = async (
   id: number
@@ -184,9 +105,7 @@ console.log(error);
     await loadStudents();
   }
 
-setGeneratedCode(
-  generateStudentCode()
-);
+
   
 };
 
@@ -228,7 +147,7 @@ const toggleStudentStatus = async (
       student.full_name
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      student.student_code
+      student.email
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       student.phone
@@ -290,30 +209,7 @@ mb-8
 >
   <div className="relative z-10 flex flex-row-reverse items-center justify-between">
 
-    {/* زر إضافة طالب */}
-    <Button
-      onClick={() => setAddStudentOpen(!addStudentOpen)}
-      className="
-      bg-white
-text-violet-700
-hover:bg-violet-50
-      rounded-[28px]
-      px-8
-      h-20
-      min-w-[210px]
-      font-bold
-      shadow-lg
-      border-0
-      "
-    >
-      <Plus size={18} />
-
-      {
-        addStudentOpen
-          ? "إغلاق النموذج"
-          : "إضافة طالب"
-      }
-    </Button>
+   
 
     {/* العنوان */}
     <div className="flex flex-row-reverse items-center gap-6">
@@ -523,155 +419,7 @@ h-20
 
 </div>
           
-<Card
-className={`
-border
-border-slate-200
-rounded-[28px]
-bg-gradient-to-b
-from-white
-to-slate-50
-shadow-none
-overflow-hidden
-transition-all
-duration-300
-${!addStudentOpen ? "hidden" : ""}
-`}
->
-  <CardContent className="p-6 space-y-5">
 
-    <div className="flex items-center gap-3">
-
-  <div
-    className="
-    w-11 h-11
-    rounded-2xl
-    bg-violet-100
-    flex items-center justify-center
-    "
-  >
-    <Plus
-      size={20}
-      className="text-violet-600"
-    />
-  </div>
-
-  <div>
-    <h2 className="font-black text-lg">
-      إضافة طالب جديد
-    </h2>
-
-    <p className="text-sm text-slate-500">
-      إنشاء حساب طالب جديد بالمنصة
-    </p>
-  </div>
-
-</div>
-
-    <div className="grid md:grid-cols-2 gap-3">
-
-      <Input
-        placeholder="اسم الطالب"
-        value={studentName}
-        onChange={(e) =>
-          setStudentName(e.target.value)
-        }
-      />
-
-      <Input
-        placeholder="رقم الطالب"
-        value={studentPhone}
-        onChange={(e) =>
-          setStudentPhone(e.target.value)
-        }
-      />
-
-      <Input
-        placeholder="رقم ولي الأمر"
-        value={parentPhone}
-        onChange={(e) =>
-          setParentPhone(e.target.value)
-        }
-      />
-
-     <select
-  className="w-full border rounded-2xl px-5 py-4"
-  value={studentGrade}
-  onChange={(e) =>
-    setStudentGrade(e.target.value)
-  }
->
-  <option value="">
-    اختر الصف الدراسي
-  </option>
-
-  {grades.map((grade) => (
-    <option
-      key={grade}
-      value={grade}
-    >
-      {grade}
-    </option>
-  ))}
-</select>
-<select
-  className="w-full border rounded-2xl px-5 py-4"
-  value={studentType}
-  onChange={(e) =>
-    setStudentType(e.target.value)
-  }
->
-  <option value="سنتر">
-    سنتر
-  </option>
-
-  <option value="أونلاين">
-    أونلاين
-  </option>
-</select>
-    </div>
-<div
-className="
-border
-border-violet-100
-rounded-2xl
-p-5
-bg-gradient-to-r from-violet-100 to-fuchsia-100/40
-"
->
-
-  <p className="text-sm text-slate-500 mb-2">
-    كود الطالب
-  </p>
-
-  <div className="flex items-center justify-between flex-row-reverse">
-
-    <span className="font-black text-lg">
-      {generatedCode}
-    </span>
-
-    <Button
-      type="button"
-      variant="outline"
-      onClick={() =>
-        setGeneratedCode(
-          generateStudentCode()
-        )
-      }
-    >
-      توليد كود
-    </Button>
-
-  </div>
-
-</div>
-    <Button onClick={createStudent}>
-      <Plus size={16} />
-      إضافة الطالب
-    </Button>
-
-  </CardContent>
-</Card>
           {/* Search */}
 <Card
   className="
@@ -873,7 +621,7 @@ bg-gradient-to-r from-violet-100 to-fuchsia-100/40
               </th>
 
               <th className="px-6 py-4 text-right text-sm font-bold text-slate-500">
-                الكود
+               الإيميل
               </th>
 
               <th className="px-6 py-4 text-right text-sm font-bold text-slate-500">
@@ -887,6 +635,10 @@ bg-gradient-to-r from-violet-100 to-fuchsia-100/40
               <th className="px-6 py-4 text-right text-sm font-bold text-slate-500">
                 الحالة
               </th>
+
+<th className="px-6 py-4 text-right text-sm font-bold text-slate-500">
+  تاريخ التسجيل
+</th>
 
               <th className="px-6 py-4 text-right text-sm font-bold text-slate-500">
                 الكورسات
@@ -943,7 +695,7 @@ bg-gradient-to-r from-violet-100 to-fuchsia-100/40
 
                 {/* الكود */}
                 <td className="px-6 py-5 text-slate-700 font-medium whitespace-nowrap">
-                  {student.student_code}
+                  {student.email}
                 </td>
 
                 {/* الصف */}
@@ -988,6 +740,13 @@ bg-gradient-to-r from-violet-100 to-fuchsia-100/40
                   </span>
 
                 </td>
+
+{/* تاريخ التسجيل */}
+<td className="px-6 py-5 text-slate-700 whitespace-nowrap">
+  {student.created_at
+    ? new Date(student.created_at).toLocaleDateString("ar-EG")
+    : "-"}
+</td>
 
                 {/* الكورسات */}
                 <td className="px-6 py-5">

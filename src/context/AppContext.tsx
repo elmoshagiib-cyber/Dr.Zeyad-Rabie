@@ -5,7 +5,7 @@ import {
   ReactNode,
   useEffect,
 } from "react";
-
+import { supabase } from "../lib/supabase";
 export type UserRole = "student" | "instructor" | "admin";
 
 export interface AppUser {
@@ -24,39 +24,42 @@ interface AppContextType {
   user: AppUser | null;
   loading: boolean;
   login: (user: AppUser) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType>({
   user: null,
   loading: true,
   login: () => {},
-  logout: () => {},
+  logout: async () => {},
 });
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
+useEffect(() => {
+  const savedUser = localStorage.getItem("user");
 
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+  if (savedUser) {
+    setUser(JSON.parse(savedUser));
+  }
 
-    setLoading(false);
-  }, []);
+  setLoading(false);
+}, []);
 
   const login = (u: AppUser) => {
-    setUser(u);
-    localStorage.setItem("user", JSON.stringify(u));
-  };
+  setUser(u);
+  localStorage.setItem("user", JSON.stringify(u));
+};
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-  };
+const logout = async () => {
+  await supabase.auth.signOut();
+
+  setUser(null);
+
+  localStorage.removeItem("user");
+};
 
   return (
     <AppContext.Provider

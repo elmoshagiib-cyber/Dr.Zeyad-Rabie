@@ -2,13 +2,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-
+import { useApp } from "../context/AppContext";
 import { supabase } from "../lib/supabase";
 import { ScrollReveal } from "../components/layout/ScrollReveal";
 import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
-
-import { FaqSection } from "../components/home/FaqSection";
+import StudentGradeCard from "../components/home/StudentGradeCard";
 
 import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
@@ -48,7 +47,10 @@ const gradeColors: Record<string, string> = {
 
 export function HomePage() {
   const navigate = useNavigate();
-
+  
+const { user } = useApp();
+console.log("USER =", user);
+console.log("GRADE =", user?.grade);
   const [selectedStage, setSelectedStage] =
     useState<"secondary" | "prep">("secondary");
 
@@ -68,6 +70,31 @@ const loadCourses = async () => {
     setCourses(data || []);
   }
 };
+
+
+const gradeMap = {
+  "الصف الأول الثانوي": {
+    title: "الصف الأول الثانوي",
+    slug: "first_sec",
+    image: "/images/secondary-stage.jpg",
+  },
+
+  "الصف الثاني الثانوي": {
+    title: "الصف الثاني الثانوي",
+    slug: "second_sec",
+    image: "/images/secondary-stage.jpg",
+  },
+
+  "الصف الثالث الثانوي": {
+    title: "الصف الثالث الثانوي",
+    slug: "third_sec",
+    image: "/images/secondary-stage.jpg",
+  },
+};
+
+const studentGrade =
+  gradeMap[user?.grade as keyof typeof gradeMap];
+
   return (
     <div className="min-h-screen bg-white dark:bg-[#0b0715]" dir="rtl">
       <Navbar />
@@ -534,13 +561,15 @@ to-[#D900A8] rounded-full"></div>
       </div>
     </div>
 
-    <div className="grid lg:grid-cols-2 gap-14 mt-24 relative">
+{user ? (
+  <StudentGradeCard grade={user.grade ?? ""} />
+) : (
+  <div className="grid lg:grid-cols-2 gap-14 mt-24 relative">
 
-
-      {/* الثانوية */}
-      <div
-        onClick={() => navigate("/stage/secondary")}
-        className="
+    {/* الثانوية */}
+    <div
+      onClick={() => navigate("/stage/secondary")}
+      className="
 cursor-pointer
 group
 relative
@@ -548,19 +577,14 @@ group-hover:-translate-y-4
 transition-all
 duration-500
 "
-      >
-        <div className="relative overflow-hidden rounded-[28px] shadow-2xl">
-         <motion.img
-  whileHover={{
-    scale: 1.1,
-    y: -10
-  }}
-  transition={{
-    duration: 0.5
-  }}
-  src="/images/secondary-stage.jpg"
-  alt=""
-  className="
+    >
+      <div className="relative overflow-hidden rounded-[28px] shadow-2xl">
+        <motion.img
+          whileHover={{ scale: 1.1, y: -10 }}
+          transition={{ duration: 0.5 }}
+          src="/images/secondary-stage.jpg"
+          alt=""
+          className="
 w-full
 h-[320px]
 object-cover
@@ -570,151 +594,74 @@ saturate-110
 group-hover:saturate-150
 group-hover:brightness-110
 "
-/>
-
-        </div>
-
-        <div
-          className="
-          bg-white
-          dark:bg-[#130726]
-          rounded-[24px]
-          shadow-2xl
-          w-[75%]
-mx-auto
--mt-10
-          relative
-          z-10
-          py-5 px-6
-          text-center
-        "
-        >
-          <h3 className="text-3xl font-black mb-5 dark:text-white">
-            المراحل الثانوية
-          </h3>
-
-          <div className="h-[3px] bg-gradient-to-r
-from-[#7C1DCC]
-via-[#A52DFF]
-to-[#D900A8] mb-5"></div>
-
-          <p className="text-slate-500 dark:text-slate-300 text-base">
-            الصف الأول والثاني والثالث الثانوي
-          </p>
-          <div
-  className="
-  mt-6
-  inline-flex
-  items-center
-  gap-2
-  bg-gradient-to-r
-from-[#7C1DCC]
-via-[#A52DFF]
-to-[#D900A8]
-bg-clip-text
-text-transparent
-  font-black
-  "
->
- 
-</div>
-        </div>
-
-
-
+        />
       </div>
 
-      {/* الإعدادي */}
-      <div
-        onClick={() => navigate("/stage/prep")}
-       className="
-cursor-pointer
-group
-relative
-group-hover:-translate-y-4
-transition-all
-duration-500
-"
-      >
-        <div className="relative overflow-hidden rounded-[28px] shadow-2xl">
-          <motion.img
-  whileHover={{
-    scale: 1.1,
-    y: -10
-  }}
-  transition={{
-    duration: 0.5
-  }}
-  src="/images/prep-stage.jpg"
-  alt=""
-  className="
-w-full
-h-[320px]
-object-cover
-transition-all
-duration-700
-saturate-110
-group-hover:saturate-150
-group-hover:brightness-110
-"
-/>
+      <div className="bg-white dark:bg-[#130726] rounded-[24px] shadow-2xl w-[75%] mx-auto -mt-10 relative z-10 py-5 px-6 text-center">
+        <h3 className="text-3xl font-black mb-5 dark:text-white">
+          المراحل الثانوية
+        </h3>
 
-        </div>
+        <div className="h-[3px] bg-gradient-to-r from-[#7C1DCC] via-[#A52DFF] to-[#D900A8] mb-5"></div>
 
-        <div
-          className="
-          bg-white
-          dark:bg-[#130726]
-          rounded-[24px]
-          shadow-2xl
-          w-[75%]
-mx-auto
--mt-10
-          relative
-          z-10
-          py-5 px-6
-          text-center
-        "
-        >
-          <h3 className="text-3xl font-black mb-5 dark:text-white">
-            المراحل الإعدادية
-          </h3>
-
-          <div className="h-[3px] bg-gradient-to-r
-from-[#7C1DCC]
-via-[#A52DFF]
-to-[#D900A8] mb-5"></div>
-
-          <p className="text-slate-500 dark:text-slate-300 text-base">
-           الصف الأول والثاني والثالث الإعدادي
-          </p>
-          <div
-  className="
-  mt-6
-  inline-flex
-  items-center
-  gap-2
-  bg-gradient-to-r
-from-[#7C1DCC]
-via-[#A52DFF]
-to-[#D900A8]
-bg-clip-text
-text-transparent
-  font-black
-  "
->
- 
-</div>
-        </div>
+        <p className="text-slate-500 dark:text-slate-300 text-base">
+          الصف الأول والثاني والثالث الثانوي
+        </p>
       </div>
-
     </div>
+
+    {/* الإعدادي */}
+    <div
+      onClick={() => navigate("/stage/prep")}
+      className="
+cursor-pointer
+group
+relative
+group-hover:-translate-y-4
+transition-all
+duration-500
+"
+    >
+      <div className="relative overflow-hidden rounded-[28px] shadow-2xl">
+        <motion.img
+          whileHover={{ scale: 1.1, y: -10 }}
+          transition={{ duration: 0.5 }}
+          src="/images/prep-stage.jpg"
+          alt=""
+          className="
+w-full
+h-[320px]
+object-cover
+transition-all
+duration-700
+saturate-110
+group-hover:saturate-150
+group-hover:brightness-110
+"
+        />
+      </div>
+
+      <div className="bg-white dark:bg-[#130726] rounded-[24px] shadow-2xl w-[75%] mx-auto -mt-10 relative z-10 py-5 px-6 text-center">
+        <h3 className="text-3xl font-black mb-5 dark:text-white">
+          المراحل الإعدادية
+        </h3>
+
+        <div className="h-[3px] bg-gradient-to-r from-[#7C1DCC] via-[#A52DFF] to-[#D900A8] mb-5"></div>
+
+        <p className="text-slate-500 dark:text-slate-300 text-base">
+          الصف الأول والثاني والثالث الإعدادي
+        </p>
+      </div>
+    </div>
+
+  </div>
+)}
 
   </div>
 
 </section>
 </ScrollReveal>
-<FaqSection />
+
 <Footer />
 
 </div>

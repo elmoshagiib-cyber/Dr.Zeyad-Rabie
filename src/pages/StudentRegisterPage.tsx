@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import HeroSection from '../components/HeroSection';
-import ActivationModal from '../components/ActivationModal';
+
 
 const GRADES = [
   'الصف الأول الثانوي',
@@ -21,7 +21,16 @@ const GRADES = [
   'الصف الثالث الإعدادي',
 ];
 
-const SECTIONS = ['علمي رياضة', 'علمي علوم', 'أدبي', 'تجاري', 'صناعي'];
+const STUDENT_TYPES = [
+  {
+    value: "online",
+    label: "طالب أونلاين",
+  },
+  {
+    value: "center",
+    label: "طالب سنتر",
+  },
+];
 
   const RegisterPage = () => {
   const navigate = useNavigate();
@@ -30,7 +39,6 @@ const SECTIONS = ['علمي رياضة', 'علمي علوم', 'أدبي', 'تج�
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [activationOpen, setActivationOpen] = useState(false);
   const [form, setForm] = useState({
   firstName: '',
   secondName: '',
@@ -40,7 +48,7 @@ const SECTIONS = ['علمي رياضة', 'علمي علوم', 'أدبي', 'تج�
   phone: '',
   email: '',
   grade: '',
-  section: '',
+  studentType: '',
   password: '',
   confirmPassword: '',
 });
@@ -73,41 +81,78 @@ if (!form.lastName.trim()) e.lastName = 'الاسم الأخير مطلوب';
     if (!form.phone.match(/^(010|011|012|015)\d{8}$/)) e.phone = 'رقم الهاتف غير صحيح (10 أرقام)';
     if (form.email && !form.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) e.email = 'البريد الإلكتروني غير صحيح';
     if (!form.grade) e.grade = 'يرجى اختيار الصف الدراسي';
-    if (!form.section) e.section = 'يرجى اختيار الشعبة';
+    if (!form.studentType)
+  e.studentType = "يرجى اختيار نوع الطالب";
     if (form.password.length < 8) e.password = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
     if (form.password !== form.confirmPassword) e.confirmPassword = 'كلمتا المرور غير متطابقتين';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = async (ev: React.FormEvent) => {
+const handleSubmit = async (ev: React.FormEvent) => {
   ev.preventDefault();
 
-  try {
-    const { data, error } = await supabase
-      .from("students")
-      .insert([
-        {
-          student_code: "ZR-000001",
-          full_name: `${form.firstName} ${form.secondName} ${form.thirdName} ${form.lastName}`,
-          phone: form.phone,
-          grade: form.grade,
-          password: form.password,
-          status: "active",
-        },
-      ]);
+  if (!validate()) return;
 
-    if (error) {
-      console.error(error);
-      alert(error.message);
+  setLoading(true);
+
+  try {
+    // إنشاء حساب في Supabase Auth
+    const { data: authData, error: authError } =
+      await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+      });
+
+      console.log("Auth Data:", authData);
+console.log("Auth Error:", authError);
+
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+console.log("Session:", session);
+
+    if (authError) {
+      alert(authError.message);
+      setLoading(false);
       return;
     }
 
-    console.log(data);
-    alert("تم حفظ الطالب بنجاح");
+    // حفظ بيانات الطالب
+    const { error } = await supabase
+      .from("students")
+      .insert([
+        {
+          auth_id: authData.user?.id,
+          full_name: `${form.firstName} ${form.secondName} ${form.thirdName} ${form.lastName}`,
+          phone: form.phone,
+          email: form.email,
+          grade: form.grade,
+          type: form.studentType,
+          status: "نشط",
+        },
+      ]);
+      
+if (error) {
+  console.error("Insert Error:", error);
+  alert(error.message);
+  setLoading(false);
+  return;
+}
+
+    setSuccess(true);
+
+    setTimeout(() => {
+      navigate("/login");
+    }, 2000);
+
   } catch (err) {
     console.error(err);
+    alert("حدث خطأ أثناء إنشاء الحساب");
   }
+
+  setLoading(false);
 };
 
   const passwordStrength = () => {
@@ -215,50 +260,7 @@ className="text-[56px] font-black text-center leading-none">
                 </p>
               </motion.div>
 
-              {/* ── Center Student Warning ── */}
-              <motion.div
-                className="
-rounded-3xl
-p-6
-mb-12
-bg-amber-50
-border
-border-amber-200
-"
-                style={{
-  background: '#FFFDF5',
-  border: '1px solid #F4D06F'
-}}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25, duration: 0.5 }}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <AlertTriangle className="w-4 h-4 text-amber-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-black mb-1" style={{ color: isDark ? '#FCD34D' : '#92400E' }}>
-                      هل أنت طالب سنتر؟
-                    </p>
-                    <p className="text-xs leading-relaxed mb-3" style={{ color: isDark ? 'rgba(252,211,77,0.6)' : '#B45309' }}>
-                     إذا كنت مسجلاً داخل السنتر فلا تقم بإنشاء حساب جديد.
-استلم كود الطالب من الإدارة ثم فعّل حسابك للدخول إلى المنصة.
-                    </p>
-                    <motion.button
-                      type="button"
-                      onClick={() => setActivationOpen(true)}
-                      className="flex items-center gap-1.5 px-5 py-3 rounded-xl text-white text-xs font-bold"
-                      style={{ background: 'linear-gradient(135deg,#6D28D9,#8B5CF6)', boxShadow: '0 4px 14px rgba(109,40,217,0.35)' }}
-                      whileHover={{ scale: 1.04, y: -1 } as any}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      <ShieldCheck className="w-3.5 h-3.5" />
-                      تفعيل حساب طالب سنتر
-                    </motion.button>
-                  </div>
-                </div>
-              </motion.div>
+             
 
               {/* ── Main Form Card ── */}
               <motion.div
@@ -363,6 +365,7 @@ border-amber-200
                         dir="ltr"
                         onFocus={e => Object.assign(e.target.style, focusShadow)}
                         onBlur={e => (e.target.style.boxShadow = '')}
+                        required
                       />
                     </div>
                     {errors.email && <p className="text-red-400 text-[11px]">{errors.email}</p>}
@@ -396,23 +399,30 @@ border-amber-200
 
                     <div className="space-y-1.5">
                       <label className="block text-sm font-semibold" style={{ color: isDark ? 'rgba(255,255,255,0.72)' : '#475569' }}>
-                        الشعبة
+                         نوع الطالب
                       </label>
                       <div className="relative">
                         <Layers className="absolute top-1/2 -translate-y-1/2 right-3 w-[17px] h-[17px] text-purple-500 pointer-events-none z-10" />
                         <select
-                          value={form.section}
-                          onChange={e => setForm(p => ({ ...p, section: e.target.value }))}
+                          value={form.studentType}
+                          onChange={e =>
+  setForm(p => ({
+    ...p,
+    studentType: e.target.value,
+  }))
+}
                           className={`${inputClass} pr-9 cursor-pointer`}
                           style={{ appearance: 'none', WebkitAppearance: 'none' }}
                           onFocus={e => Object.assign(e.target.style, focusShadow)}
                           onBlur={e => (e.target.style.boxShadow = '')}
                           required
                         >
-                          <option value="" style={{ background: isDark ? '#1a1030' : '#fff' }}>اختر الشعبة</option>
-                          {SECTIONS.map(s => (
-                            <option key={s} value={s} style={{ background: isDark ? '#1a1030' : '#fff' }}>{s}</option>
-                          ))}
+                          <option value="" style={{ background: isDark ? '#1a1030' : '#fff' }}>اختر نوع الطالب</option>
+                          {STUDENT_TYPES.map((type) => (
+  <option key={type.value} value={type.value}>
+    {type.label}
+  </option>
+))}
                         </select>
                       </div>
                       {errors.section && <p className="text-red-400 text-[11px]">{errors.section}</p>}
@@ -582,7 +592,6 @@ border-amber-200
         <Footer />
       </div>
 
-      <ActivationModal isOpen={activationOpen} onClose={() => setActivationOpen(false)} />
     </>
   );
 };

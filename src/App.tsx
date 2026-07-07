@@ -71,9 +71,6 @@ function AppRoutes() {
       <Route path="/" element={<HomePage />} />
 <Route path="/courses/:slug" element={<CourseDetailPage />} />
 
-<Route path="/login" element={<StudentLoginPage />} />
-<Route path="/register" element={<StudentRegisterPage />} />
-
 <Route path="/staff-login" element={<StaffLoginPage />} />
      <Route
   path="/login"
