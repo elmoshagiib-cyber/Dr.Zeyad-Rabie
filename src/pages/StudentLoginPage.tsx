@@ -28,23 +28,32 @@ const LoginPage = () => {  const navigate = useNavigate();
   password: "",
 });
 
-  const inputClass = `
+const inputClass = `
 w-full
-bg-transparent
-border-0
-border-b
+h-[60px]
+bg-white
+dark:bg-[#1B1131]
+border
 border-slate-300
-rounded-none
-px-0
-py-4
-text-lg
-text-slate-700
+dark:border-white/10
+rounded-2xl
+pr-14
+pl-5
+text-[15px]
+font-medium
+text-slate-800
+dark:text-white
+placeholder:text-slate-400
 outline-none
-focus:border-purple-500
-focus:ring-0
+transition-all
+duration-300
+focus:border-violet-500
+focus:ring-4
+focus:ring-violet-500/10
+hover:border-violet-300
 `;
 
-  const focusShadow = { boxShadow: '0 0 0 3px rgba(139,92,246,0.18)' };
+
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
@@ -113,20 +122,36 @@ const handleSubmit = async (e: React.FormEvent) => {
       className="min-h-screen pt-[62px] sm:pt-16"
         style={{ background: isDark ? '#0B0715' : '#ffffff' }}
       >
-        <div className="flex flex-col lg:flex-row min-h-[calc(100vh-62px)] sm:min-h-[calc(100vh-64px)]">
+        <div className="flex flex-col lg:flex-row-reverse min-h-[calc(100vh-62px)] sm:min-h-[calc(100vh-64px)]">
 
           {/* ────────────────────── LEFT: FORM ───────────────────── */}
           <motion.div
-            className="w-full lg:w-[54%] flex flex-col justify-center px-4 sm:px-8 md:px-14 lg:px-16 xl:px-20 py-8 lg:py-10 order-2 lg:order-1"
+  className="
+w-full
+lg:w-[50%]
+flex
+flex-col
+justify-center
+px-6
+sm:px-10
+md:px-16
+lg:px-20
+xl:px-24
+py-12
+bg-white
+shadow-sm
+order-2
+lg:order-2
+"
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="max-w-[680px] mx-auto w-full">
+           <div className="w-full max-w-[760px] ml-auto">
 
               {/* Page heading */}
               <motion.div
-                className="mb-7"
+                className="mb-10"
                 initial={{ opacity: 0, y: -18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15, duration: 0.6 }}
@@ -134,25 +159,55 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <div className="flex items-center gap-3 mb-2.5">
                   
                   <div>
-                    <h1
-                      className="text-[56px] font-black leading-none"
+                   <h1
+className="
+text-4xl
+lg:text-5xl
+font-black
+leading-tight
+tracking-tight
+"
                       style={{ color: isDark ? '#fff' : '#0F172A' }}
                     >
-                     مرحباً بعودتك
+                     تسجيل الدخول
                     </h1>
                   </div>
                 </div>
-                <p className="text-sm leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.48)' : '#64748B' }}>
-                 سجل الدخول للوصول إلى الدروس والواجبات ونتائج الاختبارات.
-                </p>
+
               </motion.div>
 
               {/* ── Main Card ── */}
-              <motion.div
-  className="mb-4"
+<motion.div
+  className="
+relative
+mb-8
+rounded-[28px]
+border
+border-slate-300
+dark:border-white/10
+bg-[#FCFCFD]
+dark:bg-[#130726]/85
+backdrop-blur-2xl
+shadow-[0_20px_45px_rgba(15,23,42,.08)]
+overflow-hidden
+"
 >
+  {/* Top Gradient */}
+  <div
+    className="
+absolute
+top-0
+left-0
+right-0
+h-[5px]
+bg-gradient-to-r
+from-[#5B21B6]
+via-[#7C3AED]
+to-[#A855F7]
+"
+  />
 
-                
+  <div className="p-12 lg:p-14">
 
 
                 {/* Animated Form Body */}
@@ -160,7 +215,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <motion.form
                     
                     onSubmit={handleSubmit}
-                    className="space-y-4"
+                    className="space-y-7"
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -12 }}
@@ -174,12 +229,41 @@ const handleSubmit = async (e: React.FormEvent) => {
   className="block text-sm font-semibold"
   style={{ color: isDark ? "rgba(255,255,255,0.72)" : "#475569" }}
 >
-  البريد الإلكتروني
+ رقم الهاتف
 </label>
 
-<div className="relative">
-  <Phone className="absolute top-1/2 -translate-y-1/2 right-4 w-[18px] h-[18px] text-purple-500" />
-
+<div className="relative group">
+  <input
+  type="tel"
+  placeholder="أدخل رقم الهاتف"
+  value={loginForm.email}
+  onChange={(e) =>
+    setLoginForm((p) => ({
+      ...p,
+      email: e.target.value,
+    }))
+  }
+  className="
+w-full
+h-[56px]
+rounded-xl
+border
+border-slate-200
+bg-white
+px-4
+text-[15px]
+text-slate-800
+placeholder:text-slate-400
+transition-all
+duration-300
+focus:border-violet-500
+focus:ring-4
+focus:ring-violet-500/10
+outline-none
+"
+  dir="rtl"
+  required
+/>
   <input
     type="email"
     placeholder="example@gmail.com"
@@ -192,8 +276,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
     className={`${inputClass} pr-11`}
     dir="ltr"
-    onFocus={(e) => Object.assign(e.target.style, focusShadow)}
-    onBlur={(e) => (e.target.style.boxShadow = "")}
+    
     required
   />
 </div>
@@ -210,23 +293,62 @@ const handleSubmit = async (e: React.FormEvent) => {
                             </button>
                           </div>
                           <div className="relative">
-                            <Lock className="absolute top-1/2 -translate-y-1/2 right-4 w-[18px] h-[18px] text-purple-500" />
-                            <input
-                              type={showPassword ? 'text' : 'password'}
-                              placeholder="••••••••"
-                              value={loginForm.password}
-                              onChange={e => setLoginForm(p => ({ ...p, password: e.target.value }))}
-                              className={`${inputClass} pr-11 pl-11`}
-                              dir="ltr"
-                              onFocus={e => Object.assign(e.target.style, focusShadow)}
-                              onBlur={e => (e.target.style.boxShadow = '')}
-                              required
-                            />
+
+                           <input
+  type={showPassword ? "text" : "password"}
+  placeholder="أدخل كلمة المرور"
+  value={loginForm.password}
+  onChange={(e) =>
+    setLoginForm((p) => ({
+      ...p,
+      password: e.target.value,
+    }))
+  }
+  className="
+w-full
+h-[56px]
+rounded-xl
+border
+border-slate-200
+bg-white
+px-4
+pl-12
+text-[15px]
+text-slate-800
+placeholder:text-slate-400
+transition-all
+duration-300
+focus:border-violet-500
+focus:ring-4
+focus:ring-violet-500/10
+outline-none
+"
+  dir="rtl"
+  required
+/>
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
-                              className="absolute top-1/2 -translate-y-1/2 left-4 transition-colors"
-                              style={{ color: isDark ? 'rgba(255,255,255,0.3)' : '#94A3B8' }}
+                              className="
+absolute
+left-4
+top-1/2
+-translate-y-1/2
+text-slate-400
+hover:text-violet-600
+transition-colors
+"
+                             style={{
+background:
+success
+? "linear-gradient(135deg,#16a34a,#22c55e)"
+: "linear-gradient(90deg,#5B21B6 0%,#7C3AED 55%,#A855F7 100%)",
+
+boxShadow:
+success
+? "0 12px 35px rgba(34,197,94,.30)"
+: "0 18px 45px rgba(124,58,237,.30)"
+}}
                             >
                               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
@@ -248,6 +370,20 @@ const handleSubmit = async (e: React.FormEvent) => {
                         }}
                         whileTap={{ scale: 0.88 }}
                       >
+                        <div
+className="
+absolute
+inset-0
+bg-gradient-to-r
+from-transparent
+via-white/20
+to-transparent
+-translate-x-full
+group-hover:translate-x-full
+transition-transform
+duration-700
+"
+/>
                         <AnimatePresence>
                           {rememberMe && (
                             <motion.svg
@@ -270,9 +406,25 @@ const handleSubmit = async (e: React.FormEvent) => {
 
                     {/* Submit */}
                     <motion.button
+                    
                       type="submit"
                       disabled={loading || success}
-                      className="w-full py-4 rounded-3xl text-white font-bold text-sm flex items-center justify-center gap-2 mt-1.5 disabled:opacity-70"
+                      className="
+group
+relative
+overflow-hidden
+w-full
+h-[60px]
+rounded-2xl
+text-white
+font-bold
+text-[15px]
+flex
+items-center
+justify-center
+gap-2
+disabled:opacity-70
+"
                       style={{
                         background: success
                           ? 'linear-gradient(135deg, #16a34a, #22c55e)'
@@ -306,7 +458,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </motion.button>
                   </motion.form>
                 </AnimatePresence>
-              </motion.div>
+
+</div>
+
+</motion.div>
 
             
 
@@ -332,7 +487,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
           {/* ────────────────────── RIGHT: HERO ─────────────────── */}
           <motion.div
-            className="w-full lg:w-[46%] order-1 lg:order-2 min-h-[400px] sm:min-h-[460px] lg:min-h-0"
+            className="w-full lg:w-[50%] order-1 lg:order-2 min-h-[400px] sm:min-h-[460px] lg:min-h-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
@@ -340,7 +495,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 <HeroSection image="/images/login-image.png" />
           </motion.div>
         </div>
-        <Footer />
+        
       </div>
 
       

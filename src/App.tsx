@@ -32,6 +32,7 @@ import { InstructorAnalytics } from "./pages/instructor/InstructorAnalytics";
 import { StudentDetails } from "./pages/instructor/StudentDetails";
 import { EditStudent } from "./pages/instructor/EditStudent";
 import { InstructorAttendance } from "./pages/instructor/InstructorAttendance";
+import { EditCourse } from "./pages/instructor/EditCourse";
 
 /* Admin */
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
@@ -262,6 +263,15 @@ function AppRoutes() {
   element={<InstructorAttendance />}
 />
 
+
+<Route
+  path="/instructor/courses/edit/:id"
+  element={
+    <ProtectedRoute roles={["instructor"]}>
+      <EditCourse />
+    </ProtectedRoute>
+  }
+/>
       {/* Admin */}
 
       <Route

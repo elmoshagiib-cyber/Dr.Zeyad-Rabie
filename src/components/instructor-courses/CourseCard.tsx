@@ -4,6 +4,10 @@ import {
   Edit,
   Trash2,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+
+
 
 type Props = {
   course: any;
@@ -17,7 +21,7 @@ export function CourseCard({
   onDelete,
   view,
 }: Props) {
-
+const navigate = useNavigate();
   const lectures = course.course_lectures?.length || 0;
 
 const videos =
@@ -131,17 +135,20 @@ ${course.active ? "bg-green-500" : "bg-amber-500"}
 
           <div className="flex gap-3">
 
-            <button
-              className="
-              h-11
-              px-5
-              rounded-xl
-              bg-violet-50
-              hover:bg-violet-100
-              "
-            >
-              تعديل
-            </button>
+           <button
+  onClick={() =>
+    navigate(`/instructor/courses/edit/${course.id}`)
+  }
+  className="
+  h-11
+  px-5
+  rounded-xl
+  bg-violet-50
+  hover:bg-violet-100
+  "
+>
+  تعديل
+</button>
 
             <button
               onClick={() => onDelete(course.id)}
@@ -277,20 +284,23 @@ ${course.active ? "bg-green-500" : "bg-amber-500"}
 
           <div className="flex gap-2">
 
-            <button
-              className="
-              w-10
-              h-10
-              rounded-xl
-              bg-slate-100
-              hover:bg-violet-100
-              flex
-              items-center
-              justify-center
-              "
-            >
-              <Edit size={18} />
-            </button>
+           <button
+  onClick={() =>
+    navigate(`/instructor/courses/edit/${course.id}`)
+  }
+  className="
+  w-10
+  h-10
+  rounded-xl
+  bg-slate-100
+  hover:bg-violet-100
+  flex
+  items-center
+  justify-center
+  "
+>
+  <Edit size={18} />
+</button>
 
             <button
               onClick={() => onDelete(course.id)}

@@ -62,14 +62,15 @@ useEffect(() => {
    <nav
   className={`
 sticky
-top-4
+top-0
 relative
 overflow-hidden
 z-50
 mx-auto
-w-[96%]
-max-w-[1500px]
-rounded-[26px]
+w-full
+max-w-none
+rounded-none
+lg:rounded-none
 bg-white/90
 dark:bg-[#130726]/90
 backdrop-blur-2xl
@@ -116,9 +117,9 @@ hover:drop-shadow-[0_0_10px_rgba(124,58,237,.25)]
       src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
       alt="د. زياد ربيع"
       className="
-h-8
-sm:h-10
-lg:h-[56px]
+h-10
+sm:h-12
+lg:h-[64px]
 object-contain
 "
     />
@@ -136,8 +137,8 @@ object-contain
   }}
   className="
 relative
-w-[78px]
-h-[42px]
+w-[68px]
+h-[38px]
 rounded-full
 overflow-hidden
 bg-gradient-to-r
@@ -173,8 +174,8 @@ to-white/10
 absolute
 top-[3px]
 ${isDark ? "left-[3px]" : "left-[39px]"}
-w-[36px]
-h-[36px]
+w-[32px]
+h-[32px]
 rounded-full
 bg-white
 shadow-[0_6px_20px_rgba(0,0,0,.18)]

@@ -69,36 +69,121 @@ export function LoginPage({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 flex items-center justify-center p-4" dir="rtl">
-      {/* Background effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-32 -right-32 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-blue-800/20 rounded-full blur-3xl"></div>
-      </div>
+    <div className="
+min-h-screen
+bg-white
+dark:bg-[#09090B]
+overflow-hidden
+relative
+">
 
-      <div className="w-full max-w-md relative">
-        {/* Logo */}
-        <button onClick={() => navigate("/")} className="flex items-center gap-3 mx-auto w-fit mb-8 group">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-xl shadow-blue-900/50 group-hover:scale-105 transition-transform">
-            <GraduationCap size={24} className="text-white" />
-          </div>
-          <div className="text-right">
-            <p className="text-white font-black text-lg leading-tight">د. زياد ربيع</p>
-            <p className="text-blue-300 text-xs">المنصة التعليمية</p>
-          </div>
-        </button>
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
 
-        <div className="bg-slate-900/70 backdrop-blur-xl border border-slate-700 rounded-3xl shadow-2xl overflow-hidden">
+    <div
+        className="
+absolute
+top-[-180px]
+right-[-180px]
+w-[520px]
+h-[520px]
+rounded-full
+bg-[#A52DFF]/20
+blur-[130px]
+"
+    />
+
+    <div
+        className="
+absolute
+bottom-[-220px]
+left-[-220px]
+w-[600px]
+h-[600px]
+rounded-full
+bg-fuchsia-500/15
+blur-[150px]
+"
+    />
+
+</div>
+
+      <div className="relative z-10 max-w-7xl mx-auto min-h-screen flex items-center px-6 py-12">
+  <div className="grid lg:grid-cols-2 gap-14 items-center w-full">
+
+
+
+        <div
+  className="
+relative
+overflow-hidden
+rounded-[36px]
+border
+border-slate-200
+dark:border-white/10
+bg-white/75
+dark:bg-[#130726]/80
+backdrop-blur-2xl
+shadow-[0_25px_80px_rgba(124,29,204,.18)]
+transition-all
+duration-500
+"
+>
+
+  {/* Decorative Glow */}
+
+<div
+  className="
+absolute
+top-0
+left-0
+w-full
+h-1
+bg-gradient-to-r
+from-[#7C1DCC]
+via-[#A52DFF]
+to-[#D900A8]
+"
+/>
+
+<div
+  className="
+absolute
+-left-24
+-top-24
+w-72
+h-72
+rounded-full
+bg-[#A52DFF]/10
+blur-[90px]
+pointer-events-none
+"
+/>
           {/* Header */}
-          <div className="p-8 pb-6">
-            <h1 className="text-3xl font-black text-white mb-2">
+          <div className="px-10 pt-10 pb-7">
+            <h1
+className="
+text-4xl
+font-black
+leading-tight
+text-slate-900
+dark:text-white
+mb-3
+"
+>
 
 {staffMode
 ? "لوحة تحكم المدرس"
 : "مرحباً بعودتك 👋"}
 
 </h1>
-           <p className="text-slate-300 text-sm">
+           <p
+className="
+text-base
+leading-8
+text-slate-500
+dark:text-slate-400
+"
+>
 
 {staffMode
 ? "تسجيل الدخول لإدارة المنصة"
@@ -156,33 +241,131 @@ activeRole === "admin"
           </div>
 
           {/* Form */}
-          <form onSubmit={handleLogin} className="px-8 pb-8 space-y-4">
-            <div className="relative">
-              <Phone className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 z-10" size={16} />
-              <input
-                type="tel"
-                placeholder="رقم الهاتف"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                className="w-full pr-10 pl-4 py-3.5 rounded-xl bg-slate-900/70 border border-slate-700 text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:bg-[#130726]/15"
-                required
-              />
-            </div>
-            <div className="relative">
-              <Lock className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 z-10" size={16} />
-              <input
-                type={showPass ? "text" : "password"}
-                placeholder="كلمة المرور"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="w-full pr-10 pl-10 py-3.5 rounded-xl bg-slate-900/70 border border-slate-700 text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:bg-[#130726]/15"
-                required
-              />
-              <button type="button" onClick={() => setShowPass(!showPass)} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
-                {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
+          <form onSubmit={handleLogin} className="px-10 pb-10 space-y-6">
+<div className="group">
+  <label className="block mb-2 text-sm font-bold text-slate-700 dark:text-slate-300">
+    رقم الهاتف
+  </label>
 
+  <div
+    className="
+relative
+rounded-2xl
+border
+border-slate-200
+dark:border-white/10
+bg-white/80
+dark:bg-white/5
+transition-all
+duration-300
+group-focus-within:border-violet-500
+group-focus-within:ring-4
+group-focus-within:ring-violet-500/15
+hover:border-violet-300
+"
+  >
+    <Phone
+      size={18}
+      className="
+absolute
+right-5
+top-1/2
+-translate-y-1/2
+text-violet-500
+"
+    />
+
+    <input
+      type="tel"
+      placeholder="01xxxxxxxxx"
+      value={phone}
+      onChange={(e) => setPhone(e.target.value)}
+      className="
+w-full
+h-[60px]
+bg-transparent
+pr-14
+pl-5
+rounded-2xl
+outline-none
+text-slate-900
+dark:text-white
+placeholder:text-slate-400
+"
+      required
+    />
+  </div>
+</div>
+            <div className="group">
+  <label className="block mb-2 text-sm font-bold text-slate-700 dark:text-slate-300">
+    كلمة المرور
+  </label>
+
+  <div
+    className="
+relative
+rounded-2xl
+border
+border-slate-200
+dark:border-white/10
+bg-white/80
+dark:bg-white/5
+transition-all
+duration-300
+group-focus-within:border-violet-500
+group-focus-within:ring-4
+group-focus-within:ring-violet-500/15
+hover:border-violet-300
+"
+  >
+    <Lock
+      size={18}
+      className="
+absolute
+right-5
+top-1/2
+-translate-y-1/2
+text-violet-500
+"
+    />
+
+    <input
+      type={showPass ? "text" : "password"}
+      placeholder="••••••••••"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      className="
+w-full
+h-[60px]
+bg-transparent
+pr-14
+pl-14
+rounded-2xl
+outline-none
+text-slate-900
+dark:text-white
+placeholder:text-slate-400
+"
+      required
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPass(!showPass)}
+      className="
+absolute
+left-5
+top-1/2
+-translate-y-1/2
+text-slate-400
+hover:text-violet-600
+transition-colors
+"
+    >
+      {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+    </button>
+  </div>
+</div>
             {error && (
               <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3">
                 <p className="text-red-300 text-sm">{error}</p>
@@ -225,7 +408,8 @@ activeRole === "admin"
             </button>
           </form>
         </div>
-      </div>
-    </div>
+           </div>
+  </div>
+</div>
   );
 }

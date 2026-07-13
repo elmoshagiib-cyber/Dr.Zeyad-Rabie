@@ -1,325 +1,340 @@
-
-
 import { useState } from "react";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
-import { supabase } from "../../lib/supabase";
-import { BuilderHeader } from "../../components/course-builder/BuilderHeader";
-import { useNavigate } from "react-router-dom";
-import { StepCourseInfo } from "../../components/course-builder/steps/StepCourseInfo";
-import { StepSections } from "../../components/course-builder/steps/StepSections";
-import { CoursePreview } from "../../components/course-builder/CoursePreview";
-import { BuilderHero } from "../../components/course-builder/BuilderHero";
+import InstructorLayout from "../../layouts/InstructorLayout";
 
 export function CreateCourse() {
-  const navigate = useNavigate();
-const [sections, setSections] = useState<any[]>([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [grade, setGrade] = useState("");
+  const [price, setPrice] = useState("");
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
 
 
-const [newSectionTitle, setNewSectionTitle] = useState("");
-const [courseTitle, setCourseTitle] = useState("");
-const [courseDescription, setCourseDescription] = useState("");
-const [coursePrice, setCoursePrice] = useState("");
-const [courseGrade, setCourseGrade] = useState("");
-const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-const lessonsCount = sections.reduce(
-  (acc, s) => acc + s.lessons.length,
-  0
-);
+  return (
+     <InstructorLayout>
 
-const ready =
-  !!courseTitle &&
-  !!courseGrade &&
-  !!coursePrice &&
-  !!thumbnailFile;
-const addSection = () => {
-  setSections([
-    ...sections,
-    {
-      id: crypto.randomUUID(),
-      title:
-        newSectionTitle.trim() ||
-        `الباب ${sections.length + 1}`,
-      lessons: [],
-    },
-  ]);
+      <div className="max-w-6xl mx-auto">
 
-  setNewSectionTitle("");
-};
+        <div className="mb-10">
 
-const addLesson = (
-  sectionId: string,
-  lesson: any
-) => {
-  setSections((prev) =>
-    prev.map((section) =>
-      section.id === sectionId
-        ? {
-            ...section,
-            lessons: [...section.lessons, lesson],
-          }
-        : section
-    )
-  );
-};
-        
-const deleteSection = (sectionId: string) => {
-  setSections(
-    sections.filter(
-      (section) => section.id !== sectionId
-    )
-  );
-};
-const deleteLesson = (
-  sectionId: string,
-  lessonIndex: number
-) => {
-  setSections(
-    sections.map((section) =>
-      section.id === sectionId
-        ? {
-            ...section,
-            lessons: section.lessons.filter(
-              (_: any, index: number) =>
-                index !== lessonIndex
-            ),
-          }
-        : section
-    )
-  );
-};
-const publishCourse = async () => {
-  console.log("publish clicked");
+  <h1 className="text-5xl font-black text-slate-900">
+    إنشاء كورس جديد
+  </h1>
 
-  if (
-    !courseTitle ||
-    !courseDescription ||
-    !coursePrice ||
-    !courseGrade ||
-    !thumbnailFile
-  ) {
-    alert("اكمل جميع بيانات الكورس");
-    return;
-  }
+  <p className="mt-3 text-slate-500 text-lg">
+    قم بإدخال بيانات الكورس الأساسية ثم انشره ليظهر داخل المنصة.
+  </p>
+
+</div>
 
 
-  try {
-    const courseId = `c${Date.now()}`;
-let thumbnailUrl = "";
+       <div className="grid lg:grid-cols-3 gap-8">
 
-if (thumbnailFile) {
-  const fileExt = thumbnailFile.name.split(".").pop();
+    <div className="lg:col-span-2">
 
-  const fileName = `${Date.now()}.${fileExt}`;
+        <div className="bg-white rounded-3xl border shadow-sm p-8 space-y-8">
 
-  const { error: uploadError } =
-    await supabase.storage
-      .from("course-thumbnails")
-      .upload(fileName, thumbnailFile);
+          {/* اسم الكورس */}
 
-  if (!uploadError) {
-    const { data } = supabase.storage
-      .from("course-thumbnails")
-      .getPublicUrl(fileName);
+          <div>
+            <label className="block mb-2 font-bold">
+              اسم الكورس
+            </label>
 
-    thumbnailUrl = data.publicUrl;
-    console.log("COURSE DATA =", {
-  id: courseId,
-  title: courseTitle,
-  thumbnail: thumbnailUrl,
-});
-  }
-}
-const { error: courseError } = await supabase
-  .from("courses")
-  .insert({
-    id: courseId,
-    title: courseTitle,
-    description: courseDescription,
-    thumbnail: thumbnailUrl,
-    grade: courseGrade,
-    price: Number(coursePrice),
-  });
-  
+            <input
+              value={title}
+              onChange={(e) =>
+                setTitle(e.target.value)
+              }
+              className="w-full h-12 border rounded-xl px-4"
+              placeholder="مثال : شرح الباب الأول"
+            />
+          </div>
 
-if (courseError) {
-  console.log("COURSE ERROR", courseError);
-  alert(courseError.message);
-  return;
-  
-}
 
-    // 2- حفظ الأقسام والدروس
-    for (let i = 0; i < sections.length; i++) {
-      const section = sections[i];
+          {/* الوصف */}
 
-      const { data: lectureData, error: lectureError } =
-        await supabase
-          .from("course_lectures")
-          .insert({
-            course_id: courseId,
-            title: section.title,
-            sort_order: i + 1,
-          })
-          .select()
-          .single();
+          <div>
+            <label className="block mb-2 font-bold">
+              وصف الكورس
+            </label>
 
-      if (lectureError) {
-  console.log("LECTURE ERROR", lectureError);
-  alert(JSON.stringify(lectureError));
-  return;
-}
+            <textarea
+              rows={5}
+              value={description}
+              onChange={(e) =>
+                setDescription(e.target.value)
+              }
+              className="w-full border rounded-xl p-4 resize-none"
+            />
+          </div>
 
-      const lectureId = lectureData.id;
+          {/* الصف */}
 
-      // حفظ الدروس
-      for (const lesson of section.lessons) {
-let videoUrl = "";
-let fileUrl = "";
+          <div>
+            <label className="block mb-2 font-bold">
+              الصف الدراسي
+            </label>
 
-if (lesson.videoFile) {
-  const ext =
-    lesson.videoFile.name.split(".").pop();
+            <select
+              value={grade}
+              onChange={(e) =>
+                setGrade(e.target.value)
+              }
+              className="w-full h-12 border rounded-xl px-4"
+            >
+              <option value="">
+                اختر الصف
+              </option>
 
-  const fileName =
-    `${Date.now()}-${Math.random()}.${ext}`;
+              <option value="first_sec">
+                الصف الأول الثانوي
+              </option>
 
-  const { error: uploadError } =
-    await supabase.storage
-      .from("course-videos")
-      .upload(fileName, lesson.videoFile);
+              <option value="second_sec">
+                الصف الثاني الثانوي
+              </option>
 
-  if (uploadError) {
-    console.log(uploadError);
-    continue;
-  }
+              <option value="third_sec">
+                الصف الثالث الثانوي
+              </option>
 
-  const { data } = supabase.storage
-    .from("course-videos")
-    .getPublicUrl(fileName);
+              <option value="first_prep">
+                الصف الأول الإعدادي
+              </option>
 
-  videoUrl = data.publicUrl;
+              <option value="second_prep">
+                الصف الثاني الإعدادي
+              </option>
 
-  await supabase
-    .from("lecture_videos")
-    .insert({
-      lecture_id: lectureId,
-      title: lesson.title,
-      video_url: videoUrl,
-    });
-}
+              <option value="third_prep">
+                الصف الثالث الإعدادي
+              </option>
 
-if (lesson.pdfFile) {
-  const ext =
-    lesson.pdfFile.name.split(".").pop();
+            </select>
+          </div>
 
-  const fileName =
-    `${Date.now()}-${Math.random()}.${ext}`;
+          {/* السعر */}
 
-  const { error: uploadError } =
-    await supabase.storage
-      .from("course-files")
-      .upload(fileName, lesson.pdfFile);
+          <div>
+            <label className="block mb-2 font-bold">
+              السعر
+            </label>
 
-  if (uploadError) {
-    console.log(uploadError);
-    continue;
-  }
+            <input
+              type="number"
+              value={price}
+              onChange={(e) =>
+                setPrice(e.target.value)
+              }
+              className="w-full h-12 border rounded-xl px-4"
+            />
+          </div>
 
-  const { data } = supabase.storage
-    .from("course-files")
-    .getPublicUrl(fileName);
+<div className="flex items-center gap-3">
 
-  fileUrl = data.publicUrl;
 
-  await supabase
-    .from("lecture_files")
-    .insert({
-      lecture_id: lectureId,
-      title: lesson.title,
-      file_url: fileUrl,
-    });
-}
+  <input
+    type="checkbox"
+    checked={price === "0"}
+    onChange={(e) => {
+      if (e.target.checked) {
+        setPrice("0");
+      } else {
+        setPrice("");
       }
-      
-    }
+    }}
+  />
 
-    alert("تم إنشاء الكورس بنجاح");
-    navigate("/instructor/courses");
+  <label className="font-medium">
+    الكورس مجاني
+  </label>
 
-  } catch (err) {
-    console.error(err);
-    alert("حدث خطأ");
-  }
-};
+</div>
 
-return (
-  <div
-    className="flex min-h-screen bg-slate-50"
-    dir="rtl"
+          {/* الصورة */}
+
+          <div>
+  <label className="block mb-3 font-bold">
+    صورة الكورس
+  </label>
+
+  <label
+    className="
+      w-full
+      h-[320px]
+      border-2
+      border-dashed
+      border-slate-300
+      rounded-3xl
+      bg-slate-50
+      hover:border-violet-500
+      hover:bg-violet-50
+      transition-all
+      duration-300
+      cursor-pointer
+      flex
+      flex-col
+      items-center
+      justify-center
+      overflow-hidden
+      relative
+    "
   >
-    <div className="hidden lg:block">
-      <DashboardSidebar type="instructor" />
-    </div>
-
-    <main className="flex-1 overflow-y-auto">
-
-      <BuilderHeader onPublish={publishCourse} />
-
-      <div className="p-8 space-y-8">
-
-        <BuilderHero
-          sections={sections.length}
-          lessons={lessonsCount}
-          price={coursePrice}
-          ready={ready}
+    {thumbnail ? (
+      <>
+        <img
+          src={URL.createObjectURL(thumbnail)}
+          alt="Preview"
+          className="
+            absolute
+            inset-0
+            w-full
+            h-full
+            object-cover
+          "
         />
 
-        <div className="grid grid-cols-12 gap-8 items-start">
-
-          <div className="col-span-12 xl:col-span-8 space-y-8">
-
-            <StepCourseInfo
-              courseTitle={courseTitle}
-              setCourseTitle={setCourseTitle}
-              courseDescription={courseDescription}
-              setCourseDescription={setCourseDescription}
-              coursePrice={coursePrice}
-              setCoursePrice={setCoursePrice}
-              courseGrade={courseGrade}
-              setCourseGrade={setCourseGrade}
-              thumbnailFile={thumbnailFile}
-              setThumbnailFile={setThumbnailFile}
-            />
-
-            <StepSections
-              sections={sections}
-              addSection={addSection}
-              addLesson={addLesson}
-              deleteSection={deleteSection}
-              deleteLesson={deleteLesson}
-            />
-
-          </div>
-
-          <div className="col-span-12 xl:col-span-4">
-
-            <CoursePreview
-              title={courseTitle}
-              grade={courseGrade}
-              price={coursePrice}
-              thumbnail={thumbnailFile}
-              sections={sections}
-            />
-
-          </div>
-
+        <div
+          className="
+            absolute
+            inset-0
+            bg-black/40
+            opacity-0
+            hover:opacity-100
+            transition
+            flex
+            items-center
+            justify-center
+            text-white
+            font-bold
+            text-lg
+          "
+        >
+          اضغط لتغيير الصورة
+        </div>
+      </>
+    ) : (
+      <>
+        <div className="text-6xl">
+          🖼️
         </div>
 
-      </div>
+        <h3 className="mt-6 text-2xl font-bold text-slate-700">
+          ارفع صورة الكورس
+        </h3>
 
-    </main>
+        <p className="mt-2 text-slate-500">
+          اضغط هنا لاختيار صورة من جهازك
+        </p>
+
+        <p className="mt-6 text-sm text-slate-400">
+          PNG • JPG • WEBP
+        </p>
+      </>
+    )}
+
+    <input
+      hidden
+      type="file"
+      accept="image/*"
+      onChange={(e) =>
+        setThumbnail(e.target.files?.[0] || null)
+      }
+    />
+  </label>
+</div>
+
+
+          {/* الزر */}
+
+          <button
+            className="
+            w-full
+            h-14
+            rounded-2xl
+            bg-violet-600
+            text-white
+            font-bold
+            text-lg
+            "
+          >
+            نشر الكورس
+          </button>
+        </div>
+        </div>
+        <div>
+
+  <div className="bg-white rounded-3xl border shadow-sm p-6 sticky top-8">
+
+    <h2 className="text-2xl font-black mb-6">
+      معاينة الكورس
+    </h2>
+
+    <div
+      className="
+      h-52
+      rounded-2xl
+      overflow-hidden
+      bg-slate-100
+      "
+    >
+
+      {thumbnail ? (
+
+        <img
+          src={URL.createObjectURL(thumbnail)}
+          className="w-full h-full object-cover"
+        />
+
+      ) : (
+
+        <div className="w-full h-full flex items-center justify-center text-slate-400">
+          لا توجد صورة
+        </div>
+
+      )}
+
+    </div>
+
+    <h3 className="mt-6 text-2xl font-black">
+
+      {title || "اسم الكورس"}
+
+    </h3>
+
+    <p className="mt-3 text-slate-500 line-clamp-3">
+
+      {description || "وصف الكورس"}
+
+    </p>
+
+    <div className="mt-6 flex justify-between">
+
+      <span className="font-bold">
+
+        {grade || "الصف"}
+
+      </span>
+
+      <span className="text-violet-700 font-black">
+
+        {price || 0} جنيه
+
+      </span>
+
+    </div>
 
   </div>
-);
+
+</div>
+
+</div>
+
+      </div>
+     <div>
+
+</div> 
+     </InstructorLayout>
+     
+  );
 }
-    

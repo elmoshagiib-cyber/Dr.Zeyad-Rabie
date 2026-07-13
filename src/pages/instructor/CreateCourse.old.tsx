@@ -120,25 +120,34 @@ let thumbnailUrl = "";
 if (thumbnailFile) {
   const fileExt = thumbnailFile.name.split(".").pop();
 
-  const fileName = `${Date.now()}.${fileExt}`;
+  const fileName = `${crypto.randomUUID()}.${fileExt}`;
 
-  const { error: uploadError } =
-    await supabase.storage
-      .from("course-thumbnails")
-      .upload(fileName, thumbnailFile);
+  console.log("FILE =", thumbnailFile);
 
-  if (!uploadError) {
-    const { data } = supabase.storage
+  const {
+    data: uploadData,
+    error: uploadError,
+  } = await supabase.storage
+    .from("course-thumbnails")
+    .upload(fileName, thumbnailFile);
+console.log(uploadData);
+console.log(uploadError);
+  console.log("UPLOAD DATA =", uploadData);
+  console.log("UPLOAD ERROR =", uploadError);
+
+  if (uploadError) {
+    alert(uploadError.message);
+    return;
+  }
+
+  const { data: publicData } =
+    supabase.storage
       .from("course-thumbnails")
       .getPublicUrl(fileName);
 
-    thumbnailUrl = data.publicUrl;
-    console.log("COURSE DATA =", {
-  id: courseId,
-  title: courseTitle,
-  thumbnail: thumbnailUrl,
-});
-  }
+  thumbnailUrl = publicData.publicUrl;
+console.log(thumbnailUrl);
+  console.log("PUBLIC URL =", thumbnailUrl);
 }
 const { error: courseError } = await supabase
   .from("courses")
