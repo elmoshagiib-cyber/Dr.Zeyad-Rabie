@@ -23,8 +23,6 @@ import {
   TrendingUp,
   ChevronDown,
   ArrowLeft,
-  Atom,
-  FlaskConical,
   GraduationCap,
 } from "lucide-react";
 
@@ -114,11 +112,19 @@ dark:bg-[#09090B]
 
   <div className="max-w-[1400px] mx-auto px-6 w-full">
 
-    <div className="grid lg:grid-cols-2 gap-4 items-center">
+   <div
+  className="
+grid
+lg:grid-cols-2
+items-center
+gap-24
+py-12
+lg:py-20
+"
+>
 
-
-      {/* TEXT */}
-      <motion.div
+{/* TEXT */}
+<motion.div
   initial="hidden"
   whileInView="show"
   viewport={{ once: true }}
@@ -130,77 +136,121 @@ dark:bg-[#09090B]
       },
     },
   }}
-  className="mt-16"
->
-
-
-        <h2
-className="
-text-5xl
-lg:text-7xl
-font-black
-leading-[1.2]
-pb-2
-mb-6
-text-slate-900
-dark:text-white
-"
->
-أهـلا بـك فـي منصة
-<br />
-
-<span
-className="
-inline-block
-pb-3
-bg-gradient-to-r
-from-[#7C1DCC]
-via-[#A52DFF]
-to-[#D900A8]
-bg-clip-text
-text-transparent
-"
->
-مستــر زيــاد ربيــع
-</span>
-</h2>
-
-        <p className="
-text-slate-600
-dark:text-slate-400
-text-2xl
-leading-relaxed
-max-w-2xl
-">
-         رحلة تعليمية متكاملة تشمل الشرح، الواجبات، المراجعات، والامتحانات التفاعلية لمساعدتك على تحقيق أعلى الدرجات.
-        </p>
-
-        <div className="flex flex-wrap justify-center lg:justify-start gap-4 mt-10">
-
-
-<Button
-  size="lg"
-  variant="outline"
-  onClick={() => navigate("/register")}
   className="
-bg-gradient-to-r
-from-[#7C1DCC]
-via-[#A52DFF]
-to-[#D900A8]
-text-white
-font-black
-shadow-[0_12px_35px_rgba(165,45,255,0.35)]
-hover:scale-105
-transition-all
-duration-300
-"
+  mt-4
+  sm:mt-6
+  text-center
+  lg:text-right
+  max-w-[700px]
+  mx-auto
+  lg:mx-0
+  px-2
+  sm:px-0
+  "
 >
-  سجل الآن مجاناً
-</Button>
-          
-        </div>
+  <h1
+    className="
+    text-[26px]
+    xs:text-[28px]
+    sm:text-[36px]
+    md:text-[44px]
+    lg:text-[52px]
+    font-bold
+    leading-[1.25]
+    tracking-[-0.5px]
+    text-slate-900
+    dark:text-white
+    "
+  >
+    أهلاً بك في منصة
 
-      </motion.div>
+    <span
+      className="
+      block
+      mt-1.5
+      sm:mt-2
+      text-[32px]
+      xs:text-[36px]
+      sm:text-[44px]
+      md:text-[54px]
+      lg:text-[64px]
+      font-bold
+      leading-tight
+      tracking-[-1px]
+      text-[#5B21B6]
+      dark:text-violet-400
+      "
+    >
+      مستر زياد ربيع
+    </span>
+  </h1>
+
+  <p
+    className="
+    mt-4
+    sm:mt-6
+    lg:mt-8
+    max-w-[320px]
+    xs:max-w-[380px]
+    sm:max-w-[500px]
+    lg:max-w-[620px]
+    mx-auto
+    lg:mx-0
+    text-[15px]
+    sm:text-[17px]
+    lg:text-[20px]
+    xl:text-[22px]
+    leading-[1.7]
+    sm:leading-[1.8]
+    font-normal
+    text-slate-600
+    dark:text-slate-300
+    "
+  >
+    شرح مبسط، مراجعات شاملة،
+    واختبارات تفاعلية لتحقيق أعلى الدرجات.
+  </p>
+
+  <div
+    className="
+    mt-6
+    sm:mt-8
+    lg:mt-10
+    flex
+    justify-center
+    lg:justify-start
+    "
+  >
+    <Button
+      size="lg"
+      variant="outline"
+      onClick={() => navigate("/register")}
+      className="
+      h-11
+      sm:h-12
+      lg:h-14
+      px-6
+      sm:px-7
+      lg:px-9
+      rounded-xl
+      bg-[#F97316]
+      hover:bg-[#EA580C]
+      border-0
+      text-white
+      text-[14px]
+      sm:text-[16px]
+      lg:text-[18px]
+      font-semibold
+      shadow-[0_14px_35px_rgba(249,115,22,.28)]
+      hover:scale-[1.03]
+      transition-all
+      duration-300
+      "
+    >
+      سجل الآن مجانًا
+    </Button>
+  </div>
+</motion.div>
 
       {/* IMAGE */}
       <motion.div
@@ -215,30 +265,11 @@ duration-300
       },
     },
   }}
-  className="mt-16"
+  className="mt-8 sm:mt-10 lg:mt-16"
 >
 
         <div className="relative">
-<div
-  className="
-  absolute
-  top-1/2
-  left-1/2
-  -translate-x-1/2
-  -translate-y-1/2
-  w-[600px]
-h-[600px]
-  lg:w-[520px]
-  lg:h-[520px]
-  bg-gradient-to-r
-from-[#7C1DCC]/30
-via-[#D900A8]/25
-to-[#FF6AD5]/20
-  rounded-full
-  blur-[120px]
-  z-0
-  "
-/>
+
           
          <img
   src={TEACHER.image}
@@ -246,8 +277,13 @@ to-[#FF6AD5]/20
   className="
 relative
 z-10
-w-[520px]
-lg:w-[620px]
+w-[220px]
+xs:w-[260px]
+sm:w-[340px]
+md:w-[420px]
+lg:w-[500px]
+xl:w-[560px]
+mx-auto
 object-contain
 animate-float
 "
@@ -256,7 +292,7 @@ animate-float
 <motion.div
   animate={{ y: [0, -8, 0] }}
   transition={{ repeat: Infinity, duration: 9 }}
-  className="absolute bottom-16 -right-8 bg-white dark:bg-white rounded-3xl p-5 shadow-2xl"
+  className="absolute bottom-8 sm:bottom-12 lg:bottom-16 -right-4 sm:-right-6 lg:-right-8 bg-white dark:bg-white rounded-3xl p-3 sm:p-4 lg:p-5 shadow-2xl"
 >
   
 </motion.div>
@@ -281,45 +317,6 @@ bg-white
 dark:bg-[#09090B]
 "
 >
-
-{/* Chemistry Background */}
-
-<div className="absolute inset-0 overflow-hidden pointer-events-none">
-
-  <Atom
-    size={180}
-    className="
-    absolute
-    top-20
-    right-32
-    text-[#A52DFF]/10
-    animate-spin
-    "
-    style={{ animationDuration: "30s" }}
-  />
-
-  <FlaskConical
-    size={120}
-    className="
-    absolute
-    bottom-24
-    left-24
-    text-[#A855F7]/10
-    animate-pulse
-    "
-  />
-
-  <Atom
-    size={120}
-    className="
-    absolute
-    top-1/2
-    left-1/3
-    text-violet-400/5
-    "
-  />
-
-</div>
   <div className="max-w-7xl mx-auto px-6">
 
     <div className="text-center mb-20">
@@ -367,7 +364,11 @@ dark:bg-[#09090B]
       },
     },
   }}
-  className="mt-16"
+ className="
+flex
+justify-center
+lg:justify-start
+"
 >
   <div
     className="

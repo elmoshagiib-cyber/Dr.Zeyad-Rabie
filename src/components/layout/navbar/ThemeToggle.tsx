@@ -31,8 +31,10 @@ export function ThemeToggle({
 relative
 flex
 items-center
-w-16
-h-9
+w-14
+h-8
+sm:w-16
+sm:h-9
 px-1
 rounded-full
 overflow-hidden
@@ -61,8 +63,8 @@ shrink-0
 
       <motion.span
         layout
-        animate={{
-  x: isDark ? 0 : 26,
+animate={{
+  x: isDark ? 28 : 0,
 }}
         transition={{
           type: "spring",

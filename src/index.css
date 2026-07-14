@@ -1,40 +1,72 @@
 
 
 @font-face {
-  font-family: "Thmanyah";
-  src: url("/fonts/thmanyahsans-Light.ttf") format("truetype");
+  font-family: "Alexandria";
+  src: url("/fonts/Alexandria-Thin.ttf") format("truetype");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Alexandria";
+  src: url("/fonts/Alexandria-ExtraLight.ttf") format("truetype");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Alexandria";
+  src: url("/fonts/Alexandria-Light.ttf") format("truetype");
   font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "Thmanyah";
-  src: url("/fonts/thmanyahsans-Regular.ttf") format("truetype");
+  font-family: "Alexandria";
+  src: url("/fonts/Alexandria-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "Thmanyah";
-  src: url("/fonts/thmanyahsans-Medium.ttf") format("truetype");
+  font-family: "Alexandria";
+  src: url("/fonts/Alexandria-Medium.ttf") format("truetype");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "Thmanyah";
-  src: url("/fonts/thmanyahsans-Bold.ttf") format("truetype");
+  font-family: "Alexandria";
+  src: url("/fonts/Alexandria-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Alexandria";
+  src: url("/fonts/Alexandria-Bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "Thmanyah";
-  src: url("/fonts/thmanyahsans-Black.ttf") format("truetype");
+  font-family: "Alexandria";
+  src: url("/fonts/Alexandria-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Alexandria";
+  src: url("/fonts/Alexandria-Black.ttf") format("truetype");
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -50,7 +82,7 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-family-sans: 'Thmanyah', sans-serif;
+  --font-family-sans: "Alexandria", sans-serif;
   --color-purple-brand: #6D28D9;
   --color-violet-brand: #8B5CF6;
   --color-purple-light: #A78BFA;
@@ -64,22 +96,21 @@
   font-size: 100px !important;
   color: red !important;
 }
-* {
-  font-family: 'Thmanyah', sans-serif;
-  box-sizing: border-box;
-  letter-spacing: -0.3px;
+
+*{
+font-family:"Alexandria",sans-serif;
 }
-.font-thmanyah {
-  font-family: "Thmanyah", sans-serif;
+
+.font-alexandria{
+    font-family:"Alexandria",sans-serif;
 }
 h1,
 h2,
 h3,
 h4,
 h5,
-h6 {
-  font-family: "Thmanyah", sans-serif;
-  font-weight: 700;
+h6{
+font-family:"Alexandria",sans-serif;
 }
 
 .font-black {

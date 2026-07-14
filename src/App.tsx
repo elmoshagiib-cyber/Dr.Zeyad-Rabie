@@ -305,15 +305,18 @@ export default function App() {
 
   return (
     <AppProvider>
-      <BrowserRouter>
-        {showSplash ? (
-          <SplashScreen
-            onFinish={() => setShowSplash(false)}
-          />
-        ) : (
-          <AppRoutes />
-        )}
-      </BrowserRouter>
+      <ThemeProvider>
+        <BrowserRouter>
+          {/* هنا بنمنع أي عنصر يتعدى عرض الشاشة */}
+          <div className="overflow-x-hidden w-full">
+            {showSplash ? (
+              <SplashScreen onFinish={() => setShowSplash(false)} />
+            ) : (
+              <AppRoutes />
+            )}
+          </div>
+        </BrowserRouter>
+      </ThemeProvider>
     </AppProvider>
   );
 }

@@ -56,20 +56,22 @@ useEffect(() => {
 
 
   return (
-   <nav
-className={`
-sticky
-top-0
-z-50
-w-full
-bg-white
-dark:bg-[#111111]
-border-b
-border-[#ECECEC]
-dark:border-[#2A2A2A]
-transition-all
-duration-300
-`}
+<nav
+  className={`
+    fixed
+    top-0
+    left-0
+    right-0
+    z-50
+    w-full
+    bg-white
+    dark:bg-[#111111]
+    border-b
+    border-[#ECECEC]
+    dark:border-[#2A2A2A]
+    transition-all
+    duration-300
+  `}
 >
 
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
