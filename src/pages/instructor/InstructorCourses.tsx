@@ -8,11 +8,12 @@ import { CourseAlert } from "../../components/instructor-courses/CourseAlert";
 import { CourseFilters } from "../../components/instructor-courses/CourseFilters";
 import { CourseGrid } from "../../components/instructor-courses/CourseGrid";
 import { exportCoursesCSV } from "../../utils/exportCourses";
+import { useApp } from "../../context/AppContext";
 
 export function InstructorCourses() {
   
 const navigate = useNavigate();
-
+const { user } = useApp();
 const [courses, setCourses] = useState<any[]>([]);
 
 const [search, setSearch] = useState("");
@@ -22,8 +23,12 @@ const [sortBy, setSortBy] = useState("latest");
 const [view, setView] = useState<"grid" | "list">("grid");
 
 useEffect(() => {
-  loadCourses();
-}, []);
+  if (user) {
+    console.log("APP USER =", user);
+    loadCourses();
+    console.log("Teacher ID =", user?.id);
+  }
+}, [user]);
 
 const filteredCourses = courses
   .filter((course) => {
@@ -42,8 +47,8 @@ const matchSearch =
 
  const matchStatus =
   statusFilter === "all" ||
-  (statusFilter === "published" && course.active) ||
-  (statusFilter === "draft" && !course.active);
+  (statusFilter === "published" && course.is_published) ||
+(statusFilter === "draft" && !course.is_published);
 
     return matchSearch && matchGrade && matchStatus;
   })
@@ -64,21 +69,27 @@ const matchSearch =
   });
 
 const loadCourses = async () => {
-  const { data, error } = await supabase
+const { data, error } = await supabase
   .from("courses")
   .select(`
-    *,
-    course_lectures(
-      id,
-      lecture_videos(id),
-      lecture_files(id)
-    )
+      *,
+      course_sections(
+        *,
+        course_items(*)
+      )
   `)
-  .order("created_at", { ascending: false });
+  .eq("teacher_id", user?.id)
+  .order("created_at", {
+    ascending: false,
+  });
 
-  if (error) return;
+  if (error) {
+    console.error(error);
+    return;
+  }
 
   setCourses(data || []);
+  console.log("COURSES =", data);
 };
 
 const deleteCourse = async (id: string) => {
@@ -126,9 +137,9 @@ const deleteCourse = async (id: string) => {
   totalCourses={courses.length}
 
   publishedCourses={
-    courses.filter(
-      (c) => c.status === "published"
-    ).length
+   courses.filter(
+  (c) => c.is_published
+).length
   }
 
   totalStudents={

@@ -22,21 +22,33 @@ export function CourseCard({
   view,
 }: Props) {
 const navigate = useNavigate();
-  const lectures = course.course_lectures?.length || 0;
+const sections = course.course_sections || [];
 
-const videos =
-  course.course_lectures?.reduce(
-    (sum: number, lecture: any) =>
-      sum + (lecture.lecture_videos?.length || 0),
-    0
-  ) || 0;
+const lectures = sections.length;
 
-const files =
-  course.course_lectures?.reduce(
-    (sum: number, lecture: any) =>
-      sum + (lecture.lecture_files?.length || 0),
-    0
-  ) || 0;
+const videos = sections.reduce(
+  (sum: number, section: any) => {
+    return (
+      sum +
+      (section.course_items?.filter(
+        (item: any) => item.type === "video"
+      ).length || 0)
+    );
+  },
+  0
+);
+
+const files = sections.reduce(
+  (sum: number, section: any) => {
+    return (
+      sum +
+      (section.course_items?.filter(
+        (item: any) => item.type === "pdf"
+      ).length || 0)
+    );
+  },
+  0
+);
 
   if (view === "list") {
   return (
@@ -57,7 +69,7 @@ const files =
     >
       <img
         src={
-          course.thumbnail ||
+          course.thumbnail || course.cover_image ||
           "https://images.unsplash.com/photo-1516321318423-f06f85e504b3"
         }
         className="
@@ -95,10 +107,10 @@ text-xs
 px-3
 py-1
 rounded-full
-${course.active ? "bg-green-500" : "bg-amber-500"}
+${course.is_published ? "bg-green-500" : "bg-amber-500"}
 `}
           >
-            {course.active ? "منشور" : "مسودة"}
+            {course.is_published ? "منشور" : "مسودة"}
           </span>
 
         </div>
@@ -193,7 +205,7 @@ ${course.active ? "bg-green-500" : "bg-amber-500"}
 
         <img
           src={
-            course.thumbnail ||
+            course.thumbnail || course.cover_image ||
             "https://images.unsplash.com/photo-1516321318423-f06f85e504b3"
           }
           className="w-full h-52 object-cover"
@@ -209,10 +221,10 @@ ${course.active ? "bg-green-500" : "bg-amber-500"}
     px-3
     py-1
     rounded-full
-    ${course.active ? "bg-green-500" : "bg-amber-500"}
+    ${course.is_published ? "bg-green-500" : "bg-amber-500"}
   `}
 >
-  {course.active ? "منشور" : "مسودة"}
+  {course.is_published ? "منشور" : "مسودة"}
 </span>
 
       </div>

@@ -1,17 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Plus } from "lucide-react";
-import {
-  ArrowRightOnRectangleIcon,
-  UserPlusIcon,
-} from "@heroicons/react/24/solid";
+import { GuestActions } from "./navbar/GuestActions";
+import { ThemeToggle } from "./navbar/ThemeToggle";
+import { SearchButton } from "./navbar/SearchButton";
 import { motion } from "motion/react";
+
 import {
   Menu,
   X,
   Bell,
-  Moon,
-  Sun,
   User,
   BookOpen,
   Settings,
@@ -60,42 +57,23 @@ useEffect(() => {
 
   return (
    <nav
-  className={`
+className={`
 sticky
 top-0
-relative
-overflow-hidden
 z-50
-mx-auto
 w-full
-max-w-none
-rounded-none
-lg:rounded-none
-bg-white/90
-dark:bg-[#130726]/90
-backdrop-blur-2xl
-before:absolute
-before:inset-0
-before:rounded-[26px]
-before:bg-gradient-to-b
-before:from-white/5
-before:to-transparent
-before:pointer-events-none
-border
-border-violet-200/40
-dark:border-white/10
+bg-white
+dark:bg-[#111111]
+border-b
+border-[#ECECEC]
+dark:border-[#2A2A2A]
 transition-all
 duration-300
-${
-  isScrolled
-    ? "shadow-[0_15px_50px_rgba(124,29,204,.18)]"
-    : "shadow-[0_8px_25px_rgba(124,29,204,.08)]"
-}
 `}
 >
 
-      <div className="px-8 lg:px-10">
-        <div className="flex items-center justify-between h-[76px]">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="h-24 flex items-center justify-between">
           <div className="flex items-center gap-4 pr-3">
 
   {/* Logo */}
@@ -126,109 +104,12 @@ object-contain
   </button>
 
   {/* Theme Button */}
-  <motion.button
-  onClick={toggleTheme}
-  whileHover={{ scale: 1.04 }}
-  whileTap={{ scale: 0.96 }}
-  transition={{
-    type: "spring",
-    stiffness: 500,
-    damping: 30,
-  }}
-  className="
-relative
-w-[68px]
-h-[38px]
-rounded-full
-overflow-hidden
-bg-gradient-to-r
-from-[#5B21B6]
-via-[#6D28D9]
-to-[#8B5CF6]
-shadow-[0_8px_25px_rgba(91,33,182,.35)]
-"
->
+ <ThemeToggle
+  isDark={isDark}
+  toggleTheme={toggleTheme}
+/>
 
-  {/* Background Glow */}
-
-  <div
-    className="
-absolute
-inset-0
-bg-gradient-to-t
-from-black/10
-to-white/10
-"
-  />
-
-  {/* Knob */}
-
-  <motion.div
-    layout
-    transition={{
-      type: "spring",
-      stiffness: 500,
-      damping: 32,
-    }}
-    className={`
-absolute
-top-[3px]
-${isDark ? "left-[3px]" : "left-[39px]"}
-w-[32px]
-h-[32px]
-rounded-full
-bg-white
-shadow-[0_6px_20px_rgba(0,0,0,.18)]
-flex
-items-center
-justify-center
-`}
-  >
-    {isDark ? (
-      <Moon
-        size={18}
-        strokeWidth={2.4}
-        className="text-[#5B21B6]"
-      />
-    ) : (
-      <Sun
-        size={18}
-        strokeWidth={2.4}
-        className="text-[#F59E0B]"
-      />
-    )}
-  </motion.div>
-
-  {/* Left Icon */}
-
-  <Moon
-    size={14}
-    strokeWidth={2.3}
-    className="
-absolute
-left-4
-top-1/2
--translate-y-1/2
-text-white/60
-"
-  />
-
-  {/* Right Icon */}
-
-  <Sun
-    size={14}
-    strokeWidth={2.3}
-    className="
-absolute
-right-4
-top-1/2
--translate-y-1/2
-text-white/60
-"
-  />
-
-</motion.button>
-
+ <SearchButton />
 </div>
           {/* Right Side */}
           <div className="flex items-center gap-4">
@@ -509,140 +390,9 @@ lg:w-[420px]
   )}
 
               </>
-            ) : (
-             <>
-
-             <div
-className="
-hidden
-md:flex
-items-center
-gap-3
-rounded-[28px]
-bg-[#F8FAFC]
-dark:bg-white/5
-border
-border-[#E2E8F0]
-dark:border-white/10
-p-2
-shadow-[0_10px_30px_rgba(0,0,0,.05)]
-backdrop-blur-xl
-"
->
-
-  {/* Login */}
-
-  {/* Register */}
-
-
-  <button
-    onClick={() => navigate("/login")}
-className="
-hidden
-md:flex
-items-center
-justify-center
-h-[48px]
-px-7
-rounded-[18px]
-border
-border-[#DDD6FE]
-dark:border-white/10
-bg-white/5
-dark:bg-white
-backdrop-blur-xl
-text-slate-700
-dark:text-white
-font-semibold
-hover:border-violet-400
-hover:text-violet-700
-hover:-translate-y-[2px]
-hover:shadow-[0_10px_25px_rgba(91,33,182,.10)]
-hover:shadow-violet-500/10
-transition-all
-duration-300
-ease-out
-hover:-translate-y-[2px]
-hover:scale-[1.02]
-"
-  >
-  <span>تسجيل الدخول</span>
-
-<ArrowRightOnRectangleIcon
-  className="w-5 h-5 text-slate-400
-group-hover:text-violet-600
-transition-colors
-duration-300"
-/>
-  </button>
-
-  <button
-    onClick={() => navigate("/register")}
-className="
-hidden
-md:flex
-items-center
-justify-center
-gap-4
-h-[52px]
-px-7
-rounded-[20px]
-bg-gradient-to-r
-from-[#5B21B6]
-via-[#6D28D9]
-to-[#9333EA]
-shadow-[0_10px_30px_rgba(91,33,182,.30)]
-text-white
-font-bold
-transition-all
-duration-300
-ease-out
-hover:-translate-y-[2px]
-hover:scale-[1.02]
-hover:bg-[#6633C4]
-shadow-[0_8px_20px_rgba(91,33,182,.25)]
-hover:shadow-[0_18px_40px_rgba(91,33,182,.45)]
-active:scale-[0.96]
-active:translate-y-[1px]
-"
->
-<span
-  className="
-    tracking-[-0.2px]
-    text-[15px]
-    font-semibold
-tracking-[-0.2px]
-  "
->
-  إنشاء حساب
-</span>
-
-<div
-  className="
-w-[44px]
-h-[44px]  
-    rounded-[20px]
-    bg-white/18
-backdrop-blur-md
-border
-border-white/30
-    flex
-    items-center
-    justify-center
-  "
->
-  <UserPlusIcon 
-  className="
-w-[22px]
-h-[22px]
-text-white
-"
-/>
-</div>
-  </button>
-  </div>
-</>
-            )}
+ ) : (
+  <GuestActions navigate={navigate} />
+)}
             
             {/* Mobile Menu Toggle */}
             <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 rounded-xl text-slate-500 group
@@ -711,27 +461,28 @@ to-[#D900A8]
           </div>
         </div>
       )}
-     <div className="h-[4px] w-full bg-slate-200 dark:bg-white/15 overflow-hidden">
-
-  <div
+   <div
+  className="
+absolute
+bottom-0
+left-0
+w-full
+h-[4px]
+bg-[#D9F7F4]
+overflow-hidden
+"
+>
+  <motion.div
     className="
-    h-full
-    rounded-full
-    bg-gradient-to-r
-    from-violet-600
-    via-fuchsia-500
-    to-violet-400
-    shadow-[0_0_15px_rgba(168,85,247,.8)]
-    transition-all
-    duration-300
-    ease-out
-    "
+h-full
+bg-[#27D3C2]
+"
     style={{
       width: `${scrollProgress}%`,
     }}
   />
-
 </div>
+
     </nav>
   );
 }

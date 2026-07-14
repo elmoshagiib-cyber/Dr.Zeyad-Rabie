@@ -1,5 +1,9 @@
 import { useState } from "react";
 import InstructorLayout from "../../layouts/InstructorLayout";
+import { supabase } from "../../lib/supabase";
+import { useNavigate } from "react-router-dom";
+import { useApp } from "../../context/AppContext";
+
 
 export function CreateCourse() {
   const [title, setTitle] = useState("");
@@ -7,7 +11,107 @@ export function CreateCourse() {
   const [grade, setGrade] = useState("");
   const [price, setPrice] = useState("");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
+const navigate = useNavigate();
+const { user } = useApp();
+const [loading, setLoading] = useState(false);
 
+const createCourse = async () => {
+  try {
+    setLoading(true);
+
+    if (
+      !title ||
+      !description ||
+      !grade
+    ) {
+      alert("اكمل جميع البيانات");
+      return;
+    }
+
+    let thumbnailUrl = "";
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+console.log("SESSION =", session);
+
+    if (thumbnail) {
+      const ext =
+        thumbnail.name.split(".").pop();
+
+      const fileName =
+        `${crypto.randomUUID()}.${ext}`;
+
+      const { error: uploadError } =
+        await supabase.storage
+          .from("course-thumbnails")
+          .upload(fileName, thumbnail);
+
+      if (uploadError)
+        throw uploadError;
+
+      thumbnailUrl =
+        supabase.storage
+          .from("course-thumbnails")
+          .getPublicUrl(fileName)
+          .data.publicUrl;
+    }
+
+    const slug = `${title
+  .trim()
+  .toLowerCase()
+  .replace(/\s+/g, "-")
+  .replace(/[^\w-]+/g, "")}-${Date.now()}`;
+        
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+  throw new Error("المستخدم غير مسجل دخول");
+}
+
+const { data: instructor, error: instructorError } = await supabase
+  .from("instructors")
+  .select("id")
+  .eq("auth_id", user.id)
+  .single();
+
+if (instructorError) throw instructorError;
+
+const { data, error } = await supabase
+  .from("courses")
+  
+  .insert({
+    teacher_id: instructor.id,
+
+    title,
+    slug,
+    description,
+    grade,
+
+    price: Number(price || 0),
+
+    thumbnail: thumbnailUrl,
+
+    is_free: Number(price) === 0,
+
+    is_published: false,
+  })
+  .select()
+  .single();
+
+if (error) throw error;
+
+navigate(`/instructor/courses/edit/${data.id}`);
+
+  } catch (err) {
+    console.error(err);
+    alert("حدث خطأ");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
      <InstructorLayout>
@@ -248,6 +352,8 @@ export function CreateCourse() {
           {/* الزر */}
 
           <button
+onClick={createCourse}
+disabled={loading}
             className="
             w-full
             h-14

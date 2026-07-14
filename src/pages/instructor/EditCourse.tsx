@@ -7,7 +7,10 @@ import { supabase } from "../../lib/supabase";
 // TYPES & INTERFACES
 // ─────────────────────────────────────────────
 
-type QuestionType = "multiple_choice" | "true_false";
+type QuestionType =
+  | "multiple_choice"
+  | "true_false"
+  | "essay";
 type SubmissionType = "text" | "pdf" | "image" | "multiple_files";
 type TabId = "content" | "exams" | "homework" | "settings";
 type UploadStatus = "idle" | "uploading" | "done" | "error";
@@ -96,6 +99,7 @@ interface Homework {
   pdfFile: File | null;
   imageFile: File | null;
   isExpanded: boolean;
+  isPublished: boolean;
 }
 
 interface Course {
@@ -229,6 +233,7 @@ function makeEmptyHomework(): Homework {
     pdfFile: null,
     imageFile: null,
     isExpanded: true,
+    isPublished: false,
   };
 }
 
@@ -365,71 +370,315 @@ export function EditCourse() {
   // DATA LOADING
   // ─────────────────────────────────────────
 
-  async function loadCourse() {
-    if (!id) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const { data, error: supaError } = await supabase
-        .from("courses")
-        .select("*")
-        .eq("id", id)
-        .single();
+async function loadCourse() {
+  if (!id) return;
 
-      if (supaError) throw supaError;
-      if (!data) throw new Error("الكورس غير موجود");
+  setLoading(true);
 
-      setCourse({
-        id: data.id ?? "",
-        title: data.title ?? "",
-        description: data.description ?? "",
-        price: data.price ?? 0,
-        isFree: data.is_free ?? false,
-        thumbnailUrl: data.thumbnail_url ?? "",
-        grade: data.grade ?? "",
-        isPublished: data.is_published ?? false,
-        isHidden: data.is_hidden ?? false,
-        thumbnailFile: null,
-      });
+  try {
+    // الكورس
+    const { data: courseData, error: courseError } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-      if (data.sections && Array.isArray(data.sections)) {
-        setSections(data.sections);
-      }
-      if (data.exams && Array.isArray(data.exams)) {
-        setExams(data.exams);
-      }
-      if (data.homeworks && Array.isArray(data.homeworks)) {
-        setHomeworks(data.homeworks);
-      }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "حدث خطأ أثناء تحميل الكورس";
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
+    if (courseError) throw courseError;
+
+    setCourse({
+      id: courseData.id,
+      title: courseData.title,
+      description: courseData.description,
+      price: courseData.price,
+      isFree: courseData.is_free,
+      thumbnailUrl: courseData.thumbnail,
+      grade: courseData.grade,
+      isPublished: courseData.is_published,
+      isHidden: courseData.is_hidden,
+      thumbnailFile: null,
+    });
+
+    // الأقسام
+    const { data: sectionsData, error: sectionsError } =
+  await supabase
+    .from("course_sections")
+    .select(`
+      *,
+      course_items(*)
+    `)
+    .eq("course_id", id)
+    .order("sort_order");
+
+    if (sectionsError) throw sectionsError;
+
+setSections(
+  (sectionsData || []).map((section: any) => {
+    const items = (section.course_items || []).sort(
+      (a: any, b: any) => a.sort_order - b.sort_order
+    );
+
+    return {
+      id: section.id,
+      name: section.title,
+      isCollapsed: false,
+      isRenaming: false,
+      renameValue: section.title,
+
+      videos: items
+        .filter((item: any) => item.type === "video")
+        .map((item: any) => ({
+          ...makeEmptyVideo(),
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          videoUrl: item.url,
+          durationSeconds: item.duration || 0,
+          fileSize: item.file_size || 0,
+          allowDownload: item.allow_download,
+          freePreview: item.is_preview,
+          uploadStatus: item.url ? "done" : "idle",
+        })),
+
+      pdfs: items
+        .filter((item: any) => item.type === "pdf")
+        .map((item: any) => ({
+          ...makeEmptyPdf(),
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          pdfUrl: item.url,
+          fileSize: item.file_size || 0,
+          uploadStatus: item.url ? "done" : "idle",
+        })),
+    };
+  })
+);
+
+console.log("COURSE:", courseData);
+console.log("SECTIONS:", sectionsData);
+
+  } catch (err) {
+    console.error(err);
+  }
+await loadExams();
+  setLoading(false);
+}
+
+async function removeExam(examId: string) {
+  if (!confirm("هل تريد حذف الاختبار؟")) return;
+
+  const { error } = await supabase
+    .from("exams")
+    .delete()
+    .eq("id", Number(examId));
+
+  if (error) {
+    console.error(error);
+    alert(error.message);
+    return;
   }
 
-  useEffect(() => {
-    loadCourse();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  setExams((prev) => prev.filter((e) => e.id !== examId));
+}
 
+function updateExam(examId: string, updates: Partial<Exam>) {
+  setExams((prev) =>
+    prev.map((e) =>
+      e.id === examId
+        ? { ...e, ...updates }
+        : e
+    )
+  );
+}
+
+async function saveExam(
+  examId: string,
+  updates: Partial<Exam>
+) {
+  const { error } = await supabase
+    .from("exams")
+    .update({
+      title: updates.title,
+      description: updates.description,
+      duration: updates.durationMinutes,
+      passing_grade: updates.passingScore,
+      total_score: updates.totalScore,
+      open_date: updates.openDate || null,
+      close_date: updates.closeDate || null,
+      is_visible: updates.isVisible,
+      is_published: updates.isPublished,
+    })
+    .eq("id", Number(examId));
+
+  if (error) {
+    console.error(error);
+    alert(error.message);
+  }
+}
+
+async function saveQuestion(
+  questionId: string,
+  updates: {
+    title?: string;
+    points?: number;
+    type?: string;
+    correct_answer?: string;
+  }
+) {
+  const { error } = await supabase
+    .from("exam_questions")
+    .update(updates)
+    .eq("id", questionId);
+
+  if (error) {
+    console.error(error);
+    alert(error.message);
+  }
+}
+
+async function saveQuestionOrder(questions: Question[]) {
+  for (let index = 0; index < questions.length; index++) {
+    const question = questions[index];
+
+    console.log(
+      "Saving:",
+      question.title,
+      "=>",
+      index
+    );
+
+    const { error } = await supabase
+      .from("exam_questions")
+      .update({
+        sort_order: index,
+      })
+      .eq("id", question.id);
+
+    if (error) {
+      console.error(error);
+    }
+  }
+}
+
+async function saveChoice(
+  choiceId: string,
+  text: string
+) {
+  const { error } = await supabase
+    .from("question_choices")
+    .update({
+      text,
+    })
+    .eq("id", choiceId);
+
+  if (error) {
+    console.error(error);
+    alert(error.message);
+  }
+}
+
+async function addQuestion(examId: string) {
+  const { data, error } = await supabase
+    .from("exam_questions")
+    .insert({
+      exam_id: Number(examId),
+      title: "سؤال جديد",
+      type: "multiple_choice",
+      points: 1,
+      sort_order:
+        exams.find((e) => e.id === examId)?.questions.length || 0,
+      correct_answer: "",
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error(error);
+    alert(error.message);
+    return;
+  }
+
+  const choices = Array.from({ length: 4 }).map((_, i) => ({
+    question_id: data.id,
+    text: `الخيار ${i + 1}`,
+    sort_order: i,
+  }));
+
+  const { data: choiceData } = await supabase
+    .from("question_choices")
+    .insert(choices)
+    .select();
+
+  setExams((prev) =>
+    prev.map((exam) =>
+      exam.id === examId
+        ? {
+            ...exam,
+            questions: [
+              ...exam.questions,
+              {
+                id: data.id,
+                title: data.title,
+                type: data.type as QuestionType,
+                correctAnswer: data.correct_answer ?? "",
+                points: data.points,
+                choices:
+                  choiceData?.map((c: any) => ({
+                    id: c.id,
+                    text: c.text,
+                  })) ?? [],
+              },
+            ],
+          }
+        : exam
+    )
+  );
+}
+
+ useEffect(() => {
+  loadCourse();
+  loadExams();
+  loadHomeworks();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [id]);
   // ─────────────────────────────────────────
   // COURSE FUNCTIONS
   // ─────────────────────────────────────────
 
   async function saveCourse() {
-    setSaving(true);
-    try {
-      // Placeholder: ready for Supabase integration
-      // await supabase.from("courses").update({ ... }).eq("id", course.id);
-      await new Promise((r) => setTimeout(r, 800));
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    } finally {
-      setSaving(false);
-    }
+  setSaving(true);
+
+  try {
+    const { error } = await supabase
+      .from("courses")
+      .update({
+        title: course.title,
+        description: course.description,
+        grade: course.grade,
+        price: course.price,
+        is_free: course.isFree,
+        is_hidden: course.isHidden,
+        is_published: course.isPublished,
+        thumbnail: course.thumbnailUrl,
+      })
+      .eq("id", course.id);
+
+    if (error) throw error;
+
+    setSaveSuccess(true);
+
+    setTimeout(() => {
+      setSaveSuccess(false);
+    }, 3000);
+
+  } catch (err: any) {
+    console.error(err);
+    alert(err.message || "حدث خطأ أثناء حفظ الكورس");
+  } finally {
+    setSaving(false);
   }
+}
 
   async function deleteCourse() {
     // Placeholder: ready for Supabase integration
@@ -441,38 +690,175 @@ export function EditCourse() {
     setCourse((prev) => ({ ...prev, [field]: value }));
   }
 
-  async function uploadThumbnail(_file: File): Promise<string> {
-    // Placeholder: ready for Supabase Storage integration
-    // const { data } = await supabase.storage.from("thumbnails").upload(...)
-    return "";
+async function uploadThumbnail(file: File): Promise<string> {
+  const ext = file.name.split(".").pop();
+
+  const fileName = `course-${course.id}-${Date.now()}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("course-thumbnails")
+    .upload(fileName, file, {
+      upsert: true,
+    });
+
+  if (uploadError) {
+    throw uploadError;
   }
 
-  function handleThumbnailChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const {
+    data: { publicUrl },
+  } = supabase.storage
+    .from("course-thumbnails")
+    .getPublicUrl(fileName);
+
+  return publicUrl;
+}
+
+  async function handleThumbnailChange(
+  e: React.ChangeEvent<HTMLInputElement>
+) {
+  const file = e.target.files?.[0];
+
+  if (!file) return;
+
+  try {
+    const imageUrl = await uploadThumbnail(file);
+
     updateCourseField("thumbnailFile", file);
-    const url = URL.createObjectURL(file);
-    updateCourseField("thumbnailUrl", url);
-    void uploadThumbnail(file);
-  }
+    updateCourseField("thumbnailUrl", imageUrl);
 
+  } catch (err: any) {
+    console.error(err);
+    alert(err.message || "فشل رفع الصورة");
+  }
+}
   // ─────────────────────────────────────────
   // SECTION FUNCTIONS
   // ─────────────────────────────────────────
 
-  function addSection() {
-    setSections((prev) => [...prev, makeEmptySection()]);
-  }
+async function addSection() {
+  try {
+    const { data, error } = await supabase
+      .from("course_sections")
+      .insert({
+        course_id: id,
+        title: `قسم ${sections.length + 1}`,
+        sort_order: sections.length,
+      })
+      .select()
+      .single();
 
-  function removeSection(sectionId: string) {
-    setSections((prev) => prev.filter((s) => s.id !== sectionId));
-  }
+    if (error) throw error;
 
-  function renameSection(sectionId: string, newName: string) {
-    setSections((prev) =>
-      prev.map((s) => (s.id === sectionId ? { ...s, name: newName, isRenaming: false } : s))
-    );
+    setSections((prev) => [
+      ...prev,
+      {
+        id: data.id,
+        name: data.title,
+        isCollapsed: false,
+        isRenaming: false,
+        renameValue: data.title,
+        videos: [],
+        pdfs: [],
+      },
+    ]);
+
+  } catch (err) {
+    console.error(err);
+    alert("حدث خطأ أثناء إضافة القسم");
   }
+}
+
+async function removeSection(sectionId: string) {
+  if (!confirm("هل تريد حذف هذا القسم وكل محتوياته؟")) return;
+
+  try {
+    // كل العناصر الموجودة داخل القسم
+    const { data: items, error: itemsError } = await supabase
+      .from("course_items")
+      .select("id, type, storage_path")
+      .eq("section_id", sectionId);
+
+    if (itemsError) throw itemsError;
+
+    const videoFiles =
+      items
+        ?.filter(
+          (i) => i.type === "video" && i.storage_path
+        )
+        .map((i) => i.storage_path) || [];
+
+    const pdfFiles =
+      items
+        ?.filter(
+          (i) => i.type === "pdf" && i.storage_path
+        )
+        .map((i) => i.storage_path) || [];
+
+    // حذف الفيديوهات من Storage
+    if (videoFiles.length) {
+      const { error } = await supabase.storage
+        .from("course-videos")
+        .remove(videoFiles);
+
+      if (error) console.error(error);
+    }
+
+    // حذف ملفات PDF من Storage
+    if (pdfFiles.length) {
+      const { error } = await supabase.storage
+        .from("course-files")
+        .remove(pdfFiles);
+
+      if (error) console.error(error);
+    }
+
+    // حذف عناصر القسم
+    const { error: itemsDeleteError } =
+      await supabase
+        .from("course_items")
+        .delete()
+        .eq("section_id", sectionId);
+
+    if (itemsDeleteError) throw itemsDeleteError;
+
+    // حذف القسم
+    const { error: sectionDeleteError } =
+      await supabase
+        .from("course_sections")
+        .delete()
+        .eq("id", sectionId);
+
+    if (sectionDeleteError) throw sectionDeleteError;
+
+    loadCourse();
+  } catch (err) {
+    console.error(err);
+    alert("حدث خطأ أثناء حذف القسم");
+  }
+}
+
+async function renameSection(
+  sectionId: string,
+  newName: string
+) {
+  const { error } = await supabase
+    .from("course_sections")
+    .update({
+      title: newName,
+    })
+    .eq("id", sectionId);
+
+  if (error) {
+  console.error("QUESTION ERROR:", error);
+
+  alert(JSON.stringify(error, null, 2));
+
+  return;
+}
+
+  loadCourse();
+}
 
   function toggleSectionRenaming(sectionId: string) {
     setSections((prev) =>
@@ -490,39 +876,160 @@ export function EditCourse() {
     );
   }
 
-  function moveSectionUp(index: number) {
-    if (index === 0) return;
-    setSections((prev) => {
-      const arr = [...prev];
-      [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
-      return arr;
-    });
-  }
+  async function moveSectionUp(index: number) {
+  if (index === 0) return;
 
-  function moveSectionDown(index: number) {
-    setSections((prev) => {
-      if (index === prev.length - 1) return prev;
-      const arr = [...prev];
-      [arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
-      return arr;
-    });
-  }
+  const arr = [...sections];
+
+  [arr[index - 1], arr[index]] = [
+    arr[index],
+    arr[index - 1],
+  ];
+
+  setSections(arr);
+
+  await saveSectionOrder(arr);
+}
+
+  async function moveSectionDown(index: number) {
+  if (index === sections.length - 1) return;
+
+  const arr = [...sections];
+
+  [arr[index], arr[index + 1]] = [
+    arr[index + 1],
+    arr[index],
+  ];
+
+  setSections(arr);
+
+  await saveSectionOrder(arr);
+}
 
   // ─────────────────────────────────────────
   // VIDEO FUNCTIONS
   // ─────────────────────────────────────────
 
-  function addVideo(sectionId: string) {
-    setSections((prev) =>
-      prev.map((s) => (s.id === sectionId ? { ...s, videos: [...s.videos, makeEmptyVideo()] } : s))
-    );
+async function addVideo(sectionId: string) {
+  const { data, error } = await supabase
+    .from("course_items")
+    .insert({
+      section_id: sectionId,
+      type: "video",
+      title: "درس جديد",
+      description: "",
+      source: "upload",
+      sort_order:
+        sections.find((s) => s.id === sectionId)?.videos.length || 0,
+      allow_download: false,
+      is_preview: false,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error(error);
+    return;
   }
 
-  function removeVideo(sectionId: string, videoId: string) {
+  setSections((prev) =>
+    prev.map((s) =>
+      s.id === sectionId
+        ? {
+            ...s,
+            videos: [
+              ...s.videos,
+              {
+                ...makeEmptyVideo(),
+                id: data.id,
+                title: data.title,
+              },
+            ],
+          }
+        : s
+    )
+  );
+}
+
+ async function removeVideo(sectionId: string, videoId: string) {
+  if (!confirm("هل تريد حذف الفيديو؟")) return;
+
+  try {
+    // نجيب مسار الملف من قاعدة البيانات
+    const { data, error } = await supabase
+      .from("course_items")
+      .select("storage_path")
+      .eq("id", videoId)
+      .single();
+
+    if (error) throw error;
+
+    // حذف الملف من Storage
+    if (data?.storage_path) {
+      const { error: storageError } = await supabase.storage
+        .from("course-videos")
+        .remove([data.storage_path]);
+
+      if (storageError) {
+        console.error(storageError);
+      }
+    }
+
+    // حذف السجل من قاعدة البيانات
+    const { error: deleteError } = await supabase
+      .from("course_items")
+      .delete()
+      .eq("id", videoId);
+
+    if (deleteError) throw deleteError;
+
+    // تحديث الـ UI
     setSections((prev) =>
-      prev.map((s) => (s.id === sectionId ? { ...s, videos: s.videos.filter((v) => v.id !== videoId) } : s))
+      prev.map((s) =>
+        s.id === sectionId
+          ? {
+              ...s,
+              videos: s.videos.filter((v) => v.id !== videoId),
+            }
+          : s
+      )
     );
+  } catch (err) {
+    console.error(err);
+    alert("حدث خطأ أثناء حذف الفيديو");
   }
+}
+
+async function saveSectionOrder(updatedSections: any[]) {
+  try {
+    await Promise.all(
+      updatedSections.map((section, index) =>
+        supabase
+          .from("course_sections")
+          .update({
+            sort_order: index,
+          })
+          .eq("id", section.id)
+      )
+    );
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function saveVideo(
+  videoId: string,
+  updates: any
+) {
+  const { error } = await supabase
+    .from("course_items")
+    .update(updates)
+    .eq("id", videoId);
+
+  if (error) {
+    console.error(error);
+  }
+}
 
   function updateVideo(sectionId: string, videoId: string, updates: Partial<VideoFile>) {
     setSections((prev) =>
@@ -532,20 +1039,76 @@ export function EditCourse() {
           : s
       )
     );
+    
+  }
+  
+  async function savePdfOrder(pdfs: PdfFile[]) {
+  try {
+    await Promise.all(
+      pdfs.map((pdf, index) =>
+        supabase
+          .from("course_items")
+          .update({
+            sort_order: index,
+          })
+          .eq("id", pdf.id)
+      )
+    );
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+  async function saveVideoOrder(videos: VideoFile[]) {
+  try {
+    await Promise.all(
+      videos.map((video, index) =>
+        supabase
+          .from("course_items")
+          .update({
+            sort_order: index,
+          })
+          .eq("id", video.id)
+      )
+    );
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+  async function moveVideo(
+  sectionId: string,
+  videoId: string,
+  direction: "up" | "down"
+) {
+  const section = sections.find((s) => s.id === sectionId);
+  if (!section) return;
+
+  const arr = [...section.videos];
+
+  const idx = arr.findIndex((v) => v.id === videoId);
+
+  if (direction === "up" && idx > 0) {
+    [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
   }
 
-  function moveVideo(sectionId: string, videoId: string, direction: "up" | "down") {
-    setSections((prev) =>
-      prev.map((s) => {
-        if (s.id !== sectionId) return s;
-        const arr = [...s.videos];
-        const idx = arr.findIndex((v) => v.id === videoId);
-        if (direction === "up" && idx > 0) [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
-        if (direction === "down" && idx < arr.length - 1) [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
-        return { ...s, videos: arr };
-      })
-    );
+  if (direction === "down" && idx < arr.length - 1) {
+    [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
   }
+
+  setSections((prev) =>
+    prev.map((s) =>
+      s.id === sectionId
+        ? {
+            ...s,
+            videos: arr,
+          }
+        : s
+    )
+  );
+
+  await saveVideoOrder(arr);
+}
 
   async function uploadVideo(sectionId: string, videoId: string, file: File) {
     updateVideo(sectionId, videoId, { uploadStatus: "uploading", uploadProgress: 0, file });
@@ -557,30 +1120,100 @@ export function EditCourse() {
     }
 
     try {
-      // Placeholder: ready for Supabase Storage
-      // const { data } = await supabase.storage.from("videos").upload(...)
-      const url = URL.createObjectURL(file);
+     const ext = file.name.split(".").pop();
 
-      // Get video duration
-      const duration = await new Promise<number>((resolve) => {
-        const video = document.createElement("video");
-        video.preload = "metadata";
-        video.onloadedmetadata = () => resolve(Math.floor(video.duration));
-        video.onerror = () => resolve(0);
-        video.src = url;
-      });
+const fileName = `${crypto.randomUUID()}.${ext}`;
 
-      updateVideo(sectionId, videoId, {
-        uploadStatus: "done",
-        uploadProgress: 100,
-        videoUrl: url,
-        fileName: file.name,
-        fileSize: file.size,
-        durationSeconds: duration,
-      });
-    } catch {
-      updateVideo(sectionId, videoId, { uploadStatus: "error", uploadProgress: 0 });
-    }
+const storagePath = `${sectionId}/${fileName}`;
+
+const { error: uploadError } = await supabase.storage
+  .from("course-videos")
+  .upload(storagePath, file);
+
+if (uploadError) throw uploadError;
+
+const { data } = supabase.storage
+  .from("course-videos")
+  .getPublicUrl(storagePath);
+
+const publicUrl = data.publicUrl;
+
+// استخراج مدة الفيديو
+const duration = await new Promise<number>((resolve) => {
+  const video = document.createElement("video");
+  video.preload = "metadata";
+
+  video.onloadedmetadata = () => {
+    resolve(Math.floor(video.duration));
+  };
+
+  video.onerror = () => resolve(0);
+
+  video.src = publicUrl;
+});
+
+const { error: dbError } = await supabase
+  .from("course_items")
+  .update({
+    url: publicUrl,
+    storage_path: storagePath,
+    duration,
+    file_size: file.size,
+  })
+  .eq("id", videoId);
+
+if (dbError) {
+  console.error("DB ERROR", dbError);
+  throw dbError;
+}
+
+console.log("DB UPDATED");
+
+async function saveVideoOrder(videos: VideoFile[]) {
+  try {
+    await Promise.all(
+      videos.map((video, index) =>
+        supabase
+          .from("course_items")
+          .update({
+            sort_order: index,
+          })
+          .eq("id", video.id)
+      )
+    );
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function saveVideo(videoId: string, updates: any) {
+  const { error } = await supabase
+    .from("course_items")
+    .update(updates)
+    .eq("id", videoId);
+
+  if (error) {
+    console.error(error);
+  }
+}
+
+updateVideo(sectionId, videoId, {
+  uploadStatus: "done",
+  uploadProgress: 100,
+  videoUrl: publicUrl,
+  fileName: file.name,
+  fileSize: file.size,
+  durationSeconds: duration,
+});
+     
+    } catch (err) {
+  console.error("UPLOAD ERROR:", err);
+
+  updateVideo(sectionId, videoId, {
+    uploadStatus: "error",
+    uploadProgress: 0,
+  });
+}
   }
 
   function handleVideoFileChange(sectionId: string, videoId: string, e: React.ChangeEvent<HTMLInputElement>) {
@@ -593,17 +1226,97 @@ export function EditCourse() {
   // PDF FUNCTIONS
   // ─────────────────────────────────────────
 
-  function addPdf(sectionId: string) {
-    setSections((prev) =>
-      prev.map((s) => (s.id === sectionId ? { ...s, pdfs: [...s.pdfs, makeEmptyPdf()] } : s))
-    );
+async function addPdf(sectionId: string) {
+  const { data, error } = await supabase
+    .from("course_items")
+    .insert({
+      section_id: sectionId,
+      type: "pdf",
+      title: "ملف جديد",
+      description: "",
+      source: "upload",
+      sort_order:
+        sections.find((s) => s.id === sectionId)?.pdfs.length || 0,
+      allow_download: true,
+      is_preview: false,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error(error);
+    return;
   }
 
-  function removePdf(sectionId: string, pdfId: string) {
+  setSections((prev) =>
+    prev.map((s) =>
+      s.id === sectionId
+        ? {
+            ...s,
+            pdfs: [
+              ...s.pdfs,
+              {
+                ...makeEmptyPdf(),
+                id: data.id,
+                title: data.title,
+              },
+            ],
+          }
+        : s
+    )
+  );
+}
+
+
+
+ async function removePdf(sectionId: string, pdfId: string) {
+  if (!confirm("هل تريد حذف الملف؟")) return;
+
+  try {
+    // الحصول على مسار الملف
+    const { data, error } = await supabase
+      .from("course_items")
+      .select("storage_path")
+      .eq("id", pdfId)
+      .single();
+
+    if (error) throw error;
+
+    // حذف الملف من Storage
+    if (data?.storage_path) {
+      const { error: storageError } = await supabase.storage
+        .from("course-files")
+        .remove([data.storage_path]);
+
+      if (storageError) {
+        console.error(storageError);
+      }
+    }
+
+    // حذف السجل من قاعدة البيانات
+    const { error: deleteError } = await supabase
+      .from("course_items")
+      .delete()
+      .eq("id", pdfId);
+
+    if (deleteError) throw deleteError;
+
+    // تحديث الـ UI
     setSections((prev) =>
-      prev.map((s) => (s.id === sectionId ? { ...s, pdfs: s.pdfs.filter((p) => p.id !== pdfId) } : s))
+      prev.map((s) =>
+        s.id === sectionId
+          ? {
+              ...s,
+              pdfs: s.pdfs.filter((p) => p.id !== pdfId),
+            }
+          : s
+      )
     );
+  } catch (err) {
+    console.error(err);
+    alert("حدث خطأ أثناء حذف الملف");
   }
+}
 
   function updatePdf(sectionId: string, pdfId: string, updates: Partial<PdfFile>) {
     setSections((prev) =>
@@ -615,18 +1328,39 @@ export function EditCourse() {
     );
   }
 
-  function movePdf(sectionId: string, pdfId: string, direction: "up" | "down") {
-    setSections((prev) =>
-      prev.map((s) => {
-        if (s.id !== sectionId) return s;
-        const arr = [...s.pdfs];
-        const idx = arr.findIndex((p) => p.id === pdfId);
-        if (direction === "up" && idx > 0) [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
-        if (direction === "down" && idx < arr.length - 1) [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
-        return { ...s, pdfs: arr };
-      })
-    );
+ async function movePdf(
+  sectionId: string,
+  pdfId: string,
+  direction: "up" | "down"
+) {
+  const section = sections.find((s) => s.id === sectionId);
+  if (!section) return;
+
+  const arr = [...section.pdfs];
+
+  const idx = arr.findIndex((p) => p.id === pdfId);
+
+  if (direction === "up" && idx > 0) {
+    [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
   }
+
+  if (direction === "down" && idx < arr.length - 1) {
+    [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
+  }
+
+  setSections((prev) =>
+    prev.map((s) =>
+      s.id === sectionId
+        ? {
+            ...s,
+            pdfs: arr,
+          }
+        : s
+    )
+  );
+
+  await savePdfOrder(arr);
+}
 
   async function uploadPdf(sectionId: string, pdfId: string, file: File) {
     updatePdf(sectionId, pdfId, { uploadStatus: "uploading", uploadProgress: 0, file });
@@ -635,18 +1369,53 @@ export function EditCourse() {
       updatePdf(sectionId, pdfId, { uploadProgress: p });
     }
     try {
-      // Placeholder: ready for Supabase Storage
-      const url = URL.createObjectURL(file);
-      updatePdf(sectionId, pdfId, {
-        uploadStatus: "done",
-        uploadProgress: 100,
-        pdfUrl: url,
-        fileName: file.name,
-        fileSize: file.size,
-      });
-    } catch {
-      updatePdf(sectionId, pdfId, { uploadStatus: "error", uploadProgress: 0 });
-    }
+      const ext = file.name.split(".").pop();
+
+const fileName = `${crypto.randomUUID()}.${ext}`;
+
+const storagePath = `${sectionId}/${fileName}`;
+
+const { error: uploadError } = await supabase.storage
+  .from("course-files")
+  .upload(storagePath, file);
+
+if (uploadError) throw uploadError;
+
+const { data } = supabase.storage
+  .from("course-files")
+  .getPublicUrl(storagePath);
+
+const publicUrl = data.publicUrl;
+
+const { error: dbError } = await supabase
+  .from("course_items")
+  .update({
+    url: publicUrl,
+    storage_path: storagePath,
+    file_size: file.size,
+  })
+  .eq("id", pdfId);
+
+if (dbError) throw dbError;
+
+updatePdf(sectionId, pdfId, {
+  uploadStatus: "done",
+  uploadProgress: 100,
+  pdfUrl: publicUrl,
+  fileName: file.name,
+  fileSize: file.size,
+});
+    } 
+    catch (err: any) {
+  console.error("PDF ERROR =", err);
+
+  alert(err?.message || JSON.stringify(err));
+
+  updatePdf(sectionId, pdfId, {
+    uploadStatus: "error",
+    uploadProgress: 0,
+  });
+}
   }
 
   function handlePdfFileChange(sectionId: string, pdfId: string, e: React.ChangeEvent<HTMLInputElement>) {
@@ -659,36 +1428,130 @@ export function EditCourse() {
   // EXAM FUNCTIONS
   // ─────────────────────────────────────────
 
-  function addExam() {
-    setExams((prev) => [...prev, makeEmptyExam()]);
+async function addExam() {
+  if (!id) return;
+
+  const { data, error } = await supabase
+    .from("exams")
+    .insert({
+      course_id: id,
+      title: "اختبار جديد",
+      description: "",
+      duration: 60,
+      passing_grade: 60,
+      total_score: 100,
+      is_visible: true,
+      is_published: false,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error(error);
+    alert(error.message);
+    return;
   }
 
-  function removeExam(examId: string) {
-    setExams((prev) => prev.filter((e) => e.id !== examId));
-  }
+  setExams((prev) => [
+    ...prev,
+    {
+      id: String(data.id),
+      title: data.title,
+      description: data.description ?? "",
+      passingScore: data.passing_grade,
+      totalScore: data.total_score,
+      durationMinutes: data.duration,
+      openDate: data.open_date ?? "",
+      closeDate: data.close_date ?? "",
+      isVisible: data.is_visible,
+      isPublished: data.is_published,
+      questions: [],
+      isExpanded: true,
+    },
+  ]);
+}
 
-  function updateExam(examId: string, updates: Partial<Exam>) {
-    setExams((prev) => prev.map((e) => (e.id === examId ? { ...e, ...updates } : e)));
-  }
 
-  async function saveExam(_examId: string) {
-    // Placeholder: ready for Supabase integration
-    // await supabase.from("exams").upsert({ ... })
-  }
+async function loadExams() {
+  if (!id) return;
 
-  function addQuestion(examId: string) {
-    setExams((prev) =>
-      prev.map((e) => (e.id === examId ? { ...e, questions: [...e.questions, makeEmptyQuestion()] } : e))
-    );
-  }
-
-  function removeQuestion(examId: string, questionId: string) {
-    setExams((prev) =>
-      prev.map((e) =>
-        e.id === examId ? { ...e, questions: e.questions.filter((q) => q.id !== questionId) } : e
+  const { data, error } = await supabase
+    .from("exams")
+    .select(`
+      *,
+      exam_questions (
+        *,
+        question_choices (*)
       )
-    );
+    `)
+    .eq("course_id", id)
+    .order("id");
+
+  if (error) {
+    console.error(error);
+    return;
   }
+
+  setExams(
+    (data ?? []).map((exam: any) => ({
+      id: String(exam.id),
+      title: exam.title,
+      description: exam.description ?? "",
+      passingScore: exam.passing_grade,
+      totalScore: exam.total_score,
+      durationMinutes: exam.duration,
+      openDate: exam.open_date ?? "",
+      closeDate: exam.close_date ?? "",
+      isVisible: exam.is_visible,
+      isPublished: exam.is_published,
+
+      questions:
+        exam.exam_questions?.map((question: any) => ({
+          id: question.id,
+          title: question.title,
+          type: question.type as QuestionType,
+          correctAnswer: question.correct_answer ?? "",
+          points: question.points,
+
+          choices:
+            question.question_choices?.map((choice: any) => ({
+              id: choice.id,
+              text: choice.text,
+            })) ?? [],
+        })) ?? [],
+
+      isExpanded: false,
+    }))
+  );
+}
+
+ async function removeQuestion(examId: string, questionId: string) {
+  if (!confirm("هل تريد حذف السؤال؟")) return;
+
+  const { error } = await supabase
+    .from("exam_questions")
+    .delete()
+    .eq("id", questionId);
+
+  if (error) {
+    console.error(error);
+    alert(error.message);
+    return;
+  }
+
+  setExams((prev) =>
+    prev.map((exam) =>
+      exam.id === examId
+        ? {
+            ...exam,
+            questions: exam.questions.filter(
+              (q) => q.id !== questionId
+            ),
+          }
+        : exam
+    )
+  );
+}
 
   function updateQuestion(examId: string, questionId: string, updates: Partial<Question>) {
     setExams((prev) =>
@@ -700,18 +1563,39 @@ export function EditCourse() {
     );
   }
 
-  function moveQuestion(examId: string, questionId: string, direction: "up" | "down") {
-    setExams((prev) =>
-      prev.map((e) => {
-        if (e.id !== examId) return e;
-        const arr = [...e.questions];
-        const idx = arr.findIndex((q) => q.id === questionId);
-        if (direction === "up" && idx > 0) [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
-        if (direction === "down" && idx < arr.length - 1) [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
-        return { ...e, questions: arr };
-      })
-    );
-  }
+async function moveQuestion(
+  examId: string,
+  questionId: string,
+  direction: "up" | "down"
+) {
+  let updatedQuestions: Question[] = [];
+
+  setExams((prev) =>
+    prev.map((exam) => {
+      if (exam.id !== examId) return exam;
+
+      const arr = [...exam.questions];
+      const idx = arr.findIndex((q) => q.id === questionId);
+
+      if (direction === "up" && idx > 0) {
+        [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+      }
+
+      if (direction === "down" && idx < arr.length - 1) {
+        [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
+      }
+
+      updatedQuestions = arr;
+
+      return {
+        ...exam,
+        questions: arr,
+      };
+    })
+  );
+
+  await saveQuestionOrder(updatedQuestions);
+}
 
   function updateChoice(examId: string, questionId: string, choiceId: string, text: string) {
     setExams((prev) =>
@@ -734,22 +1618,200 @@ export function EditCourse() {
   // HOMEWORK FUNCTIONS
   // ─────────────────────────────────────────
 
-  function addHomework() {
-    setHomeworks((prev) => [...prev, makeEmptyHomework()]);
+async function addHomework() {
+  if (!id) return;
+
+  const { data, error } = await supabase
+    .from("homeworks")
+    .insert({
+      course_id: id,
+      title: "واجب جديد",
+      description: "",
+      total_score: 100,
+      due_date: null,
+      allow_late_submission: false,
+      is_published: false,
+      allowed_types: [],
+      sort_order: homeworks.length,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error(error);
+    alert(error.message);
+    return;
   }
 
-  function removeHomework(hwId: string) {
-    setHomeworks((prev) => prev.filter((h) => h.id !== hwId));
+  setHomeworks((prev) => [
+    ...prev,
+    {
+      ...makeEmptyHomework(),
+      id: String(data.id),
+      title: data.title,
+      description: data.description ?? "",
+      totalScore: data.total_score,
+      dueDate: data.due_date ?? "",
+      allowLateSubmission: data.allow_late_submission,
+      isPublished: data.is_published,
+      allowedTypes: data.allowed_types ?? [],
+      attachmentPdfUrl: data.attachment_pdf ?? "",
+      attachmentImageUrl: data.attachment_image ?? "",
+    },
+  ]);
+}
+
+async function loadHomeworks() {
+  if (!id) return;
+
+  const { data, error } = await supabase
+    .from("homeworks")
+    .select("*")
+    .eq("course_id", id)
+    .order("sort_order");
+
+  if (error) {
+    console.error(error);
+    return;
   }
+
+  setHomeworks(
+    (data ?? []).map((hw: any) => ({
+      id: String(hw.id),
+      title: hw.title,
+      description: hw.description ?? "",
+      dueDate: hw.due_date ?? "",
+      totalScore: hw.total_score,
+      allowLateSubmission: hw.allow_late_submission,
+      allowedTypes: hw.allowed_types ?? ["text"],
+      instructionText: hw.instruction_text ?? "",
+      attachmentPdfUrl: hw.attachment_pdf ?? "",
+      attachmentPdfName: "",
+      attachmentImageUrl: hw.attachment_image ?? "",
+      attachmentImageName: "",
+      pdfFile: null,
+      imageFile: null,
+      isPublished: hw.is_published,
+      isExpanded: false,
+    }))
+  );
+}
+
+ async function removeHomework(hwId: string) {
+  const hw = homeworks.find((h) => h.id === hwId);
+
+  if (!hw) return;
+
+  // حذف PDF
+  if (hw.attachmentPdfUrl) {
+    const path = hw.attachmentPdfUrl.split("/").pop();
+
+    if (path) {
+      await supabase.storage
+        .from("homework-files")
+        .remove([path]);
+    }
+  }
+
+  // حذف الصورة
+  if (hw.attachmentImageUrl) {
+    const path = hw.attachmentImageUrl.split("/").pop();
+
+    if (path) {
+      await supabase.storage
+        .from("homework-images")
+        .remove([path]);
+    }
+  }
+
+  const { error } = await supabase
+    .from("homeworks")
+    .delete()
+    .eq("id", Number(hwId));
+
+  if (error) {
+    console.error(error);
+    alert(error.message);
+    return;
+  }
+
+  setHomeworks((prev) =>
+    prev.filter((h) => h.id !== hwId)
+  );
+}
+
+async function saveHomeworkOrder(homeworks: Homework[]) {
+  for (let i = 0; i < homeworks.length; i++) {
+    await supabase
+      .from("homeworks")
+      .update({
+        sort_order: i,
+      })
+      .eq("id", Number(homeworks[i].id));
+  }
+}
+
+async function moveHomework(
+  hwId: string,
+  direction: "up" | "down"
+) {
+  const list = [...homeworks];
+
+  const index = list.findIndex(
+    (h) => h.id === hwId
+  );
+
+  if (index === -1) return;
+
+  if (direction === "up" && index > 0) {
+    [list[index], list[index - 1]] = [
+      list[index - 1],
+      list[index],
+    ];
+  }
+
+  if (
+    direction === "down" &&
+    index < list.length - 1
+  ) {
+    [list[index], list[index + 1]] = [
+      list[index + 1],
+      list[index],
+    ];
+  }
+
+  setHomeworks(list);
+
+  await saveHomeworkOrder(list);
+}
 
   function updateHomework(hwId: string, updates: Partial<Homework>) {
     setHomeworks((prev) => prev.map((h) => (h.id === hwId ? { ...h, ...updates } : h)));
   }
 
-  async function saveHomework(_hwId: string) {
-    // Placeholder: ready for Supabase integration
-    // await supabase.from("homework").upsert({ ... })
+async function saveHomework(
+  hwId: string,
+  updates: Partial<Homework>
+) {
+  const { error } = await supabase
+    .from("homeworks")
+    .update({
+      title: updates.title,
+      description: updates.description,
+      due_date: updates.dueDate || null,
+      total_score: updates.totalScore,
+      allow_late_submission: updates.allowLateSubmission,
+      allowed_types: updates.allowedTypes,
+      instruction_text: updates.instructionText,
+      is_published: updates.isPublished,
+    })
+    .eq("id", Number(hwId));
+
+  if (error) {
+    console.error(error);
+    alert(error.message);
   }
+}
 
   function toggleHomeworkType(hwId: string, type: SubmissionType) {
     setHomeworks((prev) =>
@@ -764,15 +1826,67 @@ export function EditCourse() {
     );
   }
 
-  async function uploadHomeworkAttachment(hwId: string, type: "pdf" | "image", file: File) {
-    // Placeholder: ready for Supabase Storage
-    const url = URL.createObjectURL(file);
-    if (type === "pdf") {
-      updateHomework(hwId, { attachmentPdfUrl: url, attachmentPdfName: file.name, pdfFile: file });
-    } else {
-      updateHomework(hwId, { attachmentImageUrl: url, attachmentImageName: file.name, imageFile: file });
-    }
+async function uploadHomeworkAttachment(
+  hwId: string,
+  type: "pdf" | "image",
+  file: File
+) {
+  const fileName = `${Date.now()}-${file.name}`;
+
+  const bucket =
+    type === "pdf"
+      ? "homework-files"
+      : "homework-images";
+
+  const { error: uploadError } =
+    await supabase.storage
+      .from(bucket)
+      .upload(fileName, file);
+
+  if (uploadError) {
+    console.error(uploadError);
+    alert(uploadError.message);
+    return;
   }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage
+    .from(bucket)
+    .getPublicUrl(fileName);
+
+  const updates =
+    type === "pdf"
+      ? {
+          attachmentPdfUrl: publicUrl,
+          attachmentPdfName: file.name,
+          pdfFile: file,
+        }
+      : {
+          attachmentImageUrl: publicUrl,
+          attachmentImageName: file.name,
+          imageFile: file,
+        };
+
+  updateHomework(hwId, updates);
+
+  const { error } = await supabase
+    .from("homeworks")
+    .update(
+      type === "pdf"
+        ? {
+            attachment_pdf: publicUrl,
+          }
+        : {
+            attachment_image: publicUrl,
+          }
+    )
+    .eq("id", Number(hwId));
+
+  if (error) {
+    console.error(error);
+  }
+}
 
   function handleHomeworkAttachment(hwId: string, type: "pdf" | "image", e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -1172,34 +2286,84 @@ export function EditCourse() {
                           <div className="p-4 space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                               <div>
+                                
                                 <label className="mb-1.5 block text-xs font-semibold text-slate-600">عنوان الفيديو</label>
                                 <input
-                                  type="text"
-                                  value={video.title}
-                                  onChange={(e) => updateVideo(section.id, video.id, { title: e.target.value })}
+  type="text"
+  value={video.title}
+  onChange={async (e) => {
+  const value = e.target.value;
+
+  updateVideo(section.id, video.id, {
+    title: value,
+  });
+
+  await saveVideo(video.id, {
+    title: value,
+  });
+}}
+  onBlur={() =>
+    saveVideo(video.id, {
+      title: video.title,
+    })
+  }
                                   placeholder="أدخل عنوان الفيديو"
                                   className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
                                 />
                               </div>
-                              <div className="flex items-end gap-4">
-                                <Toggle
-                                  checked={video.freePreview}
-                                  onChange={(v) => updateVideo(section.id, video.id, { freePreview: v })}
-                                  label="معاينة مجانية"
-                                />
-                                <Toggle
-                                  checked={video.allowDownload}
-                                  onChange={(v) => updateVideo(section.id, video.id, { allowDownload: v })}
-                                  label="تحميل"
-                                />
-                              </div>
+                             <div className="flex items-end gap-4">
+
+  <Toggle
+    label="معاينة مجانية"
+    checked={video.freePreview}
+    onChange={async (v) => {
+      updateVideo(section.id, video.id, {
+        freePreview: v,
+      });
+
+      await saveVideo(video.id, {
+        is_preview: v,
+      });
+    }}
+  />
+
+  <Toggle
+    label="تحميل"
+    checked={video.allowDownload}
+    onChange={async (v) => {
+      updateVideo(section.id, video.id, {
+        allowDownload: v,
+      });
+
+      await saveVideo(video.id, {
+        allow_download: v,
+      });
+    }}
+  />
+
+</div>
                             </div>
 
                             <div>
                               <label className="mb-1.5 block text-xs font-semibold text-slate-600">وصف الفيديو</label>
-                              <textarea
-                                value={video.description}
-                                onChange={(e) => updateVideo(section.id, video.id, { description: e.target.value })}
+                            <textarea
+  value={video.description}
+  onChange={async (e) => {
+  const value = e.target.value;
+
+  updateVideo(section.id, video.id, {
+    description: value,
+  });
+
+  await saveVideo(video.id, {
+    description: value,
+  });
+}}
+  onBlur={() =>
+    saveVideo(video.id, {
+      description: video.description,
+    })
+  }
                                 placeholder="وصف مختصر للفيديو..."
                                 rows={2}
                                 className="w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
@@ -1329,7 +2493,17 @@ export function EditCourse() {
                               <input
                                 type="text"
                                 value={pdf.title}
-                                onChange={(e) => updatePdf(section.id, pdf.id, { title: e.target.value })}
+                                onChange={async (e) => {
+  const value = e.target.value;
+
+  updatePdf(section.id, pdf.id, {
+    title: value,
+  });
+
+  await saveVideo(pdf.id, {
+    title: value,
+  });
+}}
                                 placeholder="أدخل عنوان الملف"
                                 className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
                               />
@@ -1505,7 +2679,19 @@ export function EditCourse() {
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
-                      onClick={() => void saveExam(exam.id)}
+                      onClick={() =>
+  void saveExam(exam.id, {
+    title: exam.title,
+    description: exam.description,
+    passingScore: exam.passingScore,
+    totalScore: exam.totalScore,
+    durationMinutes: exam.durationMinutes,
+    openDate: exam.openDate,
+    closeDate: exam.closeDate,
+    isVisible: exam.isVisible,
+    isPublished: exam.isPublished,
+  })
+}
                       className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-50"
                     >
                       حفظ
@@ -1532,7 +2718,17 @@ export function EditCourse() {
                         <input
                           type="text"
                           value={exam.title}
-                          onChange={(e) => updateExam(exam.id, { title: e.target.value })}
+                          onChange={async (e) => {
+  const value = e.target.value;
+
+  updateExam(exam.id, {
+    title: value,
+  });
+
+  await saveExam(exam.id, {
+    title: value,
+  });
+}}
                           placeholder="أدخل عنوان الاختبار"
                           className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
                         />
@@ -1541,7 +2737,17 @@ export function EditCourse() {
                         <label className="mb-1.5 block text-xs font-semibold text-slate-600">الوصف</label>
                         <textarea
                           value={exam.description}
-                          onChange={(e) => updateExam(exam.id, { description: e.target.value })}
+                          onChange={async (e) => {
+  const value = e.target.value;
+
+  updateExam(exam.id, {
+    description: value,
+  });
+
+  await saveExam(exam.id, {
+    description: value,
+  });
+}}
                           placeholder="وصف مختصر..."
                           rows={2}
                           className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
@@ -1554,7 +2760,17 @@ export function EditCourse() {
                           min={0}
                           max={100}
                           value={exam.passingScore}
-                          onChange={(e) => updateExam(exam.id, { passingScore: Number(e.target.value) })}
+                          onChange={async (e) => {
+  const value = Number(e.target.value);
+
+  updateExam(exam.id, {
+    passingScore: value,
+  });
+
+  await saveExam(exam.id, {
+    passingScore: value,
+  });
+}}
                           className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
                         />
                       </div>
@@ -1564,7 +2780,17 @@ export function EditCourse() {
                           type="number"
                           min={1}
                           value={exam.totalScore}
-                          onChange={(e) => updateExam(exam.id, { totalScore: Number(e.target.value) })}
+                          onChange={async (e) => {
+  const value = Number(e.target.value);
+
+  updateExam(exam.id, {
+    totalScore: value,
+  });
+
+  await saveExam(exam.id, {
+    totalScore: value,
+  });
+}}
                           className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
                         />
                       </div>
@@ -1574,7 +2800,17 @@ export function EditCourse() {
                           type="number"
                           min={1}
                           value={exam.durationMinutes}
-                          onChange={(e) => updateExam(exam.id, { durationMinutes: Number(e.target.value) })}
+                          onChange={async (e) => {
+  const value = Number(e.target.value);
+
+  updateExam(exam.id, {
+    durationMinutes: value,
+  });
+
+  await saveExam(exam.id, {
+    durationMinutes: value,
+  });
+}}
                           className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
                         />
                       </div>
@@ -1583,7 +2819,17 @@ export function EditCourse() {
                         <input
                           type="datetime-local"
                           value={exam.openDate}
-                          onChange={(e) => updateExam(exam.id, { openDate: e.target.value })}
+                          onChange={async (e) => {
+  const value = e.target.value;
+
+  updateExam(exam.id, {
+    openDate: value,
+  });
+
+  await saveExam(exam.id, {
+    openDate: value,
+  });
+}}
                           className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
                         />
                       </div>
@@ -1592,19 +2838,45 @@ export function EditCourse() {
                         <input
                           type="datetime-local"
                           value={exam.closeDate}
-                          onChange={(e) => updateExam(exam.id, { closeDate: e.target.value })}
+                          onChange={async (e) => {
+  const value = e.target.value;
+
+  updateExam(exam.id, {
+    closeDate: value,
+  });
+
+  await saveExam(exam.id, {
+    closeDate: value,
+  });
+}}
                           className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
                         />
                       </div>
                       <div className="col-span-2 flex items-center gap-8">
                         <Toggle
                           checked={exam.isVisible}
-                          onChange={(v) => updateExam(exam.id, { isVisible: v })}
+                          onChange={async (v) => {
+  updateExam(exam.id, {
+    isVisible: v,
+  });
+
+  await saveExam(exam.id, {
+    isVisible: v,
+  });
+}}
                           label="ظاهر للطلاب"
                         />
                         <Toggle
                           checked={exam.isPublished}
-                          onChange={(v) => updateExam(exam.id, { isPublished: v })}
+                          onChange={async (v) => {
+  updateExam(exam.id, {
+    isPublished: v,
+  });
+
+  await saveExam(exam.id, {
+    isPublished: v,
+  });
+}}
                           label="منشور"
                         />
                       </div>
@@ -1638,23 +2910,56 @@ export function EditCourse() {
                                   <input
                                     type="text"
                                     value={question.title}
-                                    onChange={(e) => updateQuestion(exam.id, question.id, { title: e.target.value })}
+                                    onChange={async (e) => {
+  const value = e.target.value;
+
+  updateQuestion(exam.id, question.id, {
+    title: value,
+  });
+
+  await saveQuestion(question.id, {
+    title: value,
+  });
+}}
                                     placeholder="نص السؤال..."
                                     className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
                                   />
                                   <select
                                     value={question.type}
-                                    onChange={(e) => updateQuestion(exam.id, question.id, { type: e.target.value as QuestionType, correctAnswer: "" })}
+                                   onChange={async (e) => {
+  const value = e.target.value as QuestionType;
+
+  updateQuestion(exam.id, question.id, {
+    type: value,
+    correctAnswer: "",
+  });
+
+  await saveQuestion(question.id, {
+    type: value,
+    correct_answer: "",
+  });
+}}
                                     className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
                                   >
                                     <option value="multiple_choice">اختيار من متعدد</option>
                                     <option value="true_false">صح / خطأ</option>
+                                    <option value="essay">سؤال مقالي</option>
                                   </select>
                                   <input
                                     type="number"
                                     min={0}
                                     value={question.points}
-                                    onChange={(e) => updateQuestion(exam.id, question.id, { points: Number(e.target.value) })}
+                                    onChange={async (e) => {
+  const value = Number(e.target.value);
+
+  updateQuestion(exam.id, question.id, {
+    points: value,
+  });
+
+  await saveQuestion(question.id, {
+    points: value,
+  });
+}}
                                     title="الدرجات"
                                     placeholder="درجة"
                                     className="w-16 rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs text-slate-800 text-center outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
@@ -1669,13 +2974,32 @@ export function EditCourse() {
                                           type="radio"
                                           name={`correct-${question.id}`}
                                           checked={question.correctAnswer === choice.id}
-                                          onChange={() => updateQuestion(exam.id, question.id, { correctAnswer: choice.id })}
+                                         onChange={async () => {
+  updateQuestion(exam.id, question.id, {
+    correctAnswer: choice.id,
+  });
+
+  await saveQuestion(question.id, {
+    correct_answer: choice.id,
+  });
+}}
                                           className="h-4 w-4 flex-shrink-0 accent-violet-600"
                                         />
                                         <input
                                           type="text"
                                           value={choice.text}
-                                          onChange={(e) => updateChoice(exam.id, question.id, choice.id, e.target.value)}
+                                          onChange={async (e) => {
+  const value = e.target.value;
+
+  updateChoice(
+    exam.id,
+    question.id,
+    choice.id,
+    value
+  );
+
+  await saveChoice(choice.id, value);
+}}
                                           placeholder="نص الخيار..."
                                           className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
                                         />
@@ -1694,7 +3018,15 @@ export function EditCourse() {
                                         type="radio"
                                         name={`tf-${question.id}`}
                                         checked={question.correctAnswer === "true"}
-                                        onChange={() => updateQuestion(exam.id, question.id, { correctAnswer: "true" })}
+                                        onChange={async () => {
+  updateQuestion(exam.id, question.id, {
+    correctAnswer: "true",
+  });
+
+  await saveQuestion(question.id, {
+    correct_answer: "true",
+  });
+}}
                                         className="h-4 w-4 accent-violet-600"
                                       />
                                       <span className="text-sm font-medium text-slate-700">صح</span>
@@ -1704,13 +3036,45 @@ export function EditCourse() {
                                         type="radio"
                                         name={`tf-${question.id}`}
                                         checked={question.correctAnswer === "false"}
-                                        onChange={() => updateQuestion(exam.id, question.id, { correctAnswer: "false" })}
+                                        onChange={async () => {
+  updateQuestion(exam.id, question.id, {
+    correctAnswer: "false",
+  });
+
+  await saveQuestion(question.id, {
+    correct_answer: "false",
+  });
+}}
                                         className="h-4 w-4 accent-violet-600"
                                       />
                                       <span className="text-sm font-medium text-slate-700">خطأ</span>
                                     </label>
                                   </div>
                                 )}
+
+                                {question.type === "essay" && (
+  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-3">
+    <div className="flex items-center justify-between">
+      <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+        سؤال مقالي
+      </span>
+
+      <span className="text-xs font-medium text-slate-500">
+        الدرجة: {question.points}
+      </span>
+    </div>
+
+    <div className="rounded-lg border border-dashed border-amber-300 bg-white p-3">
+      <p className="text-sm font-medium text-slate-700">
+        سيقوم الطالب بكتابة إجابة نصية.
+      </p>
+
+      <p className="mt-2 text-xs text-slate-500">
+        لا توجد إجابة صحيحة محفوظة لهذا النوع من الأسئلة، وسيتم تصحيحه يدويًا بواسطة المدرس بعد إرسال الطالب للإجابة.
+      </p>
+    </div>
+  </div>
+)}
                               </div>
 
                               <div className="flex flex-col gap-1 flex-shrink-0">
@@ -1810,7 +3174,18 @@ export function EditCourse() {
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
-                      onClick={() => void saveHomework(hw.id)}
+                     onClick={() =>
+  void saveHomework(hw.id, {
+    title: hw.title,
+    description: hw.description,
+    dueDate: hw.dueDate,
+    totalScore: hw.totalScore,
+    allowLateSubmission: hw.allowLateSubmission,
+    allowedTypes: hw.allowedTypes,
+    instructionText: hw.instructionText,
+    isPublished: hw.isPublished,
+  })
+}
                       className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-50"
                     >
                       حفظ
@@ -1836,7 +3211,16 @@ export function EditCourse() {
                         <input
                           type="text"
                           value={hw.title}
-                          onChange={(e) => updateHomework(hw.id, { title: e.target.value })}
+                          onChange={async (e) => {
+  updateHomework(hw.id, {
+    title: e.target.value,
+  });
+
+  await saveHomework(hw.id, {
+    ...hw,
+    title: e.target.value,
+  });
+}}
                           placeholder="أدخل عنوان الواجب"
                           className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
                         />
@@ -1845,7 +3229,16 @@ export function EditCourse() {
                         <label className="mb-1.5 block text-xs font-semibold text-slate-600">الوصف</label>
                         <textarea
                           value={hw.description}
-                          onChange={(e) => updateHomework(hw.id, { description: e.target.value })}
+                          onChange={async (e) => {
+  updateHomework(hw.id, {
+    description: e.target.value,
+  });
+
+  await saveHomework(hw.id, {
+    ...hw,
+    description: e.target.value,
+  });
+}}
                           placeholder="وصف الواجب والتعليمات..."
                           rows={3}
                           className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
@@ -1856,7 +3249,16 @@ export function EditCourse() {
                         <input
                           type="datetime-local"
                           value={hw.dueDate}
-                          onChange={(e) => updateHomework(hw.id, { dueDate: e.target.value })}
+                          onChange={async (e) => {
+  updateHomework(hw.id, {
+    dueDate: e.target.value,
+  });
+
+  await saveHomework(hw.id, {
+    ...hw,
+    dueDate: e.target.value,
+  });
+}}
                           className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
                         />
                       </div>
@@ -1866,14 +3268,34 @@ export function EditCourse() {
                           type="number"
                           min={0}
                           value={hw.totalScore}
-                          onChange={(e) => updateHomework(hw.id, { totalScore: Number(e.target.value) })}
+                          onChange={async (e) => {
+  const value = Number(e.target.value);
+
+  updateHomework(hw.id, {
+    totalScore: value,
+  });
+
+  await saveHomework(hw.id, {
+    ...hw,
+    totalScore: value,
+  });
+}}
                           className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
                         />
                       </div>
                       <div className="col-span-2">
                         <Toggle
                           checked={hw.allowLateSubmission}
-                          onChange={(v) => updateHomework(hw.id, { allowLateSubmission: v })}
+                          onChange={async (v) => {
+  updateHomework(hw.id, {
+    allowLateSubmission: v,
+  });
+
+  await saveHomework(hw.id, {
+    ...hw,
+    allowLateSubmission: v,
+  });
+}}
                           label="السماح بالتسليم المتأخر"
                         />
                       </div>
@@ -1927,7 +3349,16 @@ export function EditCourse() {
                       <label className="mb-1.5 block text-xs font-semibold text-slate-600">تعليمات إضافية</label>
                       <textarea
                         value={hw.instructionText}
-                        onChange={(e) => updateHomework(hw.id, { instructionText: e.target.value })}
+                        onChange={async (e) => {
+  updateHomework(hw.id, {
+    instructionText: e.target.value,
+  });
+
+  await saveHomework(hw.id, {
+    ...hw,
+    instructionText: e.target.value,
+  });
+}}
                         placeholder="تعليمات تفصيلية للطلاب..."
                         rows={3}
                         className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
@@ -2036,13 +3467,25 @@ export function EditCourse() {
                 </div>
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold text-slate-600">الصف الدراسي / المرحلة</label>
-                  <input
-                    type="text"
-                    value={course.grade}
-                    onChange={(e) => updateCourseField("grade", e.target.value)}
-                    placeholder="مثال: الصف الأول الثانوي"
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
-                  />
+                  <select
+  value={course.grade}
+  onChange={(e) => updateCourseField("grade", e.target.value)}
+  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
+>
+  <option value="">اختر الصف الدراسي</option>
+
+  <optgroup label="المرحلة الإعدادية">
+    <option value="الصف الأول الإعدادي">الصف الأول الإعدادي</option>
+    <option value="الصف الثاني الإعدادي">الصف الثاني الإعدادي</option>
+    <option value="الصف الثالث الإعدادي">الصف الثالث الإعدادي</option>
+  </optgroup>
+
+  <optgroup label="المرحلة الثانوية">
+    <option value="الصف الأول الثانوي">الصف الأول الثانوي</option>
+    <option value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
+    <option value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
+  </optgroup>
+</select>
                 </div>
               </div>
             </SectionCard>
@@ -2064,7 +3507,9 @@ export function EditCourse() {
                 />
                 {!course.isFree && (
                   <div>
-                    <label className="mb-1.5 block text-xs font-semibold text-slate-600">السعر (ريال)</label>
+                    <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+  السعر (جنيه مصري)
+</label>
                     <div className="relative">
                       <input
                         type="number"
@@ -2074,7 +3519,7 @@ export function EditCourse() {
                         onChange={(e) => updateCourseField("price", Number(e.target.value))}
                         className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all"
                       />
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">ر.س</div>
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">ج.م</div>
                     </div>
                   </div>
                 )}

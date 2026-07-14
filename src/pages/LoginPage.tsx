@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Phone, Lock, Eye, EyeOff, GraduationCap, ArrowLeft } from "lucide-react";
-
+import { supabase } from "../lib/supabase";
 import { useApp } from "../context/AppContext";
 import { CURRENT_STUDENT } from "../data/mockData";
 
@@ -14,7 +14,7 @@ export function LoginPage({
 }) {
   const navigate = useNavigate();
   const { login } = useApp();
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -22,10 +22,21 @@ export function LoginPage({
   const [activeRole, setActiveRole] = useState<LoginRole>("student");
 
   const demoUsers = {
-    student: { phone: "01012345678", password: "student123" },
-    instructor: { phone: "01098765432", password: "instructor123" },
-    admin: { phone: "01011112222", password: "admin123" },
-  };
+  student: {
+    email: "student@test.com",
+    password: "student123",
+  },
+
+  instructor: {
+    email: "zeyadrabie10@gmail.com",
+    password: "asdfghjkl10",
+  },
+
+  admin: {
+    email: "admin@test.com",
+    password: "admin123",
+  },
+};
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,40 +44,83 @@ export function LoginPage({
     setError("");
     await new Promise(r => setTimeout(r, 1200));
 
-    const demo = demoUsers[activeRole];
-    if (phone === demo.phone && password === demo.password) {
-      if (activeRole === "student") {
-        login({
-          id: CURRENT_STUDENT.id,
-          name: CURRENT_STUDENT.name,
-          role: "student",
-          grade: CURRENT_STUDENT.grade,
-          gradeLabel: CURRENT_STUDENT.gradeLabel,
-          code: CURRENT_STUDENT.code,
-          governorate: CURRENT_STUDENT.governorate,
-          phone: CURRENT_STUDENT.phone,
-          status: "approved",
-        });
-        navigate("/dashboard");
-      } else if (activeRole === "instructor") {
-        login({ id: "i1", name: "د. زياد ربيع", role: "instructor" });
-        navigate("/instructor");
-      } else {
-        login({ id: "admin1", name: "مدير النظام", role: "admin" });
-        navigate("/admin");
-      }
-    } else {
-      setError("رقم الهاتف أو كلمة المرور غير صحيحة. جرّب البيانات التجريبية.");
-    }
-    setLoading(false);
-  };
+ if (activeRole === "student") {
+   // Login الطالب
 
-  const fillDemo = (role: LoginRole) => {
-    setActiveRole(role);
-    setPhone(demoUsers[role].phone);
-    setPassword(demoUsers[role].password);
-    setError("");
-  };
+   login({
+  id: CURRENT_STUDENT.id,
+  name: CURRENT_STUDENT.name,
+  role: "student",
+  grade: CURRENT_STUDENT.grade,
+  gradeLabel: CURRENT_STUDENT.gradeLabel,
+  code: CURRENT_STUDENT.code,
+  governorate: CURRENT_STUDENT.governorate,
+  phone: CURRENT_STUDENT.phone,
+  status: "approved",
+});
+
+navigate("/dashboard");
+
+}
+else if (activeRole === "instructor") {
+   // Login Supabase
+
+ const { data, error } =
+  await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+if (error) {
+  setError(error.message);
+  setLoading(false);
+  return;
+}
+
+console.log("AUTH USER ID =", data.user.id);
+
+const { data: instructor, error: instructorError } =
+  await supabase
+    .from("instructors")
+    .select("*")
+    .eq("auth_id", data.user.id)
+    .single();
+
+console.log("AUTH USER =", data.user);
+console.log("AUTH USER ID =", data.user.id);
+console.log("INSTRUCTOR =", instructor);
+console.log("INSTRUCTOR ERROR =", instructorError);
+
+if (instructorError || !instructor) {
+  setError("هذا الحساب ليس مدرساً");
+  setLoading(false);
+  return;
+}
+
+login({
+  id: instructor.id,
+  name: instructor.full_name,
+  role: "instructor",
+  phone: instructor.phone,
+});
+
+navigate("/instructor");
+
+setLoading(false);
+return;
+}
+else {
+  login({
+    id: "admin1",
+    name: "مدير النظام",
+    role: "admin",
+  });
+
+  navigate("/admin");
+}
+
+setLoading(false);
+};
 
   return (
     <div className="
@@ -228,23 +282,12 @@ activeRole === "admin"
 
 </div>
 )}
-          {/* Demo Hint */}
-          <div className="px-8 mb-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-4">
-              <p className="text-blue-200 text-xs font-bold mb-1">🔑 بيانات تجريبية</p>
-              <p className="text-blue-300 text-xs">رقم الهاتف: <span className="font-mono text-white">{demoUsers[activeRole].phone}</span></p>
-              <p className="text-blue-300 text-xs">كلمة المرور: <span className="font-mono text-white">{demoUsers[activeRole].password}</span></p>
-              <button onClick={() => fillDemo(activeRole)} className="mt-2 text-xs text-blue-300 underline hover:text-white">
-                تعبئة تلقائية
-              </button>
-            </div>
-          </div>
 
           {/* Form */}
           <form onSubmit={handleLogin} className="px-10 pb-10 space-y-6">
 <div className="group">
   <label className="block mb-2 text-sm font-bold text-slate-700 dark:text-slate-300">
-    رقم الهاتف
+    البريد الإلكتروني
   </label>
 
   <div
@@ -276,10 +319,11 @@ text-violet-500
     />
 
     <input
-      type="tel"
-      placeholder="01xxxxxxxxx"
-      value={phone}
-      onChange={(e) => setPhone(e.target.value)}
+      type="email"
+      placeholder="البريد الإلكتروني"
+     value={email}
+
+onChange={(e) => setEmail(e.target.value)}
       className="
 w-full
 h-[60px]
