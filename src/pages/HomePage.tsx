@@ -265,7 +265,13 @@ lg:py-20
       },
     },
   }}
-  className="mt-8 sm:mt-10 lg:mt-16"
+  className="
+mt-10
+sm:mt-12
+lg:mt-0
+flex
+justify-center
+"
 >
 
         <div className="relative">
@@ -277,15 +283,15 @@ lg:py-20
   className="
 relative
 z-10
-w-[220px]
-xs:w-[260px]
-sm:w-[340px]
-md:w-[420px]
-lg:w-[500px]
-xl:w-[560px]
+w-[320px]
+xs:w-[360px]
+sm:w-[430px]
+md:w-[500px]
+lg:w-[560px]
+xl:w-[620px]
+2xl:w-[680px]
 mx-auto
 object-contain
-animate-float
 "
 />
 
