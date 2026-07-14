@@ -75,43 +75,65 @@ useEffect(() => {
 >
 
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="h-24 flex items-center justify-between">
-          <div className="flex items-center gap-4 pr-3">
+        <div className="relative h-24 flex items-center justify-between">
+<div className="flex items-center gap-3 pr-3">
+
+  {/* Mobile Center Logo */}
+<div
+  className="
+  md:hidden
+  absolute
+  left-1/2
+  -translate-x-1/2
+  "
+>
+  <button
+    onClick={() => navigate("/")}
+    className="flex items-center justify-center"
+  >
+    <img
+      src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
+      alt="د. زياد ربيع"
+      className="h-10 object-contain"
+    />
+  </button>
+</div>
 
   {/* Logo */}
   <button
-    onClick={() => navigate("/")}
-    className="
-flex
-items-center
-justify-center
-transition-all
-duration-200
-ease-out
-hover:scale-[1.05]
-hover:drop-shadow-[0_0_10px_rgba(124,58,237,.25)]
-"
-  >
-    
+  className="
+  hidden
+  md:flex
+  items-center
+  justify-center
+  transition-all
+  duration-200
+  hover:scale-105
+  "
+  onClick={() => navigate("/")}
+>
     <img
       src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
       alt="د. زياد ربيع"
       className="
-h-10
-sm:h-12
-lg:h-[64px]
-object-contain
-"
+      h-10
+      sm:h-12
+      lg:h-16
+      object-contain
+      "
     />
   </button>
 
-  {/* Theme Button */}
- <ThemeToggle
-  isDark={isDark}
-  toggleTheme={toggleTheme}
-/>
+  <ThemeToggle
+    isDark={isDark}
+    toggleTheme={toggleTheme}
+  />
 
- <SearchButton />
+  {/* Desktop Only */}
+  <div className="hidden md:block">
+    <SearchButton />
+  </div>
+
 </div>
           {/* Right Side */}
           <div className="flex items-center gap-4">

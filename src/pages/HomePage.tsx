@@ -162,7 +162,7 @@ lg:py-20
     dark:text-white
     "
   >
-    أهلاً بك في منصة
+    مرحبا بكم في منصة
 
     <span
       className="
