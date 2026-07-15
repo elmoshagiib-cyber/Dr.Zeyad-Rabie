@@ -94,7 +94,7 @@ useEffect(() => {
     <img
       src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
       alt="د. زياد ربيع"
-      className="h-10 object-contain"
+      className="h-15 object-contain"
     />
   </button>
 </div>
@@ -448,40 +448,39 @@ mb-3
 </button>
 
 <button
-onClick={() => navigate("/register")}
-className="
-group
-relative
-overflow-hidden
-w-full
-h-[52px]
-rounded-xl
-text-white
-bg-gradient-to-r
-from-[#7C1DCC]
-via-[#A52DFF]
-to-[#D900A8]
-"
->
-
-  <div
+  onClick={() => navigate("/register")}
   className="
-    absolute
-    inset-0
-    bg-gradient-to-r
-    from-white/10
-    via-transparent
-    to-white/10
-    opacity-0
-    group-hover:opacity-100
-    transition-opacity
+    group
+    relative
+    overflow-hidden
+    w-full
+    h-[52px]
+    rounded-xl
+    bg-[#3B1248]
+    hover:bg-[#4A175B]
+    text-white
+    font-semibold
+    shadow-[0_12px_30px_rgba(59,18,72,.30)]
+    transition-all
     duration-300
   "
-/>
+>
+  <div
+    className="
+      absolute
+      inset-0
+      bg-white/10
+      opacity-0
+      group-hover:opacity-100
+      transition-opacity
+      duration-300
+    "
+  />
 
-إنشاء حساب
+  <span className="relative z-10">
+    إنشاء حساب
+  </span>
 </button>
-
           </div>
         </div>
       )}

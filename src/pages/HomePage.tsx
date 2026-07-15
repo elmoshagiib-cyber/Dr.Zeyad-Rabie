@@ -8,7 +8,7 @@ import { ScrollReveal } from "../components/layout/ScrollReveal";
 import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
 import StudentGradeCard from "../components/home/StudentGradeCard";
-
+import { BannerCarousel } from "../components/home/features/BannerCarousel";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
@@ -165,21 +165,21 @@ lg:py-20
     مرحبا بكم في منصة
 
     <span
-      className="
-      block
-      mt-1.5
-      sm:mt-2
-      text-[32px]
-      xs:text-[36px]
-      sm:text-[44px]
-      md:text-[54px]
-      lg:text-[64px]
-      font-bold
-      leading-tight
-      tracking-[-1px]
-      text-[#5B21B6]
-      dark:text-violet-400
-      "
+className="
+block
+mt-1.5
+sm:mt-2
+text-[32px]
+xs:text-[36px]
+sm:text-[44px]
+md:text-[54px]
+lg:text-[64px]
+font-bold
+leading-tight
+tracking-[-1px]
+text-[#F6AC08]
+dark:text-[#F6AC08]
+"
     >
       مستر زياد ربيع
     </span>
@@ -225,27 +225,27 @@ lg:py-20
       size="lg"
       variant="outline"
       onClick={() => navigate("/register")}
-      className="
-      h-11
-      sm:h-12
-      lg:h-14
-      px-6
-      sm:px-7
-      lg:px-9
-      rounded-xl
-      bg-[#F97316]
-      hover:bg-[#EA580C]
-      border-0
-      text-white
-      text-[14px]
-      sm:text-[16px]
-      lg:text-[18px]
-      font-semibold
-      shadow-[0_14px_35px_rgba(249,115,22,.28)]
-      hover:scale-[1.03]
-      transition-all
-      duration-300
-      "
+className="
+h-11
+sm:h-12
+lg:h-14
+px-6
+sm:px-7
+lg:px-9
+rounded-xl
+bg-[#3B1248]
+hover:bg-[#4A175B]
+border-0
+text-white
+text-[14px]
+sm:text-[16px]
+lg:text-[18px]
+font-semibold
+shadow-[0_14px_35px_rgba(59,18,72,.35)]
+hover:scale-[1.03]
+transition-all
+duration-300
+"
     >
       سجل الآن مجانًا
     </Button>
@@ -315,193 +315,60 @@ object-contain
 
 {/* FEATURES */}
 <ScrollReveal>
-<section
-className="
-relative
-py-28
-bg-white
-dark:bg-[#09090B]
-"
->
-  <div className="max-w-7xl mx-auto px-6">
-
-    <div className="text-center mb-20">
-
-<h2
-  className="
-  text-5xl
-  lg:text-7xl
-  font-black
-  leading-[1.25]
-  mb-6
-  text-slate-900
-  dark:text-white
-  "
->
-  ليه تختار{" "}
-
-  <span
+  <section
     className="
-    inline-block
-    pb-3
-    bg-gradient-to-r
-    from-[#7C1DCC]
-    via-[#A52DFF]
-    to-[#D900A8]
-    bg-clip-text
-    text-transparent
+      relative
+      py-12
+      sm:py-16
+      lg:py-24
+      bg-white
+      dark:bg-[#09090B]
     "
   >
-    مستر زياد ربيع؟
-  </span>
-</h2>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+        <h2
+          className="
+            text-[26px]
+            sm:text-[38px]
+            lg:text-[52px]
+            xl:text-[64px]
+            font-black
+            leading-[1.25]
+            mb-3
+            sm:mb-4
+            lg:mb-6
+            text-slate-900
+            dark:text-white
+          "
+        >
+          ليه تختار{" "}
+          <span
+            className="
+              inline-block
+              pb-1
+              sm:pb-2
+              lg:pb-3
+              bg-gradient-to-r
+              from-[#7C1DCC]
+              via-[#A52DFF]
+              to-[#D900A8]
+              bg-clip-text
+              text-transparent
+            "
+          >
+            مستر زياد ربيع؟
+          </span>
+        </h2>
+      </div>
+
+      <BannerCarousel />
 
     </div>
-
-    <motion.div
-  initial="hidden"
-  whileInView="show"
-  viewport={{ once: true }}
-  variants={{
-    hidden: {},
-    show: {
-      transition: {
-        staggerChildren: 0.15,
-      },
-    },
-  }}
- className="
-flex
-justify-center
-lg:justify-start
-"
->
-  <div
-    className="
-    grid
-    grid-cols-1
-    sm:grid-cols-2
-    lg:grid-cols-4
-    gap-8
-    "
-  >
-
-    {/* Card 1 */}
-    <div
-      className="
-      group
-      overflow-hidden
-      rounded-[36px]
-      shadow-[0_20px_50px_rgba(0,0,0,0.15)]
-      hover:shadow-2xl
-      transition-all
-      duration-500
-      hover:-translate-y-4
-      "
-    >
-      <img
-        src="/images/card1.jpg"
-        alt=""
-        className="
-        w-full
-        aspect-[3/4]
-        object-cover
-        transition-transform
-        duration-700
-        group-hover:scale-110
-will-change-transform
-        "
-      />
-    </div>
-
-    {/* Card 2 */}
-    <div
-      className="
-      group
-      overflow-hidden
-      rounded-[36px]
-      shadow-[0_20px_50px_rgba(0,0,0,0.15)]
-      hover:shadow-2xl
-      transition-all
-      duration-500
-      hover:-translate-y-4
-      "
-    >
-      <img
-        src="/images/card2.jpg"
-        alt=""
-        className="
-        w-full
-        aspect-[3/4]
-        object-cover
-        transition-transform
-        duration-700
-        group-hover:scale-110
-will-change-transform
-        "
-      />
-    </div>
-
-    {/* Card 3 */}
-    <div
-      className="
-      group
-      overflow-hidden
-      rounded-[36px]
-      shadow-[0_20px_50px_rgba(0,0,0,0.15)]
-      hover:shadow-2xl
-      transition-all
-      duration-500
-      hover:-translate-y-4
-      "
-    >
-      <img
-        src="/images/card3.jpg"
-        alt=""
-        className="
-        w-full
-        aspect-[3/4]
-        object-cover
-        transition-transform
-        duration-700
-        group-hover:scale-110
-will-change-transform
-        "
-      />
-    </div>
-
-    {/* Card 4 */}
-    <div
-      className="
-      group
-      overflow-hidden
-      rounded-[36px]
-      shadow-[0_20px_50px_rgba(0,0,0,0.15)]
-      hover:shadow-2xl
-      transition-all
-      duration-500
-      hover:-translate-y-4
-      "
-    >
-      <img
-        src="/images/card4.jpg"
-        alt=""
-        className="
-        w-full
-        aspect-[3/4]
-        object-cover
-        transition-transform
-        duration-700
-        group-hover:scale-105
-        "
-      />
-    </div>
-
-  </div>
-</motion.div>
-</div>
-</section>
+  </section>
 </ScrollReveal>
+
 {/* ================= GRADES SECTION ================= */}
 <ScrollReveal>
 <section
@@ -542,9 +409,9 @@ dark:text-white
 ">
  الصفوف
   <span className="bg-gradient-to-r
-from-[#7C1DCC]
-via-[#A52DFF]
-to-[#D900A8]
+from-[#350F44]
+via-[#5C1D75]
+to-[#F6AC08]
 bg-clip-text
 text-transparent">
     {" "}الدراسية 
@@ -554,17 +421,17 @@ text-transparent">
 
       <div className="flex justify-center items-center gap-4 mt-8">
         <div className="w-64 h-[3px] bg-gradient-to-r
-from-[#7C1DCC]
-via-[#A52DFF]
-to-[#D900A8] rounded-full"></div>
+from-[#350F44]
+via-[#5C1D75]
+to-[#F6AC08]] rounded-full"></div>
         <div className="w-5 h-5 rotate-45 bg-gradient-to-r
-from-[#7C1DCC]
-via-[#A52DFF]
-to-[#D900A8]"></div>
+from-[#350F44]
+via-[#5C1D75]
+to-[#F6AC08]]"></div>
         <div className="w-52 h-[3px] bg-gradient-to-r
-from-[#7C1DCC]
-via-[#A52DFF]
-to-[#D900A8] rounded-full"></div>
+from-[#350F44]
+via-[#5C1D75]
+to-[#F6AC08]] rounded-full"></div>
       </div>
     </div>
 
