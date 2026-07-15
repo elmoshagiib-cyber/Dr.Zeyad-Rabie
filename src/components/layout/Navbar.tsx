@@ -25,7 +25,6 @@ const [scrollProgress, setScrollProgress] = useState(0);
 
 
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useApp();
@@ -36,7 +35,6 @@ const [profileOpen, setProfileOpen] = useState(false);
 
 useEffect(() => {
   const handleScroll = () => {
-    setIsScrolled(window.scrollY > 20);
 
     const totalHeight =
       document.documentElement.scrollHeight -

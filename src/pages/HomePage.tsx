@@ -47,8 +47,6 @@ export function HomePage() {
   const navigate = useNavigate();
   
 const { user } = useApp();
-console.log("USER =", user);
-console.log("GRADE =", user?.grade);
   const [selectedStage, setSelectedStage] =
     useState<"secondary" | "prep">("secondary");
 
@@ -126,17 +124,19 @@ lg:py-20
 
 {/* TEXT */}
 <motion.div
-  initial="hidden"
-  whileInView="show"
-  viewport={{ once: true }}
-  variants={{
-    hidden: {},
-    show: {
-      transition: {
-        staggerChildren: 0.15,
-      },
-    },
-  }}
+initial={{
+opacity:0,
+y:40
+}}
+animate={{
+opacity:1,
+y:0
+}}
+transition={{
+duration:.8,
+delay:.25,
+ease:[0.22,1,0.36,1]
+}}
   className="
   mt-4
   sm:mt-6
@@ -255,17 +255,23 @@ duration-300
 
       {/* IMAGE */}
       <motion.div
-  initial="hidden"
-  whileInView="show"
-  viewport={{ once: true }}
-  variants={{
-    hidden: {},
-    show: {
-      transition: {
-        staggerChildren: 0.15,
-      },
-    },
-  }}
+initial={{
+opacity:0,
+x:80,
+scale:.95
+}}
+
+animate={{
+opacity:1,
+x:0,
+scale:1
+}}
+
+transition={{
+duration:1,
+delay:.45,
+ease:[0.22,1,0.36,1]
+}}
   className="
 mt-10
 sm:mt-12

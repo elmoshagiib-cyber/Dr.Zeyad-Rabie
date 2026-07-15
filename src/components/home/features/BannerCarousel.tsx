@@ -41,7 +41,6 @@ interface SlideProps {
 
 
 function Slide({ banner, isActive }: SlideProps) {
-    console.log(BANNERS.map(x => x.image));
   return (
    <div
   className="
@@ -68,8 +67,9 @@ function Slide({ banner, isActive }: SlideProps) {
   className="absolute inset-0 z-0 overflow-hidden"
 >
   <img
+  loading="lazy"
+  decoding="async"
     src={banner.image}
-    onLoad={() => console.log("loaded", banner.image)}
     alt={banner.title}
     draggable={false}
     className="w-full h-full object-cover"
