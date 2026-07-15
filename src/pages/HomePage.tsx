@@ -102,6 +102,7 @@ const studentGrade =
       <section
 className="
 relative
+overflow-hidden
 py-28
 bg-white
 dark:bg-[#09090B]
@@ -371,173 +372,165 @@ object-contain
 
 {/* ================= GRADES SECTION ================= */}
 <ScrollReveal>
-<section
-className="
-relative
-py-28
-bg-white
-dark:bg-[#09090B]
-"
->
-  <div className="max-w-[1150px] mx-auto px-6">
+  <section className="relative py-14 sm:py-20 lg:py-28 bg-white dark:bg-[#09090B]">
+    <div className="max-w-[1150px] mx-auto px-4 sm:px-6 lg:px-8">
 
-<div
-  className="
-  absolute
-  top-1/2
-  left-1/2
-  -translate-x-1/2
-  -translate-y-1/2
-  w-[600px]
-  h-[600px]
-  bg-[#A52DFF]/15
-  rounded-full
-  blur-[120px]
-  z-0
-  "
-/>
-
-    <div className="text-center mb-20">
-       <h2 className="
-text-5xl
-lg:text-7xl
-font-black
-leading-tight
-mb-6
-text-slate-900
-dark:text-white
-">
- الصفوف
-  <span className="bg-gradient-to-r
-from-[#350F44]
-via-[#5C1D75]
-to-[#F6AC08]
-bg-clip-text
-text-transparent">
-    {" "}الدراسية 
-  </span>
-</h2>
-
-
-      <div className="flex justify-center items-center gap-4 mt-8">
-        <div className="w-64 h-[3px] bg-gradient-to-r
-from-[#350F44]
-via-[#5C1D75]
-to-[#F6AC08]] rounded-full"></div>
-        <div className="w-5 h-5 rotate-45 bg-gradient-to-r
-from-[#350F44]
-via-[#5C1D75]
-to-[#F6AC08]]"></div>
-        <div className="w-52 h-[3px] bg-gradient-to-r
-from-[#350F44]
-via-[#5C1D75]
-to-[#F6AC08]] rounded-full"></div>
-      </div>
-    </div>
-
-{user ? (
-  <StudentGradeCard grade={user.grade ?? ""} />
-) : (
-  <div className="grid lg:grid-cols-2 gap-14 mt-24 relative">
-
-    {/* الثانوية */}
-    <div
-      onClick={() => navigate("/stage/secondary")}
-      className="
-cursor-pointer
-group
-relative
-group-hover:-translate-y-4
-transition-all
-duration-500
-"
-    >
-      <div className="relative overflow-hidden rounded-[28px] shadow-2xl">
-        <motion.img
-          whileHover={{ scale: 1.1, y: -10 }}
-          transition={{ duration: 0.5 }}
-          src="/images/secondary-stage.jpg"
-          alt=""
-          className="
-w-full
-h-[320px]
-object-cover
-transition-all
-duration-700
-saturate-110
-group-hover:saturate-150
-group-hover:brightness-110
-"
-        />
-      </div>
-
-      <div className="bg-white dark:bg-[#130726] rounded-[24px] shadow-2xl w-[75%] mx-auto -mt-10 relative z-10 py-5 px-6 text-center">
-        <h3 className="text-3xl font-black mb-5 dark:text-white">
-          المراحل الثانوية
-        </h3>
-
-        <div className="h-[3px] bg-gradient-to-r from-[#7C1DCC] via-[#A52DFF] to-[#D900A8] mb-5"></div>
-
-        <p className="text-slate-500 dark:text-slate-300 text-base">
-          الصف الأول والثاني والثالث الثانوي
+      {/* Title */}
+      <div className="text-center mb-10 sm:mb-14 lg:mb-20">
+        <h2 className="
+          text-[28px] sm:text-[42px] lg:text-[58px]
+          font-black leading-tight
+          text-slate-900 dark:text-white
+        ">
+          الصفوف
+          <span className="text-[#F6AC08]"> الدراسية</span>
+        </h2>
+        <p className="mt-3 sm:mt-4 text-slate-500 dark:text-slate-400 text-[14px] sm:text-[16px]">
+          اختر مرحلتك الدراسية وابدأ رحلتك التعليمية
         </p>
       </div>
+
+      {/* Content */}
+      {user ? (
+        <StudentGradeCard grade={user.grade ?? ""} />
+      ) : (
+        <div className="
+          grid grid-cols-1 sm:grid-cols-2
+          gap-6 sm:gap-8 lg:gap-12
+          mt-4 sm:mt-8
+        ">
+
+          {/* الثانوية */}
+          <div
+            onClick={() => navigate("/stage/secondary")}
+            className="cursor-pointer group"
+          >
+            {/* Image */}
+            <div className="relative overflow-hidden rounded-[20px] sm:rounded-[28px] shadow-xl">
+              <motion.img
+                whileHover={{ scale: 1.07 }}
+                transition={{ duration: 0.5 }}
+                src="/images/secondary-stage.jpg"
+                alt="المرحلة الثانوية"
+                className="
+                  w-full
+                  h-[180px] sm:h-[240px] lg:h-[300px]
+                  object-cover
+                  saturate-110
+                  group-hover:saturate-150
+                  group-hover:brightness-110
+                  transition-all duration-700
+                "
+              />
+              {/* Overlay badge */}
+              <div className="
+                absolute top-3 right-3 sm:top-4 sm:right-4
+                bg-[#350F44] dark:bg-[#F6AC08]
+                text-white dark:text-slate-900
+                text-[11px] sm:text-[12px] font-bold
+                px-3 py-1 rounded-full
+              ">
+                ثانوي
+              </div>
+            </div>
+
+            {/* Card info */}
+            <div className="
+              bg-white dark:bg-[#130726]
+              rounded-[16px] sm:rounded-[24px]
+              shadow-xl
+              w-[80%] sm:w-[78%]
+              mx-auto -mt-7 sm:-mt-10
+              relative z-10
+              py-4 sm:py-5
+              px-4 sm:px-6
+              text-center
+              group-hover:-translate-y-2
+              transition-transform duration-300
+            ">
+              <h3 className="
+                text-[18px] sm:text-[22px] lg:text-[26px]
+                font-black mb-3 sm:mb-4
+                text-slate-900 dark:text-white
+              ">
+                المراحل الثانوية
+              </h3>
+              <div className="h-[3px] bg-[#350F44] dark:bg-[#F6AC08] rounded-full mb-3 sm:mb-4" />
+              <p className="text-slate-500 dark:text-slate-300 text-[13px] sm:text-[15px]">
+                الصف الأول والثاني والثالث الثانوي
+              </p>
+            </div>
+          </div>
+
+          {/* الإعدادي */}
+          <div
+            onClick={() => navigate("/stage/prep")}
+            className="cursor-pointer group"
+          >
+            {/* Image */}
+            <div className="relative overflow-hidden rounded-[20px] sm:rounded-[28px] shadow-xl">
+              <motion.img
+                whileHover={{ scale: 1.07 }}
+                transition={{ duration: 0.5 }}
+                src="/images/prep-stage.jpg"
+                alt="المرحلة الإعدادية"
+                className="
+                  w-full
+                  h-[180px] sm:h-[240px] lg:h-[300px]
+                  object-cover
+                  saturate-110
+                  group-hover:saturate-150
+                  group-hover:brightness-110
+                  transition-all duration-700
+                "
+              />
+              {/* Overlay badge */}
+              <div className="
+                absolute top-3 right-3 sm:top-4 sm:right-4
+                bg-[#350F44] dark:bg-[#F6AC08]
+                text-white dark:text-slate-900
+                text-[11px] sm:text-[12px] font-bold
+                px-3 py-1 rounded-full
+              ">
+                إعدادي
+              </div>
+            </div>
+
+            {/* Card info */}
+            <div className="
+              bg-white dark:bg-[#130726]
+              rounded-[16px] sm:rounded-[24px]
+              shadow-xl
+              w-[80%] sm:w-[78%]
+              mx-auto -mt-7 sm:-mt-10
+              relative z-10
+              py-4 sm:py-5
+              px-4 sm:px-6
+              text-center
+              group-hover:-translate-y-2
+              transition-transform duration-300
+            ">
+              <h3 className="
+                text-[18px] sm:text-[22px] lg:text-[26px]
+                font-black mb-3 sm:mb-4
+                text-slate-900 dark:text-white
+              ">
+                المراحل الإعدادية
+              </h3>
+              <div className="h-[3px] bg-[#350F44] dark:bg-[#F6AC08] rounded-full mb-3 sm:mb-4" />
+              <p className="text-slate-500 dark:text-slate-300 text-[13px] sm:text-[15px]">
+                الصف الأول والثاني والثالث الإعدادي
+              </p>
+            </div>
+          </div>
+
+        </div>
+      )}
     </div>
-
-    {/* الإعدادي */}
-    <div
-      onClick={() => navigate("/stage/prep")}
-      className="
-cursor-pointer
-group
-relative
-group-hover:-translate-y-4
-transition-all
-duration-500
-"
-    >
-      <div className="relative overflow-hidden rounded-[28px] shadow-2xl">
-        <motion.img
-          whileHover={{ scale: 1.1, y: -10 }}
-          transition={{ duration: 0.5 }}
-          src="/images/prep-stage.jpg"
-          alt=""
-          className="
-w-full
-h-[320px]
-object-cover
-transition-all
-duration-700
-saturate-110
-group-hover:saturate-150
-group-hover:brightness-110
-"
-        />
-      </div>
-
-      <div className="bg-white dark:bg-[#130726] rounded-[24px] shadow-2xl w-[75%] mx-auto -mt-10 relative z-10 py-5 px-6 text-center">
-        <h3 className="text-3xl font-black mb-5 dark:text-white">
-          المراحل الإعدادية
-        </h3>
-
-        <div className="h-[3px] bg-gradient-to-r from-[#7C1DCC] via-[#A52DFF] to-[#D900A8] mb-5"></div>
-
-        <p className="text-slate-500 dark:text-slate-300 text-base">
-          الصف الأول والثاني والثالث الإعدادي
-        </p>
-      </div>
-    </div>
-
-  </div>
-)}
-
-  </div>
-
-</section>
+  </section>
 </ScrollReveal>
 
 <Footer />
-
 </div>
 );
 }
