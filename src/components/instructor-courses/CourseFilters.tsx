@@ -83,11 +83,18 @@ focus:ring-violet-100
 
       {/* Row */}
 
-      <div className="flex flex-wrap gap-4 items-center">
+      <div className="
+flex
+flex-col
+lg:flex-row
+gap-4
+items-stretch
+lg:items-center
+">
 
         {/* Search */}
 
-        <div className="relative flex-1 min-w-[340px]">
+        <div className="relative w-full lg:flex-1">
 
           <Search
             size={18}
@@ -121,7 +128,7 @@ focus:ring-violet-100
 
         {/* Grade */}
 
-        <div className="w-[210px]">
+       <div className="w-full lg:w-[210px]">
 
           <select
             value={gradeFilter}
@@ -134,29 +141,29 @@ focus:ring-violet-100
               كل الصفوف
             </option>
 
-            <option value="الأول الإعدادي">
-              الأول الإعدادي
-            </option>
+            <option value="الصف الأول الإعدادي">
+  الصف الأول الإعدادي
+</option>
 
-            <option value="الثاني الإعدادي">
-              الثاني الإعدادي
-            </option>
+<option value="الصف الثاني الإعدادي">
+  الصف الثاني الإعدادي
+</option>
 
-            <option value="الثالث الإعدادي">
-              الثالث الإعدادي
-            </option>
+<option value="الصف الثالث الإعدادي">
+  الصف الثالث الإعدادي
+</option>
 
-            <option value="الأول الثانوي">
-              الأول الثانوي
-            </option>
+<option value="الصف الأول الثانوي">
+  الصف الأول الثانوي
+</option>
 
-            <option value="الثاني الثانوي">
-              الثاني الثانوي
-            </option>
+<option value="الصف الثاني الثانوي">
+  الصف الثاني الثانوي
+</option>
 
-            <option value="الثالث الثانوي">
-              الثالث الثانوي
-            </option>
+<option value="الصف الثالث الثانوي">
+  الصف الثالث الثانوي
+</option>
 
           </select>
 
@@ -164,7 +171,7 @@ focus:ring-violet-100
 
         {/* Status */}
 
-        <div className="w-[180px]">
+        <div className="w-full lg:w-[180px]">
 
           <select
             value={statusFilter}
@@ -173,9 +180,6 @@ focus:ring-violet-100
             }
             className={selectClass}
           >
-            <option value="all">
-              كل الحالات
-            </option>
 
             <option value="published">
               منشور
@@ -191,7 +195,7 @@ focus:ring-violet-100
 
         {/* Sort */}
 
-        <div className="w-[170px]">
+        <div className="w-full lg:w-[170px]">
 
           <select
             value={sortBy}
@@ -223,41 +227,35 @@ focus:ring-violet-100
 
         {/* Reset */}
 
-        <button
-          onClick={() => {
-            setSearch("");
-            setGradeFilter("all");
-            setStatusFilter("all");
-            setSortBy("latest");
-          }}
-          className="
-group
-h-12
-px-6
-rounded-2xl
-border
-border-slate-200
-bg-white
-hover:bg-slate-50
-transition
-flex
-items-center
-gap-2
-font-medium
-"
-        >
+<div className="flex items-center gap-3">
+  <button
+    onClick={() => {
+      setSearch("");
+      setGradeFilter("all");
+      setStatusFilter("all");
+      setSortBy("latest");
+    }}
+    className="
+      h-11
+      px-5
+      rounded-xl
+      border
+      border-slate-200
+      hover:bg-slate-50
+      transition
+      flex
+      items-center
+      gap-2
+      text-sm
+      font-medium
+    "
+  >
+    <RotateCcw size={16} />
+    إعادة الضبط
+  </button>
 
-          <RotateCcw
-            size={18}
-            className="transition duration-500 group-hover:-rotate-180"
-          />
-
-          إعادة الضبط
-
-        </button>
-
-      </div>
-
+</div>
+</div>
       {/* Footer */}
 
       <div className="mt-6 flex items-center justify-between">

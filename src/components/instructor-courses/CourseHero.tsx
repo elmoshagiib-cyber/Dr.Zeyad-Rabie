@@ -1,6 +1,5 @@
 import {
   Plus,
-  Download,
   LayoutGrid,
   Rows3,
 } from "lucide-react";
@@ -11,7 +10,6 @@ import type { Dispatch, SetStateAction } from "react";
 type Props = {
   onCreateCourse: () => void;
 
-  onExport: () => void;
 
   totalCourses: number;
 
@@ -28,7 +26,6 @@ type Props = {
 
 export function CourseHero({
   onCreateCourse,
-  onExport,
   totalCourses,
   publishedCourses,
   totalStudents,
@@ -44,7 +41,7 @@ return (
   overflow-hidden
   rounded-[32px]
   bg-[#4C1D95]
-  p-10
+  p-5 md:p-7 lg:p-8
   text-white
   shadow-xl
 "
@@ -53,10 +50,10 @@ return (
 <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
 <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
 
-    <div className="relative z-10 flex items-start justify-between">
+    <div className="relative z-10 flex flex-col-reverse lg:flex-row items-start justify-between gap-6">
       {/* المعلومات */}
       <div className="flex-1">
-        <h1 className="text-5xl font-black">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-black">
           إدارة الكورسات
         </h1>
 
@@ -79,82 +76,11 @@ return (
           </span>
         </div>
 
-        <p className="mt-4 max-w-xl text-lg text-violet-100">
+        <p className="mt-3 max-w-xl text-sm md:text-base text-violet-100">
           تحكم في جميع الكورسات والمحاضرات والطلاب
           من مكان واحد بسهولة.
         </p>
 
-        {/* الإحصائيات */}
-        <div className="mt-8 flex flex-wrap gap-5">
-          <div
-            className="
-              min-w-[150px]
-              rounded-2xl
-              bg-white/10
-              backdrop-blur
-              px-5
-              py-4
-              transition-all
-              duration-300
-              hover:-translate-y-1
-              hover:bg-white/15
-            "
-          >
-            <p className="text-sm text-violet-200">
-              إجمالي الكورسات
-            </p>
-
-            <h2 className="mt-2 text-3xl font-black">
-              {totalCourses}
-            </h2>
-          </div>
-
-          <div
-            className="
-              min-w-[150px]
-              rounded-2xl
-              bg-white/10
-              backdrop-blur
-              px-5
-              py-4
-              transition-all
-              duration-300
-              hover:-translate-y-1
-              hover:bg-white/15
-            "
-          >
-            <p className="text-sm text-violet-200">
-              الكورسات المنشورة
-            </p>
-
-            <h2 className="mt-2 text-3xl font-black">
-              {publishedCourses}
-            </h2>
-          </div>
-
-          <div
-            className="
-              min-w-[150px]
-              rounded-2xl
-              bg-white/10
-              backdrop-blur
-              px-5
-              py-4
-              transition-all
-              duration-300
-              hover:-translate-y-1
-              hover:bg-white/15
-            "
-          >
-            <p className="text-sm text-violet-200">
-              إجمالي الطلاب
-            </p>
-
-            <h2 className="mt-2 text-3xl font-black">
-              {totalStudents}
-            </h2>
-          </div>
-        </div>
 
         {/* Divider */}
         <div className="mt-8 h-px bg-white/10" />
@@ -183,11 +109,11 @@ return (
       </div>
 
       {/* الأزرار */}
-      <div className="flex flex-col items-end gap-5">
+      <div className="flex w-full lg:w-auto flex-row lg:flex-col justify-end gap-3">
         <Button
           onClick={onCreateCourse}
           className="
-            h-14
+            h-12 md:h-14
             rounded-2xl
             bg-white
             px-8
@@ -205,28 +131,6 @@ return (
           إنشاء كورس جديد
         </Button>
 
-        <Button
-          onClick={onExport}
-          variant="outline"
-          className="
-            h-14
-            rounded-2xl
-            border-white/20
-            bg-white/10
-            px-7
-            font-semibold
-            text-white
-            backdrop-blur
-            transition-all
-            hover:-translate-y-1
-            hover:scale-105
-            hover:bg-white/20
-            active:scale-95
-          "
-        >
-          <Download size={18} />
-          تصدير
-        </Button>
 
         {/* View */}
         <div

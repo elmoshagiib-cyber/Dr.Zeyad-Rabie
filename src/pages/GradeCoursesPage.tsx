@@ -193,49 +193,34 @@ to-[#D900A8]
 
 <div className="relative overflow-hidden">
 
-  <div
-    className="
-    absolute
-    left-1/2
-    top-0
-    -translate-x-1/2
-    w-[900px]
-    h-[400px]
-    bg-[#A52DFF]/10
-    blur-[180px]
-    rounded-full
-    "
-  />
-
   <div className="max-w-7xl mx-auto px-6 py-24 text-center">
 
     <h1
-      className="
-      text-5xl
-      lg:text-7xl
-      font-black
-      text-slate-900
-dark:text-white
-      dark:text-white
-      "
-    >
-      كورسات
+  className="
+    text-5xl
+    lg:text-7xl
+    font-black
+    text-center
+    text-slate-900
+    dark:text-white
+  "
+>
+  الكورسات
 
-      <span
-        className="
-        mr-4
-        bg-gradient-to-r
-        from-[#7C1DCC]
-        via-[#A52DFF]
-        to-[#D900A8]
-        bg-clip-text
-        text-transparent
-        "
-      >
-        {gradeNames[grade || ""]}
-      </span>
-
-    </h1>
+  <span
+    className="
+      mr-3
+      bg-gradient-to-r
+      from-[#371143]
+      via-[#5C1D75]
+      to-[#F6AC08]
+      bg-clip-text
+      text-transparent
+    "
+  >
+    المتاحة
+  </span>
+</h1>
 
     <p
       className="
@@ -250,7 +235,17 @@ dark:text-white
 
     <div className="flex justify-center items-center gap-4 mt-10">
 
-      <div className="w-40 h-[3px] bg-gradient-to-r from-[#7C1DCC] to-[#D900A8]" />
+      <div
+  className="
+  w-40
+  h-[3px]
+  rounded-full
+  bg-gradient-to-r
+  from-[#371143]
+  via-[#5C1D75]
+  to-[#F6AC08]
+  "
+/>
 
       <div
         className="
@@ -263,7 +258,17 @@ dark:text-white
         "
       />
 
-      <div className="w-40 h-[3px] bg-gradient-to-r from-[#7C1DCC] to-[#D900A8]" />
+      <div
+  className="
+  w-40
+  h-[3px]
+  rounded-full
+  bg-gradient-to-r
+  from-[#371143]
+  via-[#5C1D75]
+  to-[#F6AC08]
+  "
+/>
 
     </div>
 
@@ -277,17 +282,17 @@ dark:text-white
 
         {courses.length === 0 ? (
 
-          <div className="text-center py-24">
+          <div className="text-center py-28">
 
-            <h3 className="text-2xl font-bold text-white mb-4">
-              لا توجد كورسات حالياً
-            </h3>
+<h3 className="text-3xl font-black text-slate-900 dark:text-white mb-4">
+لا توجد كورسات متاحة حالياً
+</h3>
 
-            <p className="text-slate-400">
-              سيتم إضافة الكورسات قريباً
-            </p>
+<p className="text-lg text-slate-500 dark:text-slate-400">
+سيتم إضافة الكورسات قريبًا...
+</p>
 
-          </div>
+</div>
 
         ) : (
 
@@ -313,7 +318,7 @@ flex-col
 transition-all
 duration-500
 hover:-translate-y-2
-hover:shadow-2xl
+hover:shadow-[0_10px_28px_rgba(0,0,0,.12)]
 "
 >
 
@@ -370,7 +375,8 @@ dark:text-white
   line-clamp-2
   transition-all
   duration-300
-  group-hover:text-violet-600
+  group-hover:text-[#5C1D75]
+dark:group-hover:text-[#F6AC08]
   "
 
   >
@@ -411,18 +417,15 @@ dark:text-slate-400
   <div className="flex gap-3">
 
     <Button
-  className="
-  flex-1
-  bg-gradient-to-r
-from-[#7C1DCC]
-via-[#A52DFF]
-to-[#D900A8]
-  hover:bg-[#5b5d45]
-  text-white
-  transition-all
-  duration-300
-  hover:scale-105
-  "
+className="
+flex-1
+bg-[#371143]
+hover:bg-[#4A175B]
+text-white
+transition-all
+duration-300
+hover:scale-[1.03]
+"
     >
       اشترك الآن
     </Button>

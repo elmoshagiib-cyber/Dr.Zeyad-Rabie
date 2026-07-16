@@ -27,23 +27,28 @@ export function GuestActions({ navigate }: GuestActionsProps) {
         <ArrowRightOnRectangleIcon className="w-4 h-4 text-slate-400" />
       </button>
 
-      <button
-        onClick={() => navigate("/register")}
-        className="
-          flex items-center justify-center gap-2
-          h-10 px-5
-          rounded-xl
-          bg-[#F97316] hover:bg-[#EA580C]
-          text-white text-[14px] font-bold
-          shadow-[0_6px_18px_rgba(249,115,22,.28)]
-          hover:-translate-y-[1px] hover:shadow-[0_10px_24px_rgba(249,115,22,.36)]
-          active:scale-[0.98]
-          transition-all duration-300
-        "
-      >
-        <UserPlusIcon className="w-4 h-4" />
-        <span>إنشاء حساب</span>
-      </button>
+     <button
+  onClick={() => navigate("/register")}
+  className="
+    flex items-center justify-center gap-2
+    h-10 px-5
+    rounded-xl
+    bg-[#371143]
+    hover:bg-[#4A175B]
+    text-white
+    text-[14px]
+    font-bold
+    shadow-[0_12px_30px_rgba(55,17,67,.30)]
+    hover:-translate-y-[1px]
+    hover:shadow-[0_16px_36px_rgba(55,17,67,.40)]
+    active:scale-[0.98]
+    transition-all
+    duration-300
+  "
+>
+  <UserPlusIcon className="w-4 h-4" />
+  <span>إنشاء حساب</span>
+</button>
     </div>
   );
 }

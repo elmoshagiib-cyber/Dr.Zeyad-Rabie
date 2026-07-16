@@ -6,8 +6,7 @@ import { CourseHero } from "../../components/instructor-courses/CourseHero";
 import { CourseStats } from "../../components/instructor-courses/CourseStats";
 import { CourseAlert } from "../../components/instructor-courses/CourseAlert";
 import { CourseFilters } from "../../components/instructor-courses/CourseFilters";
-import { CourseGrid } from "../../components/instructor-courses/CourseGrid";
-import { exportCoursesCSV } from "../../utils/exportCourses";
+import { CourseGrid } from "../../components/instructor-courses/CourseGrid"
 import { useApp } from "../../context/AppContext";
 
 export function InstructorCourses() {
@@ -51,6 +50,7 @@ const matchSearch =
 (statusFilter === "draft" && !course.is_published);
 
     return matchSearch && matchGrade && matchStatus;
+    
   })
   .sort((a, b) => {
     switch (sortBy) {
@@ -90,6 +90,8 @@ const { data, error } = await supabase
 
   setCourses(data || []);
   console.log("COURSES =", data);
+  console.log("GRADE =", data?.[0]?.grade);
+console.log("COURSE =", data?.[0]);
 };
 
 const deleteCourse = async (id: string) => {
@@ -108,97 +110,53 @@ const deleteCourse = async (id: string) => {
   loadCourses();
 };
 
-  return (
-    <div
-  className="flex min-h-screen bg-[#F8FAFC]"
-  dir="rtl"
->
-      <div className="hidden lg:block">
-        <DashboardSidebar type="instructor" />
+return (
+  <div className="flex min-h-screen bg-[#F8FAFC]" dir="rtl">
+
+    {/* Sidebar — desktop only */}
+    <div className="hidden lg:block">
+      <DashboardSidebar type="instructor" />
+    </div>
+
+    <main className="flex-1 overflow-y-auto bg-slate-50 min-w-0">
+
+      {/* Hero */}
+      <div className="p-4 sm:p-5 lg:p-6">
+        <CourseHero
+          onCreateCourse={() => navigate("/instructor/courses/create")}
+          totalCourses={courses.length}
+          publishedCourses={courses.filter((c) => c.is_published).length}
+          totalStudents={courses.reduce((sum, c) => sum + (c.students_count || 0), 0)}
+          view={view}
+          setView={setView}
+        />
       </div>
 
-<main
-  className="
-    flex-1
-    overflow-y-auto
-    bg-slate-50
-    p-6
-  "
->
-<CourseHero
-  onCreateCourse={() =>
-    navigate("/instructor/courses/create")
-  }
+      {/* Stats + Alert + Filters + Grid */}
+      <div className="px-4 sm:px-5 lg:px-6 pb-8 sm:pb-10 space-y-4 sm:space-y-5 lg:space-y-6">
+        <CourseStats courses={courses} />
+        <CourseAlert courses={courses} />
+        <CourseFilters
+          search={search}
+          setSearch={setSearch}
+          gradeFilter={gradeFilter}
+          setGradeFilter={setGradeFilter}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          view={view}
+          setView={setView}
+          resultsCount={filteredCourses.length}
+        />
+        <CourseGrid
+          courses={filteredCourses}
+          onDelete={deleteCourse}
+          view={view}
+        />
+      </div>
 
-  onExport={() =>
-    exportCoursesCSV(filteredCourses)
-  }
-
-  totalCourses={courses.length}
-
-  publishedCourses={
-   courses.filter(
-  (c) => c.is_published
-).length
-  }
-
-  totalStudents={
-    courses.reduce(
-      (sum, c) =>
-        sum + (c.students_count || 0),
-      0
-    )
-  }
-
-  view={view}
-
-  setView={setView}
-/>
-
-  <div className="mt-6">
-    <CourseStats courses={courses} />
+    </main>
   </div>
-
-  <div className="mt-6">
-    <CourseAlert
-  courses={courses}
-/>
-  </div>
-
-  <div className="mt-6">
-    <CourseFilters
-  search={search}
-  setSearch={setSearch}
-
-  gradeFilter={gradeFilter}
-  setGradeFilter={setGradeFilter}
-
-  statusFilter={statusFilter}
-  setStatusFilter={setStatusFilter}
-
-  sortBy={sortBy}
-  setSortBy={setSortBy}
-
-  view={view}
-  setView={setView}
-
-  resultsCount={filteredCourses.length}
-/>
-
-  </div>
-
-  <div className="mt-8">
-   <CourseGrid
-  courses={filteredCourses}
-  onDelete={deleteCourse}
-  view={view}
-/>
-
-  </div>
-
-  
-</main>
-
-    </div>
-  );
+);
 }

@@ -40,7 +40,8 @@ export function InstructorDashboard() {
   const [courses, setCourses]             = useState<any[]>([]);
   const [students, setStudents]           = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
-  const [exams, setExams]                 = useState<any[]>([]);
+  const [homeworks, setHomeworks] = useState<any[]>([]);
+const [exams, setExams] = useState<any[]>([]);
   const [studentCourses, setStudentCourses] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen]     = useState(false);
   const [loading, setLoading]             = useState(true);
@@ -60,33 +61,75 @@ export function InstructorDashboard() {
 
   const loadData = async () => {
     setLoading(true);
-    const [coursesRes, studentsRes, announcementsRes, examsRes, studentCoursesRes] =
-      await Promise.all([
-        supabase.from("courses").select("*").order("created_at", { ascending: false }),
-        supabase.from("students").select("*").order("created_at", { ascending: false }),
-        supabase.from("announcements").select("*").order("created_at", { ascending: false }),
-        supabase.from("exams").select("*").order("created_at", { ascending: false }),
-        supabase.from("student_courses").select("*"),
-      ]);
+const [
+  coursesRes,
+  studentsRes,
+  announcementsRes,
+  studentCoursesRes,
+  homeworksRes,
+  examsRes,
+] = await Promise.all([
+
+  supabase
+    .from("courses")
+    .select("*")
+    .eq("teacher_id", user?.id)
+    .order("created_at", { ascending: false }),
+
+  supabase
+    .from("students")
+    .select("*")
+    .order("created_at", { ascending: false }),
+
+  supabase
+    .from("announcements")
+    .select("*")
+    .order("created_at", { ascending: false }),
+
+  supabase
+    .from("student_courses")
+    .select("*"),
+
+    supabase
+  .from("homeworks")
+  .select("title, created_at")
+  .order("created_at", { ascending: false }),
+
+supabase
+  .from("exams")
+  .select("title, created_at")
+  .order("created_at", { ascending: false }),
+
+]);
+
     setCourses(coursesRes.data || []);
     setStudents(studentsRes.data || []);
     setAnnouncements(announcementsRes.data || []);
-    setExams(examsRes.data || []);
+    setHomeworks(homeworksRes.data || []);
+setExams(examsRes.data || []);
     setStudentCourses(studentCoursesRes.data || []);
     setLoading(false);
+    console.log("Courses", coursesRes.data);
+console.log(
+  studentsRes.data?.map((s) => ({
+    name: s.full_name,
+    type: s.type,
+  }))
+);
+console.log("Student Courses", studentCoursesRes.data);
   };
 
   // ── Derived ─────────────────────────────────────────────────────────────────
-  const activeCourses      = courses.filter((c) => c.active);
+  const activeCourses = courses.filter(
+  (c) => c.is_published
+);
   const totalStudents      = students.length;
   const totalCourses       = courses.length;
   const totalAnnouncements = announcements.length;
-  const totalExams         = exams.length;
   const totalSubscriptions = studentCourses.length;
-  const averageStudents    = totalCourses === 0 ? 0 : Math.round(totalSubscriptions / totalCourses);
   const recentStudents     = students.slice(0, 10);
 
-  const courseStudentsMap = new Map<number, number>();
+  const courseStudentsMap = new Map<string, number>();
   studentCourses.forEach((item) => {
     courseStudentsMap.set(item.course_id, (courseStudentsMap.get(item.course_id) || 0) + 1);
   });
@@ -101,26 +144,45 @@ export function InstructorDashboard() {
       : 0,
   }));
 
-  const recentActivities = [
-    ...announcements.slice(0, 4).map((a) => ({
-      title: "تم نشر إعلان",
-      description: a.title,
-      time: new Date(a.created_at).toLocaleDateString("ar-EG"),
-      color: "bg-violet-500",
-    })),
-    ...courses.slice(0, 4).map((c) => ({
-      title: "تم إنشاء كورس",
-      description: c.title,
-      time: new Date(c.created_at).toLocaleDateString("ar-EG"),
-      color: "bg-blue-500",
-    })),
-    ...exams.slice(0, 4).map((e) => ({
-      title: "تم إنشاء اختبار",
-      description: e.title,
-      time: new Date(e.created_at).toLocaleDateString("ar-EG"),
-      color: "bg-emerald-500",
-    })),
-  ].slice(0, 6);
+const recentActivities = [
+  ...announcements.map((a) => ({
+    title: "تم نشر إعلان",
+    description: a.title,
+    time: a.created_at,
+    color: "bg-violet-500",
+  })),
+
+  ...courses.map((c) => ({
+    title: "تم إنشاء كورس",
+    description: c.title,
+    time: c.created_at,
+    color: "bg-blue-500",
+  })),
+
+  ...homeworks.map((h) => ({
+    title: "تم إضافة واجب",
+    description: h.title,
+    time: h.created_at,
+    color: "bg-orange-500",
+  })),
+
+  ...exams.map((e) => ({
+    title: "تم إنشاء امتحان",
+    description: e.title,
+    time: e.created_at,
+    color: "bg-emerald-500",
+  })),
+]
+  .sort(
+    (a, b) =>
+      new Date(b.time).getTime() -
+      new Date(a.time).getTime()
+  )
+  .slice(0, 6)
+  .map((item) => ({
+    ...item,
+    time: new Date(item.time).toLocaleDateString("ar-EG"),
+  }));
 
   const analyticsData = [
     { day: "السبت",    students: 12 },
@@ -139,25 +201,105 @@ export function InstructorDashboard() {
     return "🌙 مساء الخير";
   })();
 
-  const overviewCards = [
-    { title: "إجمالي الطلاب",   value: totalStudents,                                        subtitle: "إجمالي الطلاب المسجلين", icon: Users,         color: "bg-blue-50 text-blue-600"     },
-    { title: "طلاب السنتر",     value: students.filter((s) => s.type === "سنتر").length,     subtitle: "طلاب داخل السنتر",        icon: Building2,     color: "bg-violet-50 text-violet-600"  },
-    { title: "طلاب الأونلاين",  value: students.filter((s) => s.type === "اونلاين").length,  subtitle: "طلاب المنصة",             icon: Monitor,       color: "bg-cyan-50 text-cyan-600"      },
-    { title: "الكورسات النشطة", value: activeCourses.length,                                 subtitle: "الكورسات المنشورة",       icon: BookOpen,      color: "bg-emerald-50 text-emerald-600" },
-    { title: "الاختبارات",      value: totalExams,                                           subtitle: "الاختبارات المنشورة",     icon: ClipboardList, color: "bg-orange-50 text-orange-600"  },
-    { title: "الإعلانات",       value: totalAnnouncements,                                   subtitle: "الإعلانات الحالية",       icon: Bell,          color: "bg-pink-50 text-pink-600"      },
-    { title: "الاشتراكات",      value: totalSubscriptions,                                   subtitle: "إجمالي الاشتراكات",       icon: GraduationCap, color: "bg-green-50 text-green-600"    },
-    { title: "متوسط الطلاب",    value: averageStudents,                                      subtitle: "لكل كورس",                icon: BarChart2,     color: "bg-yellow-50 text-yellow-600"  },
-  ];
+ const overviewCards = [
+  {
+    title: "إجمالي الطلاب",
+    value: totalStudents,
+    subtitle: "إجمالي الطلاب المسجلين",
+    icon: Users,
+    color: "bg-blue-50 text-blue-600",
+  },
 
-  const quickActions = [
-    { title: "إنشاء كورس",  subtitle: "أضف كورس جديد",  icon: PlusCircle,   color: "from-blue-500 to-cyan-500",       path: "/instructor/courses/create" },
-    { title: "إضافة اختبار",subtitle: "إنشاء امتحان",    icon: ClipboardList,color: "from-orange-500 to-amber-500",    path: "/instructor/exams"          },
-    { title: "نشر إعلان",   subtitle: "إرسال إشعار",     icon: Bell,         color: "from-violet-500 to-fuchsia-500",  path: "/instructor/announcements"  },
-    { title: "الحضور",      subtitle: "QR Code",          icon: QrCode,       color: "from-emerald-500 to-green-500",   path: "/instructor/attendance"     },
-    { title: "الطلاب",      subtitle: "إدارة الطلاب",    icon: Users,        color: "from-pink-500 to-rose-500",       path: "/instructor/students"       },
-    { title: "التحليلات",   subtitle: "عرض التقارير",    icon: BarChart2,    color: "from-indigo-500 to-violet-600",   path: "/instructor/analytics"      },
-  ];
+  {
+    title: "طلاب السنتر",
+    value: students.filter((s) => s.type === "center").length,
+    subtitle: "طلاب داخل السنتر",
+    icon: Building2,
+    color: "bg-violet-50 text-violet-600",
+  },
+
+  {
+    title: "طلاب الأونلاين",
+    value: students.filter((s) => s.type === "online").length,
+    subtitle: "طلاب المنصة",
+    icon: Monitor,
+    color: "bg-cyan-50 text-cyan-600",
+  },
+
+  {
+    title: "الكورسات النشطة",
+    value: activeCourses.length,
+    subtitle: "الكورسات المنشورة",
+    icon: BookOpen,
+    color: "bg-emerald-50 text-emerald-600",
+  },
+
+  {
+    title: "الإعلانات",
+    value: totalAnnouncements,
+    subtitle: "الإعلانات الحالية",
+    icon: Bell,
+    color: "bg-pink-50 text-pink-600",
+  },
+
+  {
+    title: "الاشتراكات",
+    value: totalSubscriptions,
+    subtitle: "إجمالي التسجيلات",
+    icon: GraduationCap,
+    color: "bg-green-50 text-green-600",
+  },
+];
+
+const quickActions = [
+  {
+    title: "إنشاء كورس",
+    subtitle: "أضف كورس جديد",
+    icon: PlusCircle,
+    color: "from-blue-500 to-cyan-500",
+    path: "/instructor/courses/create",
+  },
+
+  {
+    title: "كورساتي",
+    subtitle: "إدارة الكورسات",
+    icon: BookOpen,
+    color: "from-emerald-500 to-teal-500",
+    path: "/instructor/courses",
+  },
+
+  {
+    title: "الطلاب",
+    subtitle: "إدارة الطلاب",
+    icon: Users,
+    color: "from-pink-500 to-rose-500",
+    path: "/instructor/students",
+  },
+
+  {
+    title: "الحضور",
+    subtitle: "QR Code",
+    icon: QrCode,
+    color: "from-violet-500 to-fuchsia-500",
+    path: "/instructor/attendance",
+  },
+
+  {
+    title: "تسليمات الطلاب",
+    subtitle: "مراجعة الواجبات",
+    icon: GraduationCap,
+    color: "from-orange-500 to-amber-500",
+    path: "/instructor/submissions",
+  },
+
+  {
+    title: "الإشعارات",
+    subtitle: "إرسال إشعار",
+    icon: Bell,
+    color: "from-indigo-500 to-violet-600",
+    path: "/instructor/notifications",
+  },
+];
 
   // ── Loading skeleton ─────────────────────────────────────────────────────────
   if (loading) {
@@ -178,10 +320,10 @@ export function InstructorDashboard() {
     <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
 
       {/* ── Hero header ── */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[36px] bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-4 sm:px-7 lg:px-10 py-5 sm:py-7 lg:py-10 text-white shadow-[0_16px_48px_rgba(37,99,235,.35)] mb-4 sm:mb-6">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[36px] bg-gradient-to-r from-[#4C1D95] via-[#5B21B6] to-[#7C3AED] px-4 sm:px-7 lg:px-10 py-5 sm:py-7 lg:py-10 text-white shadow-[0_16px_48px_rgba(91,33,182,.35)] mb-4 sm:mb-6">
         {/* single glow — no duplicates */}
-        <div className="absolute -top-16 -left-12 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 right-0 w-72 h-72 bg-blue-300/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-20 -left-20 w-72 h-72 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+<div className="absolute -bottom-20 right-0 w-72 h-72 bg-white/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex items-center justify-between gap-4">
           {/* icon */}
@@ -237,37 +379,7 @@ export function InstructorDashboard() {
         {activeTab === "overview" && (
           <div className="space-y-4 sm:space-y-6">
 
-            {/* Activity chart */}
-            <Card className="rounded-2xl sm:rounded-3xl lg:rounded-[36px] border-0 shadow-lg sm:shadow-xl shadow-slate-200/50">
-              <CardContent className="p-4 sm:p-6 lg:p-8">
-                <div className="flex items-center justify-between mb-5 sm:mb-8 gap-3">
-                  <Button variant="outline" className="rounded-xl text-xs sm:text-sm shrink-0">
-                    هذا الأسبوع
-                  </Button>
-                  <div className="text-right">
-                    <h2 className="text-lg sm:text-2xl font-black">تحليل النشاط</h2>
-                    <p className="text-slate-500 text-xs sm:text-sm mt-0.5">متابعة أداء المنصة خلال الأسبوع</p>
-                  </div>
-                </div>
-                <div className="h-[180px] sm:h-[260px] lg:h-[340px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={analyticsData}>
-                      <CartesianGrid strokeDasharray="5 5" stroke="#E2E8F0" />
-                      <XAxis
-                        dataKey="day"
-                        tick={{ fill: "#64748B", fontSize: 11 }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <Tooltip
-                        contentStyle={{ borderRadius: 16, border: "none", boxShadow: "0 15px 40px rgba(0,0,0,.08)", fontSize: 13 }}
-                      />
-                      <Area type="monotone" dataKey="students" stroke="#2563EB" fill="#2563EB22" strokeWidth={3} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
+
 
             {/* Recent activities */}
             <Card className="rounded-2xl sm:rounded-3xl lg:rounded-[36px] border-0 shadow-lg sm:shadow-xl">

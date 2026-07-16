@@ -1,6 +1,5 @@
 import {
   BookOpen,
-  DollarSign,
   CheckCircle2,
   Sparkles,
 } from "lucide-react";
@@ -14,8 +13,8 @@ export function CourseStats({
 }: Props) {
   const totalCourses = courses.length;
 
-  const activeCourses = courses.filter(
-  (course) => course.active
+const activeCourses = courses.filter(
+  (course) => course.is_published
 ).length;
 
   const freeCourses = courses.filter(
@@ -23,13 +22,6 @@ export function CourseStats({
       Number(course.price) === 0
   ).length;
 
-  const totalRevenue = courses.reduce(
-  (sum, course) =>
-    sum +
-    Number(course.price || 0) *
-    Number(course.students_count || 0),
-  0
-);
 
   const stats = [
     {
@@ -52,13 +44,6 @@ export function CourseStats({
       icon: Sparkles,
       color: "text-orange-500",
       bg: "bg-orange-100",
-    },
-    {
-      title: "إجمالي الإيرادات",
-      value: `${totalRevenue} ج`,
-      icon: DollarSign,
-      color: "text-blue-600",
-      bg: "bg-blue-100",
     },
   ];
 
