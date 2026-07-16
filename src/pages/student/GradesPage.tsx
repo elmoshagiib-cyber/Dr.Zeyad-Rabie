@@ -51,7 +51,27 @@ export default function GradesPage() {
 
       <div className="min-h-screen bg-white dark:bg-[#09090B] relative overflow-hidden">
 
-        <div className="max-w-[1600px] mx-auto py-16 sm:py-20 lg:py-28 px-4 sm:px-6 lg:px-8 relative z-10">
+        <div
+  className="
+    max-w-[1600px]
+    mx-auto
+
+    pt-24
+    sm:pt-28
+    lg:pt-32
+
+    pb-16
+    sm:pb-20
+    lg:pb-28
+
+    px-4
+    sm:px-6
+    lg:px-8
+
+    relative
+    z-10
+  "
+>
 
 {/* ── العنوان ── */}
 <img
