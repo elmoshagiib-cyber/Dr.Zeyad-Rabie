@@ -52,15 +52,21 @@ const { user } = useApp();
 
     const [courses, setCourses] = useState<any[]>([]);
 const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+useEffect(() => {
+  console.log("Deferred Prompt =", deferredPrompt);
+}, [deferredPrompt]);
     useEffect(() => {
   loadCourses();
 }, []);
 
 useEffect(() => {
-  const handler = (e: any) => {
-    e.preventDefault();
-    setDeferredPrompt(e);
-  };
+const handler = (e: any) => {
+  console.log("beforeinstallprompt Fired");
+
+  e.preventDefault();
+
+  setDeferredPrompt(e);
+};
 
   window.addEventListener("beforeinstallprompt", handler);
 
@@ -279,7 +285,7 @@ dark:text-[#F6AC08]
     سجل الآن مجانًا
   </Button>
 
-  {deferredPrompt && (
+  {true && (
     <Button
       size="lg"
       onClick={installApp}
