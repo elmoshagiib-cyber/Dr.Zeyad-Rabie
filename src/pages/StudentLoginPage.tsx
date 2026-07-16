@@ -21,16 +21,29 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [loginForm, setLoginForm] = useState({
+  phone: "",
+  password: "",
+});
+  const [errors, setErrors] = useState<{
+  phone?: string;
+  password?: string;
+}>({});
 
   const fieldIcon = "w-4 h-4 text-[#F6AC08] flex-shrink-0";
 
   const validate = () => {
-    const e: { email?: string; password?: string } = {};
-    if (!loginForm.email.trim()) e.email = 'البريد الإلكتروني مطلوب';
-    else if (!loginForm.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
-      e.email = 'البريد الإلكتروني غير صحيح';
+    const e: {
+  phone?: string;
+  password?: string;
+} = {};
+    if (!loginForm.phone.trim())
+  e.phone = "رقم الهاتف مطلوب";
+
+else if (
+  !/^01[0125][0-9]{8}$/.test(loginForm.phone)
+)
+  e.phone = "رقم الهاتف غير صحيح";
     if (!loginForm.password) e.password = 'كلمة المرور مطلوبة';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -42,49 +55,79 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const { data: student, error: studentError } = await supabase
-        .from("students")
-        .select("*")
-        .eq("email", loginForm.email.trim())
-        .single();
+// البحث عن الطالب برقم الهاتف
+const { data: studentByPhone, error: phoneError } = await supabase
+  .from("students")
+  .select("id, auth_id, full_name, phone, email, grade, status")
+  .eq("phone", loginForm.phone.trim())
+  .single();
 
-      if (studentError || !student) {
-        setErrors({ email: 'البريد الإلكتروني غير موجود' });
-        setLoading(false);
-        return;
-      }
+if (phoneError || !studentByPhone) {
+  setErrors({
+    phone: "رقم الهاتف غير مسجل",
+  });
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email: student.email,
-        password: loginForm.password,
-      });
+  setLoading(false);
+  return;
+}
 
-      if (error) {
-        setErrors({ password: 'كلمة المرور غير صحيحة' });
-        setLoading(false);
-        return;
-      }
+// تسجيل الدخول باستخدام الإيميل المخزن في قاعدة البيانات
+const { data: authData, error: authError } =
+  await supabase.auth.signInWithPassword({
+    email: studentByPhone.email,
+    password: loginForm.password,
+  });
 
-      await supabase
-        .from("students")
-        .update({ last_login: new Date().toISOString() })
-        .eq("id", student.id);
+if (authError) {
+  setErrors({
+    password: "كلمة المرور غير صحيحة",
+  });
 
-      login({
-        id: String(student.id),
-        name: student.full_name,
-        role: "student",
-        grade: student.grade,
-        gradeLabel: student.grade,
-        phone: student.phone,
-        status: "approved",
-      });
+  setLoading(false);
+  return;
+}
+
+
+const { data: student, error: studentError } = await supabase
+  .from("students")
+  .select("*")
+  .eq("auth_id", authData.user.id)
+  .single();
+
+if (studentError || !student) {
+  await supabase.auth.signOut();
+
+  setErrors({
+    phone: "بيانات الطالب غير موجودة",
+  });
+
+  setLoading(false);
+  return;
+}
+
+await supabase
+  .from("students")
+  .update({
+    last_login: new Date().toISOString(),
+  })
+  .eq("auth_id", authData.user.id);
+
+     await supabase
+  .from("students")
+  .update({
+    last_login: new Date().toISOString(),
+  })
+  .eq("id", student.id);
 
       setSuccess(true);
       setTimeout(() => navigate("/"), 1200);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("حدث خطأ أثناء تسجيل الدخول");
+
+setErrors({
+  password:
+    err.message || "حدث خطأ أثناء تسجيل الدخول",
+});
     }
 
     setLoading(false);
@@ -162,7 +205,7 @@ overflow-hidden
                   </h1>
                 </div>
                 <p className={`text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  ادخل على حسابك بإدخال البريد الإلكتروني و كلمة المرور المسجل بهم من قبل
+                  ادخل إلى حسابك باستخدام رقم الهاتف وكلمة المرور.
                 </p>
               </motion.div>
 
@@ -175,14 +218,14 @@ overflow-hidden
                 transition={{ delay: 0.2, duration: 0.5 }}
               >
 
-                {/* ── Email ── */}
+                {/* ── Phone ── */}
                 <div className="flex flex-col gap-1">
                   <div
                     className={`
                       flex items-center gap-3
                       border-b-2 py-2.5
                       transition-colors duration-200
-                      ${errors.email
+                      ${errors.phone
                         ? 'border-red-400'
                         : isDark
                           ? 'border-gray-700 focus-within:border-[#F6AC08]'
@@ -192,12 +235,12 @@ overflow-hidden
                   >
                     <Phone className={fieldIcon} />
                     <input
-                      type="email"
-                      placeholder="البريد الإلكتروني"
-                      value={loginForm.email}
+                     type="tel"
+                      placeholder="رقم الهاتف"
+                      value={loginForm.phone}
                       onChange={e => {
-                        setLoginForm(p => ({ ...p, email: e.target.value }));
-                        setErrors(p => ({ ...p, email: undefined }));
+                        setLoginForm(p => ({ ...p, phone: e.target.value }));
+                        setErrors(p => ({ ...p, phone: undefined }));
                       }}
                       dir="ltr"
                       required
@@ -209,8 +252,8 @@ overflow-hidden
                       `}
                     />
                   </div>
-                  {errors.email && (
-                    <p className="text-xs text-red-500 text-right">{errors.email}</p>
+                  {errors.phone && (
+                    <p className="text-xs text-red-500 text-right">{errors.phone}</p>
                   )}
                 </div>
 
@@ -274,7 +317,7 @@ overflow-hidden
                         w-11 h-6 rounded-full
                         transition-colors duration-300
                         ${rememberMe
-                          ? 'bg-teal-500'
+                          ? 'bg-[#421651]'
                           : isDark ? 'bg-gray-700' : 'bg-gray-200'
                         }
                       `}
@@ -366,7 +409,7 @@ duration-300
                 <button
                   type="button"
                   onClick={() => navigate('/register')}
-                  className="font-bold text-orange-500 hover:text-orange-400 transition-colors"
+                  className="font-bold text-[#F6AC08] hover:text-[#E5A000] transition-colors"
                 >
                   أنشئ حسابك الآن !
                 </button>

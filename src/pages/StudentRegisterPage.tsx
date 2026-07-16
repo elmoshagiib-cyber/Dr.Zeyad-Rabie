@@ -34,6 +34,119 @@ const GOVERNORATES = [
   'شمال سيناء', 'سوهاج',
 ];
 
+
+
+ /* ── Reusable underline input row ── */
+  const InputField = ({
+  icon: Icon,
+  placeholder,
+  value,
+  onChange,
+  type = "text",
+  dir,
+  error,
+  required = false,
+  suffix,
+  isDark,
+}: {
+  icon: React.ElementType;
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  dir?: string;
+  error?: string;
+  required?: boolean;
+  suffix?: React.ReactNode;
+  isDark: boolean;
+}) => (
+  <div className="flex flex-col gap-0.5 w-full">
+    <div
+      className={`flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
+        ${
+          error
+            ? "border-red-400"
+            : "border-gray-200 focus-within:border-[#421651]"
+        }
+        ${isDark ? "border-gray-700 focus-within:border-[#421651]" : ""}
+      `}
+    >
+      <Icon className="w-4 h-4 text-[#F6AC08] flex-shrink-0" />
+
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        dir={dir}
+        required={required}
+        className={`
+          flex-1 min-w-0 bg-transparent border-0 outline-none
+          text-sm md:text-base py-0.5
+          placeholder-gray-400
+          ${isDark ? "text-white placeholder-gray-500" : "text-gray-700"}
+        `}
+      />
+
+      {suffix}
+    </div>
+
+    {error && (
+      <p className="text-xs text-red-500 mt-0.5 text-right">
+        {error}
+      </p>
+    )}
+  </div>
+);
+
+  /* ── Reusable underline select row ── */
+  const SelectField = ({
+  icon: Icon,
+  value,
+  onChange,
+  error,
+  children,
+  required = false,
+  isDark,
+}: {
+  icon: React.ElementType;
+  value: string;
+  onChange: (v: string) => void;
+  error?: string;
+  children: React.ReactNode;
+  required?: boolean;
+  isDark: boolean;
+}) => (
+    <div className="flex flex-col gap-0.5 w-full">
+      <div
+        className={`flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
+          ${error ? 'border-red-400' : 'border-gray-200 focus-within:border-[#421651]'}
+          ${isDark ? 'border-gray-700 focus-within:border-[#421651]' : ''}
+        `}
+      >
+        <Icon className="w-4 h-4 text-[#F6AC08] flex-shrink-0" />
+        <select
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          required={required}
+          style={{ appearance: 'none', WebkitAppearance: 'none' }}
+          className={`
+            flex-1 min-w-0 bg-transparent border-0 outline-none
+            text-sm md:text-base py-0.5 cursor-pointer
+            ${isDark ? 'text-white' : value ? 'text-gray-700' : 'text-gray-400'}
+          `}
+        >
+          {children}
+        </select>
+        <ChevronLeft className="w-4 h-4 text-gray-400 rotate-[-90deg] flex-shrink-0" />
+      </div>
+      {error && (
+        <p className="text-xs text-red-500 mt-0.5 text-right">{error}</p>
+      )}
+    </div>
+  );
+
+  
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { isDark } = useTheme();
@@ -65,7 +178,13 @@ const RegisterPage = () => {
     if (!form.lastName.trim()) e.lastName = 'الاسم الأخير مطلوب';
     if (!form.phone.match(/^(010|011|012|015)\d{8}$/)) e.phone = 'رقم الهاتف غير صحيح';
     if (form.parentPhone && !form.parentPhone.match(/^(010|011|012|015)\d{8}$/)) e.parentPhone = 'رقم هاتف ولي الأمر غير صحيح';
-    if (form.email && !form.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) e.email = 'البريد الإلكتروني غير صحيح';
+    if (!form.email.trim()) {
+  e.email = "البريد الإلكتروني مطلوب";
+} else if (
+  !form.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+) {
+  e.email = "البريد الإلكتروني غير صحيح";
+}
     if (!form.grade) e.grade = 'يرجى اختيار الصف الدراسي';
     if (!form.governorate) e.governorate = 'يرجى اختيار المحافظة';
     if (!form.studentType) e.studentType = 'يرجى اختيار نوع الطالب';
@@ -80,13 +199,25 @@ const RegisterPage = () => {
     if (!validate()) return;
     setLoading(true);
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
-      });
-      if (authError) { alert(authError.message); setLoading(false); return; }
-      const { error } = await supabase.from("students").insert([{
-        auth_id: authData.user?.id,
+const { data: authData, error: authError } =
+  await supabase.auth.signUp({
+    email: form.email.trim().toLowerCase(),
+    password: form.password,
+    options: {
+      data: {
+        full_name: `${form.firstName} ${form.secondName} ${form.thirdName} ${form.lastName}`,
+      },
+    },
+  });
+
+if (authError) throw authError;
+
+if (!authData.user) {
+  throw new Error("لم يتم إنشاء المستخدم");
+}
+
+      const { error: insertError } = await supabase.from("students").insert([{
+        auth_id: authData.user.id,
         full_name: `${form.firstName} ${form.secondName} ${form.thirdName} ${form.lastName}`,
         phone: form.phone,
         parent_phone: form.parentPhone,
@@ -95,14 +226,49 @@ const RegisterPage = () => {
         governorate: form.governorate,
         type: form.studentType,
         status: "نشط",
+        is_activated: true,
+
+subscription_status: "غير مشترك",
+
+attendance_percentage: 0,
+
+watched_lessons: 0,
+total_lessons: 0,
+
+completed_homework: 0,
+total_homework: 0,
       }]);
-      if (error) { console.error("Insert Error:", error); alert(error.message); setLoading(false); return; }
+if (insertError) {
+  console.log(insertError);
+console.log(insertError.code);
+console.log(insertError.message);
+console.log(insertError.details);
+console.log(insertError.hint);
+console.log("INSERT ERROR =", insertError);
+  alert(
+    JSON.stringify(insertError, null, 2)
+  );
+
+  setLoading(false);
+  return;
+}
+await supabase.auth.signOut();
       setSuccess(true);
-      setTimeout(() => navigate("/login"), 2500);
-    } catch (err) {
-      console.error(err);
-      alert("حدث خطأ أثناء إنشاء الحساب");
-    }
+
+setTimeout(() => {
+navigate("/login", {
+replace: true,
+});
+},1500);
+    } catch (err: any) {
+  console.error(err);
+
+  if (err.message?.includes("already registered")) {
+    alert("هذا البريد الإلكتروني مستخدم بالفعل");
+  } else {
+    alert(err.message || "حدث خطأ أثناء إنشاء الحساب");
+  }
+}
     setLoading(false);
   };
 
@@ -122,108 +288,7 @@ const RegisterPage = () => {
 
   const strength = passwordStrength();
 
-const fieldIcon = "w-4 h-4 text-[#F6AC08] flex-shrink-0";
-
-  /* ── Reusable underline input row ── */
-  const InputField = ({
-    icon: Icon,
-    placeholder,
-    value,
-    onChange,
-    type = 'text',
-    dir,
-    error,
-    required = false,
-    suffix,
-  }: {
-    icon: React.ElementType;
-    placeholder: string;
-    value: string;
-    onChange: (v: string) => void;
-    type?: string;
-    dir?: string;
-    error?: string;
-    required?: boolean;
-    suffix?: React.ReactNode;
-  }) => (
-    <div className="flex flex-col gap-0.5 w-full">
-      <div
-        className={`flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
-          ${error
-            ? 'border-red-400'
-            : 'border-gray-200 focus-within:border-[#421651]'
-          }
-          ${isDark ? 'border-gray-700 focus-within:border-[#421651]' : ''}
-        `}
-      >
-        <Icon className={fieldIcon} />
-        <input
-          type={type}
-          placeholder={placeholder}
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          dir={dir}
-          required={required}
-          className={`
-            flex-1 min-w-0 bg-transparent border-0 outline-none
-            text-sm md:text-base py-0.5
-            placeholder-gray-400
-            ${isDark ? 'text-white placeholder-gray-500' : 'text-gray-700'}
-          `}
-        />
-        {suffix}
-      </div>
-      {error && (
-        <p className="text-xs text-red-500 mt-0.5 text-right">{error}</p>
-      )}
-    </div>
-  );
-
-  /* ── Reusable underline select row ── */
-  const SelectField = ({
-    icon: Icon,
-    value,
-    onChange,
-    error,
-    children,
-    required = false,
-  }: {
-    icon: React.ElementType;
-    value: string;
-    onChange: (v: string) => void;
-    error?: string;
-    children: React.ReactNode;
-    required?: boolean;
-  }) => (
-    <div className="flex flex-col gap-0.5 w-full">
-      <div
-        className={`flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
-          ${error ? 'border-red-400' : 'border-gray-200 focus-within:border-[#421651]'}
-          ${isDark ? 'border-gray-700 focus-within:border-[#421651]' : ''}
-        `}
-      >
-        <Icon className={fieldIcon} />
-        <select
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          required={required}
-          style={{ appearance: 'none', WebkitAppearance: 'none' }}
-          className={`
-            flex-1 min-w-0 bg-transparent border-0 outline-none
-            text-sm md:text-base py-0.5 cursor-pointer
-            ${isDark ? 'text-white' : value ? 'text-gray-700' : 'text-gray-400'}
-          `}
-        >
-          {children}
-        </select>
-        <ChevronLeft className="w-4 h-4 text-gray-400 rotate-[-90deg] flex-shrink-0" />
-      </div>
-      {error && (
-        <p className="text-xs text-red-500 mt-0.5 text-right">{error}</p>
-      )}
-    </div>
-  );
-
+ 
   /* ══════════════════════════════════════
      SUCCESS SCREEN
   ══════════════════════════════════════ */
@@ -413,6 +478,7 @@ gap-2
                 {/* Names — row 1 */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 lg:gap-x-10 gap-y-4">
                   <InputField
+                    isDark={isDark}
                     icon={User}
                     placeholder="الاسم الأول"
                     value={form.firstName}
@@ -421,6 +487,7 @@ gap-2
                     required
                   />
                   <InputField
+                    isDark={isDark}
                     icon={User}
                     placeholder="الاسم الثاني"
                     value={form.secondName}
@@ -433,6 +500,7 @@ gap-2
                 {/* Names — row 2 */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 lg:gap-x-10 gap-y-4">
                   <InputField
+                    isDark={isDark}
                     icon={User}
                     placeholder="الاسم الثالث"
                     value={form.thirdName}
@@ -441,6 +509,7 @@ gap-2
                     required
                   />
                   <InputField
+                    isDark={isDark}
                     icon={User}
                     placeholder="الاسم الأخير"
                     value={form.lastName}
@@ -455,6 +524,7 @@ gap-2
                   {/* Student phone */}
                   <div className="flex flex-col gap-1">
                     <InputField
+                      isDark={isDark}
                       icon={Phone}
                       placeholder="رقم الهاتف"
                       value={form.phone}
@@ -473,6 +543,8 @@ gap-2
                   {/* Parent phone */}
                   <div className="flex flex-col gap-1">
                     <InputField
+                      isDark={isDark}
+                    required
                       icon={Phone}
                       placeholder="رقم هاتف ولي الأمر"
                       value={form.parentPhone}
@@ -490,6 +562,7 @@ gap-2
 
                 {/* Email */}
                 <InputField
+                  isDark={isDark}
                   icon={Mail}
                   placeholder="البريد الإلكتروني"
                   value={form.email}
@@ -502,6 +575,7 @@ gap-2
 
                 {/* Governorate */}
                 <SelectField
+                  isDark={isDark}
                   icon={MapPin}
                   value={form.governorate}
                   onChange={v => setForm(p => ({ ...p, governorate: v }))}
@@ -516,6 +590,7 @@ gap-2
 
                 {/* Grade */}
                 <SelectField
+                  isDark={isDark}
                   icon={BookOpen}
                   value={form.grade}
                   onChange={v => setForm(p => ({ ...p, grade: v }))}
@@ -530,6 +605,7 @@ gap-2
 
                 {/* Student Type */}
                 <SelectField
+                  isDark={isDark}
                   icon={Layers}
                   value={form.studentType}
                   onChange={v => setForm(p => ({ ...p, studentType: v }))}
@@ -556,7 +632,7 @@ gap-2
                         ${isDark ? 'border-gray-700 focus-within:border-[#421651]' : ''}
                       `}
                     >
-                      <Lock className={fieldIcon} />
+                      <Lock className="w-4 h-4 text-[#F6AC08] flex-shrink-0" />
                       <input
                         type={showPassword ? 'text' : 'password'}
                         placeholder="كلمة السر"
@@ -628,7 +704,7 @@ gap-2
                         ${isDark ? 'border-gray-700' : ''}
                       `}
                     >
-                      <Lock className={fieldIcon} />
+                      <Lock className="w-4 h-4 text-[#F6AC08] flex-shrink-0" />
                       <input
                         type={showConfirm ? 'text' : 'password'}
                         placeholder="تأكيد كلمة السر"

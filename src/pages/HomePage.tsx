@@ -13,7 +13,7 @@ import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { Avatar } from "../components/ui/Avatar";
-
+import { Download } from "lucide-react";
 import {
   ChevronRight,
   Play,
@@ -51,9 +51,22 @@ const { user } = useApp();
     useState<"secondary" | "prep">("secondary");
 
     const [courses, setCourses] = useState<any[]>([]);
-
+const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
     useEffect(() => {
   loadCourses();
+}, []);
+
+useEffect(() => {
+  const handler = (e: any) => {
+    e.preventDefault();
+    setDeferredPrompt(e);
+  };
+
+  window.addEventListener("beforeinstallprompt", handler);
+
+  return () => {
+    window.removeEventListener("beforeinstallprompt", handler);
+  };
 }, []);
 
 const loadCourses = async () => {
@@ -67,6 +80,19 @@ const loadCourses = async () => {
   }
 };
 
+const installApp = async () => {
+  if (!deferredPrompt) return;
+
+  deferredPrompt.prompt();
+
+  const { outcome } = await deferredPrompt.userChoice;
+
+  if (outcome === "accepted") {
+    console.log("PWA Installed");
+  }
+
+  setDeferredPrompt(null);
+};
 
 const gradeMap = {
   "الصف الأول الثانوي": {
@@ -222,35 +248,66 @@ dark:text-[#F6AC08]
     lg:justify-start
     "
   >
+   <div className="mt-6 sm:mt-8 lg:mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+
+  <Button
+    size="lg"
+    variant="outline"
+    onClick={() => navigate("/register")}
+    className="
+      h-11
+      sm:h-12
+      lg:h-14
+      px-6
+      sm:px-7
+      lg:px-9
+      rounded-xl
+      bg-[#3B1248]
+      hover:bg-[#4A175B]
+      border-0
+      text-white
+      text-[14px]
+      sm:text-[16px]
+      lg:text-[18px]
+      font-semibold
+      shadow-[0_14px_35px_rgba(59,18,72,.35)]
+      hover:scale-[1.03]
+      transition-all
+      duration-300
+    "
+  >
+    سجل الآن مجانًا
+  </Button>
+
+  {deferredPrompt && (
     <Button
       size="lg"
-      variant="outline"
-      onClick={() => navigate("/register")}
-className="
-h-11
-sm:h-12
-lg:h-14
-px-6
-sm:px-7
-lg:px-9
-rounded-xl
-bg-[#3B1248]
-hover:bg-[#4A175B]
-border-0
-text-white
-text-[14px]
-sm:text-[16px]
-lg:text-[18px]
-font-semibold
-shadow-[0_14px_35px_rgba(59,18,72,.35)]
-hover:scale-[1.03]
-transition-all
-duration-300
-"
+      onClick={installApp}
+      className="
+        h-11
+        sm:h-12
+        lg:h-14
+        px-6
+        sm:px-7
+        lg:px-9
+        rounded-xl
+        bg-[#F6AC08]
+        hover:bg-[#E29E00]
+        text-[#421651]
+        font-bold
+        shadow-[0_12px_30px_rgba(246,172,8,.45)]
+        hover:scale-[1.03]
+        transition-all
+        duration-300
+      "
     >
-      سجل الآن مجانًا
+      <Download className="w-5 h-5 ml-2" />
+
+      تثبيت التطبيق
     </Button>
-  </div>
+  )}
+</div>
+</div>
 </motion.div>
 
       {/* IMAGE */}
