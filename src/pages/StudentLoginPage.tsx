@@ -6,499 +6,378 @@ import { supabase } from "../lib/supabase";
 import { Footer } from "../components/layout/Footer";
 import {
   Eye, EyeOff, Phone, Lock,
-  ChevronLeft, Loader2, CheckCircle2
+  Loader2, CheckCircle2, LogIn
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import HeroSection from '../components/HeroSection';
-
 import { useNavigate } from "react-router-dom";
 
-
-const LoginPage = () => {  const navigate = useNavigate();
+const LoginPage = () => {
+  const navigate = useNavigate();
   const { login } = useApp();
   const { isDark } = useTheme();
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  
   const [rememberMe, setRememberMe] = useState(false);
- const [loginForm, setLoginForm] = useState({
-  email: "",
-  password: "",
-});
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
-const inputClass = `
-w-full
-h-[60px]
-bg-white
-dark:bg-[#1B1131]
-border
-border-slate-300
-dark:border-white/10
-rounded-2xl
-pr-14
-pl-5
-text-[15px]
-font-medium
-text-slate-800
-dark:text-white
-placeholder:text-slate-400
-outline-none
-transition-all
-duration-300
-focus:border-violet-500
-focus:ring-4
-focus:ring-violet-500/10
-hover:border-violet-300
-`;
+  const fieldIcon = "w-4 h-4 text-orange-400 flex-shrink-0";
 
+  const validate = () => {
+    const e: { email?: string; password?: string } = {};
+    if (!loginForm.email.trim()) e.email = 'البريد الإلكتروني مطلوب';
+    else if (!loginForm.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
+      e.email = 'البريد الإلكتروني غير صحيح';
+    if (!loginForm.password) e.password = 'كلمة المرور مطلوبة';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+    setLoading(true);
 
-  setLoading(true);
+    try {
+      const { data: student, error: studentError } = await supabase
+        .from("students")
+        .select("*")
+        .eq("email", loginForm.email.trim())
+        .single();
 
-  try {
-    // نجيب الطالب من جدول students باستخدام الإيميل
-    const { data: student, error: studentError } = await supabase
-      .from("students")
-      .select("*")
-      .eq("email", loginForm.email.trim())
-      .single();
+      if (studentError || !student) {
+        setErrors({ email: 'البريد الإلكتروني غير موجود' });
+        setLoading(false);
+        return;
+      }
 
-    if (studentError || !student) {
-      alert("البريد الإلكتروني غير موجود");
-      setLoading(false);
-      return;
+      const { error } = await supabase.auth.signInWithPassword({
+        email: student.email,
+        password: loginForm.password,
+      });
+
+      if (error) {
+        setErrors({ password: 'كلمة المرور غير صحيحة' });
+        setLoading(false);
+        return;
+      }
+
+      await supabase
+        .from("students")
+        .update({ last_login: new Date().toISOString() })
+        .eq("id", student.id);
+
+      login({
+        id: String(student.id),
+        name: student.full_name,
+        role: "student",
+        grade: student.grade,
+        gradeLabel: student.grade,
+        phone: student.phone,
+        status: "approved",
+      });
+
+      setSuccess(true);
+      setTimeout(() => navigate("/"), 1200);
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ أثناء تسجيل الدخول");
     }
 
-    // تسجيل الدخول في Supabase Auth
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: student.email,
-      password: loginForm.password,
-    });
+    setLoading(false);
+  };
 
-    if (error) {
-      alert("البريد الإلكتروني أو كلمة المرور غير صحيحة");
-      setLoading(false);
-      return;
-    }
+  return (
+    <>
+      <Navbar />
 
-    await supabase
-      .from("students")
-      .update({
-        last_login: new Date().toISOString(),
-      })
-      .eq("id", student.id);
+      <div className={`min-h-screen pt-[62px] sm:pt-16 ${isDark ? 'bg-gray-950' : 'bg-white'}`}>
 
-    login({
-      id: String(student.id),
-      name: student.full_name,
-      role: "student",
-      grade: student.grade,
-      gradeLabel: student.grade,
-      phone: student.phone,
-      status: "approved",
-    });
+        {/* ── outer flex wrapper ── */}
+        <div className="flex flex-col lg:flex-row lg:min-h-[calc(100vh-64px)]">
 
-    navigate("/");
-  } catch (err) {
-    console.error(err);
-    alert("حدث خطأ أثناء تسجيل الدخول");
-  }
-
-  setLoading(false);
-};
-  const cardShadow = isDark
-    ? '0 20px 60px rgba(109,40,217,0.18), 0 0 0 1px rgba(255,255,255,0.05)'
-    : '0 10px 50px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.03)';
-
-    return (
-  <>
-    <Navbar />
-
-    <div
-      className="min-h-screen pt-[62px] sm:pt-16"
-        style={{ background: isDark ? '#0B0715' : '#ffffff' }}
-      >
-        <div className="flex flex-col lg:flex-row-reverse min-h-[calc(100vh-62px)] sm:min-h-[calc(100vh-64px)]">
-
-          {/* ────────────────────── LEFT: FORM ───────────────────── */}
+          {/* ══════════════════════════════════════════
+              FORM COLUMN
+              • phone  : full width, order 1 (top)
+              • tablet : full width, order 1 (top)
+              • desktop: 58 % left, order 1
+          ══════════════════════════════════════════ */}
           <motion.div
-  className="
-w-full
-lg:w-[50%]
-flex
-flex-col
-justify-center
-px-6
-sm:px-10
-md:px-16
-lg:px-20
-xl:px-24
-py-12
-bg-white
-shadow-sm
-order-2
-lg:order-2
-"
-            initial={{ opacity: 0, x: -50 }}
+            className="
+              w-full lg:w-[58%]
+              order-1 lg:order-1
+              flex flex-col justify-center
+              px-5 sm:px-10 md:px-16 lg:px-14 xl:px-20
+              py-10 sm:py-12 lg:py-0
+              min-h-[calc(100vh-62px)] lg:min-h-0
+            "
+            dir="rtl"
+            initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
           >
-           <div className="w-full max-w-[760px] ml-auto">
+            {/* inner container — centres on mobile, left-aligned on desktop */}
+            <div className="w-full max-w-md mx-auto lg:max-w-lg xl:max-w-xl">
 
-              {/* Page heading */}
+              {/* ── Title ── */}
               <motion.div
-                className="mb-10"
-                initial={{ opacity: 0, y: -18 }}
+                className="mb-8 sm:mb-10"
+                initial={{ opacity: 0, y: -12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15, duration: 0.6 }}
+                transition={{ delay: 0.1, duration: 0.45 }}
               >
-                <div className="flex items-center gap-3 mb-2.5">
-                  
-                  <div>
-                   <h1
-className="
-text-4xl
-lg:text-5xl
-font-black
-leading-tight
-tracking-tight
-"
-                      style={{ color: isDark ? '#fff' : '#0F172A' }}
-                    >
-                     تسجيل الدخول
-                    </h1>
-                  </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <LogIn className="w-6 h-6 sm:w-7 sm:h-7 text-teal-500 flex-shrink-0" />
+                  <h1 className={`text-2xl sm:text-3xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    تسجيل{' '}
+                    <span className="text-orange-500">الدخول</span>
+                    {' '}:
+                  </h1>
                 </div>
-
+                <p className={`text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                  ادخل على حسابك بإدخال البريد الإلكتروني و كلمة المرور المسجل بهم من قبل
+                </p>
               </motion.div>
 
-              {/* ── Main Card ── */}
-<motion.div
-  className="
-relative
-mb-8
-rounded-[28px]
-border
-border-slate-300
-dark:border-white/10
-bg-[#FCFCFD]
-dark:bg-[#130726]/85
-backdrop-blur-2xl
-shadow-[0_20px_45px_rgba(15,23,42,.08)]
-overflow-hidden
-"
->
-  {/* Top Gradient */}
-  <div
-    className="
-absolute
-top-0
-left-0
-right-0
-h-[5px]
-bg-gradient-to-r
-from-[#5B21B6]
-via-[#7C3AED]
-to-[#A855F7]
-"
-  />
+              {/* ── FORM ── */}
+              <motion.form
+                onSubmit={handleSubmit}
+                className="space-y-6 sm:space-y-7"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
 
-  <div className="p-12 lg:p-14">
-
-
-                {/* Animated Form Body */}
-                <AnimatePresence mode="wait">
-                  <motion.form
-                    
-                    onSubmit={handleSubmit}
-                    className="space-y-7"
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.28 }}
+                {/* ── Email ── */}
+                <div className="flex flex-col gap-1">
+                  <div
+                    className={`
+                      flex items-center gap-3
+                      border-b-2 py-2.5
+                      transition-colors duration-200
+                      ${errors.email
+                        ? 'border-red-400'
+                        : isDark
+                          ? 'border-gray-700 focus-within:border-orange-400'
+                          : 'border-gray-200 focus-within:border-orange-400'
+                      }
+                    `}
                   >
-                   
-                      <>
-                        {/* Student Code */}
-                        <div className="space-y-1.5">
-                         <label
-  className="block text-sm font-semibold"
-  style={{ color: isDark ? "rgba(255,255,255,0.72)" : "#475569" }}
->
- رقم الهاتف
-</label>
-
-<div className="relative group">
-  <input
-  type="tel"
-  placeholder="أدخل رقم الهاتف"
-  value={loginForm.email}
-  onChange={(e) =>
-    setLoginForm((p) => ({
-      ...p,
-      email: e.target.value,
-    }))
-  }
-  className="
-w-full
-h-[56px]
-rounded-xl
-border
-border-slate-200
-bg-white
-px-4
-text-[15px]
-text-slate-800
-placeholder:text-slate-400
-transition-all
-duration-300
-focus:border-violet-500
-focus:ring-4
-focus:ring-violet-500/10
-outline-none
-"
-  dir="rtl"
-  required
-/>
-  <input
-    type="email"
-    placeholder="example@gmail.com"
-    value={loginForm.email}
-    onChange={(e) =>
-      setLoginForm((p) => ({
-        ...p,
-        email: e.target.value,
-      }))
-    }
-    className={`${inputClass} pr-11`}
-    dir="ltr"
-    
-    required
-  />
-</div>
- </div>                         
-
-                        {/* Password */}
-                        <div className="space-y-1.5">
-                          <div className="flex items-center justify-between">
-                            <label className="block text-sm font-semibold" style={{ color: isDark ? 'rgba(255,255,255,0.72)' : '#475569' }}>
-                              كلمة المرور
-                            </label>
-                            <button type="button" className="text-xs font-bold text-purple-500 hover:text-purple-400 transition-colors">
-                              نسيت كلمة المرور؟
-                            </button>
-                          </div>
-                          <div className="relative">
-
-                           <input
-  type={showPassword ? "text" : "password"}
-  placeholder="أدخل كلمة المرور"
-  value={loginForm.password}
-  onChange={(e) =>
-    setLoginForm((p) => ({
-      ...p,
-      password: e.target.value,
-    }))
-  }
-  className="
-w-full
-h-[56px]
-rounded-xl
-border
-border-slate-200
-bg-white
-px-4
-pl-12
-text-[15px]
-text-slate-800
-placeholder:text-slate-400
-transition-all
-duration-300
-focus:border-violet-500
-focus:ring-4
-focus:ring-violet-500/10
-outline-none
-"
-  dir="rtl"
-  required
-/>
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="
-absolute
-left-4
-top-1/2
--translate-y-1/2
-text-slate-400
-hover:text-violet-600
-transition-colors
-"
-                             style={{
-background:
-success
-? "linear-gradient(135deg,#16a34a,#22c55e)"
-: "linear-gradient(90deg,#5B21B6 0%,#7C3AED 55%,#A855F7 100%)",
-
-boxShadow:
-success
-? "0 12px 35px rgba(34,197,94,.30)"
-: "0 18px 45px rgba(124,58,237,.30)"
-}}
-                            >
-                              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                          </div>
-                        </div>
-                      </>
-                    
-
-                    {/* Remember Me */}
-                    <div className="flex items-center gap-2.5 pt-1">
-                      <motion.button
-                        type="button"
-                        onClick={() => setRememberMe(!rememberMe)}
-                        className="w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all duration-250"
-                        style={{
-                          background: rememberMe ? 'linear-gradient(135deg,#6D28D9,#8B5CF6)' : 'transparent',
-                          borderColor: rememberMe ? '#8B5CF6' : isDark ? 'rgba(255,255,255,0.2)' : '#CBD5E1',
-                          boxShadow: rememberMe ? '0 2px 10px rgba(109,40,217,0.4)' : 'none',
-                        }}
-                        whileTap={{ scale: 0.88 }}
-                      >
-                        <div
-className="
-absolute
-inset-0
-bg-gradient-to-r
-from-transparent
-via-white/20
-to-transparent
--translate-x-full
-group-hover:translate-x-full
-transition-transform
-duration-700
-"
-/>
-                        <AnimatePresence>
-                          {rememberMe && (
-                            <motion.svg
-                              className="w-2.5 h-2.5 text-white"
-                              fill="none" viewBox="0 0 24 24"
-                              stroke="currentColor" strokeWidth={3.5}
-                              initial={{ scale: 0, opacity: 0 }}
-                              animate={{ scale: 1, opacity: 1 }}
-                              exit={{ scale: 0, opacity: 0 }}
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </motion.svg>
-                          )}
-                        </AnimatePresence>
-                      </motion.button>
-                      <span className="text-sm font-medium" style={{ color: isDark ? 'rgba(255,255,255,0.55)' : '#64748B' }}>
-                        تذكرني
-                      </span>
-                    </div>
-
-                    {/* Submit */}
-                    <motion.button
-                    
-                      type="submit"
-                      disabled={loading || success}
-                      className="
-group
-relative
-overflow-hidden
-w-full
-h-[60px]
-rounded-2xl
-text-white
-font-bold
-text-[15px]
-flex
-items-center
-justify-center
-gap-2
-disabled:opacity-70
-"
-                      style={{
-                        background: success
-                          ? 'linear-gradient(135deg, #16a34a, #22c55e)'
-                          : 'linear-gradient(135deg, #5B21B6, #7C3AED, #8B5CF6)',
-                        boxShadow: success
-                          ? '0 6px 24px rgba(34,197,94,0.4)'
-                          : '0 6px 24px rgba(109,40,217,0.45)',
-                        transition: 'all 0.4s ease',
+                    <Phone className={fieldIcon} />
+                    <input
+                      type="email"
+                      placeholder="البريد الإلكتروني"
+                      value={loginForm.email}
+                      onChange={e => {
+                        setLoginForm(p => ({ ...p, email: e.target.value }));
+                        setErrors(p => ({ ...p, email: undefined }));
                       }}
-                      whileHover={!loading && !success ? { scale: 1.02, y: -1 } : {}}
-                      whileTap={!loading && !success ? { scale: 0.98 } : {}}
+                      dir="ltr"
+                      required
+                      className={`
+                        flex-1 min-w-0 bg-transparent border-0 outline-none
+                        text-sm sm:text-base py-0.5
+                        placeholder-gray-400
+                        ${isDark ? 'text-white placeholder-gray-500' : 'text-gray-700'}
+                      `}
+                    />
+                  </div>
+                  {errors.email && (
+                    <p className="text-xs text-red-500 text-right">{errors.email}</p>
+                  )}
+                </div>
+
+                {/* ── Password ── */}
+                <div className="flex flex-col gap-1">
+                  <div
+                    className={`
+                      flex items-center gap-3
+                      border-b-2 py-2.5
+                      transition-colors duration-200
+                      ${errors.password
+                        ? 'border-red-400'
+                        : isDark
+                          ? 'border-gray-700 focus-within:border-orange-400'
+                          : 'border-gray-200 focus-within:border-orange-400'
+                      }
+                    `}
+                  >
+                    <Lock className={fieldIcon} />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="كلمة السر"
+                      value={loginForm.password}
+                      onChange={e => {
+                        setLoginForm(p => ({ ...p, password: e.target.value }));
+                        setErrors(p => ({ ...p, password: undefined }));
+                      }}
+                      dir="ltr"
+                      required
+                      className={`
+                        flex-1 min-w-0 bg-transparent border-0 outline-none
+                        text-sm sm:text-base py-0.5
+                        placeholder-gray-400
+                        ${isDark ? 'text-white placeholder-gray-500' : 'text-gray-700'}
+                      `}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                      <AnimatePresence mode="wait">
-                        {loading ? (
-                          <motion.div key="loading" className="flex items-center gap-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            جاري تسجيل الدخول...
-                          </motion.div>
-                        ) : success ? (
-                          <motion.div key="success" className="flex items-center gap-2" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}>
-                            <CheckCircle2 className="w-5 h-5" />
-                            تم بنجاح!
-                          </motion.div>
-                        ) : (
-                          <motion.div key="default" className="flex items-center gap-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                            <ChevronLeft className="w-5 h-5" />
-                            تسجيل الدخول
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.button>
-                  </motion.form>
-                </AnimatePresence>
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <p className="text-xs text-red-500 text-right">{errors.password}</p>
+                  )}
+                </div>
 
-</div>
+                {/* ── Remember me + Forgot password ── */}
+                <div className="flex items-center justify-between">
 
-</motion.div>
+                  {/* Toggle switch */}
+                  <div className="flex items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setRememberMe(!rememberMe)}
+                      aria-label="تذكرني"
+                      className={`
+                        relative flex-shrink-0
+                        w-11 h-6 rounded-full
+                        transition-colors duration-300
+                        ${rememberMe
+                          ? 'bg-teal-500'
+                          : isDark ? 'bg-gray-700' : 'bg-gray-200'
+                        }
+                      `}
+                    >
+                      <motion.span
+                        className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow"
+                        animate={{ right: rememberMe ? '2px' : 'calc(100% - 22px)' }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+                      />
+                    </button>
+                    <span className={`text-xs sm:text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                      تذكرني
+                    </span>
+                  </div>
 
-            
+                  {/* Forgot password */}
+                  <button
+                    type="button"
+                    className="text-xs sm:text-sm font-semibold text-orange-500 hover:text-orange-400 transition-colors"
+                  >
+                    نسيت كلمة المرور؟
+                  </button>
+                </div>
 
-              {/* Register prompt */}
+                {/* ── Submit ── */}
+                <motion.button
+                  type="submit"
+                  disabled={loading || success}
+                  className="
+                    w-full py-3 sm:py-3.5
+                    rounded-xl text-white font-bold
+                    text-sm sm:text-base
+                    flex items-center justify-center gap-2
+                    disabled:opacity-70
+                    transition-all duration-300
+                  "
+                  style={{
+                    background: success
+                      ? 'linear-gradient(135deg, #0d9488, #14b8a6)'
+                      : 'linear-gradient(135deg, #e11d48, #f43f5e)',
+                    boxShadow: success
+                      ? '0 8px 24px rgba(13,148,136,0.30)'
+                      : '0 8px 24px rgba(225,29,72,0.30)',
+                  }}
+                  whileHover={!loading && !success ? { scale: 1.012, y: -1 } : {}}
+                  whileTap={!loading && !success ? { scale: 0.97 } : {}}
+                >
+                  <AnimatePresence mode="wait">
+                    {loading ? (
+                      <motion.div
+                        key="loading"
+                        className="flex items-center gap-2"
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      >
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        جاري تسجيل الدخول...
+                      </motion.div>
+                    ) : success ? (
+                      <motion.div
+                        key="success"
+                        className="flex items-center gap-2"
+                        initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+                      >
+                        <CheckCircle2 className="w-5 h-5" />
+                        تم بنجاح!
+                      </motion.div>
+                    ) : (
+                      <motion.span
+                        key="default"
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      >
+                        تسجيل الدخول
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+
+              </motion.form>
+
+              {/* ── Register prompt ── */}
               <motion.p
-                className="text-center text-sm"
-                style={{ color: isDark ? 'rgba(255,255,255,0.4)' : '#94A3B8' }}
+                className={`text-center text-xs sm:text-sm mt-6 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.55 }}
+                transition={{ delay: 0.5 }}
               >
-                ليس لديك حساب؟{' '}
+                لا يوجد لديك حساب؟{' '}
                 <button
                   type="button"
                   onClick={() => navigate('/register')}
-                  className="font-bold text-purple-500 hover:text-purple-400 transition-colors"
+                  className="font-bold text-orange-500 hover:text-orange-400 transition-colors"
                 >
-                  أنشئ حساباً الآن
+                  أنشئ حسابك الآن !
                 </button>
               </motion.p>
+
             </div>
           </motion.div>
 
-          {/* ────────────────────── RIGHT: HERO ─────────────────── */}
+          {/* ══════════════════════════════════════════
+              HERO IMAGE COLUMN
+              • phone  : hidden
+              • tablet : hidden
+              • desktop: 42 % right, sticky full height
+          ══════════════════════════════════════════ */}
           <motion.div
-            className="w-full lg:w-[50%] order-1 lg:order-2 min-h-[400px] sm:min-h-[460px] lg:min-h-0"
+            className="
+              hidden lg:flex
+              lg:w-[42%]
+              order-2
+              sticky top-16 self-start
+              h-[calc(100vh-64px)]
+              overflow-hidden
+            "
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-<HeroSection image="/images/login-image.png" />
+            <div className="w-full h-full">
+              <HeroSection image="/images/login-image.png" />
+            </div>
           </motion.div>
-        </div>
-        
-      </div>
 
-      
+        </div>
+
+        <Footer />
+      </div>
     </>
   );
 };

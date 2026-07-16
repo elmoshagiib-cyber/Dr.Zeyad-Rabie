@@ -53,36 +53,34 @@ export default function GradesPage() {
 
         <div className="max-w-[1600px] mx-auto py-16 sm:py-20 lg:py-28 px-4 sm:px-6 lg:px-8 relative z-10">
 
-          {/* ── العنوان ── */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-center text-slate-900 dark:text-white leading-tight">
-            {stage === "secondary" ? (
-              <>
-                المرحلة{" "}
-                <span className="bg-gradient-to-r from-[#371143] via-[#5C1D75] to-[#F6AC08] bg-clip-text text-transparent">
-                  الثانوية
-                </span>
-              </>
-            ) : (
-              <>
-                المرحلة{" "}
-                <span className="bg-gradient-to-r from-[#371143] via-[#5C1D75] to-[#F6AC08] bg-clip-text text-transparent">
-                  الإعدادية
-                </span>
-              </>
-            )}
-          </h1>
+{/* ── العنوان ── */}
+<img
+  src={
+    stage === "secondary"
+      ? "/typography/secondary-title.png"
+      : "/typography/prep-title.png"
+  }
+  alt={
+    stage === "secondary"
+      ? "المرحلة الثانوية"
+      : "المرحلة الإعدادية"
+  }
+  draggable={false}
+  className="
+    mx-auto
+    w-[280px]
+    sm:w-[420px]
+    md:w-[560px]
+    lg:w-[700px]
+    xl:w-[820px]
+    h-auto
+    select-none
+    pointer-events-none
+  "
+/>
 
-          {/* ── الوصف ── */}
-          <p className="text-slate-500 dark:text-slate-400 text-base sm:text-lg lg:text-xl text-center mt-4 sm:mt-5 mb-10 sm:mb-14 lg:mb-16">
-            اختر صفك الدراسي وابدأ رحلتك التعليمية
-          </p>
-
-          {/* ── الفاصل ── */}
-          <div className="flex justify-center items-center gap-3 sm:gap-4 mt-6 sm:mt-8 mb-12 sm:mb-16 lg:mb-20">
-            <div className="w-20 sm:w-32 lg:w-40 h-[3px] rounded-full bg-gradient-to-r from-[#371143] via-[#5C1D75] to-[#F6AC08]" />
-            <div className="w-3 h-3 sm:w-4 sm:h-4 rotate-45 bg-gradient-to-r from-[#371143] via-[#5C1D75] to-[#F6AC08]" />
-            <div className="w-20 sm:w-32 lg:w-40 h-[3px] rounded-full bg-gradient-to-r from-[#371143] via-[#5C1D75] to-[#F6AC08]" />
-          </div>
+         
+  
 
           {/* ── الكروت ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7 lg:gap-11 max-w-[1800px] mx-auto">

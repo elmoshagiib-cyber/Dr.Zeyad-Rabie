@@ -334,41 +334,24 @@ object-contain
   >
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-      <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-        <h2
-          className="
-            text-[26px]
-            sm:text-[38px]
-            lg:text-[52px]
-            xl:text-[64px]
-            font-black
-            leading-[1.25]
-            mb-3
-            sm:mb-4
-            lg:mb-6
-            text-slate-900
-            dark:text-white
-          "
-        >
-          ليه تختار{" "}
-          <span
-            className="
-              inline-block
-              pb-1
-              sm:pb-2
-              lg:pb-3
-              bg-gradient-to-r
-              from-[#7C1DCC]
-              via-[#A52DFF]
-              to-[#D900A8]
-              bg-clip-text
-              text-transparent
-            "
-          >
-            مستر زياد ربيع؟
-          </span>
-        </h2>
-      </div>
+<div className="text-center mb-8 sm:mb-12 lg:mb-16">
+  <img
+    src="/typography/features-title.png"
+    alt="ليه تختار مستر زياد ربيع؟"
+    draggable={false}
+    className="
+      mx-auto
+      w-[280px]
+      sm:w-[420px]
+      md:w-[560px]
+      lg:w-[700px]
+      xl:w-[820px]
+      h-auto
+      select-none
+      pointer-events-none
+    "
+  />
+</div>
 
       <BannerCarousel />
 
@@ -383,17 +366,21 @@ object-contain
 
       {/* Title */}
       <div className="text-center mb-10 sm:mb-14 lg:mb-20">
-        <h2 className="
-          text-[28px] sm:text-[42px] lg:text-[58px]
-          font-black leading-tight
-          text-slate-900 dark:text-white
-        ">
-          الصفوف
-          <span className="text-[#F6AC08]"> الدراسية</span>
-        </h2>
-        <p className="mt-3 sm:mt-4 text-slate-500 dark:text-slate-400 text-[14px] sm:text-[16px]">
-          اختر مرحلتك الدراسية وابدأ رحلتك التعليمية
-        </p>
+<img
+  src="/typography/grades-title.png"
+  alt="الصفوف الدراسية"
+  className="
+    mx-auto
+    w-[280px]
+    sm:w-[420px]
+    md:w-[560px]
+    lg:w-[700px]
+    xl:w-[820px]
+    h-auto
+    select-none
+    pointer-events-none
+  "
+/>
       </div>
 
       {/* Content */}
