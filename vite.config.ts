@@ -13,29 +13,49 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), VitePWA({
   registerType: "autoUpdate",
 
-  includeAssets: ["favicon.png"],
+  includeAssets: [
+  "favicon.png",
+  "favicon-192.png",
+  "favicon-512.png",
+  "maskable-512.png"
+],
 
-  manifest: {
-    name: "منصة مستر زياد ربيع",
-    short_name: "زياد ربيع",
-    description: "منصة تعليمية لمستر زياد ربيع",
+manifest: {
+  name: "منصة مستر زياد ربيع",
+  short_name: "زياد ربيع",
+  description: "منصة تعليمية لمستر زياد ربيع",
 
-    theme_color: "#421651",
-    background_color: "#ffffff",
+  lang: "ar",
+  dir: "rtl",
 
-    display: "standalone",
-    orientation: "portrait",
+  start_url: "/",
+  scope: "/",
 
-    start_url: "/",
+  display: "standalone",
+  orientation: "portrait",
 
-    icons: [
-      {
-        src: "/favicon.png",
-        sizes: "512x512",
-        type: "image/png",
-      },
-    ],
-  },
+  theme_color: "#421651",
+  background_color: "#ffffff",
+
+  icons: [
+    {
+      src: "favicon-192.png",
+      sizes: "192x192",
+      type: "image/png",
+    },
+    {
+      src: "favicon-512.png",
+      sizes: "512x512",
+      type: "image/png",
+    },
+    {
+      src: "maskable-512.png",
+      sizes: "512x512",
+      type: "image/png",
+      purpose: "maskable"
+    }
+  ]
+}
 })],
   resolve: {
     alias: {
