@@ -122,7 +122,7 @@ const RegisterPage = () => {
 
   const strength = passwordStrength();
 
-  const fieldIcon = "w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5";
+const fieldIcon = "w-4 h-4 text-[#F6AC08] flex-shrink-0";
 
   /* ── Reusable underline input row ── */
   const InputField = ({
@@ -151,9 +151,9 @@ const RegisterPage = () => {
         className={`flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
           ${error
             ? 'border-red-400'
-            : 'border-gray-200 focus-within:border-orange-400'
+            : 'border-gray-200 focus-within:border-[#421651]'
           }
-          ${isDark ? 'border-gray-700 focus-within:border-orange-400' : ''}
+          ${isDark ? 'border-gray-700 focus-within:border-[#421651]' : ''}
         `}
       >
         <Icon className={fieldIcon} />
@@ -198,8 +198,8 @@ const RegisterPage = () => {
     <div className="flex flex-col gap-0.5 w-full">
       <div
         className={`flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
-          ${error ? 'border-red-400' : 'border-gray-200 focus-within:border-orange-400'}
-          ${isDark ? 'border-gray-700 focus-within:border-orange-400' : ''}
+          ${error ? 'border-red-400' : 'border-gray-200 focus-within:border-[#421651]'}
+          ${isDark ? 'border-gray-700 focus-within:border-[#421651]' : ''}
         `}
       >
         <Icon className={fieldIcon} />
@@ -275,10 +275,46 @@ const RegisterPage = () => {
     <>
       <Navbar />
 
-      <div className={`min-h-screen pt-[62px] sm:pt-16 ${isDark ? 'bg-gray-950' : 'bg-white'}`}>
+      <div
+  className={`
+    min-h-screen
+pt-20
+sm:pt-24
+lg:pt-24
+xl:pt-24
+    ${isDark ? "bg-gray-950" : "bg-white"}
+  `}
+>
 
         {/* ── Two-column wrapper ── */}
-        <div className="flex flex-col lg:flex-row lg:min-h-[calc(100vh-64px)]">
+        <div className="flex flex-col lg:flex-row lg:min-min-h-[1050px]">
+
+
+ {/* ════════════════════════════════
+              RIGHT — HERO IMAGE
+              Mobile  : hidden (form is enough)
+              Tablet  : hidden
+              Desktop : 42% width, sticky, full height
+          ════════════════════════════════ */}
+          <motion.div
+            className="
+hidden
+lg:block
+lg:w-[40%]
+xl:w-[38%]
+order-1
+lg:order-2
+overflow-hidden
+"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            {/* HeroSection fills the column completely */}
+            <div className="w-full h-full">
+              <HeroSection image="/images/register-image.png" />
+            </div>
+          </motion.div>
 
           {/* ════════════════════════════════
               LEFT — FORM
@@ -288,8 +324,9 @@ const RegisterPage = () => {
           ════════════════════════════════ */}
           <motion.div
             className={`
-              w-full lg:w-[58%]
-              order-2 lg:order-1
+              w-full lg:w-[60%]
+xl:w-[62%]
+              order-2 lg:order-2
               px-4 sm:px-8 md:px-12 lg:px-14 xl:px-20
               py-6 sm:py-8 lg:py-10
               flex flex-col justify-start
@@ -311,17 +348,17 @@ const RegisterPage = () => {
                 transition={{ delay: 0.1, duration: 0.45 }}
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <UserCheck className="w-6 h-6 sm:w-7 sm:h-7 text-teal-500 flex-shrink-0" />
+                  <UserCheck className="w-6 h-6 sm:w-7 sm:h-7 text-[#421651] flex-shrink-0" />
                   <h1 className={`text-xl sm:text-2xl font-black
                     ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    طلب{' '}
-                    <span className="text-orange-500">انشاء حساب</span>
+                    {' '}
+                    <span className="text-[#F6AC08]">انشاء حساب</span>
                     {' '}:
                   </h1>
                 </div>
                 <p className={`text-xs sm:text-sm
                   ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  ادخل بياناتك بشكل صحيح وسيتم التواصل معاك في اسرع وقت لتفعيل الحساب !
+                  ادخل بياناتك بشكل صحيح لسهولة التواصل معاك 
                 </p>
               </motion.div>
 
@@ -334,14 +371,25 @@ const RegisterPage = () => {
               >
                 <button
                   type="button"
-                  className={`
-                    bg-orange-500 hover:bg-orange-600 active:scale-95
-                    transition-all text-white font-bold
-                    text-sm sm:text-base
-                    px-5 sm:px-7 py-2.5 sm:py-3
-                    rounded-xl shadow-md shadow-orange-200
-                    flex items-center gap-2
-                  `}
+                  className="
+bg-[#421651]
+hover:bg-[#532065]
+active:scale-95
+transition-all
+text-white
+font-bold
+text-sm
+sm:text-base
+px-5
+sm:px-7
+py-2.5
+sm:py-3
+rounded-xl
+shadow-[0_10px_30px_rgba(66,22,81,.28)]
+flex
+items-center
+gap-2
+"
                 >
                   <BookOpen className="w-4 h-4 flex-shrink-0" />
                   <span className="leading-snug text-right">
@@ -503,9 +551,9 @@ const RegisterPage = () => {
                       className={`flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
                         ${errors.password
                           ? 'border-red-400'
-                          : 'border-gray-200 focus-within:border-orange-400'
+                          : 'border-gray-200 focus-within:border-[#421651]'
                         }
-                        ${isDark ? 'border-gray-700 focus-within:border-orange-400' : ''}
+                        ${isDark ? 'border-gray-700 focus-within:border-[#421651]' : ''}
                       `}
                     >
                       <Lock className={fieldIcon} />
@@ -575,7 +623,7 @@ const RegisterPage = () => {
                           ? 'border-red-400'
                           : form.confirmPassword && form.password === form.confirmPassword
                             ? 'border-green-400'
-                            : 'border-gray-200 focus-within:border-orange-400'
+                            : 'border-gray-200 focus-within:border-[#421651]'
                         }
                         ${isDark ? 'border-gray-700' : ''}
                       `}
@@ -623,32 +671,39 @@ const RegisterPage = () => {
                   </div>
                 </div>
 
-                {/* Submit button */}
-                <motion.button
-                  type="submit"
-                  disabled={loading}
-                  className={`
-                    w-full py-3 sm:py-3.5
-                    rounded-xl text-white font-bold
-                    text-sm sm:text-base
-                    flex items-center justify-center gap-2
-                    mt-1 disabled:opacity-70
-                    shadow-lg shadow-teal-100
-                    transition-colors
-                  `}
-                  style={{ background: 'linear-gradient(135deg, #0d9488, #14b8a6)' }}
-                  whileHover={!loading ? { scale: 1.012, y: -1 } : {}}
-                  whileTap={!loading ? { scale: 0.98 } : {}}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      جاري إنشاء الحساب...
-                    </>
-                  ) : (
-                    'طلب انشاء حساب !'
-                  )}
-                </motion.button>
+            {/* Submit button */}
+<motion.button
+  type="submit"
+  disabled={loading}
+  className="
+    w-full
+    py-3 sm:py-3.5
+    rounded-xl
+    bg-[#421651]
+    hover:bg-[#4E1B61]
+    text-white
+    font-bold
+    text-sm sm:text-base
+    flex items-center justify-center gap-2
+    mt-1
+    disabled:opacity-70
+    shadow-[0_12px_30px_rgba(66,22,81,.25)]
+    hover:shadow-[0_16px_35px_rgba(66,22,81,.35)]
+    transition-all
+    duration-300
+  "
+  whileHover={!loading ? { scale: 1.01, y: -1 } : {}}
+  whileTap={!loading ? { scale: 0.98 } : {}}
+>
+  {loading ? (
+    <>
+      <Loader2 className="w-5 h-5 animate-spin" />
+      جاري إنشاء الحساب...
+    </>
+  ) : (
+    " إنشاء حساب"
+  )}
+</motion.button>
               </motion.form>
 
               {/* Login prompt */}
@@ -663,7 +718,7 @@ const RegisterPage = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/login")}
-                  className="font-bold text-orange-500 hover:text-orange-400 transition-colors"
+                  className="font-bold text-[#F6AC08] hover:text-[#E5A000] transition-colors"
                 >
                   ادخل إلى حسابك الآن !
                 </button>
@@ -674,31 +729,7 @@ const RegisterPage = () => {
             </div>
           </motion.div>
 
-          {/* ════════════════════════════════
-              RIGHT — HERO IMAGE
-              Mobile  : hidden (form is enough)
-              Tablet  : hidden
-              Desktop : 42% width, sticky, full height
-          ════════════════════════════════ */}
-          <motion.div
-            className={`
-              hidden lg:block
-              lg:w-[42%]
-              order-1 lg:order-2
-              sticky top-16
-              self-start
-              h-[calc(100vh-64px)]
-              overflow-hidden
-            `}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            {/* HeroSection fills the column completely */}
-            <div className="w-full h-full">
-              <HeroSection image="/images/register-image.png" />
-            </div>
-          </motion.div>
+         
 
         </div>
 

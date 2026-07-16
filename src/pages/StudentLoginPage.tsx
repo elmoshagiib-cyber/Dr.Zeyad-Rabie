@@ -24,7 +24,7 @@ const LoginPage = () => {
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
-  const fieldIcon = "w-4 h-4 text-orange-400 flex-shrink-0";
+  const fieldIcon = "w-4 h-4 text-[#F6AC08] flex-shrink-0";
 
   const validate = () => {
     const e: { email?: string; password?: string } = {};
@@ -99,6 +99,30 @@ const LoginPage = () => {
         {/* ── outer flex wrapper ── */}
         <div className="flex flex-col lg:flex-row lg:min-h-[calc(100vh-64px)]">
 
+
+  {/* ══════════════════════════════════════════
+              HERO IMAGE COLUMN
+              • phone  : hidden
+              • tablet : hidden
+              • desktop: 42 % right, sticky full height
+          ══════════════════════════════════════════ */}
+          <motion.div
+           className="
+hidden
+lg:block
+lg:w-[42%]
+overflow-hidden
+"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="w-full h-full">
+              <HeroSection image="/images/login-image.png" />
+            </div>
+          </motion.div>
+
+
           {/* ══════════════════════════════════════════
               FORM COLUMN
               • phone  : full width, order 1 (top)
@@ -108,7 +132,7 @@ const LoginPage = () => {
           <motion.div
             className="
               w-full lg:w-[58%]
-              order-1 lg:order-1
+              order-2
               flex flex-col justify-center
               px-5 sm:px-10 md:px-16 lg:px-14 xl:px-20
               py-10 sm:py-12 lg:py-0
@@ -130,10 +154,10 @@ const LoginPage = () => {
                 transition={{ delay: 0.1, duration: 0.45 }}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <LogIn className="w-6 h-6 sm:w-7 sm:h-7 text-teal-500 flex-shrink-0" />
+                  <LogIn className="w-6 h-6 sm:w-7 sm:h-7 text-[#F6AC08] flex-shrink-0" />
                   <h1 className={`text-2xl sm:text-3xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     تسجيل{' '}
-                    <span className="text-orange-500">الدخول</span>
+                    <span className="text-[#F6AC08]">الدخول</span>
                     {' '}:
                   </h1>
                 </div>
@@ -161,8 +185,8 @@ const LoginPage = () => {
                       ${errors.email
                         ? 'border-red-400'
                         : isDark
-                          ? 'border-gray-700 focus-within:border-orange-400'
-                          : 'border-gray-200 focus-within:border-orange-400'
+                          ? 'border-gray-700 focus-within:border-[#F6AC08]'
+                          : 'border-gray-200 focus-within:border-[#F6AC08]'
                       }
                     `}
                   >
@@ -200,8 +224,8 @@ const LoginPage = () => {
                       ${errors.password
                         ? 'border-red-400'
                         : isDark
-                          ? 'border-gray-700 focus-within:border-orange-400'
-                          : 'border-gray-200 focus-within:border-orange-400'
+                          ? 'border-gray-700 focus-within:border-[#F6AC08]'
+                          : 'border-gray-200 focus-within:border-[#F6AC08]'
                       }
                     `}
                   >
@@ -269,7 +293,7 @@ const LoginPage = () => {
                   {/* Forgot password */}
                   <button
                     type="button"
-                    className="text-xs sm:text-sm font-semibold text-orange-500 hover:text-orange-400 transition-colors"
+                    className="text-xs sm:text-sm font-semibold text-[#F6AC08] hover:text-[#E5A000] transition-colors"
                   >
                     نسيت كلمة المرور؟
                   </button>
@@ -279,22 +303,23 @@ const LoginPage = () => {
                 <motion.button
                   type="submit"
                   disabled={loading || success}
-                  className="
-                    w-full py-3 sm:py-3.5
-                    rounded-xl text-white font-bold
-                    text-sm sm:text-base
-                    flex items-center justify-center gap-2
-                    disabled:opacity-70
-                    transition-all duration-300
-                  "
-                  style={{
-                    background: success
-                      ? 'linear-gradient(135deg, #0d9488, #14b8a6)'
-                      : 'linear-gradient(135deg, #e11d48, #f43f5e)',
-                    boxShadow: success
-                      ? '0 8px 24px rgba(13,148,136,0.30)'
-                      : '0 8px 24px rgba(225,29,72,0.30)',
-                  }}
+className="
+w-full
+py-3 sm:py-3.5
+rounded-xl
+bg-[#421651]
+hover:bg-[#532065]
+text-white
+font-bold
+text-sm sm:text-base
+flex items-center justify-center gap-2
+disabled:opacity-70
+shadow-[0_12px_30px_rgba(66,22,81,.25)]
+hover:shadow-[0_16px_35px_rgba(66,22,81,.35)]
+transition-all
+duration-300
+"
+                  
                   whileHover={!loading && !success ? { scale: 1.012, y: -1 } : {}}
                   whileTap={!loading && !success ? { scale: 0.97 } : {}}
                 >
@@ -350,30 +375,7 @@ const LoginPage = () => {
             </div>
           </motion.div>
 
-          {/* ══════════════════════════════════════════
-              HERO IMAGE COLUMN
-              • phone  : hidden
-              • tablet : hidden
-              • desktop: 42 % right, sticky full height
-          ══════════════════════════════════════════ */}
-          <motion.div
-            className="
-              hidden lg:flex
-              lg:w-[42%]
-              order-2
-              sticky top-16 self-start
-              h-[calc(100vh-64px)]
-              overflow-hidden
-            "
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="w-full h-full">
-              <HeroSection image="/images/login-image.png" />
-            </div>
-          </motion.div>
-
+        
         </div>
 
         <Footer />
