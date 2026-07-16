@@ -5,93 +5,49 @@ import { DashboardTopbar } from "../topbar/DashboardTopbar";
 type Props = {
   children: ReactNode;
   type: "student" | "instructor" | "admin";
-
   sidebarOpen: boolean;
   setSidebarOpen: (v: boolean) => void;
 };
 
-export function DashboardLayout({
-  children,
-  type,
-  sidebarOpen,
-  setSidebarOpen,
-}: Props) {
+export function DashboardLayout({ children, type, sidebarOpen, setSidebarOpen }: Props) {
   return (
-    <div
-      dir="rtl"
-      className="flex min-h-screen bg-[#f5f7fb]"
-    >
-      {/* Desktop */}
+    <div dir="rtl" className="flex min-h-screen bg-[#f5f7fb]">
 
-      <div className="hidden lg:block">
+      {/* ── Desktop sidebar (xl+) ── */}
+      <div className="hidden xl:block shrink-0">
         <DashboardSidebar type={type} />
       </div>
 
-      {/* Overlay */}
-
+      {/* ── Mobile overlay ── */}
       {sidebarOpen && (
         <div
-          onClick={() =>
-            setSidebarOpen(false)
-          }
-          className="
-          fixed
-          inset-0
-          z-40
-          bg-black/40
-          backdrop-blur-sm
-          lg:hidden
-          "
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm xl:hidden"
         />
       )}
 
-      {/* Mobile */}
-
+      {/* ── Mobile sidebar ── */}
       <div
         className={`
-        fixed
-        top-0
-        right-0
-        z-50
-        h-screen
-        transition-all
-        duration-300
-        lg:hidden
-        ${
-          sidebarOpen
-            ? "translate-x-0"
-            : "translate-x-full"
-        }
-      `}
+          fixed top-0 right-0 z-50 h-screen
+          transition-transform duration-300
+          xl:hidden
+          ${sidebarOpen ? "translate-x-0" : "translate-x-full"}
+        `}
       >
         <DashboardSidebar
           type={type}
-          onClose={() =>
-            setSidebarOpen(false)
-          }
+          mobileOpen={true}
+          onClose={() => setSidebarOpen(false)}
         />
       </div>
 
-      <main
-  className="
-  flex-1
-  overflow-y-auto
-  px-4
-  py-4
-  sm:px-6
-  lg:px-8
-  "
->
+      {/* ── Main content ── */}
+      <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 lg:px-8">
+        <DashboardTopbar onMenuClick={() => setSidebarOpen(true)} />
+        {children}
+      </main>
 
-  <DashboardTopbar
-    onMenuClick={() =>
-      setSidebarOpen(true)
-    }
-  />
-
-  {children}
-
-</main>
     </div>
   );
 }
