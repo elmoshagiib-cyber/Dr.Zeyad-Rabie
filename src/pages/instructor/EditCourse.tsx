@@ -1,7 +1,9 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import InstructorLayout from "../../layouts/InstructorLayout";
 import { supabase } from "../../lib/supabase";
+
+// ==================== INTERFACES ====================
 
 interface Question {
   id: string;
@@ -100,19 +102,27 @@ interface Course {
   sections: Section[];
 }
 
+// ==================== MAIN COMPONENT ====================
+
 export function EditCourse() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
+  // State Management
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [course, setCourse] = useState<Course | null>(null);
   const [activeTab, setActiveTab] = useState<'content' | 'settings'>('content');
   const [isScrolled, setIsScrolled] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // ==================== EFFECTS ====================
+
+  // Handle click outside dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -124,6 +134,7 @@ export function EditCourse() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -133,9 +144,14 @@ export function EditCourse() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Load course data
   useEffect(() => {
-    loadCourse();
+    if (id) {
+      loadCourse();
+    }
   }, [id]);
+
+  // ==================== DATA LOADING ====================
 
   const loadCourse = async () => {
     try {
@@ -143,9 +159,7 @@ export function EditCourse() {
       setError(null);
 
       if (!id) {
-        setError('معرف الدورة غير موجود');
-        setLoading(false);
-        return;
+        throw new Error('معرف الدورة غير موجود');
       }
 
       const { data, error: fetchError } = await supabase
@@ -157,9 +171,7 @@ export function EditCourse() {
       if (fetchError) throw fetchError;
 
       if (!data) {
-        setError('الدورة غير موجودة');
-        setLoading(false);
-        return;
+        throw new Error('الدورة غير موجودة');
       }
 
       const loadedCourse: Course = {
@@ -177,30 +189,118 @@ export function EditCourse() {
       };
 
       setCourse(loadedCourse);
-      setLoading(false);
     } catch (err: any) {
+      console.error('Error loading course:', err);
       setError(err.message || 'حدث خطأ أثناء تحميل الدورة');
+    } finally {
       setLoading(false);
     }
   };
 
+  // ==================== COURSE OPERATIONS ====================
+
   const saveCourse = async () => {
-    console.log('Saving course:', course);
-    alert('تم حفظ التغييرات بنجاح');
+    if (!course) return;
+
+    try {
+      setSaving(true);
+      setError(null);
+
+      // Upload thumbnail if changed
+      let thumbnailUrl = course.thumbnail;
+      if (course.thumbnailFile) {
+        const fileExt = course.thumbnailFile.name.split('.').pop();
+        const fileName = `${course.id}-${Date.now()}.${fileExt}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('course-thumbnails')
+          .upload(fileName, course.thumbnailFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('course-thumbnails')
+          .getPublicUrl(fileName);
+
+        thumbnailUrl = publicUrl;
+      }
+
+      // Update course in database
+      const { error: updateError } = await supabase
+        .from('courses')
+        .update({
+          title: course.title,
+          description: course.description,
+          price: course.price,
+          is_free: course.isFree,
+          thumbnail: thumbnailUrl,
+          grade: course.grade,
+          is_published: course.isPublished,
+          is_hidden: course.isHidden,
+          sections: course.sections,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', course.id);
+
+      if (updateError) throw updateError;
+
+      // Show success message
+      alert('تم حفظ التغييرات بنجاح');
+      
+      // Reload course data
+      await loadCourse();
+    } catch (err: any) {
+      console.error('Error saving course:', err);
+      setError(err.message || 'حدث خطأ أثناء حفظ التغييرات');
+      alert('فشل حفظ التغييرات: ' + (err.message || 'خطأ غير معروف'));
+    } finally {
+      setSaving(false);
+    }
   };
 
   const deleteCourse = async () => {
-    console.log('Deleting course:', id);
-    alert('تم حذف الدورة');
-    navigate('/instructor/courses');
+    if (!id) return;
+
+    try {
+      setSaving(true);
+
+      // Delete course from database
+      const { error: deleteError } = await supabase
+        .from('courses')
+        .delete()
+        .eq('id', id);
+
+      if (deleteError) throw deleteError;
+
+      // Delete thumbnail from storage if exists
+      if (course?.thumbnail) {
+        // Extract file name from URL
+        const fileName = course.thumbnail.split('/').pop();
+        if (fileName) {
+          await supabase.storage
+            .from('course-thumbnails')
+            .remove([fileName]);
+        }
+      }
+
+      alert('تم حذف الدورة بنجاح');
+      navigate('/instructor/courses');
+    } catch (err: any) {
+      console.error('Error deleting course:', err);
+      alert('فشل حذف الدورة: ' + (err.message || 'خطأ غير معروف'));
+    } finally {
+      setSaving(false);
+      setShowDeleteConfirm(false);
+    }
   };
 
-  const addSection = () => {
+  // ==================== SECTION OPERATIONS ====================
+
+  const addSection = useCallback(() => {
     if (!course) return;
 
     const newSection: Section = {
-      id: `section_${Date.now()}`,
-      title: 'قسم جديد',
+      id: `section_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      title: `قسم ${course.sections.length + 1}`,
       isCollapsed: false,
       items: []
     };
@@ -209,18 +309,22 @@ export function EditCourse() {
       ...course,
       sections: [...course.sections, newSection]
     });
-  };
+  }, [course]);
 
-  const removeSection = (sectionId: string) => {
+  const removeSection = useCallback((sectionId: string) => {
     if (!course) return;
+
+    if (!confirm('هل أنت متأكد من حذف هذا القسم؟ سيتم حذف جميع العناصر بداخله.')) {
+      return;
+    }
 
     setCourse({
       ...course,
       sections: course.sections.filter(s => s.id !== sectionId)
     });
-  };
+  }, [course]);
 
-  const renameSection = (sectionId: string, newTitle: string) => {
+  const renameSection = useCallback((sectionId: string, newTitle: string) => {
     if (!course) return;
 
     setCourse({
@@ -229,9 +333,9 @@ export function EditCourse() {
         s.id === sectionId ? { ...s, title: newTitle } : s
       )
     });
-  };
+  }, [course]);
 
-  const toggleSectionCollapse = (sectionId: string) => {
+  const toggleSectionCollapse = useCallback((sectionId: string) => {
     if (!course) return;
 
     setCourse({
@@ -240,9 +344,9 @@ export function EditCourse() {
         s.id === sectionId ? { ...s, isCollapsed: !s.isCollapsed } : s
       )
     });
-  };
+  }, [course]);
 
-  const moveSectionUp = (sectionId: string) => {
+  const moveSectionUp = useCallback((sectionId: string) => {
     if (!course) return;
 
     const index = course.sections.findIndex(s => s.id === sectionId);
@@ -255,9 +359,9 @@ export function EditCourse() {
       ...course,
       sections: newSections
     });
-  };
+  }, [course]);
 
-  const moveSectionDown = (sectionId: string) => {
+  const moveSectionDown = useCallback((sectionId: string) => {
     if (!course) return;
 
     const index = course.sections.findIndex(s => s.id === sectionId);
@@ -270,18 +374,22 @@ export function EditCourse() {
       ...course,
       sections: newSections
     });
-  };
+  }, [course]);
 
-  const addItem = (sectionId: string, type: 'video' | 'pdf' | 'quiz' | 'homework') => {
+  // ==================== ITEM OPERATIONS ====================
+
+  const addItem = useCallback((sectionId: string, type: 'video' | 'pdf' | 'quiz' | 'homework') => {
     if (!course) return;
 
     let newItem: CourseItem;
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substr(2, 9);
 
     switch (type) {
       case 'video':
         newItem = {
           type: 'video',
-          id: `video_${Date.now()}`,
+          id: `video_${timestamp}_${randomId}`,
           title: 'فيديو جديد',
           description: '',
           videoFile: null,
@@ -298,7 +406,7 @@ export function EditCourse() {
       case 'pdf':
         newItem = {
           type: 'pdf',
-          id: `pdf_${Date.now()}`,
+          id: `pdf_${timestamp}_${randomId}`,
           title: 'ملف PDF جديد',
           pdfFile: null,
           pdfUrl: '',
@@ -312,7 +420,7 @@ export function EditCourse() {
       case 'quiz':
         newItem = {
           type: 'quiz',
-          id: `quiz_${Date.now()}`,
+          id: `quiz_${timestamp}_${randomId}`,
           title: 'اختبار جديد',
           description: '',
           duration: 30,
@@ -326,7 +434,7 @@ export function EditCourse() {
       case 'homework':
         newItem = {
           type: 'homework',
-          id: `homework_${Date.now()}`,
+          id: `homework_${timestamp}_${randomId}`,
           title: 'واجب جديد',
           description: '',
           dueDate: '',
@@ -359,10 +467,14 @@ export function EditCourse() {
     });
 
     setOpenDropdownId(null);
-  };
+  }, [course]);
 
-  const removeItem = (sectionId: string, itemId: string) => {
+  const removeItem = useCallback((sectionId: string, itemId: string) => {
     if (!course) return;
+
+    if (!confirm('هل أنت متأكد من حذف هذا العنصر؟')) {
+      return;
+    }
 
     setCourse({
       ...course,
@@ -372,9 +484,9 @@ export function EditCourse() {
           : s
       )
     });
-  };
+  }, [course]);
 
-  const moveItemUp = (sectionId: string, itemId: string) => {
+  const moveItemUp = useCallback((sectionId: string, itemId: string) => {
     if (!course) return;
 
     setCourse({
@@ -391,9 +503,9 @@ export function EditCourse() {
         return { ...s, items: newItems };
       })
     });
-  };
+  }, [course]);
 
-  const moveItemDown = (sectionId: string, itemId: string) => {
+  const moveItemDown = useCallback((sectionId: string, itemId: string) => {
     if (!course) return;
 
     setCourse({
@@ -410,9 +522,9 @@ export function EditCourse() {
         return { ...s, items: newItems };
       })
     });
-  };
+  }, [course]);
 
-  const updateItem = (sectionId: string, itemId: string, updates: Partial<CourseItem>) => {
+  const updateItem = useCallback((sectionId: string, itemId: string, updates: Partial<CourseItem>) => {
     if (!course) return;
 
     setCourse({
@@ -428,9 +540,13 @@ export function EditCourse() {
           : s
       )
     });
-  };
+  }, [course]);
 
-  const handleVideoUpload = (sectionId: string, itemId: string, file: File) => {
+  // ==================== FILE UPLOAD OPERATIONS ====================
+
+  const handleVideoUpload = useCallback((sectionId: string, itemId: string, file: File) => {
+    if (!file) return;
+
     updateItem(sectionId, itemId, {
       videoFile: file,
       fileName: file.name,
@@ -439,11 +555,12 @@ export function EditCourse() {
       uploadProgress: 0
     } as Partial<VideoItem>);
 
+    // Simulate upload progress
     let progress = 0;
     const interval = setInterval(() => {
       progress += 10;
       updateItem(sectionId, itemId, {
-        uploadProgress: progress
+        uploadProgress: Math.min(progress, 100)
       } as Partial<VideoItem>);
 
       if (progress >= 100) {
@@ -454,9 +571,11 @@ export function EditCourse() {
         } as Partial<VideoItem>);
       }
     }, 300);
-  };
+  }, [updateItem]);
 
-  const handlePdfUpload = (sectionId: string, itemId: string, file: File) => {
+  const handlePdfUpload = useCallback((sectionId: string, itemId: string, file: File) => {
+    if (!file) return;
+
     updateItem(sectionId, itemId, {
       pdfFile: file,
       fileName: file.name,
@@ -465,11 +584,12 @@ export function EditCourse() {
       uploadProgress: 0
     } as Partial<PdfItem>);
 
+    // Simulate upload progress
     let progress = 0;
     const interval = setInterval(() => {
       progress += 10;
       updateItem(sectionId, itemId, {
-        uploadProgress: progress
+        uploadProgress: Math.min(progress, 100)
       } as Partial<PdfItem>);
 
       if (progress >= 100) {
@@ -480,13 +600,43 @@ export function EditCourse() {
         } as Partial<PdfItem>);
       }
     }, 300);
-  };
+  }, [updateItem]);
 
-  const addQuestion = (sectionId: string, itemId: string) => {
+  const handleThumbnailUpload = useCallback((file: File) => {
+    if (!course || !file) return;
+
+    setCourse({
+      ...course,
+      thumbnailFile: file,
+      thumbnail: URL.createObjectURL(file)
+    });
+  }, [course]);
+
+  const handleHomeworkAttachmentPdf = useCallback((sectionId: string, itemId: string, file: File) => {
+    if (!file) return;
+
+    updateItem(sectionId, itemId, {
+      attachmentPdf: file,
+      attachmentPdfUrl: URL.createObjectURL(file)
+    } as Partial<HomeworkItem>);
+  }, [updateItem]);
+
+  const handleHomeworkAttachmentImage = useCallback((sectionId: string, itemId: string, file: File) => {
+    if (!file) return;
+
+    updateItem(sectionId, itemId, {
+      attachmentImage: file,
+      attachmentImageUrl: URL.createObjectURL(file)
+    } as Partial<HomeworkItem>);
+  }, [updateItem]);
+
+  // ==================== QUIZ OPERATIONS ====================
+
+  const addQuestion = useCallback((sectionId: string, itemId: string) => {
     if (!course) return;
 
     const newQuestion: Question = {
-      id: `question_${Date.now()}`,
+      id: `question_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       title: '',
       type: 'multiple_choice',
       choices: ['', '', '', ''],
@@ -509,9 +659,9 @@ export function EditCourse() {
           : s
       )
     });
-  };
+  }, [course]);
 
-  const updateQuestion = (sectionId: string, itemId: string, questionId: string, updates: Partial<Question>) => {
+  const updateQuestion = useCallback((sectionId: string, itemId: string, questionId: string, updates: Partial<Question>) => {
     if (!course) return;
 
     setCourse({
@@ -534,10 +684,14 @@ export function EditCourse() {
           : s
       )
     });
-  };
+  }, [course]);
 
-  const removeQuestion = (sectionId: string, itemId: string, questionId: string) => {
+  const removeQuestion = useCallback((sectionId: string, itemId: string, questionId: string) => {
     if (!course) return;
+
+    if (!confirm('هل أنت متأكد من حذف هذا السؤال؟')) {
+      return;
+    }
 
     setCourse({
       ...course,
@@ -557,31 +711,9 @@ export function EditCourse() {
           : s
       )
     });
-  };
+  }, [course]);
 
-  const handleThumbnailUpload = (file: File) => {
-    if (!course) return;
-
-    setCourse({
-      ...course,
-      thumbnailFile: file,
-      thumbnail: URL.createObjectURL(file)
-    });
-  };
-
-  const handleHomeworkAttachmentPdf = (sectionId: string, itemId: string, file: File) => {
-    updateItem(sectionId, itemId, {
-      attachmentPdf: file,
-      attachmentPdfUrl: URL.createObjectURL(file)
-    } as Partial<HomeworkItem>);
-  };
-
-  const handleHomeworkAttachmentImage = (sectionId: string, itemId: string, file: File) => {
-    updateItem(sectionId, itemId, {
-      attachmentImage: file,
-      attachmentImageUrl: URL.createObjectURL(file)
-    } as Partial<HomeworkItem>);
-  };
+  // ==================== UTILITY FUNCTIONS ====================
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 بايت';
@@ -596,6 +728,8 @@ export function EditCourse() {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  // ==================== RENDER FUNCTIONS ====================
 
   const renderVideoItem = (sectionId: string, item: VideoItem, index: number, totalItems: number) => {
     return (
@@ -1034,6 +1168,7 @@ export function EditCourse() {
                 onChange={(e) => updateItem(sectionId, item.id, { duration: parseInt(e.target.value) || 0 } as Partial<QuizItem>)}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
                 placeholder="30"
+                min="1"
               />
             </div>
 
@@ -1617,6 +1752,8 @@ export function EditCourse() {
     );
   };
 
+  // ==================== LOADING STATE ====================
+
   if (loading) {
     return (
       <InstructorLayout>
@@ -1630,6 +1767,8 @@ export function EditCourse() {
       </InstructorLayout>
     );
   }
+
+  // ==================== ERROR STATE ====================
 
   if (error || !course) {
     return (
@@ -1655,9 +1794,12 @@ export function EditCourse() {
     );
   }
 
+  // ==================== MAIN RENDER ====================
+
   return (
     <InstructorLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100" dir="rtl">
+        {/* Header */}
         <div
           className={`sticky top-0 z-50 transition-all duration-300 ${
             isScrolled
@@ -1681,18 +1823,21 @@ export function EditCourse() {
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
                   className="px-6 py-3 bg-white border-2 border-red-300 text-red-600 rounded-xl hover:bg-red-50 hover:border-red-400 transition-all font-medium shadow-sm"
+                  disabled={saving}
                 >
                   حذف الدورة
                 </button>
                 <button
                   onClick={saveCourse}
-                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 font-semibold"
+                  disabled={saving}
+                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  حفظ التغييرات
+                  {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
                 </button>
               </div>
             </div>
 
+            {/* Tabs */}
             <div className="flex gap-2 border-b border-gray-200">
               <button
                 onClick={() => setActiveTab('content')}
@@ -1718,6 +1863,7 @@ export function EditCourse() {
           </div>
         </div>
 
+        {/* Content */}
         <div className="max-w-7xl mx-auto px-8 py-8">
           {activeTab === 'content' ? (
             <div className="space-y-8">
@@ -2024,6 +2170,7 @@ export function EditCourse() {
         </div>
       </div>
 
+      {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 transform transition-all">
@@ -2039,15 +2186,17 @@ export function EditCourse() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-semibold"
+                disabled={saving}
+                className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 إلغاء
               </button>
               <button
                 onClick={deleteCourse}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-lg shadow-red-500/30 font-semibold"
+                disabled={saving}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-lg shadow-red-500/30 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                حذف نهائياً
+                {saving ? 'جاري الحذف...' : 'حذف نهائياً'}
               </button>
             </div>
           </div>

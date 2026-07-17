@@ -27,7 +27,7 @@ import { InstructorDashboard } from "./pages/instructor/InstructorDashboard";
 import { InstructorCourses } from "./pages/instructor/InstructorCourses";
 import { CreateCourse } from "./pages/instructor/CreateCourse";
 import { InstructorStudents } from "./pages/instructor/InstructorStudents";
-import { InstructorNotifications } from "./pages/instructor/InstructorNotifications";
+import InstructorNotifications from "./pages/instructor/InstructorNotifications";
 import { InstructorAnalytics } from "./pages/instructor/InstructorAnalytics";
 import { StudentDetails } from "./pages/instructor/StudentDetails";
 import { EditStudent } from "./pages/instructor/EditStudent";
