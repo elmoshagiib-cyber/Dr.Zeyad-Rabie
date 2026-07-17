@@ -88,6 +88,8 @@ if (authError) {
 }
 
 
+
+
 const { data: student, error: studentError } = await supabase
   .from("students")
   .select("*")
@@ -104,6 +106,15 @@ if (studentError || !student) {
   setLoading(false);
   return;
 }
+
+login({
+  id: student.auth_id,
+  name: student.full_name,
+  role: "student",
+  grade: student.grade,
+  phone: student.phone,
+  governorate: student.governorate,
+});
 
 await supabase
   .from("students")

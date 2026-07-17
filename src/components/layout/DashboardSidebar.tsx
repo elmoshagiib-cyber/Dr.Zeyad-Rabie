@@ -20,7 +20,14 @@ interface NavItem {
 const getSection = (path: string, type: "student" | "instructor" | "admin") => {
   if (type === "instructor") {
     if (path === "/instructor") return "الرئيسية";
-    if (["/instructor/courses", "/instructor/courses/create", "/instructor/submissions"].includes(path))
+    if (
+  [
+    "/instructor/courses",
+    "/instructor/courses/create",
+    "/instructor/submissions",
+    "/instructor/subscription-codes",
+  ].includes(path)
+)
       return "إدارة المحتوى";
     if (["/instructor/students", "/instructor/attendance"].includes(path))
       return "إدارة الطلاب";
@@ -31,36 +38,131 @@ const getSection = (path: string, type: "student" | "instructor" | "admin") => {
 };
 
 const studentNav: NavItem[] = [
-  { label: "لوحة التحكم",  path: "/dashboard",               icon: <LayoutDashboard size={20} /> },
-  { label: "كورساتي",      path: "/dashboard/courses",        icon: <BookOpen size={20} /> },
-  { label: "الواجبات",     path: "/dashboard/homework",       icon: <FileText size={20} />, badge: 2 },
-  { label: "الامتحانات",   path: "/dashboard/exams",          icon: <ClipboardList size={20} /> },
-  { label: "المتصدرون",    path: "/dashboard/leaderboard",    icon: <Trophy size={20} /> },
-  { label: "الإعلانات",    path: "/dashboard/announcements",  icon: <Bell size={20} />, badge: 3 },
-  { label: "ملفي الشخصي", path: "/profile",                  icon: <User size={20} /> },
+  {
+    label: "لوحة التحكم",
+    path: "/dashboard",
+    icon: <LayoutDashboard size={20} />,
+  },
+  {
+    label: "كورساتي",
+    path: "/dashboard/courses",
+    icon: <BookOpen size={20} />,
+  },
+  {
+    label: "الواجبات",
+    path: "/dashboard/homework",
+    icon: <FileText size={20} />,
+    badge: 2,
+  },
+  {
+    label: "الامتحانات",
+    path: "/dashboard/exams",
+    icon: <ClipboardList size={20} />,
+  },
+  {
+    label: "المتصدرون",
+    path: "/dashboard/leaderboard",
+    icon: <Trophy size={20} />,
+  },
+  {
+    label: "الإعلانات",
+    path: "/dashboard/announcements",
+    icon: <Bell size={20} />,
+    badge: 3,
+  },
+  {
+    label: "ملفي الشخصي",
+    path: "/profile",
+    icon: <User size={20} />,
+  },
 ];
 
 const instructorNav: NavItem[] = [
-  { label: "لوحة التحكم",        path: "/instructor",                icon: <LayoutDashboard size={20} /> },
-  { label: "كورساتي",             path: "/instructor/courses",        icon: <BookOpen size={20} /> },
-  { label: "إنشاء كورس",         path: "/instructor/courses/create", icon: <PlusCircle size={20} /> },
-  { label: "تسليمات الطلاب",     path: "/instructor/submissions",    icon: <CheckCircle size={20} /> },
-  { label: "الإشعارات",          path: "/instructor/notifications",  icon: <Bell size={20} /> },
-  { label: "الطلاب",             path: "/instructor/students",       icon: <Users size={20} /> },
-  { label: "الحضور والانصراف",   path: "/instructor/attendance",     icon: <QrCode size={20} /> },
-  { label: "التحليلات",          path: "/instructor/analytics",      icon: <BarChart2 size={20} /> },
+  {
+    label: "لوحة التحكم",
+    path: "/instructor",
+    icon: <LayoutDashboard size={20} />,
+  },
+  {
+    label: "كورساتي",
+    path: "/instructor/courses",
+    icon: <BookOpen size={20} />,
+  },
+  {
+    label: "إنشاء كورس",
+    path: "/instructor/courses/create",
+    icon: <PlusCircle size={20} />,
+  },
+  {
+    label: "أكواد الاشتراك",
+    path: "/instructor/subscription-codes",
+    icon: <QrCode size={20} />,
+  },
+  {
+    label: "تسليمات الطلاب",
+    path: "/instructor/submissions",
+    icon: <CheckCircle size={20} />,
+  },
+  {
+    label: "الإشعارات",
+    path: "/instructor/notifications",
+    icon: <Bell size={20} />,
+  },
+  {
+    label: "الطلاب",
+    path: "/instructor/students",
+    icon: <Users size={20} />,
+  },
+  {
+    label: "الحضور والانصراف",
+    path: "/instructor/attendance",
+    icon: <QrCode size={20} />,
+  },
+  {
+    label: "التحليلات",
+    path: "/instructor/analytics",
+    icon: <BarChart2 size={20} />,
+  },
 ];
 
 const adminNav: NavItem[] = [
-  { label: "لوحة التحكم", path: "/admin",               icon: <LayoutDashboard size={20} /> },
-  { label: "المستخدمون",  path: "/admin/users",          icon: <Users size={20} /> },
-  { label: "الموافقات",   path: "/admin/approvals",      icon: <CheckCircle size={20} />, badge: 47 },
-  { label: "الكورسات",    path: "/admin/courses",        icon: <Video size={20} /> },
-  { label: "الإعلانات",   path: "/admin/announcements",  icon: <MessageSquare size={20} /> },
-  { label: "التحليلات",   path: "/admin/analytics",      icon: <BarChart2 size={20} /> },
-  { label: "الإعدادات",   path: "/admin/settings",       icon: <Settings size={20} /> },
+  {
+    label: "لوحة التحكم",
+    path: "/admin",
+    icon: <LayoutDashboard size={20} />,
+  },
+  {
+    label: "المستخدمون",
+    path: "/admin/users",
+    icon: <Users size={20} />,
+  },
+  {
+    label: "الموافقات",
+    path: "/admin/approvals",
+    icon: <CheckCircle size={20} />,
+    badge: 47,
+  },
+  {
+    label: "الكورسات",
+    path: "/admin/courses",
+    icon: <Video size={20} />,
+  },
+  {
+    label: "الإعلانات",
+    path: "/admin/announcements",
+    icon: <MessageSquare size={20} />,
+  },
+  {
+    label: "التحليلات",
+    path: "/admin/analytics",
+    icon: <BarChart2 size={20} />,
+  },
+  {
+    label: "الإعدادات",
+    path: "/admin/settings",
+    icon: <Settings size={20} />,
+  },
 ];
-
 interface DashboardSidebarProps {
   type: "student" | "instructor" | "admin";
   onClose?: () => void;

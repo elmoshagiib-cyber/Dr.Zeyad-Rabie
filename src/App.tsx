@@ -33,6 +33,7 @@ import { StudentDetails } from "./pages/instructor/StudentDetails";
 import { EditStudent } from "./pages/instructor/EditStudent";
 import { InstructorAttendance } from "./pages/instructor/InstructorAttendance";
 import { EditCourse } from "./pages/instructor/EditCourse";
+import SubscriptionCodes from "./pages/instructor/SubscriptionCodes";
 
 /* Admin */
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
@@ -271,6 +272,11 @@ function AppRoutes() {
       <EditCourse />
     </ProtectedRoute>
   }
+/>
+
+<Route
+    path="/instructor/subscription-codes"
+    element={<SubscriptionCodes />}
 />
       {/* Admin */}
 

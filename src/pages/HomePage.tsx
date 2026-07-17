@@ -14,6 +14,7 @@ import { Card, CardContent } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { Avatar } from "../components/ui/Avatar";
 import { Download } from "lucide-react";
+import GradeCoursesContent from "../components/student/courses/GradeCoursesContent";
 import {
   ChevronRight,
   Play,
@@ -256,6 +257,7 @@ dark:text-[#F6AC08]
   >
    <div className="mt-6 sm:mt-8 lg:mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
 
+ {!user && (
   <Button
     size="lg"
     variant="outline"
@@ -284,6 +286,7 @@ dark:text-[#F6AC08]
   >
     سجل الآن مجانًا
   </Button>
+)}
 
   {true && (
     <Button
@@ -383,25 +386,67 @@ object-contain
 </section>
 
 
-{/* FEATURES */}
-<ScrollReveal>
-  <section
-    className="
-      relative
-      py-12
-      sm:py-16
-      lg:py-24
-      bg-white
-      dark:bg-[#09090B]
-    "
-  >
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+{!user && (
+  <>
+    {/* FEATURES */}
+    <ScrollReveal>
+      <section
+        className="
+          relative
+          py-12
+          sm:py-16
+          lg:py-24
+          bg-white
+          dark:bg-[#09090B]
+        "
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-<div className="text-center mb-8 sm:mb-12 lg:mb-16">
+          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+            <img
+              src="/typography/features-title.png"
+              alt="ليه تختار مستر زياد ربيع؟"
+              draggable={false}
+              className="
+                mx-auto
+                w-[280px]
+                sm:w-[420px]
+                md:w-[560px]
+                lg:w-[700px]
+                xl:w-[820px]
+                h-auto
+                select-none
+                pointer-events-none
+              "
+            />
+          </div>
+
+          <BannerCarousel />
+
+        </div>
+      </section>
+    </ScrollReveal>
+  </>
+)}
+
+{/* ================= GRADES SECTION ================= */}
+<ScrollReveal>
+  <section className="relative py-14 sm:py-20 lg:py-28 bg-white dark:bg-[#09090B]">
+    <div className="max-w-[1150px] mx-auto px-4 sm:px-6 lg:px-8">
+
+{/* Title */}
+<div className="text-center mb-10 sm:mb-14 lg:mb-20">
   <img
-    src="/typography/features-title.png"
-    alt="ليه تختار مستر زياد ربيع؟"
-    draggable={false}
+    src={
+      user
+        ? "/typography/courses-title.png"
+        : "/typography/grades-title.png"
+    }
+    alt={
+      user
+        ? "الكورسات المتاحة"
+        : "الصفوف الدراسية"
+    }
     className="
       mx-auto
       w-[280px]
@@ -416,40 +461,10 @@ object-contain
   />
 </div>
 
-      <BannerCarousel />
-
-    </div>
-  </section>
-</ScrollReveal>
-
-{/* ================= GRADES SECTION ================= */}
-<ScrollReveal>
-  <section className="relative py-14 sm:py-20 lg:py-28 bg-white dark:bg-[#09090B]">
-    <div className="max-w-[1150px] mx-auto px-4 sm:px-6 lg:px-8">
-
-      {/* Title */}
-      <div className="text-center mb-10 sm:mb-14 lg:mb-20">
-<img
-  src="/typography/grades-title.png"
-  alt="الصفوف الدراسية"
-  className="
-    mx-auto
-    w-[280px]
-    sm:w-[420px]
-    md:w-[560px]
-    lg:w-[700px]
-    xl:w-[820px]
-    h-auto
-    select-none
-    pointer-events-none
-  "
-/>
-      </div>
-
       {/* Content */}
       {user ? (
-        <StudentGradeCard grade={user.grade ?? ""} />
-      ) : (
+  <GradeCoursesContent grade={user.grade ?? ""} />
+) : (
         <div className="
           grid grid-cols-1 sm:grid-cols-2
           gap-6 sm:gap-8 lg:gap-12
