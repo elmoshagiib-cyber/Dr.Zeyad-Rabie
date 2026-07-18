@@ -26,12 +26,11 @@ export function SidebarNavigation({
       className="
       flex-1
       overflow-y-auto
-      px-4
-      py-4
+      px-5 py-5
       scrollbar-hide
       "
     >
-      <div className="space-y-3">
+      <div className="space-y-2">
 
        {navItems.map((item) => {
 

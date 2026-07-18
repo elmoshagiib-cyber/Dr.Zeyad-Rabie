@@ -1,82 +1,82 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, type ReactElement } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import InstructorLayout from "../../layouts/InstructorLayout";
 import { supabase } from "../../lib/supabase";
 
-// ==================== INTERFACES ====================
+// ============================================================
+// TYPES & INTERFACES
+// ============================================================
+
+type ItemType = "video" | "pdf" | "quiz" | "homework";
+
+interface VideoItem {
+  type: "video";
+  id: string;
+  title: string;
+  description: string;
+  fileName: string;
+  fileSize: number;
+  duration: string;
+  freePreview: boolean;
+  allowDownload: boolean;
+  uploadProgress: number;
+  status: "idle" | "uploading" | "done" | "error";
+  videoUrl: string;
+thumbnailUrl: string;
+storagePath: string;
+file?: File;
+}
+
+interface PdfItem {
+  type: "pdf";
+  id: string;
+  title: string;
+  fileName: string;
+  fileSize: number;
+  allowDownload: boolean;
+  uploadProgress: number;
+  status: "idle" | "uploading" | "done" | "error";
+  pdfUrl: string;
+storagePath: string;
+file?: File;
+}
 
 interface Question {
   id: string;
   title: string;
-  type: 'multiple_choice' | 'true_false';
+  questionType: "multiple_choice" | "true_false";
   choices: string[];
   correctAnswer: number;
   points: number;
 }
 
-interface VideoItem {
-  type: 'video';
-  id: string;
-  title: string;
-  description: string;
-  videoFile: File | null;
-  videoUrl: string;
-  fileName: string;
-  fileSize: number;
-  duration: number;
-  isFreePreview: boolean;
-  allowDownload: boolean;
-  uploadProgress: number;
-  status: 'idle' | 'uploading' | 'completed' | 'error';
-}
-
-interface PdfItem {
-  type: 'pdf';
-  id: string;
-  title: string;
-  pdfFile: File | null;
-  pdfUrl: string;
-  fileName: string;
-  fileSize: number;
-  allowDownload: boolean;
-  uploadProgress: number;
-  status: 'idle' | 'uploading' | 'completed' | 'error';
-}
-
 interface QuizItem {
-  type: 'quiz';
+  type: "quiz";
   id: string;
   title: string;
   description: string;
   duration: number;
   passingScore: number;
-  maxAttempts: number;
-  isVisible: boolean;
-  isPublished: boolean;
+  attempts: number;
+  visibility: "public" | "private";
+  published: boolean;
   questions: Question[];
 }
 
 interface HomeworkItem {
-  type: 'homework';
+  type: "homework";
   id: string;
   title: string;
   description: string;
   dueDate: string;
   totalScore: number;
   allowLateSubmission: boolean;
-  instructions: string;
-  attachmentPdf: File | null;
-  attachmentPdfUrl: string;
-  attachmentImage: File | null;
-  attachmentImageUrl: string;
-  allowedSubmissionTypes: {
-    text: boolean;
-    pdf: boolean;
-    image: boolean;
-    multipleFiles: boolean;
-  };
-  isVisible: boolean;
-  isPublished: boolean;
+  instructionsFile: string;
+  instructionsFileName: string;
+  submissionTypes: ("text" | "pdf" | "image" | "multiple_files")[];
+  visibility: "public" | "private";
+  published: boolean;
+  attachmentFile?: File;
 }
 
 type CourseItem = VideoItem | PdfItem | QuizItem | HomeworkItem;
@@ -84,7 +84,7 @@ type CourseItem = VideoItem | PdfItem | QuizItem | HomeworkItem;
 interface Section {
   id: string;
   title: string;
-  isCollapsed: boolean;
+  collapsed: boolean;
   items: CourseItem[];
 }
 
@@ -94,2114 +94,2398 @@ interface Course {
   description: string;
   price: number;
   isFree: boolean;
-  thumbnail: string;
-  thumbnailFile: File | null;
+  thumbnailUrl: string;
   grade: string;
-  isPublished: boolean;
-  isHidden: boolean;
+  published: boolean;
+  hidden: boolean;
   sections: Section[];
 }
 
-// ==================== MAIN COMPONENT ====================
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
+
+function generateId(): string {
+  return Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return "0 بايت";
+  const k = 1024;
+  const sizes = ["بايت", "كيلوبايت", "ميغابايت", "غيغابايت"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+
+function createDefaultVideo(): VideoItem {
+  return {
+    type: "video",
+    id: generateId(),
+    title: "درس فيديو جديد",
+    description: "",
+    fileName: "",
+    fileSize: 0,
+    duration: "",
+    freePreview: false,
+    allowDownload: false,
+    uploadProgress: 0,
+    status: "idle",
+    videoUrl: "",
+thumbnailUrl: "",
+storagePath: "",
+  };
+}
+
+function createDefaultPdf(): PdfItem {
+  return {
+    type: "pdf",
+    id: generateId(),
+    title: "ملف PDF جديد",
+    fileName: "",
+    fileSize: 0,
+    allowDownload: true,
+    uploadProgress: 0,
+    status: "idle",
+    pdfUrl: "",
+storagePath: "",
+  };
+}
+
+function createDefaultQuestion(): Question {
+  return {
+    id: generateId(),
+    title: "",
+    questionType: "multiple_choice",
+    choices: ["", "", "", ""],
+    correctAnswer: 0,
+    points: 1,
+  };
+}
+
+function createDefaultQuiz(): QuizItem {
+  return {
+    type: "quiz",
+    id: generateId(),
+    title: "اختبار جديد",
+    description: "",
+    duration: 30,
+    passingScore: 60,
+    attempts: 3,
+    visibility: "public",
+    published: false,
+    questions: [createDefaultQuestion()],
+  };
+}
+
+function createDefaultHomework(): HomeworkItem {
+  return {
+    type: "homework",
+    id: generateId(),
+    title: "واجب منزلي جديد",
+    description: "",
+    dueDate: "",
+    totalScore: 100,
+    allowLateSubmission: false,
+    instructionsFile: "",
+    instructionsFileName: "",
+    submissionTypes: ["text"],
+    visibility: "public",
+    published: false,
+  };
+}
+
+// ============================================================
+// EXPORT COMPONENT
+// ============================================================
 
 export function EditCourse() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // State Management
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // ── State ────────────────────────────────────────────────
   const [course, setCourse] = useState<Course | null>(null);
-  const [activeTab, setActiveTab] = useState<'content' | 'settings'>('content');
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState<"content" | "settings">("content");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [openDropdownSectionId, setOpenDropdownSectionId] = useState<string | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
+  const [expandedQuestions, setExpandedQuestions] = useState<Record<string, boolean>>({});
 
-  // ==================== EFFECTS ====================
-
-  // Handle click outside dropdown
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setOpenDropdownId(null);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // Handle scroll effect
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Load course data
-  useEffect(() => {
-    if (id) {
-      loadCourse();
-    }
-  }, [id]);
-
-  // ==================== DATA LOADING ====================
-
-  const loadCourse = async () => {
+  // ── Load Course ──────────────────────────────────────────
+  async function loadCourse() {
+    if (!id) return;
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-
-      if (!id) {
-        throw new Error('معرف الدورة غير موجود');
-      }
-
-      const { data, error: fetchError } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('id', id)
+      const { data, error: supabaseError } = await supabase
+        .from("courses")
+        .select("*")
+        .eq("id", id)
         .single();
 
-      if (fetchError) throw fetchError;
+      if (supabaseError) throw supabaseError;
 
-      if (!data) {
-        throw new Error('الدورة غير موجودة');
-      }
+
+      // تحميل الأقسام
+const { data: sectionsData, error: sectionsError } = await supabase
+  .from("course_sections")
+  .select("*")
+  .eq("course_id", id)
+  .order("sort_order", { ascending: true });
+
+if (sectionsError) throw sectionsError;
+
+// تحميل عناصر الأقسام
+const sectionIds = (sectionsData || []).map((section) => section.id);
+
+const { data: itemsData, error: itemsError } = await supabase
+  .from("course_items")
+  .select("*")
+  .in("section_id", sectionIds.length ? sectionIds : ["00000000-0000-0000-0000-000000000000"])
+  .order("sort_order", { ascending: true });
+
+if (itemsError) throw itemsError;
+
+const { data: examsData, error: examsError } = await supabase
+  .from("exams")
+  .select("*");
+
+if (examsError) throw examsError;
+
+const { data: questionsData, error: questionsError } = await supabase
+  .from("exam_questions")
+  .select("*");
+
+if (questionsError) throw questionsError;
+
+const { data: choicesData, error: choicesError } = await supabase
+  .from("question_choices")
+  .select("*");
+
+if (choicesError) throw choicesError;
+
+const { data: homeworksData, error: homeworksError } = await supabase
+  .from("homeworks")
+  .select("*");
+
+if (homeworksError) throw homeworksError;
 
       const loadedCourse: Course = {
         id: data.id,
-        title: data.title || '',
-        description: data.description || '',
+        title: data.title || "",
+        description: data.description || "",
         price: data.price || 0,
         isFree: data.is_free || false,
-        thumbnail: data.thumbnail || '',
-        thumbnailFile: null,
-        grade: data.grade || '',
-        isPublished: data.is_published || false,
-        isHidden: data.is_hidden || false,
-        sections: data.sections || []
-      };
+        thumbnailUrl: data.thumbnail || "",
+        grade: data.grade || "",
+published: data.is_published || false,
+hidden: data.is_hidden || false,
+        sections: (sectionsData || []).map((section) => ({
+  id: section.id,
+  title: section.title,
+  collapsed: false,
+  items: (itemsData || [])
+    .filter((item) => item.section_id === section.id)
+    .map((item) => {
+switch (item.type) {
+  case "video":
+    return {
+      type: "video",
+      id: item.id,
+      title: item.title || "",
+      description: item.description || "",
+      fileName: "",
+      fileSize: item.file_size || 0,
+      duration: item.duration || "",
+      freePreview: item.is_preview || false,
+      allowDownload: item.allow_download || false,
+      uploadProgress: 100,
+      status: "done",
+      videoUrl: item.url || "",
+      thumbnailUrl: item.thumbnail || "",
+      storagePath: item.storage_path || "",
+    };
 
+  case "pdf":
+    return {
+      type: "pdf",
+      id: item.id,
+      title: item.title || "",
+      fileName: "",
+      fileSize: item.file_size || 0,
+      allowDownload: item.allow_download || false,
+      uploadProgress: 100,
+      status: "done",
+      pdfUrl: item.url || "",
+      storagePath: item.storage_path || "",
+    };
+
+  case "quiz": {
+    const exam = (examsData || []).find(
+      (e) => e.course_item_id === item.id
+    );
+
+    const questions = (questionsData || [])
+      .filter((q) => q.exam_id === exam?.id)
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((q) => ({
+        id: String(q.id),
+        title: q.title || "",
+        questionType:
+          q.type === "true_false"
+            ? "true_false"
+            : "multiple_choice",
+        correctAnswer: Number(q.correct_answer || 0),
+        points: q.points || 1,
+        choices: (choicesData || [])
+          .filter((c) => c.question_id === q.id)
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .map((c) => c.text),
+      }));
+
+    return {
+      type: "quiz",
+      id: item.id,
+      title: item.title,
+      description: exam?.description || "",
+      duration: exam?.duration || 30,
+      passingScore: exam?.passing_grade || 60,
+      attempts: 3,
+      visibility: exam?.is_visible ? "public" : "private",
+      published: exam?.is_published || false,
+      questions,
+    };
+  }
+
+  case "homework": {
+    const hw = (homeworksData || []).find(
+      (h) => h.course_item_id === item.id
+    );
+
+    return {
+      type: "homework",
+      id: item.id,
+      title: item.title,
+      description: hw?.description || "",
+      dueDate: hw?.due_date || "",
+      totalScore: hw?.total_score || 100,
+      allowLateSubmission: hw?.allow_late_submission || false,
+      instructionsFile: hw?.attachment_pdf || "",
+      instructionsFileName: "",
+      submissionTypes: hw?.allowed_types || ["text"],
+      visibility: "public",
+      published: hw?.is_published || false,
+    };
+  }
+
+  default:
+    return null;
+}
+  
+    })
+    .filter(Boolean),
+})),
+      };
       setCourse(loadedCourse);
-    } catch (err: any) {
-      console.error('Error loading course:', err);
-      setError(err.message || 'حدث خطأ أثناء تحميل الدورة');
+      if (data.thumbnail)
+    setThumbnailPreview(data.thumbnail);
+    } catch {
+      setError("حدث خطأ أثناء تحميل بيانات الدورة. يرجى المحاولة مرة أخرى.");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  // ==================== COURSE OPERATIONS ====================
+  useEffect(() => {
+    loadCourse();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
-  const saveCourse = async () => {
-    if (!course) return;
+  // ── Save Course ──────────────────────────────────────────
+async function saveCourse() {
+  if (!course) return;
 
-    try {
-      setSaving(true);
-      setError(null);
+  setSaving(true);
+  setSaveSuccess(false);
 
-      // Upload thumbnail if changed
-      let thumbnailUrl = course.thumbnail;
-      if (course.thumbnailFile) {
-        const fileExt = course.thumbnailFile.name.split('.').pop();
-        const fileName = `${course.id}-${Date.now()}.${fileExt}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('course-thumbnails')
-          .upload(fileName, course.thumbnailFile);
+  try {
+    const { error } = await supabase
+      .from("courses")
+      .update({
+        title: course.title,
+        description: course.description,
+        price: course.price,
+        is_free: course.isFree,
+        grade: course.grade,
+        is_published: course.published,
+is_hidden: course.hidden,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", course.id);
 
-        if (uploadError) throw uploadError;
+    if (error) throw error;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('course-thumbnails')
-          .getPublicUrl(fileName);
+    // =============================
+// Save Sections
+// =============================
+for (let i = 0; i < course.sections.length; i++) {
+  const section = course.sections[i];
 
-        thumbnailUrl = publicUrl;
+  // Section جديدة
+  if (section.id.length < 30) {
+    const { data: newSection, error } = await supabase
+      .from("course_sections")
+      .insert({
+        course_id: course.id,
+        title: section.title,
+        sort_order: i + 1,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // تحديث الـ id داخل الـ state
+    section.id = newSection.id;
+  }
+
+  // Section موجودة
+  else {
+    const { error } = await supabase
+      .from("course_sections")
+      .update({
+        title: section.title,
+        sort_order: i + 1,
+      })
+      .eq("id", section.id);
+
+    if (error) throw error;
+  }
+}
+
+
+// =============================
+// Delete Removed Sections
+// =============================
+const { data: dbSections, error: sectionsError } = await supabase
+  .from("course_sections")
+  .select("id")
+  .eq("course_id", course.id);
+
+if (sectionsError) throw sectionsError;
+
+const currentIds = course.sections.map((s) => s.id);
+
+const deletedIds =
+  (dbSections || [])
+    .filter((s) => !currentIds.includes(s.id))
+    .map((s) => s.id);
+
+if (deletedIds.length) {
+  const { error } = await supabase
+    .from("course_sections")
+    .delete()
+    .in("id", deletedIds);
+
+  if (error) throw error;
+}
+
+// =============================
+// Save Course Items
+// =============================
+for (const section of course.sections) {
+  for (let i = 0; i < section.items.length; i++) {
+    const item = section.items[i];
+
+    const payload: any = {
+      section_id: section.id,
+      type: item.type,
+      title: item.title,
+      sort_order: i + 1,
+    };
+
+    // ==========================
+    // Video
+    // ==========================
+    if (item.type === "video") {
+      Object.assign(payload, {
+        description: item.description || "",
+        url: item.videoUrl || "",
+        storage_path: item.storagePath || "",
+        thumbnail: item.thumbnailUrl || "",
+        duration: Number(item.duration) || 0,
+      });
+    }
+
+    // ==========================
+    // PDF
+    // ==========================
+    if (item.type === "pdf") {
+      Object.assign(payload, {
+        url: item.pdfUrl || "",
+        storage_path: item.storagePath || "",
+        file_size: item.fileSize || 0,
+        allow_download: item.allowDownload,
+      });
+    }
+
+    // ==========================
+    // Save Course Item
+    // ==========================
+    if (item.id.length < 30) {
+      const { data: newItem, error } = await supabase
+        .from("course_items")
+        .insert(payload)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      item.id = newItem.id;
+    } else {
+      const { error } = await supabase
+        .from("course_items")
+        .update(payload)
+        .eq("id", item.id);
+
+      if (error) throw error;
+    }
+
+       // ==========================
+    // Quiz
+    // ==========================
+    if (item.type === "quiz") {
+      const examPayload = {
+        title: item.title,
+        description: item.description || "",
+        duration: Number(item.duration) || 30,
+        passing_grade: Number(item.passingScore) || 60,
+        total_score: item.questions.reduce(
+          (sum, q) => sum + (Number(q.points) || 0),
+          0
+        ),
+        is_visible: item.visibility === "public",
+        is_published: item.published,
+        course_item_id: item.id,
+      };
+
+      let examId: number;
+
+      const { data: existingExam } = await supabase
+        .from("exams")
+        .select("id")
+        .eq("course_item_id", item.id)
+        .maybeSingle();
+
+      if (!existingExam) {
+        const { data: newExam, error } = await supabase
+          .from("exams")
+          .insert(examPayload)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        examId = newExam.id;
+      } else {
+        examId = existingExam.id;
+
+        const { error } = await supabase
+          .from("exams")
+          .update(examPayload)
+          .eq("id", examId);
+
+        if (error) throw error;
       }
 
-      // Update course in database
-      const { error: updateError } = await supabase
-        .from('courses')
-        .update({
-          title: course.title,
-          description: course.description,
-          price: course.price,
-          is_free: course.isFree,
-          thumbnail: thumbnailUrl,
-          grade: course.grade,
-          is_published: course.isPublished,
-          is_hidden: course.isHidden,
-          sections: course.sections,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', course.id);
+      // حذف الأسئلة القديمة
+      const { data: oldQuestions } = await supabase
+        .from("exam_questions")
+        .select("id")
+        .eq("exam_id", examId);
 
-      if (updateError) throw updateError;
+      if (oldQuestions?.length) {
+        await supabase
+          .from("question_choices")
+          .delete()
+          .in(
+            "question_id",
+            oldQuestions.map((q) => q.id)
+          );
 
-      // Show success message
-      alert('تم حفظ التغييرات بنجاح');
-      
-      // Reload course data
-      await loadCourse();
-    } catch (err: any) {
-      console.error('Error saving course:', err);
-      setError(err.message || 'حدث خطأ أثناء حفظ التغييرات');
-      alert('فشل حفظ التغييرات: ' + (err.message || 'خطأ غير معروف'));
-    } finally {
-      setSaving(false);
-    }
-  };
+        await supabase
+          .from("exam_questions")
+          .delete()
+          .eq("exam_id", examId);
+      }
 
-  const deleteCourse = async () => {
-    if (!id) return;
+      for (let qIndex = 0; qIndex < item.questions.length; qIndex++) {
+        const question = item.questions[qIndex];
 
-    try {
-      setSaving(true);
+        const { data: newQuestion, error } = await supabase
+          .from("exam_questions")
+          .insert({
+            exam_id: examId,
+            title: question.title,
+            type:
+              question.questionType === "true_false"
+                ? "true_false"
+                : "multiple_choice",
+            points: Number(question.points) || 1,
+            sort_order: qIndex + 1,
+            correct_answer: String(question.correctAnswer),
+          })
+          .select()
+          .single();
 
-      // Delete course from database
-      const { error: deleteError } = await supabase
-        .from('courses')
-        .delete()
-        .eq('id', id);
+        if (error) throw error;
 
-      if (deleteError) throw deleteError;
+        for (let cIndex = 0; cIndex < question.choices.length; cIndex++) {
+          const { error } = await supabase
+            .from("question_choices")
+            .insert({
+              question_id: newQuestion.id,
+              text: question.choices[cIndex],
+              sort_order: cIndex + 1,
+            });
 
-      // Delete thumbnail from storage if exists
-      if (course?.thumbnail) {
-        // Extract file name from URL
-        const fileName = course.thumbnail.split('/').pop();
-        if (fileName) {
-          await supabase.storage
-            .from('course-thumbnails')
-            .remove([fileName]);
+          if (error) throw error;
         }
       }
-
-      alert('تم حذف الدورة بنجاح');
-      navigate('/instructor/courses');
-    } catch (err: any) {
-      console.error('Error deleting course:', err);
-      alert('فشل حذف الدورة: ' + (err.message || 'خطأ غير معروف'));
-    } finally {
-      setSaving(false);
-      setShowDeleteConfirm(false);
     }
-  };
 
-  // ==================== SECTION OPERATIONS ====================
+    // ==========================
+    // Homework
+    // ==========================
+    if (item.type === "homework") {
+      const homeworkPayload = {
+        title: item.title,
+        description: item.description || "",
+        course_id: course.id,
+        section_id: section.id,
+        due_date: item.dueDate || null,
+        total_score: Number(item.totalScore) || 100,
+        allow_late_submission: item.allowLateSubmission,
+        is_published: item.published,
+        attachment_pdf: item.instructionsFile || null,
+        attachment_image: null,
+        allowed_types: item.submissionTypes,
+        sort_order: i + 1,
+        course_item_id: item.id,
+      };
 
-  const addSection = useCallback(() => {
+      const { data: existingHomework } = await supabase
+        .from("homeworks")
+        .select("id")
+        .eq("course_item_id", item.id)
+        .maybeSingle();
+
+      if (!existingHomework) {
+        const { error } = await supabase
+          .from("homeworks")
+          .insert(homeworkPayload);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("homeworks")
+          .update(homeworkPayload)
+          .eq("id", existingHomework.id);
+
+        if (error) throw error;
+      }
+    }
+  }
+}
+
+
+// =============================
+// Delete Removed Course Items
+// =============================
+const { data: dbItems, error: itemsError } = await supabase
+  .from("course_items")
+  .select("id")
+  .in(
+    "section_id",
+    course.sections.map((s) => s.id)
+  );
+
+if (itemsError) throw itemsError;
+
+  
+const currentItemIds = course.sections.flatMap((section) =>
+  section.items
+    .filter((item) => item.id.length >= 30) // العناصر المحفوظة فقط
+    .map((item) => item.id)
+);
+
+const deletedItemIds = (dbItems || [])
+  .filter((item) => !currentItemIds.includes(item.id))
+  .map((item) => item.id);
+
+if (deletedItemIds.length > 0) {
+  const { error } = await supabase
+    .from("course_items")
+    .delete()
+    .in("id", deletedItemIds);
+
+  if (error) throw error;
+}
+
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 3000);
+  } catch (err: any) {
+  console.error("Save Error:", err);
+  console.log("Message:", err?.message);
+  console.log("Details:", err?.details);
+  console.log("Hint:", err?.hint);
+  console.log("Code:", err?.code);
+
+  alert(err?.message || "حدث خطأ أثناء حفظ الدورة");
+} finally {
+    setSaving(false);
+  }
+}
+
+
+
+  // ── Delete Course ────────────────────────────────────────
+  async function deleteCourse() {
     if (!course) return;
+    try {
+      // Placeholder: ready for Supabase integration
+      // await supabase.from("courses").delete().eq("id", course.id);
+      navigate("/instructor/courses");
+    } catch {
+      // handle error
+    }
+  }
 
+  // ── Course Field Updates ─────────────────────────────────
+  function updateCourseField<K extends keyof Course>(field: K, value: Course[K]) {
+    setCourse((prev) => (prev ? { ...prev, [field]: value } : prev));
+  }
+
+  // ── Thumbnail ────────────────────────────────────────────
+ async function handleThumbnailChange(
+  e: React.ChangeEvent<HTMLInputElement>
+) {
+  const file = e.target.files?.[0];
+  if (!file || !course) return;
+
+  setThumbnailFile(file);
+if ((course as any).thumbnailPath) {
+  await supabase.storage
+    .from("course-thumbnails")
+    .remove([(course as any).thumbnailPath]);
+}
+
+
+  const fileExt = file.name.split(".").pop();
+  const filePath = `${course.id}/${Date.now()}.${fileExt}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("course-thumbnails")
+    .upload(filePath, file, {
+      upsert: true,
+    });
+
+  if (uploadError) {
+    alert(uploadError.message);
+    return;
+  }
+
+  const { data } = supabase.storage
+    .from("course-thumbnails")
+    .getPublicUrl(filePath);
+
+  setThumbnailPreview(data.publicUrl);
+
+  updateCourseField("thumbnailUrl", data.publicUrl);
+  (course as any).thumbnailPath = filePath;
+}
+
+  // ── Sections ─────────────────────────────────────────────
+  function addSection() {
     const newSection: Section = {
-      id: `section_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      title: `قسم ${course.sections.length + 1}`,
-      isCollapsed: false,
-      items: []
+      id: generateId(),
+      title: "قسم جديد",
+      collapsed: false,
+      items: [],
     };
+    setCourse((prev) =>
+      prev ? { ...prev, sections: [...prev.sections, newSection] } : prev
+    );
+  }
 
-    setCourse({
-      ...course,
-      sections: [...course.sections, newSection]
+  function removeSection(sectionId: string) {
+    setCourse((prev) =>
+      prev
+        ? { ...prev, sections: prev.sections.filter((s) => s.id !== sectionId) }
+        : prev
+    );
+  }
+
+  function renameSection(sectionId: string, newTitle: string) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId ? { ...s, title: newTitle } : s
+            ),
+          }
+        : prev
+    );
+  }
+
+  function toggleCollapseSection(sectionId: string) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId ? { ...s, collapsed: !s.collapsed } : s
+            ),
+          }
+        : prev
+    );
+  }
+
+  function moveSectionUp(index: number) {
+    if (index === 0) return;
+    setCourse((prev) => {
+      if (!prev) return prev;
+      const sections = [...prev.sections];
+      [sections[index - 1], sections[index]] = [sections[index], sections[index - 1]];
+      return { ...prev, sections };
     });
-  }, [course]);
+  }
 
-  const removeSection = useCallback((sectionId: string) => {
-    if (!course) return;
-
-    if (!confirm('هل أنت متأكد من حذف هذا القسم؟ سيتم حذف جميع العناصر بداخله.')) {
-      return;
-    }
-
-    setCourse({
-      ...course,
-      sections: course.sections.filter(s => s.id !== sectionId)
+  function moveSectionDown(index: number) {
+    setCourse((prev) => {
+      if (!prev) return prev;
+      if (index === prev.sections.length - 1) return prev;
+      const sections = [...prev.sections];
+      [sections[index], sections[index + 1]] = [sections[index + 1], sections[index]];
+      return { ...prev, sections };
     });
-  }, [course]);
+  }
 
-  const renameSection = useCallback((sectionId: string, newTitle: string) => {
-    if (!course) return;
-
-    setCourse({
-      ...course,
-      sections: course.sections.map(s =>
-        s.id === sectionId ? { ...s, title: newTitle } : s
-      )
-    });
-  }, [course]);
-
-  const toggleSectionCollapse = useCallback((sectionId: string) => {
-    if (!course) return;
-
-    setCourse({
-      ...course,
-      sections: course.sections.map(s =>
-        s.id === sectionId ? { ...s, isCollapsed: !s.isCollapsed } : s
-      )
-    });
-  }, [course]);
-
-  const moveSectionUp = useCallback((sectionId: string) => {
-    if (!course) return;
-
-    const index = course.sections.findIndex(s => s.id === sectionId);
-    if (index <= 0) return;
-
-    const newSections = [...course.sections];
-    [newSections[index - 1], newSections[index]] = [newSections[index], newSections[index - 1]];
-
-    setCourse({
-      ...course,
-      sections: newSections
-    });
-  }, [course]);
-
-  const moveSectionDown = useCallback((sectionId: string) => {
-    if (!course) return;
-
-    const index = course.sections.findIndex(s => s.id === sectionId);
-    if (index === -1 || index >= course.sections.length - 1) return;
-
-    const newSections = [...course.sections];
-    [newSections[index], newSections[index + 1]] = [newSections[index + 1], newSections[index]];
-
-    setCourse({
-      ...course,
-      sections: newSections
-    });
-  }, [course]);
-
-  // ==================== ITEM OPERATIONS ====================
-
-  const addItem = useCallback((sectionId: string, type: 'video' | 'pdf' | 'quiz' | 'homework') => {
-    if (!course) return;
-
+  // ── Items ────────────────────────────────────────────────
+  function addItem(sectionId: string, itemType: ItemType) {
     let newItem: CourseItem;
-    const timestamp = Date.now();
-    const randomId = Math.random().toString(36).substr(2, 9);
-
-    switch (type) {
-      case 'video':
-        newItem = {
-          type: 'video',
-          id: `video_${timestamp}_${randomId}`,
-          title: 'فيديو جديد',
-          description: '',
-          videoFile: null,
-          videoUrl: '',
-          fileName: '',
-          fileSize: 0,
-          duration: 0,
-          isFreePreview: false,
-          allowDownload: false,
-          uploadProgress: 0,
-          status: 'idle'
-        };
+    switch (itemType) {
+      case "video":
+        newItem = createDefaultVideo();
         break;
-      case 'pdf':
-        newItem = {
-          type: 'pdf',
-          id: `pdf_${timestamp}_${randomId}`,
-          title: 'ملف PDF جديد',
-          pdfFile: null,
-          pdfUrl: '',
-          fileName: '',
-          fileSize: 0,
-          allowDownload: true,
-          uploadProgress: 0,
-          status: 'idle'
-        };
+      case "pdf":
+        newItem = createDefaultPdf();
         break;
-      case 'quiz':
-        newItem = {
-          type: 'quiz',
-          id: `quiz_${timestamp}_${randomId}`,
-          title: 'اختبار جديد',
-          description: '',
-          duration: 30,
-          passingScore: 70,
-          maxAttempts: 3,
-          isVisible: true,
-          isPublished: false,
-          questions: []
-        };
+      case "quiz":
+        newItem = createDefaultQuiz();
         break;
-      case 'homework':
-        newItem = {
-          type: 'homework',
-          id: `homework_${timestamp}_${randomId}`,
-          title: 'واجب جديد',
-          description: '',
-          dueDate: '',
-          totalScore: 100,
-          allowLateSubmission: false,
-          instructions: '',
-          attachmentPdf: null,
-          attachmentPdfUrl: '',
-          attachmentImage: null,
-          attachmentImageUrl: '',
-          allowedSubmissionTypes: {
-            text: true,
-            pdf: true,
-            image: true,
-            multipleFiles: false
-          },
-          isVisible: true,
-          isPublished: false
-        };
+      case "homework":
+        newItem = createDefaultHomework();
         break;
     }
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId ? { ...s, items: [...s.items, newItem] } : s
+            ),
+          }
+        : prev
+    );
+    setOpenDropdownSectionId(null);
+  }
 
-    setCourse({
-      ...course,
-      sections: course.sections.map(s =>
-        s.id === sectionId
-          ? { ...s, items: [...s.items, newItem] }
-          : s
-      )
-    });
+  function removeItem(sectionId: string, itemId: string) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId
+                ? { ...s, items: s.items.filter((i) => i.id !== itemId) }
+                : s
+            ),
+          }
+        : prev
+    );
+  }
 
-    setOpenDropdownId(null);
-  }, [course]);
-
-  const removeItem = useCallback((sectionId: string, itemId: string) => {
-    if (!course) return;
-
-    if (!confirm('هل أنت متأكد من حذف هذا العنصر؟')) {
-      return;
-    }
-
-    setCourse({
-      ...course,
-      sections: course.sections.map(s =>
-        s.id === sectionId
-          ? { ...s, items: s.items.filter(item => item.id !== itemId) }
-          : s
-      )
-    });
-  }, [course]);
-
-  const moveItemUp = useCallback((sectionId: string, itemId: string) => {
-    if (!course) return;
-
-    setCourse({
-      ...course,
-      sections: course.sections.map(s => {
+  function moveItem(sectionId: string, itemIndex: number, direction: "up" | "down") {
+    setCourse((prev) => {
+      if (!prev) return prev;
+      const sections = prev.sections.map((s) => {
         if (s.id !== sectionId) return s;
-
-        const index = s.items.findIndex(item => item.id === itemId);
-        if (index <= 0) return s;
-
-        const newItems = [...s.items];
-        [newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]];
-
-        return { ...s, items: newItems };
-      })
+        const items = [...s.items];
+        if (direction === "up" && itemIndex > 0) {
+          [items[itemIndex - 1], items[itemIndex]] = [items[itemIndex], items[itemIndex - 1]];
+        } else if (direction === "down" && itemIndex < items.length - 1) {
+          [items[itemIndex], items[itemIndex + 1]] = [items[itemIndex + 1], items[itemIndex]];
+        }
+        return { ...s, items };
+      });
+      return { ...prev, sections };
     });
-  }, [course]);
+  }
 
-  const moveItemDown = useCallback((sectionId: string, itemId: string) => {
-    if (!course) return;
+  function updateItem(sectionId: string, itemId: string, updates: Partial<CourseItem>) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId
+                ? {
+                    ...s,
+                    items: s.items.map((item) =>
+                      item.id === itemId ? ({ ...item, ...updates } as CourseItem) : item
+                    ),
+                  }
+                : s
+            ),
+          }
+        : prev
+    );
+  }
 
-    setCourse({
-      ...course,
-      sections: course.sections.map(s => {
-        if (s.id !== sectionId) return s;
+  // ── Video Upload ─────────────────────────────────────────
+async function uploadVideo(
+  sectionId: string,
+  itemId: string,
+  file: File
+) {
+  if (!course) return;
 
-        const index = s.items.findIndex(item => item.id === itemId);
-        if (index === -1 || index >= s.items.length - 1) return s;
+  
+  const fileExt = file.name.split(".").pop();
+  const filePath = `${course.id}/${sectionId}/${Date.now()}.${fileExt}`;
 
-        const newItems = [...s.items];
-        [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
-
-        return { ...s, items: newItems };
-      })
+  const { error: uploadError } = await supabase.storage
+    .from("course-videos")
+    .upload(filePath, file,{
+      upsert: true,
     });
-  }, [course]);
 
-  const updateItem = useCallback((sectionId: string, itemId: string, updates: Partial<CourseItem>) => {
-    if (!course) return;
+  if (uploadError) {
+    alert(uploadError.message);
+    return;
+  }
 
-    setCourse({
-      ...course,
-      sections: course.sections.map(s =>
-        s.id === sectionId
-          ? {
-              ...s,
-              items: s.items.map(item =>
-                item.id === itemId ? { ...item, ...updates } : item
-              )
-            }
-          : s
-      )
-    });
-  }, [course]);
+  const { data } = supabase.storage
+    .from("course-videos")
+    .getPublicUrl(filePath);
 
-  // ==================== FILE UPLOAD OPERATIONS ====================
+  setCourse((prev) => {
+    if (!prev) return prev;
 
-  const handleVideoUpload = useCallback((sectionId: string, itemId: string, file: File) => {
-    if (!file) return;
+    return {
+      ...prev,
+      sections: prev.sections.map((section) => ({
+        ...section,
+        items: section.items.map((item) => {
+          if (item.id !== itemId) return item;
 
-    updateItem(sectionId, itemId, {
-      videoFile: file,
-      fileName: file.name,
-      fileSize: file.size,
-      status: 'uploading',
-      uploadProgress: 0
-    } as Partial<VideoItem>);
-
-    // Simulate upload progress
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 10;
-      updateItem(sectionId, itemId, {
-        uploadProgress: Math.min(progress, 100)
-      } as Partial<VideoItem>);
-
-      if (progress >= 100) {
-        clearInterval(interval);
-        updateItem(sectionId, itemId, {
-          status: 'completed',
-          videoUrl: URL.createObjectURL(file)
-        } as Partial<VideoItem>);
-      }
-    }, 300);
-  }, [updateItem]);
-
-  const handlePdfUpload = useCallback((sectionId: string, itemId: string, file: File) => {
-    if (!file) return;
-
-    updateItem(sectionId, itemId, {
-      pdfFile: file,
-      fileName: file.name,
-      fileSize: file.size,
-      status: 'uploading',
-      uploadProgress: 0
-    } as Partial<PdfItem>);
-
-    // Simulate upload progress
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 10;
-      updateItem(sectionId, itemId, {
-        uploadProgress: Math.min(progress, 100)
-      } as Partial<PdfItem>);
-
-      if (progress >= 100) {
-        clearInterval(interval);
-        updateItem(sectionId, itemId, {
-          status: 'completed',
-          pdfUrl: URL.createObjectURL(file)
-        } as Partial<PdfItem>);
-      }
-    }, 300);
-  }, [updateItem]);
-
-  const handleThumbnailUpload = useCallback((file: File) => {
-    if (!course || !file) return;
-
-    setCourse({
-      ...course,
-      thumbnailFile: file,
-      thumbnail: URL.createObjectURL(file)
-    });
-  }, [course]);
-
-  const handleHomeworkAttachmentPdf = useCallback((sectionId: string, itemId: string, file: File) => {
-    if (!file) return;
-
-    updateItem(sectionId, itemId, {
-      attachmentPdf: file,
-      attachmentPdfUrl: URL.createObjectURL(file)
-    } as Partial<HomeworkItem>);
-  }, [updateItem]);
-
-  const handleHomeworkAttachmentImage = useCallback((sectionId: string, itemId: string, file: File) => {
-    if (!file) return;
-
-    updateItem(sectionId, itemId, {
-      attachmentImage: file,
-      attachmentImageUrl: URL.createObjectURL(file)
-    } as Partial<HomeworkItem>);
-  }, [updateItem]);
-
-  // ==================== QUIZ OPERATIONS ====================
-
-  const addQuestion = useCallback((sectionId: string, itemId: string) => {
-    if (!course) return;
-
-    const newQuestion: Question = {
-      id: `question_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      title: '',
-      type: 'multiple_choice',
-      choices: ['', '', '', ''],
-      correctAnswer: 0,
-      points: 10
+          return {
+            ...item,
+            videoUrl: data.publicUrl,
+storagePath: filePath,
+            fileName: file.name,
+            fileSize: file.size,
+            uploadProgress: 100,
+            status: "done",
+          };
+        }),
+      })),
     };
+  });
+}
 
-    setCourse({
-      ...course,
-      sections: course.sections.map(s =>
-        s.id === sectionId
-          ? {
-              ...s,
-              items: s.items.map(item =>
-                item.id === itemId && item.type === 'quiz'
-                  ? { ...item, questions: [...item.questions, newQuestion] }
-                  : item
-              )
-            }
-          : s
-      )
+  // ── PDF Upload ───────────────────────────────────────────
+async function uploadPdf(
+  sectionId: string,
+  itemId: string,
+  file: File
+) {
+  if (!course) return;
+
+  const fileExt = file.name.split(".").pop();
+  const filePath = `${course.id}/${sectionId}/${Date.now()}.${fileExt}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("course-files")
+    .upload(filePath, file, {
+      upsert: true,
     });
-  }, [course]);
 
-  const updateQuestion = useCallback((sectionId: string, itemId: string, questionId: string, updates: Partial<Question>) => {
-    if (!course) return;
+  if (uploadError) {
+    alert(uploadError.message);
+    return;
+  }
 
-    setCourse({
-      ...course,
-      sections: course.sections.map(s =>
-        s.id === sectionId
-          ? {
-              ...s,
-              items: s.items.map(item =>
-                item.id === itemId && item.type === 'quiz'
-                  ? {
-                      ...item,
-                      questions: item.questions.map(q =>
-                        q.id === questionId ? { ...q, ...updates } : q
-                      )
-                    }
-                  : item
-              )
-            }
-          : s
-      )
-    });
-  }, [course]);
+  const { data } = supabase.storage
+    .from("course-files")
+    .getPublicUrl(filePath);
 
-  const removeQuestion = useCallback((sectionId: string, itemId: string, questionId: string) => {
-    if (!course) return;
+  setCourse((prev) => {
+    if (!prev) return prev;
 
-    if (!confirm('هل أنت متأكد من حذف هذا السؤال؟')) {
-      return;
-    }
+    return {
+      ...prev,
+      sections: prev.sections.map((section) => ({
+        ...section,
+        items: section.items.map((item) => {
+          if (item.id !== itemId) return item;
 
-    setCourse({
-      ...course,
-      sections: course.sections.map(s =>
-        s.id === sectionId
-          ? {
-              ...s,
-              items: s.items.map(item =>
-                item.id === itemId && item.type === 'quiz'
-                  ? {
-                      ...item,
-                      questions: item.questions.filter(q => q.id !== questionId)
-                    }
-                  : item
-              )
-            }
-          : s
-      )
-    });
-  }, [course]);
+          return {
+            ...item,
+            pdfUrl: data.publicUrl,
+storagePath: filePath,
+            fileName: file.name,
+            fileSize: file.size,
+            uploadProgress: 100,
+            status: "done",
+          };
+        }),
+      })),
+    };
+  });
+}
 
-  // ==================== UTILITY FUNCTIONS ====================
+  // ── Quiz Helpers ─────────────────────────────────────────
+  function addQuestion(sectionId: string, quizId: string) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId
+                ? {
+                    ...s,
+                    items: s.items.map((item) =>
+                      item.id === quizId && item.type === "quiz"
+                        ? {
+                            ...item,
+                            questions: [...item.questions, createDefaultQuestion()],
+                          }
+                        : item
+                    ),
+                  }
+                : s
+            ),
+          }
+        : prev
+    );
+  }
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 بايت';
-    const k = 1024;
-    const sizes = ['بايت', 'كيلوبايت', 'ميجابايت', 'جيجابايت'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-  };
+  function removeQuestion(sectionId: string, quizId: string, questionId: string) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId
+                ? {
+                    ...s,
+                    items: s.items.map((item) =>
+                      item.id === quizId && item.type === "quiz"
+                        ? {
+                            ...item,
+                            questions: item.questions.filter((q) => q.id !== questionId),
+                          }
+                        : item
+                    ),
+                  }
+                : s
+            ),
+          }
+        : prev
+    );
+  }
 
-  const formatDuration = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  function updateQuestion(
+    sectionId: string,
+    quizId: string,
+    questionId: string,
+    updates: Partial<Question>
+  ) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId
+                ? {
+                    ...s,
+                    items: s.items.map((item) =>
+                      item.id === quizId && item.type === "quiz"
+                        ? {
+                            ...item,
+                            questions: item.questions.map((q) =>
+                              q.id === questionId ? { ...q, ...updates } : q
+                            ),
+                          }
+                        : item
+                    ),
+                  }
+                : s
+            ),
+          }
+        : prev
+    );
+  }
 
-  // ==================== RENDER FUNCTIONS ====================
+  function moveQuestion(
+    sectionId: string,
+    quizId: string,
+    qIndex: number,
+    direction: "up" | "down"
+  ) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId
+                ? {
+                    ...s,
+                    items: s.items.map((item) => {
+                      if (item.id !== quizId || item.type !== "quiz") return item;
+                      const questions = [...item.questions];
+                      if (direction === "up" && qIndex > 0) {
+                        [questions[qIndex - 1], questions[qIndex]] = [
+                          questions[qIndex],
+                          questions[qIndex - 1],
+                        ];
+                      } else if (direction === "down" && qIndex < questions.length - 1) {
+                        [questions[qIndex], questions[qIndex + 1]] = [
+                          questions[qIndex + 1],
+                          questions[qIndex],
+                        ];
+                      }
+                      return { ...item, questions };
+                    }),
+                  }
+                : s
+            ),
+          }
+        : prev
+    );
+  }
 
-  const renderVideoItem = (sectionId: string, item: VideoItem, index: number, totalItems: number) => {
+  // ── Homework helpers ────────────────────────────────────
+  function toggleSubmissionType(
+    sectionId: string,
+    hwId: string,
+    type: HomeworkItem["submissionTypes"][number]
+  ) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId
+                ? {
+                    ...s,
+                    items: s.items.map((item) => {
+                      if (item.id !== hwId || item.type !== "homework") return item;
+                      const exists = item.submissionTypes.includes(type);
+                      const submissionTypes = exists
+                        ? item.submissionTypes.filter((t) => t !== type)
+                        : [...item.submissionTypes, type];
+                      return { ...item, submissionTypes };
+                    }),
+                  }
+                : s
+            ),
+          }
+        : prev
+    );
+  }
+
+  // ── UI Close Dropdown on outside click ──────────────────
+  function handleBackdropClick() {
+    setOpenDropdownSectionId(null);
+  }
+
+  // ── Render Item Badge ────────────────────────────────────
+  function renderItemTypeBadge(type: ItemType) {
+    const config = {
+      video: {
+        label: "فيديو",
+        bg: "bg-blue-50",
+        text: "text-blue-700",
+        border: "border-blue-200",
+        icon: (
+          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        ),
+      },
+      pdf: {
+        label: "PDF",
+        bg: "bg-rose-50",
+        text: "text-rose-700",
+        border: "border-rose-200",
+        icon: (
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        ),
+      },
+      quiz: {
+        label: "اختبار",
+        bg: "bg-violet-50",
+        text: "text-violet-700",
+        border: "border-violet-200",
+        icon: (
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+        ),
+      },
+      homework: {
+        label: "واجب",
+        bg: "bg-amber-50",
+        text: "text-amber-700",
+        border: "border-amber-200",
+        icon: (
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        ),
+      },
+    };
+    const c = config[type];
     return (
-      <div key={item.id} className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${c.bg} ${c.text} ${c.border}`}>
+        {c.icon}
+        {c.label}
+      </span>
+    );
+  }
+
+  // ── Render Video Item ────────────────────────────────────
+  function renderVideoItem(sectionId: string,  item: VideoItem, itemIndex: number, totalItems: number)  {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:border-slate-300">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-l from-blue-50 to-transparent border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
             </div>
             <div>
-              <span className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">فيديو</span>
+              {renderItemTypeBadge("video")}
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
-              onClick={() => moveItemUp(sectionId, item.id)}
-              disabled={index === 0}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              onClick={() => moveItem(sectionId, itemIndex, "up")}
+              disabled={itemIndex === 0}
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               title="تحريك لأعلى"
             >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-              </svg>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
             </button>
             <button
-              onClick={() => moveItemDown(sectionId, item.id)}
-              disabled={index === totalItems - 1}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              onClick={() => moveItem(sectionId, itemIndex, "down")}
+              disabled={itemIndex === totalItems - 1}
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               title="تحريك لأسفل"
             >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
             </button>
             <button
               onClick={() => removeItem(sectionId, item.id)}
-              className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
+              className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
               title="حذف"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </button>
           </div>
         </div>
-
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">عنوان الفيديو</label>
-            <input
-              type="text"
-              value={item.title}
-              onChange={(e) => updateItem(sectionId, item.id, { title: e.target.value } as Partial<VideoItem>)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
-              placeholder="أدخل عنوان الفيديو"
-            />
+        {/* Body */}
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">عنوان الفيديو</label>
+              <input
+                type="text"
+                value={item.title}
+                onChange={(e) => updateItem(sectionId, item.id, { title: e.target.value } as Partial<VideoItem>)}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm"
+                placeholder="أدخل عنوان الفيديو"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">الوصف</label>
+              <textarea
+                value={item.description}
+                onChange={(e) => updateItem(sectionId, item.id, { description: e.target.value } as Partial<VideoItem>)}
+                rows={2}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm resize-none"
+                placeholder="وصف مختصر للفيديو"
+              />
+            </div>
           </div>
 
+          {/* Upload Area */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">الوصف</label>
-            <textarea
-              value={item.description}
-              onChange={(e) => updateItem(sectionId, item.id, { description: e.target.value } as Partial<VideoItem>)}
-              rows={3}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none resize-none"
-              placeholder="أدخل وصف الفيديو"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">رفع الفيديو</label>
-            {!item.videoFile ? (
-              <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all duration-300 group">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
-                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                  </div>
-                  <p className="mb-2 text-base font-semibold text-gray-700">اسحب وأفلت الفيديو هنا</p>
-                  <p className="text-sm text-gray-500">أو انقر للتحديد من جهازك</p>
-                  <p className="text-xs text-gray-400 mt-2">MP4, MOV, AVI حتى 500 ميجابايت</p>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">رفع الفيديو</label>
+            {item.status === "idle" || item.status === "error" ? (
+              <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer bg-slate-50 hover:bg-blue-50 hover:border-blue-400 transition-all group">
+                <div className="flex flex-col items-center gap-2 text-slate-400 group-hover:text-blue-500 transition-colors">
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <span className="text-sm font-medium">اسحب الفيديو هنا أو انقر للرفع</span>
+                  <span className="text-xs text-slate-400">MP4, MOV, AVI — حجم أقصى 2GB</span>
                 </div>
                 <input
                   type="file"
-                  className="hidden"
                   accept="video/*"
+                  className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
-                    if (file) handleVideoUpload(sectionId, item.id, file);
+                    if (file) uploadVideo(sectionId, item.id, file);
                   }}
                 />
               </label>
+            ) : item.status === "uploading" ? (
+              <div className="w-full p-5 border border-blue-200 rounded-2xl bg-blue-50 space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2 text-blue-700 font-medium">
+                    <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    جاري الرفع...
+                  </div>
+                  <span className="text-blue-600 font-bold">{item.uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2">
+                  <div
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${item.uploadProgress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-blue-600 truncate">{item.fileName} — {formatFileSize(item.fileSize)}</p>
+              </div>
             ) : (
-              <div className="space-y-4">
-                {item.status === 'uploading' && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-blue-900">جاري الرفع...</span>
-                      <span className="text-sm font-semibold text-blue-600">{item.uploadProgress}%</span>
-                    </div>
-                    <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${item.uploadProgress}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {item.status === 'completed' && (
-                  <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl overflow-hidden">
-                    <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center relative">
-                      {item.videoUrl ? (
-                        <video
-                          src={item.videoUrl}
-                          controls
-                          className="w-full h-full"
-                        />
-                      ) : (
-                        <div className="text-center">
-                          <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M8 5v14l11-7z" />
-                            </svg>
-                          </div>
-                          <p className="text-white font-medium">معاينة الفيديو</p>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4 bg-white">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <p className="font-semibold text-gray-900 mb-1 truncate">{item.fileName}</p>
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
-                            <span className="flex items-center gap-1">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                              </svg>
-                              {formatFileSize(item.fileSize)}
-                            </span>
-                            {item.duration > 0 && (
-                              <span className="flex items-center gap-1">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                {formatDuration(item.duration)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => updateItem(sectionId, item.id, { videoFile: null, videoUrl: '', fileName: '', fileSize: 0, status: 'idle' } as Partial<VideoItem>)}
-                          className="mr-4 p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+              <div className="w-full p-4 border border-emerald-200 rounded-2xl bg-emerald-50 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-emerald-800 truncate">{item.fileName}</p>
+                  <p className="text-xs text-emerald-600">{formatFileSize(item.fileSize)}</p>
+                </div>
+                <label className="text-xs text-emerald-600 hover:text-emerald-800 cursor-pointer underline underline-offset-2 font-medium">
+                  تغيير
+                  <input type="file" accept="video/*" className="hidden" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) uploadVideo(sectionId, item.id, file);
+                  }} />
+                </label>
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-8 pt-4 border-t border-gray-100">
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={item.isFreePreview}
-                  onChange={(e) => updateItem(sectionId, item.id, { isFreePreview: e.target.checked } as Partial<VideoItem>)}
-                  className="sr-only peer"
-                />
-                <div className="w-12 h-7 bg-gray-200 rounded-full peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 transition-all duration-300"></div>
-                <div className="absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-5"></div>
+          {/* Toggles */}
+          <div className="flex flex-wrap gap-6 pt-1">
+            <label className="flex items-center gap-2.5 cursor-pointer group">
+              <div
+                onClick={() => updateItem(sectionId, item.id, { freePreview: !item.freePreview } as Partial<VideoItem>)}
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${item.freePreview ? "bg-blue-600" : "bg-slate-300"}`}
+              >
+                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${item.freePreview ? "-translate-x-5" : "translate-x-0"}`} />
               </div>
-              <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">معاينة مجانية</span>
+              <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">معاينة مجانية</span>
             </label>
-
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={item.allowDownload}
-                  onChange={(e) => updateItem(sectionId, item.id, { allowDownload: e.target.checked } as Partial<VideoItem>)}
-                  className="sr-only peer"
-                />
-                <div className="w-12 h-7 bg-gray-200 rounded-full peer-checked:bg-gradient-to-r peer-checked:from-green-500 peer-checked:to-green-600 transition-all duration-300"></div>
-                <div className="absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-5"></div>
+            <label className="flex items-center gap-2.5 cursor-pointer group">
+              <div
+                onClick={() => updateItem(sectionId, item.id, { allowDownload: !item.allowDownload } as Partial<VideoItem>)}
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${item.allowDownload ? "bg-blue-600" : "bg-slate-300"}`}
+              >
+                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${item.allowDownload ? "-translate-x-5" : "translate-x-0"}`} />
               </div>
-              <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">السماح بالتحميل</span>
+              <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">السماح بالتحميل</span>
             </label>
           </div>
         </div>
       </div>
     );
-  };
+  }
 
-  const renderPdfItem = (sectionId: string, item: PdfItem, index: number, totalItems: number) => {
+  // ── Render PDF Item ──────────────────────────────────────
+  function renderPdfItem(sectionId: string, item: PdfItem, itemIndex: number, totalItems: number) {
     return (
-      <div key={item.id} className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/30">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:border-slate-300">
+        <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-l from-rose-50 to-transparent border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             </div>
-            <div>
-              <span className="text-xs font-medium text-red-600 bg-red-50 px-3 py-1 rounded-full">ملف PDF</span>
-            </div>
+            {renderItemTypeBadge("pdf")}
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => moveItemUp(sectionId, item.id)}
-              disabled={index === 0}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              title="تحريك لأعلى"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-              </svg>
+          <div className="flex items-center gap-1">
+            <button onClick={() => moveItem(sectionId, itemIndex, "up")} disabled={itemIndex === 0} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
             </button>
-            <button
-              onClick={() => moveItemDown(sectionId, item.id)}
-              disabled={index === totalItems - 1}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              title="تحريك لأسفل"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+            <button onClick={() => moveItem(sectionId, itemIndex, "down")} disabled={itemIndex === totalItems - 1} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
             </button>
-            <button
-              onClick={() => removeItem(sectionId, item.id)}
-              className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
-              title="حذف"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
+            <button onClick={() => removeItem(sectionId, item.id)} className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </button>
           </div>
         </div>
-
-        <div className="space-y-6">
+        <div className="p-5 space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">عنوان الملف</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">عنوان الملف</label>
             <input
               type="text"
               value={item.title}
               onChange={(e) => updateItem(sectionId, item.id, { title: e.target.value } as Partial<PdfItem>)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm"
               placeholder="أدخل عنوان الملف"
             />
           </div>
-
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">رفع ملف PDF</label>
-            {!item.pdfFile ? (
-              <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer hover:border-red-500 hover:bg-red-50 transition-all duration-300 group">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4 group-hover:bg-red-200 transition-colors">
-                    <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                  </div>
-                  <p className="mb-2 text-base font-semibold text-gray-700">اسحب وأفلت ملف PDF هنا</p>
-                  <p className="text-sm text-gray-500">أو انقر للتحديد من جهازك</p>
-                  <p className="text-xs text-gray-400 mt-2">PDF حتى 50 ميجابايت</p>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">رفع ملف PDF</label>
+            {item.status === "idle" || item.status === "error" ? (
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer bg-slate-50 hover:bg-rose-50 hover:border-rose-400 transition-all group">
+                <div className="flex flex-col items-center gap-2 text-slate-400 group-hover:text-rose-500 transition-colors">
+                  <svg className="w-9 h-9" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                  <span className="text-sm font-medium">اسحب ملف PDF هنا أو انقر للرفع</span>
                 </div>
-                <input
-                  type="file"
-                  className="hidden"
-                  accept=".pdf"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handlePdfUpload(sectionId, item.id, file);
-                  }}
-                />
+                <input type="file" accept=".pdf" className="hidden" onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadPdf(sectionId, item.id, file);
+                }} />
               </label>
+            ) : item.status === "uploading" ? (
+              <div className="w-full p-5 border border-rose-200 rounded-2xl bg-rose-50 space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-rose-700 font-medium">جاري الرفع...</span>
+                  <span className="text-rose-600 font-bold">{item.uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-rose-200 rounded-full h-2">
+                  <div className="bg-rose-600 h-2 rounded-full transition-all duration-300" style={{ width: `${item.uploadProgress}%` }} />
+                </div>
+                <p className="text-xs text-rose-600 truncate">{item.fileName}</p>
+              </div>
             ) : (
-              <div className="space-y-4">
-                {item.status === 'uploading' && (
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-red-900">جاري الرفع...</span>
-                      <span className="text-sm font-semibold text-red-600">{item.uploadProgress}%</span>
-                    </div>
-                    <div className="w-full bg-red-200 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="bg-gradient-to-r from-red-500 to-red-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${item.uploadProgress}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {item.status === 'completed' && (
-                  <div className="bg-gradient-to-br from-red-50 to-orange-50 border border-red-200 rounded-2xl p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center flex-shrink-0 shadow-lg">
-                        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-gray-900 mb-1 truncate">{item.fileName}</h4>
-                        <p className="text-sm text-gray-600 mb-3">{formatFileSize(item.fileSize)}</p>
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-100 px-3 py-1 rounded-full">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            تم الرفع بنجاح
-                          </span>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => updateItem(sectionId, item.id, { pdfFile: null, pdfUrl: '', fileName: '', fileSize: 0, status: 'idle' } as Partial<PdfItem>)}
-                        className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                )}
+              <div className="w-full p-4 border border-emerald-200 rounded-2xl bg-emerald-50 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-emerald-800 truncate">{item.fileName}</p>
+                  <p className="text-xs text-emerald-600">{formatFileSize(item.fileSize)}</p>
+                </div>
+                <label className="text-xs text-emerald-600 hover:text-emerald-800 cursor-pointer underline underline-offset-2 font-medium">
+                  تغيير
+                  <input type="file" accept=".pdf" className="hidden" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) uploadPdf(sectionId, item.id, file);
+                  }} />
+                </label>
               </div>
             )}
           </div>
+          <label className="flex items-center gap-2.5 cursor-pointer group">
+            <div
+              onClick={() => updateItem(sectionId, item.id, { allowDownload: !item.allowDownload } as Partial<PdfItem>)}
+              className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${item.allowDownload ? "bg-rose-500" : "bg-slate-300"}`}
+            >
+              <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${item.allowDownload ? "-translate-x-5" : "translate-x-0"}`} />
+            </div>
+            <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">السماح بتحميل الملف</span>
+          </label>
+        </div>
+      </div>
+    );
+  }
 
-          <div className="pt-4 border-t border-gray-100">
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={item.allowDownload}
-                  onChange={(e) => updateItem(sectionId, item.id, { allowDownload: e.target.checked } as Partial<PdfItem>)}
-                  className="sr-only peer"
-                />
-                <div className="w-12 h-7 bg-gray-200 rounded-full peer-checked:bg-gradient-to-r peer-checked:from-green-500 peer-checked:to-green-600 transition-all duration-300"></div>
-                <div className="absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-5"></div>
-              </div>
-              <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">السماح بالتحميل</span>
-            </label>
+  // ── Render Quiz Item ─────────────────────────────────────
+  function renderQuizItem(sectionId: string, item: QuizItem, itemIndex: number, totalItems: number) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-l from-violet-50 to-transparent border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+            </div>
+            {renderItemTypeBadge("quiz")}
+          </div>
+          <div className="flex items-center gap-1">
+            <button onClick={() => moveItem(sectionId, itemIndex, "up")} disabled={itemIndex === 0} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+            </button>
+            <button onClick={() => moveItem(sectionId, itemIndex, "down")} disabled={itemIndex === totalItems - 1} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <button onClick={() => removeItem(sectionId, item.id)} className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            </button>
+          </div>
+        </div>
+        <div className="p-5 space-y-5">
+          {/* Quiz Meta */}
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">عنوان الاختبار</label>
+              <input type="text" value={item.title} onChange={(e) => updateItem(sectionId, item.id, { title: e.target.value } as Partial<QuizItem>)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm" placeholder="عنوان الاختبار" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">الوصف</label>
+              <textarea value={item.description} onChange={(e) => updateItem(sectionId, item.id, { description: e.target.value } as Partial<QuizItem>)} rows={2} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm resize-none" placeholder="وصف مختصر للاختبار" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">المدة (دقيقة)</label>
+              <input type="number" min={1} value={item.duration} onChange={(e) => updateItem(sectionId, item.id, { duration: Number(e.target.value) } as Partial<QuizItem>)} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">درجة النجاح (%)</label>
+              <input type="number" min={0} max={100} value={item.passingScore} onChange={(e) => updateItem(sectionId, item.id, { passingScore: Number(e.target.value) } as Partial<QuizItem>)} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">عدد المحاولات</label>
+              <input type="number" min={1} value={item.attempts} onChange={(e) => updateItem(sectionId, item.id, { attempts: Number(e.target.value) } as Partial<QuizItem>)} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">الظهور</label>
+              <select value={item.visibility} onChange={(e) => updateItem(sectionId, item.id, { visibility: e.target.value as "public" | "private" } as Partial<QuizItem>)} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm">
+                <option value="public">عام</option>
+                <option value="private">خاص</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <div
+              onClick={() => updateItem(sectionId, item.id, { published: !item.published } as Partial<QuizItem>)}
+              className={`relative w-11 h-6 rounded-full cursor-pointer transition-colors duration-200 ${item.published ? "bg-violet-600" : "bg-slate-300"}`}
+            >
+              <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${item.published ? "-translate-x-5" : "translate-x-0"}`} />
+            </div>
+            <span className="text-sm font-medium text-slate-700">نشر الاختبار</span>
+          </div>
+
+          {/* Questions */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-bold text-slate-800">الأسئلة ({item.questions.length})</h4>
+              <button
+                onClick={() => addQuestion(sectionId, item.id)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600 text-white text-xs font-semibold hover:bg-violet-700 transition-colors shadow-sm shadow-violet-200"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                إضافة سؤال
+              </button>
+            </div>
+            <div className="space-y-3">
+              {item.questions.map((q, qIdx) => {
+                const isExpanded = expandedQuestions[q.id] !== false;
+                return (
+                  <div key={q.id} className="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50">
+                    <div
+                      className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => setExpandedQuestions((prev) => ({ ...prev, [q.id]: !isExpanded }))}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                          {qIdx + 1}
+                        </span>
+                        <span className="text-sm font-medium text-slate-700 truncate max-w-xs">
+                          {q.title || "سؤال بدون عنوان"}
+                        </span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-500">
+                          {q.questionType === "multiple_choice" ? "اختيار متعدد" : "صح/خطأ"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => moveQuestion(sectionId, item.id, qIdx, "up")} disabled={qIdx === 0} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+                        </button>
+                        <button onClick={() => moveQuestion(sectionId, item.id, qIdx, "down")} disabled={qIdx === item.questions.length - 1} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        <button onClick={() => removeQuestion(sectionId, item.id, q.id)} className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                        <svg className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                      </div>
+                    </div>
+                    {isExpanded && (
+                      <div className="px-4 pb-4 space-y-4 bg-white border-t border-slate-100">
+                        <div className="pt-3 grid grid-cols-1 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-1">نص السؤال</label>
+                            <textarea
+                              value={q.title}
+                              onChange={(e) => updateQuestion(sectionId, item.id, q.id, { title: e.target.value })}
+                              rows={2}
+                              className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm resize-none"
+                              placeholder="اكتب نص السؤال هنا..."
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-600 mb-1">نوع السؤال</label>
+                              <select
+                                value={q.questionType}
+                                onChange={(e) => {
+                                  const newType = e.target.value as Question["questionType"];
+                                  updateQuestion(sectionId, item.id, q.id, {
+                                    questionType: newType,
+                                    choices: newType === "true_false" ? ["صح", "خطأ"] : ["", "", "", ""],
+                                    correctAnswer: 0,
+                                  });
+                                }}
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm"
+                              >
+                                <option value="multiple_choice">اختيار متعدد</option>
+                                <option value="true_false">صح / خطأ</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-600 mb-1">الدرجات</label>
+                              <input type="number" min={1} value={q.points} onChange={(e) => updateQuestion(sectionId, item.id, q.id, { points: Number(e.target.value) })} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-2">الخيارات والإجابة الصحيحة</label>
+                            <div className="space-y-2">
+                              {q.choices.map((choice, cIdx) => (
+                                <div key={cIdx} className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => updateQuestion(sectionId, item.id, q.id, { correctAnswer: cIdx })}
+                                    className={`w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${q.correctAnswer === cIdx ? "border-emerald-500 bg-emerald-500" : "border-slate-300 hover:border-emerald-400"}`}
+                                  >
+                                    {q.correctAnswer === cIdx && (
+                                      <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                    )}
+                                  </button>
+                                  <input
+                                    type="text"
+                                    value={choice}
+                                    disabled={q.questionType === "true_false"}
+                                    onChange={(e) => {
+                                      const newChoices = [...q.choices];
+                                      newChoices[cIdx] = e.target.value;
+                                      updateQuestion(sectionId, item.id, q.id, { choices: newChoices });
+                                    }}
+                                    className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                                    placeholder={`الخيار ${cIdx + 1}`}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {item.questions.length === 0 && (
+                <div className="text-center py-8 text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                  <svg className="w-10 h-10 mx-auto mb-2 opacity-40" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <p className="text-sm font-medium">لا توجد أسئلة بعد</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
     );
-  };
+  }
 
-  const renderQuizItem = (sectionId: string, item: QuizItem, index: number, totalItems: number) => {
+  // ── Render Homework Item ─────────────────────────────────
+  function renderHomeworkItem(sectionId: string, item: HomeworkItem, itemIndex: number, totalItems: number) {
+    const submissionOptions: { key: HomeworkItem["submissionTypes"][number]; label: string; icon: ReactElement }[] = [
+      {
+        key: "text",
+        label: "نص",
+        icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" /></svg>,
+      },
+      {
+        key: "pdf",
+        label: "PDF",
+        icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
+      },
+      {
+        key: "image",
+        label: "صورة",
+        icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
+      },
+      {
+        key: "multiple_files",
+        label: "ملفات متعددة",
+        icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>,
+      },
+    ];
+
     return (
-      <div key={item.id} className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-              </svg>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+        <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-l from-amber-50 to-transparent border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+            </div>
+            {renderItemTypeBadge("homework")}
+          </div>
+          <div className="flex items-center gap-1">
+            <button onClick={() => moveItem(sectionId, itemIndex, "up")} disabled={itemIndex === 0} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+            </button>
+            <button onClick={() => moveItem(sectionId, itemIndex, "down")} disabled={itemIndex === totalItems - 1} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <button onClick={() => removeItem(sectionId, item.id)} className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            </button>
+          </div>
+        </div>
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">عنوان الواجب</label>
+              <input type="text" value={item.title} onChange={(e) => updateItem(sectionId, item.id, { title: e.target.value } as Partial<HomeworkItem>)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm" placeholder="عنوان الواجب" />
             </div>
             <div>
-              <span className="text-xs font-medium text-purple-600 bg-purple-50 px-3 py-1 rounded-full">اختبار</span>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">التعليمات والوصف</label>
+              <textarea value={item.description} onChange={(e) => updateItem(sectionId, item.id, { description: e.target.value } as Partial<HomeworkItem>)} rows={3} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm resize-none" placeholder="اكتب تعليمات الواجب هنا..." />
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => moveItemUp(sectionId, item.id)}
-              disabled={index === 0}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              title="تحريك لأعلى"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-              </svg>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">تاريخ التسليم</label>
+              <input type="datetime-local" value={item.dueDate} onChange={(e) => updateItem(sectionId, item.id, { dueDate: e.target.value } as Partial<HomeworkItem>)} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 bg-slate-50 text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">الدرجة الكلية</label>
+              <input type="number" min={1} value={item.totalScore} onChange={(e) => updateItem(sectionId, item.id, { totalScore: Number(e.target.value) } as Partial<HomeworkItem>)} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 bg-slate-50 text-sm" />
+            </div>
+          </div>
+
+          {/* Submission Types */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">أنواع التسليم المسموح بها</label>
+            <div className="flex flex-wrap gap-2">
+              {submissionOptions.map((opt) => {
+                const isSelected = item.submissionTypes.includes(opt.key);
+                return (
+                  <button
+                    key={opt.key}
+                    onClick={() => toggleSubmissionType(sectionId, item.id, opt.key)}
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border-2 transition-all ${
+                      isSelected
+                        ? "border-amber-400 bg-amber-50 text-amber-700"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-amber-300 hover:bg-amber-50"
+                    }`}
+                  >
+                    {opt.icon}
+                    {opt.label}
+                    {isSelected && (
+                      <svg className="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Upload Instructions */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">رفع ملف التعليمات (اختياري)</label>
+            {item.instructionsFileName ? (
+              <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                <svg className="w-5 h-5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+                <span className="text-sm text-amber-800 flex-1 truncate">{item.instructionsFileName}</span>
+                <button onClick={() => updateItem(sectionId, item.id, { instructionsFileName: "", instructionsFile: "" } as Partial<HomeworkItem>)} className="text-amber-500 hover:text-red-500 transition-colors">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+            ) : (
+              <label className="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-amber-400 hover:bg-amber-50 transition-all group">
+                <svg className="w-5 h-5 text-slate-400 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                <span className="text-sm text-slate-500 group-hover:text-amber-600 transition-colors">رفع ملف التعليمات (PDF أو صورة)</span>
+                <input type="file" accept=".pdf,image/*" className="hidden" onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) updateItem(sectionId, item.id, { instructionsFileName: file.name, instructionsFile: file.name } as Partial<HomeworkItem>);
+                }} />
+              </label>
+            )}
+          </div>
+
+          {/* Toggles */}
+          <div className="flex flex-wrap gap-6">
+            <label className="flex items-center gap-2.5 cursor-pointer group">
+              <div onClick={() => updateItem(sectionId, item.id, { allowLateSubmission: !item.allowLateSubmission } as Partial<HomeworkItem>)} className={`relative w-11 h-6 rounded-full transition-colors duration-200 cursor-pointer ${item.allowLateSubmission ? "bg-amber-500" : "bg-slate-300"}`}>
+                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${item.allowLateSubmission ? "-translate-x-5" : "translate-x-0"}`} />
+              </div>
+              <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">السماح بالتسليم المتأخر</span>
+            </label>
+            <label className="flex items-center gap-2.5 cursor-pointer group">
+              <div onClick={() => updateItem(sectionId, item.id, { published: !item.published } as Partial<HomeworkItem>)} className={`relative w-11 h-6 rounded-full transition-colors duration-200 cursor-pointer ${item.published ? "bg-amber-500" : "bg-slate-300"}`}>
+                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${item.published ? "-translate-x-5" : "translate-x-0"}`} />
+              </div>
+              <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">نشر الواجب</span>
+            </label>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">الظهور</label>
+            <select value={item.visibility} onChange={(e) => updateItem(sectionId, item.id, { visibility: e.target.value as "public" | "private" } as Partial<HomeworkItem>)} className="w-full sm:w-48 px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 bg-slate-50 text-sm">
+              <option value="public">عام</option>
+              <option value="private">خاص</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Render Single Item ───────────────────────────────────
+  function renderItem(sectionId: string, item: CourseItem, itemIndex: number, totalItems: number) {
+    switch (item.type) {
+      case "video":
+        return renderVideoItem(sectionId, item, itemIndex, totalItems);
+      case "pdf":
+        return renderPdfItem(sectionId, item, itemIndex, totalItems);
+      case "quiz":
+        return renderQuizItem(sectionId, item, itemIndex, totalItems);
+      case "homework":
+        return renderHomeworkItem(sectionId, item, itemIndex, totalItems);
+    }
+  }
+
+  // ── Render Section Card ──────────────────────────────────
+  function renderSectionCard(section: Section, sectionIndex: number, totalSections: number) {
+    const isDropdownOpen = openDropdownSectionId === section.id;
+    return (
+      <div key={section.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible transition-all duration-200 hover:shadow-md">
+        {/* Section Header */}
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-gradient-to-l from-slate-50 to-white">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-sm font-bold shadow-sm shadow-indigo-200 flex-shrink-0">
+            {sectionIndex + 1}
+          </div>
+          <input
+            type="text"
+            value={section.title}
+            onChange={(e) => renameSection(section.id, e.target.value)}
+            className="flex-1 text-base font-bold text-slate-800 bg-transparent border-none outline-none focus:bg-slate-50 focus:px-2 focus:rounded-lg transition-all"
+            placeholder="اسم القسم"
+          />
+          <div className="flex items-center gap-1 mr-auto">
+            <button onClick={() => moveSectionUp(sectionIndex)} disabled={sectionIndex === 0} className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all" title="تحريك لأعلى">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
             </button>
-            <button
-              onClick={() => moveItemDown(sectionId, item.id)}
-              disabled={index === totalItems - 1}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              title="تحريك لأسفل"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+            <button onClick={() => moveSectionDown(sectionIndex)} disabled={sectionIndex === totalSections - 1} className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all" title="تحريك لأسفل">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
             </button>
-            <button
-              onClick={() => removeItem(sectionId, item.id)}
-              className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
-              title="حذف"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
+            <button onClick={() => toggleCollapseSection(section.id)} className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all" title={section.collapsed ? "توسيع" : "طي"}>
+              <svg className={`w-4 h-4 transition-transform duration-200 ${section.collapsed ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <button onClick={() => removeSection(section.id)} className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all" title="حذف القسم">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </button>
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">عنوان الاختبار</label>
-              <input
-                type="text"
-                value={item.title}
-                onChange={(e) => updateItem(sectionId, item.id, { title: e.target.value } as Partial<QuizItem>)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-                placeholder="أدخل عنوان الاختبار"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">الوصف</label>
-              <textarea
-                value={item.description}
-                onChange={(e) => updateItem(sectionId, item.id, { description: e.target.value } as Partial<QuizItem>)}
-                rows={3}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none resize-none"
-                placeholder="أدخل وصف الاختبار"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">المدة (دقيقة)</label>
-              <input
-                type="number"
-                value={item.duration}
-                onChange={(e) => updateItem(sectionId, item.id, { duration: parseInt(e.target.value) || 0 } as Partial<QuizItem>)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-                placeholder="30"
-                min="1"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">درجة النجاح (%)</label>
-              <input
-                type="number"
-                value={item.passingScore}
-                onChange={(e) => updateItem(sectionId, item.id, { passingScore: parseInt(e.target.value) || 0 } as Partial<QuizItem>)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-                placeholder="70"
-                min="0"
-                max="100"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">عدد المحاولات</label>
-              <input
-                type="number"
-                value={item.maxAttempts}
-                onChange={(e) => updateItem(sectionId, item.id, { maxAttempts: parseInt(e.target.value) || 1 } as Partial<QuizItem>)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-                placeholder="3"
-                min="1"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-8 pt-4 border-t border-gray-100">
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={item.isVisible}
-                  onChange={(e) => updateItem(sectionId, item.id, { isVisible: e.target.checked } as Partial<QuizItem>)}
-                  className="sr-only peer"
-                />
-                <div className="w-12 h-7 bg-gray-200 rounded-full peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 transition-all duration-300"></div>
-                <div className="absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-5"></div>
-              </div>
-              <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">مرئي للطلاب</span>
-            </label>
-
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={item.isPublished}
-                  onChange={(e) => updateItem(sectionId, item.id, { isPublished: e.target.checked } as Partial<QuizItem>)}
-                  className="sr-only peer"
-                />
-                <div className="w-12 h-7 bg-gray-200 rounded-full peer-checked:bg-gradient-to-r peer-checked:from-green-500 peer-checked:to-green-600 transition-all duration-300"></div>
-                <div className="absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-5"></div>
-              </div>
-              <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">منشور</span>
-            </label>
-          </div>
-
-          <div className="pt-6 border-t-2 border-gray-200">
-            <div className="flex items-center justify-between mb-6">
-              <h4 className="text-lg font-bold text-gray-900">الأسئلة ({item.questions.length})</h4>
-              <button
-                onClick={() => addQuestion(sectionId, item.id)}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 font-medium"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                إضافة سؤال
-              </button>
-            </div>
-
-            {item.questions.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <p className="text-gray-500 font-medium">لا توجد أسئلة بعد</p>
-                <p className="text-sm text-gray-400 mt-1">انقر على "إضافة سؤال" لإنشاء السؤال الأول</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {item.questions.map((question, qIndex) => (
-                  <div key={question.id} className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-purple-700 text-white flex items-center justify-center font-bold shadow-md">
-                          {qIndex + 1}
-                        </div>
-                        <select
-                          value={question.type}
-                          onChange={(e) => updateQuestion(sectionId, item.id, question.id, { type: e.target.value as 'multiple_choice' | 'true_false' })}
-                          className="px-4 py-2 bg-white border border-purple-300 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-purple-500 outline-none"
-                        >
-                          <option value="multiple_choice">اختيار من متعدد</option>
-                          <option value="true_false">صح أو خطأ</option>
-                        </select>
-                      </div>
-                      <button
-                        onClick={() => removeQuestion(sectionId, item.id, question.id)}
-                        className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">نص السؤال</label>
-                        <input
-                          type="text"
-                          value={question.title}
-                          onChange={(e) => updateQuestion(sectionId, item.id, question.id, { title: e.target.value })}
-                          className="w-full px-4 py-3 bg-white border border-purple-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-                          placeholder="أدخل نص السؤال"
-                        />
-                      </div>
-
-                      {question.type === 'multiple_choice' ? (
-                        <div className="space-y-3">
-                          <label className="block text-sm font-semibold text-gray-700">الخيارات</label>
-                          {question.choices.map((choice, cIndex) => (
-                            <div key={cIndex} className="flex items-center gap-3">
-                              <input
-                                type="radio"
-                                name={`question_${question.id}_correct`}
-                                checked={question.correctAnswer === cIndex}
-                                onChange={() => updateQuestion(sectionId, item.id, question.id, { correctAnswer: cIndex })}
-                                className="w-5 h-5 text-purple-600 focus:ring-purple-500"
-                              />
-                              <input
-                                type="text"
-                                value={choice}
-                                onChange={(e) => {
-                                  const newChoices = [...question.choices];
-                                  newChoices[cIndex] = e.target.value;
-                                  updateQuestion(sectionId, item.id, question.id, { choices: newChoices });
-                                }}
-                                className="flex-1 px-4 py-3 bg-white border border-purple-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-                                placeholder={`الخيار ${cIndex + 1}`}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          <label className="block text-sm font-semibold text-gray-700">الإجابة الصحيحة</label>
-                          <div className="flex gap-4">
-                            <label className="flex items-center gap-3 flex-1 bg-white border-2 border-purple-300 rounded-xl p-4 cursor-pointer hover:bg-purple-50 transition-colors">
-                              <input
-                                type="radio"
-                                name={`question_${question.id}_tf`}
-                                checked={question.correctAnswer === 0}
-                                onChange={() => updateQuestion(sectionId, item.id, question.id, { correctAnswer: 0, choices: ['صح', 'خطأ', '', ''] })}
-                                className="w-5 h-5 text-purple-600 focus:ring-purple-500"
-                              />
-                              <span className="font-semibold text-gray-700">صح</span>
-                            </label>
-                            <label className="flex items-center gap-3 flex-1 bg-white border-2 border-purple-300 rounded-xl p-4 cursor-pointer hover:bg-purple-50 transition-colors">
-                              <input
-                                type="radio"
-                                name={`question_${question.id}_tf`}
-                                checked={question.correctAnswer === 1}
-                                onChange={() => updateQuestion(sectionId, item.id, question.id, { correctAnswer: 1, choices: ['صح', 'خطأ', '', ''] })}
-                                className="w-5 h-5 text-purple-600 focus:ring-purple-500"
-                              />
-                              <span className="font-semibold text-gray-700">خطأ</span>
-                            </label>
-                          </div>
-                        </div>
-                      )}
-
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">النقاط</label>
-                        <input
-                          type="number"
-                          value={question.points}
-                          onChange={(e) => updateQuestion(sectionId, item.id, question.id, { points: parseInt(e.target.value) || 0 })}
-                          className="w-full px-4 py-3 bg-white border border-purple-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-                          placeholder="10"
-                          min="0"
-                        />
-                      </div>
-                    </div>
+        {/* Section Content */}
+        {!section.collapsed && (
+          <div className="p-5 space-y-4">
+            {/* Items */}
+            {section.items.length > 0 && (
+              <div className="space-y-3">
+                {section.items.map((item, itemIndex) => (
+                  <div key={item.id}>
+                    {renderItem(section.id, item, itemIndex, section.items.length)}
                   </div>
                 ))}
               </div>
             )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderHomeworkItem = (sectionId: string, item: HomeworkItem, index: number, totalItems: number) => {
-    return (
-      <div key={item.id} className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-xs font-medium text-orange-600 bg-orange-50 px-3 py-1 rounded-full">واجب</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => moveItemUp(sectionId, item.id)}
-              disabled={index === 0}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              title="تحريك لأعلى"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-              </svg>
-            </button>
-            <button
-              onClick={() => moveItemDown(sectionId, item.id)}
-              disabled={index === totalItems - 1}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              title="تحريك لأسفل"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            <button
-              onClick={() => removeItem(sectionId, item.id)}
-              className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
-              title="حذف"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">عنوان الواجب</label>
-              <input
-                type="text"
-                value={item.title}
-                onChange={(e) => updateItem(sectionId, item.id, { title: e.target.value } as Partial<HomeworkItem>)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none"
-                placeholder="أدخل عنوان الواجب"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">الوصف</label>
-              <textarea
-                value={item.description}
-                onChange={(e) => updateItem(sectionId, item.id, { description: e.target.value } as Partial<HomeworkItem>)}
-                rows={3}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none resize-none"
-                placeholder="أدخل وصف الواجب"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">تاريخ التسليم</label>
-              <input
-                type="datetime-local"
-                value={item.dueDate}
-                onChange={(e) => updateItem(sectionId, item.id, { dueDate: e.target.value } as Partial<HomeworkItem>)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">الدرجة الكلية</label>
-              <input
-                type="number"
-                value={item.totalScore}
-                onChange={(e) => updateItem(sectionId, item.id, { totalScore: parseInt(e.target.value) || 0 } as Partial<HomeworkItem>)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none"
-                placeholder="100"
-                min="0"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">تعليمات التسليم</label>
-              <textarea
-                value={item.instructions}
-                onChange={(e) => updateItem(sectionId, item.id, { instructions: e.target.value } as Partial<HomeworkItem>)}
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none resize-none"
-                placeholder="أدخل تعليمات التسليم للطلاب"
-              />
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-gray-100">
-            <label className="flex items-center gap-3 cursor-pointer group mb-6">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={item.allowLateSubmission}
-                  onChange={(e) => updateItem(sectionId, item.id, { allowLateSubmission: e.target.checked } as Partial<HomeworkItem>)}
-                  className="sr-only peer"
-                />
-                <div className="w-12 h-7 bg-gray-200 rounded-full peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-orange-600 transition-all duration-300"></div>
-                <div className="absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-5"></div>
+            {section.items.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-10 text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                <svg className="w-12 h-12 mb-3 opacity-40" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <p className="text-sm font-medium">لا يوجد محتوى في هذا القسم</p>
+                <p className="text-xs mt-1 text-slate-400">انقر على "إضافة محتوى" لإضافة فيديو أو ملف أو اختبار</p>
               </div>
-              <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">السماح بالتسليم المتأخر</span>
-            </label>
+            )}
 
-            <div className="space-y-4">
-              <h5 className="text-sm font-bold text-gray-900">المرفقات</h5>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">مرفق PDF</label>
-                  {!item.attachmentPdf ? (
-                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-orange-500 hover:bg-orange-50 transition-all duration-300 group">
-                      <div className="flex flex-col items-center justify-center">
-                        <svg className="w-8 h-8 text-gray-400 group-hover:text-orange-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                        </svg>
-                        <p className="text-xs text-gray-500">رفع PDF</p>
-                      </div>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept=".pdf"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleHomeworkAttachmentPdf(sectionId, item.id, file);
-                        }}
-                      />
-                    </label>
-                  ) : (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <svg className="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        <span className="text-sm text-gray-700 truncate">{item.attachmentPdf.name}</span>
-                      </div>
-                      <button
-                        onClick={() => updateItem(sectionId, item.id, { attachmentPdf: null, attachmentPdfUrl: '' } as Partial<HomeworkItem>)}
-                        className="p-1 hover:bg-red-100 text-red-600 rounded transition-colors flex-shrink-0"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
+            {/* Add Item Button with Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setOpenDropdownSectionId(isDropdownOpen ? null : section.id)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border-2 border-dashed border-indigo-300 text-indigo-600 font-semibold text-sm hover:border-indigo-500 hover:bg-indigo-50 transition-all"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                إضافة محتوى
+              </button>
+              {isDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={handleBackdropClick} />
+                  <div className="absolute bottom-full mb-2 right-0 left-0 z-20 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+                    <div className="p-2 space-y-1">
+                      {[
+                        {
+                          type: "video" as ItemType,
+                          label: "فيديو",
+                          desc: "رفع درس فيديو",
+                          color: "text-blue-600 bg-blue-50 hover:bg-blue-100",
+                          iconBg: "bg-blue-100",
+                          icon: <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>,
+                        },
+                        {
+                          type: "pdf" as ItemType,
+                          label: "ملف PDF",
+                          desc: "رفع مستند PDF",
+                          color: "text-rose-600 bg-rose-50 hover:bg-rose-100",
+                          iconBg: "bg-rose-100",
+                          icon: <svg className="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
+                        },
+                        {
+                          type: "quiz" as ItemType,
+                          label: "اختبار",
+                          desc: "إنشاء اختبار تفاعلي",
+                          color: "text-violet-600 bg-violet-50 hover:bg-violet-100",
+                          iconBg: "bg-violet-100",
+                          icon: <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>,
+                        },
+                        {
+                          type: "homework" as ItemType,
+                          label: "واجب منزلي",
+                          desc: "إضافة واجب للطلاب",
+                          color: "text-amber-600 bg-amber-50 hover:bg-amber-100",
+                          iconBg: "bg-amber-100",
+                          icon: <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>,
+                        },
+                      ].map((opt) => (
+                        <button
+                          key={opt.type}
+                          onClick={() => addItem(section.id, opt.type)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${opt.color}`}
+                        >
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${opt.iconBg}`}>
+                            {opt.icon}
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-semibold">{opt.label}</p>
+                            <p className="text-xs opacity-70">{opt.desc}</p>
+                          </div>
+                        </button>
+                      ))}
                     </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">مرفق صورة</label>
-                  {!item.attachmentImage ? (
-                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-orange-500 hover:bg-orange-50 transition-all duration-300 group">
-                      <div className="flex flex-col items-center justify-center">
-                        <svg className="w-8 h-8 text-gray-400 group-hover:text-orange-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <p className="text-xs text-gray-500">رفع صورة</p>
-                      </div>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleHomeworkAttachmentImage(sectionId, item.id, file);
-                        }}
-                      />
-                    </label>
-                  ) : (
-                    <div className="relative h-32 rounded-xl overflow-hidden border-2 border-orange-200 group">
-                      <img
-                        src={item.attachmentImageUrl}
-                        alt="Attachment"
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        onClick={() => updateItem(sectionId, item.id, { attachmentImage: null, attachmentImageUrl: '' } as Partial<HomeworkItem>)}
-                        className="absolute top-2 right-2 p-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+                </>
+              )}
             </div>
-          </div>
-
-          <div className="pt-4 border-t border-gray-100">
-            <h5 className="text-sm font-bold text-gray-900 mb-4">أنواع التسليم المسموحة</h5>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={item.allowedSubmissionTypes.text}
-                  onChange={(e) => updateItem(sectionId, item.id, {
-                    allowedSubmissionTypes: { ...item.allowedSubmissionTypes, text: e.target.checked }
-                  } as Partial<HomeworkItem>)}
-                  className="w-5 h-5 text-orange-600 focus:ring-orange-500 rounded"
-                />
-                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">نص</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={item.allowedSubmissionTypes.pdf}
-                  onChange={(e) => updateItem(sectionId, item.id, {
-                    allowedSubmissionTypes: { ...item.allowedSubmissionTypes, pdf: e.target.checked }
-                  } as Partial<HomeworkItem>)}
-                  className="w-5 h-5 text-orange-600 focus:ring-orange-500 rounded"
-                />
-                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">PDF</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={item.allowedSubmissionTypes.image}
-                  onChange={(e) => updateItem(sectionId, item.id, {
-                    allowedSubmissionTypes: { ...item.allowedSubmissionTypes, image: e.target.checked }
-                  } as Partial<HomeworkItem>)}
-                  className="w-5 h-5 text-orange-600 focus:ring-orange-500 rounded"
-                />
-                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">صورة</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={item.allowedSubmissionTypes.multipleFiles}
-                  onChange={(e) => updateItem(sectionId, item.id, {
-                    allowedSubmissionTypes: { ...item.allowedSubmissionTypes, multipleFiles: e.target.checked }
-                  } as Partial<HomeworkItem>)}
-                  className="w-5 h-5 text-orange-600 focus:ring-orange-500 rounded"
-                />
-                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">ملفات متعددة</span>
-              </label>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-8 pt-4 border-t border-gray-100">
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={item.isVisible}
-                  onChange={(e) => updateItem(sectionId, item.id, { isVisible: e.target.checked } as Partial<HomeworkItem>)}
-                  className="sr-only peer"
-                />
-                <div className="w-12 h-7 bg-gray-200 rounded-full peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 transition-all duration-300"></div>
-                <div className="absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-5"></div>
-              </div>
-              <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">مرئي للطلاب</span>
-            </label>
-
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={item.isPublished}
-                  onChange={(e) => updateItem(sectionId, item.id, { isPublished: e.target.checked } as Partial<HomeworkItem>)}
-                  className="sr-only peer"
-                />
-                <div className="w-12 h-7 bg-gray-200 rounded-full peer-checked:bg-gradient-to-r peer-checked:from-green-500 peer-checked:to-green-600 transition-all duration-300"></div>
-                <div className="absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-5"></div>
-              </div>
-              <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">منشور</span>
-            </label>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderItem = (sectionId: string, item: CourseItem, index: number, totalItems: number) => {
-    switch (item.type) {
-      case 'video':
-        return renderVideoItem(sectionId, item, index, totalItems);
-      case 'pdf':
-        return renderPdfItem(sectionId, item, index, totalItems);
-      case 'quiz':
-        return renderQuizItem(sectionId, item, index, totalItems);
-      case 'homework':
-        return renderHomeworkItem(sectionId, item, index, totalItems);
-      default:
-        return null;
-    }
-  };
-
-  const renderAddItemDropdown = (sectionId: string) => {
-    return (
-      <div className="relative inline-block" ref={openDropdownId === sectionId ? dropdownRef : null}>
-        <button
-          onClick={() => setOpenDropdownId(openDropdownId === sectionId ? null : sectionId)}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30 font-medium"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          إضافة عنصر
-        </button>
-        {openDropdownId === sectionId && (
-          <div className="absolute left-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
-            <button
-              onClick={() => addItem(sectionId, 'video')}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50 transition-colors text-right"
-            >
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div>
-                <div className="font-semibold text-gray-900">فيديو</div>
-                <div className="text-xs text-gray-500">إضافة محاضرة فيديو</div>
-              </div>
-            </button>
-            <button
-              onClick={() => addItem(sectionId, 'pdf')}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors text-right"
-            >
-              <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div>
-                <div className="font-semibold text-gray-900">ملف PDF</div>
-                <div className="text-xs text-gray-500">إضافة ملف قراءة</div>
-              </div>
-            </button>
-            <button
-              onClick={() => addItem(sectionId, 'quiz')}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-purple-50 transition-colors text-right"
-            >
-              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-              </div>
-              <div>
-                <div className="font-semibold text-gray-900">اختبار</div>
-                <div className="text-xs text-gray-500">إضافة اختبار تقييمي</div>
-              </div>
-            </button>
-            <button
-              onClick={() => addItem(sectionId, 'homework')}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-orange-50 transition-colors text-right"
-            >
-              <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-                <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div>
-                <div className="font-semibold text-gray-900">واجب</div>
-                <div className="text-xs text-gray-500">إضافة واجب منزلي</div>
-              </div>
-            </button>
           </div>
         )}
       </div>
     );
-  };
+  }
 
-  // ==================== LOADING STATE ====================
+  // ── Render Content Tab ───────────────────────────────────
+  function renderContentTab() {
+    if (!course) return null;
+    return (
+      <div className="space-y-5">
+        {course.sections.map((section, sectionIndex) => (
+          <div key={section.id}>
+            {renderSectionCard(section, sectionIndex, course.sections.length)}
+          </div>
+        ))}
+        <button
+          onClick={addSection}
+          className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-2xl border-2 border-dashed border-slate-300 text-slate-500 font-semibold hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+          إضافة قسم جديد
+        </button>
+      </div>
+    );
+  }
 
+  // ── Render Settings Tab ──────────────────────────────────
+  function renderSettingsTab() {
+    if (!course) return null;
+    return (
+      <div className="space-y-6">
+        {/* Basic Info Card */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-l from-slate-50 to-white">
+            <h3 className="text-base font-bold text-slate-800">المعلومات الأساسية</h3>
+            <p className="text-sm text-slate-500 mt-0.5">تعديل بيانات الدورة الرئيسية</p>
+          </div>
+          <div className="p-6 space-y-5">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">عنوان الدورة</label>
+              <input
+                type="text"
+                value={course.title}
+                onChange={(e) => updateCourseField("title", e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors"
+                placeholder="أدخل عنوان الدورة"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">وصف الدورة</label>
+              <textarea
+                value={course.description}
+                onChange={(e) => updateCourseField("description", e.target.value)}
+                rows={5}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors resize-none"
+                placeholder="اكتب وصفاً شاملاً للدورة..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">الصف الدراسي / المرحلة</label>
+              <select
+                value={course.grade}
+                onChange={(e) => updateCourseField("grade", e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-800 bg-slate-50"
+              >
+                <option value="">اختر المرحلة الدراسية</option>
+<option value="prep_1">الصف الأول الإعدادي</option>
+<option value="prep_2">الصف الثاني الإعدادي</option>
+<option value="prep_3">الصف الثالث الإعدادي</option>
+
+<option value="sec_1">الصف الأول الثانوي</option>
+<option value="sec_2">الصف الثاني الثانوي</option>
+<option value="sec_3">الصف الثالث الثانوي</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Pricing Card */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-l from-slate-50 to-white">
+            <h3 className="text-base font-bold text-slate-800">التسعير</h3>
+            <p className="text-sm text-slate-500 mt-0.5">تحديد سعر الدورة أو جعلها مجانية</p>
+          </div>
+          <div className="p-6 space-y-5">
+            <div className="flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 transition-colors">
+              <div>
+                <p className="text-sm font-semibold text-slate-800">دورة مجانية</p>
+                <p className="text-xs text-slate-500 mt-0.5">إتاحة الدورة مجاناً لجميع الطلاب</p>
+              </div>
+              <div
+                onClick={() => updateCourseField("isFree", !course.isFree)}
+                className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-200 ${course.isFree ? "bg-emerald-500" : "bg-slate-300"}`}
+              >
+                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${course.isFree ? "-translate-x-6" : "translate-x-0"}`} />
+              </div>
+            </div>
+            {!course.isFree && (
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">السعر (بالجنيه المصري)</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min={0}
+                    value={course.price}
+                    onChange={(e) => updateCourseField("price", Number(e.target.value))}
+                    className="w-full pl-4 pr-16 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors"
+                    placeholder="0"
+                  />
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-500">ج.م</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Thumbnail Card */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-l from-slate-50 to-white">
+            <h3 className="text-base font-bold text-slate-800">صورة الدورة</h3>
+            <p className="text-sm text-slate-500 mt-0.5">الصورة المصغرة للدورة في القوائم</p>
+          </div>
+          <div className="p-6">
+            <div className="flex gap-6 items-start">
+              {thumbnailPreview ? (
+                <div className="relative flex-shrink-0">
+                  <img src={thumbnailPreview} alt="thumbnail" className="w-40 h-28 object-cover rounded-2xl border border-slate-200 shadow-sm" />
+                  <button
+                    onClick={() => { setThumbnailPreview(""); setThumbnailFile(null); }}
+                    className="absolute -top-2 -left-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow hover:bg-red-600 transition-colors"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              ) : (
+                <div className="w-40 h-28 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 flex-shrink-0">
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </div>
+              )}
+              <div className="flex-1 space-y-3">
+                <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer bg-slate-50 hover:bg-indigo-50 hover:border-indigo-400 transition-all group">
+                  <div className="flex flex-col items-center gap-1 text-slate-400 group-hover:text-indigo-500 transition-colors">
+                    <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                    <span className="text-sm font-medium">{thumbnailPreview ? "تغيير الصورة" : "رفع صورة الدورة"}</span>
+                    <span className="text-xs">PNG, JPG — الحجم الموصى به 1280×720</span>
+                  </div>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleThumbnailChange} />
+                </label>
+                {thumbnailFile && (
+                  <p className="text-xs text-slate-500">تم اختيار: {thumbnailFile.name}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Visibility Card */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-l from-slate-50 to-white">
+            <h3 className="text-base font-bold text-slate-800">حالة النشر والظهور</h3>
+            <p className="text-sm text-slate-500 mt-0.5">التحكم في نشر الدورة وإخفائها</p>
+          </div>
+          <div className="p-6 space-y-4">
+            <div className="flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 transition-colors">
+              <div>
+                <p className="text-sm font-semibold text-slate-800">نشر الدورة</p>
+                <p className="text-xs text-slate-500 mt-0.5">جعل الدورة متاحة للطلاب</p>
+              </div>
+              <div
+                onClick={() => updateCourseField("published", !course.published)}
+                className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-200 ${course.published ? "bg-indigo-600" : "bg-slate-300"}`}
+              >
+                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${course.published ? "-translate-x-6" : "translate-x-0"}`} />
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 transition-colors">
+              <div>
+                <p className="text-sm font-semibold text-slate-800">إخفاء الدورة</p>
+                <p className="text-xs text-slate-500 mt-0.5">إخفاء الدورة من قوائم البحث</p>
+              </div>
+              <div
+                onClick={() => updateCourseField("hidden", !course.hidden)}
+                className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-200 ${course.hidden ? "bg-slate-600" : "bg-slate-300"}`}
+              >
+                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${course.hidden ? "-translate-x-6" : "translate-x-0"}`} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Danger Zone */}
+        <div className="bg-white rounded-2xl border-2 border-red-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-red-100 bg-red-50">
+            <h3 className="text-base font-bold text-red-700">منطقة الخطر</h3>
+            <p className="text-sm text-red-500 mt-0.5">الإجراءات التالية لا يمكن التراجع عنها</p>
+          </div>
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-slate-800">حذف الدورة نهائياً</p>
+                <p className="text-xs text-slate-500 mt-0.5">سيتم حذف جميع محتويات الدورة بشكل دائم</p>
+              </div>
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 text-red-600 font-semibold text-sm border-2 border-red-200 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                حذف الدورة
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Loading State ────────────────────────────────────────
   if (loading) {
     return (
       <InstructorLayout>
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-          <div className="text-center">
-            <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
-            <p className="text-xl font-semibold text-gray-700">جاري تحميل الدورة...</p>
-            <p className="text-sm text-gray-500 mt-2">الرجاء الانتظار</p>
+        <div dir="rtl" className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="relative w-16 h-16 mx-auto">
+              <div className="absolute inset-0 rounded-full border-4 border-indigo-100" />
+              <div className="absolute inset-0 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-slate-700">جاري تحميل الدورة...</p>
+              <p className="text-sm text-slate-400 mt-1">يرجى الانتظار</p>
+            </div>
           </div>
         </div>
       </InstructorLayout>
     );
   }
 
-  // ==================== ERROR STATE ====================
-
+  // ── Error State ──────────────────────────────────────────
   if (error || !course) {
     return (
       <InstructorLayout>
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-          <div className="text-center max-w-md">
-            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <div dir="rtl" className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-10 text-center max-w-md w-full space-y-5">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-red-100 flex items-center justify-center">
+              <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">حدث خطأ</h2>
-            <p className="text-gray-600 mb-6">{error || 'فشل تحميل الدورة'}</p>
-            <button
-              onClick={() => navigate('/instructor/courses')}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg font-medium"
-            >
-              العودة إلى الدورات
-            </button>
+            <div>
+              <h2 className="text-lg font-bold text-slate-800">خطأ في التحميل</h2>
+              <p className="text-sm text-slate-500 mt-2">{error || "الدورة غير موجودة"}</p>
+            </div>
+            <div className="flex gap-3 justify-center">
+              <button onClick={loadCourse} className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                إعادة المحاولة
+              </button>
+              <button onClick={() => navigate("/instructor/courses")} className="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-semibold text-sm hover:bg-slate-200 transition-colors">
+                العودة للدورات
+              </button>
+            </div>
           </div>
         </div>
       </InstructorLayout>
     );
   }
 
-  // ==================== MAIN RENDER ====================
-
+  // ── MAIN RENDER ──────────────────────────────────────────
   return (
     <InstructorLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100" dir="rtl">
-        {/* Header */}
-        <div
-          className={`sticky top-0 z-50 transition-all duration-300 ${
-            isScrolled
-              ? 'bg-white/95 backdrop-blur-md shadow-lg shadow-gray-900/5'
-              : 'bg-white'
-          }`}
-        >
-          <div className="max-w-7xl mx-auto px-8 py-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">تحرير الدورة</h1>
-                <p className="text-gray-600">{course.title}</p>
+      <div dir="rtl" className="min-h-screen bg-slate-50">
+
+        {/* Sticky Top Bar */}
+        <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+          <div className="max-w-5xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between gap-4">
+              {/* Title */}
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-sm shadow-indigo-200 flex-shrink-0">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                </div>
+                <div className="min-w-0">
+                  <h1 className="text-base font-bold text-slate-900 truncate">{course.title || "بدون عنوان"}</h1>
+                  <p className="text-xs text-slate-500">تعديل محتوى وإعدادات الدورة</p>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
+              {/* Actions */}
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <button
-                  onClick={() => navigate('/instructor/courses')}
-                  className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all font-medium shadow-sm"
+                  onClick={() => navigate("/instructor/courses")}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-slate-600 font-semibold text-sm bg-slate-100 hover:bg-slate-200 transition-all"
                 >
-                  العودة إلى الدورات
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                  <span className="hidden sm:inline">العودة</span>
                 </button>
                 <button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="px-6 py-3 bg-white border-2 border-red-300 text-red-600 rounded-xl hover:bg-red-50 hover:border-red-400 transition-all font-medium shadow-sm"
-                  disabled={saving}
+                  onClick={() => setShowDeleteModal(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-red-600 font-semibold text-sm bg-red-50 hover:bg-red-100 transition-all border border-red-200"
                 >
-                  حذف الدورة
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  <span className="hidden sm:inline">حذف</span>
                 </button>
                 <button
                   onClick={saveCourse}
                   disabled={saving}
-                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`inline-flex items-center gap-2 px-5 py-2 rounded-xl font-semibold text-sm shadow-sm transition-all ${
+                    saveSuccess
+                      ? "bg-emerald-500 text-white shadow-emerald-200"
+                      : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-200"
+                  } disabled:opacity-70 disabled:cursor-not-allowed`}
                 >
-                  {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                  {saving ? (
+                    <>
+                      <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                      جاري الحفظ...
+                    </>
+                  ) : saveSuccess ? (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      تم الحفظ
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                      حفظ التغييرات
+                    </>
+                  )}
                 </button>
               </div>
             </div>
-
-            {/* Tabs */}
-            <div className="flex gap-2 border-b border-gray-200">
-              <button
-                onClick={() => setActiveTab('content')}
-                className={`px-6 py-3 font-semibold transition-all duration-300 border-b-2 ${
-                  activeTab === 'content'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                المحتوى
-              </button>
-              <button
-                onClick={() => setActiveTab('settings')}
-                className={`px-6 py-3 font-semibold transition-all duration-300 border-b-2 ${
-                  activeTab === 'settings'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                الإعدادات
-              </button>
-            </div>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="max-w-7xl mx-auto px-8 py-8">
-          {activeTab === 'content' ? (
-            <div className="space-y-8">
-              {course.sections.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200 shadow-sm">
-                  <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">لا توجد أقسام بعد</h3>
-                  <p className="text-gray-600 mb-6">ابدأ ببناء محتوى دورتك بإضافة القسم الأول</p>
-                  <button
-                    onClick={addSection}
-                    className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 font-semibold"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    إضافة قسم جديد
-                  </button>
-                </div>
-              ) : (
-                <>
-                  {course.sections.map((section, sIndex) => (
-                    <div key={section.id} className="bg-white rounded-3xl shadow-lg shadow-gray-900/5 overflow-hidden border border-gray-100">
-                      <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-b border-gray-200">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 flex-1">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-500/30">
-                              {sIndex + 1}
-                            </div>
-                            <input
-                              type="text"
-                              value={section.title}
-                              onChange={(e) => renameSection(section.id, e.target.value)}
-                              className="flex-1 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none font-semibold text-lg"
-                              placeholder="اسم القسم"
-                            />
-                          </div>
-                          <div className="flex items-center gap-2 mr-4">
-                            <button
-                              onClick={() => moveSectionUp(section.id)}
-                              disabled={sIndex === 0}
-                              className="p-2.5 hover:bg-white/80 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                              title="تحريك لأعلى"
-                            >
-                              <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => moveSectionDown(section.id)}
-                              disabled={sIndex === course.sections.length - 1}
-                              className="p-2.5 hover:bg-white/80 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                              title="تحريك لأسفل"
-                            >
-                              <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => toggleSectionCollapse(section.id)}
-                              className="p-2.5 hover:bg-white/80 rounded-lg transition-colors"
-                              title={section.isCollapsed ? 'توسيع' : 'طي'}
-                            >
-                              <svg
-                                className={`w-5 h-5 text-gray-700 transition-transform ${
-                                  section.isCollapsed ? 'rotate-180' : ''
-                                }`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => removeSection(section.id)}
-                              className="p-2.5 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
-                              title="حذف القسم"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      {!section.isCollapsed && (
-                        <div className="p-8 space-y-6">
-                          {section.items.length === 0 ? (
-                            <div className="text-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                              </div>
-                              <p className="text-gray-600 font-medium mb-4">لا توجد عناصر في هذا القسم</p>
-                              {renderAddItemDropdown(section.id)}
-                            </div>
-                          ) : (
-                            <>
-                              {section.items.map((item, itemIndex) => (
-                                <div key={item.id}>
-                                  {renderItem(section.id, item, itemIndex, section.items.length)}
-                                </div>
-                              ))}
-
-                              <div className="pt-4">
-                                {renderAddItemDropdown(section.id)}
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-
-                  <button
-                    onClick={addSection}
-                    className="w-full py-6 border-2 border-dashed border-gray-300 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all duration-300 group"
-                  >
-                    <div className="flex items-center justify-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-blue-100 group-hover:bg-blue-200 flex items-center justify-center transition-colors">
-                        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                      </div>
-                      <span className="text-lg font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
-                        إضافة قسم جديد
-                      </span>
-                    </div>
-                  </button>
-                </>
-              )}
+        {/* Page Content */}
+        <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
+          {/* Page Title */}
+          <div>
+            <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
+              <button onClick={() => navigate("/instructor/courses")} className="hover:text-indigo-600 transition-colors">الدورات</button>
+              <svg className="w-4 h-4 rotate-180" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+              <span className="text-slate-800 font-medium truncate max-w-xs">{course.title || "بدون عنوان"}</span>
             </div>
-          ) : (
-            <div className="bg-white rounded-3xl shadow-lg shadow-gray-900/5 p-8 border border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-8">إعدادات الدورة</h2>
+            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">تعديل الدورة</h1>
+            <p className="text-slate-500 mt-1.5">أدِر محتوى الدورة وأقسامها وإعداداتها من هنا</p>
+          </div>
 
-              <div className="space-y-8">
+          {/* Stats Row */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[
+              {
+                label: "الأقسام",
+                value: course.sections.length,
+                icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
+                color: "text-indigo-600 bg-indigo-50",
+              },
+              {
+                label: "الفيديوهات",
+                value: course.sections.reduce((acc, s) => acc + s.items.filter((i) => i.type === "video").length, 0),
+                icon: <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>,
+                color: "text-blue-600 bg-blue-50",
+              },
+              {
+                label: "الاختبارات",
+                value: course.sections.reduce((acc, s) => acc + s.items.filter((i) => i.type === "quiz").length, 0),
+                icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>,
+                color: "text-violet-600 bg-violet-50",
+              },
+              {
+                label: "الواجبات",
+                value: course.sections.reduce((acc, s) => acc + s.items.filter((i) => i.type === "homework").length, 0),
+                icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>,
+                color: "text-amber-600 bg-amber-50",
+              },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-3 shadow-sm hover:shadow-md transition-shadow">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${stat.color}`}>
+                  {stat.icon}
+                </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">عنوان الدورة</label>
-                  <input
-                    type="text"
-                    value={course.title}
-                    onChange={(e) => setCourse({ ...course, title: e.target.value })}
-                    className="w-full px-5 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-lg"
-                    placeholder="أدخل عنوان الدورة"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">الوصف</label>
-                  <textarea
-                    value={course.description}
-                    onChange={(e) => setCourse({ ...course, description: e.target.value })}
-                    rows={6}
-                    className="w-full px-5 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none resize-none"
-                    placeholder="أدخل وصف الدورة"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">السعر</label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={course.price}
-                        onChange={(e) => setCourse({ ...course, price: parseFloat(e.target.value) || 0 })}
-                        disabled={course.isFree}
-                        className="w-full px-5 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        placeholder="0.00"
-                        min="0"
-                        step="0.01"
-                      />
-                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ريال</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">المرحلة الدراسية</label>
-                    <input
-                      type="text"
-                      value={course.grade}
-                      onChange={(e) => setCourse({ ...course, grade: e.target.value })}
-                      className="w-full px-5 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
-                      placeholder="المرحلة الدراسية"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">صورة الدورة</label>
-                  {!course.thumbnail ? (
-                    <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all duration-300 group">
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
-                          <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                        <p className="mb-2 text-lg font-semibold text-gray-700">اسحب وأفلت الصورة هنا</p>
-                        <p className="text-sm text-gray-500">أو انقر للتحديد من جهازك</p>
-                        <p className="text-xs text-gray-400 mt-2">PNG, JPG, GIF حتى 10 ميجابايت</p>
-                      </div>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleThumbnailUpload(file);
-                        }}
-                      />
-                    </label>
-                  ) : (
-                    <div className="relative rounded-2xl overflow-hidden border-2 border-gray-200 group">
-                      <img
-                        src={course.thumbnail}
-                        alt={course.title}
-                        className="w-full h-64 object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <button
-                          onClick={() => setCourse({ ...course, thumbnail: '', thumbnailFile: null })}
-                          className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium"
-                        >
-                          حذف الصورة
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="pt-6 border-t border-gray-200 space-y-6">
-                  <label className="flex items-center gap-4 cursor-pointer group">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        checked={course.isFree}
-                        onChange={(e) => setCourse({ ...course, isFree: e.target.checked, price: e.target.checked ? 0 : course.price })}
-                        className="sr-only peer"
-                      />
-                      <div className="w-14 h-8 bg-gray-200 rounded-full peer-checked:bg-gradient-to-r peer-checked:from-green-500 peer-checked:to-green-600 transition-all duration-300"></div>
-                      <div className="absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-6"></div>
-                    </div>
-                    <div>
-                      <span className="text-base font-semibold text-gray-900 group-hover:text-gray-700">دورة مجانية</span>
-                      <p className="text-sm text-gray-500">اجعل هذه الدورة متاحة مجاناً للجميع</p>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center gap-4 cursor-pointer group">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        checked={course.isPublished}
-                        onChange={(e) => setCourse({ ...course, isPublished: e.target.checked })}
-                        className="sr-only peer"
-                      />
-                      <div className="w-14 h-8 bg-gray-200 rounded-full peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 transition-all duration-300"></div>
-                      <div className="absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-6"></div>
-                    </div>
-                    <div>
-                      <span className="text-base font-semibold text-gray-900 group-hover:text-gray-700">منشور</span>
-                      <p className="text-sm text-gray-500">جعل الدورة متاحة للطلاب</p>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center gap-4 cursor-pointer group">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        checked={course.isHidden}
-                        onChange={(e) => setCourse({ ...course, isHidden: e.target.checked })}
-                        className="sr-only peer"
-                      />
-                      <div className="w-14 h-8 bg-gray-200 rounded-full peer-checked:bg-gradient-to-r peer-checked:from-gray-500 peer-checked:to-gray-600 transition-all duration-300"></div>
-                      <div className="absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-6"></div>
-                    </div>
-                    <div>
-                      <span className="text-base font-semibold text-gray-900 group-hover:text-gray-700">مخفي</span>
-                      <p className="text-sm text-gray-500">إخفاء الدورة من القائمة العامة</p>
-                    </div>
-                  </label>
-                </div>
-
-                <div className="pt-6 border-t-2 border-red-200">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">منطقة الخطر</h3>
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 font-semibold"
-                  >
-                    حذف الدورة نهائياً
-                  </button>
+                  <p className="text-2xl font-extrabold text-slate-800">{stat.value}</p>
+                  <p className="text-xs text-slate-500">{stat.label}</p>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-      </div>
+            ))}
+          </div>
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 transform transition-all">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 text-center mb-3">تأكيد الحذف</h3>
-            <p className="text-gray-600 text-center mb-8">
-              هل أنت متأكد من حذف هذه الدورة؟ هذا الإجراء لا يمكن التراجع عنه وسيتم حذف جميع المحتويات المرتبطة بها.
-            </p>
-            <div className="flex gap-3">
+          {/* Tab Navigation */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-1.5 flex gap-1">
+            {[
+              {
+                key: "content" as const,
+                label: "المحتوى",
+                icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
+              },
+              {
+                key: "settings" as const,
+                label: "الإعدادات",
+                icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
+              },
+            ].map((tab) => (
               <button
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={saving}
-                className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                  activeTab === tab.key
+                    ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200"
+                    : "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
+                }`}
               >
-                إلغاء
+                {tab.icon}
+                {tab.label}
               </button>
-              <button
-                onClick={deleteCourse}
-                disabled={saving}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-lg shadow-red-500/30 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {saving ? 'جاري الحذف...' : 'حذف نهائياً'}
-              </button>
-            </div>
+            ))}
+          </div>
+
+          {/* Tab Content */}
+          <div>
+            {activeTab === "content" ? renderContentTab() : renderSettingsTab()}
+          </div>
+
+          {/* Bottom Save Button */}
+          <div className="flex justify-start pb-10">
+            <button
+              onClick={saveCourse}
+              disabled={saving}
+              className={`inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg transition-all ${
+                saveSuccess
+                  ? "bg-emerald-500 text-white shadow-emerald-200"
+                  : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-200 hover:shadow-xl hover:shadow-indigo-200 hover:-translate-y-0.5"
+              } disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none`}
+            >
+              {saving ? (
+                <>
+                  <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                  جاري الحفظ...
+                </>
+              ) : saveSuccess ? (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                  تم الحفظ بنجاح
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                  حفظ جميع التغييرات
+                </>
+              )}
+            </button>
           </div>
         </div>
-      )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)} />
+            <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-md w-full p-8 space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">تأكيد حذف الدورة</h3>
+                  <p className="text-sm text-slate-500 mt-1">هذا الإجراء لا يمكن التراجع عنه</p>
+                </div>
+              </div>
+              <div className="bg-red-50 rounded-2xl p-4 border border-red-100">
+                <p className="text-sm text-red-700">
+                  سيتم حذف دورة <strong className="font-bold">"{course.title}"</strong> وجميع محتوياتها بشكل نهائي، بما في ذلك {course.sections.length} قسم وجميع الفيديوهات والملفات والاختبارات والواجبات.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 px-5 py-3 rounded-xl bg-slate-100 text-slate-700 font-semibold text-sm hover:bg-slate-200 transition-colors"
+                >
+                  إلغاء
+                </button>
+                <button
+                  onClick={deleteCourse}
+                  className="flex-1 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold text-sm hover:bg-red-700 transition-colors shadow-sm shadow-red-200"
+                >
+                  نعم، احذف الدورة
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </InstructorLayout>
   );
 }

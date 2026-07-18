@@ -11,10 +11,13 @@ type Props = {
 
 export function DashboardLayout({ children, type, sidebarOpen, setSidebarOpen }: Props) {
   return (
-    <div dir="rtl" className="flex min-h-screen bg-[#f5f7fb]">
+    <div
+  dir="rtl"
+  className="flex items-stretch min-h-screen bg-[#f5f7fb]"
+>
 
       {/* ── Desktop sidebar (xl+) ── */}
-      <div className="hidden xl:block shrink-0">
+      <div className="hidden xl:flex shrink-0 self-stretch">
         <DashboardSidebar type={type} />
       </div>
 

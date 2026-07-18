@@ -102,9 +102,9 @@ export function CreateCourse() {
   };
 
   const grades = [
-    { value: "first_sec", label: "الصف الأول الثانوي" },
-    { value: "second_sec", label: "الصف الثاني الثانوي" },
-    { value: "third_sec", label: "الصف الثالث الثانوي" },
+    { value: "sec_1", label: "الصف الأول الثانوي" },
+    { value: "sec_2", label: "الصف الثاني الثانوي" },
+    { value: "sec_3", label: "الصف الثالث الثانوي" },
     { value: "first_prep", label: "الصف الأول الإعدادي" },
     { value: "second_prep", label: "الصف الثاني الإعدادي" },
     { value: "third_prep", label: "الصف الثالث الإعدادي" },

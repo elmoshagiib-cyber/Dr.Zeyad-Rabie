@@ -33,9 +33,9 @@ export function CourseDetailPage() {
   const navigate = useNavigate();
   const { user } = useApp();
 const gradeLabels: Record<string, string> = {
-  third_sec: "الصف الثالث الثانوي",
-  second_sec: "الصف الثاني الثانوي",
-  first_sec: "الصف الأول الثانوي",
+  sec_3: "الصف الثالث الثانوي",
+  sec_2: "الصف الثاني الثانوي",
+  sec_1: "الصف الأول الثانوي",
 };
 
   const [isEnrolled, setIsEnrolled] = useState(false);

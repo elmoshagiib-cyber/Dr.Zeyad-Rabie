@@ -187,16 +187,15 @@ export function DashboardSidebar({ type, onClose, mobileOpen = false }: Dashboar
 
   return (
     <aside
-      className={cn(
-        // base
-        "flex flex-col h-screen bg-white border border-slate-200/70",
-        "shadow-[0_20px_60px_rgba(15,23,42,0.08)] overflow-hidden",
-        "transition-all duration-300",
-        // desktop: sticky, rounded, respects collapsed width
-        "xl:sticky xl:top-4 xl:h-[calc(100vh-2rem)] xl:rounded-[32px]",
-        // width
-        collapsed ? "xl:w-[78px] w-[300px]" : "w-[300px]",
-      )}
+className={cn(
+  "flex flex-col h-full min-h-full",
+  "bg-white/85 backdrop-blur-xl",
+  "border border-white/60",
+  "shadow-[0_25px_80px_rgba(15,23,42,.12)]",
+  "transition-all duration-300",
+  "xl:rounded-[30px]",
+  collapsed ? "xl:w-[82px] w-[300px]" : "w-[300px]"
+)}
     >
       <SidebarHeader collapsed={collapsed} setCollapsed={setCollapsed} />
 

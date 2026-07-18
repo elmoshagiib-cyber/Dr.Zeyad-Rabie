@@ -75,8 +75,8 @@ export function LeaderboardPage() {
             <div className="flex gap-1 bg-white dark:bg-[#130726] border border-slate-200 p-1 rounded-xl">
               {[
                 { key: "all", label: "جميع الصفوف" },
-                { key: "third_sec", label: "تالتة ثانوي" },
-                { key: "second_sec", label: "تانية ثانوي" },
+                { key: "sec_3", label: "تالتة ثانوي" },
+                { key: "sec_2", label: "تانية ثانوي" },
               ].map(g => (
                 <button
                   key={g.key}

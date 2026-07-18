@@ -14,37 +14,37 @@ const gradeConfig: Record<
     route: string;
   }
 > = {
-  first_sec: {
+  sec_1: {
     title: "الصف الأول الثانوي",
     image: "/images/secondary-stage.jpg",
-    route: "/grade/first_sec",
+    route: "/grade/sec_1",
   },
   "الصف الأول الثانوي": {
     title: "الصف الأول الثانوي",
     image: "/images/secondary-stage.jpg",
-    route: "/grade/first_sec",
+    route: "/grade/sec_1",
   },
 
-  second_sec: {
+  sec_2: {
     title: "الصف الثاني الثانوي",
     image: "/images/secondary-stage.jpg",
-    route: "/grade/second_sec",
+    route: "/grade/sec_2",
   },
   "الصف الثاني الثانوي": {
     title: "الصف الثاني الثانوي",
     image: "/images/secondary-stage.jpg",
-    route: "/grade/second_sec",
+    route: "/grade/sec_2",
   },
 
-  third_sec: {
+  sec_3: {
     title: "الصف الثالث الثانوي",
     image: "/images/secondary-stage.jpg",
-    route: "/grade/third_sec",
+    route: "/grade/sec_3",
   },
   "الصف الثالث الثانوي": {
     title: "الصف الثالث الثانوي",
     image: "/images/secondary-stage.jpg",
-    route: "/grade/third_sec",
+    route: "/grade/sec_3",
   },
 
   first_prep: {

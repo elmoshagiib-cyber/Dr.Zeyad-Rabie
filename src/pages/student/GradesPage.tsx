@@ -12,17 +12,17 @@ export default function GradesPage() {
     stage === "secondary"
       ? [
           {
-            id: "first_sec",
+            id: "sec_1",
             title: "الصف الأول الثانوي",
             image: "/images/course-science1.jpg",
           },
           {
-            id: "second_sec",
+            id: "sec_2",
             title: "الصف الثاني الثانوي",
             image: "/images/course-chemistry2.jpg",
           },
           {
-            id: "third_sec",
+            id: "sec_3",
             title: "الصف الثالث الثانوي",
             image: "/images/course-chemistry3.jpg",
           },

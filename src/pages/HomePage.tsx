@@ -38,9 +38,9 @@ import {
 } from "../data/mockData";
 
 const gradeColors: Record<string, string> = {
-  third_sec: "rose",
-  second_sec: "violet",
-  first_sec: "blue",
+  sec_3: "rose",
+  sec_2: "violet",
+  sec_1: "blue",
   primary: "emerald",
 };
 
@@ -104,19 +104,19 @@ const installApp = async () => {
 const gradeMap = {
   "الصف الأول الثانوي": {
     title: "الصف الأول الثانوي",
-    slug: "first_sec",
+    slug: "sec_1",
     image: "/images/secondary-stage.jpg",
   },
 
   "الصف الثاني الثانوي": {
     title: "الصف الثاني الثانوي",
-    slug: "second_sec",
+    slug: "sec_2",
     image: "/images/secondary-stage.jpg",
   },
 
   "الصف الثالث الثانوي": {
     title: "الصف الثالث الثانوي",
-    slug: "third_sec",
+    slug: "sec_3",
     image: "/images/secondary-stage.jpg",
   },
 };

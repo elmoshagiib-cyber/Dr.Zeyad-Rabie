@@ -14,26 +14,48 @@ export default function GradeCoursesPage() {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const gradeNames: Record<string, string> = {
-    first_sec: "الصف الأول الثانوي",
-    second_sec: "الصف الثاني الثانوي",
-    third_sec: "الصف الثالث الثانوي",
-  };
+ const gradeNames: Record<string, string> = {
+  prep_1: "الصف الأول الإعدادي",
+  prep_2: "الصف الثاني الإعدادي",
+  prep_3: "الصف الثالث الإعدادي",
 
+  sec_1: "الصف الأول الثانوي",
+  sec_2: "الصف الثاني الثانوي",
+  sec_3: "الصف الثالث الثانوي",
+};
   useEffect(() => {
     loadCourses();
   }, [grade]);
 
   const loadCourses = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("courses")
-      .select("*")
-      .eq("active", true)
-      .eq("grade", grade)
-      .order("sort_order", { ascending: true });
-    setCourses(data || []);
-    setLoading(false);
+const { data, error } = await supabase
+  .from("courses")
+  .select(`
+  *,
+  course_sections (
+    id,
+    course_items (
+      id,
+      type
+    )
+  )
+`)
+  .eq("is_published", true)
+  .eq("is_hidden", false)
+  .eq("grade", grade)
+  .order("created_at", { ascending: false });
+
+console.log(data);
+if (error) {
+  console.log("SUPABASE ERROR:", error);
+  alert(JSON.stringify(error, null, 2));
+  setLoading(false);
+  return;
+}
+
+setCourses(data || []);
+setLoading(false);
   };
 
   /* ─── single course card ─── */

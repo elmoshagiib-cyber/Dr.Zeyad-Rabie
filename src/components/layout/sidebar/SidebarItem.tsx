@@ -1,3 +1,4 @@
+import { ChevronLeft } from "lucide-react";
 import { cn } from "../../../utils/cn";
 
 type Props = {
@@ -28,54 +29,50 @@ export function SidebarItem({
         w-full
         items-center
         overflow-hidden
-        rounded-3xl
+        rounded-[22px]
         px-3
         py-3
         transition-all
-        duration-300
+        duration-500
+ease-out
         `,
-        collapsed
-          ? "justify-center"
-          : "justify-between",
+        collapsed ? "justify-center" : "justify-between",
 
         active
           ? `
-            bg-[#4C1D95]
+            bg-gradient-to-r
+            from-violet-700
+via-purple-700
+to-fuchsia-600
             text-white
-            shadow-lg
-            shadow-violet-900/20
+            shadow-[0_18px_45px_rgba(109,40,217,.35)]
           `
           : `
             text-slate-600
-            hover:bg-violet-100
+            hover:bg-gradient-to-r
+hover:from-violet-50
+hover:to-fuchsia-50
             hover:text-violet-700
           `
       )}
     >
-
+      {/* Active Glow */}
       {active && (
-        <div
-          className="
-          absolute
-          right-0
-          top-3
-          bottom-3
-          w-1
-          rounded-l-full
-          bg-white
-          "
-        />
+        <div className="absolute inset-0 bg-white/5 pointer-events-none" />
+      )}
+
+      {/* Active Line */}
+      {active && (
+        <div className="absolute right-0 top-3 bottom-3 w-[4px] rounded-l-full bg-white" />
       )}
 
       <div
         className={cn(
-          "flex items-center",
-          collapsed
-            ? "justify-center"
-            : "gap-3"
+          "relative flex items-center",
+          collapsed ? "justify-center" : "gap-3"
         )}
       >
-
+        {/* Icon */}
         <div
           className={cn(
             `
@@ -86,13 +83,21 @@ export function SidebarItem({
             justify-center
             rounded-2xl
             transition-all
-            duration-300
+            duration-500
+ease-out
+            group-hover:scale-110
+  group-hover:rotate-3
             `,
             active
-              ? "bg-white/15"
+              ? `
+                bg-white/15
+                backdrop-blur-md
+              `
               : `
-                bg-slate-50
-                group-hover:bg-violet-200
+                bg-slate-100
+                group-hover:bg-violet-100
+                group-hover:scale-110
+                group-hover:text-violet-700
               `
           )}
         >
@@ -100,36 +105,47 @@ export function SidebarItem({
         </div>
 
         {!collapsed && (
-          <span className="font-semibold text-[15px]">
+          <span className="font-bold text-[15px] tracking-wide">
             {label}
           </span>
         )}
-
       </div>
 
-      {!collapsed && badge && (
-        <div
-          className={cn(
-            `
-            flex
-            h-6
-            min-w-[24px]
-            items-center
-            justify-center
-            rounded-full
-            px-2
-            text-xs
-            font-bold
-            `,
-            active
-              ? "bg-white text-violet-700"
-              : "bg-red-500 text-white"
+      {!collapsed && (
+        <div className="flex items-center gap-2">
+
+          {badge && (
+            <div
+              className={cn(
+                `
+                flex
+                h-6
+                min-w-[24px]
+                items-center
+                justify-center
+                rounded-full
+                px-2
+                text-[11px]
+                font-black
+                `,
+                active
+                  ? "bg-white text-violet-700"
+                  : "bg-rose-500 text-white"
+              )}
+            >
+              {badge}
+            </div>
           )}
-        >
-          {badge}
+
+          {active && (
+            <ChevronLeft
+              size={18}
+              className="text-white/90"
+            />
+          )}
+
         </div>
       )}
-
     </button>
   );
 }
