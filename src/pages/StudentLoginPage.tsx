@@ -108,7 +108,7 @@ if (studentError || !student) {
 }
 
 login({
-  id: student.auth_id,
+  id: String(student.id),
   name: student.full_name,
   role: "student",
   grade: student.grade,

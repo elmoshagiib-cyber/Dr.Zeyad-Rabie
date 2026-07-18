@@ -25,9 +25,10 @@ export default function GradeCoursesContent({ grade }: GradeCoursesContentProps)
     const { data } = await supabase
       .from("courses")
       .select("*")
-      .eq("active", true)
-      .eq("grade", grade)
-      .order("sort_order", { ascending: true });
+      .eq("is_published", true)
+.eq("is_hidden", false)
+.eq("grade", grade)
+.order("created_at", { ascending: false });
     setCourses(data || []);
     setLoading(false);
   };
@@ -60,7 +61,7 @@ export default function GradeCoursesContent({ grade }: GradeCoursesContentProps)
           "
         />
 
-        {course.price === 0 && (
+        {course.is_free && (
           <span className="
             absolute top-3 right-3
             bg-blue-500 text-white
@@ -131,32 +132,60 @@ export default function GradeCoursesContent({ grade }: GradeCoursesContentProps)
 
         {course.price > 0 && (
           <div className="flex items-center gap-1.5">
-            <Tag className="w-4 h-4 text-purple-500" />
-            <span className="text-base sm:text-lg font-black text-purple-600 dark:text-purple-400">
-              {course.price} جنيه
-            </span>
-          </div>
+  <Tag className="w-4 h-4 text-purple-500" />
+
+  <span
+    className={`text-base sm:text-lg font-black ${
+      course.is_free
+        ? "text-emerald-600"
+        : "text-purple-600 dark:text-purple-400"
+    }`}
+  >
+    {course.is_free ? "مجاني" : `${course.price} جنيه`}
+  </span>
+</div>
         )}
 
-        <div className="flex gap-2 sm:gap-3 mt-1">
-          <Button
-            className="
-              flex-1 text-xs sm:text-sm py-2 sm:py-2.5
-              bg-[#371143] hover:bg-[#4A175B]
-              text-white transition-all duration-300
-              hover:scale-[1.02]
-            "
-          >
-            اشترك الآن
-          </Button>
-          <Button
-            variant="outline"
-            className="flex-1 text-xs sm:text-sm py-2 sm:py-2.5"
-            onClick={() => navigate(`/courses/${course.id}`)}
-          >
-            تفاصيل
-          </Button>
-        </div>
+     {course.is_free ? (
+  <Button
+    className="
+      w-full
+      text-sm sm:text-base
+      py-2.5 sm:py-3
+      bg-[#371143]
+      hover:bg-[#4A175B]
+      text-white
+      transition-all duration-300
+      hover:scale-[1.02]
+    "
+    onClick={() => navigate(`/courses/${course.id}`)}
+  >
+    الدخول للكورس
+  </Button>
+) : (
+  <div className="flex gap-2 sm:gap-3 mt-1">
+    <Button
+      className="
+        flex-1 text-xs sm:text-sm py-2 sm:py-2.5
+        bg-[#371143]
+        hover:bg-[#4A175B]
+        text-white
+        transition-all duration-300
+        hover:scale-[1.02]
+      "
+    >
+      اشترك الآن
+    </Button>
+
+    <Button
+      variant="outline"
+      className="flex-1 text-xs sm:text-sm py-2 sm:py-2.5"
+      onClick={() => navigate(`/courses/${course.id}`)}
+    >
+      تفاصيل
+    </Button>
+  </div>
+)}
       </CardContent>
     </Card>
   );

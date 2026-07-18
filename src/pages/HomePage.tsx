@@ -80,7 +80,8 @@ const loadCourses = async () => {
   const { data, error } = await supabase
     .from("courses")
     .select("*")
-    .eq("active", true);
+    .eq("is_published", true)
+.eq("is_hidden", false);
 
   if (!error) {
     setCourses(data || []);
@@ -124,7 +125,21 @@ const gradeMap = {
 const studentGrade =
   gradeMap[user?.grade as keyof typeof gradeMap];
 
-  return (
+console.log("USER =", user);
+console.log("GRADE =", user?.grade);
+
+const gradeSlugMap: Record<string, string> = {
+  "الصف الأول الثانوي": "sec_1",
+  "الصف الثاني الثانوي": "sec_2",
+  "الصف الثالث الثانوي": "sec_3",
+  "الصف الأول الإعدادي": "first_prep",
+  "الصف الثاني الإعدادي": "second_prep",
+  "الصف الثالث الإعدادي": "third_prep",
+};
+
+const userGradeSlug = gradeSlugMap[user?.grade ?? ""] ?? "";
+
+return (
     <div className="min-h-screen bg-white dark:bg-[#0b0715]" dir="rtl">
       <Navbar />
 
@@ -462,8 +477,10 @@ object-contain
 </div>
 
       {/* Content */}
+      
       {user ? (
-  <GradeCoursesContent grade={user.grade ?? ""} />
+        
+  <GradeCoursesContent grade={userGradeSlug} />
 ) : (
         <div className="
           grid grid-cols-1 sm:grid-cols-2

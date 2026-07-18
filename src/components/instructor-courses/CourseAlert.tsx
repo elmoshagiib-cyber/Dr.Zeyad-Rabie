@@ -10,15 +10,18 @@ type Props = {
 export function CourseAlert({
   courses,
 }: Props) {
- const draftCourses = courses.filter(
-  (course) => !course.active
+const draftCourses = courses.filter(
+  (course) => !course.is_published
+);
+
+const hiddenCourses = courses.filter(
+  (course) => course.is_hidden
 );
 
 const noImageCourses = courses.filter(
-  (course) =>
-    !course.thumbnail ||
-    course.thumbnail === "EMPTY"
+  (course) => !course.thumbnail
 );
+
   const noDescriptionCourses = courses.filter(
     (course) => !course.description
   );

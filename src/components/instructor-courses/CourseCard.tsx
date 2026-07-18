@@ -75,9 +75,13 @@ export function CourseCard({ course, onDelete, onFeature, view }: Props) {
           </div>
 
           <div className="flex flex-wrap justify-between items-center mt-6 gap-3">
-            <span className="text-2xl sm:text-3xl font-black text-violet-700">
-              {course.price} ج
-            </span>
+            <span
+  className={`text-2xl sm:text-3xl font-black ${
+    course.is_free ? "text-emerald-600" : "text-violet-700"
+  }`}
+>
+  {course.is_free ? "مجاني" : `${course.price} ج.م`}
+</span>
 
             <div className="flex gap-2">
               {/* نجمة - تمييز */}
@@ -259,9 +263,13 @@ export function CourseCard({ course, onDelete, onFeature, view }: Props) {
           </div>
 
           {/* السعر */}
-          <span className="text-xl sm:text-2xl font-black text-violet-700 whitespace-nowrap">
-            {course.price} ج.م
-          </span>
+          <span
+  className={`text-xl sm:text-2xl font-black whitespace-nowrap ${
+    course.is_free ? "text-emerald-600" : "text-violet-700"
+  }`}
+>
+  {course.is_free ? "مجاني" : `${course.price} ج.م`}
+</span>
 
         </div>
       </div>

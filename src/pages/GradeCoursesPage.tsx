@@ -25,6 +25,7 @@ export default function GradeCoursesPage() {
 };
   useEffect(() => {
     loadCourses();
+    console.log("URL GRADE =", grade);
   }, [grade]);
 
   const loadCourses = async () => {
@@ -32,19 +33,26 @@ export default function GradeCoursesPage() {
 const { data, error } = await supabase
   .from("courses")
   .select(`
-  *,
-  course_sections (
-    id,
-    course_items (
+    *,
+    course_sections (
       id,
-      type
+      course_items (
+        id,
+        type
+      )
     )
-  )
-`)
+  `)
   .eq("is_published", true)
   .eq("is_hidden", false)
   .eq("grade", grade)
   .order("created_at", { ascending: false });
+
+console.log("==========");
+console.log("USER:", localStorage.getItem("user"));
+console.log("GRADE:", grade);
+console.log("DATA:", data);
+console.log("ERROR:", error);
+console.log("==========");
 
 console.log(data);
 if (error) {
@@ -89,7 +97,7 @@ setLoading(false);
         />
 
         {/* free badge */}
-        {course.price === 0 && (
+        {course.is_free && (
           <span className="
             absolute top-3 right-3
             bg-blue-500 text-white
@@ -166,14 +174,19 @@ setLoading(false);
         </div>
 
         {/* price */}
-        {course.price > 0 && (
-          <div className="flex items-center gap-1.5">
-            <Tag className="w-4 h-4 text-purple-500" />
-            <span className="text-base sm:text-lg font-black text-purple-600 dark:text-purple-400">
-              {course.price} جنيه
-            </span>
-          </div>
-        )}
+        <div className="flex items-center gap-1.5">
+  <Tag className="w-4 h-4 text-purple-500" />
+
+  <span
+    className={`text-base sm:text-lg font-black ${
+      course.is_free
+        ? "text-emerald-600"
+        : "text-purple-600 dark:text-purple-400"
+    }`}
+  >
+    {course.is_free ? "مجاني" : `${course.price} جنيه`}
+  </span>
+</div>
 
         {/* actions */}
         <div className="flex gap-2 sm:gap-3 mt-1">
@@ -185,7 +198,7 @@ setLoading(false);
               hover:scale-[1.02]
             "
           >
-            اشترك الآن
+            {course.is_free ? "ابدأ مجانًا" : "اشترك الآن"}
           </Button>
           <Button
             variant="outline"

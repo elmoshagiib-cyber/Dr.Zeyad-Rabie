@@ -192,6 +192,11 @@ const loadCourses = async () => {
     return;
   }
 
+  if (!data?.length) {
+  setCourses([]);
+  return;
+}
+
   const courseIds = data.map(
     (item: any) => item.course_id
   );
@@ -223,10 +228,11 @@ const [availableCourses, setAvailableCourses] =
   useState<any[]>([]);
 
 const loadAvailableCourses = async () => {
-  const { data } = await supabase
-    .from("courses")
-    .select("*")
-    .eq("active", true);
+ const { data } = await supabase
+  .from("courses")
+  .select("*")
+  .eq("is_published", true)
+  .eq("is_hidden", false);
 
   if (data) {
     setAvailableCourses(data);
@@ -286,10 +292,11 @@ if (
   const { data, error } = await supabase
     .from("student_courses")
     .insert({
-      student_id: Number(id),
-      course_id: selectedCourse,
-      active: true,
-    })
+  student_id: Number(id),
+  course_id: selectedCourse,
+  active: true,
+  subscription_type: "إداري",
+})
     .select();
 
   console.log(data);
@@ -889,11 +896,9 @@ transition-all
   </p>
 
   <p className="font-bold mt-1">
-    {student.last_login
-      ? new Date(
-          student.last_login
-        ).toLocaleDateString("ar-EG")
-      : "-"}
+    {student.join_date
+  ? new Date(student.join_date).toLocaleString("ar-EG")
+  : "-"}
   </p>
 </div>
 

@@ -44,8 +44,7 @@ file?: File;
 interface Question {
   id: string;
   title: string;
-  questionType: "multiple_choice" | "true_false";
-  choices: string[];
+questionType: "multiple_choice" | "true_false" | "essay";  choices: string[];
   correctAnswer: number;
   points: number;
 }
@@ -418,7 +417,7 @@ async function saveCourse() {
       .update({
         title: course.title,
         description: course.description,
-        price: course.price,
+        price: course.isFree ? 0 : course.price,
         is_free: course.isFree,
         grade: course.grade,
         is_published: course.published,
@@ -623,39 +622,49 @@ for (const section of course.sections) {
           .eq("exam_id", examId);
       }
 
-      for (let qIndex = 0; qIndex < item.questions.length; qIndex++) {
-        const question = item.questions[qIndex];
+for (let qIndex = 0; qIndex < item.questions.length; qIndex++) {
+  const question = item.questions[qIndex];
 
-        const { data: newQuestion, error } = await supabase
-          .from("exam_questions")
-          .insert({
-            exam_id: examId,
-            title: question.title,
-            type:
-              question.questionType === "true_false"
-                ? "true_false"
-                : "multiple_choice",
-            points: Number(question.points) || 1,
-            sort_order: qIndex + 1,
-            correct_answer: String(question.correctAnswer),
-          })
-          .select()
-          .single();
+  const isEssay = question.questionType === "essay";
 
-        if (error) throw error;
+  const { data: newQuestion, error } = await supabase
+    .from("exam_questions")
+    .insert({
+      exam_id: examId,
+      title: question.title,
+      type: isEssay
+        ? "essay"
+        : question.questionType === "true_false"
+        ? "true_false"
+        : "multiple_choice",
+      points: Number(question.points) || 1,
+      sort_order: qIndex + 1,
 
-        for (let cIndex = 0; cIndex < question.choices.length; cIndex++) {
-          const { error } = await supabase
-            .from("question_choices")
-            .insert({
-              question_id: newQuestion.id,
-              text: question.choices[cIndex],
-              sort_order: cIndex + 1,
-            });
+      // للمقالي احفظ الإجابة النموذجية
+      correct_answer: isEssay
+        ? ((question as any).correctText || "")
+        : String(question.correctAnswer),
+    })
+    .select()
+    .single();
 
-          if (error) throw error;
-        }
-      }
+  if (error) throw error;
+
+  // السؤال المقالي ملوش اختيارات
+  if (isEssay) continue;
+
+  for (let cIndex = 0; cIndex < question.choices.length; cIndex++) {
+    const { error } = await supabase
+      .from("question_choices")
+      .insert({
+        question_id: newQuestion.id,
+        text: question.choices[cIndex],
+        sort_order: cIndex + 1,
+      });
+
+    if (error) throw error;
+  }
+}
     }
 
     // ==========================
@@ -1566,13 +1575,7 @@ storagePath: filePath,
               <label className="block text-xs font-semibold text-slate-600 mb-1.5">عدد المحاولات</label>
               <input type="number" min={1} value={item.attempts} onChange={(e) => updateItem(sectionId, item.id, { attempts: Number(e.target.value) } as Partial<QuizItem>)} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm" />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">الظهور</label>
-              <select value={item.visibility} onChange={(e) => updateItem(sectionId, item.id, { visibility: e.target.value as "public" | "private" } as Partial<QuizItem>)} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm">
-                <option value="public">عام</option>
-                <option value="private">خاص</option>
-              </select>
-            </div>
+           
           </div>
           <div className="flex items-center gap-2.5">
             <div
@@ -1648,17 +1651,24 @@ storagePath: filePath,
                               <select
                                 value={q.questionType}
                                 onChange={(e) => {
-                                  const newType = e.target.value as Question["questionType"];
-                                  updateQuestion(sectionId, item.id, q.id, {
-                                    questionType: newType,
-                                    choices: newType === "true_false" ? ["صح", "خطأ"] : ["", "", "", ""],
-                                    correctAnswer: 0,
-                                  });
-                                }}
+  const newType = e.target.value as Question["questionType"];
+
+  updateQuestion(sectionId, item.id, q.id, {
+    questionType: newType,
+    choices:
+      newType === "essay"
+        ? []
+        : newType === "true_false"
+        ? ["صح", "خطأ"]
+        : ["", "", "", ""],
+    correctAnswer: 0,
+  });
+}}
                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm"
                               >
                                 <option value="multiple_choice">اختيار متعدد</option>
                                 <option value="true_false">صح / خطأ</option>
+                                <option value="essay">مقالي</option>
                               </select>
                             </div>
                             <div>
@@ -1666,41 +1676,113 @@ storagePath: filePath,
                               <input type="number" min={1} value={q.points} onChange={(e) => updateQuestion(sectionId, item.id, q.id, { points: Number(e.target.value) })} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm" />
                             </div>
                           </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-slate-600 mb-2">الخيارات والإجابة الصحيحة</label>
-                            <div className="space-y-2">
-                              {q.choices.map((choice, cIdx) => (
-                                <div key={cIdx} className="flex items-center gap-2">
-                                  <button
-                                    onClick={() => updateQuestion(sectionId, item.id, q.id, { correctAnswer: cIdx })}
-                                    className={`w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${q.correctAnswer === cIdx ? "border-emerald-500 bg-emerald-500" : "border-slate-300 hover:border-emerald-400"}`}
-                                  >
-                                    {q.correctAnswer === cIdx && (
-                                      <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                    )}
-                                  </button>
-                                  <input
-                                    type="text"
-                                    value={choice}
-                                    disabled={q.questionType === "true_false"}
-                                    onChange={(e) => {
-                                      const newChoices = [...q.choices];
-                                      newChoices[cIdx] = e.target.value;
-                                      updateQuestion(sectionId, item.id, q.id, { choices: newChoices });
-                                    }}
-                                    className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
-                                    placeholder={`الخيار ${cIdx + 1}`}
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+             {q.questionType !== "essay" && (
+  <div>
+    <label className="block text-xs font-semibold text-slate-600 mb-2">
+      الخيارات والإجابة الصحيحة
+    </label>
+
+    <div className="space-y-2">
+      {q.choices.map((choice, cIdx) => (
+        <div key={cIdx} className="flex items-center gap-2">
+          <button
+            onClick={() =>
+              updateQuestion(sectionId, item.id, q.id, {
+                correctAnswer: cIdx,
+              })
+            }
+            className={`w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+              q.correctAnswer === cIdx
+                ? "border-emerald-500 bg-emerald-500"
+                : "border-slate-300 hover:border-emerald-400"
+            }`}
+          >
+            {q.correctAnswer === cIdx && (
+              <svg
+                className="w-3.5 h-3.5 text-white"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={3}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            )}
+          </button>
+
+          <input
+            type="text"
+            value={choice}
+            disabled={q.questionType === "true_false"}
+            onChange={(e) => {
+              const newChoices = [...q.choices];
+              newChoices[cIdx] = e.target.value;
+
+              updateQuestion(sectionId, item.id, q.id, {
+                choices: newChoices,
+              });
+            }}
+            className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            placeholder={`الخيار ${cIdx + 1}`}
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
+{q.questionType === "essay" && (
+  <div>
+    <label className="block text-xs font-semibold text-slate-600 mb-2">
+      الإجابة النموذجية (اختياري)
+    </label>
+
+    <textarea
+      value={(q as any).correctText || ""}
+      onChange={(e) =>
+        updateQuestion(sectionId, item.id, q.id, {
+          correctText: e.target.value,
+        } as any)
+      }
+      rows={5}
+      className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm resize-none"
+      placeholder="اكتب الإجابة النموذجية هنا..."
+    />
+  </div>
+)}
+
+</div>
+</div>
+)}
+</div>
+
+);
+})}
+
+{item.questions.length === 0 && (
+  <div className="text-center py-8 text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+    <svg
+      className="w-10 h-10 mx-auto mb-2 opacity-40"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+
+    <p className="text-sm font-medium">لا توجد أسئلة بعد</p>
+  </div>
+)}
+              
               {item.questions.length === 0 && (
                 <div className="text-center py-8 text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                   <svg className="w-10 h-10 mx-auto mb-2 opacity-40" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -1773,10 +1855,6 @@ storagePath: filePath,
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">تاريخ التسليم</label>
-              <input type="datetime-local" value={item.dueDate} onChange={(e) => updateItem(sectionId, item.id, { dueDate: e.target.value } as Partial<HomeworkItem>)} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 bg-slate-50 text-sm" />
-            </div>
-            <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5">الدرجة الكلية</label>
               <input type="number" min={1} value={item.totalScore} onChange={(e) => updateItem(sectionId, item.id, { totalScore: Number(e.target.value) } as Partial<HomeworkItem>)} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 bg-slate-50 text-sm" />
             </div>
@@ -1848,13 +1926,6 @@ storagePath: filePath,
             </label>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">الظهور</label>
-            <select value={item.visibility} onChange={(e) => updateItem(sectionId, item.id, { visibility: e.target.value as "public" | "private" } as Partial<HomeworkItem>)} className="w-full sm:w-48 px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 bg-slate-50 text-sm">
-              <option value="public">عام</option>
-              <option value="private">خاص</option>
-            </select>
-          </div>
         </div>
       </div>
     );

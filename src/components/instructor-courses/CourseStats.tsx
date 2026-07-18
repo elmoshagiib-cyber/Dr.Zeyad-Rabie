@@ -17,10 +17,9 @@ const activeCourses = courses.filter(
   (course) => course.is_published
 ).length;
 
-  const freeCourses = courses.filter(
-    (course) =>
-      Number(course.price) === 0
-  ).length;
+const freeCourses = courses.filter(
+  (course) => course.is_free
+).length;
 
 
   const stats = [
