@@ -1,153 +1,88 @@
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  Star,
-  Users,
   BookOpen,
-  Clock,
-  ChevronRight,
   ChevronDown,
+  ChevronUp,
   Play,
   FileText,
-  CheckCircle,
-  Award,
-  Download,
   Lock,
   ClipboardList,
   ClipboardCheck,
+  LayoutGrid,
 } from "lucide-react";
 
 import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
-import { Button } from "../components/ui/Button";
-import { Badge } from "../components/ui/Badge";
-import { Card, CardContent } from "../components/ui/Card";
-import { Avatar } from "../components/ui/Avatar";
-import { COURSES, TEACHER } from "../data/mockData";
 import { useApp } from "../context/AppContext";
 import { supabase } from "../lib/supabase";
 import { useEffect, useState } from "react";
 
-
 export function CourseDetailPage() {
   const { slug } = useParams<{ slug: string }>();
+  console.log("SLUG =", slug);
   const navigate = useNavigate();
   const { user } = useApp();
-const gradeLabels: Record<string, string> = {
-  sec_3: "الصف الثالث الثانوي",
-  sec_2: "الصف الثاني الثانوي",
-  sec_1: "الصف الأول الثانوي",
-};
+
+  const gradeLabels: Record<string, string> = {
+    sec_3: "الصف الثالث الثانوي",
+    sec_2: "الصف الثاني الثانوي",
+    sec_1: "الصف الأول الثانوي",
+  };
 
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [openUnit, setOpenUnit] = useState<string | null>(null);
   const [units, setUnits] = useState<any[]>([]);
   const [course, setCourse] = useState<any>(null);
-  console.log("slug =", slug);
-  console.log("course =", course);
-
-  const totalDuration = "18 ساعة و 30 دقيقة";
 
   const loadCourse = async () => {
-  const { data, error } = await supabase
-    .from("courses")
-    .select(`
-  *,
-  teacher_name,
-  teacher_image,
-  teacher_bio,
-  course_features,
-  cover_image,
-  intro_video,
-  students_count
-`)
-    .eq("id", slug)
-    .single();
+    const { data, error } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("id", slug)
+      .single();
 
-  console.log("error =", error);
-  console.log("data =", data);
+    console.log("error =", error);
+    console.log("data =", data);
 
-  if (data) {
-    setCourse(data);
-  }
-};
-const loadUnits = async () => {
-  console.log("slug inside loadUnits =", slug);
+    if (data) {
+      setCourse(data);
+    }
+  };
 
-  const { data: lectures, error } = await supabase
-    .from("course_lectures")
-    .select("*")
-    .eq("course_id", slug);
+  const loadUnits = async () => {
+    const { data: sections, error: sectionsError } = await supabase
+      .from("course_sections")
+      .select("*")
+      .eq("course_id", slug);
 
-  console.log("ERROR =", error);
-  console.log("LECTURES =", lectures);
+    console.log("SECTIONS", sections);
+    console.log("SECTIONS ERROR", sectionsError);
 
-  if (!lectures?.length) return;
+    if (!sections?.length) return;
 
-  const unitsData = await Promise.all(
-    lectures.map(async (lecture) => {
-      const { data: videos } = await supabase
-        .from("lecture_videos")
+    const units = [];
+
+    for (const section of sections) {
+      const { data: items, error: itemsError } = await supabase
+        .from("course_items")
         .select("*")
-        .eq("lecture_id", lecture.id);
+        .eq("section_id", section.id)
+        .order("sort_order");
 
-      const { data: files } = await supabase
-        .from("lecture_files")
-        .select("*")
-        .eq("lecture_id", lecture.id);
-const { data: homeworks } = await supabase
-  .from("homeworks")
-  .select("*")
-  .eq("lecture_id", lecture.id);
+      console.log("SECTION ID =", section.id);
+      console.log("ITEMS =", items);
+      console.log("ITEMS ERROR =", itemsError);
 
-const { data: exams } = await supabase
-  .from("exams")
-  .select("*")
-  .eq("lecture_id", lecture.id);
-      return {
-        id: lecture.id,
-        title: lecture.title,
-lessons: [
+      units.push({
+        id: section.id,
+        title: section.title,
+        lessons: items || [],
+      });
+    }
 
-  ...(videos || []).map((v) => ({
-    id: v.id,
-    title: v.title,
-    type: "video",
-    video_url: v.video_url,
-    duration: v.duration,
-  })),
-
-  ...(files || []).map((f) => ({
-    id: f.id,
-    title: f.title,
-    type: "file",
-    file_url: f.file_url,
-  })),
-
-  ...(homeworks || []).map((h) => ({
-    id: h.id,
-    title: h.title,
-    type: "homework",
-    homework_id: h.id,
-  })),
-
-  ...(exams || []).map((e) => ({
-    id: e.id,
-    title: e.title,
-    type: "exam",
-    exam_id: e.id,
-    duration: e.duration,
-  })),
-
-],
-
-      };
-    })
-  );
-
-  setUnits(unitsData);
-  console.log("UNITS DATA =", unitsData);
-  
-};
+    console.log("FINAL =", units);
+    setUnits(units);
+  };
 
   const checkEnrollment = async () => {
     if (!user || !course) return;
@@ -162,10 +97,10 @@ lessons: [
     setIsEnrolled(!!data?.length);
   };
 
- useEffect(() => {
-  loadCourse();
-  loadUnits();
-}, [slug]);
+  useEffect(() => {
+    loadCourse();
+    loadUnits();
+  }, [slug]);
 
   useEffect(() => {
     if (course) {
@@ -174,772 +109,469 @@ lessons: [
   }, [user, course]);
 
   const handleEnroll = async () => {
-    // الكود بتاعك كما هو
+    // existing logic preserved
   };
-const lessonsCount = units.reduce(
-  (total, unit) => total + unit.lessons.length,
-  0
-);
 
-const studentsCount = 2450;
-if (!course) {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      جاري تحميل الكورس...
-    </div>
+  const lessonsCount = units.reduce(
+    (total, unit) => total + unit.lessons.length,
+    0
   );
-}
-return (
-  <div className="min-h-screen bg-white dark:bg-[#0b0715]">
-    
-    <Navbar />
 
-    <div className="pt-24 pb-44">
-
-<div className="max-w-[1700px] mx-auto px-6">
-
-<div
-className="
-relative
-overflow-hidden
-rounded-[34px]
-h-[540px]
-"
->
-
-<img
-src={
-course.cover_image ||
-course.thumbnail ||
-"https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1600"
-}
-alt={course.title}
-className="
-absolute
-inset-0
-w-full
-h-full
-object-cover
-"
-/>
-
-<div
-className="
-absolute
-inset-0
-bg-gradient-to-r
-from-[#0B1020]/95
-via-[#0B1020]/80
-via-40%
-to-black/20
-"
-/>
-
-<div
-className="
-absolute
-inset-0
-bg-gradient-to-t
-from-black/60
-via-transparent
-to-transparent
-"
-/>
-
-<div
-className="
-relative
-z-10
-h-full
-grid
-grid-cols-[420px_1fr]
-items-center
-gap-20
-px-20
-"
->
-
-{/* اليسار */}
-
-<div
-className="
-w-[460px]
-rounded-[30px]
-overflow-hidden
-shadow-[0_40px_90px_rgba(0,0,0,.6)]
-border
-border-white/20
-bg-black/20
-backdrop-blur
-">
-
-<img
-src={
-course.thumbnail ||
-course.cover_image
-}
-alt={course.title}
-className="
-w-full
-h-[320px]
-object-cover
-"
-/>
-
-<div className="p-6">
-
-<div className="flex items-center justify-between text-white/80">
-
-<div className="flex items-center gap-2">
-
-<BookOpen size={18}/>
-
-<span>
-{gradeLabels[course.grade]}
-</span>
-
-</div>
-
-<div className="flex items-center gap-2">
-
-<Star
-size={18}
-fill="currentColor"
-/>
-
-<span>
-{course.rating || 5}
-</span>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-{/* اليمين */}
-
-<div
-className="
-max-w-[900px]
-text-right
-text-white
-"
->
-
-<div
-className="
-inline-flex
-items-center
-gap-2
-bg-white/10
-backdrop-blur-xl
-border
-border-white/20
-rounded-full
-px-5
-py-2
-mb-8
-text-white
-"
->
-
-<BookOpen size={18}/>
-
-<span>
-
-{gradeLabels[course.grade]}
-
-</span>
-
-</div>
-
-<h1
-className="
-text-6xl
-xl:text-[78px]
-font-black
-leading-[1.05]
-tracking-tight
-max-w-[850px]
-"
->
-
-{course.title}
-
-</h1>
-
-<p
-className="
-mt-6
-text-xl
-max-w-[820px]
-text-slate-200
-leading-10
-"
->
-
-{course.description}
-
-</p>
-<div
-className="
-flex
-flex-wrap
-gap-4
-mt-10
-"
->
-
-<div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl px-5 py-3 text-white flex items-center gap-3">
-<Play size={18}/>
-<span className="font-bold">
-{units.reduce((t,u)=>t+u.lessons.filter((l:any)=>l.type==="video").length,0)}
-</span>
-<span className="text-white/70">
-فيديوهات
-</span>
-</div>
-
-<div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl px-5 py-3 text-white flex items-center gap-3">
-<ClipboardList size={18}/>
-<span className="font-bold">
-{units.reduce((t,u)=>t+u.lessons.filter((l:any)=>l.type==="exam").length,0)}
-</span>
-<span className="text-white/70">
-امتحانات
-</span>
-</div>
-
-<div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl px-5 py-3 text-white flex items-center gap-3">
-<ClipboardCheck size={18}/>
-<span className="font-bold">
-{units.reduce((t,u)=>t+u.lessons.filter((l:any)=>l.type==="homework").length,0)}
-</span>
-<span className="text-white/70">
-واجبات
-</span>
-</div>
-
-<div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl px-5 py-3 text-white flex items-center gap-3">
-<FileText size={18}/>
-<span className="font-bold">
-{units.reduce((t,u)=>t+u.lessons.filter((l:any)=>l.type==="file").length,0)}
-</span>
-<span className="text-white/70">
-ملفات
-</span>
-</div>
-
-</div>
-
-<div
-className="
-mt-10
-grid
-grid-cols-2
-xl:grid-cols-4
-gap-4
-"
->
-
-<div
-className="
-bg-white/10
-backdrop-blur-xl
-border
-border-white/10
-rounded-2xl
-p-5
-"
->
-
-<div className="text-sm text-white/60">
-
-عدد الدروس
-
-</div>
-
-<div className="text-3xl font-black text-white mt-2">
-
-{lessonsCount}
-
-</div>
-
-</div>
-
-<div
-className="
-bg-white/10
-backdrop-blur-xl
-border
-border-white/10
-rounded-2xl
-p-5
-"
->
-
-<div className="text-sm text-white/60">
-
-عدد الطلاب
-
-</div>
-
-<div className="text-3xl font-black text-white mt-2">
-
-{studentsCount}
-
-</div>
-
-</div>
-
-<div
-className="
-bg-white/10
-backdrop-blur-xl
-border
-border-white/10
-rounded-2xl
-p-5
-"
->
-
-<div className="text-sm text-white/60">
-
-التقييم
-
-</div>
-
-<div className="text-3xl font-black text-white mt-2">
-
-⭐ {course.rating || 5}
-
-</div>
-
-</div>
-
-<div
-className="
-bg-white/10
-backdrop-blur-xl
-border
-border-white/10
-rounded-2xl
-p-5
-"
->
-
-<div className="text-sm text-white/60">
-
-السعر
-
-</div>
-
-<div className="text-3xl font-black text-white mt-2">
-
-{course.price === 0 ? "مجاني" : `${course.price} ج`}
-
-</div>
-
-</div>
-
-</div>
-
-<div className="flex flex-wrap gap-5 mt-12">
-
-
-
-{course.intro_video && (
-
-<Button
-variant="outline"
-className="
-h-14
-px-8
-rounded-2xl
-border-white
-text-white
-bg-white/10
-hover:bg-white/20
-"
-onClick={()=>window.open(course.intro_video)}
->
-
-<Play size={18}/>
-
-<span className="mr-2">
-مشاهدة المقدمة
-</span>
-
-</Button>
-
-)}
-
-</div>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-    </div>
-
-    {/* ================= Content ================= */}
-
-<div className="max-w-7xl mx-auto px-6 -mt-10 mb-10">
-
-
-</div>
-
-    <div className="max-w-7xl mx-auto px-6 -mt-40 pb-24 relative z-20">
-
-      <div className="grid xl:grid-cols-[360px_1fr] gap-8 items-start">
-
-        {/* ================= Main Content ================= */}
-
-        {/* المحتوى */}
-
-{/* ================= Subscription Card ================= */}
-
-<div>
-
-<Card
-className="
-sticky
-bg-white
-top-24
-rounded-[32px]
-overflow-hidden
-border-0
-shadow-[0_30px_80px_rgba(0,0,0,.35)]
-bg-white
-"
->
-
-<img
-  src={
-    course.thumbnail ||
-    course.cover_image ||
-    "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1000"
+  const videosCount = units.reduce(
+    (t, u) => t + u.lessons.filter((l: any) => l.type === "video").length,
+    0
+  );
+  const examsCount = units.reduce(
+    (t, u) => t + u.lessons.filter((l: any) => l.type === "quiz").length,
+    0
+  );
+  const homeworksCount = units.reduce(
+    (t, u) => t + u.lessons.filter((l: any) => l.type === "homework").length,
+    0
+  );
+  const filesCount = units.reduce(
+    (t, u) => t + u.lessons.filter((l: any) => l.type === "pdf").length,
+    0
+  );
+
+  if (!course) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-rose-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-600 font-medium">جاري تحميل الكورس...</p>
+        </div>
+      </div>
+    );
   }
-  alt={course.title}
-  className="
-w-full
-h-64
-object-cover
-"
-/>
 
-<CardContent className="p-8 text-center">
-
-<h2 className="text-5xl font-black text-slate-900">
-
-{course.price === 0 ? "مجاني" : `${course.price} جنيه`}
-
-</h2>
-
-<p className="mt-5 text-slate-500 leading-8">
-
-احصل على وصول كامل لجميع محتويات الكورس
-
-</p>
-
-<Button
-className="
-w-full
-mt-8
-h-[68px]
-hover:shadow-[0_20px_50px_rgba(168,85,247,.45)]
-text-xl
-font-black
-shadow-xl
-rounded-2xl
-bg-gradient-to-r
-from-violet-600
-via-fuchsia-600
-to-pink-600
-text-lg
-font-black
-"
->
-
-{isEnrolled ? "ابدأ التعلم" : "اشترك الآن"}
-
-</Button>
-
-{course.intro_video && (
-
-<Button
-variant="outline"
-className="
-w-full
-mt-4
-h-14
-rounded-2xl
-"
-onClick={() => window.open(course.intro_video)}
-
->
-
-<Play size={18}/>
-
-<span className="mr-2">
-
-مشاهدة المقدمة
-
-</span>
-
-</Button>
-
-)}
-
-</CardContent>
-
-</Card>
-
-</div>
-<div className="lg:col-span-2 xl:col-span-2">
-
-
-<Card className="rounded-[32px] border-0 shadow-xl overflow-hidden">
-
-<CardContent className="p-8">
-
-<h2 className="text-4xl font-black mb-8">
-
-محتويات الكورس
-
-</h2>
-
-<div className="space-y-5">
-
-{units.map((unit) => (
-
-<div
-key={unit.id}
-className="
-rounded-3xl
-border
-overflow-hidden
-bg-white
-shadow-md
-hover:shadow-2xl
-transition-all
-duration-300
-"
->
-
-<button
-onClick={() =>
-setOpenUnit(openUnit === unit.id ? null : unit.id)
-}
-className="
-w-full
-flex
-items-center
-justify-between
-px-8
-py-7
-text-2xl
-font-black
-hover:bg-violet-50
-transition
-"
->
-
-<span>{unit.title}</span>
-
-{openUnit === unit.id ? (
-
-<ChevronDown className="w-7 h-7"/>
-
-) : (
-
-<ChevronRight className="w-7 h-7"/>
-
-)}
-
-</button>
-
-{openUnit === unit.id && (
-
-<div className="border-t bg-slate-50">
-
-{unit.lessons.map((lesson:any)=>{
-
-const isVideo = lesson.type === "video";
-const isFile = lesson.type === "file";
-const isHomework = lesson.type === "homework";
-const isExam = lesson.type === "exam";
-
-return(
-
-<div
-className="
-flex
-items-center
-justify-between
-px-8
-py-6
-border-b
-last:border-b-0
-hover:bg-slate-100
-transition-all
-duration-300
-"
->
-
-<div className="flex items-center gap-5">
-
-<div
-className={`
-w-16
-h-16
-rounded-2xl
-flex
-items-center
-justify-center
-text-white
-
-${isVideo && "bg-green-600"}
-
-${isFile && "bg-slate-600"}
-
-${isHomework && "bg-blue-600"}
-
-${isExam && "bg-red-600"}
-`}
->
-
-{isVideo && <Play size={26} />}
-
-{isFile && <FileText size={26} />}
-
-{isHomework && <ClipboardCheck size={26} />}
-
-{isExam && <ClipboardList size={26} />}
-
-</div>
-
-<div>
-
-<h3 className="text-xl font-bold">
-
-{lesson.title}
-
-</h3>
-
-<p className="text-slate-500 mt-1">
-
-{isVideo && (lesson.duration || "فيديو")}
-
-{isFile && "ملف PDF"}
-
-{isHomework && "واجب"}
-
-{isExam && `امتحان • ${lesson.duration || 30} دقيقة`}
-
-</p>
-
-</div>
-
-</div>
-
-<div>
-
-{isEnrolled ? (
-
-<Button
-className="
-rounded-xl
-h-11
-px-8
-bg-gradient-to-r
-from-violet-600
-to-fuchsia-600
-"
-onClick={() => {
-
-if (isVideo) {
-  window.open(lesson.video_url, "_blank");
-}
-
-if (isFile) {
-  window.open(lesson.file_url, "_blank");
-}
-
-if (isHomework) {
-  navigate(`/homework/${lesson.homework_id}`);
-}
-
-if (isExam) {
-  navigate(`/exam/${lesson.exam_id}`);
-}
-
-}}
->
-
-{isVideo && "شاهد الآن"}
-
-{isFile && "تحميل"}
-
-{isHomework && "حل الواجب"}
-
-{isExam && "ابدأ الامتحان"}
-
-</Button>
-
-) : (
-
-<div className="flex items-center gap-2 text-slate-500">
-
-<Lock size={18}/>
-
-<span>
-
-مقفل
-
-</span>
-
-</div>
-
-)}
-
-</div>
-
-</div>
-
-)
-
-})}
-
-</div>
-
-)}
-
-</div>
-
-))}
-
-</div>
-
-</CardContent>
-
-</Card>
-
-</div>
-    
-
-
+  return (
+    <div className="min-h-screen bg-gray-100 dark:bg-[#0b0715]" dir="rtl">
+      <Navbar />
+
+      {/* ══════════════════════════════════════
+          HERO SECTION
+      ══════════════════════════════════════ */}
+      <div className="relative bg-gradient-to-br from-rose-500 via-rose-400 to-pink-400 pt-20 sm:pt-24 pb-0 overflow-hidden">
+
+        {/* Background triangle pattern */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern
+                id="triangles"
+                x="0" y="0"
+                width="40" height="40"
+                patternUnits="userSpaceOnUse"
+              >
+                <polygon
+                  points="20,5 35,35 5,35"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="1"
+                />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#triangles)" />
+          </svg>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+          {/* ── Stats badges ── */}
+          <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3 mb-5 sm:mb-6">
+
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-[#1a1a2e] text-white rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold shadow-lg">
+              <span className="bg-yellow-400 text-black rounded-full px-1.5 sm:px-2 py-0.5 text-xs font-black">
+                {videosCount}+
+              </span>
+              <Play size={12} className="text-yellow-400" />
+              <span>فيديوهات</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-[#1a1a2e] text-white rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold shadow-lg">
+              <span className="bg-yellow-400 text-black rounded-full px-1.5 sm:px-2 py-0.5 text-xs font-black">
+                {examsCount}+
+              </span>
+              <ClipboardList size={12} className="text-yellow-400" />
+              <span>امتحانات</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-[#1a1a2e] text-white rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold shadow-lg">
+              <span className="bg-yellow-400 text-black rounded-full px-1.5 sm:px-2 py-0.5 text-xs font-black">
+                {homeworksCount}+
+              </span>
+              <ClipboardCheck size={12} className="text-yellow-400" />
+              <span>واجبات</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-cyan-400 text-[#1a1a2e] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold shadow-lg">
+              <span className="bg-[#1a1a2e] text-white rounded-full px-1.5 sm:px-2 py-0.5 text-xs font-black">
+                {filesCount}+
+              </span>
+              <FileText size={12} />
+              <span>ملفات</span>
+            </div>
+
+          </div>
+
+          {/* ── Title & grade ── */}
+          <div className="text-right mb-3 sm:mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-black text-white leading-tight">
+              {course.title} 💪
+            </h1>
+            <p className="mt-2 sm:mt-3 text-white/90 text-base sm:text-lg font-medium">
+              ❤️ {gradeLabels[course.grade] || course.grade}
+            </p>
+          </div>
+
+          {/* ── Date info row ── */}
+          <div className="flex flex-wrap items-center justify-end gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="flex items-center gap-2 text-white/90 text-xs sm:text-sm">
+              <span className="bg-yellow-400 text-black rounded-full px-2 sm:px-3 py-1 text-xs font-bold whitespace-nowrap">
+                {new Date(course.created_at || Date.now()).toLocaleDateString("ar-EG", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+              <span className="font-medium whitespace-nowrap">تاريخ إنشاء الكورس 🗓</span>
+            </div>
+            <div className="flex items-center gap-2 text-white/90 text-xs sm:text-sm">
+              <span className="bg-cyan-300 text-black rounded-full px-2 sm:px-3 py-1 text-xs font-bold whitespace-nowrap">
+                {new Date(course.updated_at || Date.now()).toLocaleDateString("ar-EG", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+              <span className="font-medium whitespace-nowrap">⏱ آخر تحديث للكورس</span>
+            </div>
+          </div>
+
+          {/* ── Hero bottom grid: image + subscription card ── */}
+          <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6 xl:gap-8 items-end">
+
+            {/* Course cover image */}
+            <div className="w-full">
+              <div className="rounded-t-2xl sm:rounded-t-3xl overflow-hidden shadow-2xl border-2 sm:border-4 border-white/20 w-full max-w-2xl mx-auto xl:mx-0">
+                <img
+                  src={
+                    course.cover_image ||
+                    course.thumbnail ||
+                    "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1000"
+                  }
+                  alt={course.title}
+                  className="w-full object-cover max-h-48 sm:max-h-64 md:max-h-80 xl:max-h-96"
+                />
+              </div>
+            </div>
+
+            {/* Subscription card */}
+            <div className="w-full xl:pb-0 pb-6">
+              <div className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.25)] border border-gray-100">
+
+                {/* Card image */}
+                <img
+                  src={
+                    course.thumbnail ||
+                    course.cover_image ||
+                    "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800"
+                  }
+                  alt={course.title}
+                  className="w-full h-36 sm:h-44 md:h-48 object-cover"
+                />
+
+                <div className="p-4 sm:p-6">
+
+                  {/* Price / enroll button */}
+                  {course.price === 0 ? (
+                    <button
+                      onClick={handleEnroll}
+                      className="
+                        w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white
+                        text-lg sm:text-xl font-black
+                        bg-gradient-to-r from-rose-500 to-pink-500
+                        hover:from-rose-600 hover:to-pink-600
+                        shadow-lg hover:shadow-rose-300
+                        transition-all duration-300 hover:scale-[1.02]
+                        mb-3 sm:mb-4
+                      "
+                    >
+                      {isEnrolled ? "ابدأ التعلم الآن" : "هذا الكورس مجاني! 🎉"}
+                    </button>
+                  ) : (
+                    <>
+                      <div className="text-center mb-3 sm:mb-4">
+                        <span className="text-3xl sm:text-4xl font-black text-gray-900">
+                          {course.price}
+                        </span>
+                        <span className="text-base sm:text-lg text-gray-500 mr-1">جنيه</span>
+                      </div>
+                      <button
+                        onClick={handleEnroll}
+                        className="
+                          w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white
+                          text-lg sm:text-xl font-black
+                          bg-gradient-to-r from-rose-500 to-pink-500
+                          hover:from-rose-600 hover:to-pink-600
+                          shadow-lg hover:shadow-rose-300
+                          transition-all duration-300 hover:scale-[1.02]
+                          mb-3
+                        "
+                      >
+                        {isEnrolled ? "ابدأ التعلم الآن" : "اشترك الآن"}
+                      </button>
+                    </>
+                  )}
+
+                  {/* Intro video button */}
+                  {course.intro_video && (
+                    <button
+                      onClick={() => window.open(course.intro_video)}
+                      className="
+                        w-full py-2.5 sm:py-3 rounded-xl sm:rounded-2xl
+                        text-gray-700 font-bold text-sm sm:text-base
+                        border-2 border-gray-200 hover:border-rose-300
+                        flex items-center justify-center gap-2
+                        hover:bg-rose-50 transition-all duration-300
+                        mb-3 sm:mb-4
+                      "
+                    >
+                      <Play size={16} className="text-rose-500" />
+                      <span>مشاهدة المقدمة</span>
+                    </button>
+                  )}
+
+                  {/* Stats rows */}
+                  <div className="border-t border-gray-100 pt-3 sm:pt-4 space-y-2 sm:space-y-3">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                      <span className="font-bold text-gray-800">+ 11 ساعة</span>
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <span>المحتوى</span>
+                        <BookOpen size={14} className="text-gray-400" />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                      <span className="font-bold text-gray-800">+ {lessonsCount} درس</span>
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <span>إجمالي الدروس</span>
+                        <ClipboardList size={14} className="text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
       </div>
 
+      {/* ══════════════════════════════════════
+          COURSE CONTENT SECTION
+      ══════════════════════════════════════ */}
+      <div className="bg-gray-100 dark:bg-gray-900 py-8 sm:py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+          {/* Section heading card */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8 mb-4 sm:mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <h2 className="text-2xl sm:text-3xl xl:text-4xl font-black text-right">
+              <span className="text-gray-900 dark:text-white">محتوى </span>
+              <span className="text-rose-500">الكورس</span>
+            </h2>
+          </div>
+
+          {/* Units list */}
+          <div className="space-y-3 sm:space-y-4">
+            {units.map((unit) => {
+              const isOpen = openUnit === unit.id;
+
+              return (
+                <div
+                  key={unit.id}
+                  className="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-300"
+                >
+                  {/* ── Unit header button ── */}
+                  <button
+                    onClick={() => setOpenUnit(isOpen ? null : unit.id)}
+                    className={`
+                      w-full flex items-center justify-between
+                      px-4 sm:px-6 py-4 sm:py-5
+                      transition-colors duration-200
+                      ${isOpen
+                        ? "bg-rose-50 dark:bg-rose-900/20"
+                        : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                      }
+                    `}
+                  >
+                    {/* Chevron — always on the left in RTL layout */}
+                    <div
+                      className={`
+                        flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2
+                        flex items-center justify-center transition-all duration-300
+                        ${isOpen
+                          ? "border-rose-400 bg-rose-50 dark:bg-rose-900/30"
+                          : "border-gray-300 dark:border-gray-600"
+                        }
+                      `}
+                    >
+                      {isOpen
+                        ? <ChevronUp size={18} className="text-rose-500" />
+                        : <ChevronDown size={18} className="text-gray-500 dark:text-gray-400" />
+                      }
+                    </div>
+
+                    {/* Title block — right side */}
+                    <div className="flex items-center gap-3 sm:gap-4 text-right flex-1 mr-3 sm:mr-4">
+                      <div className="flex flex-col items-end flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base sm:text-xl xl:text-2xl font-black text-gray-900 dark:text-white truncate">
+                            {unit.title} 💪
+                          </h3>
+                          <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-rose-100 dark:bg-rose-900/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                            <LayoutGrid size={16} className="text-rose-500 sm:hidden" />
+                            <LayoutGrid size={20} className="text-rose-500 hidden sm:block" />
+                          </div>
+                        </div>
+                        <p className="text-xs sm:text-sm text-gray-400 mt-0.5 truncate max-w-full">
+                          {unit.title} 💪
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* ── Lessons list ── */}
+                  {isOpen && (
+                    <div className="border-t border-gray-100 dark:border-gray-700">
+                      {unit.lessons.map((lesson: any, idx: number) => {
+                        const isVideo    = lesson.type === "video";
+                        const isFile     = lesson.type === "pdf";
+                        const isHomework = lesson.type === "homework";
+                        const isExam     = lesson.type === "quiz";
+
+                        return (
+                          <div
+                            key={lesson.id}
+                            className={`
+                              flex items-center justify-between
+                              px-3 sm:px-6 py-3 sm:py-5 gap-2 sm:gap-4
+                              ${idx !== unit.lessons.length - 1
+                                ? "border-b border-gray-100 dark:border-gray-700"
+                                : ""}
+                              hover:bg-gray-50 dark:hover:bg-gray-700/30
+                              transition-colors duration-200
+                            `}
+                          >
+                            {/* Action button — left */}
+                            <div className="flex-shrink-0">
+                              {isEnrolled ? (
+                                <>
+                                  {isVideo && (
+                                    <button
+                                      onClick={() => window.open(lesson.video_url, "_blank")}
+                                      className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                    >
+                                      <Play size={13} />
+                                      <span>مشاهدة الفيديو</span>
+                                    </button>
+                                  )}
+                                  {isFile && (
+                                    <button
+                                      onClick={() => window.open(lesson.file_url, "_blank")}
+                                      className="flex items-center gap-1.5 sm:gap-2 bg-blue-500 hover:bg-blue-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-blue-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                    >
+                                      <FileText size={13} />
+                                      <span>تحميل الملف</span>
+                                    </button>
+                                  )}
+                                  {isHomework && (
+                                    <button
+                                      onClick={() => navigate(`/homework/${lesson.id}`)}
+                                      className="flex items-center gap-1.5 sm:gap-2 bg-green-500 hover:bg-green-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-green-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                    >
+                                      <ClipboardCheck size={13} />
+                                      <span>حل الواجب</span>
+                                    </button>
+                                  )}
+                                  {isExam && (
+                                    <button
+                                      onClick={() => navigate(`/exam/${lesson.id}`)}
+                                      className="flex items-center gap-1.5 sm:gap-2 bg-red-500 hover:bg-red-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-red-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                    >
+                                      <ClipboardList size={13} />
+                                      <span>ابدأ الكويز</span>
+                                    </button>
+                                  )}
+                                </>
+                              ) : (
+                                <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl">
+                                  <Lock size={14} />
+                                  <span className="text-xs sm:text-sm font-bold">مقفل</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Title + icon — right */}
+                            <div className="flex items-center gap-2 sm:gap-3 text-right flex-1 min-w-0">
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-sm sm:text-base xl:text-lg font-bold text-gray-900 dark:text-white truncate">
+                                  {lesson.title}
+                                </h4>
+                                {isVideo && lesson.duration && (
+                                  <p className="text-xs text-gray-400 mt-0.5">{lesson.duration}</p>
+                                )}
+                                {isExam && (
+                                  <p className="text-xs text-gray-400 mt-0.5">
+                                    {lesson.duration || 30} دقيقة
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Type icon badge */}
+                              <div
+                                className={`
+                                  flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl
+                                  flex items-center justify-center
+                                  ${isVideo    ? "bg-yellow-100 text-yellow-500" : ""}
+                                  ${isFile     ? "bg-blue-100   text-blue-500"   : ""}
+                                  ${isHomework ? "bg-green-100  text-green-500"  : ""}
+                                  ${isExam     ? "bg-red-100    text-red-500"    : ""}
+                                `}
+                              >
+                                {isVideo    && <Play size={15} />}
+                                {isFile     && <FileText size={15} />}
+                                {isHomework && <ClipboardCheck size={15} />}
+                                {isExam     && <ClipboardList size={15} />}
+                              </div>
+                            </div>
+
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Empty state */}
+          {units.length === 0 && (
+            <div className="text-center py-16 sm:py-20 text-gray-400">
+              <BookOpen size={48} className="mx-auto mb-4 opacity-40" />
+              <p className="text-lg sm:text-xl font-bold">لا يوجد محتوى بعد</p>
+            </div>
+          )}
+
+        </div>
+      </div>
+
+      <Footer />
     </div>
-
-    <Footer />
-
-  </div>
-);
+  );
 }
