@@ -12,12 +12,11 @@ type Props = {
 export function DashboardLayout({ children, type, sidebarOpen, setSidebarOpen }: Props) {
   return (
     <div
-  dir="rtl"
-  className="flex items-stretch min-h-screen bg-[#f5f7fb]"
->
-
+      dir="rtl"
+      className="flex items-stretch min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200"
+    >
       {/* ── Desktop sidebar (xl+) ── */}
-      <div className="hidden xl:flex shrink-0 self-stretch">
+      <div className="hidden xl:flex shrink-0 self-stretch p-4">
         <DashboardSidebar type={type} />
       </div>
 
@@ -25,7 +24,7 @@ export function DashboardLayout({ children, type, sidebarOpen, setSidebarOpen }:
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm xl:hidden"
+          className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm xl:hidden transition-opacity duration-300"
         />
       )}
 
@@ -33,7 +32,7 @@ export function DashboardLayout({ children, type, sidebarOpen, setSidebarOpen }:
       <div
         className={`
           fixed top-0 right-0 z-50 h-screen
-          transition-transform duration-300
+          transition-transform duration-300 ease-out
           xl:hidden
           ${sidebarOpen ? "translate-x-0" : "translate-x-full"}
         `}
@@ -46,11 +45,12 @@ export function DashboardLayout({ children, type, sidebarOpen, setSidebarOpen }:
       </div>
 
       {/* ── Main content ── */}
-      <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 lg:px-8">
+      <main className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-5 lg:px-8 lg:py-6">
         <DashboardTopbar onMenuClick={() => setSidebarOpen(true)} />
-        {children}
+        <div className="max-w-[1600px] mx-auto">
+          {children}
+        </div>
       </main>
-
     </div>
   );
 }

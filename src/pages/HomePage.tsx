@@ -45,6 +45,7 @@ const gradeColors: Record<string, string> = {
 };
 
 export function HomePage() {
+    console.log("HOME PAGE RENDERED");
   const navigate = useNavigate();
   
 const { user } = useApp();

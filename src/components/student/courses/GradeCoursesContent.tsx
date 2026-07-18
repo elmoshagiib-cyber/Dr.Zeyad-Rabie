@@ -15,6 +15,10 @@ export default function GradeCoursesContent({ grade }: GradeCoursesContentProps)
   const navigate = useNavigate();
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+const [showAuthModal, setShowAuthModal] = useState(false);
+const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+const [subscriptionCode, setSubscriptionCode] = useState("");
+const [selectedCourse, setSelectedCourse] = useState<any>(null);
 
   useEffect(() => {
     loadCourses();
@@ -32,6 +36,27 @@ export default function GradeCoursesContent({ grade }: GradeCoursesContentProps)
     setCourses(data || []);
     setLoading(false);
   };
+
+
+  const handleCourseAction = (course: any) => {
+  const user = localStorage.getItem("user");
+
+  // المستخدم غير مسجل
+  if (!user) {
+    setShowAuthModal(true);
+    return;
+  }
+
+  // الكورس مجاني
+  if (course.is_free) {
+    navigate(`/courses/${course.id}`);
+    return;
+  }
+
+  // الكورس مدفوع
+  setSelectedCourse(course);
+  setShowSubscriptionModal(true);
+};
 
   const CourseCard = ({ course }: { course: any }) => (
     <Card
@@ -164,18 +189,20 @@ export default function GradeCoursesContent({ grade }: GradeCoursesContentProps)
   </Button>
 ) : (
   <div className="flex gap-2 sm:gap-3 mt-1">
-    <Button
-      className="
-        flex-1 text-xs sm:text-sm py-2 sm:py-2.5
-        bg-[#371143]
-        hover:bg-[#4A175B]
-        text-white
-        transition-all duration-300
-        hover:scale-[1.02]
-      "
-    >
-      اشترك الآن
-    </Button>
+    
+  <Button
+  className="
+    flex-1 text-xs sm:text-sm py-2 sm:py-2.5
+    bg-[#371143]
+    hover:bg-[#4A175B]
+    text-white
+    transition-all duration-300
+    hover:scale-[1.02]
+  "
+  onClick={() => handleCourseAction(course)}
+>
+  اشترك الآن
+</Button>
 
     <Button
       variant="outline"

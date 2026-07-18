@@ -8,11 +8,17 @@ import { Button } from "../components/ui/Button";
 import { BookOpen, Clock, Tag } from "lucide-react";
 
 export default function GradeCoursesPage() {
+    console.log("GRADE PAGE RENDERED");
+  alert("GRADE PAGE");
   const { grade } = useParams();
   const navigate = useNavigate();
 
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+const [showAuthModal, setShowAuthModal] = useState(false);
+const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+const [subscriptionCode, setSubscriptionCode] = useState("");
+const [selectedCourse, setSelectedCourse] = useState<any>(null);
 
  const gradeNames: Record<string, string> = {
   prep_1: "الصف الأول الإعدادي",
@@ -66,20 +72,41 @@ setCourses(data || []);
 setLoading(false);
   };
 
+
+
+const handleCourseAction = (course: any) => {
+  const user = localStorage.getItem("user");
+
+  // المستخدم غير مسجل
+  if (!user) {
+    setShowAuthModal(true);
+    return;
+  }
+
+  // الكورس مجاني
+  if (course.is_free) {
+    navigate(`/courses/${course.id}`);
+    return;
+  }
+
+  // الكورس مدفوع
+  setSelectedCourse(course);
+setShowSubscriptionModal(true);
+};
+
   /* ─── single course card ─── */
   const CourseCard = ({ course }: { course: any }) => (
-    <Card
-      hover
-      className="
-        group overflow-hidden rounded-2xl
-        border border-slate-200 dark:border-white/10
-        bg-white dark:bg-[#130726]
-        shadow-md hover:shadow-xl
-        flex flex-col
-        transition-all duration-500
-        hover:-translate-y-1
-      "
-    >
+   <div
+  className="
+    group overflow-hidden rounded-2xl
+    border border-slate-200 dark:border-white/10
+    bg-white dark:bg-[#130726]
+    shadow-md hover:shadow-xl
+    flex flex-col
+    transition-all duration-500
+    hover:-translate-y-1
+  "
+>
       {/* thumbnail */}
       <div className="relative overflow-hidden aspect-video w-full">
         <img
@@ -125,8 +152,12 @@ setLoading(false);
         )}
 
         {/* shine overlay */}
-        <div className="
-          absolute inset-0 opacity-0 group-hover:opacity-100
+        <div
+  className="
+    pointer-events-none
+    absolute inset-0
+    opacity-0
+    group-hover:opacity-100
           transition-opacity duration-700
           bg-gradient-to-r from-transparent via-white/15 to-transparent
           -translate-x-full group-hover:translate-x-full
@@ -190,27 +221,32 @@ setLoading(false);
 
         {/* actions */}
         <div className="flex gap-2 sm:gap-3 mt-1">
+<button
+  onClick={() => {
+    alert("BUTTON CLICKED");
+    handleCourseAction(course);
+  }}
+  className="
+    flex-1
+    bg-red-500
+    text-white
+    py-3
+    rounded-lg
+  "
+>
+  TEST BUTTON
+</button>
           <Button
-            className="
-              flex-1 text-xs sm:text-sm py-2 sm:py-2.5
-              bg-[#371143] hover:bg-[#4A175B]
-              text-white transition-all duration-300
-              hover:scale-[1.02]
-            "
-          >
-            {course.is_free ? "ابدأ مجانًا" : "اشترك الآن"}
-          </Button>
-          <Button
-            variant="outline"
-            className="flex-1 text-xs sm:text-sm py-2 sm:py-2.5"
-            onClick={() => navigate(`/courses/${course.id}`)}
-          >
+  variant="outline"
+  className="flex-1 text-xs sm:text-sm py-2 sm:py-2.5"
+  onClick={() => navigate(`/courses/${course.id}`)}
+>
             تفاصيل
           </Button>
         </div>
 
       </CardContent>
-    </Card>
+    </div>
   );
 
   /* ─── section block ─── */
@@ -419,7 +455,149 @@ setLoading(false);
         </div>
       </div>
 
+      {showAuthModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+
+    <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl">
+
+      <div className="text-center">
+
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-3xl">
+          🔒
+        </div>
+
+        <h2 className="text-2xl font-black text-slate-800">
+          يجب تسجيل الدخول
+        </h2>
+
+        <p className="mt-3 text-slate-500 leading-7">
+          للوصول إلى الكورسات والاستفادة من جميع مميزات المنصة،
+          يرجى تسجيل الدخول أو إنشاء حساب جديد.
+        </p>
+
+      </div>
+
+      <div className="mt-8 space-y-3">
+
+        <Button
+          className="w-full"
+          onClick={() => navigate("/login")}
+        >
+          تسجيل الدخول
+        </Button>
+
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => navigate("/register")}
+        >
+          إنشاء حساب جديد
+        </Button>
+
+        <button
+          onClick={() => setShowAuthModal(false)}
+          className="w-full text-sm text-slate-500 hover:text-slate-700 transition"
+        >
+          إلغاء
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
+
+{showSubscriptionModal && (
+  <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+
+    <div
+      className="
+        w-full max-w-md
+        rounded-3xl
+        bg-white dark:bg-[#130726]
+        border border-slate-200 dark:border-white/10
+        shadow-2xl
+        p-8
+      "
+    >
+
+      <div className="text-center">
+
+        <div
+          className="
+            mx-auto mb-5
+            w-16 h-16
+            rounded-full
+            bg-purple-100
+            dark:bg-[#2A0F3B]
+            flex items-center justify-center
+            text-3xl
+          "
+        >
+          🔐
+        </div>
+
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+          تفعيل الاشتراك
+        </h2>
+
+        <p className="mt-3 text-slate-500 dark:text-slate-400 leading-7">
+          أدخل كود الاشتراك الخاص بك لتفعيل الكورس.
+        </p>
+<h3 className="mt-2 font-bold text-lg text-[#371143] dark:text-[#F6AC08]">
+  {selectedCourse?.title}
+</h3>
+
+      </div>
+
+      <input
+        type="text"
+        value={subscriptionCode}
+        onChange={(e) => setSubscriptionCode(e.target.value.toUpperCase())}
+        placeholder="XXXX-XXXX"
+        className="
+          mt-8
+          w-full
+          rounded-xl
+          border
+          border-slate-300
+          dark:border-white/10
+          bg-transparent
+          px-4
+          py-3
+          text-center
+          tracking-[4px]
+          font-bold
+          outline-none
+          focus:border-purple-500
+        "
+      />
+
+      <Button
+        className="w-full mt-5"
+      >
+        تفعيل الاشتراك
+      </Button>
+
+      <Button
+        variant="outline"
+        className="w-full mt-3"
+        onClick={() => {
+          setShowSubscriptionModal(false);
+          setSubscriptionCode("");
+        }}
+      >
+        إلغاء
+      </Button>
+
+    </div>
+
+  </div>
+)}
+
       <Footer />
+
     </div>
   );
 }

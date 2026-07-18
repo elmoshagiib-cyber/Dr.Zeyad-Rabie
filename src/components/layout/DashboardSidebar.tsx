@@ -17,26 +17,6 @@ interface NavItem {
   badge?: number;
 }
 
-const getSection = (path: string, type: "student" | "instructor" | "admin") => {
-  if (type === "instructor") {
-    if (path === "/instructor") return "الرئيسية";
-    if (
-  [
-    "/instructor/courses",
-    "/instructor/courses/create",
-    "/instructor/submissions",
-    "/instructor/subscription-codes",
-  ].includes(path)
-)
-      return "إدارة المحتوى";
-    if (["/instructor/students", "/instructor/attendance"].includes(path))
-      return "إدارة الطلاب";
-    if (["/instructor/analytics", "/instructor/notifications"].includes(path))
-      return "التقارير";
-  }
-  return "";
-};
-
 const studentNav: NavItem[] = [
   {
     label: "لوحة التحكم",
@@ -163,22 +143,36 @@ const adminNav: NavItem[] = [
     icon: <Settings size={20} />,
   },
 ];
+
 interface DashboardSidebarProps {
   type: "student" | "instructor" | "admin";
   onClose?: () => void;
   mobileOpen?: boolean;
 }
 
-export function DashboardSidebar({ type, onClose, mobileOpen = false }: DashboardSidebarProps) {
-  const navigate  = useNavigate();
-  const location  = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
+export function DashboardSidebar({ 
+  type, 
+  onClose, 
+  mobileOpen = false 
+}: DashboardSidebarProps) {
+  
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [collapsed, setCollapsed] = useState(() => {
+    const saved = localStorage.getItem("sidebar-collapsed");
+    return saved === "true";
+  });
 
   useEffect(() => {
     localStorage.setItem("sidebar-collapsed", String(collapsed));
   }, [collapsed]);
 
-  const navItems = type === "student" ? studentNav : type === "instructor" ? instructorNav : adminNav;
+  const navItems = 
+    type === "student" 
+      ? studentNav 
+      : type === "instructor" 
+      ? instructorNav 
+      : adminNav;
 
   const handleNav = (path: string) => {
     navigate(path);
@@ -187,24 +181,43 @@ export function DashboardSidebar({ type, onClose, mobileOpen = false }: Dashboar
 
   return (
     <aside
-className={cn(
-  "flex flex-col h-full min-h-full",
-  "bg-white/85 backdrop-blur-xl",
-  "border border-white/60",
-  "shadow-[0_25px_80px_rgba(15,23,42,.12)]",
-  "transition-all duration-300",
-  "xl:rounded-[30px]",
-  collapsed ? "xl:w-[82px] w-[300px]" : "w-[300px]"
-)}
+      className={cn(
+        "flex flex-col h-full",
+        "bg-white",
+        "border border-slate-200",
+        "shadow-xl",
+        "transition-all duration-300 ease-out",
+        mobileOpen 
+          ? "rounded-none w-[280px] sm:w-[300px]" 
+          : "xl:rounded-2xl",
+        collapsed && !mobileOpen ? "xl:w-[80px]" : "w-[280px] sm:w-[300px]"
+      )}
     >
-      <SidebarHeader collapsed={collapsed} setCollapsed={setCollapsed} />
+      <SidebarHeader 
+        collapsed={collapsed && !mobileOpen} 
+        setCollapsed={setCollapsed} 
+      />
 
       <SidebarNavigation
         navItems={navItems}
-        collapsed={collapsed}
+        collapsed={collapsed && !mobileOpen}
         currentPath={location.pathname}
         onNavigate={handleNav}
       />
+
+      {/* Footer (optional) */}
+      <div className="border-t border-slate-200 p-3 sm:p-4 bg-slate-50/50">
+        <div className="flex items-center gap-2 text-xs text-slate-400">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className={cn(
+            "font-medium transition-opacity duration-200",
+            collapsed && !mobileOpen ? "opacity-0" : "opacity-100"
+          )}>
+            متصل الآن
+          </span>
+        </div>
+      </div>
+
     </aside>
   );
 }
