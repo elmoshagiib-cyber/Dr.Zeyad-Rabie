@@ -38,24 +38,93 @@ const [selectedCourse, setSelectedCourse] = useState<any>(null);
   };
 
 
-  const handleCourseAction = (course: any) => {
+const handleCourseAction = (course: any) => {
   const user = localStorage.getItem("user");
 
-  // المستخدم غير مسجل
   if (!user) {
     setShowAuthModal(true);
     return;
   }
 
-  // الكورس مجاني
   if (course.is_free) {
     navigate(`/courses/${course.id}`);
     return;
   }
 
-  // الكورس مدفوع
   setSelectedCourse(course);
   setShowSubscriptionModal(true);
+};
+
+const activateSubscription = async () => {
+
+  const { data, error } = await supabase
+    .from("subscription_codes")
+    .select("*")
+    .eq("code", subscriptionCode)
+    .single();
+
+  if (error || !data) {
+    alert("كود الاشتراك غير صحيح");
+    return;
+  }
+
+  if (data.status !== "active") {
+    alert("هذا الكود غير صالح أو تم استخدامه");
+    return;
+  }
+
+  if (data.course_id !== selectedCourse.id) {
+    alert("هذا الكود لا يخص هذا الكورس");
+    return;
+  }
+
+  const currentUser = JSON.parse(localStorage.getItem("user")!);
+
+const studentId = Number(currentUser.id);
+
+const { error: enrollError } = await supabase
+  .from("student_courses")
+  .insert({
+    student_id: studentId,
+    course_id: selectedCourse.id,
+    active: true,
+    subscription_type: "كود اشتراك",
+  });
+
+
+if (enrollError) {
+  alert("حدث خطأ أثناء إضافة الاشتراك");
+  return;
+}
+
+
+const expiresAt = new Date();
+
+expiresAt.setDate(expiresAt.getDate() + data.duration_days);
+
+const { error: codeError } = await supabase
+  .from("subscription_codes")
+  .update({
+    status: "used",
+    student_id: studentId,
+    used_at: new Date().toISOString(),
+    expires_at: expiresAt.toISOString(),
+  })
+  .eq("id", data.id);
+
+
+
+if (codeError) {
+  alert("تم الاشتراك لكن حدث خطأ أثناء تحديث الكود");
+  return;
+}
+
+setShowSubscriptionModal(false);
+setSubscriptionCode("");
+setSelectedCourse(null);
+
+alert("تم تفعيل الاشتراك بنجاح ✅");
+
 };
 
   const CourseCard = ({ course }: { course: any }) => (
@@ -189,16 +258,8 @@ const [selectedCourse, setSelectedCourse] = useState<any>(null);
   </Button>
 ) : (
   <div className="flex gap-2 sm:gap-3 mt-1">
-    
-  <Button
-  className="
-    flex-1 text-xs sm:text-sm py-2 sm:py-2.5
-    bg-[#371143]
-    hover:bg-[#4A175B]
-    text-white
-    transition-all duration-300
-    hover:scale-[1.02]
-  "
+
+<Button
   onClick={() => handleCourseAction(course)}
 >
   اشترك الآن
@@ -270,8 +331,10 @@ const [selectedCourse, setSelectedCourse] = useState<any>(null);
 
   const hasSections = term1.length || term2.length || revision.length || free.length;
 
-  return (
+return (
+  <>
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+
       {loading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {[1, 2, 3, 4, 5, 6].map(i => (
@@ -366,5 +429,97 @@ const [selectedCourse, setSelectedCourse] = useState<any>(null);
         )
       )}
     </div>
-  );
+
+   {showSubscriptionModal && (
+  <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+
+    <div
+      className="
+        w-full max-w-md
+        rounded-3xl
+        bg-white dark:bg-[#130726]
+        border border-slate-200 dark:border-white/10
+        shadow-2xl
+        p-8
+      "
+    >
+
+      <div className="text-center">
+
+        <div
+          className="
+            mx-auto mb-5
+            w-16 h-16
+            rounded-full
+            bg-purple-100
+            dark:bg-[#2A0F3B]
+            flex items-center justify-center
+            text-3xl
+          "
+        >
+          🔐
+        </div>
+
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+          تفعيل الاشتراك
+        </h2>
+
+        <p className="mt-3 text-slate-500 dark:text-slate-400 leading-7">
+          أدخل كود الاشتراك الخاص بك لتفعيل الكورس.
+        </p>
+
+        <h3 className="mt-2 font-bold text-lg text-[#371143] dark:text-[#F6AC08]">
+          {selectedCourse?.title}
+        </h3>
+
+      </div>
+
+      <input
+        type="text"
+        value={subscriptionCode}
+        onChange={(e) => setSubscriptionCode(e.target.value.toUpperCase())}
+        placeholder="XXXX-XXXX"
+        className="
+          mt-8
+          w-full
+          rounded-xl
+          border
+          border-slate-300
+          dark:border-white/10
+          bg-transparent
+          px-4
+          py-3
+          text-center
+          tracking-[4px]
+          font-bold
+          outline-none
+          focus:border-purple-500
+        "
+      />
+
+      <Button
+  className="w-full mt-5"
+  onClick={activateSubscription}
+>
+  تفعيل الاشتراك
+</Button>
+
+      <Button
+        variant="outline"
+        className="w-full mt-3"
+        onClick={() => {
+          setShowSubscriptionModal(false);
+          setSubscriptionCode("");
+        }}
+      >
+        إلغاء
+      </Button>
+
+    </div>
+
+  </div>
+)}
+
+  </>
+);
 }

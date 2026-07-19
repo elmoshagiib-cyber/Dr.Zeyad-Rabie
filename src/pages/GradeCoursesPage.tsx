@@ -8,8 +8,7 @@ import { Button } from "../components/ui/Button";
 import { BookOpen, Clock, Tag } from "lucide-react";
 
 export default function GradeCoursesPage() {
-    console.log("GRADE PAGE RENDERED");
-  alert("GRADE PAGE");
+  
   const { grade } = useParams();
   const navigate = useNavigate();
 
@@ -96,7 +95,8 @@ setShowSubscriptionModal(true);
 
   /* ─── single course card ─── */
   const CourseCard = ({ course }: { course: any }) => (
-   <div
+<Card
+  hover
   className="
     group overflow-hidden rounded-2xl
     border border-slate-200 dark:border-white/10
@@ -221,21 +221,21 @@ setShowSubscriptionModal(true);
 
         {/* actions */}
         <div className="flex gap-2 sm:gap-3 mt-1">
-<button
-  onClick={() => {
-    alert("BUTTON CLICKED");
-    handleCourseAction(course);
-  }}
+<Button
+  onClick={() => handleCourseAction(course)}
   className="
     flex-1
-    bg-red-500
+    text-xs sm:text-sm
+    py-2 sm:py-2.5
+    bg-[#371143]
+    hover:bg-[#4A175B]
     text-white
-    py-3
-    rounded-lg
+    transition-all duration-300
+    hover:scale-[1.02]
   "
 >
-  TEST BUTTON
-</button>
+  اشترك الآن
+</Button>
           <Button
   variant="outline"
   className="flex-1 text-xs sm:text-sm py-2 sm:py-2.5"
@@ -246,7 +246,7 @@ setShowSubscriptionModal(true);
         </div>
 
       </CardContent>
-    </div>
+   </Card>
   );
 
   /* ─── section block ─── */
