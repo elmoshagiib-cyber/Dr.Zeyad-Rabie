@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, BookOpen, Settings, LogOut } from 'lucide-react';
+import { User, BookOpen, Settings, LogOut } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
 import { supabase } from '../../../lib/supabase';
@@ -102,10 +102,10 @@ export function UserMenu() {
   }, [isOpen, showHint]);
 
   if (!user) return null;
-
+const avatar = user.avatar_url || "/images/default-avatar.png";
   const menuItems = [
     {
-      icon: User,
+     icon: User,
       label: 'حسابي',
       action: () => handleNavigate('/dashboard'),
       color: 'text-gray-700 dark:text-gray-300',
@@ -127,16 +127,30 @@ export function UserMenu() {
     }
   ];
 
-  return (
-    <div className="relative" ref={menuRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-        aria-label="User menu"
-      >
-        <User className="w-5 h-5" />
-      </button>
-
+ return (
+  <div className="relative" ref={menuRef}>
+<button
+  onClick={() => setIsOpen(!isOpen)}
+  className="
+    w-12
+    h-12
+    rounded-full
+    overflow-hidden
+    hover:scale-105
+    transition-all
+    duration-200
+  "
+>
+  <img
+    src={avatar}
+    alt={user.name}
+    className="w-full h-full object-cover"
+    onError={(e) => {
+      e.currentTarget.src = "/images/default-avatar.png";
+    }}
+  />
+</button>
+    
       <AnimatePresence>
         {showHint && (
           <motion.div
@@ -183,12 +197,24 @@ export function UserMenu() {
             <div className="bg-white dark:bg-gray-900 rounded-[28px] shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div className="p-6">
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white mb-3">
-                    <User className="w-8 h-8" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                    {user.name}
-                  </h3>
+<div
+  className="
+    w-20
+    h-20
+    rounded-full
+    overflow-hidden
+    mb-3
+  "
+>
+  <img
+    src={avatar}
+    alt={user.name}
+    className="w-full h-full object-cover"
+    onError={(e) => {
+      e.currentTarget.src = "/images/default-avatar.png";
+    }}
+  />
+</div>
                   {user.grade && (
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {user.grade}

@@ -352,7 +352,7 @@ xl:pt-24
 >
 
         {/* ── Two-column wrapper ── */}
-        <div className="flex flex-col lg:flex-row lg:min-min-h-[1050px]">
+        <div className="flex flex-col lg:flex-row lg:min-h-[calc(100vh-64px)]">
 
 
  {/* ════════════════════════════════
@@ -362,24 +362,20 @@ xl:pt-24
               Desktop : 42% width, sticky, full height
           ════════════════════════════════ */}
           <motion.div
-            className="
-hidden
-lg:block
-lg:w-[40%]
-xl:w-[38%]
-order-1
-lg:order-2
-overflow-hidden
-"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            {/* HeroSection fills the column completely */}
-            <div className="w-full h-full">
-              <HeroSection image="/images/register-image.png" />
-            </div>
-          </motion.div>
+  className="
+    hidden
+    lg:block
+    lg:w-[42%]
+    overflow-hidden
+  "
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: 0.5 }}
+>
+  <div className="w-full h-full">
+    <HeroSection image="/images/register-image.png" />
+  </div>
+</motion.div>
 
           {/* ════════════════════════════════
               LEFT — FORM
@@ -389,8 +385,7 @@ overflow-hidden
           ════════════════════════════════ */}
           <motion.div
             className={`
-              w-full lg:w-[60%]
-xl:w-[62%]
+              w-full lg:w-[58%]
               order-2 lg:order-2
               px-4 sm:px-8 md:px-12 lg:px-14 xl:px-20
               py-6 sm:py-8 lg:py-10

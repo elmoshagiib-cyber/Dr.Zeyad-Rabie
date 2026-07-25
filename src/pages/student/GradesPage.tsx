@@ -14,7 +14,7 @@ export default function GradesPage() {
           {
             id: "sec_1",
             title: "الصف الأول الثانوي",
-            image: "/images/course-science1.jpg",
+            image: "/images/course-chemistry1.jpg",
           },
           {
             id: "sec_2",
@@ -129,23 +129,21 @@ export default function GradesPage() {
                 "
               >
                 {/* Image */}
-                <div className="overflow-hidden relative">
+                <div className="overflow-hidden relative aspect-video">
                   <img
                     src={grade.image}
                     alt={grade.title}
                     className="
-                      w-full
-                      h-[180px]
-                      sm:h-[200px]
-                      lg:h-[220px]
-                      object-cover
-                      transition-all
-                      duration-700
-                      ease-out
-                      group-hover:scale-[1.08]
-                      group-hover:brightness-110
-                      group-hover:saturate-110
-                    "
+  w-full
+  h-full
+  object-cover
+  transition-all
+  duration-700
+  ease-out
+  group-hover:scale-[1.08]
+  group-hover:brightness-110
+  group-hover:saturate-110
+"
                   />
                   {/* Light Effect */}
                   <div className="

@@ -12,6 +12,9 @@ export interface AppUser {
   id: string;
   name: string;
   role: UserRole;
+
+  avatar_url?: string;
+
   grade?: string;
   gradeLabel?: string;
   code?: string;

@@ -120,17 +120,27 @@ export function CourseDetailPage() {
 
     console.log("checkEnrollment → studentId:", studentId, "course.id:", course.id);
 
-    const { data, error } = await supabase
-      .from("student_courses")
-      .select("*")
-      .eq("student_id", studentId)
-      .eq("course_id", course.id)
-      .eq("active", true);
+const now = new Date().toISOString();
 
-    console.log("Enrollment rows:", data);
-    console.log("Enrollment error:", error);
+const { data } = await supabase
+  .from("student_courses")
+  .select(`
+    *,
+    subscription_codes (
+      expires_at
+    )
+  `)
+  .eq("student_id", studentId)
+  .eq("course_id", course.id)
+  .eq("active", true);
 
-    setIsEnrolled((data?.length ?? 0) > 0);
+const valid = data?.some((row: any) => {
+  if (!row.subscription_codes) return true; // كورس مجاني
+
+  return row.subscription_codes.expires_at > now;
+});
+
+setIsEnrolled(valid || false);
   };
 
   useEffect(() => {
@@ -465,7 +475,19 @@ console.log("INSERT ERROR =", error);
                       </span>
                     </div>
                     <button
-                      onClick={handleEnroll}
+                      onClick={() => {
+  if (isEnrolled) {
+    const firstLesson = units[0]?.lessons[0];
+
+    if (firstLesson?.video_url) {
+      window.open(firstLesson.video_url, "_blank");
+    }
+
+    return;
+  }
+
+  handleEnroll();
+}}
                       className="
                         w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white
                         text-lg sm:text-xl font-black
@@ -639,7 +661,7 @@ console.log("INSERT ERROR =", error);
                           >
                             {/* Action button — على اليسار */}
                             <div className="flex-shrink-0">
-                              {true ? (
+                              {isEnrolled ? (
                                 <>
                                   {isVideo && (
                                     <button

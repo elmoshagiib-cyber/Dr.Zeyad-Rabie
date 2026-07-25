@@ -172,7 +172,7 @@ export const COURSES = [
     type: "yearly",
     typeLabel: "كورس سنوي",
     price: 320,
-    thumbnail: "/images/course-science1.jpg",
+    thumbnail: "/images/course-chemistry.jpg",
     lessonsCount: 54,
     studentsCount: 560,
     rating: 4.7,

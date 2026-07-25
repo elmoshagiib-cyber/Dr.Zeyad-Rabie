@@ -6,6 +6,7 @@ import { supabase } from "../../../lib/supabase";
 import { Card, CardContent } from "../../ui/Card";
 import { Button } from "../../ui/Button";
 import { BookOpen, Clock, Tag } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 interface GradeCoursesContentProps {
   grade: string;
@@ -19,10 +20,12 @@ const [showAuthModal, setShowAuthModal] = useState(false);
 const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 const [subscriptionCode, setSubscriptionCode] = useState("");
 const [selectedCourse, setSelectedCourse] = useState<any>(null);
+const [myCourses, setMyCourses] = useState<number[]>([]);
 
-  useEffect(() => {
-    loadCourses();
-  }, [grade]);
+useEffect(() => {
+  loadCourses();
+  loadMyCourses();
+}, [grade]);
 
   const loadCourses = async () => {
     setLoading(true);
@@ -37,8 +40,44 @@ const [selectedCourse, setSelectedCourse] = useState<any>(null);
     setLoading(false);
   };
 
+const loadMyCourses = async () => {
+  const user = localStorage.getItem("user");
+
+  if (!user) return;
+
+  const currentUser = JSON.parse(user);
+
+  const now = new Date().toISOString();
+
+  const { data } = await supabase
+    .from("student_courses")
+    .select(`
+      course_id,
+      subscription_codes!inner(
+        expires_at
+      )
+    `)
+    .eq("student_id", currentUser.id)
+    .eq("active", true);
+
+  const validCourses =
+    data
+      ?.filter((item: any) => {
+        const expire = item.subscription_codes?.expires_at;
+
+        return !expire || expire > now;
+      })
+      .map((item: any) => item.course_id) || [];
+
+  setMyCourses(validCourses);
+};
 
 const handleCourseAction = (course: any) => {
+
+  if (myCourses.includes(course.id)) {
+  navigate(`/courses/${course.id}`);
+  return;
+}
   const user = localStorage.getItem("user");
 
   if (!user) {
@@ -112,12 +151,26 @@ const { error: codeError } = await supabase
   })
   .eq("id", data.id);
 
+  const { data: existingSubscription } = await supabase
+  .from("student_courses")
+  .select("id")
+  .eq("student_id", studentId)
+  .eq("course_id", selectedCourse.id)
+  .eq("active", true)
+  .maybeSingle();
+
+if (existingSubscription) {
+  alert("أنت مشترك بالفعل في هذا الكورس.");
+  return;
+}
 
 
 if (codeError) {
   alert("تم الاشتراك لكن حدث خطأ أثناء تحديث الكود");
   return;
 }
+
+setMyCourses((prev) => [...prev, selectedCourse.id]);
 
 setShowSubscriptionModal(false);
 setSubscriptionCode("");
@@ -126,6 +179,8 @@ setSelectedCourse(null);
 alert("تم تفعيل الاشتراك بنجاح ✅");
 
 };
+
+loadMyCourses();
 
   const CourseCard = ({ course }: { course: any }) => (
     <Card
@@ -262,7 +317,9 @@ alert("تم تفعيل الاشتراك بنجاح ✅");
 <Button
   onClick={() => handleCourseAction(course)}
 >
-  اشترك الآن
+  {myCourses.includes(course.id)
+  ? "الدخول للكورس"
+  : "اشترك الآن"}
 </Button>
 
     <Button
@@ -502,6 +559,30 @@ return (
   onClick={activateSubscription}
 >
   تفعيل الاشتراك
+</Button>
+
+<Button
+  variant="outline"
+  className="
+    w-full
+    mt-3
+    border-green-500
+    text-green-600
+    hover:bg-green-500
+    hover:text-white
+    flex items-center justify-center gap-2
+  "
+  onClick={() =>
+  window.open(
+    `https://wa.me/201109414585?text=${encodeURIComponent(
+      `السلام عليكم، عايز الاشتراك في كورس ${selectedCourse?.title}`
+    )}`,
+    "_blank"
+  )
+}
+>
+  <FaWhatsapp className="text-xl" />
+  شراء كود عبر واتساب
 </Button>
 
       <Button
