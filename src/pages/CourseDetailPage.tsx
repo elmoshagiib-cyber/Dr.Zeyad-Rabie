@@ -691,7 +691,7 @@ console.log("INSERT ERROR =", error);
 
       {isHomework && (
         <button
-          onClick={() => navigate(`/homework/${lesson.id}`)}
+          onClick={() => navigate(`/dashboard/homework/${lesson.id}`)}
           className="flex items-center gap-1.5 sm:gap-2 bg-green-500 hover:bg-green-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-green-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
         >
           <ClipboardCheck size={13} />
@@ -701,7 +701,7 @@ console.log("INSERT ERROR =", error);
 
       {isExam && (
         <button
-          onClick={() => navigate(`/exam/${lesson.id}`)}
+          onClick={() => navigate(`/dashboard/exams/${lesson.id}`)}
           className="flex items-center gap-1.5 sm:gap-2 bg-red-500 hover:bg-red-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-red-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
         >
           <ClipboardList size={13} />
