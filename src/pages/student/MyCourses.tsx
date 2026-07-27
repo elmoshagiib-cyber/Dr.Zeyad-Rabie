@@ -5,23 +5,49 @@ import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { ProgressBar } from "../../components/ui/ProgressBar";
-import { COURSES, CURRENT_STUDENT } from "../../data/mockData";
+import { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
+import { useApp } from "../../context/AppContext";
 
 export function MyCoursesPage() {
   const navigate = useNavigate();
-  const studentCourses = JSON.parse(
-  localStorage.getItem("student-courses-1") || "[]"
-);
+const { user } = useApp();
 
-const enrolledCourses = studentCourses
-  .filter((course: any) => course.active)
-  .map((course: any, index: number) => ({
-    id: index,
-    title: course.name,
-    progress: 0,
-    lastLesson: "لم يبدأ بعد",
-    lastAccessedAt: "لا يوجد",
-  }));
+const [loading, setLoading] = useState(true);
+const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
+
+
+  useEffect(() => {
+  loadCourses();
+}, []);
+
+const loadCourses = async () => {
+  if (!user) return;
+
+  setLoading(true);
+
+  const { data: enrollments } = await supabase
+    .from("student_courses")
+    .select("course_id")
+    .eq("student_id", Number(user.id))
+    .eq("active", true);
+
+  if (!enrollments || enrollments.length === 0) {
+    setEnrolledCourses([]);
+    setLoading(false);
+    return;
+  }
+
+  const ids = enrollments.map((c) => c.course_id);
+
+  const { data: courses } = await supabase
+    .from("courses")
+    .select("*")
+    .in("id", ids);
+
+  setEnrolledCourses(courses || []);
+  setLoading(false);
+};
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden" dir="rtl">
@@ -34,48 +60,71 @@ const enrolledCourses = studentCourses
           <p className="text-slate-500 text-sm">{enrolledCourses.length} كورسات مشترك بها</p>
         </div>
         <div className="p-6 space-y-4">
-         {enrolledCourses.map(
-  (
-    {
-      id,
-      title,
-      progress,
-      lastLesson,
-      lastAccessedAt,
-    }: any
-  ) => (
-            <Card key={id} hover>
-              <CardContent className="flex flex-col sm:flex-row gap-5">
-                <img
-                  src="https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=400"
-                  alt={title}
-                  className="w-full sm:w-40 h-32 sm:h-24 rounded-xl object-cover flex-shrink-0"
-                  onError={e => { (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=160&h=96&fit=crop`; }}
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <h3 className="font-black text-slate-900">{title}</h3>
-                    <Badge variant={progress === 100 ? "emerald" : "blue"} className="flex-shrink-0">
-                      {progress === 100 ? "مكتمل ✓" : `${progress}%`}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-slate-500 mb-3">
-                    <span className="flex items-center gap-1"><BookOpen size={12} />0 درس</span>
-                    <span className="flex items-center gap-1"><Clock size={12} />آخر نشاط: {lastAccessedAt}</span>
-                  </div>
-                  <p className="text-xs text-slate-500 mb-3">
-                    <span className="font-medium text-slate-700">آخر درس:</span> {lastLesson}
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <ProgressBar value={progress} className="flex-1" size="sm" />
-                    <Button size="sm" onClick={() => navigate("/dashboard/lesson/l1")}>
-                      <Play size={13} />
-                      {progress === 0 ? "ابدأ" : progress === 100 ? "مراجعة" : "متابعة"}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+{enrolledCourses.map((course: any) => (
+
+<Card key={course.id} hover>
+  <CardContent className="flex flex-col sm:flex-row gap-5">
+    <img
+      src={
+        course.thumbnail ||
+        "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=400"
+      }
+      alt={course.title}
+      className="w-full sm:w-40 h-32 sm:h-24 rounded-xl object-cover flex-shrink-0"
+      onError={(e) => {
+        (e.target as HTMLImageElement).src =
+          "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=160&h=96&fit=crop";
+      }}
+    />
+
+    <div className="flex-1 min-w-0">
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <h3 className="font-black text-slate-900">
+          {course.title}
+        </h3>
+
+        <Badge variant="blue" className="flex-shrink-0">
+          0%
+        </Badge>
+      </div>
+
+      <div className="flex items-center gap-4 text-xs text-slate-500 mb-3">
+        <span className="flex items-center gap-1">
+          <BookOpen size={12} />
+          0 درس
+        </span>
+
+        <span className="flex items-center gap-1">
+          <Clock size={12} />
+          آخر نشاط: لا يوجد
+        </span>
+      </div>
+
+      <p className="text-xs text-slate-500 mb-3">
+        <span className="font-medium text-slate-700">
+          آخر درس:
+        </span>{" "}
+        لم يبدأ بعد
+      </p>
+
+      <div className="flex items-center gap-4">
+        <ProgressBar
+          value={0}
+          className="flex-1"
+          size="sm"
+        />
+
+        <Button
+          size="sm"
+          onClick={() => navigate(`/courses/${course.id}`)}
+        >
+          <Play size={13} />
+          ابدأ
+        </Button>
+      </div>
+    </div>
+  </CardContent>
+</Card>
           )
 )}
 

@@ -49,25 +49,18 @@ const loadMyCourses = async () => {
 
   const now = new Date().toISOString();
 
-  const { data } = await supabase
-    .from("student_courses")
-    .select(`
-      course_id,
-      subscription_codes!inner(
-        expires_at
-      )
-    `)
-    .eq("student_id", currentUser.id)
-    .eq("active", true);
+const { data } = await supabase
+  .from("student_courses")
+  .select("course_id, expires_at")
+  .eq("student_id", currentUser.id)
+  .eq("active", true);
 
-  const validCourses =
-    data
-      ?.filter((item: any) => {
-        const expire = item.subscription_codes?.expires_at;
-
-        return !expire || expire > now;
-      })
-      .map((item: any) => item.course_id) || [];
+const validCourses =
+  data
+    ?.filter((item: any) => {
+      return !item.expires_at || item.expires_at > now;
+    })
+    .map((item: any) => item.course_id) || [];
 
   setMyCourses(validCourses);
 };
@@ -121,37 +114,8 @@ const activateSubscription = async () => {
 
 const studentId = Number(currentUser.id);
 
-const { error: enrollError } = await supabase
-  .from("student_courses")
-  .insert({
-    student_id: studentId,
-    course_id: selectedCourse.id,
-    active: true,
-    subscription_type: "كود اشتراك",
-  });
-
-
-if (enrollError) {
-  alert("حدث خطأ أثناء إضافة الاشتراك");
-  return;
-}
-
-
-const expiresAt = new Date();
-
-expiresAt.setDate(expiresAt.getDate() + data.duration_days);
-
-const { error: codeError } = await supabase
-  .from("subscription_codes")
-  .update({
-    status: "used",
-    student_id: studentId,
-    used_at: new Date().toISOString(),
-    expires_at: expiresAt.toISOString(),
-  })
-  .eq("id", data.id);
-
-  const { data: existingSubscription } = await supabase
+// التحقق أولًا هل الطالب مشترك بالفعل
+const { data: existingSubscription } = await supabase
   .from("student_courses")
   .select("id")
   .eq("student_id", studentId)
@@ -164,23 +128,54 @@ if (existingSubscription) {
   return;
 }
 
+// إضافة الاشتراك
+const { error: enrollError } = await supabase
+  .from("student_courses")
+  .insert({
+    student_id: studentId,
+    course_id: selectedCourse.id,
+    active: true,
+    subscription_type: "كود اشتراك",
+    expires_at: new Date(
+      Date.now() + data.duration_days * 24 * 60 * 60 * 1000
+    ).toISOString(),
+  });
+
+if (enrollError) {
+  alert("حدث خطأ أثناء إضافة الاشتراك");
+  return;
+}
+
+// تحديث حالة الكود
+const expiresAt = new Date();
+expiresAt.setDate(expiresAt.getDate() + data.duration_days);
+
+const { error: codeError } = await supabase
+  .from("subscription_codes")
+  .update({
+    status: "used",
+    student_id: studentId,
+    used_at: new Date().toISOString(),
+    expires_at: expiresAt.toISOString(),
+  })
+  .eq("id", data.id);
 
 if (codeError) {
   alert("تم الاشتراك لكن حدث خطأ أثناء تحديث الكود");
   return;
 }
 
-setMyCourses((prev) => [...prev, selectedCourse.id]);
+// تحديث الواجهة
+await loadMyCourses();
 
 setShowSubscriptionModal(false);
 setSubscriptionCode("");
 setSelectedCourse(null);
 
 alert("تم تفعيل الاشتراك بنجاح ✅");
-
 };
 
-loadMyCourses();
+
 
   const CourseCard = ({ course }: { course: any }) => (
     <Card

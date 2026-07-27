@@ -42,14 +42,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
 useEffect(() => {
-  const savedUser = localStorage.getItem("user");
+  const checkUser = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-  if (savedUser) {
-    setUser(JSON.parse(savedUser));
-  }
+    if (!session) {
+      localStorage.removeItem("user");
+      setUser(null);
+      setLoading(false);
+      return;
+    }
 
-  setLoading(false);
-}, []);
+
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+
+    setLoading(false);
+  };
+
+  checkUser();
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_, session)=> {
+    if (!session) {
+      localStorage.removeItem("user");
+      setUser(null);
+    }
+  });
+
+  return () => {
+    subscription.unsubscribe();
+  };
+}, []);  const savedUser = localStorage.getItem("user");
+
 
   const login = (u: AppUser) => {
   setUser(u);

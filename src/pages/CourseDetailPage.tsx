@@ -89,29 +89,17 @@ export function CourseDetailPage() {
   };
 
   // ✅ Always resolves the numeric student id from auth_id
-  const getStudentId = async (): Promise<number | null> => {
-    if (!user) return null;
+const getStudentId = (): number | null => {
+  if (!user) return null;
 
-    const { data, error } = await supabase
-      .from("students")
-      .select("id")
-      .eq("auth_id", user.id)
-      .single();
-
-    if (error) {
-      console.error("getStudentId error:", error);
-      return null;
-    }
-
-    console.log("getStudentId resolved:", data?.id);
-    return data?.id ?? null;
-  };
+  return Number(user.id);
+};
 
   // ✅ Fixed: uses getStudentId() instead of Number(user.id)
   const checkEnrollment = async () => {
     if (!user || !course) return;
 
-    const studentId = await getStudentId();
+    const studentId = getStudentId();
 
     if (!studentId) {
       console.warn("checkEnrollment: studentId is null, skipping");
@@ -120,27 +108,20 @@ export function CourseDetailPage() {
 
     console.log("checkEnrollment → studentId:", studentId, "course.id:", course.id);
 
-const now = new Date().toISOString();
-
-const { data } = await supabase
+const { data, error } = await supabase
   .from("student_courses")
-  .select(`
-    *,
-    subscription_codes (
-      expires_at
-    )
-  `)
+  .select("*")
   .eq("student_id", studentId)
   .eq("course_id", course.id)
   .eq("active", true);
 
-const valid = data?.some((row: any) => {
-  if (!row.subscription_codes) return true; // كورس مجاني
+console.log("CHECK DATA =", data);
+console.log("CHECK ERROR =", error);
+console.log("COURSE ID =", course.id);
+console.log("STUDENT ID =", studentId);
 
-  return row.subscription_codes.expires_at > now;
-});
-
-setIsEnrolled(valid || false);
+setIsEnrolled((data?.length ?? 0) > 0);
+console.log("IS ENROLLED SHOULD BE =", (data?.length ?? 0) > 0);
   };
 
   useEffect(() => {
@@ -167,7 +148,7 @@ setIsEnrolled(valid || false);
     if (!course) return;
 
     if (course.is_free) {
-      const studentId = await getStudentId();
+      const studentId = getStudentId();
 
       if (!studentId) {
         console.error("handleEnroll: could not resolve studentId");
@@ -445,63 +426,71 @@ console.log("INSERT ERROR =", error);
 
               <div className="p-6">
 
-                {/* Price / enroll button */}
-                {course.is_free ? (
-                  <button
-                    onClick={() => {
-  alert("BUTTON CLICKED");
-  console.log("BUTTON CLICKED");
-  handleEnroll();
-}}
-                    className="
-                      w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white
-                      text-lg sm:text-xl font-black
-                      bg-[#43164f] hover:bg-[#542061]
-                      shadow-lg hover:shadow-rose-300
-                      transition-all duration-300 hover:scale-[1.02]
-                      mb-3 sm:mb-4
-                    "
-                  >
-                    {isEnrolled ? "ابدأ التعلم الآن" : "الدخول للكورس 🎉"}
-                  </button>
-                ) : (
-                  <>
-                    <div className="text-center mb-3 sm:mb-4">
-                      <span className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white">
-                        {course.price}
-                      </span>
-                      <span className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mr-1">
-                        جنيه
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => {
-  if (isEnrolled) {
-    const firstLesson = units[0]?.lessons[0];
+{/* Price / enroll button */}
+{course.is_free ? (
+  <button
+    onClick={() => {
+      alert("BUTTON CLICKED");
+      console.log("BUTTON CLICKED");
+      handleEnroll();
+    }}
+    className="
+      w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white
+      text-lg sm:text-xl font-black
+      bg-[#43164f] hover:bg-[#542061]
+      shadow-lg hover:shadow-rose-300
+      transition-all duration-300 hover:scale-[1.02]
+      mb-3 sm:mb-4
+    "
+  >
+    {isEnrolled ? "الدخول للكورس 🎉" : "اشترك مجانًا"}
+  </button>
+) : (
+  <>
+    {isEnrolled ? (
+      <div className="text-center mb-4">
+        
+      </div>
+    ) : (
+      <div className="text-center mb-3 sm:mb-4">
+        <span className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white">
+          {course.price}
+        </span>
+        <span className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mr-1">
+          جنيه
+        </span>
+      </div>
+    )}
 
-    if (firstLesson?.video_url) {
-      window.open(firstLesson.video_url, "_blank");
+   <button
+  onClick={() => {
+    if (isEnrolled) {
+      const firstLesson = units[0]?.lessons[0];
+
+      if (firstLesson?.video_url) {
+        window.open(firstLesson.video_url, "_blank");
+      }
+
+      return;
     }
 
-    return;
-  }
+    handleEnroll();
+  }}
+  className="
+    w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white
+    text-lg sm:text-xl font-black
+    bg-gradient-to-r from-rose-500 to-pink-500
+    hover:from-rose-600 hover:to-pink-600
+    shadow-lg hover:shadow-rose-300
+    transition-all duration-300 hover:scale-[1.02]
+    mb-3
+  "
+>
+  {isEnrolled ? " أنت مشترك في هذا الكورس" : "اشترك الآن"}
+</button>
 
-  handleEnroll();
-}}
-                      className="
-                        w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white
-                        text-lg sm:text-xl font-black
-                        bg-gradient-to-r from-rose-500 to-pink-500
-                        hover:from-rose-600 hover:to-pink-600
-                        shadow-lg hover:shadow-rose-300
-                        transition-all duration-300 hover:scale-[1.02]
-                        mb-3
-                      "
-                    >
-                      {isEnrolled ? "ابدأ التعلم الآن" : "اشترك الآن"}
-                    </button>
-                  </>
-                )}
+  </>
+)}
 
                 {/* Intro video button */}
                 {course.intro_video && (
@@ -659,64 +648,76 @@ console.log("INSERT ERROR =", error);
                               transition-colors duration-200
                             `}
                           >
-                            {/* Action button — على اليسار */}
-                            <div className="flex-shrink-0">
-                              {isEnrolled ? (
-                                <>
-                                  {isVideo && (
-                                    <button
-                                      onClick={() =>
-                                        window.open(lesson.video_url, "_blank")
-                                      }
-                                      className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-                                    >
-                                      <Play size={13} />
-                                      <span>مشاهدة الفيديو</span>
-                                    </button>
-                                  )}
-                                  {isFile && (
-                                    <button
-                                      onClick={() =>
-                                        window.open(lesson.file_url, "_blank")
-                                      }
-                                      className="flex items-center gap-1.5 sm:gap-2 bg-blue-500 hover:bg-blue-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-blue-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-                                    >
-                                      <FileText size={13} />
-                                      <span>تحميل الملف</span>
-                                    </button>
-                                  )}
-                                  {isHomework && (
-                                    <button
-                                      onClick={() =>
-                                        navigate(`/homework/${lesson.id}`)
-                                      }
-                                      className="flex items-center gap-1.5 sm:gap-2 bg-green-500 hover:bg-green-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-green-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-                                    >
-                                      <ClipboardCheck size={13} />
-                                      <span>حل الواجب</span>
-                                    </button>
-                                  )}
-                                  {isExam && (
-                                    <button
-                                      onClick={() =>
-                                        navigate(`/exam/${lesson.id}`)
-                                      }
-                                      className="flex items-center gap-1.5 sm:gap-2 bg-red-500 hover:bg-red-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-red-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-                                    >
-                                      <ClipboardList size={13} />
-                                      <span>ابدأ الكويز</span>
-                                    </button>
-                                  )}
-                                </>
-                              ) : (
-                                <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl">
-                                  <Lock size={14} />
-                                  <span className="text-xs sm:text-sm font-bold">
-                                    مقفل
-                                  </span>
-                                </div>
-                              )}
-                            </div>
+                 {/* Action button — على اليسار */}
+<div className="flex-shrink-0">
+  {isEnrolled ? (
+    <>
+      {isVideo && (
+        <button
+        onClick={() => {
+  console.log("LESSON =", lesson);
+  console.log("URL =", lesson.url);
+
+  if (!lesson.url) {
+    alert("الرابط غير موجود");
+    return;
+  }
+
+            window.open(lesson.url, "_blank", "noopener,noreferrer");
+          }}
+          className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+        >
+          <Play size={13} />
+          <span>مشاهدة الفيديو</span>
+        </button>
+      )}
+
+      {isFile && (
+        <button
+          onClick={() => {
+            if (!lesson.url) {
+              alert("رابط الملف غير موجود");
+              return;
+            }
+
+            window.open(lesson.url, "_blank", "noopener,noreferrer");
+          }}
+          className="flex items-center gap-1.5 sm:gap-2 bg-blue-500 hover:bg-blue-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-blue-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+        >
+          <FileText size={13} />
+          <span>تحميل الملف</span>
+        </button>
+      )}
+
+      {isHomework && (
+        <button
+          onClick={() => navigate(`/homework/${lesson.id}`)}
+          className="flex items-center gap-1.5 sm:gap-2 bg-green-500 hover:bg-green-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-green-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+        >
+          <ClipboardCheck size={13} />
+          <span>حل الواجب</span>
+        </button>
+      )}
+
+      {isExam && (
+        <button
+          onClick={() => navigate(`/exam/${lesson.id}`)}
+          className="flex items-center gap-1.5 sm:gap-2 bg-red-500 hover:bg-red-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-red-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+        >
+          <ClipboardList size={13} />
+          <span>ابدأ الكويز</span>
+        </button>
+      )}
+    </>
+  ) : (
+    <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl">
+      <Lock size={14} />
+      <span className="text-xs sm:text-sm font-bold">
+        مقفل
+      </span>
+    </div>
+  )}
+</div>
 
                             {/* Title + icon — على اليمين */}
                             <div className="flex items-center gap-2 sm:gap-3 text-right flex-1 min-w-0">

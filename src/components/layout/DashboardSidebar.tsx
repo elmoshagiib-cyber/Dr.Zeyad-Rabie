@@ -3,9 +3,23 @@ import { SidebarHeader } from "./sidebar/SidebarHeader";
 import { SidebarNavigation } from "./sidebar/SidebarNavigation";
 import { cn } from "../../utils/cn";
 import {
-  LayoutDashboard, BookOpen, FileText, ClipboardList, Trophy,
-  Bell, User, BarChart2, Users, CheckCircle, Settings,
-  PlusCircle, MessageSquare, LogOut, Video, QrCode,
+  LayoutDashboard,
+  BookOpen,
+  FileText,
+  ClipboardList,
+  Trophy,
+  Bell,
+  User,
+  BarChart2,
+  Users,
+  CheckCircle,
+  Settings,
+  PlusCircle,
+  MessageSquare,
+  LogOut,
+  Video,
+  QrCode,
+  Home,
 } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { useState, useEffect } from "react";
@@ -32,7 +46,6 @@ const studentNav: NavItem[] = [
     label: "الواجبات",
     path: "/dashboard/homework",
     icon: <FileText size={20} />,
-    badge: 2,
   },
   {
     label: "الامتحانات",
@@ -45,16 +58,21 @@ const studentNav: NavItem[] = [
     icon: <Trophy size={20} />,
   },
   {
-    label: "الإعلانات",
+    label: "الاشعارات",
     path: "/dashboard/announcements",
     icon: <Bell size={20} />,
-    badge: 3,
+    
   },
   {
     label: "ملفي الشخصي",
     path: "/profile",
     icon: <User size={20} />,
   },
+  {
+  label: "الرئيسية",
+  path: "/",
+  icon: <Home size={20} />,
+},
 ];
 
 const instructorNav: NavItem[] = [
@@ -128,7 +146,7 @@ const adminNav: NavItem[] = [
     icon: <Video size={20} />,
   },
   {
-    label: "الإعلانات",
+    label: "الاشعارات",
     path: "/admin/announcements",
     icon: <MessageSquare size={20} />,
   },
@@ -142,6 +160,7 @@ const adminNav: NavItem[] = [
     path: "/admin/settings",
     icon: <Settings size={20} />,
   },
+
 ];
 
 interface DashboardSidebarProps {
@@ -158,14 +177,18 @@ export function DashboardSidebar({
   
   const navigate = useNavigate();
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(() => {
-    const saved = localStorage.getItem("sidebar-collapsed");
-    return saved === "true";
-  });
+const [collapsed, setCollapsed] = useState(() => {
+  if (type === "student") return false;
 
-  useEffect(() => {
+  const saved = localStorage.getItem("sidebar-collapsed");
+  return saved === "true";
+});
+
+useEffect(() => {
+  if (type !== "student") {
     localStorage.setItem("sidebar-collapsed", String(collapsed));
-  }, [collapsed]);
+  }
+}, [collapsed, type]);
 
   const navItems = 
     type === "student" 
@@ -190,13 +213,12 @@ export function DashboardSidebar({
         mobileOpen 
           ? "rounded-none w-[280px] sm:w-[300px]" 
           : "xl:rounded-2xl",
-        collapsed && !mobileOpen ? "xl:w-[80px]" : "w-[280px] sm:w-[300px]"
+        type !== "student" && collapsed && !mobileOpen
+  ? "xl:w-[80px]"
+  : "w-[280px] sm:w-[300px]"
       )}
     >
-      <SidebarHeader 
-        collapsed={collapsed && !mobileOpen} 
-        setCollapsed={setCollapsed} 
-      />
+   
 
       <SidebarNavigation
         navItems={navItems}
@@ -205,19 +227,7 @@ export function DashboardSidebar({
         onNavigate={handleNav}
       />
 
-      {/* Footer (optional) */}
-      <div className="border-t border-slate-200 p-3 sm:p-4 bg-slate-50/50">
-        <div className="flex items-center gap-2 text-xs text-slate-400">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className={cn(
-            "font-medium transition-opacity duration-200",
-            collapsed && !mobileOpen ? "opacity-0" : "opacity-100"
-          )}>
-            متصل الآن
-          </span>
-        </div>
-      </div>
-
+     
     </aside>
   );
 }

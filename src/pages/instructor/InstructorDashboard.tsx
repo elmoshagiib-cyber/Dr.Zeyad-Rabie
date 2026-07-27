@@ -235,9 +235,9 @@ const recentActivities = [
   },
 
   {
-    title: "الإعلانات",
+    title: "الاشعارات",
     value: totalAnnouncements,
-    subtitle: "الإعلانات الحالية",
+    subtitle: "الاشعارات الحالية",
     icon: Bell,
     color: "bg-pink-50 text-pink-600",
   },

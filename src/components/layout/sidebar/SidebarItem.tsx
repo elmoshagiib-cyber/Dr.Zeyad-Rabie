@@ -105,7 +105,7 @@ export function SidebarItem({
       {!collapsed && (
         <div className="flex items-center gap-2">
 
-          {badge && badge > 0 && (
+         {typeof badge === "number" && badge > 0 && (
             <div
               className={cn(
                 `

@@ -33,7 +33,18 @@ export function InstructorStudents() {
   useEffect(() => { loadStudents(); }, []);
 
   const loadStudents = async () => {
-    const { data, error } = await supabase.from("students").select("*");
+const { data, error } = await supabase
+  .from("students")
+  .select(`
+    *,
+    student_courses(
+      id,
+      active
+    )
+  `);
+ 
+  console.log(data);
+console.log(error);
     if (!error) setStudents(data || []);
   };
 
@@ -273,7 +284,7 @@ export function InstructorStudents() {
                       {/* الكورسات */}
                       <td className="px-4 sm:px-6 py-3 sm:py-5">
                         <span className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs sm:text-sm font-medium">
-                          {student.courses || 0} كورس
+                          {student.student_courses?.length || 0} كورس
                         </span>
                       </td>
 

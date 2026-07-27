@@ -29,11 +29,13 @@ import { useApp } from "../../context/AppContext";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { COURSES, LEADERBOARD, CURRENT_STUDENT } from "../../data/mockData";
+import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
+import StudentLayout from "./StudentLayout";
 
 export function StudentDashboard() {
   const navigate = useNavigate();
   const { user } = useApp();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [studentCourses, setStudentCourses] = useState<any[]>([]);
   const [homeworks, setHomeworks] = useState<any[]>([]);
@@ -84,78 +86,88 @@ export function StudentDashboard() {
     }
   };
 
-  const loadStudentCourses = async () => {
-    if (!user?.id) return;
+ const loadStudentCourses = async () => {
+  if (!user?.id) return;
 
-    try {
-      setLoading(true);
-      const { data: enrollments } = await supabase
-        .from("student_courses")
-        .select("course_id")
-        .eq("student_id", Number(user.id))
-        .eq("active", true);
+  try {
+    setLoading(true);
 
-      if (!enrollments) {
-        setLoading(false);
-        return;
-      }
+    const { data: enrollments, error: enrollError } = await supabase
+      .from("student_courses")
+      .select("course_id")
+      .eq("student_id", Number(user.id))
+      .eq("active", true);
 
-      const courseIds = enrollments.map((c: any) => c.course_id);
+    if (enrollError) throw enrollError;
 
-      if (courseIds.length > 0) {
-        const { data: courses } = await supabase
-          .from("courses")
-          .select("*")
-          .in("id", courseIds);
-
-        setStudentCourses(courses || []);
-      }
-    } catch (error) {
-      console.error("Error loading courses:", error);
-    } finally {
-      setLoading(false);
+    if (!enrollments?.length) {
+      setStudentCourses([]);
+      return;
     }
-  };
+
+    const courseIds = enrollments.map((c: any) => c.course_id);
+
+    const { data: courses, error: courseError } = await supabase
+      .from("courses")
+      .select("*")
+      .in("id", courseIds);
+
+    if (courseError) throw courseError;
+
+    const coursesWithStats = await Promise.all(
+      (courses || []).map(async (course: any) => {
+        const { data: sections } = await supabase
+          .from("course_sections")
+          .select("id")
+          .eq("course_id", course.id);
+
+        const sectionIds = (sections || []).map((s: any) => s.id);
+
+        let lessons = [];
+
+        if (sectionIds.length > 0) {
+          const { data: items } = await supabase
+            .from("course_items")
+            .select("*")
+            .in("section_id", sectionIds);
+
+          lessons = items || [];
+        }
+
+        return {
+          ...course,
+
+          progress: 0,
+
+          sectionsCount: sections?.length || 0,
+
+          lessonsCount: lessons.length,
+
+          videosCount: lessons.filter(
+            (l: any) => l.type === "video"
+          ).length,
+
+          filesCount: lessons.filter(
+            (l: any) => l.type === "file"
+          ).length,
+
+          examsCount: lessons.filter(
+            (l: any) => l.type === "exam"
+          ).length,
+        };
+      })
+    );
+
+    setStudentCourses(coursesWithStats);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Stats configuration
-  const stats = [
-    {
-      label: "الكورسات المشترك بها",
-      value: studentCourses.length.toString(),
-      icon: <BookOpen size={20} />,
-      gradient: "from-blue-500 to-blue-600",
-      bgLight: "bg-blue-50",
-      textColor: "text-blue-600",
-      iconBg: "bg-blue-500",
-    },
-    {
-      label: "نسبة الإكمال",
-      value: "0%",
-      icon: <TrendingUp size={20} />,
-      gradient: "from-violet-500 to-violet-600",
-      bgLight: "bg-violet-50",
-      textColor: "text-violet-600",
-      iconBg: "bg-violet-500",
-    },
-    {
-      label: "الترتيب في الصف",
-      value: "#--",
-      icon: <Trophy size={20} />,
-      gradient: "from-amber-500 to-amber-600",
-      bgLight: "bg-amber-50",
-      textColor: "text-amber-600",
-      iconBg: "bg-amber-500",
-    },
-    {
-      label: "النقاط المكتسبة",
-      value: "0",
-      icon: <Star size={20} />,
-      gradient: "from-emerald-500 to-emerald-600",
-      bgLight: "bg-emerald-50",
-      textColor: "text-emerald-600",
-      iconBg: "bg-emerald-500",
-    },
-  ];
+
 
   const topThree = LEADERBOARD.slice(0, 3);
 
@@ -193,154 +205,22 @@ export function StudentDashboard() {
     }
   };
 
-  return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-violet-50/20 overflow-hidden" dir="rtl">
-      {/* Sidebar - Desktop */}
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="student" />
-      </div>
+return (
+<StudentLayout>
 
-      {/* Mobile sidebar overlay */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div 
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
-            onClick={() => setMobileMenuOpen(false)} 
-          />
-          <div className="absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] animate-slide-in-right">
-            <DashboardSidebar type="student" onClose={() => setMobileMenuOpen(false)} />
-          </div>
-        </div>
-      )}
+
+
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        {/* Enhanced Top Bar */}
-        <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm">
-          <div className="px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              {/* Right Section */}
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setMobileMenuOpen(true)} 
-                  className="lg:hidden p-2.5 rounded-xl hover:bg-slate-100 transition-all active:scale-95"
-                >
-                  <Menu size={22} className="text-slate-700" />
-                </button>
-                <div>
-                  <h1 className="font-black text-slate-900 text-lg sm:text-xl bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
-                    لوحة التحكم
-                  </h1>
-                  <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
-                    أهلاً بك، {user?.name?.split(" ")[0]} 👋
-                  </p>
-                </div>
-              </div>
+    <>
 
-              {/* Left Section */}
-              <div className="flex items-center gap-2 sm:gap-3">
-                <button 
-                  onClick={() => navigate("/dashboard/announcements")} 
-                  className="relative p-2.5 rounded-xl bg-gradient-to-br from-blue-50 to-violet-50 hover:from-blue-100 hover:to-violet-100 transition-all active:scale-95 group"
-                >
-                  <Bell size={18} className="text-blue-600 group-hover:scale-110 transition-transform" />
-                  {announcements.some(a => a.is_new) && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full animate-pulse">
-                      <span className="absolute inset-0 bg-rose-500 rounded-full animate-ping"></span>
-                    </span>
-                  )}
-                </button>
-                <div className="hidden sm:block">
-                  <Avatar name={user?.name} size="sm" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-          {/* Enhanced Welcome Banner */}
-          <div className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-violet-700 rounded-3xl p-6 sm:p-8 overflow-hidden shadow-2xl shadow-blue-500/20">
-            {/* Decorative circles */}
-            <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
-            <div className="absolute bottom-0 right-0 w-96 h-96 bg-violet-500/20 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl"></div>
-            
-            <div className="relative">
-              <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6">
-                <div className="flex-1">
-                  <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 mb-3">
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                    <span className="text-white/90 text-xs font-medium">نشط الآن</span>
-                  </div>
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-2">
-                    مرحباً، {user?.name?.split(" ")[0]}! 🎉
-                  </h2>
-                  <p className="text-blue-100 text-sm sm:text-base">
-                    {user?.gradeLabel} • {user?.governorate}
-                  </p>
-                </div>
 
-                {/* Rank Card */}
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 shadow-lg">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-1">
-                      <Trophy className="text-amber-300" size={20} />
-                      <p className="text-white font-black text-3xl">#12</p>
-                    </div>
-                    <p className="text-blue-100 text-xs font-medium">ترتيبك في الصف</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Stats Pills */}
-              <div className="flex flex-wrap gap-3">
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-xl px-4 py-2.5 border border-white/20">
-                  <Flame size={18} className="text-orange-300" />
-                  <div>
-                    <p className="text-white text-sm font-bold">7 أيام</p>
-                    <p className="text-blue-100 text-xs">متواصلة</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-xl px-4 py-2.5 border border-white/20">
-                  <Target size={18} className="text-emerald-300" />
-                  <div>
-                    <p className="text-white text-sm font-bold">90%</p>
-                    <p className="text-blue-100 text-xs">هدفك</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-xl px-4 py-2.5 border border-white/20">
-                  <Activity size={18} className="text-cyan-300" />
-                  <div>
-                    <p className="text-white text-sm font-bold">نشط</p>
-                    <p className="text-blue-100 text-xs">كل يوم</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Enhanced Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {stats.map((stat, i) => (
-              <Card 
-                key={i} 
-                className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border-0"
-              >
-                <div className="p-4 sm:p-5">
-                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
-                    <div className="text-white">{stat.icon}</div>
-                  </div>
-                  <p className="text-2xl sm:text-3xl font-black text-slate-900 mb-1">
-                    {stat.value}
-                  </p>
-                  <p className="text-slate-500 text-xs sm:text-sm font-medium">
-                    {stat.label}
-                  </p>
-                </div>
-              </Card>
-            ))}
+       
           </div>
 
           <div className="grid lg:grid-cols-3 gap-6">
@@ -401,16 +281,18 @@ export function StudentDashboard() {
                             <h3 className="font-bold text-slate-900 text-base leading-snug group-hover:text-blue-600 transition-colors">
                               {course.title}
                             </h3>
-                            <Badge variant="blue" className="flex-shrink-0 font-bold">
-                              0%
-                            </Badge>
+                            
                           </div>
 
-                          <p className="text-sm text-slate-500 mb-3 line-clamp-2">
-                            {course.description || "وصف الكورس"}
-                          </p>
+<div className="flex items-center gap-4 text-sm text-slate-500 mb-3">
+  <span className="flex items-center gap-1">
+    📚 {course.sectionsCount} أقسام
+  </span>
 
-                          <ProgressBar value={0} size="sm" className="mb-3" />
+  <span className="flex items-center gap-1">
+    🎥 {course.lessonsCount} درس
+  </span>
+</div>
 
                           <div className="flex items-center justify-between">
                             <button
@@ -423,16 +305,15 @@ export function StudentDashboard() {
                               <Play size={16} className="group-hover:scale-110 transition-transform" /> 
                               متابعة التعلم
                             </button>
-                            <div className="flex items-center gap-4 text-xs text-slate-400">
-                              <span className="flex items-center gap-1">
-                                <BookOpen size={14} />
-                                0 درس
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock size={14} />
-                                0 ساعة
-                              </span>
-                            </div>
+                            <div className="flex items-center gap-4 text-xs text-slate-500">
+  <span className="flex items-center gap-1">
+    📄 {course.filesCount} ملفات
+  </span>
+
+  <span className="flex items-center gap-1">
+    📝 {course.examsCount} امتحانات
+  </span>
+</div>
                           </div>
                         </div>
                       </CardContent>
@@ -473,53 +354,27 @@ export function StudentDashboard() {
             <div className="space-y-5">
               {/* Enhanced Upcoming Tasks */}
               <Card className="border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <h3 className="font-black text-slate-900 text-lg mb-5 flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-                      <Clock size={16} className="text-white" />
-                    </div>
-                    المهام القادمة
-                  </h3>
+  <CardContent className="py-16 text-center">
+    <Activity
+      size={48}
+      className="mx-auto text-blue-500 mb-4"
+    />
 
-                  {homeworks.length > 0 ? (
-                    <div className="space-y-3">
-                      {homeworks.slice(0, 5).map((hw) => (
-                        <div 
-                          key={hw.id} 
-                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
-                        >
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                            <FileText size={18} className="text-amber-600" />
-                          </div>
+    <h3 className="text-2xl font-black text-slate-900 mb-3">
+      آخر النشاطات
+    </h3>
 
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-slate-700 truncate group-hover:text-amber-600 transition-colors">
-                              {hw.title}
-                            </p>
-                            <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                              <Calendar size={12} />
-                              {new Date(hw.due_date).toLocaleDateString("ar-EG", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric"
-                              })}
-                            </p>
-                          </div>
+    <p className="text-slate-500 leading-8 mb-5">
+      سيتم عرض آخر مشاهدة للدروس
+      وآخر الامتحانات والواجبات
+      بعد الانتهاء من نظام تتبع النشاط.
+    </p>
 
-                          <ChevronRight size={16} className="text-slate-300 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                        <CheckCircle2 className="text-slate-400" size={24} />
-                      </div>
-                      <p className="text-slate-500 text-sm">لا توجد مهام قادمة</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+    <Badge variant="blue">
+      🚧 تحت التطوير
+    </Badge>
+  </CardContent>
+</Card>
 
               {/* Enhanced Leaderboard */}
               <Card className="border-0 shadow-lg overflow-hidden">
@@ -539,150 +394,52 @@ export function StudentDashboard() {
                 </div>
 
                 <CardContent className="p-5">
-                  <div className="space-y-3">
-                    {topThree.map((s, idx) => (
-                      <div 
-                        key={s.rank} 
-                        className={`flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer ${
-                          idx === 0 ? 'bg-gradient-to-r from-amber-50 to-yellow-50' :
-                          idx === 1 ? 'bg-gradient-to-r from-slate-50 to-gray-50' :
-                          'bg-gradient-to-r from-orange-50 to-amber-50'
-                        } hover:shadow-md`}
-                      >
-                        <span className="text-2xl flex-shrink-0">
-                          {s.badge || `#${s.rank}`}
-                        </span>
-                        <Avatar name={s.name} size="sm" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-slate-800 truncate">
-                            {s.name}
-                          </p>
-                          <p className="text-xs text-slate-500">{s.grade}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-lg font-black bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
-                            {s.score}%
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+               <div className="flex flex-col items-center justify-center py-12 text-center">
+  <div className="text-5xl mb-4">🏆</div>
+
+  <h3 className="text-xl font-black text-slate-800 mb-2">
+    قريبًا
+  </h3>
+
+  <p className="text-slate-500 leading-7 max-w-xs">
+    يتم العمل حاليًا على نظام المتصدرين وترتيب الطلاب حسب الأداء والدرجات.
+  </p>
+
+  <span className="mt-5 px-4 py-2 rounded-full bg-amber-100 text-amber-700 font-bold text-sm">
+    🚧 تحت التطوير
+  </span>
+</div>
                 </CardContent>
               </Card>
-
-              {/* Enhanced Recent Activity */}
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <h3 className="font-black text-slate-900 text-lg mb-5 flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center">
-                      <Activity size={16} className="text-white" />
-                    </div>
-                    آخر النشاطات
-                  </h3>
-
-                  <div className="space-y-4">
-                    {CURRENT_STUDENT.recentActivity.map((act, i) => (
-                      <div key={i} className="flex items-start gap-3 group cursor-pointer">
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all group-hover:scale-110 ${
-                          act.type === "lesson" ? "bg-blue-100" :
-                          act.type === "quiz" ? "bg-violet-100" :
-                          "bg-emerald-100"
-                        }`}>
-                          {act.type === "lesson" ? (
-                            <Play size={16} className="text-blue-600" />
-                          ) : act.type === "quiz" ? (
-                            <FileText size={16} className="text-violet-600" />
-                          ) : (
-                            <BookOpen size={16} className="text-emerald-600" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-slate-700 leading-relaxed group-hover:text-slate-900">
-                            {act.text}
-                          </p>
-                          <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                            <Clock size={12} />
-                            {act.time}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+             
             </div>
           </div>
 
           {/* Enhanced Announcements Section */}
-          <Card className="border-0 shadow-lg overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-violet-600 p-5">
-              <div className="flex items-center justify-between text-white">
-                <h2 className="font-black text-xl flex items-center gap-2">
-                  <Bell size={22} />
-                  آخر الإشعارات
-                </h2>
-                <button 
-                  onClick={() => navigate("/dashboard/announcements")} 
-                  className="text-sm font-bold bg-white/20 rounded-xl px-4 py-2 hover:bg-white/30 transition-all"
-                >
-                  عرض الكل
-                </button>
-              </div>
-            </div>
+         <Card className="border-0 shadow-lg">
+  <CardContent className="py-16 text-center">
+    <Bell
+      size={48}
+      className="mx-auto text-violet-500 mb-4"
+    />
 
-            <CardContent className="p-6">
-              {announcements.length > 0 ? (
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {announcements.slice(0, 6).map((ann: any) => {
-                    const style = getAnnouncementStyle(ann.type);
-                    return (
-                      <div
-                        key={ann.id}
-                        className={`${style.bg} rounded-2xl p-4 border-r-4 ${style.border} hover:shadow-lg transition-all cursor-pointer group`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className={`w-10 h-10 ${style.iconBg} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
-                            {style.icon}
-                          </div>
+    <h3 className="text-2xl font-black text-slate-900 mb-3">
+      آخر الإشعارات
+    </h3>
 
-                          <div className="flex-1 min-w-0">
-                            {ann.is_new && (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-gradient-to-r from-blue-600 to-violet-600 text-white px-2 py-1 rounded-full mb-2">
-                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
-                                جديد
-                              </span>
-                            )}
+    <p className="text-slate-500 leading-8 mb-5">
+      سيتم عرض أحدث الاشعارات
+      التي ينشرها المستر مباشرة هنا.
+    </p>
 
-                            <p className="text-sm text-slate-700 leading-relaxed mb-2">
-                              {ann.content}
-                            </p>
-
-                            <p className="text-xs text-slate-500 flex items-center gap-1">
-                              <Clock size={12} />
-                              {new Date(ann.created_at).toLocaleDateString("ar-EG", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric"
-                              })}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Bell className="text-slate-400" size={32} />
-                  </div>
-                  <p className="text-slate-500">لا توجد إشعارات حالياً</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+    <Badge variant="blue">
+      🚧 سيتم تفعيلها مع لوحة تحكم المستر
+    </Badge>
+  </CardContent>
+</Card>
         </div>
-      </main>
-    </div>
-  );
+    </>
+</StudentLayout>
+);
+
 }
