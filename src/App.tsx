@@ -34,7 +34,7 @@ import { EditStudent } from "./pages/instructor/EditStudent";
 import { InstructorAttendance } from "./pages/instructor/InstructorAttendance";
 import { EditCourse } from "./pages/instructor/EditCourse";
 import SubscriptionCodes from "./pages/instructor/SubscriptionCodes";
-
+import { HomeworkDetailsPage } from "./pages/student/HomeworkDetailsPage";
 /* Admin */
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 
@@ -93,6 +93,15 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+<Route
+  path="/dashboard/homework/:id"
+  element={
+    <ProtectedRoute roles={["student"]}>
+      <HomeworkDetailsPage />
+    </ProtectedRoute>
+  }
+/>
 
       <Route
         path="/dashboard/courses"

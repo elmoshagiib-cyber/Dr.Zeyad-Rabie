@@ -691,7 +691,14 @@ console.log("INSERT ERROR =", error);
 
       {isHomework && (
         <button
-          onClick={() => navigate(`/dashboard/homework/${lesson.id}`)}
+          onClick={() =>
+  navigate(`/dashboard/homework/${lesson.id}`, {
+    state: {
+      fromCourse: true,
+      courseId: slug,
+    },
+  })
+}
           className="flex items-center gap-1.5 sm:gap-2 bg-green-500 hover:bg-green-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-green-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
         >
           <ClipboardCheck size={13} />
@@ -699,15 +706,29 @@ console.log("INSERT ERROR =", error);
         </button>
       )}
 
-      {isExam && (
-        <button
-          onClick={() => navigate(`/dashboard/exams/${lesson.id}`)}
-          className="flex items-center gap-1.5 sm:gap-2 bg-red-500 hover:bg-red-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-red-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-        >
-          <ClipboardList size={13} />
-          <span>ابدأ الكويز</span>
-        </button>
-      )}
+{isExam && (
+  <button
+    onClick={async () => {
+      const { data, error } = await supabase
+        .from("exams")
+        .select("id")
+        .eq("course_item_id", lesson.id)
+        .single();
+
+      if (error || !data) {
+        console.error(error);
+        alert("الامتحان غير موجود");
+        return;
+      }
+
+      navigate(`/dashboard/exams/${data.id}`);
+    }}
+    className="flex items-center gap-1.5 sm:gap-2 bg-red-500 hover:bg-red-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-red-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+  >
+    <ClipboardList size={13} />
+    <span>ابدأ الكويز</span>
+  </button>
+)}
     </>
   ) : (
     <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl">

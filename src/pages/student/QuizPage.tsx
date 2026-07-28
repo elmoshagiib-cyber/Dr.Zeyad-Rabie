@@ -26,6 +26,7 @@ export function QuizPage() {
   console.log("QUIZ PAGE LOADED");
   const navigate = useNavigate();
   const { id } = useParams();
+const examId = Number(id);
 
   const [quiz, setQuiz] = useState<any>(null);
   const [questions, setQuestions] = useState<any[]>([]);
@@ -47,16 +48,33 @@ export function QuizPage() {
     getCurrentUser();
   }, []);
 
-  const getCurrentUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      setStudentId(user.id);
-    }
-  };
+const getCurrentUser = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return;
+
+  const { data: student, error } = await supabase
+    .from("students")
+    .select("id")
+    .eq("auth_id", user.id)
+    .single();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setStudentId(student.id);
+};
 
   // Load exam and check for existing attempt
   useEffect(() => {
     if (studentId) {
+      console.log("URL ID =", id);
+console.log("TYPE =", typeof id);
+console.log("NUMBER =", Number(id));
       loadExam();
     }
   }, [studentId]);
@@ -92,7 +110,7 @@ export function QuizPage() {
         const { data: existingAttempt, error: resultError } = await supabase
           .from("exam_results")
           .select("*")
-          .eq("exam_id", id)
+          .eq("exam_id", examId)
           .eq("student_id", studentId)
           .maybeSingle();
 
@@ -215,16 +233,15 @@ setWrongAnswers(result.wrong);
     if (studentId && id) {
       try {
 const resultData = {
-    exam_id: id,
-    student_id: studentId,
+   exam_id: quiz.id,
+student_id: Number(studentId),
     score: result.percentage,
     percentage: result.percentage,
-    passed: passed,
+    passed,
     correct_answers: result.correct,
     wrong_answers: result.wrong,
     total_questions: result.total,
 };
-
         const { error: insertError } = await supabase
           .from("exam_results")
           .insert([resultData]);
@@ -454,12 +471,12 @@ const resultData = {
                     إلغاء
                   </Button>                   
 <Button
-variant="default"
-className="bg-green-600 hover:bg-green-700"
-onClick={handleSubmitClick}
+  variant="default"
+  className="bg-green-600 hover:bg-green-700"
+  onClick={handleSubmitConfirmed}
 >
-                    تسليم الاختبار
-                  </Button>
+  تسليم الاختبار
+</Button>
                 </div>
               </div>
             </div>
@@ -531,11 +548,15 @@ onClick={handleSubmitClick}
         <main className="flex-1 overflow-y-auto flex items-center justify-center p-6">
           <div className="max-w-lg w-full">
             <div className="bg-white dark:bg-[#1E244F] rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
-              <div className={`p-8 text-center ${passed ? "bg-gradient-to-br from-emerald-500 to-emerald-600" : "bg-gradient-to-br from-rose-500 to-rose-600"}`}>
-                <div className="text-6xl mb-3">{passed ? "🏆" : "😔"}</div>
-                <h2 className="text-2xl font-black text-white mb-1">{passed ? "أحسنت! نجحت!" : "لم تنجح هذه المرة"}</h2>
-                <p className="text-white/80 text-sm">{passed ? "نتيجة رائعة، استمر في التميز" : "راجع المادة وحاول مرة أخرى"}</p>
-              </div>
+              <div className="p-8 text-center border-b border-slate-200">
+  <h2 className="text-2xl font-black text-slate-900">
+    نتيجة الاختبار
+  </h2>
+
+  <p className="text-slate-500 mt-2 text-sm">
+    تم تسليم الاختبار بنجاح
+  </p>
+</div>
               <div className="p-8 space-y-6">
                 {/* Score Circle */}
                 <div className="flex justify-center">
@@ -567,25 +588,57 @@ onClick={handleSubmitClick}
                   <span className="text-lg font-black text-slate-900">{quiz.passing_grade}%</span>
                 </div>
 
-                {/* Question Review */}
-                <div>
-                  <h3 className="font-black text-slate-900 mb-3 text-sm">مراجعة الإجابات</h3>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {questions.map((q, i) => {
-                      const selected = answers[String(q.id)];
-                      const isRight = selected === q.correct_answer;
-                      return (
-                        <div key={q.id} className={`flex items-center gap-3 p-3 rounded-xl ${isRight ? "bg-emerald-50" : "bg-rose-50"}`}>
-                          {isRight ? <CheckCircle size={15} className="text-emerald-500 flex-shrink-0" /> : <XCircle size={15} className="text-rose-500 flex-shrink-0" />}
-                          <p className="text-xs text-slate-700 flex-1 truncate">س{i + 1}: {q.question.substring(0, 50)}...</p>
-                          <span className={`text-xs font-bold ${isRight ? "text-emerald-600" : "text-rose-600"}`}>
-                            {isRight ? "✓" : "✗"}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+              {/* Question Review */}
+<div>
+  <h3 className="font-black text-slate-900 mb-3 text-sm">
+    مراجعة الإجابات
+  </h3>
+
+  <div className="space-y-2 max-h-48 overflow-y-auto">
+    {questions.map((q: any, i: number) => {
+      const selected = answers[String(q.id)];
+
+      const correctChoice = (q.question_choices || []).find(
+        (c: any) => c.is_correct
+      );
+
+      const isRight = selected === correctChoice?.id;
+
+      return (
+        <div
+          key={q.id}
+          className={`flex items-center gap-3 p-3 rounded-xl ${
+            isRight ? "bg-emerald-50" : "bg-rose-50"
+          }`}
+        >
+          {isRight ? (
+            <CheckCircle
+              size={15}
+              className="text-emerald-500 flex-shrink-0"
+            />
+          ) : (
+            <XCircle
+              size={15}
+              className="text-rose-500 flex-shrink-0"
+            />
+          )}
+
+          <p className="text-xs text-slate-700 flex-1 truncate">
+            س{i + 1}: {q.title}
+          </p>
+
+          <span
+            className={`text-xs font-bold ${
+              isRight ? "text-emerald-600" : "text-rose-600"
+            }`}
+          >
+            {isRight ? "✓" : "✗"}
+          </span>
+        </div>
+      );
+    })}
+  </div>
+</div>
 
                 <div className="flex gap-3">
                   <Button  onClick={() => navigate("/dashboard")}>
@@ -626,56 +679,58 @@ onClick={handleSubmitClick}
         </div>
 
         <div className="max-w-3xl mx-auto p-6 space-y-6">
-          {/* Question */}
-          <div className="bg-white dark:bg-[#1E244F] rounded-2xl border border-slate-200 shadow-sm p-8">
-            <div className="flex items-start gap-3 mb-6">
-              <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-black text-sm flex items-center justify-center flex-shrink-0">
-                {currentQ + 1}
-              </div>
-              <div>
-                <p className="text-xs text-slate-400 mb-1">اختيار من متعدد</p>
-                <h2 className="text-lg font-bold text-slate-900 leading-relaxed">{q.question}</h2>
-              </div>
+
+{/* Question */}
+<div className="bg-white dark:bg-[#1E244F] rounded-2xl border border-slate-200 shadow-sm p-8">
+  <div className="flex items-start gap-3 mb-6">
+    <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-black text-sm flex items-center justify-center flex-shrink-0">
+      {currentQ + 1}
+    </div>
+
+    <div>
+      <p className="text-xs text-slate-400 mb-1">
+        {q.type === "mcq" ? "اختيار من متعدد" : "سؤال"}
+      </p>
+
+      <h2 className="text-lg font-bold text-slate-900 leading-relaxed">
+        {q.title}
+      </h2>
+    </div>
+  </div>
+
+  <div className="space-y-3">
+    {(q.question_choices || []).map((choice: any) => {
+      const selected = answers[String(q.id)] === choice.id;
+
+      return (
+        <button
+          key={choice.id}
+          onClick={() => handleAnswer(String(q.id), choice.id)}
+          className={`w-full text-right p-4 rounded-xl border-2 transition-all font-medium text-sm ${
+            selected
+              ? "border-blue-600 bg-blue-50 text-blue-900"
+              : "border-slate-200 bg-white dark:bg-[#1E244F] text-slate-700 hover:border-blue-300 hover:bg-blue-50/50"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
+                selected
+                  ? "border-blue-600 bg-blue-600"
+                  : "border-slate-300"
+              }`}
+            >
+              {selected && (
+                <div className="w-2 h-2 bg-white rounded-full"></div>
+              )}
             </div>
 
-            <div className="space-y-3">
-              {[
-                { id: "A", text: q.option_a },
-                { id: "B", text: q.option_b },
-                { id: "C", text: q.option_c },
-                { id: "D", text: q.option_d },
-              ].map((option) => {
-                const selected = answers[String(q.id)] === option.id;
-
-                return (
-                  <button
-                    key={option.id}
-                    onClick={() => handleAnswer(String(q.id), option.id)}
-                    className={`w-full text-right p-4 rounded-xl border-2 transition-all font-medium text-sm ${
-                      selected
-                        ? "border-blue-600 bg-blue-50 text-blue-900"
-                        : "border-slate-200 bg-white dark:bg-[#1E244F] text-slate-700 hover:border-blue-300 hover:bg-blue-50/50"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
-                          selected
-                            ? "border-blue-600 bg-blue-600"
-                            : "border-slate-300"
-                        }`}
-                      >
-                        {selected && (
-                          <div className="w-2 h-2 bg-white dark:bg-[#1E244F] rounded-full"></div>
-                        )}
-                      </div>
-
-                      <span>{option.text}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+            <span>{choice.text}</span>
+          </div>
+        </button>
+      );
+    })}
+  </div>
           </div>
 
           {/* Navigation */}
@@ -712,12 +767,13 @@ onClick={handleSubmitClick}
                 <ChevronLeft size={16} />
               </Button>
             ) : (
-            <Button
+<Button
   variant="default"
   className="w-full bg-green-600 hover:bg-green-700"
+  onClick={handleSubmitClick}
 >
-                تسليم الاختبار
-              </Button>
+  تسليم الاختبار
+</Button>
             )}
           </div>
 

@@ -14,6 +14,7 @@ import { Card, CardContent } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { Avatar } from "../components/ui/Avatar";
 import { Download } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import GradeCoursesContent from "../components/student/courses/GradeCoursesContent";
 import {
   ChevronRight,
@@ -214,23 +215,23 @@ ease:[0.22,1,0.36,1]
   >
     مرحبا بكم في منصة
 
-    <span
-className="
-block
-mt-1.5
-sm:mt-2
-text-[32px]
-xs:text-[36px]
-sm:text-[44px]
-md:text-[54px]
-lg:text-[64px]
-font-bold
-leading-tight
-tracking-[-1px]
-text-[#F6AC08]
-dark:text-[#F6AC08]
-"
-    >
+<span
+  className="
+  block
+  mt-1.5
+  sm:mt-2
+  text-[32px]
+  xs:text-[36px]
+  sm:text-[44px]
+  md:text-[54px]
+  lg:text-[64px]
+  font-bold
+  leading-tight
+  tracking-[-1px]
+  text-[#422E91]
+  dark:text-[#5D49B3]
+  "
+>
       مستر زياد ربيع
     </span>
   </h1>
@@ -617,6 +618,38 @@ object-contain
     </div>
   </section>
 </ScrollReveal>
+
+<a
+  href="https://wa.me/201109414585"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="
+    fixed
+    bottom-6
+    right-6
+    z-50
+    group
+  "
+>
+  <div
+    className="
+      w-16
+      h-16
+      rounded-full
+      bg-[#25D366]
+      flex
+      items-center
+      justify-center
+      shadow-[0_12px_30px_rgba(37,211,102,.35)]
+      transition-all
+      duration-300
+      group-hover:scale-110
+      group-hover:shadow-[0_18px_40px_rgba(37,211,102,.45)]
+    "
+  >
+    <FaWhatsapp className="text-white text-[34px]" />
+  </div>
+</a>
 
 <Footer />
 </div>
