@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { X } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { ThemeToggle } from "./ThemeToggle";
 import { LoginButton } from "./LoginButton";
 import { RegisterButton } from "./RegisterButton";
+import { useTheme } from "../../../context/ThemeContext";
+import { TbAtom2 } from "react-icons/tb";
 
 interface NavItem {
   label: string;
@@ -22,6 +24,7 @@ const NAV_ITEMS: NavItem[] = [
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+const { isDark, toggleTheme } = useTheme();
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -32,31 +35,68 @@ export function MobileMenu() {
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.93 }}
           transition={{ type: "spring", stiffness: 400, damping: 22 }}
-          className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-white shadow-sm border border-gray-100 hover:border-gray-200 hover:shadow-md transition-shadow duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2"
+        className="
+md:hidden
+flex
+items-center
+justify-center
+w-11
+h-11
+bg-transparent
+border-0
+shadow-none
+p-0
+"
         >
-          <AnimatePresence mode="wait" initial={false}>
-            {open ? (
-              <motion.span
-                key="close"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.18 }}
-              >
-                <X size={18} strokeWidth={2} className="text-gray-500" aria-hidden="true" />
-              </motion.span>
-            ) : (
-              <motion.span
-                key="menu"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.18 }}
-              >
-                <Menu size={18} strokeWidth={2} className="text-gray-500" aria-hidden="true" />
-              </motion.span>
-            )}
-          </AnimatePresence>
+<AnimatePresence mode="wait" initial={false}>
+  {!open ? (
+    <motion.div
+      key="menu"
+      initial={{ opacity: 0, rotate: -90 }}
+      animate={{ opacity: 1, rotate: 0 }}
+      exit={{ opacity: 0, rotate: 90 }}
+      transition={{ duration: 0.25 }}
+      className="flex flex-col justify-center gap-[5px]"
+    >
+      <motion.span
+  className="block h-[3px] w-7 rounded-full bg-[#FF4D73]"
+  whileHover={{ x: -2 }}
+/>
+      <motion.span
+  className="block h-[3px] w-7 rounded-full bg-[#FF4D73]"
+  whileHover={{ x: -2 }}
+/>
+     <motion.span
+  className="block h-[3px] w-7 rounded-full bg-[#FF4D73]"
+  whileHover={{ x: -2 }}
+/>
+    </motion.div>
+  ) : (
+    <motion.div
+      key="close"
+      initial={{ opacity: 0, rotate: 90 }}
+      animate={{ opacity: 1, rotate: 0 }}
+      exit={{ opacity: 0, rotate: -90 }}
+      transition={{ duration: 0.25 }}
+    >
+<motion.div
+  animate={{ rotate: 360 }}
+  transition={{
+    repeat: Infinity,
+    duration: 3,
+    ease: "linear",
+  }}
+>
+  <TbAtom2
+    size={28}
+    className="text-[#FF4D73]"
+  />
+</motion.div>
+
+    </motion.div>
+  )}
+</AnimatePresence>
+
         </motion.button>
       </Dialog.Trigger>
 
@@ -132,17 +172,25 @@ export function MobileMenu() {
               })}
             </nav>
 
-            {/* Bottom Actions */}
-            <div className="flex flex-col gap-3 px-5 pb-8 pt-4 border-t border-gray-100">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500 font-medium">المظهر</span>
-                <ThemeToggle />
-              </div>
-              <div className="flex flex-col gap-2 pt-1">
-                <LoginButton />
-                <RegisterButton />
-              </div>
-            </div>
+{/* Bottom Actions */}
+<div className="flex flex-col gap-3 px-5 pb-8 pt-4 border-t border-gray-100">
+  <div className="flex items-center justify-between">
+    <span className="text-sm text-gray-500 font-medium">
+      المظهر
+    </span>
+
+    <ThemeToggle
+      isDark={isDark}
+      toggleTheme={toggleTheme}
+    />
+  </div>
+
+  <div className="flex flex-col gap-2 pt-1">
+    <LoginButton />
+    <RegisterButton />
+  </div>
+</div>
+
           </motion.div>
         </Dialog.Content>
       </Dialog.Portal>

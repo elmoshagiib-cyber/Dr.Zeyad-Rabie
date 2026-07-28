@@ -3,12 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { GuestActions } from "./navbar/GuestActions";
 import { ThemeToggle } from "./navbar/ThemeToggle";
 import { SearchButton } from "./navbar/SearchButton";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { UserMenu } from "./navbar/UserMenu";
-import {
-  Menu,
-  X,
-} from "lucide-react";
+
+import { FaReact } from "react-icons/fa6";
 import { useApp } from "../../context/AppContext";
 import { useTheme } from "../../context/ThemeContext";
 export function Navbar() {
@@ -134,9 +132,57 @@ useEffect(() => {
            {!user && (
   <button
     onClick={() => setMobileOpen(!mobileOpen)}
-    className="md:hidden p-2 rounded-xl text-slate-500 hover:bg-violet-50 dark:hover:bg-white/5"
+    className="
+md:hidden
+flex
+items-center
+justify-center
+w-11
+h-11
+bg-transparent
+p-0
+"
   >
-    {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+   <AnimatePresence mode="wait">
+  {!mobileOpen ? (
+    <motion.div
+      key="menu"
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.8 }}
+      transition={{ duration: 0.2 }}
+      className="flex flex-col justify-center gap-[5px]"
+    >
+      <span className="block w-7 h-[3px] rounded-full bg-[#FF4D73]" />
+      <span className="block w-7 h-[3px] rounded-full bg-[#FF4D73]" />
+      <span className="block w-7 h-[3px] rounded-full bg-[#FF4D73]" />
+    </motion.div>
+  ) : (
+    <motion.div
+      key="atom"
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.5 }}
+      transition={{ duration: 0.2 }}
+    >
+   <motion.div
+  animate={{ rotate: 360 }}
+  transition={{
+    repeat: Infinity,
+    duration: 4,
+    ease: "linear",
+  }}
+>
+  <FaReact
+    size={28}
+    className="text-[#FF4D73]"
+  />
+</motion.div>
+
+    </motion.div>
+  )}
+</AnimatePresence>
+
   </button>
 )}
           </div>
@@ -154,7 +200,12 @@ w-full
 h-[52px]
 rounded-xl
 border
-border-violet-300
+border-[#422E91]
+text-[#422E91]
+hover:bg-[#422E91]
+hover:text-white
+transition-all
+duration-300
 mb-3
 "
 >
@@ -164,30 +215,29 @@ mb-3
 <button
   onClick={() => navigate("/register")}
   className="
-    group
-    relative
-    overflow-hidden
-    w-full
-    h-[52px]
-    rounded-xl
-    bg-[#422E91]
-    hover:bg-[#5340A8]
-    text-white
-    font-semibold
-    shadow-[0_12px_30px_rgba(66,46,145,.35)]
-    transition-all
-    duration-300
-  "
->
-  <div
-    className="
+group
+relative
+overflow-hidden
+w-full
+h-[52px]
+rounded-xl
 bg-[#422E91]
 hover:bg-[#5340A8]
 text-white
-rounded-2xl
-shadow-[0_10px_30px_rgba(66,46,145,.28)]
-hover:shadow-[0_14px_36px_rgba(66,46,145,.38)]
+font-semibold
+shadow-[0_12px_30px_rgba(66,46,145,.35)]
 transition-all
+duration-300
+"
+>
+  <div
+    className="
+absolute
+inset-0
+bg-white/10
+opacity-0
+group-hover:opacity-100
+transition-opacity
 duration-300
 "
   />
