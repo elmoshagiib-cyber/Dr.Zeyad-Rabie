@@ -8,7 +8,6 @@ import { ScrollReveal } from "../components/layout/ScrollReveal";
 import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
 import StudentGradeCard from "../components/home/StudentGradeCard";
-import { BannerCarousel } from "../components/home/features/BannerCarousel";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
@@ -140,6 +139,33 @@ const gradeSlugMap: Record<string, string> = {
 };
 
 const userGradeSlug = gradeSlugMap[user?.grade ?? ""] ?? "";
+
+const FEATURES = [
+  {
+    icon: BookOpen,
+    title: "شرح مبسط",
+    description:
+      "شرح بأسلوب سهل ومنظم يساعدك على فهم الكيمياء من أول مرة.",
+  },
+  {
+    icon: GraduationCap,
+    title: "مراجعات شاملة",
+    description:
+      "مراجعات مركزة تغطي جميع أجزاء المنهج مع أهم الأفكار والأسئلة.",
+  },
+  {
+    icon: Star,
+    title: "اختبارات تفاعلية",
+    description:
+      "اختبر مستواك بعد كل درس مع تصحيح فوري وتحليل للنتيجة.",
+  },
+  {
+    icon: TrendingUp,
+    title: "متابعة مستمرة",
+    description:
+      "تابع تقدمك أولًا بأول واعرف نقاط القوة والضعف بسهولة.",
+  },
+];
 
 return (
     <div className="min-h-screen bg-white dark:bg-[#0b0715]" dir="rtl">
@@ -437,7 +463,114 @@ object-contain
             />
           </div>
 
-          <BannerCarousel />
+        <div
+  className="
+  grid
+  grid-cols-1
+  sm:grid-cols-2
+  xl:grid-cols-4
+  gap-6
+  mt-10
+"
+>
+  {FEATURES.map((feature, index) => {
+    const Icon = feature.icon;
+
+    return (
+      <motion.div
+        key={feature.title}
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{
+          duration: .5,
+          delay: index * .12,
+        }}
+        whileHover={{
+          y: -8,
+        }}
+        className="
+        group
+        relative
+        overflow-hidden
+        rounded-3xl
+        border
+        border-[#E7E4F7]
+        dark:border-[#2D356F]
+        bg-white
+        dark:bg-[#1E244F]
+        p-7
+        shadow-[0_15px_45px_rgba(15,23,42,.08)]
+        hover:shadow-[0_25px_60px_rgba(66,46,145,.18)]
+        transition-all
+        duration-300
+        "
+      >
+
+        <div
+          className="
+          absolute
+          top-0
+          left-0
+          w-full
+          h-1
+          bg-[#422E91]
+          scale-x-0
+          group-hover:scale-x-100
+          transition-transform
+          duration-300
+          origin-left
+          "
+        />
+
+        <div
+          className="
+          w-16
+          h-16
+          rounded-2xl
+          bg-[#422E91]
+          flex
+          items-center
+          justify-center
+          mb-6
+          group-hover:scale-110
+          transition-transform
+          duration-300
+          "
+        >
+          <Icon
+            className="text-white"
+            size={30}
+          />
+        </div>
+
+        <h3
+          className="
+          text-xl
+          font-bold
+          text-slate-900
+          dark:text-white
+          mb-3
+          "
+        >
+          {feature.title}
+        </h3>
+
+        <p
+          className="
+          text-[15px]
+          leading-8
+          text-slate-500
+          dark:text-slate-300
+          "
+        >
+          {feature.description}
+        </p>
+
+      </motion.div>
+    );
+  })}
+</div>
 
         </div>
       </section>
@@ -626,7 +759,7 @@ object-contain
   className="
     fixed
     bottom-6
-    right-6
+    left-6
     z-50
     group
   "

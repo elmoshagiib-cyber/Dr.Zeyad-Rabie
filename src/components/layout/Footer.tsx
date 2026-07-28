@@ -42,7 +42,7 @@ export function Footer() {
           className="
             h-20 sm:h-28 lg:h-32
             mx-auto mb-5 sm:mb-6
-            drop-shadow-[0_0_30px_rgba(168,85,247,.45)]
+            
             object-contain
           "
         />

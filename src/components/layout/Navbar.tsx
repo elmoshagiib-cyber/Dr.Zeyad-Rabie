@@ -17,20 +17,22 @@ const [scrollProgress, setScrollProgress] = useState(0);
   const navigate = useNavigate();
   const { user } = useApp();
   const { isDark, toggleTheme } = useTheme();
-
+const [isScrolled, setIsScrolled] = useState(false);
 
 useEffect(() => {
-  const handleScroll = () => {
+const handleScroll = () => {
+  const scrollY = window.scrollY;
 
-    const totalHeight =
-      document.documentElement.scrollHeight -
-      document.documentElement.clientHeight;
+  const totalHeight =
+    document.documentElement.scrollHeight -
+    document.documentElement.clientHeight;
 
-    const progress =
-      (window.scrollY / totalHeight) * 100;
+  const progress = (scrollY / totalHeight) * 100;
 
-    setScrollProgress(progress);
-  };
+  setScrollProgress(progress);
+
+  setIsScrolled(scrollY > 0);
+};
 
   window.addEventListener("scroll", handleScroll);
 
@@ -50,11 +52,13 @@ useEffect(() => {
     w-full
     bg-white
     dark:bg-[#111111]
-    border-b
-    border-[#ECECEC]
-    dark:border-[#2A2A2A]
     transition-all
     duration-300
+    ${
+      isScrolled
+        ? "border-b border-[#ECECEC] dark:border-[#2A2A2A]"
+        : "border-b border-transparent"
+    }
   `}
 >
 
@@ -225,7 +229,6 @@ bg-[#422E91]
 hover:bg-[#5340A8]
 text-white
 font-semibold
-shadow-[0_12px_30px_rgba(66,46,145,.35)]
 transition-all
 duration-300
 "
@@ -249,27 +252,42 @@ duration-300
           </div>
         </div>
       )}
-   <div
-  className="
-absolute
-bottom-0
-left-0
-w-full
-h-[4px]
-bg-[#D9F7F4]
-overflow-hidden
-"
->
-  <motion.div
-    className="
-h-full
-bg-[#27D3C2]
-"
-    style={{
-      width: `${scrollProgress}%`,
-    }}
-  />
-</div>
+
+
+<AnimatePresence>
+  {isScrolled && (
+    <motion.div
+      initial={{ scaleY: 0, opacity: 0 }}
+      animate={{ scaleY: 1, opacity: 1 }}
+      exit={{ scaleY: 0, opacity: 0 }}
+      transition={{
+        duration: 0.25,
+        ease: [0.4, 0, 0.2, 1],
+      }}
+      style={{
+        transformOrigin: "top",
+      }}
+      className="
+        absolute
+        bottom-0
+        left-0
+        w-full
+        h-[3px]
+        pointer-events-none
+      "
+    >
+      <motion.div
+        className="h-full bg-[#422E91]"
+        initial={{ width: "0%" }}
+        animate={{ width: `${scrollProgress}%` }}
+        transition={{
+          duration: 0.1,
+          ease: "linear",
+        }}
+      />
+    </motion.div>
+  )}
+</AnimatePresence>
 
     </nav>
   );
