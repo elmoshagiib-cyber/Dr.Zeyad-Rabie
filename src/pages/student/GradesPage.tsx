@@ -115,7 +115,7 @@ export default function GradesPage() {
                 onClick={() => navigate(`/grade/${grade.id}`)}
                 className="
                   bg-white
-                  dark:bg-[#130726]
+                  dark:bg-[#1E244F]
                   rounded-[24px]
                   sm:rounded-[28px]
                   lg:rounded-[32px]
@@ -173,35 +173,37 @@ export default function GradesPage() {
                     {grade.title}
                   </h3>
 
-                  <button className="
-                    bg-[#371143]
-                    hover:bg-[#4A175B]
-                    text-white
-                    h-10
-                    sm:h-11
-                    lg:h-12
-                    px-3
-                    sm:px-4
-                    lg:px-5
-                    rounded-xl
-                    sm:rounded-2xl
-                    font-bold
-                    flex
-                    items-center
-                    gap-1.5
-                    sm:gap-2
-                    text-sm
-                    sm:text-base
-                    shadow-[0_6px_18px_rgba(0,0,0,.08)]
-                    hover:shadow-[0_10px_28px_rgba(0,0,0,.12)]
-                    transition-all
-                    duration-300
-                    group-hover:scale-105
-                    shrink-0
-                  ">
-                    ابدأ الآن
-                    <ArrowLeft size={16} className="sm:w-[18px] sm:h-[18px]" />
-                  </button>
+                 <button
+  className="
+    bg-[#F8B605]
+    hover:bg-[#E6A600]
+    text-white
+    h-10
+    sm:h-11
+    lg:h-12
+    px-3
+    sm:px-4
+    lg:px-5
+    rounded-xl
+    sm:rounded-2xl
+    font-bold
+    flex
+    items-center
+    gap-1.5
+    sm:gap-2
+    text-sm
+    sm:text-base
+    shadow-[0_6px_18px_rgba(248,182,5,.25)]
+    hover:shadow-[0_10px_28px_rgba(248,182,5,.35)]
+    transition-all
+    duration-300
+    group-hover:scale-105
+    shrink-0
+  "
+>
+  ابدأ الآن
+  <ArrowLeft size={16} className="sm:w-[18px] sm:h-[18px]" />
+</button>
                 </div>
               </motion.div>
             ))}

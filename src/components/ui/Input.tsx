@@ -17,7 +17,7 @@ export function Input({ label, error, icon, className, ...props }: InputProps) {
         <input
           className={cn(
             "w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-slate-900 dark:text-white placeholder-slate-400 text-sm transition-all",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 focus:bg-white dark:bg-[#130726]",
+            "focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 focus:bg-white dark:bg-[#1E244F]",
             icon && "pr-10",
             error && "border-red-400 focus:ring-red-300 focus:border-red-400",
             className
@@ -42,7 +42,7 @@ export function Select({ label, error, children, className, ...props }: SelectPr
       <select
         className={cn(
           "w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-slate-900 text-sm transition-all appearance-none",
-          "focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 focus:bg-white dark:bg-[#130726]",
+          "focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 focus:bg-white dark:bg-[#1E244F]",
           error && "border-red-400",
           className
         )}

@@ -422,44 +422,7 @@ xl:pt-24
                 </p>
               </motion.div>
 
-              {/* ── "How to create account" button ── */}
-              <motion.div
-                className="mb-5 sm:mb-6"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 8 }}
-                transition={{ delay: 0.18, duration: 0.45 }}
-              >
-                <button
-                  type="button"
-                  className="
-bg-[#421651]
-hover:bg-[#532065]
-active:scale-95
-transition-all
-text-white
-font-bold
-text-sm
-sm:text-base
-px-5
-sm:px-7
-py-2.5
-sm:py-3
-rounded-xl
-shadow-[0_10px_30px_rgba(66,22,81,.28)]
-flex
-items-center
-gap-2
-"
-                >
-                  <BookOpen className="w-4 h-4 flex-shrink-0" />
-                  <span className="leading-snug text-right">
-                    طريقة انشاء حساب
-                    <span className="font-normal text-xs sm:text-sm opacity-90 block">
-                     علي منصه مستر زياد ربيع
-                    </span>
-                  </span>
-                </button>
-              </motion.div>
+             
 
               {/* ── FORM ── */}
               <motion.form

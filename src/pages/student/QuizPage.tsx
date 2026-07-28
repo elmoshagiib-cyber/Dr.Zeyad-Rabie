@@ -275,7 +275,7 @@ const resultData = {
         <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
         <main className="flex-1 overflow-y-auto flex items-center justify-center p-6">
           <div className="max-w-lg w-full">
-            <div className="bg-white dark:bg-[#130726] rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+            <div className="bg-white dark:bg-[#1E244F] rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
               <div className="bg-gradient-to-br from-violet-600 to-blue-600 p-8">
                 <div className="h-8 bg-white/20 rounded-lg animate-pulse mb-4"></div>
                 <div className="h-4 bg-white/20 rounded animate-pulse w-2/3 mx-auto"></div>
@@ -306,7 +306,7 @@ const resultData = {
         <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
         <main className="flex-1 overflow-y-auto flex items-center justify-center p-6">
           <div className="max-w-lg w-full">
-            <div className="bg-white dark:bg-[#130726] rounded-3xl shadow-xl border border-slate-200 p-8 text-center">
+            <div className="bg-white dark:bg-[#1E244F] rounded-3xl shadow-xl border border-slate-200 p-8 text-center">
               <div className="text-6xl mb-4">⚠️</div>
               <h2 className="text-2xl font-black text-slate-900 mb-2">حدث خطأ</h2>
               <p className="text-slate-600 mb-6">{error}</p>
@@ -337,7 +337,7 @@ const resultData = {
         <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
         <main className="flex-1 overflow-y-auto flex items-center justify-center p-6">
           <div className="max-w-lg w-full">
-            <div className="bg-white dark:bg-[#130726] rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+            <div className="bg-white dark:bg-[#1E244F] rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
               <div className={`p-8 text-center ${passed ? "bg-gradient-to-br from-blue-500 to-blue-600" : "bg-gradient-to-br from-slate-500 to-slate-600"}`}>
                 <div className="text-6xl mb-3">{passed ? "✅" : "📋"}</div>
                 <h2 className="text-2xl font-black text-white mb-1">لقد أكملت هذا الاختبار</h2>
@@ -414,7 +414,7 @@ const resultData = {
         <main className="flex-1 overflow-y-auto">
           {/* Backdrop */}
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6">
-            <div className="bg-white dark:bg-[#130726] rounded-3xl shadow-2xl border border-slate-200 max-w-md w-full overflow-hidden">
+            <div className="bg-white dark:bg-[#1E244F] rounded-3xl shadow-2xl border border-slate-200 max-w-md w-full overflow-hidden">
               <div className="bg-gradient-to-br from-amber-500 to-orange-600 p-6 text-center">
                 <div className="text-5xl mb-3">⚠️</div>
                 <h3 className="text-xl font-black text-white">تأكيد التسليم</h3>
@@ -476,7 +476,7 @@ onClick={handleSubmitClick}
         <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
         <main className="flex-1 overflow-y-auto flex items-center justify-center p-6">
           <div className="max-w-lg w-full">
-            <div className="bg-white dark:bg-[#130726] rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+            <div className="bg-white dark:bg-[#1E244F] rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
               <div className="bg-gradient-to-br from-violet-600 to-blue-600 p-8 text-center">
                 <div className="text-6xl mb-4">🧪</div>
                 <h1 className="text-2xl font-black text-white mb-2">{quiz.title}</h1>
@@ -530,7 +530,7 @@ onClick={handleSubmitClick}
         <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
         <main className="flex-1 overflow-y-auto flex items-center justify-center p-6">
           <div className="max-w-lg w-full">
-            <div className="bg-white dark:bg-[#130726] rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+            <div className="bg-white dark:bg-[#1E244F] rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
               <div className={`p-8 text-center ${passed ? "bg-gradient-to-br from-emerald-500 to-emerald-600" : "bg-gradient-to-br from-rose-500 to-rose-600"}`}>
                 <div className="text-6xl mb-3">{passed ? "🏆" : "😔"}</div>
                 <h2 className="text-2xl font-black text-white mb-1">{passed ? "أحسنت! نجحت!" : "لم تنجح هذه المرة"}</h2>
@@ -607,7 +607,7 @@ onClick={handleSubmitClick}
       <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
       <main className="flex-1 overflow-y-auto">
         {/* Quiz Header */}
-        <div className="sticky top-0 z-10 bg-white dark:bg-[#130726] border-b border-slate-200 px-6 py-4">
+        <div className="sticky top-0 z-10 bg-white dark:bg-[#1E244F] border-b border-slate-200 px-6 py-4">
           <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center justify-between mb-2">
@@ -627,7 +627,7 @@ onClick={handleSubmitClick}
 
         <div className="max-w-3xl mx-auto p-6 space-y-6">
           {/* Question */}
-          <div className="bg-white dark:bg-[#130726] rounded-2xl border border-slate-200 shadow-sm p-8">
+          <div className="bg-white dark:bg-[#1E244F] rounded-2xl border border-slate-200 shadow-sm p-8">
             <div className="flex items-start gap-3 mb-6">
               <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-black text-sm flex items-center justify-center flex-shrink-0">
                 {currentQ + 1}
@@ -654,7 +654,7 @@ onClick={handleSubmitClick}
                     className={`w-full text-right p-4 rounded-xl border-2 transition-all font-medium text-sm ${
                       selected
                         ? "border-blue-600 bg-blue-50 text-blue-900"
-                        : "border-slate-200 bg-white dark:bg-[#130726] text-slate-700 hover:border-blue-300 hover:bg-blue-50/50"
+                        : "border-slate-200 bg-white dark:bg-[#1E244F] text-slate-700 hover:border-blue-300 hover:bg-blue-50/50"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -666,7 +666,7 @@ onClick={handleSubmitClick}
                         }`}
                       >
                         {selected && (
-                          <div className="w-2 h-2 bg-white dark:bg-[#130726] rounded-full"></div>
+                          <div className="w-2 h-2 bg-white dark:bg-[#1E244F] rounded-full"></div>
                         )}
                       </div>
 
@@ -721,7 +721,7 @@ onClick={handleSubmitClick}
             )}
           </div>
 
-          <div className="bg-white dark:bg-[#130726] rounded-2xl border border-slate-200 p-4">
+          <div className="bg-white dark:bg-[#1E244F] rounded-2xl border border-slate-200 p-4">
             <div className="flex items-center justify-between text-sm mb-2">
               <span>تقدم الإجابات</span>
 

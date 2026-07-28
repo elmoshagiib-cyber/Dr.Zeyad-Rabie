@@ -31,7 +31,7 @@ export function AnnouncementsPage() {
 
       <main className="flex-1 overflow-y-auto">
         {/* Header */}
-        <div className="bg-white dark:bg-[#130726] border-b border-slate-200 px-6 py-5">
+        <div className="bg-white dark:bg-[#1E244F] border-b border-slate-200 px-6 py-5">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-blue-100 flex items-center justify-center">
               <Bell
@@ -63,7 +63,7 @@ export function AnnouncementsPage() {
               ))}
             </div>
           ) : announcements.length === 0 ? (
-            <div className="bg-white dark:bg-[#130726] rounded-3xl p-16 text-center shadow-sm border border-slate-200">
+            <div className="bg-white dark:bg-[#1E244F] rounded-3xl p-16 text-center shadow-sm border border-slate-200">
               <Bell
                 size={60}
                 className="mx-auto text-slate-300 mb-6"

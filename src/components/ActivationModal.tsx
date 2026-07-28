@@ -135,8 +135,8 @@ try {
 
   const inputBase = `w-full rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 outline-none border ${
     isDark
-      ? 'bg-white dark:bg-[#130726]/5 border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:bg-white dark:bg-[#130726]/8'
-      : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400 focus:border-purple-500 focus:bg-white dark:bg-[#130726]'
+      ? 'bg-white dark:bg-[#1E244F]/5 border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:bg-white dark:bg-[#1E244F]/8'
+      : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400 focus:border-purple-500 focus:bg-white dark:bg-[#1E244F]'
   } focus:shadow-[0_0_0_3px_rgba(139,92,246,0.15)]`;
 
   return (
@@ -162,7 +162,7 @@ try {
             className={`relative w-full max-w-md rounded-3xl overflow-hidden shadow-2xl ${
               isDark
                 ? 'bg-[#100d1f] border border-white/10'
-                : 'bg-white dark:bg-[#130726] border border-purple-100'
+                : 'bg-white dark:bg-[#1E244F] border border-purple-100'
             }`}
             initial={{ opacity: 0, scale: 0.85, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -180,13 +180,13 @@ try {
                 <div className="flex items-center justify-between mb-4">
                   <motion.button
                     onClick={onClose}
-                    className="w-8 h-8 rounded-xl bg-white dark:bg-[#130726]/10 hover:bg-white dark:bg-[#130726]/20 flex items-center justify-center text-white/80 hover:text-white transition-all"
+                    className="w-8 h-8 rounded-xl bg-white dark:bg-[#1E244F]/10 hover:bg-white dark:bg-[#1E244F]/20 flex items-center justify-center text-white/80 hover:text-white transition-all"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
                     <X className="w-4 h-4" />
                   </motion.button>
-                  <div className="w-10 h-10 rounded-2xl bg-white dark:bg-[#130726]/15 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-2xl bg-white dark:bg-[#1E244F]/15 backdrop-blur-sm border border-white/20 flex items-center justify-center">
                     <ShieldCheck className="w-5 h-5 text-purple-300" />
                   </div>
                 </div>

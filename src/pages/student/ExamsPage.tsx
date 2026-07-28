@@ -47,7 +47,7 @@ const loadExams = async () => {
           {exams.map((exam) => (
             <div
               key={exam.id}
-              className="bg-white dark:bg-[#130726] rounded-2xl border border-slate-200 p-6 shadow-sm"
+              className="bg-white dark:bg-[#1E244F] rounded-2xl border border-slate-200 p-6 shadow-sm"
             >
               <div className="flex justify-between items-center">
                 <div>

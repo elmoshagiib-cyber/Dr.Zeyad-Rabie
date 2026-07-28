@@ -75,7 +75,7 @@ export function ProfilePage() {
                     <input
                       value={editName}
                       onChange={e => setEditName(e.target.value)}
-                      className="bg-white dark:bg-[#130726]/20 border border-white/30 rounded-xl px-4 py-2 text-white text-xl font-black focus:outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-auto"
+                      className="bg-white dark:bg-[#1E244F]/20 border border-white/30 rounded-xl px-4 py-2 text-white text-xl font-black focus:outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-auto"
                     />
                   </div>
                 ) : (

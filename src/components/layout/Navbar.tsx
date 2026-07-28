@@ -145,7 +145,7 @@ useEffect(() => {
 
       {/* Mobile Menu */}
             {!user && mobileOpen && (
-        <div className="md:hidden bg-white dark:bg-[#130726] border-t border-slate-100 p-4">
+        <div className="md:hidden bg-white dark:bg-[#1E244F] border-t border-slate-100 p-4">
           <div className="space-y-1">
             <button
 onClick={() => navigate("/login")}
@@ -170,25 +170,26 @@ mb-3
     w-full
     h-[52px]
     rounded-xl
-    bg-[#3B1248]
-    hover:bg-[#4A175B]
+    bg-[#422E91]
+    hover:bg-[#5340A8]
     text-white
     font-semibold
-    shadow-[0_12px_30px_rgba(59,18,72,.30)]
+    shadow-[0_12px_30px_rgba(66,46,145,.35)]
     transition-all
     duration-300
   "
 >
   <div
     className="
-      absolute
-      inset-0
-      bg-white/10
-      opacity-0
-      group-hover:opacity-100
-      transition-opacity
-      duration-300
-    "
+bg-[#422E91]
+hover:bg-[#5340A8]
+text-white
+rounded-2xl
+shadow-[0_10px_30px_rgba(66,46,145,.28)]
+hover:shadow-[0_14px_36px_rgba(66,46,145,.38)]
+transition-all
+duration-300
+"
   />
 
   <span className="relative z-10">

@@ -276,7 +276,6 @@ dark:text-[#F6AC08]
  {!user && (
   <Button
     size="lg"
-    variant="outline"
     onClick={() => navigate("/register")}
     className="
       h-11
@@ -286,15 +285,15 @@ dark:text-[#F6AC08]
       sm:px-7
       lg:px-9
       rounded-xl
-      bg-[#3B1248]
-      hover:bg-[#4A175B]
+      bg-[#422e91]
+      hover:bg-[#5340A8]
       border-0
       text-white
       text-[14px]
       sm:text-[16px]
       lg:text-[18px]
       font-semibold
-      shadow-[0_14px_35px_rgba(59,18,72,.35)]
+      shadow-[0_14px_35px_rgba(66,46,145,.35)]
       hover:scale-[1.03]
       transition-all
       duration-300
@@ -318,7 +317,7 @@ dark:text-[#F6AC08]
         rounded-xl
         bg-[#F6AC08]
         hover:bg-[#E29E00]
-        text-[#421651]
+        text-[#ffffff]
         font-bold
         shadow-[0_12px_30px_rgba(246,172,8,.45)]
         hover:scale-[1.03]
@@ -514,7 +513,7 @@ object-contain
               {/* Overlay badge */}
               <div className="
                 absolute top-3 right-3 sm:top-4 sm:right-4
-                bg-[#350F44] dark:bg-[#F6AC08]
+                bg-[#422E91] dark:bg-[#F6AC08]
                 text-white dark:text-slate-900
                 text-[11px] sm:text-[12px] font-bold
                 px-3 py-1 rounded-full
@@ -525,7 +524,7 @@ object-contain
 
             {/* Card info */}
             <div className="
-              bg-white dark:bg-[#130726]
+              bg-white dark:bg-[#1E244F]
               rounded-[16px] sm:rounded-[24px]
               shadow-xl
               w-[80%] sm:w-[78%]
@@ -544,7 +543,7 @@ object-contain
               ">
                 المراحل الثانوية
               </h3>
-              <div className="h-[3px] bg-[#350F44] dark:bg-[#F6AC08] rounded-full mb-3 sm:mb-4" />
+              <div className="h-[3px] bg-[#422E91] dark:bg-[#F6AC08] rounded-full mb-3 sm:mb-4" />
               <p className="text-slate-500 dark:text-slate-300 text-[13px] sm:text-[15px]">
                 الصف الأول والثاني والثالث الثانوي
               </p>
@@ -576,7 +575,7 @@ object-contain
               {/* Overlay badge */}
               <div className="
                 absolute top-3 right-3 sm:top-4 sm:right-4
-                bg-[#350F44] dark:bg-[#F6AC08]
+                bg-[#422E91] dark:bg-[#F6AC08]
                 text-white dark:text-slate-900
                 text-[11px] sm:text-[12px] font-bold
                 px-3 py-1 rounded-full
@@ -587,7 +586,7 @@ object-contain
 
             {/* Card info */}
             <div className="
-              bg-white dark:bg-[#130726]
+              bg-white dark:bg-[#1E244F]
               rounded-[16px] sm:rounded-[24px]
               shadow-xl
               w-[80%] sm:w-[78%]
@@ -606,7 +605,7 @@ object-contain
               ">
                 المراحل الإعدادية
               </h3>
-              <div className="h-[3px] bg-[#350F44] dark:bg-[#F6AC08] rounded-full mb-3 sm:mb-4" />
+              <div className="h-[3px] bg-[#422E91] dark:bg-[#F6AC08] rounded-full mb-3 sm:mb-4" />
               <p className="text-slate-500 dark:text-slate-300 text-[13px] sm:text-[15px]">
                 الصف الأول والثاني والثالث الإعدادي
               </p>

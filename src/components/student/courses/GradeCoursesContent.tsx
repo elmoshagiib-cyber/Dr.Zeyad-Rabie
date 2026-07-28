@@ -183,7 +183,7 @@ alert("تم تفعيل الاشتراك بنجاح ✅");
       className="
         group overflow-hidden rounded-2xl
         border border-slate-200 dark:border-white/10
-        bg-white dark:bg-[#130726]
+        bg-white dark:bg-[#1E244F]
         shadow-md hover:shadow-xl
         flex flex-col
         transition-all duration-500
@@ -392,7 +392,7 @@ return (
           {[1, 2, 3, 4, 5, 6].map(i => (
             <div key={i} className="
               rounded-2xl overflow-hidden
-              bg-white dark:bg-[#130726]
+              bg-white dark:bg-[#1E244F]
               border border-slate-200 dark:border-white/10
               animate-pulse
             ">
@@ -489,7 +489,7 @@ return (
       className="
         w-full max-w-md
         rounded-3xl
-        bg-white dark:bg-[#130726]
+        bg-white dark:bg-[#1E244F]
         border border-slate-200 dark:border-white/10
         shadow-2xl
         p-8
