@@ -34,10 +34,16 @@ interface Submission {
   feedback?: string;
   submitted_at: string;
   student_name?: string;
+
   homeworks?: {
     title: string;
     total_score?: number;
-    course_id?: number;
+    course_id?: string;
+
+    courses?: {
+      grade?: string;
+      title?: string;
+    };
   };
 }
 
@@ -49,6 +55,7 @@ export function InstructorHomeworkSubmissions() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("الكل");
   const [homeworkFilter, setHomeworkFilter] = useState("الكل");
+  const [gradeFilter, setGradeFilter] = useState("الكل");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -66,10 +73,19 @@ export function InstructorHomeworkSubmissions() {
   const loadSubmissions = async () => {
     setLoading(true);
 
-    const { data, error } = await supabase
-      .from("homework_submissions")
-      .select(`*, homeworks(*)`)
-      .order("submitted_at", { ascending: false });
+const { data, error } = await supabase
+  .from("homework_submissions")
+  .select(`
+    *,
+    homeworks (
+      *,
+      courses (
+        grade,
+        title
+      )
+    )
+  `)
+  .order("submitted_at", { ascending: false });
 
     if (error) {
       console.error(error);
@@ -98,30 +114,69 @@ export function InstructorHomeworkSubmissions() {
 
   const gradedCount = submissions.filter((s) => s.grade !== null).length;
   const pendingCount = submissions.length - gradedCount;
+const gradeLabels: Record<string, string> = {
+  prep_1: "أولى إعدادي",
+  prep_2: "ثانية إعدادي",
+  prep_3: "ثالثة إعدادي",
 
+  sec_1: "أولى ثانوي",
+  sec_2: "ثانية ثانوي",
+  sec_3: "ثالثة ثانوي",
+};
   const homeworkOptions = useMemo(() => {
     const titles = submissions.map((s) => s.homeworks?.title).filter(Boolean);
     return ["الكل", ...Array.from(new Set(titles))];
   }, [submissions]);
 
-  const filteredSubmissions = useMemo(() => {
-    return submissions.filter((item) => {
-      const matchesSearch =
-        item.student_name?.toLowerCase().includes(search.toLowerCase()) ||
-        item.homeworks?.title?.toLowerCase().includes(search.toLowerCase());
+  const gradeOptions = [
+  "الكل",
 
-      const matchesStatus =
-        statusFilter === "الكل" ||
-        (statusFilter === "تم التصحيح" && item.grade !== null) ||
-        (statusFilter === "بانتظار التصحيح" && item.grade === null);
+  "أولى إعدادي",
+  "ثانية إعدادي",
+  "ثالثة إعدادي",
 
-      const matchesHomework =
-        homeworkFilter === "الكل" ||
-        item.homeworks?.title === homeworkFilter;
+  "أولى ثانوي",
+  "ثانية ثانوي",
+  "ثالثة ثانوي",
+];
 
-      return matchesSearch && matchesStatus && matchesHomework;
-    });
-  }, [submissions, search, statusFilter, homeworkFilter]);
+const filteredSubmissions = useMemo(() => {
+  return submissions.filter((item) => {
+    const matchesSearch =
+      item.student_name?.toLowerCase().includes(search.toLowerCase()) ||
+      item.homeworks?.title?.toLowerCase().includes(search.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "الكل" ||
+      (statusFilter === "تم التصحيح" && item.grade !== null) ||
+      (statusFilter === "بانتظار التصحيح" && item.grade === null);
+
+    const matchesHomework =
+      homeworkFilter === "الكل" ||
+      item.homeworks?.title === homeworkFilter;
+
+    const gradeName =
+      gradeLabels[item.homeworks?.courses?.grade || ""] || "";
+
+    const matchesGrade =
+      gradeFilter === "الكل" ||
+      gradeName === gradeFilter;
+
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesHomework &&
+      matchesGrade
+    );
+  });
+
+}, [
+  submissions,
+  search,
+  statusFilter,
+  homeworkFilter,
+  gradeFilter,
+]);
 
   const saveGrade = async (id: number) => {
     const gradeValue = grades[id];
@@ -264,7 +319,7 @@ export function InstructorHomeworkSubmissions() {
 
         {/* Filters */}
         <div className="p-4 lg:p-6 bg-white dark:bg-[#09090B] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
             <div className="relative">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <Input
@@ -280,10 +335,21 @@ export function InstructorHomeworkSubmissions() {
               onChange={(e) => setHomeworkFilter(e.target.value)}
               className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
             >
+
               {homeworkOptions.map((hw, idx) => (
                 <option key={idx}>{hw}</option>
               ))}
             </select>
+
+<select
+  value={gradeFilter}
+  onChange={(e) => setGradeFilter(e.target.value)}
+  className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+>
+  {gradeOptions.map((grade) => (
+    <option key={grade}>{grade}</option>
+  ))}
+</select>
 
             <select
               value={statusFilter}
@@ -339,9 +405,13 @@ export function InstructorHomeworkSubmissions() {
                             <h3 className="font-black text-gray-900 dark:text-white text-sm truncate">
                               {submission.student_name}
                             </h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                              {submission.homeworks?.title}
-                            </p>
+<p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+  {submission.homeworks?.title}
+</p>
+
+<p className="text-[11px] font-bold text-[#B348FE] mt-1">
+  {gradeLabels[submission.homeworks?.courses?.grade || ""] || ""}
+</p>
                           </div>
                           
                           <span

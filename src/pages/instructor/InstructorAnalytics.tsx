@@ -91,139 +91,56 @@ const studentsPerCourse = [
           </p>
         </div>
 
-        <div className="p-6 space-y-6">
+<div className="flex items-center justify-center h-[calc(100vh-110px)] px-6">
 
-          {/* Stats */}
-          <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
-            {stats.map((item) => (
-              <Card key={item.title}>
-                <CardContent className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-500">
-                      {item.title}
-                    </p>
+  <Card className="w-full max-w-3xl border border-[#E8D6FF] shadow-[0_20px_60px_rgba(179,72,254,.12)] rounded-3xl">
+    <CardContent className="py-16 px-8 text-center">
 
-                    <p className="text-2xl font-black mt-1">
-                      {item.value}
-                    </p>
-                  </div>
+      <div className="w-24 h-24 mx-auto rounded-3xl bg-[#F6EEFF] flex items-center justify-center shadow-md">
+        <BarChart3
+          size={46}
+          className="text-[#B348FE]"
+        />
+      </div>
 
-                  {item.icon}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-<div className="grid xl:grid-cols-2 gap-6">
-
-  <Card>
-    <CardContent className="h-[320px]">
-      <h2 className="font-black mb-4">
-        نشاط المشاهدات
+      <h2 className="mt-8 text-3xl font-black text-slate-900">
+        قسم التحليلات قيد التطوير
       </h2>
 
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={weeklyActivity}>
-          <XAxis dataKey="day" />
-          <YAxis />
-          <Tooltip />
-          <Line
-            type="monotone"
-            dataKey="views"
-            stroke="#2563eb"
-            strokeWidth={3}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </CardContent>
-  </Card>
+      <p className="mt-5 text-slate-500 text-lg leading-9 max-w-xl mx-auto">
+        نعمل حاليًا على تطوير لوحة تحليلات احترافية تمنحك رؤية كاملة حول
+        أداء المنصة، وإحصائيات الطلاب، ونسب المشاهدة، والإيرادات،
+        والتقارير التفصيلية في مكان واحد.
+      </p>
 
-  <Card>
-    <CardContent className="h-[320px]">
-      <h2 className="font-black mb-4">
-        الطلاب لكل كورس
-      </h2>
+      <div className="mt-10 flex flex-wrap justify-center gap-3">
 
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={studentsPerCourse}>
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="students" fill="#10b981" />
-        </BarChart>
-      </ResponsiveContainer>
+        <div className="px-5 py-3 rounded-2xl bg-[#F6EEFF] text-[#B348FE] font-bold">
+          إحصائيات الطلاب
+        </div>
+
+        <div className="px-5 py-3 rounded-2xl bg-[#F6EEFF] text-[#B348FE] font-bold">
+          أداء الكورسات
+        </div>
+
+        <div className="px-5 py-3 rounded-2xl bg-[#F6EEFF] text-[#B348FE] font-bold">
+          الإيرادات
+        </div>
+
+        <div className="px-5 py-3 rounded-2xl bg-[#F6EEFF] text-[#B348FE] font-bold">
+          تقارير متقدمة
+        </div>
+
+      </div>
+
+      <div className="mt-10 inline-flex items-center gap-3 rounded-2xl bg-[#B348FE] text-white px-6 py-3 font-bold shadow-[0_10px_35px_rgba(179,72,254,.35)]">
+        🚀 قريبًا بإذن الله
+      </div>
+
     </CardContent>
   </Card>
 
 </div>
-
-          {/* Top Courses */}
-          <Card>
-            <CardContent>
-              <div className="flex items-center gap-2 mb-5">
-                <BarChart3 size={20} />
-                <h2 className="font-black text-lg">
-                  أفضل الكورسات أداءً
-                </h2>
-              </div>
-
-              <div className="space-y-4">
-                {topCourses.map((course, index) => (
-                  <div
-                    key={index}
-                    className="border rounded-xl p-4 flex justify-between items-center"
-                  >
-                    <div>
-                      <h3 className="font-bold">
-                        {course.name}
-                      </h3>
-
-                      <p className="text-sm text-slate-500 mt-1">
-                        {course.students} طالب
-                      </p>
-                    </div>
-
-                    <div className="text-emerald-600 font-black">
-                      {course.completion}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Activity */}
-          <Card>
-            <CardContent>
-              <h2 className="font-black text-lg mb-4">
-                نشاط آخر 7 أيام
-              </h2>
-
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span>مشاهدات الدروس</span>
-                  <span className="font-bold">1,245</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span>الامتحانات المكتملة</span>
-                  <span className="font-bold">318</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span>الواجبات المسلمة</span>
-                  <span className="font-bold">271</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span>طلاب جدد</span>
-                  <span className="font-bold">42</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-        </div>
       </main>
     </div>
   );

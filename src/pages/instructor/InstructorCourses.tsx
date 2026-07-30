@@ -72,23 +72,49 @@ const loadCourses = async () => {
 const { data, error } = await supabase
   .from("courses")
   .select(`
+    *,
+    course_sections(
       *,
-      course_sections(
-        *,
-        course_items(*)
-      )
+      course_items(*)
+    )
   `)
   .eq("teacher_id", user?.id)
   .order("created_at", {
     ascending: false,
   });
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+  const { data: subscriptions } = await supabase
+  .from("student_courses")
+  .select("student_id, course_id, active");
 
-  setCourses(data || []);
+if (error) {
+  console.log("ERROR =", error);
+  return;
+}
+
+const coursesWithStudents = (data || []).map((course) => {
+
+  const students = (subscriptions || []).filter(
+    (s: any) =>
+      s.active &&
+      String(s.course_id) === String(course.id)
+  );
+
+  const uniqueStudents = new Set(
+    students.map((s: any) => s.student_id)
+  );
+
+  return {
+    ...course,
+    students_count: uniqueStudents.size,
+  };
+
+});
+
+setCourses(coursesWithStudents);
+
+console.log(coursesWithStudents);
+
   console.log("COURSES =", data);
   console.log("GRADE =", data?.[0]?.grade);
 console.log("COURSE =", data?.[0]);

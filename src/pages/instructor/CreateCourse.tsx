@@ -168,7 +168,7 @@ export function CreateCourse() {
                   transition
                   text-sm sm:text-base
                 "
-                placeholder="مثال : شرح الباب الأول في الفيزياء"
+                placeholder="مثال : شرح الباب الأول"
               />
             </div>
 

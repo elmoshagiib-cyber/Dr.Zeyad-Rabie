@@ -26,7 +26,7 @@ import {
   ArrowLeft,
   GraduationCap,
 } from "lucide-react";
-
+import { Bell, X, Clock3 } from "lucide-react";
 import {
   TEACHER,
   STATS,
@@ -53,13 +53,17 @@ const { user } = useApp();
     useState<"secondary" | "prep">("secondary");
 
     const [courses, setCourses] = useState<any[]>([]);
+    const [announcement, setAnnouncement] = useState<any>(null);
 const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
 useEffect(() => {
   console.log("Deferred Prompt =", deferredPrompt);
 }, [deferredPrompt]);
-    useEffect(() => {
+
+   useEffect(() => {
   loadCourses();
-}, []);
+  loadAnnouncement();
+}, [user]);
 
 useEffect(() => {
 const handler = (e: any) => {
@@ -167,9 +171,184 @@ const FEATURES = [
   },
 ];
 
+const loadAnnouncement = async () => {
+  if (!user) return;
+
+  const { data } = await supabase
+    .from("student_announcements")
+    .select("*")
+    .eq("student_id", user.id)
+    .eq("is_active", true)
+    .eq("dismissed", false)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (data) {
+    setAnnouncement(data);
+  }
+  console.log("Announcement =", data);
+};
+
+const dismissAnnouncement = async () => {
+  if (!announcement) return;
+
+  const { error } = await supabase
+    .from("student_announcements")
+    .update({
+      dismissed: true,
+      dismissed_at: new Date().toISOString(),
+    })
+    .eq("id", announcement.id);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setAnnouncement(null);
+};
+
+
+const formatAnnouncementDate = (date: string) => {
+  const created = new Date(date);
+  const now = new Date();
+
+  const diff = Math.floor((now.getTime() - created.getTime()) / 1000);
+
+  if (diff < 60) return "الآن";
+
+  if (diff < 3600)
+    return `منذ ${Math.floor(diff / 60)} دقيقة`;
+
+  if (diff < 86400)
+    return `منذ ${Math.floor(diff / 3600)} ساعة`;
+
+  return created.toLocaleDateString("ar-EG", {
+    month: "short",
+    day: "numeric",
+  });
+};
+
 return (
     <div className="min-h-screen bg-white dark:bg-[#0b0715]" dir="rtl">
-      <Navbar />
+     <Navbar />
+
+{user && announcement && (
+  <div
+    className="
+      fixed
+      top-[78px]
+      left-0
+      right-0
+      z-[9999]
+      px-4
+      animate-in
+      slide-in-from-top-3
+      duration-500
+    "
+  >
+    <div
+      className="
+        max-w-[1350px]
+        mx-auto
+        overflow-hidden
+        rounded-2xl
+        border
+        border-[#E8D6FF]
+        bg-white/90
+        dark:bg-[#141414]/95
+        backdrop-blur-xl
+        shadow-[0_15px_45px_rgba(179,72,254,.15)]
+      "
+    >
+
+
+
+      <div className="flex items-center justify-between px-5 py-4">
+
+        <div className="flex items-center gap-4">
+
+          <div
+            className="
+              w-11
+              h-11
+              rounded-xl
+              bg-[#B348FE]
+              flex
+              items-center
+              justify-center
+              text-white
+              shadow-md
+            "
+          >
+            <Bell size={20} />
+          </div>
+
+          <div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+
+              <span className="font-extrabold text-[14px] text-[#2B1042] dark:text-white">
+                رسالة من مستر زياد ربيع
+              </span>
+
+              {announcement.priority === "important" && (
+                <span className="px-2 py-1 rounded-full bg-[#B348FE] text-white text-[10px] font-bold">
+                  مهم
+                </span>
+              )}
+
+              {announcement.priority === "urgent" && (
+                <span className="px-2 py-1 rounded-full bg-red-500 text-white text-[10px] font-bold">
+                  عاجل
+                </span>
+              )}
+
+            </div>
+
+            <p className="mt-2 text-[14px] text-gray-700 dark:text-gray-300 leading-7 whitespace-pre-line">
+              {announcement.message}
+            </p>
+
+            <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
+
+              <Clock3 size={14} />
+
+              <span>
+                {formatAnnouncementDate(announcement.created_at)}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <button
+          onClick={dismissAnnouncement}
+          className="
+            w-10
+            h-10
+            rounded-full
+            flex
+            items-center
+            justify-center
+            text-gray-500
+            hover:bg-[#F3F3F3]
+            dark:hover:bg-[#232323]
+            hover:text-red-500
+            transition-all
+          "
+        >
+          <X size={18} />
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
 
       
 
@@ -477,6 +656,8 @@ object-contain
   {FEATURES.map((feature, index) => {
     const Icon = feature.icon;
 
+
+    
     return (
       <motion.div
         key={feature.title}

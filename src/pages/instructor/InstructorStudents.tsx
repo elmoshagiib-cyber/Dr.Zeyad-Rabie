@@ -1,6 +1,7 @@
 import {
   Search, Users, UserCheck, GraduationCap,
   Trash2, Eye, Power, UsersRound,
+  ChevronRight, ChevronLeft, Filter
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { useEffect, useState } from "react";
@@ -81,244 +82,319 @@ export function InstructorStudents() {
     );
   });
 
-  const statCards = [
-    {
-      label:    "إجمالي الطلاب",
-      value:    students.length,
-      sub:      "جميع الطلاب المسجلين",
-      subColor: "text-gray-400 dark:text-gray-500",
-      icon:     Users,
-      iconBg:   "bg-[#F6EEFF] dark:bg-[#2B103D]",
-      iconColor:"text-[#B348FE]",
-    },
-    {
-      label:    "الطلاب النشطون",
-      value:    students.filter((s) => s.status === "نشط" || s.status === "active").length,
-      sub:      "100% من إجمالي الطلاب",
-      subColor: "text-emerald-500 dark:text-emerald-400",
-      icon:     UserCheck,
-      iconBg:   "bg-emerald-50 dark:bg-emerald-950/30",
-      iconColor:"text-emerald-600 dark:text-emerald-500",
-    },
-    {
-      label:    "طلاب هذا الشهر",
-      value:    newStudentsThisMonth,
-      sub:      "+100% عن الشهر الماضي",
-      subColor: "text-emerald-500 dark:text-emerald-400",
-      icon:     GraduationCap,
-      iconBg:   "bg-amber-50 dark:bg-amber-950/30",
-      iconColor:"text-amber-600 dark:text-amber-500",
-    },
-  ];
-
-  const selectCls = `
-    w-full border-2 border-gray-200 dark:border-[#2A2A2A] rounded-2xl
-    px-4 py-3 sm:px-5 sm:py-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm sm:text-base
-    focus:outline-none focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20
-  `;
+  const getStudentTypeLabel = (type?: string) => {
+    switch (type) {
+      case "center":
+        return "سنتر";
+      case "online":
+        return "أونلاين";
+      default:
+        return "سنتر";
+    }
+  };
 
   return (
     <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-
-      {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] px-5 sm:px-8 lg:px-10 py-6 sm:py-8 lg:py-10 text-white shadow-xl mb-5 sm:mb-8">
-        <div className="relative z-10 flex flex-row-reverse items-center gap-4 sm:gap-6">
-          <div className="text-right flex-1">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight">الطلاب</h1>
-            <p className="text-white/90 mt-2 sm:mt-3 text-sm sm:text-base lg:text-lg">
-              إدارة ومتابعة جميع الطلاب بالمنصة
-            </p>
-          </div>
-          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-white/10 backdrop-blur-md flex items-center justify-center shrink-0">
-            <UsersRound size={24} className="text-white sm:hidden" />
-            <UsersRound size={32} className="text-white hidden sm:block" />
-          </div>
-        </div>
-        <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/5 blur-3xl pointer-events-none" />
-        <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/5 blur-3xl pointer-events-none" />
-      </div>
-
-      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 lg:gap-6">
-          {statCards.map((card) => {
-            const Icon = card.icon;
-            return (
-              <Card key={card.label} className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#B348FE] transition-all duration-300">
-                <CardContent className="px-4 sm:px-6 lg:px-7 py-4 sm:py-5 lg:py-6 flex items-center justify-between gap-4">
-                  <div className={`w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl ${card.iconBg} flex items-center justify-center shrink-0`}>
-                    <Icon size={20} className={`sm:hidden ${card.iconColor}`} />
-                    <Icon size={24} className={`hidden sm:block lg:hidden ${card.iconColor}`} />
-                    <Icon size={28} className={`hidden lg:block ${card.iconColor}`} />
-                  </div>
-                  <div className="text-right">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-bold mb-1 sm:mb-2">{card.label}</p>
-                    <p className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white leading-none">{card.value}</p>
-                    <p className={`text-xs sm:text-sm mt-2 font-bold ${card.subColor}`}>{card.sub}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Search & filters */}
-        <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
-          <CardContent className="p-4 sm:p-6 lg:p-8">
-            <div className="flex items-start justify-between mb-4 sm:mb-6 gap-3">
-              <Button
-                variant="outline"
-                onClick={() => { setSearchTerm(""); setGradeFilter(""); setStatusFilter(""); setTypeFilter(""); }}
-                className="h-10 sm:h-12 px-4 sm:px-6 rounded-2xl text-sm font-bold border-2 hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] hover:border-[#B348FE] shrink-0"
-              >
-                إعادة تعيين
-              </Button>
-              <div className="text-right">
-                <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 dark:text-white mb-0.5 sm:mb-1">البحث والفلاتر</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">ابحث عن طالب معين أو استخدم الفلاتر</p>
-              </div>
+      <div className="flex flex-col h-full bg-[#09090B] min-h-screen">
+        {/* Header - مطابق لتصميم صفحة التسليمات */}
+        <div className="bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] p-6 lg:p-8 text-white relative overflow-hidden flex-shrink-0">
+          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
+          <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
+          
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-black mb-2">الطلاب</h1>
+              <p className="text-white/90 text-sm lg:text-base">إدارة ومتابعة جميع الطلاب بالمنصة</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="h-14 w-14 lg:h-16 lg:w-16 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center">
+              <UsersRound size={28} className="text-white" />
+            </div>
+          </div>
+        </div>
+
+        {/* Stats - كروت مضغوطة مثل صفحة التسليمات */}
+        <div className="grid grid-cols-3 gap-4 p-6 bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
+          <div className="text-center">
+            <div className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white">{students.length}</div>
+            <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 font-bold mt-1">إجمالي الطلاب</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl lg:text-3xl font-black text-emerald-600">
+              {students.filter((s) => s.status === "نشط" || s.status === "active").length}
+            </div>
+            <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 font-bold mt-1">النشطون</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl lg:text-3xl font-black text-amber-600">{newStudentsThisMonth}</div>
+            <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 font-bold mt-1">هذا الشهر</div>
+          </div>
+        </div>
+
+        {/* Filters - مطابقة لتصميم صفحة التسليمات */}
+        <div className="p-4 lg:p-6 bg-white dark:bg-[#09090B] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Filter size={18} className="text-[#B348FE]" />
+              <h3 className="text-base font-black text-gray-900 dark:text-white">البحث والفلاتر</h3>
+            </div>
+            <button
+              onClick={() => { setSearchTerm(""); setGradeFilter(""); setStatusFilter(""); setTypeFilter(""); }}
+              className="text-xs font-bold text-[#B348FE] hover:text-[#9E2FFF] transition-colors"
+            >
+              إعادة تعيين الفلاتر
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <Input
                 placeholder="اسم الطالب أو الكود..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                icon={<Search size={18} />}
-                className="bg-white dark:bg-[#1A1A1A] border-gray-200 dark:border-[#2A2A2A]"
+                className="pr-10 bg-white dark:bg-[#111111] border-gray-200 dark:border-[#2A2A2A] rounded-xl h-12"
               />
-              <select className={selectCls} value={gradeFilter} onChange={(e) => setGradeFilter(e.target.value)}>
-                <option value="">كل الصفوف</option>
-                {grades.map((g) => <option key={g} value={g}>{g}</option>)}
-              </select>
-              <select className={selectCls} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                <option value="">جميع الحالات</option>
-                <option value="نشط">نشط</option>
-                <option value="موقوف">موقوف</option>
-              </select>
-              <select className={selectCls} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-                <option value="">جميع الأنواع</option>
-                <option value="سنتر">سنتر</option>
-                <option value="أونلاين">أونلاين</option>
-              </select>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* List header */}
-        <div className="flex items-center gap-3">
-          <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">قائمة الطلاب</h2>
-          <span className="px-3 py-1.5 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] text-xs sm:text-sm font-black border border-[#EAD8FF] dark:border-[#2A2A2A]">
-            {filteredStudents.length} طالب
-          </span>
+            <select 
+              value={gradeFilter} 
+              onChange={(e) => setGradeFilter(e.target.value)}
+              className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+            >
+              <option value="">كل الصفوف</option>
+              {grades.map((g) => <option key={g} value={g}>{g}</option>)}
+            </select>
+
+            <select 
+              value={statusFilter} 
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+            >
+              <option value="">جميع الحالات</option>
+              <option value="نشط">نشط</option>
+              <option value="موقوف">موقوف</option>
+            </select>
+
+            <select 
+              value={typeFilter} 
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+            >
+              <option value="">جميع الأنواع</option>
+              <option value="center">سنتر</option>
+              <option value="online">أونلاين</option>
+            </select>
+          </div>
         </div>
 
-        {/* Table */}
-        <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl overflow-hidden shadow-sm">
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[700px]">
-                <thead>
-                  <tr className="bg-gray-50 dark:bg-[#1A1A1A] border-b border-gray-100 dark:border-[#2A2A2A]">
-                    {["الطالب","الإيميل","الصف الدراسي","النوع","الحالة","تاريخ التسجيل","الكورسات","الإجراءات"].map((h, i) => (
-                      <th key={h} className={`px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-xs sm:text-sm font-black text-gray-600 dark:text-gray-400 ${i === 7 ? "text-center" : "text-right"}`}>
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredStudents.map((student) => (
-                    <tr key={student.id} className="border-b border-gray-100 dark:border-[#2A2A2A] hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] transition-colors duration-200">
+        {/* Content */}
+        <div className="flex-1 overflow-auto p-4 lg:p-6 bg-[#09090B]">
+          {/* Header with count */}
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-lg font-black text-gray-900 dark:text-white">قائمة الطلاب</h2>
+            <span className="px-2.5 py-1 rounded-lg bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] text-xs font-black border border-[#EAD8FF] dark:border-[#2A2A2A]">
+              {filteredStudents.length} طالب
+            </span>
+          </div>
 
-                      {/* الطالب */}
-                      <td className="px-4 sm:px-8 py-3 sm:py-5">
-                        <div className="flex items-center gap-2 sm:gap-4">
-                          <Avatar name={student.full_name || student.name} size="sm" />
+          {filteredStudents.length === 0 ? (
+            <div className="text-center py-16">
+              <Users className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />
+              <p className="text-gray-600 dark:text-gray-400 font-bold">لا يوجد طلاب</p>
+            </div>
+          ) : (
+            <>
+              {/* Desktop & Tablet Table */}
+              <div className="hidden md:block">
+                <Card className="
+bg-[#111111]
+border
+border-[#2A2A2A]
+rounded-[28px]
+shadow-none
+overflow-hidden
+">
+                  <CardContent className="p-0">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#2A2A2A]">
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الطالب</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الإيميل</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الصف</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">النوع</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الحالة</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الكورسات</th>
+                          <th className="px-4 py-3 text-center text-xs font-black text-gray-600 dark:text-gray-400">الإجراءات</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredStudents.map((student) => (
+                          <tr 
+                            key={student.id} 
+                            className="border-b border-gray-100 dark:border-[#2A2A2A] hover:bg-[#F6EEFF]/50 dark:hover:bg-[#2B103D]/50 transition-all duration-200"
+                          >
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <Avatar name={student.full_name || student.name} size="sm" className="h-8 w-8 text-xs" />
+                                <div>
+                                  <p className="font-bold text-gray-900 dark:text-white text-sm">
+                                    {student.full_name || student.name}
+                                  </p>
+                                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                                    {student.phone || "لا يوجد رقم"}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs font-medium truncate max-w-[150px]">
+                              {student.email}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-bold border border-gray-200 dark:border-gray-700">
+                                {student.grade}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
+                                student.type === "online" 
+                                  ? "bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] border-[#EAD8FF] dark:border-[#2A2A2A]" 
+                                  : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900"
+                              }`}>
+                                {getStudentTypeLabel(student.type)}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
+                                student.status === "نشط" || student.status === "active"
+                                  ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900"
+                                  : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900"
+                              }`}>
+                                {student.status === "نشط" || student.status === "active" ? "نشط" : "موقوف"}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-bold border border-gray-200 dark:border-gray-700">
+                                {student.student_courses?.length || 0}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex justify-center gap-1">
+                                <button
+                                  onClick={() => navigate(`/instructor/students/${student.id}`)}
+                                  className="w-8 h-8 rounded-lg bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] hover:bg-[#EAD8FF] dark:hover:bg-[#3D1952] flex items-center justify-center transition-all duration-200"
+                                >
+                                  <Eye size={14} />
+                                </button>
+                                <button
+                                  onClick={() => toggleStudentStatus(student.id, student.status)}
+                                  className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900/40 flex items-center justify-center transition-all duration-200"
+                                >
+                                  <Power size={14} />
+                                </button>
+                                <button
+                                  onClick={() => { if (confirm("هل أنت متأكد من حذف الطالب؟")) deleteStudent(student.id); }}
+                                  className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 flex items-center justify-center transition-all duration-200"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="md:hidden space-y-3">
+                {filteredStudents.map((student) => (
+                  <Card 
+                    key={student.id} 
+                    className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl overflow-hidden"
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <Avatar name={student.full_name || student.name} size="sm" className="h-10 w-10" />
                           <div>
-                            <p className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">
+                            <h3 className="font-black text-gray-900 dark:text-white text-sm">
                               {student.full_name || student.name}
-                            </p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 sm:mt-1">
-                              {student.phone || "لا يوجد رقم"}
+                            </h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                              {student.email}
                             </p>
                           </div>
                         </div>
-                      </td>
-
-                      {/* الإيميل */}
-                      <td className="px-4 sm:px-6 py-3 sm:py-5 text-gray-700 dark:text-gray-300 font-medium text-xs sm:text-sm whitespace-nowrap">
-                        {student.email}
-                      </td>
-
-                      {/* الصف */}
-                      <td className="px-4 sm:px-6 py-3 sm:py-5">
-                        <span className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs sm:text-sm font-bold whitespace-nowrap border border-gray-200 dark:border-gray-700">
-                          {student.grade}
-                        </span>
-                      </td>
-
-                      {/* النوع */}
-                      <td className="px-4 sm:px-6 py-3 sm:py-5">
-                        <span className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-black border ${
-                          student.type === "أونلاين" 
-                            ? "bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] border-[#EAD8FF] dark:border-[#2A2A2A]" 
-                            : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900"
-                        }`}>
-                          {student.type || "سنتر"}
-                        </span>
-                      </td>
-
-                      {/* الحالة */}
-                      <td className="px-4 sm:px-6 py-3 sm:py-5">
-                        <span className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-black border ${
+                        <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
                           student.status === "نشط" || student.status === "active"
                             ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900"
                             : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900"
                         }`}>
                           {student.status === "نشط" || student.status === "active" ? "نشط" : "موقوف"}
                         </span>
-                      </td>
+                      </div>
 
-                      {/* تاريخ التسجيل */}
-                      <td className="px-4 sm:px-6 py-3 sm:py-5 text-gray-700 dark:text-gray-300 text-xs sm:text-sm whitespace-nowrap font-medium">
-                        {student.created_at ? new Date(student.created_at).toLocaleDateString("ar-EG") : "-"}
-                      </td>
-
-                      {/* الكورسات */}
-                      <td className="px-4 sm:px-6 py-3 sm:py-5">
-                        <span className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs sm:text-sm font-bold border border-gray-200 dark:border-gray-700">
-                          {student.student_courses?.length || 0} كورس
-                        </span>
-                      </td>
-
-                      {/* الإجراءات */}
-                      <td className="px-4 sm:px-6 py-3 sm:py-5">
-                        <div className="flex justify-center gap-1.5 sm:gap-2 flex-row-reverse">
-                          <Button size="sm" onClick={() => navigate(`/instructor/students/${student.id}`)}
-                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] hover:bg-[#EAD8FF] dark:hover:bg-[#3D1952] border-0 shadow-none p-0">
-                            <Eye size={14} />
-                          </Button>
-                          <Button size="sm" onClick={() => toggleStudentStatus(student.id, student.status)}
-                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900/40 border-0 shadow-none p-0">
-                            <Power size={14} />
-                          </Button>
-                          <Button size="sm"
-                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 border-0 shadow-none p-0"
-                            onClick={() => { if (confirm("هل أنت متأكد من حذف الطالب؟")) deleteStudent(student.id); }}>
-                            <Trash2 size={13} />
-                          </Button>
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-2.5">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">الصف</p>
+                          <p className="text-xs font-bold text-gray-900 dark:text-white">{student.grade}</p>
                         </div>
-                      </td>
+                        <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-2.5">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">النوع</p>
+                          <span className={`text-xs font-black ${
+                            student.type === "online" ? "text-[#B348FE]" : "text-amber-600"
+                          }`}>
+                            {getStudentTypeLabel(student.type)}
+                          </span>
+                        </div>
+                        <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-2.5">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">الكورسات</p>
+                          <p className="text-xs font-bold text-gray-900 dark:text-white">
+                            {student.student_courses?.length || 0}
+                          </p>
+                        </div>
+                        <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-2.5">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">الهاتف</p>
+                          <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                            {student.phone || "-"}
+                          </p>
+                        </div>
+                      </div>
 
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => navigate(`/instructor/students/${student.id}`)}
+                          className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl py-2 text-xs font-black"
+                        >
+                          <Eye size={14} className="ml-1" />
+                          عرض
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => toggleStudentStatus(student.id, student.status)}
+                          className="flex-1 border-amber-200 text-amber-600 hover:bg-amber-50 rounded-xl py-2 text-xs font-black"
+                        >
+                          <Power size={14} className="ml-1" />
+                          {student.status === "نشط" ? "تعطيل" : "تفعيل"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => { if (confirm("هل أنت متأكد من حذف الطالب؟")) deleteStudent(student.id); }}
+                          className="flex-1 border-red-200 text-red-600 hover:bg-red-50 rounded-xl py-2 text-xs font-black"
+                        >
+                          <Trash2 size={14} className="ml-1" />
+                          حذف
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );

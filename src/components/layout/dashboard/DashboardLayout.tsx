@@ -16,10 +16,16 @@ export function DashboardLayout({
   setSidebarOpen,
 }: Props) {
   return (
-    <div
-      dir="rtl"
-      className="flex items-stretch min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200"
-    >
+<div
+  dir="rtl"
+  className="
+    flex
+    items-stretch
+    min-h-screen
+    bg-[#09090B]
+    text-white
+  "
+>
       {/* ───────── Desktop Sidebar (Instructor & Admin only) ───────── */}
       {type !== "student" && (
         <div className="hidden xl:flex shrink-0 self-stretch p-4">
@@ -85,10 +91,24 @@ export function DashboardLayout({
       )}
 
       {/* ───────── Main Content ───────── */}
-      <main className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-5 lg:px-8 lg:py-6">
+      <main
+  className="
+    flex-1
+    overflow-y-auto
+    bg-[#09090B]
+    px-3
+    py-3
+    sm:px-4
+    sm:py-4
+    md:px-6
+    md:py-5
+    lg:px-8
+    lg:py-6
+  "
+>
         <DashboardTopbar onMenuClick={() => setSidebarOpen(true)} />
 
-        <div className="max-w-[1600px] mx-auto">
+        <div className="max-w-[1600px] mx-auto w-full">
           {children}
         </div>
       </main>

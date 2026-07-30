@@ -228,234 +228,92 @@ export default function InstructorNotifications() {
       <DashboardSidebar type="instructor" />
 
       <main className="flex-1 overflow-y-auto">
-        <div className="p-6 lg:p-8 space-y-6">
-          {/* Top Header Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200"
-          >
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#350F44] to-[#4a1a5c] flex items-center justify-center shadow-lg">
-                  <Bell className="text-white" size={32} />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-black text-slate-900 mb-2">
-                    إدارة الإشعارات
-                  </h1>
-                  <p className="text-slate-600 text-base max-w-2xl leading-relaxed">
-                    يمكنك إدارة جميع إشعارات المنصة والتحكم في الرسائل المرسلة
-                    للطلاب.
-                  </p>
-                </div>
-              </div>
-              <button className="px-6 py-3 border-2 border-[#350F44] text-[#350F44] rounded-2xl font-bold hover:bg-[#350F44] hover:text-white transition-all duration-300 flex items-center gap-2 whitespace-nowrap">
-                <FileText size={20} />
-                سجل الإشعارات
-              </button>
-            </div>
-          </motion.div>
+<div className="flex items-center justify-center h-[calc(100vh-130px)] px-6">
 
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-                className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 cursor-pointer group"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div
-                    className={`w-14 h-14 rounded-2xl ${stat.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
-                  >
-                    <stat.icon className={stat.iconColor} size={28} />
-                  </div>
-                </div>
-                <h3 className="text-4xl font-black text-slate-900 mb-2">
-                  {stat.value}
-                </h3>
-                <p className="text-slate-900 font-bold text-base mb-1">
-                  {stat.title}
-                </p>
-                <p className="text-slate-500 text-sm">{stat.description}</p>
-              </motion.div>
-            ))}
-          </div>
+  <div className="
+    w-full
+    max-w-3xl
+    bg-white
+    rounded-[32px]
+    border
+    border-[#E8D6FF]
+    shadow-[0_20px_60px_rgba(179,72,254,.12)]
+    p-10
+    text-center
+  ">
 
-          {/* Notification Settings */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200"
-          >
-            <h2 className="text-2xl font-black text-slate-900 mb-6">
-              إعدادات الإشعارات
-            </h2>
-            <div className="space-y-4">
-              {settings.map((setting, index) => (
-                <motion.div
-                  key={setting.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                  className="flex items-center justify-between p-5 rounded-2xl border border-slate-200 hover:border-[#F6AC08] hover:bg-slate-50 transition-all duration-300 group"
-                >
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className="w-12 h-12 rounded-xl bg-slate-100 group-hover:bg-[#F6AC08]/10 flex items-center justify-center transition-colors duration-300">
-                      <setting.icon
-                        className="text-slate-600 group-hover:text-[#F6AC08] transition-colors duration-300"
-                        size={24}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-base font-bold text-slate-900 mb-1">
-                        {setting.title}
-                      </h3>
-                      <p className="text-sm text-slate-600">
-                        {setting.description}
-                      </p>
-                    </div>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={setting.enabled}
-                      onChange={() => toggleSetting(setting.id)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:right-1 after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#350F44]"></div>
-                  </label>
-                </motion.div>
-              ))}
-            </div>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleSaveSettings}
-              className="w-full mt-8 px-8 py-4 bg-gradient-to-r from-[#350F44] to-[#4a1a5c] text-white rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              حفظ التعديلات
-            </motion.button>
-          </motion.div>
+    <div className="
+      w-24
+      h-24
+      mx-auto
+      rounded-[28px]
+      bg-[#F6EEFF]
+      flex
+      items-center
+      justify-center
+      shadow-[0_10px_30px_rgba(179,72,254,.15)]
+    ">
+      <Bell
+        size={48}
+        className="text-[#B348FE]"
+      />
+    </div>
 
-          {/* Notification History */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-black text-slate-900">
-                سجل الإشعارات
-              </h2>
-              <button className="px-5 py-2.5 text-[#350F44] font-bold hover:bg-slate-50 rounded-xl transition-all duration-300 flex items-center gap-2">
-                عرض الكل
-                <TrendingUp size={18} />
-              </button>
-            </div>
+    <h2 className="mt-8 text-3xl font-black text-slate-900">
+      مركز الإشعارات قيد التطوير
+    </h2>
 
-            {history.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-slate-200">
-                      <th className="text-right py-4 px-4 text-sm font-bold text-slate-700">
-                        عنوان الإشعار
-                      </th>
-                      <th className="text-right py-4 px-4 text-sm font-bold text-slate-700">
-                        النوع
-                      </th>
-                      <th className="text-right py-4 px-4 text-sm font-bold text-slate-700">
-                        المستلمون
-                      </th>
-                      <th className="text-right py-4 px-4 text-sm font-bold text-slate-700">
-                        تاريخ الإرسال
-                      </th>
-                      <th className="text-right py-4 px-4 text-sm font-bold text-slate-700">
-                        الحالة
-                      </th>
-                      <th className="text-right py-4 px-4 text-sm font-bold text-slate-700">
-                        الإجراءات
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {history.map((item, index) => (
-                      <motion.tr
-                        key={item.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.05 }}
-                        className="border-b border-slate-100 hover:bg-slate-50 transition-colors duration-200"
-                      >
-                        <td className="py-4 px-4">
-                          <p className="text-sm font-medium text-slate-900">
-                            {item.title}
-                          </p>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span
-                            className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${getTypeColor(
-                              item.type
-                            )}`}
-                          >
-                            {item.type}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="flex items-center gap-2">
-                            <Users size={16} className="text-slate-400" />
-                            <span className="text-sm font-medium text-slate-700">
-                              {item.recipients} طالب
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <p className="text-sm text-slate-600">{item.date}</p>
-                        </td>
-                        <td className="py-4 px-4">{getStatusBadge(item.status)}</td>
-                        <td className="py-4 px-4">
-                          <div className="flex items-center gap-2">
-                            <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors duration-200">
-                              <Eye size={18} className="text-slate-600" />
-                            </button>
-                            <button className="p-2 hover:bg-rose-50 rounded-lg transition-colors duration-200">
-                              <Trash2 size={18} className="text-rose-600" />
-                            </button>
-                          </div>
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="text-center py-16"
-              >
-                <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-slate-100 flex items-center justify-center">
-                  <Bell size={48} className="text-slate-400" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">
-                  لا توجد إشعارات حتى الآن
-                </h3>
-                <p className="text-slate-600 max-w-md mx-auto">
-                  سيتم عرض جميع الإشعارات المرسلة للطلاب هنا
-                </p>
-              </motion.div>
-            )}
-          </motion.div>
-        </div>
+    <p className="mt-5 text-slate-500 text-lg leading-9 max-w-2xl mx-auto">
+      نعمل حاليًا على تطوير نظام إشعارات متكامل يسمح بإرسال الرسائل
+      الفردية والجماعية للطلاب، مع جدولة الإشعارات وتتبع حالة التسليم
+      وإحصائيات الوصول، لتوفير تجربة أكثر احترافية.
+    </p>
+
+    <div className="mt-10 flex flex-wrap justify-center gap-3">
+
+      <span className="px-5 py-3 rounded-2xl bg-[#F6EEFF] text-[#B348FE] font-bold">
+        رسائل فردية
+      </span>
+
+      <span className="px-5 py-3 rounded-2xl bg-[#F6EEFF] text-[#B348FE] font-bold">
+        رسائل جماعية
+      </span>
+
+      <span className="px-5 py-3 rounded-2xl bg-[#F6EEFF] text-[#B348FE] font-bold">
+        جدولة الإرسال
+      </span>
+
+      <span className="px-5 py-3 rounded-2xl bg-[#F6EEFF] text-[#B348FE] font-bold">
+        سجل الإشعارات
+      </span>
+
+      <span className="px-5 py-3 rounded-2xl bg-[#F6EEFF] text-[#B348FE] font-bold">
+        تقارير التسليم
+      </span>
+
+    </div>
+
+    <div
+      className="
+        mt-10
+        inline-flex
+        items-center
+        gap-3
+        rounded-2xl
+        bg-[#B348FE]
+        text-white
+        px-7
+        py-4
+        font-bold
+        shadow-[0_12px_35px_rgba(179,72,254,.35)]
+      "
+    >
+      🔔 قريبًا بإذن الله
+    </div>
+
+  </div>
+
+</div>
       </main>
     </div>
   );

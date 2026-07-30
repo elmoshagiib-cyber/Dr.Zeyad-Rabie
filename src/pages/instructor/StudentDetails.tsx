@@ -3,18 +3,26 @@ import {
   Monitor,
   Activity,
   BarChart3,
+  User,
+  Bell,
+  Plus,
+  Power,
+  Trash2,
+  Eye,
+  GraduationCap,
+  Calendar,
+  Phone,
+  Mail,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  ArrowRight
 } from "lucide-react";
-
-import { User } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "../../components/ui/Card";
-import {
-  useParams,
-  useNavigate,
-} from "react-router-dom";
-
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 
 export function StudentDetails() {
@@ -22,328 +30,194 @@ export function StudentDetails() {
   const navigate = useNavigate();
   const [student, setStudent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
   const [courses, setCourses] = useState<any[]>([]);
-  const [examResults, setExamResults] =
-  useState<any[]>([]);
+  const [examResults, setExamResults] = useState<any[]>([]);
+  const [homeworkResults, setHomeworkResults] = useState<any[]>([]);
 
-  const toggleStudentStatus = async () => {
-  const newStatus =
-    student?.status === "نشط"
-      ? "موقوف"
-      : "نشط";
+  const [showCourseModal, setShowCourseModal] = useState(false);
+const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
 
-  const { error } = await supabase
-    .from("students")
-    .update({
-      status: newStatus,
-    })
-    .eq("id", student.id);
+const [announcementMessage, setAnnouncementMessage] = useState("");
 
-  if (!error) {
-    loadStudent();
-  }
-};
-
-
-const [showCourseModal, setShowCourseModal] =
-  useState(false);
+const [announcementPriority, setAnnouncementPriority] =
+  useState("important");
   
-  const [showNotificationModal, setShowNotificationModal] =
-  useState(false);
+  const [selectedCourse, setSelectedCourse] = useState("");
+  const [availableCourses, setAvailableCourses] = useState<any[]>([]);
 
-const [notificationType, setNotificationType] =
-  useState("student");
+  const gradeMap: Record<string, string> = {
+    "الصف الأول الثانوي": "sec_1",
+    "الصف الثاني الثانوي": "sec_2",
+    "الصف الثالث الثانوي": "sec_3",
+    "الصف الأول الإعدادي": "prep_1",
+    "الصف الثاني الإعدادي": "prep_2",
+    "الصف الثالث الإعدادي": "prep_3",
+  };
 
-const [notificationTitle, setNotificationTitle] =
-  useState("");
-
-const [notificationMessage, setNotificationMessage] =
-  useState("");
-
-const [notificationReason, setNotificationReason] =
-  useState("");
-  useEffect(() => {
-
-  if (notificationReason === "غياب محاضرة") {
-
-  setNotificationTitle("تنبيه غياب محاضرة");
-
-  if (notificationType === "student") {
-
-    setNotificationMessage(
-`مرحباً ${student?.full_name}،
-
-لاحظنا أنك لم تحضر إحدى المحاضرات المقررة.
-
-يرجى مشاهدة المحاضرة في أقرب وقت حتى لا يفوتك المحتوى الدراسي.`
-    );
-
-  } else {
-
-    setNotificationMessage(
-`نحيطكم علماً بأن الطالب ${student?.full_name}
-لم يقم بحضور إحدى المحاضرات المقررة.
-
-يرجى المتابعة والتأكد من مشاهدة المحاضرة في أقرب وقت.`
-    );
-
-  }
-
-}
-
-  if (notificationReason === "غياب امتحان") {
-
-  setNotificationTitle("تنبيه غياب امتحان");
-
-  if (notificationType === "student") {
-
-    setNotificationMessage(
-`مرحباً ${student?.full_name}،
-
-لقد تم تسجيل غيابك عن الامتحان المقرر.
-
-يرجى التواصل مع إدارة المنصة لمعرفة الخطوات المطلوبة.`
-    );
-
-  } else {
-
-    setNotificationMessage(
-`نحيطكم علماً بأن الطالب ${student?.full_name}
-لم يحضر الامتحان المقرر.
-
-يرجى المتابعة معه ومعرفة سبب الغياب.`
-    );
-
-  }
-
-}
-
-  if (notificationReason === "عدم تسليم واجب") {
-
-  setNotificationTitle("تنبيه عدم تسليم واجب");
-
-  if (notificationType === "student") {
-
-    setNotificationMessage(
-`مرحباً ${student?.full_name}،
-
-لم تقم بتسليم الواجب المطلوب حتى الآن.
-
-يرجى رفع الواجب في أقرب وقت لتجنب فقدان الدرجة.`
-    );
-
-  } else {
-
-    setNotificationMessage(
-`نحيطكم علماً بأن الطالب ${student?.full_name}
-لم يقم بتسليم الواجب المطلوب حتى الآن.
-
-يرجى المتابعة معه واستكمال التسليم في أسرع وقت.`
-    );
-
-  }
-
-}
-
-  if (notificationReason === "تنبيه عام") {
-
-    setNotificationTitle("");
-    setNotificationMessage("");
-
-  }
-
-  if (notificationReason === "رسالة مخصصة") {
-
-    setNotificationTitle("");
-    setNotificationMessage("");
-
-  }
-
-}, [notificationReason, student]);
-
-const [homeworkResults, setHomeworkResults] =
-  useState<any[]>([]);
 
 
   const loadStudent = async () => {
-  const { data, error } = await supabase
-    .from("students")
-    .select("*")
-    .eq("id", id)
-    .single();
+    const { data, error } = await supabase
+      .from("students")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-  if (!error && data) {
-    setStudent(data);
-  }
+if (error) {
+  console.log("Student Error:", error);
+}
 
-  setLoading(false);
-};
+console.log("Student Data:", data);
 
+if (data) {
+  setStudent(data);
+}
+    setLoading(false);
+  };
 
-const loadCourses = async () => {
-  const { data, error } = await supabase
-    .from("student_courses")
-    .select("*")
-    .eq("student_id", Number(id));
+  const loadCourses = async () => {
+    const { data, error } = await supabase
+      .from("student_courses")
+      .select("*")
+      .eq("student_id", Number(id));
 
-  if (error) {
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    if (!data?.length) {
+      setCourses([]);
+      return;
+    }
+
+    const courseIds = data.map((item: any) => item.course_id);
+
+    const { data: coursesData } = await supabase
+      .from("courses")
+      .select("*")
+      .in("id", courseIds);
+
+    const mergedData = data.map((item: any) => ({
+      ...item,
+      courseData: coursesData?.find((c: any) => c.id === item.course_id),
+    }));
+
+    mergedData.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime()
+    );
+    setCourses(mergedData);
+  };
+
+  const loadAvailableCourses = async () => {
+    if (!student) return;
+
+    const gradeKey = gradeMap[student.grade] || student.grade;
+
+    const { data, error } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("is_published", true)
+      .eq("is_hidden", false)
+      .eq("grade", gradeKey);
+
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    setAvailableCourses(data || []);
+  };
+
+  useEffect(() => {
+    if (student) {
+      loadAvailableCourses();
+    }
+  }, [student]);
+
+  const deleteCourse = async (courseId: number) => {
+    const confirmed = window.confirm("هل أنت متأكد من حذف الكورس؟");
+    if (!confirmed) return;
+
+    await supabase
+      .from("student_courses")
+      .delete()
+      .eq("id", courseId);
+
+    loadCourses();
+  };
+
+  const addCourse = async () => {
+    if (!selectedCourse) return;
+
+    const alreadyExists = courses.some(
+      (c) => String(c.course_id) === String(selectedCourse)
+    );
+
+    if (alreadyExists) {
+      alert("الطالب مشترك بالفعل في هذا الكورس");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("student_courses")
+      .insert({
+        student_id: Number(id),
+        course_id: selectedCourse,
+        active: true,
+        subscription_type: "إداري",
+      })
+      .select();
+
+    console.log(data);
     console.log(error);
-    return;
-  }
 
-  if (!data?.length) {
-  setCourses([]);
-  return;
-}
+    if (error) {
+      alert(error.message);
+      return;
+    }
 
-  const courseIds = data.map(
-    (item: any) => item.course_id
-  );
+    setShowCourseModal(false);
+    setSelectedCourse("");
 
-  const { data: coursesData } = await supabase
-    .from("courses")
-    .select("*")
-    .in("id", courseIds);
+    await loadCourses();
+  };
 
-  const mergedData = data.map((item: any) => ({
-    ...item,
-    courseData: coursesData?.find(
-      (c: any) => c.id === item.course_id
-    ),
-  }));
-  
-mergedData.sort(
-  (a, b) =>
-    new Date(b.created_at).getTime() -
-    new Date(a.created_at).getTime()
-);
-  setCourses(mergedData);
-};
+  const loadExamResults = async () => {
+    const { data } = await supabase
+      .from("exam_results")
+      .select(`*, exams (title)`)
+      .eq("student_id", Number(id));
+    if (data) {
+      setExamResults(data);
+    }
+  };
 
-const [selectedCourse, setSelectedCourse] =
-  useState("");
+  const loadHomeworkResults = async () => {
+    const { data } = await supabase
+      .from("homework_submissions")
+      .select("*")
+      .eq("student_id", Number(id));
 
-const [availableCourses, setAvailableCourses] =
-  useState<any[]>([]);
+    if (data) {
+      setHomeworkResults(data);
+    }
+  };
 
-const loadAvailableCourses = async () => {
- const { data } = await supabase
-  .from("courses")
-  .select("*")
-  .eq("is_published", true)
-  .eq("is_hidden", false);
-
-  if (data) {
-    setAvailableCourses(data);
-  }
-};
-
-
-useEffect(() => {
-  loadAvailableCourses();
-}, []);
-
-
-const deleteCourse = async (courseId:number) => {
-
-  const confirmed = window.confirm(
-    "هل أنت متأكد من حذف الكورس؟"
-  );
-
-  if (!confirmed) return;
-
-  await supabase
-    .from("student_courses")
-    .delete()
-    .eq("id", courseId);
-
-  loadCourses();
-};
-
-const addCourse = async () => {
-
-  if (!selectedCourse) return;
-
-  const alreadyExists = courses.some(
-  (c) =>
-    String(c.course_id) ===
-    String(selectedCourse)
-);
-const courseInfo = availableCourses.find(
-  (c) => c.id === selectedCourse
-);
-
-if (
-  courseInfo &&
-  courseInfo.grade !== student.grade
-) {
-  alert(
-    "لا يمكن إضافة كورس من صف مختلف"
-  );
-  return;
-}
-
-  if (alreadyExists) {
-    alert("الطالب مشترك بالفعل في هذا الكورس");
-    return;
-  }
-
-  const { data, error } = await supabase
-    .from("student_courses")
-    .insert({
-  student_id: Number(id),
-  course_id: selectedCourse,
-  active: true,
-  subscription_type: "إداري",
-})
-    .select();
-
-  console.log(data);
-  console.log(error);
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  setShowCourseModal(false);
-  setSelectedCourse("");
-
-  await loadCourses();
-};
-
-const loadExamResults = async () => {
-const { data } = await supabase
-  .from("exam_results")
-  .select(`
-    *,
-    exams (
-      title
-    )
-  `)
-  .eq("student_id", Number(id));
-  if (data) {
-    setExamResults(data);
-  }
-};
-
-const sendNotification = async () => {
-
-  if (!notificationTitle || !notificationMessage) {
-    alert("أكمل بيانات الإشعار");
+const sendAnnouncement = async () => {
+  if (!announcementMessage.trim()) {
+    alert("اكتب الرسالة أولاً");
     return;
   }
 
   const { error } = await supabase
-    .from("notifications")
+    .from("student_announcements")
     .insert({
       student_id: student.id,
-      title: notificationTitle,
-      message: notificationMessage,
-      type: notificationReason,
-      target: notificationType,
-      is_read: false,
+      message: announcementMessage,
+      priority: announcementPriority,
     });
 
   if (error) {
@@ -352,1416 +226,626 @@ const sendNotification = async () => {
     return;
   }
 
-  alert("تم إرسال الإشعار بنجاح");
+  alert("تم إرسال الرسالة بنجاح");
 
-  setShowNotificationModal(false);
-
-  setNotificationTitle("");
-  setNotificationMessage("");
-  setNotificationReason("");
+  setAnnouncementMessage("");
+  setAnnouncementPriority("important");
+  setShowAnnouncementModal(false);
 };
 
-const loadHomeworkResults = async () => {
-  const { data } = await supabase
-    .from("homework_submissions")
-    .select("*")
-    .eq("student_id", Number(id));
+  const toggleStudentStatus = async () => {
+    const confirmed = window.confirm(
+      student.is_blocked
+        ? "هل تريد تفعيل هذا الطالب؟"
+        : "هل تريد إيقاف هذا الطالب؟"
+    );
 
-  if (data) {
-    setHomeworkResults(data);
+    if (!confirmed) return;
+
+    const { error } = await supabase
+      .from("students")
+      .update({
+        is_blocked: !student.is_blocked,
+        status: !student.is_blocked ? "موقوف" : "نشط",
+      })
+      .eq("id", student.id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    loadStudent();
+  };
+
+  useEffect(() => {
+    loadStudent();
+    loadCourses();
+    loadExamResults();
+    loadHomeworkResults();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-white dark:bg-[#09090B]" dir="rtl">
+        <div className="hidden lg:block flex-shrink-0">
+          <DashboardSidebar type="instructor" />
+        </div>
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400 font-bold">جاري تحميل بيانات الطالب...</p>
+          </div>
+        </main>
+      </div>
+    );
   }
-};
 
+  if (!student) {
+    return (
+      <div className="flex h-screen bg-white dark:bg-[#09090B]" dir="rtl">
+        <div className="hidden lg:block flex-shrink-0">
+          <DashboardSidebar type="instructor" />
+        </div>
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <AlertCircle className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={64} />
+            <p className="text-gray-600 dark:text-gray-400 font-bold text-lg">الطالب غير موجود</p>
+            <Button onClick={() => navigate(-1)} className="mt-4 bg-[#B348FE] hover:bg-[#9E2FFF]">
+              العودة
+            </Button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
-
-useEffect(() => {
-  loadStudent();
-  loadCourses();
-  loadExamResults();
-  loadHomeworkResults();
-}, [id]);
-
-if (loading) {
-    
+  const uniqueCourses = [...new Set(courses.map((c) => c.course_id))];
+  const lessonsPercent = student.total_lessons > 0
+    ? Math.round((student.watched_lessons / student.total_lessons) * 100)
+    : 0;
+  const homeworkPercent = student.total_homework > 0
+    ? Math.round((student.completed_homework / student.total_homework) * 100)
+    : 0;
+  const overallProgress = Math.round((lessonsPercent + homeworkPercent) / 2);
+  const totalScores = examResults.reduce((sum: number, exam: any) => sum + (exam.score || 0), 0);
+  const averageScore = examResults.length > 0 ? Math.round(totalScores / examResults.length) : 0;
+  const highestScore = examResults.length > 0 ? Math.max(...examResults.map((e: any) => e.score || 0)) : 0;
 
   return (
-    <div className="p-10 text-center">
-      جاري تحميل بيانات الطالب...
-    </div>
-  );
-}
-
-if (!student) {
-  return (
-    <div className="p-10 text-center">
-      الطالب غير موجود
-    </div>
-  );
-}
-const daysSinceJoin =
-  student?.join_date
-    ? Math.floor(
-        (
-          Date.now() -
-          new Date(
-            student.join_date
-          ).getTime()
-        ) /
-        (1000 * 60 * 60 * 24)
-      )
-    : 0;
-const lessonsPercent =
-  student.total_lessons > 0
-    ? Math.round(
-        (student.watched_lessons /
-          student.total_lessons) *
-          100
-      )
-    : 0;
-
-  const homeworkPercent =
-  student.total_homework > 0
-    ? Math.round(
-        (student.completed_homework /
-          student.total_homework) *
-          100
-      )
-    : 0;
-
-    const totalScores = examResults.reduce(
-  (sum: number, exam: any) =>
-    sum + (exam.score || 0),
-  0
-);
-
-
-
-    const overallProgress = Math.round(
-  (lessonsPercent + homeworkPercent) / 2
-);
-
-const averageScore =
-  examResults.length > 0
-    ? Math.round(
-        totalScores /
-          examResults.length
-      )
-    : 0;
-
-const highestScore =
-  examResults.length > 0
-    ? Math.max(
-        ...examResults.map(
-          (e: any) => e.score || 0
-        )
-      )
-    : 0;
-
-    const uniqueCourses = [
-  ...new Set(
-    courses.map((c) => c.course_id)
-  ),
-];
-
- return (
-  <div
-    className="flex h-screen bg-slate-50 overflow-hidden"
-    dir="rtl"
-  >
-    <div className="hidden lg:block flex-shrink-0">
-      <DashboardSidebar type="instructor" />
-    </div>
-
-    <main className="flex-1 overflow-y-auto p-6 space-y-6">
-
-      <Card className="overflow-hidden border-0 shadow-xl">
-  <div className="bg-gradient-to-l from-blue-600 via-indigo-600 to-violet-700 p-8">
-
-    <div className="flex items-center justify-between">
-
-      <div>
-
-        <div className="flex items-center gap-4">
-
-          <div
-            className="
-            w-20 h-20
-            rounded-full
-            bg-white/20
-            flex items-center justify-center
-            text-white
-            text-3xl
-            font-black
-          "
-          >
-            {student.avatar_url ? (
-  <img
-    src={student.avatar_url}
-    alt=""
-    className="w-full h-full object-cover rounded-full"
-  />
-) : (
-  student.full_name?.charAt(0)
-)}
-          </div>
-
-          <div>
-
-            <h1 className="text-3xl font-black text-white">
-              {student.full_name}
-            </h1>
-
-            <p className="text-blue-100 mt-1">
-              {student.student_code}
-            </p>
-
-<div className="flex flex-wrap gap-4 mt-4 text-white/90 text-sm">
-
-  <span className="flex items-center gap-2">
-
-  <div
-    className={`w-2 h-2 rounded-full ${
-      student?.status === "نشط"
-        ? "bg-emerald-400"
-        : "bg-red-400"
-    }`}
-  />
-
-  {student.status}
-
-</span>
-
-<span className="bg-white/10 px-3 py-1 rounded-full">
-  {uniqueCourses.length} كورس
-</span>
-
-  <span>
-    {student.watched_lessons || 0} محاضرة
-  </span>
-
-  <span>
-    {examResults.length} اختبار
-  </span>
-
-<span>
-{student.grade}
-</span>
-
-</div>
-
-          </div>
-
-        </div>
-
+    <div className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]" dir="rtl">
+      <div className="hidden lg:block flex-shrink-0">
+        <DashboardSidebar type="instructor" />
       </div>
 
-      <Button
-        variant="outline"
-        className="
-bg-white
-text-slate-900
-rounded-xl
-font-bold
-px-6
-hover:bg-slate-100
-"
-        onClick={() =>
-          navigate(
-            `/instructor/students/edit/${student.id}`
-          )
-        }
-      >
-        تعديل الطالب
-      </Button>
-
-    </div>
-
-  </div>
-</Card>
-
-<Card className="border border-slate-200 shadow-sm rounded-3xl">
-  <CardContent className="p-5">
-
-    <div className="flex flex-wrap gap-3">
-
-      <Button
-  onClick={() =>
-    setShowCourseModal(true)
-  }
->
-  + إضافة كورس
-</Button>
-
-      <Button
-  variant="outline"
-  onClick={() => setShowNotificationModal(true)}
->
-  إرسال إشعار
-</Button>
-
-      
-
-      <Button
-  variant="outline"
-  onClick={toggleStudentStatus}
-  className={
-    student.status === "نشط"
-      ? "text-red-600 border-red-200"
-      : "text-emerald-600 border-emerald-200"
-  }
->
-  {student.status === "نشط"
-    ? "إيقاف الطالب"
-    : "تفعيل الطالب"}
-</Button>
-
-    </div>
-
-  </CardContent>
-</Card>
-
-<div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6">
-
-  <Card className="border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300">
-  <CardContent className="p-6">
-
-    <div className="flex items-center justify-between">
-
-      <div>
-
-        <p className="text-slate-500 text-sm">
-          محاضرة مشاهدة
-        </p>
-
-        <h3 className="text-4xl font-black text-blue-600 mt-2">
-          {student.watched_lessons || 0}
-        </h3>
-
-      </div>
-
-      <div className="
-        w-14
-        h-14
-        rounded-2xl
-        bg-blue-100
-        flex
-        items-center
-        justify-center
-      ">
-        📺
-      </div>
-
-    </div>
-
-  </CardContent>
-</Card>
-
-  <Card className="border border-slate-200 shadow-sm rounded-3xl hover:shadow-lg transition-all duration-300">
-  <CardContent className="p-6">
-
-    <div className="flex items-center justify-between">
-
-      <div>
-        <p className="text-slate-500 text-sm">
-          واجب محلول
-        </p>
-
-        <h3 className="text-4xl font-black text-emerald-600 mt-2">
-          {student.completed_homework || 0}
-        </h3>
-      </div>
-
-      <div className="
-        w-14 h-14
-        rounded-2xl
-        bg-emerald-100
-        flex items-center justify-center
-        text-2xl
-      ">
-        📝
-      </div>
-
-    </div>
-
-  </CardContent>
-</Card>
-
-<Card className="border border-slate-200 shadow-sm rounded-3xl hover:shadow-lg transition-all duration-300">
-  <CardContent className="p-6">
-
-    <div className="flex items-center justify-between">
-
-      <div>
-        <p className="text-slate-500 text-sm">
-          كورس مشترك
-        </p>
-
-        <h3 className="text-4xl font-black text-orange-500 mt-2">
-          {uniqueCourses.length}
-        </h3>
-      </div>
-
-      <div className="
-        w-14 h-14
-        rounded-2xl
-        bg-orange-100
-        flex items-center justify-center
-        text-2xl
-      ">
-        📚
-      </div>
-
-    </div>
-
-  </CardContent>
-</Card>
-
-<Card className="border border-slate-200 shadow-sm rounded-3xl hover:shadow-lg transition-all duration-300">
-  <CardContent className="p-6">
-
-    <div className="flex items-center justify-between">
-
-      <div>
-        <p className="text-slate-500 text-sm">
-          نسبة الإنجاز
-        </p>
-
-        <h3 className="text-4xl font-black text-violet-600 mt-2">
-          {lessonsPercent}%
-        </h3>
-      </div>
-
-      <div className="
-        w-14 h-14
-        rounded-2xl
-        bg-violet-100
-        flex items-center justify-center
-        text-2xl
-      ">
-        📈
-      </div>
-
-    </div>
-
-  </CardContent>
-</Card>
-
-</div>
-
-<Card className="border border-slate-200 shadow-sm rounded-3xl">
-  <CardContent className="p-6">
-
-    <div className="flex justify-between items-center">
-
-      <div className="mb-8">
-  <h2 className="text-3xl font-black">
-    بيانات الطالب
-  </h2>
-
-  <p className="text-slate-500 mt-2">
-    معلومات الطالب الأساسية
-  </p>
-</div>
-
-      <div className="w-14 h-14 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 flex items-center justify-center text-white text-2xl font-black">
-  <User className="w-10 h-10 text-white" />
-</div>
-
-    </div>
-
-    <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6 mt-6">
-
-      <div className="
-bg-slate-50
-rounded-2xl
-p-5
-border
-border-slate-100
-hover:border-violet-200
-transition-all
-">
-        <p className="text-slate-500 text-sm">
-          اسم الطالب
-        </p>
-
-        <p className="font-bold mt-1">
-          {student.full_name}
-        </p>
-      </div>
-
-      <div className="
-bg-slate-50
-rounded-2xl
-p-5
-border
-border-slate-100
-hover:border-violet-200
-transition-all
-">
-        <p className="text-slate-500 text-sm">
-          كود الطالب
-        </p>
-
-        <p className="font-bold mt-1">
-          {student.student_code}
-        </p>
-      </div>
-
-      <div className="
-bg-slate-50
-rounded-2xl
-p-5
-border
-border-slate-100
-hover:border-violet-200
-transition-all
-">
-        <p className="text-slate-500 text-sm">
-          الصف الدراسي
-        </p>
-
-        <p className="font-bold mt-1">
-          {student.grade}
-        </p>
-      </div>
-
-      <div className="
-bg-slate-50
-rounded-2xl
-p-5
-border
-border-slate-100
-hover:border-violet-200
-transition-all
-">
-        <p className="text-slate-500 text-sm">
-          رقم الطالب
-        </p>
-
-        <p className="font-bold mt-1">
-          {student.phone}
-        </p>
-      </div>
-
-      <div className="
-bg-slate-50
-rounded-2xl
-p-5
-border
-border-slate-100
-hover:border-violet-200
-transition-all
-">
-  <p className="text-slate-500 text-sm">
-    رقم ولي الأمر
-  </p>
-
-  <p className="font-bold mt-1">
-    {student.parent_phone || "-"}
-  </p>
-</div>
-
-<div className="
-bg-slate-50
-rounded-2xl
-p-5
-border
-border-slate-100
-hover:border-violet-200
-transition-all
-">
-  <p className="text-slate-500 text-sm">
-    تاريخ التسجيل
-  </p>
-
-  <p className="font-bold mt-1">
-    {student.join_date
-      ? new Date(student.last_login)
-.toLocaleString("ar-EG")
-      : "-"}
-  </p>
-</div>
-
-<div className="
-bg-slate-50
-rounded-2xl
-p-5
-border
-border-slate-100
-hover:border-violet-200
-transition-all
-">
-  <p className="text-slate-500 text-sm">
-    آخر دخول
-  </p>
-
-  <p className="font-bold mt-1">
-    {student.join_date
-  ? new Date(student.join_date).toLocaleString("ar-EG")
-  : "-"}
-  </p>
-</div>
-
-     <div className="bg-slate-50 rounded-xl p-4">
-
-  <p className="text-slate-500 text-sm">
-    الحالة
-  </p>
-
-  <span
-    className={`
-      inline-flex
-      items-center
-      gap-2
-      px-3
-      py-1
-      rounded-full
-      text-sm
-      font-bold
-      mt-2
-      ${
-        student?.status === "نشط"
-          ? "bg-emerald-100 text-emerald-700"
-          : "bg-red-100 text-red-700"
-      }
-    `}
-  >
-
-    <div
-      className={`
-        w-2 h-2 rounded-full
-        ${
-          student?.status === "نشط"
-            ? "bg-emerald-500"
-            : "bg-red-500"
-        }
-      `}
-    />
-
-    {student.status}
-
-  </span>
-
-</div>
-
-    </div>
-
-  </CardContent>
-</Card>
-
-<Card className="
-rounded-3xl
-border
-border-slate-200
-shadow-sm
-overflow-hidden
-">
-  <CardContent className="p-8">
-
-    {/* Header */}
-    <div className="flex items-center justify-between px-6 py-6 border-b border-slate-100">
-
-  <div className="text-right">
-    <h2 className="text-[42px] font-black text-slate-900">
-      تقدم الطالب
-    </h2>
-
-    <p className="text-slate-500 text-lg mt-2">
-      نظرة شاملة على إنجاز ومتابعة الطالب
-    </p>
-  </div>
-
-  <div className="w-12 h-12 rounded-xl bg-violet-600 text-white flex items-center justify-center text-xl shadow-lg">
-    ↗
-  </div>
-
-</div>
-    {/* Progress Box */}
-    <div className="bg-slate-50 rounded-3xl p-8 max-w-full">
-
-      <div className="flex items-center gap-3 mb-6">
-
-  <h3 className="text-3xl font-black text-slate-900">
-    التقدم الكلي في جميع الكورسات
-  </h3>
-
-  <span className="text-4xl font-black bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
-    {overallProgress}%
-  </span>
-
-</div>
-
-      <div className="w-full h-6 bg-slate-200 rounded-full overflow-hidden">
-
-        <div
-          className="h-full bg-gradient-to-r from-violet-600 to-blue-600 rounded-full transition-all duration-500"
-          style={{
-            width: `${overallProgress}%`,
-          }}
-        />
-
-      </div>
-
-      <div className="flex justify-between mt-5 text-lg text-slate-500">
-
-        <span>
-          أكمل {student.watched_lessons || 0}
-          {" "}من أصل{" "}
-          {student.total_lessons || 0}
-          {" "}محاضرة
-        </span>
-
-        <span>
-          {student.watched_lessons || 0}
-          {" "}محاضرة مكتملة
-        </span>
-
-<span>
-{student.completed_homework || 0}
- واجب مكتمل
-</span>
-
-      </div>
-
-    </div>
-
-  </CardContent>
-</Card>
-
-<Card className="rounded-3xl border border-slate-200">
-  <CardContent className="p-6">
-
-    <h3 className="text-2xl font-black mb-6">
-      ملخص الأداء
-    </h3>
-
-    <div className="grid lg:grid-cols-4 gap-4">
-
-<Card className="border border-slate-200 shadow-sm">
-    <CardContent className="py-6 text-center">
-      <h3 className="text-3xl font-black text-blue-600">
-        {examResults.length}
-      </h3>
-
-      <p className="text-slate-500 mt-2">
-        عدد الاختبارات
-      </p>
-    </CardContent>
-  </Card>
-
-  <Card className="border border-slate-200 shadow-sm">
-    <CardContent className="py-6 text-center">
-      <h3 className="text-3xl font-black text-violet-600">
-        {averageScore}%
-      </h3>
-
-      <p className="text-slate-500 mt-2">
-        متوسط الدرجات
-      </p>
-    </CardContent>
-  </Card>
-
-  <Card className="border border-slate-200 shadow-sm">
-    <CardContent className="py-6 text-center">
-      <h3 className="text-3xl font-black text-emerald-600">
-        {highestScore}%
-      </h3>
-
-      <p className="text-slate-500 mt-2">
-        أعلى درجة
-      </p>
-    </CardContent>
-  </Card>
-
-  <Card className="border border-slate-200 shadow-sm">
-    <CardContent className="py-6 text-center">
-      <h3 className="text-3xl font-black text-orange-500">
-        {totalScores}
-      </h3>
-
-      <p className="text-slate-500 mt-2">
-        مجموع الدرجات
-      </p>
-    </CardContent>
-  </Card>
-<div className="grid lg:grid-cols-4 md:grid-cols-2 gap-4">
-
-</div>
-</div>
-
-  </CardContent>
-</Card>
-
-<div className="space-y-6">
-
-  {/* الاشتراكات والكورسات */}
-<Card className="rounded-3xl border border-slate-200 shadow-sm overflow-hidden bg-white">
-
-  <CardContent className="p-0">
-
-    {/* Header */}
-    <div className="flex items-center justify-between px-6 py-6 border-b border-slate-100">
-
-      <h3 className="font-black text-slate-900 flex items-center gap-2">
-        <BookOpen
-          size={18}
-          className="text-violet-500"
-        />
-        الاشتراكات والكورسات
-      </h3>
-
-      <span className="bg-violet-100 text-violet-700 px-3 py-1 rounded-full text-sm font-bold">
-        {uniqueCourses.length} كورس
-      </span>
-
-    </div>
-
-    {uniqueCourses.length > 0 ? (
-
-      <div className="p-6">
-
-        {/* Table Header */}
-        <div
-          className="
-          grid
-          grid-cols-5
-          bg-slate-50
-          rounded-2xl
-          px-5
-          py-5
-          text-sm
-          font-bold
-          text-slate-500
-          mb-2
-        "
-        >
-          <div>الكورس</div>
-          <div>الصف الدراسي</div>
-          <div>تاريخ الاشتراك</div>
-          <div>الحالة</div>
-          <div>إجراءات</div>
-        </div>
-
-        {/* Rows */}
-        <div className="space-y-2">
-
-          {uniqueCourses.map((courseId) => {
-
-            const course = courses.find(
-              (c) => c.course_id === courseId
-            );
-
-            if (!course) return null;
-
-            return (
-
-              <div
-                key={course.id}
-                className="
-                grid
-                grid-cols-5
-                items-center
-                px-5
-                py-5
-                rounded-2xl
-                border
-                border-slate-100
-                hover:border-violet-200
-                hover:bg-violet-50/40
-                transition-all
-                duration-200
-              "
+      <main className="flex-1 overflow-y-auto">
+        {/* Header */}
+        <div className="bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] p-6 lg:p-10 text-white relative overflow-hidden flex-shrink-0">
+          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
+          <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
+
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-4">
+              <Button
+                variant="outline"
+                onClick={() => navigate(-1)}
+                className="mb-0 border-2 border-white/30 hover:bg-white/10 text-white font-bold rounded-xl"
               >
-
-                {/* اسم الكورس */}
-                <div className="font-bold text-slate-800">
-                  <div>
-  <div className="font-bold">
-    {course.courseData?.title}
-  </div>
-
-  <div className="text-xs text-slate-500 mt-1">
-    ID: {course.course_id}
-  </div>
-</div>
-                </div>
-
-                {/* الصف */}
-                <div className="text-slate-600">
-                  {course.courseData?.grade}
-                </div>
-
-                {/* التاريخ */}
-                <div className="text-slate-600">
-                  {new Date(
-                    course.created_at
-                  ).toLocaleDateString("ar-EG")}
-                </div>
-
-                {/* الحالة */}
-                <div>
-                  <span
-                    className={`
-                      inline-flex
-                      items-center
-                      px-3
-                      py-1
-                      rounded-full
-                      text-xs
-                      font-bold
-                      ${
-                        course.active
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-red-100 text-red-700"
-                      }
-                    `}
-                  >
-                    {course.active
-                      ? "مفعل"
-                      : "غير مفعل"}
-                  </span>
-                </div>
-
-                {/* الإجراءات */}
-                <div>
-
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="
-                    text-red-600
-                    border-red-200
-                    hover:bg-red-50
-                  "
-                    onClick={() =>
-                      deleteCourse(course.id)
-                    }
-                  >
-                    حذف
-                  </Button>
-
-                </div>
-
-              </div>
-
-            );
-
-          })}
-
-        </div>
-
-      </div>
-
-    ) : (
-
-      <div className="py-16 text-center">
-
-        <BookOpen
-          size={40}
-          className="mx-auto text-slate-300 mb-3"
-        />
-
-        <p className="text-slate-400">
-          لا توجد اشتراكات حالياً
-        </p>
-
-      </div>
-
-    )}
-
-  </CardContent>
-
-</Card>
-
-  {/* إدارة أجهزة الطالب */}
-  <Card className="rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-
-    <CardContent className="p-0">
-
-      <div className="flex items-center justify-between px-6 py-5">
-
-        <h3 className="font-black text-slate-900 flex items-center gap-2">
-  <Monitor
-    size={18}
-    className="text-violet-500"
-  />
-  إدارة أجهزة الطالب
-</h3>
-
-      </div>
-
-      <div className="px-6 pb-4">
-
-        <div className="grid grid-cols-4 bg-slate-50 rounded-2xl px-5 py-6 text-sm font-bold text-slate-500">
-
-          <div>اسم الجهاز</div>
-          <div>النظام / المتصفح</div>
-          <div>الحالة</div>
-          <div>آخر نشاط</div>
-
-        </div>
-
-      </div>
-
-      <div className="px-6 pb-6">
-
-        <div className="grid grid-cols-4 items-center px-5 py-5">
-
-          <div>Unknown Device</div>
-
-          <div>macOS / Safari</div>
-
-          <div>
-            <span className="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold">
-              متصل
-            </span>
-          </div>
-
-          <div>2026-05-21</div>
-
-        </div>
-
-      </div>
-
-    </CardContent>
-
-  </Card>
-
-<Card className="rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-
-  <CardContent className="p-0">
-
-    <div className="flex items-center justify-between px-6 py-6 border-b border-slate-100">
-
-      <h3 className="font-black text-slate-900 flex items-center gap-2">
-        <BarChart3
-          size={18}
-          className="text-violet-500"
-        />
-        سجل الامتحانات والدرجات
-      </h3>
-
-    </div>
-
-    <div className="p-6">
-
-      <div
-        className="
-        grid
-        grid-cols-6
-        bg-slate-50
-        rounded-2xl
-        px-5
-        py-6
-        text-sm
-        font-bold
-        text-slate-500
-      "
-      >
-        <div>الصف</div>
-        <div>الامتحان</div>
-        <div>الدرجة</div>
-        <div>الكلية</div>
-        <div>النسبة</div>
-        <div>التاريخ</div>
-      </div>
-
-      {examResults.length > 0 ? (
-
-        <div className="mt-2">
-
-          {examResults.map((exam:any) => (
-
-            <div
-              key={exam.id}
-              className="
-              grid
-              grid-cols-6
-              px-5
-              py-5
-              border-t
-              border-slate-100
-              hover:bg-slate-50
-              transition-all
-            "
-            >
-
-              <div>{student.grade}</div>
-
-              <div>
-                {exam.exams?.title}
-              </div>
-
-              <div>
-                {exam.score}
-              </div>
-
-              <div>100</div>
-
-              <div>
-                {exam.score}%
-              </div>
-
-              <div>
-                {new Date(
-                  exam.submitted_at
-                ).toLocaleDateString("ar-EG")}
-              </div>
-
+                <ArrowRight size={16} />
+              </Button>
             </div>
 
-          ))}
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center text-3xl font-black border-2 border-white/20">
+                  {student.avatar_url ? (
+                    <img src={student.avatar_url} alt={student.full_name} className="w-full h-full object-cover rounded-2xl" />
+                  ) : (
+                    student.full_name?.charAt(0)
+                  )}
+                </div>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-black mb-2">{student.full_name}</h1>
+                  <div className="flex flex-wrap gap-2 text-white/90 text-sm">
+                    <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full">
+                      <div className={`w-2 h-2 rounded-full ${student.is_blocked ? "bg-red-400" : "bg-emerald-400"}`} />
+                      {student.is_blocked ? "موقوف" : "نشط"}
+                    </span>
+                    <span className="bg-white/10 px-3 py-1 rounded-full">
+                      {student.type === "online" ? "أونلاين" : student.type === "center" ? "سنتر" : "نوع"}
+                    </span>
+                    <span className="bg-white/10 px-3 py-1 rounded-full">{uniqueCourses.length} كورس</span>
+                    <span className="bg-white/10 px-3 py-1 rounded-full">{student.watched_lessons || 0} محاضرة</span>
+                  </div>
+                </div>
+              </div>
 
+              <Button
+                onClick={() => navigate(`/instructor/students/edit/${student.id}`)}
+                className="bg-white text-[#B348FE] hover:bg-white/90 rounded-xl font-black px-6 shadow-lg h-12"
+              >
+                تعديل الطالب
+              </Button>
+            </div>
+          </div>
         </div>
 
-      ) : (
+        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
+          {/* Action Buttons */}
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
+            <CardContent className="p-4 lg:p-6">
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  onClick={() => setShowCourseModal(true)}
+                  className="bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-bold shadow-md hover:shadow-[0_8px_20px_rgba(179,72,254,.35)] h-12"
+                >
+                  <Plus size={18} className="ml-2" />
+                  إضافة كورس
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAnnouncementModal(true)}
+                  className="border-2 border-gray-200 dark:border-[#2A2A2A] hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] hover:border-[#B348FE] rounded-xl font-bold h-12 transition-all duration-300"
+                >
+                  <Bell size={18} className="ml-2" />
+                  إرسال إشعار
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={toggleStudentStatus}
+                  className={`border-2 rounded-xl font-bold h-12 transition-all duration-300 ${
+                    student.is_blocked
+                      ? "border-emerald-200 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+                      : "border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/30"
+                  }`}
+                >
+                  <Power size={18} className="ml-2" />
+                  {student.is_blocked ? "تفعيل الطالب" : "إيقاف الطالب"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-        <div className="py-12 text-center text-slate-400">
-          لم يتم أداء أي امتحانات
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#B348FE] transition-all duration-300">
+              <CardContent className="p-4 lg:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">محاضرة مشاهدة</p>
+                    <h3 className="text-2xl lg:text-3xl font-black text-[#B348FE]">{student.watched_lessons || 0}</h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                    <BookOpen className="text-[#B348FE]" size={24} />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#B348FE] transition-all duration-300">
+              <CardContent className="p-4 lg:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">واجب محلول</p>
+                    <h3 className="text-2xl lg:text-3xl font-black text-emerald-600">{student.completed_homework || 0}</h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
+                    <CheckCircle2 className="text-emerald-600" size={24} />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#B348FE] transition-all duration-300">
+              <CardContent className="p-4 lg:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">كورس مشترك</p>
+                    <h3 className="text-2xl lg:text-3xl font-black text-amber-500">{uniqueCourses.length}</h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center">
+                    <GraduationCap className="text-amber-600" size={24} />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#B348FE] transition-all duration-300">
+              <CardContent className="p-4 lg:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">نسبة الإنجاز</p>
+                    <h3 className="text-2xl lg:text-3xl font-black text-blue-600">{lessonsPercent}%</h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
+                    <Activity className="text-blue-600" size={24} />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Student Info Card */}
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
+            <CardContent className="p-6 lg:p-8">
+              <div className="mb-6">
+                <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">بيانات الطالب</h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">معلومات الطالب الأساسية</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <InfoCardItem label="اسم الطالب" value={student.full_name} icon={<User size={18} />} />
+                <InfoCardItem label="الصف الدراسي" value={student.grade} icon={<GraduationCap size={18} />} />
+                <InfoCardItem label="رقم الطالب" value={student.phone} icon={<Phone size={18} />} />
+                <InfoCardItem label="رقم ولي الأمر" value={student.parent_phone || "-"} icon={<Phone size={18} />} />
+                <InfoCardItem label="المحافظة" value={student.governorate || "-"} icon={<Mail size={18} />} />
+                <InfoCardItem
+                  label="تاريخ التسجيل"
+                  value={student.created_at ? new Date(student.created_at).toLocaleString("ar-EG") : "-"}
+                  icon={<Calendar size={18} />}
+                />
+                <InfoCardItem
+                  label="آخر دخول"
+                  value={student.last_login ? new Date(student.last_login).toLocaleString("ar-EG") : "-"}
+                  icon={<Calendar size={18} />}
+                />
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE] transition-all duration-200">
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">الحالة</p>
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black border ${
+                      student.is_blocked
+                        ? "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900"
+                        : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900"
+                    }`}
+                  >
+                    <div className={`w-2 h-2 rounded-full ${student.is_blocked ? "bg-red-500" : "bg-emerald-500"}`} />
+                    {student.is_blocked ? "موقوف" : "نشط"}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Progress Section */}
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
+            <CardContent className="p-6 lg:p-8">
+              <div className="mb-6">
+                <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">تقدم الطالب</h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">نظرة شاملة على إنجاز ومتابعة الطالب</p>
+              </div>
+
+              <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-6 border border-gray-100 dark:border-[#2A2A2A]">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white">التقدم الكلي في جميع الكورسات</h3>
+                  <span className="text-3xl font-black text-[#B348FE]">{overallProgress}%</span>
+                </div>
+                <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#B348FE] to-[#9E2FFF] rounded-full transition-all duration-500"
+                    style={{ width: `${overallProgress}%` }}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                  <div className="bg-white dark:bg-[#111111] rounded-xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">المحاضرات</p>
+                    <p className="text-gray-900 dark:text-white font-black text-sm">
+                      {student.watched_lessons || 0} / {student.total_lessons || 0}
+                    </p>
+                  </div>
+                  <div className="bg-white dark:bg-[#111111] rounded-xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">الواجبات</p>
+                    <p className="text-gray-900 dark:text-white font-black text-sm">
+                      {student.completed_homework || 0} / {student.total_homework || 0}
+                    </p>
+                  </div>
+                  <div className="bg-white dark:bg-[#111111] rounded-xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">الحضور</p>
+                    <p className={`font-black text-sm ${
+                      (student.attendance_percentage || 0) >= 80
+                        ? "text-emerald-600"
+                        : (student.attendance_percentage || 0) >= 50
+                        ? "text-amber-600"
+                        : "text-red-600"
+                    }`}>
+                      {student.attendance_percentage || 0}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Performance Summary */}
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
+            <CardContent className="p-6 lg:p-8">
+              <h3 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-6">ملخص الأداء</h3>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 text-center border border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE] transition-all duration-300">
+                  <h3 className="text-2xl font-black text-[#B348FE]">{examResults.length}</h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mt-2">عدد الاختبارات</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 text-center border border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE] transition-all duration-300">
+                  <h3 className="text-2xl font-black text-blue-600">{averageScore}%</h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mt-2">متوسط الدرجات</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 text-center border border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE] transition-all duration-300">
+                  <h3 className="text-2xl font-black text-emerald-600">{highestScore}%</h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mt-2">أعلى درجة</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 text-center border border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE] transition-all duration-300">
+                  <h3 className="text-2xl font-black text-amber-600">{totalScores}</h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mt-2">مجموع الدرجات</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Courses Section */}
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                    <BookOpen className="text-[#B348FE]" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-gray-900 dark:text-white">الاشتراكات والكورسات</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{uniqueCourses.length} كورس</p>
+                  </div>
+                </div>
+              </div>
+
+              {uniqueCourses.length > 0 ? (
+                <div className="p-6">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-100 dark:border-[#2A2A2A]">
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الكورس</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الصف</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">تاريخ الاشتراك</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الحالة</th>
+                          <th className="px-4 py-3 text-center text-xs font-black text-gray-600 dark:text-gray-400">الإجراءات</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {uniqueCourses.map((courseId) => {
+                          const course = courses.find((c) => c.course_id === courseId);
+                          if (!course) return null;
+                          return (
+                            <tr key={course.id} className="border-b border-gray-100 dark:border-[#2A2A2A] hover:bg-[#F6EEFF]/50 dark:hover:bg-[#2B103D]/50 transition-all">
+                              <td className="px-4 py-3">
+                                <div>
+                                  <div className="font-bold text-gray-900 dark:text-white text-sm">{course.courseData?.title}</div>
+                                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">ID: {course.course_id}</div>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{course.courseData?.grade || "-"}</td>
+                              <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
+                                {course.created_at ? new Date(course.created_at).toLocaleDateString("ar-EG") : "-"}
+                              </td>
+                              <td className="px-4 py-3">
+                                <span
+                                  className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black border ${
+                                    course.active
+                                      ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900"
+                                      : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900"
+                                  }`}
+                                >
+                                  {course.active ? "مفعل" : "غير مفعل"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-center">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => deleteCourse(course.id)}
+                                  className="text-red-600 border-red-200 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/30 rounded-lg text-xs font-bold h-8"
+                                >
+                                  <Trash2 size={14} className="ml-1" />
+                                  حذف
+                                </Button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-16 text-center">
+                  <BookOpen className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />
+                  <p className="text-gray-500 dark:text-gray-400 font-bold">لا توجد اشتراكات حالياً</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Exam Results */}
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                    <BarChart3 className="text-[#B348FE]" size={20} />
+                  </div>
+                  <h3 className="font-black text-gray-900 dark:text-white">سجل الامتحانات والدرجات</h3>
+                </div>
+              </div>
+              <div className="p-6">
+                {examResults.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-100 dark:border-[#2A2A2A]">
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الصف</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الامتحان</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الدرجة</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الكلية</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">النسبة</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">التاريخ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {examResults.map((exam: any) => (
+                          <tr key={exam.id} className="border-b border-gray-100 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-all">
+                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-white font-medium">{student.grade}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-white font-medium">{exam.exams?.title || "-"}</td>
+                            <td className="px-4 py-3 text-sm font-bold text-[#B348FE]">{exam.score || 0}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">100</td>
+                            <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{exam.score || 0}%</td>
+                            <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                              {exam.submitted_at ? new Date(exam.submitted_at).toLocaleDateString("ar-EG") : "-"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="py-12 text-center text-gray-500 dark:text-gray-400">
+                    <AlertCircle className="mx-auto text-gray-300 dark:text-gray-700 mb-3" size={48} />
+                    <p className="font-bold">لم يتم أداء أي امتحانات</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Activity Logs */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
+              <CardContent className="p-0">
+                <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                      <Activity className="text-[#B348FE]" size={20} />
+                    </div>
+                    <h3 className="font-black text-gray-900 dark:text-white">سجل مشاهدة المحاضرات</h3>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="py-12 text-center text-gray-500 dark:text-gray-400">
+                    <Monitor className="mx-auto text-gray-300 dark:text-gray-700 mb-3" size={48} />
+                    <p className="font-bold">لا يوجد سجل مشاهدات</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
+              <CardContent className="p-0">
+                <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                      <Monitor className="text-[#B348FE]" size={20} />
+                    </div>
+                    <h3 className="font-black text-gray-900 dark:text-white">إدارة أجهزة الطالب</h3>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-100 dark:border-[#2A2A2A]">
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">اسم الجهاز</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">النظام</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الحالة</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">آخر نشاط</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-all">
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">Unknown Device</td>
+                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">macOS / Safari</td>
+                          <td className="px-4 py-3">
+                            <span className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 px-2 py-1 rounded-full text-xs font-black border border-emerald-200 dark:border-emerald-900">
+                              متصل
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">2026-05-21</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
+      </main>
 
-      )}
+{/* Announcement Modal */}
+{showAnnouncementModal && (
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="bg-white dark:bg-[#111111] w-full max-w-[650px] rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-[#2A2A2A]">
 
-    </div>
+      <div className="p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+            <Bell className="text-[#B348FE]" size={24} />
+          </div>
 
-  </CardContent>
+          <div>
+            <h3 className="text-xl font-black text-gray-900 dark:text-white">
+              رسالة خاصة للطالب
+            </h3>
 
-</Card>
-
-<Card className="rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-
-  <CardContent className="p-0">
-
-    <div className="flex items-center justify-between px-6 py-6 border-b border-slate-100">
-
-      <h3 className="font-black text-slate-900 flex items-center gap-2">
-        <Activity
-          size={18}
-          className="text-violet-500"
-        />
-        سجل مشاهدة المحاضرات
-      </h3>
-
-    </div>
-
-    <div className="p-6">
-
-      <div
-        className="
-        grid
-        grid-cols-4
-        bg-slate-50
-        rounded-2xl
-        px-5
-        py-6
-        text-sm
-        font-bold
-        text-slate-500
-      "
-      >
-        <div>الصف</div>
-        <div>المحاضرة</div>
-        <div>مدة المشاهدة (دقائق)</div>
-        <div>آخر مشاهدة</div>
-      </div>
-
-      <div className="py-12 text-center text-slate-400">
-        لا يوجد سجل مشاهدات
-      </div>
-
-    </div>
-
-  </CardContent>
-
-</Card>
-
-  {/* سجل النشاط التفصيلي */}
-  <Card className="rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-
-    <CardContent className="p-0">
-
-      <div className="flex items-center justify-between px-6 py-5">
-
-        <h3 className="font-black text-slate-900 flex items-center gap-2">
-  <Activity
-    size={18}
-    className="text-violet-500"
-  />
-  سجل النشاط التفصيلي
-</h3>
-
-      </div>
-
-      <div className="px-6 pb-4">
-
-        <div className="grid grid-cols-5 bg-slate-50 rounded-2xl px-5 py-6 text-sm font-bold text-slate-500">
-
-          <div>المحاضرة</div>
-          <div>الكورس</div>
-          <div>مدة المشاهدة</div>
-          <div>تاريخ المشاهدة</div>
-          <div>الحالة</div>
-
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              ستظهر هذه الرسالة لهذا الطالب فقط أسفل شريط التنقل.
+            </p>
+          </div>
         </div>
-
       </div>
 
-      <div className="py-10 text-center text-slate-400">
-        لا يوجد سجل نشاط بعد
-      </div>
-
-    </CardContent>
-
-  </Card>
-
-</div>
-{showNotificationModal && (
-  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-
-    <div
-  className="
-    bg-white
-    rounded-3xl
-    w-full
-    max-w-[700px]
-    shadow-2xl
-    overflow-hidden
-    max-h-[90vh]
-    flex
-    flex-col
-  "
->
-
-      <div className="p-6 border-b">
-
-       <div className="flex items-center gap-3">
-
-  <div className="
-    w-12 h-12
-    rounded-2xl
-    bg-gradient-to-r
-    from-violet-600
-    to-blue-600
-    flex
-    items-center
-    justify-center
-    text-white
-  ">
-    🔔
-  </div>
-
-  <div>
-    <h3 className="text-2xl font-black">
-      إرسال إشعار
-    </h3>
-
-    <p className="text-slate-500">
-      إرسال إشعار للطالب أو ولي الأمر
-    </p>
-  </div>
-
-</div>
-
-        <p className="text-slate-500 mt-2">
-          إرسال إشعار للطالب أو ولي الأمر
-        </p>
-
-      </div>
-
-      <div className="p-6 space-y-5 overflow-y-auto">
+      <div className="p-6 space-y-5">
 
         <div>
-
-          <label className="font-bold mb-2 block">
-            جهة الإرسال
+          <label className="font-bold text-sm mb-2 block">
+            أهمية الرسالة
           </label>
 
           <select
-            value={notificationType}
-            onChange={(e) =>
-              setNotificationType(e.target.value)
-            }
-            className="w-full border rounded-xl p-3"
+            value={announcementPriority}
+            onChange={(e) => setAnnouncementPriority(e.target.value)}
+            className="w-full h-12 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-4"
           >
-            <option value="student">
-              الطالب فقط
-            </option>
-
-            <option value="parent">
-              ولي الأمر فقط
-            </option>
-
-            <option value="both">
-              الطالب + ولي الأمر
-            </option>
+            <option value="normal">عادية</option>
+            <option value="important">مهمة</option>
+            <option value="urgent">عاجلة</option>
           </select>
-
-<div className="mt-3 bg-slate-50 rounded-xl p-3 text-sm">
-
-  {notificationType === "student" && (
-    <span>
-      📱 {student.phone}
-    </span>
-  )}
-
-  {notificationType === "parent" && (
-    <span>
-      📱 {student.parent_phone}
-    </span>
-  )}
-
-  {notificationType === "both" && (
-    <div className="space-y-1">
-      <div>📱 {student.phone}</div>
-      <div>📱 {student.parent_phone}</div>
-    </div>
-  )}
-
-</div>
-
         </div>
 
         <div>
-
-          <label className="font-bold mb-2 block">
-            سبب الإشعار
-          </label>
-
-          <select
-            value={notificationReason}
-            onChange={(e) =>
-              setNotificationReason(e.target.value)
-            }
-            className="w-full border rounded-xl p-3"
-          >
-            <option value="">
-              اختر السبب
-            </option>
-
-           <option value="غياب محاضرة">
-  غياب محاضرة
-</option>
-
-<option value="غياب امتحان">
-  غياب امتحان
-</option>
-
-<option value="عدم تسليم واجب">
-  عدم تسليم واجب
-</option>
-
-<option value="تنبيه عام">
-  تنبيه عام
-</option>
-
-<option value="رسالة مخصصة">
-  رسالة مخصصة
-</option>
-
-          </select>
-
-        </div>
-
-        <div>
-
-          <label className="font-bold mb-2 block">
-            عنوان الإشعار
-          </label>
-
-          <input
-            value={notificationTitle}
-            onChange={(e) =>
-              setNotificationTitle(e.target.value)
-            }
-            className="w-full border rounded-xl p-3"
-            placeholder="عنوان الإشعار"
-          />
-
-        </div>
-
-        <div>
-
-          <label className="font-bold mb-2 block">
+          <label className="font-bold text-sm mb-2 block">
             الرسالة
           </label>
 
           <textarea
-            rows={5}
-            value={notificationMessage}
-            onChange={(e) =>
-              setNotificationMessage(e.target.value)
-            }
-            className="w-full border rounded-xl p-3 resize-none"
-            placeholder="اكتب الرسالة..."
+            rows={6}
+            value={announcementMessage}
+            onChange={(e) => setAnnouncementMessage(e.target.value)}
+            placeholder="اكتب الرسالة التي ستظهر لهذا الطالب..."
+            className="w-full rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] p-4 resize-none"
           />
-<div className="mt-5">
-
-  <h4 className="font-black mb-3">
-    معاينة الإشعار
-  </h4>
-
-  <div
-    className="
-    border
-    border-violet-200
-    bg-violet-50
-    rounded-2xl
-    p-4
-    "
-  >
-
-    <div className="flex items-center gap-2 mb-3">
-
-      <div
-        className="
-        w-10 h-10
-        rounded-xl
-        bg-violet-600
-        text-white
-        flex items-center justify-center
-        "
-      >
-        🔔
-      </div>
-
-      <div>
-
-        <p className="font-black">
-          {notificationTitle || "عنوان الإشعار"}
-        </p>
-
-        <p className="text-xs text-slate-500">
-          سيتم إرساله للطالب أو ولي الأمر
-        </p>
-
-      </div>
-
-    </div>
-
-    <p className="text-slate-700 whitespace-pre-line">
-      {notificationMessage || "سيظهر نص الإشعار هنا"}
-    </p>
-
-  </div>
-
-</div>
         </div>
 
       </div>
 
-      <div className="p-6 border-t flex gap-3">
+      <div className="p-6 border-t border-gray-100 dark:border-[#2A2A2A] flex gap-3">
 
         <Button
-  onClick={sendNotification}
->
-  إرسال الإشعار
-</Button>
+          onClick={sendAnnouncement}
+          className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl h-12 font-black"
+        >
+          إرسال الرسالة
+        </Button>
 
         <Button
           variant="outline"
-          onClick={() =>
-            setShowNotificationModal(false)
-          }
+          onClick={() => setShowAnnouncementModal(false)}
+          className="flex-1 rounded-xl h-12 font-black"
         >
           إلغاء
         </Button>
@@ -1769,72 +853,72 @@ overflow-hidden
       </div>
 
     </div>
-
   </div>
 )}
-{showCourseModal && (
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 
-    <div className="bg-white rounded-3xl p-6 w-[500px]">
-
-      <h3 className="text-2xl font-black mb-6">
-        إضافة كورس للطالب
-      </h3>
-
-      <select
-        value={selectedCourse}
-        onChange={(e) =>
-          setSelectedCourse(e.target.value)
-        }
-        className="
-          w-full
-          border
-          rounded-xl
-          p-3
-          mb-6
-        "
-      >
-        <option value="">
-          اختر الكورس
-        </option>
-
-        {availableCourses
-  .filter(
-    (course) =>
-      course.grade === student.grade
-  )
-  .map((course) => (
-          <option
-            key={course.id}
-            value={course.id}
-          >
-            {course.title}
-          </option>
-        ))}
-      </select>
-
-      <div className="flex gap-3">
-
-        <Button onClick={addCourse}>
-          إضافة
-        </Button>
-
-        <Button
-          variant="outline"
-          onClick={() =>
-            setShowCourseModal(false)
-          }
-        >
-          إلغاء
-        </Button>
-
-      </div>
-
+      {/* Course Modal */}
+      {showCourseModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#111111] w-full max-w-[500px] rounded-3xl shadow-2xl p-6 border border-gray-200 dark:border-[#2A2A2A]">
+            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-6">إضافة كورس للطالب</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="font-bold text-gray-900 dark:text-white text-sm mb-2 block">اختر الكورس</label>
+                <select
+                  value={selectedCourse}
+                  onChange={(e) => setSelectedCourse(e.target.value)}
+                  className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                >
+                  <option value="">اختر الكورس</option>
+                  {availableCourses.length === 0 ? (
+                    <option disabled>لا توجد كورسات منشورة لهذا الصف الدراسي</option>
+                  ) : (
+                    availableCourses.map((course) => {
+                      const subscribed = courses.some(
+                        (c) => String(c.course_id) === String(course.id)
+                      );
+                      return (
+                        <option key={course.id} value={course.id} disabled={subscribed}>
+                          {course.title}
+                          {subscribed ? " (مشترك بالفعل)" : ""}
+                        </option>
+                      );
+                    })
+                  )}
+                </select>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button onClick={addCourse} className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-black h-12">
+                  إضافة
+                </Button>
+                <Button variant="outline" onClick={() => setShowCourseModal(false)} className="flex-1 border-2 border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] rounded-xl font-black h-12">
+                  إلغاء
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
 
-  </div>
-)}
-    </main>
-  </div>
-);
+function InfoCardItem({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE] transition-all duration-200">
+      <div className="flex items-start gap-2 mb-2">
+        <span className="text-gray-500 dark:text-gray-400 mt-0.5">{icon}</span>
+        <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">{label}</p>
+      </div>
+      <p className="font-bold text-gray-900 dark:text-white text-sm line-clamp-2">{value}</p>
+    </div>
+  );
 }

@@ -213,7 +213,7 @@ export function EditCourse() {
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
   const [expandedQuestions, setExpandedQuestions] = useState<Record<string, boolean>>({});
-
+const [collapsedItems, setCollapsedItems] = useState<Record<string, boolean>>({});
   // ── Load Course ──────────────────────────────────────────
   async function loadCourse() {
     if (!id) return;
@@ -273,41 +273,44 @@ const { data: homeworksData, error: homeworksError } = await supabase
 
 if (homeworksError) throw homeworksError;
 
-      const loadedCourse: Course = {
-        id: data.id,
-        title: data.title || "",
-        description: data.description || "",
-        price: data.price || 0,
-        isFree: data.is_free || false,
-        thumbnailUrl: data.thumbnail || "",
-        grade: data.grade || "",
-published: data.is_published || false,
-hidden: data.is_hidden || false,
-        sections: (sectionsData || []).map((section) => ({
-  id: section.id,
-  title: section.title,
-  collapsed: false,
-  items: (itemsData || [])
-    .filter((item) => item.section_id === section.id)
-    .map((item) => {
-switch (item.type) {
-  case "video":
-    return {
-      type: "video",
-      id: item.id,
-      title: item.title || "",
-      description: item.description || "",
-      fileName: "",
-      fileSize: item.file_size || 0,
-      duration: item.duration || "",
-      freePreview: item.is_preview || false,
-      allowDownload: item.allow_download || false,
-      uploadProgress: 100,
-      status: "done",
-      videoUrl: item.url || "",
-      thumbnailUrl: item.thumbnail || "",
-      storagePath: item.storage_path || "",
-    };
+const loadedCourse: Course = {
+  id: data.id,
+  title: data.title || "",
+  description: data.description || "",
+  price: data.price || 0,
+  isFree: data.is_free || false,
+
+  thumbnailUrl: data.thumbnail || "",
+
+  grade: data.grade || "",
+  published: data.is_published || false,
+  hidden: data.is_hidden || false,
+
+  sections: (sectionsData || []).map((section) => ({
+    id: section.id,
+    title: section.title,
+    collapsed: false,
+    items: (itemsData || [])
+      .filter((item) => item.section_id === section.id)
+      .map((item) => {
+        switch (item.type) {
+          case "video":
+            return {
+              type: "video",
+              id: item.id,
+              title: item.title || "",
+              description: item.description || "",
+              fileName: "",
+              fileSize: item.file_size || 0,
+              duration: item.duration || "",
+              freePreview: item.is_preview || false,
+              allowDownload: item.allow_download || false,
+              uploadProgress: 100,
+              status: "done",
+              videoUrl: item.url || "",
+              thumbnailUrl: item.thumbnail || "",
+              storagePath: item.storage_path || "",
+            };
 
   case "pdf":
     return {
@@ -385,10 +388,12 @@ switch (item.type) {
     return null;
 }
   
+
     })
     .filter(Boolean),
 })),
       };
+                  
       setCourse(loadedCourse);
       if (data.thumbnail)
     setThumbnailPreview(data.thumbnail);
@@ -412,18 +417,23 @@ async function saveCourse() {
   setSaveSuccess(false);
 
   try {
-    const { error } = await supabase
-      .from("courses")
-      .update({
-        title: course.title,
-        description: course.description,
-        price: course.isFree ? 0 : course.price,
-        is_free: course.isFree,
-        grade: course.grade,
-        is_published: course.published,
-is_hidden: course.hidden,
-        updated_at: new Date().toISOString(),
-      })
+    const { error } =
+await supabase
+  .from("courses")
+  .update({
+  title: course.title,
+  description: course.description,
+  price: course.isFree ? 0 : course.price,
+  is_free: course.isFree,
+  grade: course.grade,
+
+  thumbnail: course.thumbnailUrl,
+
+  is_published: course.published,
+  is_hidden: course.hidden,
+  updated_at: new Date().toISOString(),
+})
+
       .eq("id", course.id);
 
     if (error) throw error;
@@ -511,13 +521,19 @@ for (const section of course.sections) {
     // Video
     // ==========================
     if (item.type === "video") {
-      Object.assign(payload, {
-        description: item.description || "",
-        url: item.videoUrl || "",
-        storage_path: item.storagePath || "",
-        thumbnail: item.thumbnailUrl || "",
-        duration: Number(item.duration) || 0,
-      });
+Object.assign(payload,{
+    description: item.description || "",
+
+    url: item.videoUrl || "",
+    storage_path: item.storagePath || "",
+    thumbnail: item.thumbnailUrl || "",
+
+    duration: Number(item.duration) || 0,
+    file_size: item.fileSize || 0,
+
+    is_preview: item.freePreview,
+    allow_download: item.allowDownload,
+});
     }
 
     // ==========================
@@ -765,6 +781,7 @@ if (deletedItemIds.length > 0) {
   // ── Delete Course ────────────────────────────────────────
   async function deleteCourse() {
     if (!course) return;
+    
     try {
       // Placeholder: ready for Supabase integration
       // await supabase.from("courses").delete().eq("id", course.id);
@@ -947,6 +964,13 @@ if ((course as any).thumbnailPath) {
     });
   }
 
+  function toggleItemCollapse(itemId: string) {
+  setCollapsedItems((prev) => ({
+    ...prev,
+    [itemId]: !prev[itemId],
+  }));
+}
+
   function updateItem(sectionId: string, itemId: string, updates: Partial<CourseItem>) {
     setCourse((prev) =>
       prev
@@ -974,7 +998,27 @@ async function uploadVideo(
   file: File
 ) {
   if (!course) return;
+setCourse((prev) => {
+  if (!prev) return prev;
 
+  return {
+    ...prev,
+    sections: prev.sections.map((section) => ({
+      ...section,
+      items: section.items.map((item) => {
+        if (item.id !== itemId) return item;
+
+        return {
+          ...item,
+          fileName: file.name,
+          fileSize: file.size,
+          status: "uploading",
+          uploadProgress: 0,
+        };
+      }),
+    })),
+  };
+});
   
   const fileExt = file.name.split(".").pop();
   const filePath = `${course.id}/${sectionId}/${Date.now()}.${fileExt}`;
@@ -1298,6 +1342,30 @@ storagePath: filePath,
             </div>
           </div>
           <div className="flex items-center gap-1">
+
+            <button
+  type="button"
+  onClick={() => toggleItemCollapse(item.id)}
+  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+  title="إظهار / إخفاء"
+>
+  <svg
+    className={`w-4 h-4 transition-transform duration-300 ${
+      collapsedItems[item.id] ? "" : "rotate-180"
+    }`}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M19 9l-7 7-7-7"
+    />
+  </svg>
+</button>
+
             <button
               onClick={() => moveItem(sectionId, itemIndex, "up")}
               disabled={itemIndex === 0}
@@ -1324,6 +1392,7 @@ storagePath: filePath,
           </div>
         </div>
         {/* Body */}
+        {!collapsedItems[item.id] && (
         <div className="p-5 space-y-4">
           <div className="grid grid-cols-1 gap-4">
             <div>
@@ -1420,17 +1489,10 @@ storagePath: filePath,
               </div>
               <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">معاينة مجانية</span>
             </label>
-            <label className="flex items-center gap-2.5 cursor-pointer group">
-              <div
-                onClick={() => updateItem(sectionId, item.id, { allowDownload: !item.allowDownload } as Partial<VideoItem>)}
-                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${item.allowDownload ? "bg-blue-600" : "bg-slate-300"}`}
-              >
-                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${item.allowDownload ? "-translate-x-5" : "translate-x-0"}`} />
-              </div>
-              <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">السماح بالتحميل</span>
-            </label>
+            
           </div>
         </div>
+        )}
       </div>
     );
   }
@@ -1458,6 +1520,7 @@ storagePath: filePath,
             </button>
           </div>
         </div>
+
         <div className="p-5 space-y-4">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">عنوان الملف</label>
@@ -1523,6 +1586,7 @@ storagePath: filePath,
           </label>
         </div>
       </div>
+      
     );
   }
 
@@ -1577,15 +1641,7 @@ storagePath: filePath,
             </div>
            
           </div>
-          <div className="flex items-center gap-2.5">
-            <div
-              onClick={() => updateItem(sectionId, item.id, { published: !item.published } as Partial<QuizItem>)}
-              className={`relative w-11 h-6 rounded-full cursor-pointer transition-colors duration-200 ${item.published ? "bg-violet-600" : "bg-slate-300"}`}
-            >
-              <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${item.published ? "-translate-x-5" : "translate-x-0"}`} />
-            </div>
-            <span className="text-sm font-medium text-slate-700">نشر الاختبار</span>
-          </div>
+         
 
           {/* Questions */}
           <div>
@@ -1912,18 +1968,8 @@ storagePath: filePath,
 
           {/* Toggles */}
           <div className="flex flex-wrap gap-6">
-            <label className="flex items-center gap-2.5 cursor-pointer group">
-              <div onClick={() => updateItem(sectionId, item.id, { allowLateSubmission: !item.allowLateSubmission } as Partial<HomeworkItem>)} className={`relative w-11 h-6 rounded-full transition-colors duration-200 cursor-pointer ${item.allowLateSubmission ? "bg-amber-500" : "bg-slate-300"}`}>
-                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${item.allowLateSubmission ? "-translate-x-5" : "translate-x-0"}`} />
-              </div>
-              <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">السماح بالتسليم المتأخر</span>
-            </label>
-            <label className="flex items-center gap-2.5 cursor-pointer group">
-              <div onClick={() => updateItem(sectionId, item.id, { published: !item.published } as Partial<HomeworkItem>)} className={`relative w-11 h-6 rounded-full transition-colors duration-200 cursor-pointer ${item.published ? "bg-amber-500" : "bg-slate-300"}`}>
-                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${item.published ? "-translate-x-5" : "translate-x-0"}`} />
-              </div>
-              <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">نشر الواجب</span>
-            </label>
+           
+            
           </div>
 
         </div>
@@ -1969,9 +2015,7 @@ storagePath: filePath,
             <button onClick={() => moveSectionDown(sectionIndex)} disabled={sectionIndex === totalSections - 1} className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all" title="تحريك لأسفل">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
             </button>
-            <button onClick={() => toggleCollapseSection(section.id)} className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all" title={section.collapsed ? "توسيع" : "طي"}>
-              <svg className={`w-4 h-4 transition-transform duration-200 ${section.collapsed ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-            </button>
+           
             <button onClick={() => removeSection(section.id)} className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all" title="حذف القسم">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </button>
@@ -2244,18 +2288,7 @@ storagePath: filePath,
                 <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${course.published ? "-translate-x-6" : "translate-x-0"}`} />
               </div>
             </div>
-            <div className="flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 transition-colors">
-              <div>
-                <p className="text-sm font-semibold text-slate-800">إخفاء الدورة</p>
-                <p className="text-xs text-slate-500 mt-0.5">إخفاء الدورة من قوائم البحث</p>
-              </div>
-              <div
-                onClick={() => updateCourseField("hidden", !course.hidden)}
-                className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-200 ${course.hidden ? "bg-slate-600" : "bg-slate-300"}`}
-              >
-                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${course.hidden ? "-translate-x-6" : "translate-x-0"}`} />
-              </div>
-            </div>
+           
           </div>
         </div>
 
