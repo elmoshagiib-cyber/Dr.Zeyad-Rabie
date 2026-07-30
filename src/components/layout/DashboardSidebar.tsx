@@ -203,21 +203,33 @@ useEffect(() => {
   };
 
   return (
+
     <aside
-      className={cn(
-        "flex flex-col h-full",
-        "bg-white",
-        "border border-slate-200",
-        "shadow-xl",
-        "transition-all duration-300 ease-out",
-        mobileOpen 
-          ? "rounded-none w-[280px] sm:w-[300px]" 
-          : "xl:rounded-2xl",
-        type !== "student" && collapsed && !mobileOpen
-  ? "xl:w-[80px]"
-  : "w-[280px] sm:w-[300px]"
-      )}
-    >
+  className={cn(
+    "flex flex-col h-full",
+
+    "bg-white",
+    "dark:bg-[#111111]",
+
+    "border",
+    "border-gray-200",
+    "dark:border-[#2A2A2A]",
+
+    "shadow-xl",
+    "dark:shadow-[0_20px_50px_rgba(0,0,0,.45)]",
+
+    "transition-all duration-300 ease-out",
+    "transition-colors",
+
+    mobileOpen
+      ? "rounded-none w-[280px] sm:w-[300px]"
+      : "xl:rounded-2xl",
+
+    type !== "student" && collapsed && !mobileOpen
+      ? "xl:w-[80px]"
+      : "w-[280px] sm:w-[300px]"
+  )}
+>
    
 
       <SidebarNavigation

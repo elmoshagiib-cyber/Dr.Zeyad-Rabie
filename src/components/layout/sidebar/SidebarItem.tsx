@@ -29,7 +29,7 @@ export function SidebarItem({
         w-full
         items-center
         overflow-hidden
-        rounded-xl
+        rounded-2xl
         px-3
         py-2.5
         sm:py-3
@@ -39,25 +39,26 @@ export function SidebarItem({
         `,
         collapsed ? "justify-center" : "justify-between",
 
-        active
-          ? `
-            bg-indigo-600
-            text-white
-            shadow-lg
-            shadow-indigo-600/40
-            scale-[1.02]
-          `
+active
+  ? `
+    bg-[#B348FE]
+    text-white
+    scale-[1.02]
+  `
           : `
-            text-slate-600
-            hover:bg-indigo-50
-            hover:text-indigo-700
-            active:scale-[0.98]
+text-gray-700
+dark:text-gray-300
+hover:bg-[#F6EEFF]
+dark:hover:bg-[#1A1A1A]
+hover:text-[#B348FE]
+active:scale-[0.98]
           `
       )}
     >
       {/* Active Indicator */}
       {active && (
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-l-full bg-white" />
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-l-full bg-white
+shadow-[0_0_12px_rgba(255,255,255,.6)]" />
       )}
 
       <div
@@ -81,15 +82,17 @@ export function SidebarItem({
             ease-out
             `,
             active
-              ? `
-                bg-white/20
-                backdrop-blur-sm
-              `
-              : `
-                bg-slate-100
-                group-hover:bg-indigo-100
-                group-hover:text-indigo-600
-              `
+  ? `
+    bg-white/15
+  `
+  : `
+    bg-[#F6EEFF]
+    dark:bg-[#1F1F1F]
+    text-[#B348FE]
+    group-hover:bg-[#EEDBFF]
+    dark:group-hover:bg-[#2B103D]
+    group-hover:scale-110
+  `
           )}
         >
           {icon}
@@ -119,9 +122,9 @@ export function SidebarItem({
                 text-[10px] sm:text-[11px]
                 font-bold
                 `,
-                active
-                  ? "bg-white text-indigo-600"
-                  : "bg-rose-500 text-white"
+active
+  ? "bg-white text-[#B348FE]"
+  : "bg-[#B348FE] text-white"
               )}
             >
               {badge > 99 ? "99+" : badge}
@@ -130,9 +133,14 @@ export function SidebarItem({
 
           {active && (
             <ChevronLeft
-              size={16}
-              className="text-white/80"
-            />
+  size={16}
+  className="
+    text-white
+    transition-all
+    duration-300
+    group-hover:-translate-x-1
+  "
+/>
           )}
 
         </div>

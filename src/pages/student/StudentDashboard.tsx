@@ -86,154 +86,130 @@ export function StudentDashboard() {
     }
   };
 
- const loadStudentCourses = async () => {
-  if (!user?.id) return;
+  const loadStudentCourses = async () => {
+    if (!user?.id) return;
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const { data: enrollments, error: enrollError } = await supabase
-      .from("student_courses")
-      .select("course_id")
-      .eq("student_id", Number(user.id))
-      .eq("active", true);
+      const { data: enrollments, error: enrollError } = await supabase
+        .from("student_courses")
+        .select("course_id")
+        .eq("student_id", Number(user.id))
+        .eq("active", true);
 
-    if (enrollError) throw enrollError;
+      if (enrollError) throw enrollError;
 
-    if (!enrollments?.length) {
-      setStudentCourses([]);
-      return;
+      if (!enrollments?.length) {
+        setStudentCourses([]);
+        return;
+      }
+
+      const courseIds = enrollments.map((c: any) => c.course_id);
+
+      const { data: courses, error: courseError } = await supabase
+        .from("courses")
+        .select("*")
+        .in("id", courseIds);
+
+      if (courseError) throw courseError;
+
+      const coursesWithStats = await Promise.all(
+        (courses || []).map(async (course: any) => {
+          const { data: sections } = await supabase
+            .from("course_sections")
+            .select("id")
+            .eq("course_id", course.id);
+
+          const sectionIds = (sections || []).map((s: any) => s.id);
+
+          let lessons = [];
+
+          if (sectionIds.length > 0) {
+            const { data: items } = await supabase
+              .from("course_items")
+              .select("*")
+              .in("section_id", sectionIds);
+
+            lessons = items || [];
+          }
+
+          return {
+            ...course,
+            progress: 0,
+            sectionsCount: sections?.length || 0,
+            lessonsCount: lessons.length,
+            videosCount: lessons.filter((l: any) => l.type === "video").length,
+            filesCount: lessons.filter((l: any) => l.type === "file").length,
+            examsCount: lessons.filter((l: any) => l.type === "exam").length,
+          };
+        })
+      );
+
+      setStudentCourses(coursesWithStats);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-
-    const courseIds = enrollments.map((c: any) => c.course_id);
-
-    const { data: courses, error: courseError } = await supabase
-      .from("courses")
-      .select("*")
-      .in("id", courseIds);
-
-    if (courseError) throw courseError;
-
-    const coursesWithStats = await Promise.all(
-      (courses || []).map(async (course: any) => {
-        const { data: sections } = await supabase
-          .from("course_sections")
-          .select("id")
-          .eq("course_id", course.id);
-
-        const sectionIds = (sections || []).map((s: any) => s.id);
-
-        let lessons = [];
-
-        if (sectionIds.length > 0) {
-          const { data: items } = await supabase
-            .from("course_items")
-            .select("*")
-            .in("section_id", sectionIds);
-
-          lessons = items || [];
-        }
-
-        return {
-          ...course,
-
-          progress: 0,
-
-          sectionsCount: sections?.length || 0,
-
-          lessonsCount: lessons.length,
-
-          videosCount: lessons.filter(
-            (l: any) => l.type === "video"
-          ).length,
-
-          filesCount: lessons.filter(
-            (l: any) => l.type === "file"
-          ).length,
-
-          examsCount: lessons.filter(
-            (l: any) => l.type === "exam"
-          ).length,
-        };
-      })
-    );
-
-    setStudentCourses(coursesWithStats);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  // Stats configuration
-
+  };
 
   const topThree = LEADERBOARD.slice(0, 3);
 
-  // Get announcement style
   const getAnnouncementStyle = (type: string) => {
     switch (type) {
       case "exam":
         return {
           border: "border-rose-400",
-          bg: "bg-gradient-to-br from-rose-50 to-pink-50",
+          bg: "bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20",
           icon: <AlertCircle className="text-rose-500" size={16} />,
-          iconBg: "bg-rose-100",
+          iconBg: "bg-rose-100 dark:bg-rose-900/30",
         };
       case "lesson":
         return {
-          border: "border-blue-400",
-          bg: "bg-gradient-to-br from-blue-50 to-cyan-50",
-          icon: <BookOpen className="text-blue-500" size={16} />,
-          iconBg: "bg-blue-100",
+          border: "border-[#B348FE]",
+          bg: "bg-gradient-to-br from-[#F6EEFF] to-purple-50 dark:from-[#2B103D] dark:to-purple-950/20",
+          icon: <BookOpen className="text-[#B348FE]" size={16} />,
+          iconBg: "bg-[#F6EEFF] dark:bg-[#2B103D]",
         };
       case "homework":
         return {
           border: "border-amber-400",
-          bg: "bg-gradient-to-br from-amber-50 to-orange-50",
+          bg: "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20",
           icon: <FileText className="text-amber-500" size={16} />,
-          iconBg: "bg-amber-100",
+          iconBg: "bg-amber-100 dark:bg-amber-900/30",
         };
       default:
         return {
-          border: "border-slate-300",
-          bg: "bg-gradient-to-br from-slate-50 to-gray-50",
-          icon: <Bell className="text-slate-500" size={16} />,
-          iconBg: "bg-slate-100",
+          border: "border-gray-300 dark:border-[#2A2A2A]",
+          bg: "bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#111111] dark:to-[#0a0a0a]",
+          icon: <Bell className="text-gray-500 dark:text-gray-400" size={16} />,
+          iconBg: "bg-gray-100 dark:bg-gray-800",
         };
     }
   };
 
-return (
-<StudentLayout>
-
-
-
-
+  return (
+    <StudentLayout>
       {/* Main Content */}
-    <>
-
-
+      <>
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-
-
           {/* Enhanced Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-       
+            {/* Stats cards can be added here */}
           </div>
 
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Enhanced My Courses Section */}
             <div className="lg:col-span-2 space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="font-black text-slate-900 text-xl flex items-center gap-2">
-                  <BookOpen className="text-blue-600" size={24} />
+                <h2 className="font-black text-gray-900 dark:text-white text-xl flex items-center gap-2">
+                  <BookOpen className="text-[#B348FE]" size={24} />
                   كورساتي
                 </h2>
                 <button 
                   onClick={() => navigate("/dashboard/courses")} 
-                  className="flex items-center gap-1 text-blue-600 text-sm font-bold hover:gap-2 transition-all group"
+                  className="flex items-center gap-1 text-[#B348FE] hover:text-[#9E2FFF] text-sm font-bold hover:gap-2 transition-all group"
                 >
                   عرض الكل 
                   <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
@@ -243,13 +219,16 @@ return (
               {loading ? (
                 <div className="space-y-4">
                   {[1, 2].map(i => (
-                    <Card key={i} className="animate-pulse">
+                    <Card 
+                      key={i} 
+                      className="animate-pulse bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl"
+                    >
                       <CardContent className="flex gap-4 p-5">
-                        <div className="w-24 h-24 bg-slate-200 rounded-2xl"></div>
+                        <div className="w-24 h-24 bg-gray-200 dark:bg-gray-800 rounded-2xl"></div>
                         <div className="flex-1 space-y-3">
-                          <div className="h-4 bg-slate-200 rounded w-3/4"></div>
-                          <div className="h-3 bg-slate-200 rounded w-1/2"></div>
-                          <div className="h-2 bg-slate-200 rounded"></div>
+                          <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
+                          <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
+                          <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded"></div>
                         </div>
                       </CardContent>
                     </Card>
@@ -260,7 +239,7 @@ return (
                   {studentCourses.map((course: any) => (
                     <Card 
                       key={course.id} 
-                      className="group hover:shadow-xl hover:border-blue-200 transition-all duration-300 cursor-pointer overflow-hidden"
+                      className="group hover:shadow-xl hover:border-[#B348FE] bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl transition-all duration-300 cursor-pointer overflow-hidden"
                       onClick={() => navigate(`/dashboard/course/${course.id}`)}
                     >
                       <CardContent className="flex gap-4 p-5">
@@ -278,21 +257,19 @@ return (
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 mb-2">
-                            <h3 className="font-bold text-slate-900 text-base leading-snug group-hover:text-blue-600 transition-colors">
+                            <h3 className="font-bold text-gray-900 dark:text-white text-base leading-snug group-hover:text-[#B348FE] transition-colors">
                               {course.title}
                             </h3>
-                            
                           </div>
 
-<div className="flex items-center gap-4 text-sm text-slate-500 mb-3">
-  <span className="flex items-center gap-1">
-    📚 {course.sectionsCount} أقسام
-  </span>
-
-  <span className="flex items-center gap-1">
-    🎥 {course.lessonsCount} درس
-  </span>
-</div>
+                          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
+                            <span className="flex items-center gap-1">
+                              📚 {course.sectionsCount} أقسام
+                            </span>
+                            <span className="flex items-center gap-1">
+                              🎥 {course.lessonsCount} درس
+                            </span>
+                          </div>
 
                           <div className="flex items-center justify-between">
                             <button
@@ -300,20 +277,19 @@ return (
                                 e.stopPropagation(); 
                                 navigate(`/dashboard/course/${course.id}`); 
                               }}
-                              className="flex items-center gap-2 text-blue-600 text-sm font-bold hover:text-blue-700 hover:gap-3 transition-all group"
+                              className="flex items-center gap-2 text-[#B348FE] hover:text-[#9E2FFF] text-sm font-bold hover:gap-3 transition-all group"
                             >
                               <Play size={16} className="group-hover:scale-110 transition-transform" /> 
                               متابعة التعلم
                             </button>
-                            <div className="flex items-center gap-4 text-xs text-slate-500">
-  <span className="flex items-center gap-1">
-    📄 {course.filesCount} ملفات
-  </span>
-
-  <span className="flex items-center gap-1">
-    📝 {course.examsCount} امتحانات
-  </span>
-</div>
+                            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                              <span className="flex items-center gap-1">
+                                📄 {course.filesCount} ملفات
+                              </span>
+                              <span className="flex items-center gap-1">
+                                📝 {course.examsCount} امتحانات
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </CardContent>
@@ -321,17 +297,17 @@ return (
                   ))}
                 </>
               ) : (
-                <Card className="border-2 border-dashed border-slate-200">
+                <Card className="border-2 border-dashed border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl">
                   <CardContent className="text-center py-12">
-                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <BookOpen className="text-slate-400" size={32} />
+                    <div className="w-16 h-16 bg-[#F6EEFF] dark:bg-[#2B103D] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <BookOpen className="text-[#B348FE]" size={32} />
                     </div>
-                    <p className="text-slate-500 font-medium mb-4">
+                    <p className="text-gray-500 dark:text-gray-400 font-medium mb-4">
                       لم تشترك في أي كورس بعد
                     </p>
                     <button
                       onClick={() => navigate("/courses")}
-                      className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-xl font-bold hover:shadow-lg hover:scale-105 transition-all"
+                      className="px-6 py-2.5 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-bold shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)] hover:scale-105 transition-all"
                     >
                       استكشف الكورسات
                     </button>
@@ -341,9 +317,9 @@ return (
 
               <button
                 onClick={() => navigate("/courses")}
-                className="w-full border-2 border-dashed border-slate-200 rounded-2xl py-8 text-slate-400 text-sm font-bold hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/50 transition-all flex items-center justify-center gap-2 group"
+                className="w-full border-2 border-dashed border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl py-8 text-gray-400 dark:text-gray-500 text-sm font-bold hover:border-[#B348FE] hover:text-[#B348FE] hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] transition-all flex items-center justify-center gap-2 group"
               >
-                <div className="w-10 h-10 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 group-hover:bg-[#F6EEFF] dark:group-hover:bg-[#2B103D] flex items-center justify-center transition-colors">
                   <BookOpen className="group-hover:scale-110 transition-transform" size={20} />
                 </div>
                 اشترك في كورس جديد
@@ -353,41 +329,31 @@ return (
             {/* Enhanced Right Column */}
             <div className="space-y-5">
               {/* Enhanced Upcoming Tasks */}
-              <Card className="bg-white
-dark:bg-[#111111]
-border
-border-gray-200
-dark:border-[#2A2A2A]
-shadow-xl">
-  <CardContent className="py-16 text-center">
-    <Activity
-      size={48}
-      className="mx-auto text-blue-500 mb-4"
-    />
+              <Card className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm">
+                <CardContent className="py-16 text-center">
+                  <Activity
+                    size={48}
+                    className="mx-auto text-[#B348FE] mb-4"
+                  />
 
-    <h3 className="text-2xl font-black text-slate-900 mb-3">
-      آخر النشاطات
-    </h3>
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-3">
+                    آخر النشاطات
+                  </h3>
 
-    <p className="text-slate-500 leading-8 mb-5">
-      سيتم عرض آخر مشاهدة للدروس
-      وآخر الامتحانات والواجبات
-      بعد الانتهاء من نظام تتبع النشاط.
-    </p>
+                  <p className="text-gray-500 dark:text-gray-400 leading-8 mb-5">
+                    سيتم عرض آخر مشاهدة للدروس
+                    وآخر الامتحانات والواجبات
+                    بعد الانتهاء من نظام تتبع النشاط.
+                  </p>
 
-    <Badge variant="blue">
-      🚧 تحت التطوير
-    </Badge>
-  </CardContent>
-</Card>
+                  <Badge variant="blue">
+                    🚧 تحت التطوير
+                  </Badge>
+                </CardContent>
+              </Card>
 
               {/* Enhanced Leaderboard */}
-              <Card className="bg-white
-dark:bg-[#111111]
-border
-border-gray-200
-dark:border-[#2A2A2A]
-shadow-xl overflow-hidden">
+              <Card className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
                 <div className="bg-gradient-to-r from-amber-400 to-orange-400 p-4">
                   <div className="flex items-center justify-between text-white">
                     <h3 className="font-black text-lg flex items-center gap-2">
@@ -404,57 +370,50 @@ shadow-xl overflow-hidden">
                 </div>
 
                 <CardContent className="p-5">
-               <div className="flex flex-col items-center justify-center py-12 text-center">
-  <div className="text-5xl mb-4">🏆</div>
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="text-5xl mb-4">🏆</div>
 
-  <h3 className="text-xl font-black text-slate-800 mb-2">
-    قريبًا
-  </h3>
+                    <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">
+                      قريبًا
+                    </h3>
 
-  <p className="text-slate-500 leading-7 max-w-xs">
-    يتم العمل حاليًا على نظام المتصدرين وترتيب الطلاب حسب الأداء والدرجات.
-  </p>
+                    <p className="text-gray-500 dark:text-gray-400 leading-7 max-w-xs">
+                      يتم العمل حاليًا على نظام المتصدرين وترتيب الطلاب حسب الأداء والدرجات.
+                    </p>
 
-  <span className="mt-5 px-4 py-2 rounded-full bg-amber-100 text-amber-700 font-bold text-sm">
-    🚧 تحت التطوير
-  </span>
-</div>
+                    <span className="mt-5 px-4 py-2 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 font-bold text-sm">
+                      🚧 تحت التطوير
+                    </span>
+                  </div>
                 </CardContent>
               </Card>
-             
             </div>
           </div>
 
           {/* Enhanced Announcements Section */}
-         <Card className="bg-white
-dark:bg-[#111111]
-border
-border-gray-200
-dark:border-[#2A2A2A]
-shadow-xl">
-  <CardContent className="py-16 text-center">
-    <Bell
-      size={48}
-      className="mx-auto text-violet-500 mb-4"
-    />
+          <Card className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm">
+            <CardContent className="py-16 text-center">
+              <Bell
+                size={48}
+                className="mx-auto text-[#B348FE] mb-4"
+              />
 
-    <h3 className="text-2xl font-black text-slate-900 mb-3">
-      آخر الإشعارات
-    </h3>
+              <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-3">
+                آخر الإشعارات
+              </h3>
 
-    <p className="text-slate-500 leading-8 mb-5">
-      سيتم عرض أحدث الاشعارات
-      التي ينشرها المستر مباشرة هنا.
-    </p>
+              <p className="text-gray-500 dark:text-gray-400 leading-8 mb-5">
+                سيتم عرض أحدث الاشعارات
+                التي ينشرها المستر مباشرة هنا.
+              </p>
 
-    <Badge variant="blue">
-      🚧 سيتم تفعيلها مع لوحة تحكم المستر
-    </Badge>
-  </CardContent>
-</Card>
+              <Badge variant="blue">
+                🚧 سيتم تفعيلها مع لوحة تحكم المستر
+              </Badge>
+            </CardContent>
+          </Card>
         </div>
-    </>
-</StudentLayout>
-);
-
+      </>
+    </StudentLayout>
+  );
 }

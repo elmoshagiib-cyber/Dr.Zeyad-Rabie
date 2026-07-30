@@ -17,25 +17,23 @@ export function HomeworkPage() {
     }
   }, [user]);
 
-
-
   // Helper function to get homework status
-const getHomeworkStatus = (hw: any) => {
-  const hasSubmission = hw.submitted;
-  const hasGrade =
-    hw.submission?.grade !== null &&
-    hw.submission?.grade !== undefined;
+  const getHomeworkStatus = (hw: any) => {
+    const hasSubmission = hw.submitted;
+    const hasGrade =
+      hw.submission?.grade !== null &&
+      hw.submission?.grade !== undefined;
 
-  if (!hasSubmission) {
-    return "not_submitted";
-  }
+    if (!hasSubmission) {
+      return "not_submitted";
+    }
 
-  if (hasGrade) {
-    return "corrected";
-  }
+    if (hasGrade) {
+      return "corrected";
+    }
 
-  return "submitted";
-};
+    return "submitted";
+  };
 
   const submitted = homeworks.filter(h => h.submitted).length;
   const pending = homeworks.filter(h => !h.submitted).length;
@@ -155,65 +153,80 @@ const getHomeworkStatus = (hw: any) => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden" dir="rtl">
+    <div
+      className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]"
+      dir="rtl"
+    >
       <div className="hidden lg:block flex-shrink-0">
         <DashboardSidebar type="student" />
       </div>
 
       <main className="flex-1 overflow-y-auto">
-        <div className="bg-white dark:bg-[#1E244F] border-b border-slate-200 px-6 py-5">
-          <h1 className="text-2xl font-black text-slate-900">الواجبات</h1>
-          <p className="text-slate-500 text-sm mt-1">
+        {/* Header */}
+        <div className="bg-white dark:bg-[#09090B] border-b border-gray-100 dark:border-[#2A2A2A] px-6 lg:px-8 py-6">
+          <h1 className="text-3xl lg:text-4xl font-black text-gray-900 dark:text-white mb-2">
+            الواجبات
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm lg:text-base">
             متابعة وتسليم جميع الواجبات الدراسية
           </p>
         </div>
 
-        <div className="p-6 space-y-6">
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="p-6">
+        <div className="p-6 lg:p-8 space-y-6 lg:space-y-8">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+            {/* Submitted Card */}
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
+              <CardContent className="p-6 lg:p-7">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-500 text-sm font-medium mb-1">تم التسليم</p>
-                    <p className="text-3xl font-black text-emerald-600">
+                  <div className="flex-1">
+                    <p className="text-gray-500 dark:text-gray-400 text-sm font-bold mb-2">
+                      تم التسليم
+                    </p>
+                    <p className="text-4xl lg:text-5xl font-black text-emerald-600">
                       {submitted}
                     </p>
                   </div>
-                  <div className="bg-emerald-100 p-3 rounded-xl">
-                    <CheckCircle className="text-emerald-600" size={28} />
+                  <div className="bg-emerald-50 dark:bg-emerald-950/30 p-4 rounded-2xl">
+                    <CheckCircle className="text-emerald-600" size={32} />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="p-6">
+            {/* Pending Card */}
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
+              <CardContent className="p-6 lg:p-7">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-500 text-sm font-medium mb-1">قيد الانتظار</p>
-                    <p className="text-3xl font-black text-amber-600">
+                  <div className="flex-1">
+                    <p className="text-gray-500 dark:text-gray-400 text-sm font-bold mb-2">
+                      قيد الانتظار
+                    </p>
+                    <p className="text-4xl lg:text-5xl font-black text-amber-600">
                       {pending}
                     </p>
                   </div>
-                  <div className="bg-amber-100 p-3 rounded-xl">
-                    <Clock className="text-amber-600" size={28} />
+                  <div className="bg-amber-50 dark:bg-amber-950/30 p-4 rounded-2xl">
+                    <Clock className="text-amber-600" size={32} />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="p-6">
+            {/* Interactive Card */}
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
+              <CardContent className="p-6 lg:p-7">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-500 text-sm font-medium mb-1">واجبات تفاعلية</p>
-                    <p className="text-3xl font-black text-blue-600">
+                  <div className="flex-1">
+                    <p className="text-gray-500 dark:text-gray-400 text-sm font-bold mb-2">
+                      واجبات تفاعلية
+                    </p>
+                    <p className="text-4xl lg:text-5xl font-black text-[#B348FE]">
                       {interactive}
                     </p>
                   </div>
-                  <div className="bg-blue-100 p-3 rounded-xl">
-                    <AlertCircle className="text-blue-600" size={28} />
+                  <div className="bg-[#F6EEFF] dark:bg-[#2B103D] p-4 rounded-2xl">
+                    <AlertCircle className="text-[#B348FE]" size={32} />
                   </div>
                 </div>
               </CardContent>
@@ -221,114 +234,126 @@ const getHomeworkStatus = (hw: any) => {
           </div>
 
           {/* Homework List */}
-          <div className="space-y-4">
+          <div className="space-y-5 lg:space-y-6">
             {homeworks.map(hw => {
               const status = getHomeworkStatus(hw);
               const canUpload = hw.allow_file_upload;
 
               return (
-                <Card key={hw.id} hover>
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
+                <Card 
+                  key={hw.id} 
+                  className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-xl hover:border-[#B348FE] transition-all duration-300"
+                >
+                  <CardContent className="p-6 lg:p-8">
+                    <div className="space-y-6">
+                      {/* Header Section */}
+                      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-black text-gray-900 dark:text-white text-xl lg:text-2xl mb-3 leading-tight">
+                            {hw.title}
+                          </h3>
 
-                  {/* Header Section */}
-<div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-  <div className="flex-1">
-    <h3 className="font-black text-slate-900 text-lg mb-2">
-      {hw.title}
-    </h3>
+                          {hw.description && (
+                            <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
+                              {hw.description}
+                            </p>
+                          )}
+                        </div>
 
-    {hw.description && (
-      <p className="text-sm text-slate-600 leading-relaxed">
-        {hw.description}
-      </p>
-    )}
-  </div>
+                        <div className="flex flex-wrap gap-2">
+                          {status === "not_submitted" && (
+                            <span className="px-4 py-2 rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 text-xs font-black whitespace-nowrap border border-amber-200 dark:border-amber-900">
+                              لم يتم التسليم
+                            </span>
+                          )}
 
-  <div className="flex flex-wrap gap-2">
-    {status === "not_submitted" && (
-      <span className="px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 text-xs font-bold whitespace-nowrap">
-        لم يتم التسليم
-      </span>
-    )}
+                          {status === "submitted" && (
+                            <span className="px-4 py-2 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] text-xs font-black whitespace-nowrap border border-[#EAD8FF] dark:border-[#2A2A2A]">
+                              تم التسليم
+                            </span>
+                          )}
 
-    {status === "submitted" && (
-      <span className="px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold whitespace-nowrap">
-        تم التسليم
-      </span>
-    )}
+                          {status === "corrected" && (
+                            <span className="px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-xs font-black whitespace-nowrap border border-emerald-200 dark:border-emerald-900">
+                              تم التصحيح
+                            </span>
+                          )}
+                        </div>
+                      </div>
 
-    {status === "corrected" && (
-      <span className="px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold whitespace-nowrap">
-        تم التصحيح
-      </span>
-    )}
-  </div>
-</div>
+                      {/* Homework Attachments */}
+                      {(hw.attachment_pdf || hw.attachment_image) && (
+                        <div className="bg-[#F6EEFF] dark:bg-[#1A1A1A] border border-[#EAD8FF] dark:border-[#2A2A2A] rounded-2xl p-5 lg:p-6">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className="bg-[#B348FE] bg-opacity-10 p-3 rounded-xl">
+                                <FileText className="text-[#B348FE]" size={20} />
+                              </div>
+                              <p className="font-black text-gray-900 dark:text-white text-base">
+                                ملفات الواجب
+                              </p>
+                            </div>
 
-{(hw.attachment_pdf || hw.attachment_image) && (
-  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-    <div className="flex items-center justify-between">
+                            <div className="flex flex-wrap gap-3">
+                              {hw.attachment_pdf && (
+                                <a
+                                  href={hw.attachment_pdf}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    className="font-bold"
+                                  >
+                                    <Eye size={16} />
+                                    عرض PDF
+                                  </Button>
+                                </a>
+                              )}
 
-      <div>
-        <p className="font-bold">
-          ملفات الواجب
-        </p>
-      </div>
+                              {hw.attachment_image && (
+                                <a
+                                  href={hw.attachment_image}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  <Button 
+                                    size="sm"
+                                    className="bg-[#B348FE] hover:bg-[#9E2FFF] font-bold"
+                                  >
+                                    <Eye size={16} />
+                                    عرض الصورة
+                                  </Button>
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
-      <div className="flex gap-2">
-
-        {hw.attachment_pdf && (
-          <a
-            href={hw.attachment_pdf}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Button size="sm" variant="outline">
-              <Eye size={14} />
-              PDF
-            </Button>
-          </a>
-        )}
-
-        {hw.attachment_image && (
-          <a
-            href={hw.attachment_image}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Button size="sm">
-              <Eye size={14} />
-              صورة
-            </Button>
-          </a>
-        )}
-
-      </div>
-
-    </div>
-  </div>
-)}
                       {/* Grade Display */}
                       {status === "corrected" && hw.submission?.grade !== null && hw.submission?.grade !== undefined && (
-                        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                        <div className="bg-emerald-50 dark:bg-emerald-950/20 border-2 border-emerald-200 dark:border-emerald-900 rounded-2xl p-5 lg:p-6">
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="bg-emerald-100 p-2 rounded-lg">
-                                <CheckCircle className="text-emerald-600" size={20} />
+                            <div className="flex items-center gap-4">
+                              <div className="bg-emerald-100 dark:bg-emerald-900/30 p-3 rounded-xl">
+                                <CheckCircle className="text-emerald-600 dark:text-emerald-500" size={24} />
                               </div>
                               <div>
-                                <p className="font-bold text-slate-900 text-sm">درجة الواجب</p>
+                                <p className="font-black text-gray-900 dark:text-white text-base">
+                                  درجة الواجب
+                                </p>
                               </div>
                             </div>
                             <div className="text-left">
-                              <p className="text-2xl font-black text-emerald-600">
+                              <p className="text-3xl lg:text-4xl font-black text-emerald-600 dark:text-emerald-500">
                                 {hw.submission.grade}
-{hw.total_score && (
-  <span className="text-lg text-slate-500">
-    / {hw.total_score}
-  </span>
-)}
+                                {hw.total_score && (
+                                  <span className="text-xl lg:text-2xl text-gray-500 dark:text-gray-400 font-bold">
+                                    {" "}/ {hw.total_score}
+                                  </span>
+                                )}
                               </p>
                             </div>
                           </div>
@@ -337,14 +362,16 @@ const getHomeworkStatus = (hw: any) => {
 
                       {/* Teacher Feedback */}
                       {hw.submission?.teacher_comment && (
-                        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-                          <div className="flex items-start gap-3">
-                            <div className="bg-slate-100 p-2 rounded-lg mt-0.5">
-                              <FileText className="text-slate-600" size={18} />
+                        <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-5 lg:p-6">
+                          <div className="flex items-start gap-4">
+                            <div className="bg-[#F6EEFF] dark:bg-[#2B103D] p-3 rounded-xl flex-shrink-0">
+                              <FileText className="text-[#B348FE]" size={22} />
                             </div>
                             <div className="flex-1">
-                              <p className="font-bold text-slate-900 text-sm mb-1">ملاحظات المعلم</p>
-                              <p className="text-sm text-slate-700 leading-relaxed">
+                              <p className="font-black text-gray-900 dark:text-white text-base mb-2">
+                                ملاحظات المعلم
+                              </p>
+                              <p className="text-sm lg:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
                                 {hw.submission.teacher_comment}
                               </p>
                             </div>
@@ -354,15 +381,17 @@ const getHomeworkStatus = (hw: any) => {
 
                       {/* Student Submission Display */}
                       {hw.submission && (
-                        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="bg-slate-100 p-2 rounded-lg">
-                                <FileText className="text-slate-600" size={20} />
+                        <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-5 lg:p-6">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div className="flex items-center gap-4">
+                              <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl">
+                                <FileText className="text-gray-600 dark:text-gray-400" size={24} />
                               </div>
                               <div>
-                                <p className="font-bold text-slate-900 text-sm">ملفك المرفوع</p>
-                                <p className="text-xs text-slate-500 mt-0.5">
+                                <p className="font-black text-gray-900 dark:text-white text-base mb-1">
+                                  ملفك المرفوع
+                                </p>
+                                <p className="text-xs lg:text-sm text-gray-500 dark:text-gray-400">
                                   {hw.submission.answer?.split("/").pop()}
                                 </p>
                               </div>
@@ -372,8 +401,12 @@ const getHomeworkStatus = (hw: any) => {
                               target="_blank"
                               rel="noreferrer"
                             >
-                              <Button size="sm" variant="outline">
-                                <Eye size={14} />
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                className="font-bold w-full sm:w-auto"
+                              >
+                                <Eye size={16} />
                                 عرض الملف
                               </Button>
                             </a>
@@ -382,87 +415,93 @@ const getHomeworkStatus = (hw: any) => {
                       )}
 
                       {/* Upload Section */}
-                      <div className="border-t pt-4">
+                      <div className="border-t border-gray-200 dark:border-[#2A2A2A] pt-6">
                         {hw.submitted && canUpload && (
-                          <p className="text-amber-600 text-sm font-medium mb-3 flex items-center gap-2">
-                            <AlertCircle size={16} />
-                            سيتم استبدال الملف السابق عند رفع ملف جديد
-                          </p>
+                          <div className="mb-5 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900">
+                            <p className="text-amber-700 dark:text-amber-400 text-sm font-bold flex items-center gap-2">
+                              <AlertCircle size={18} />
+                              سيتم استبدال الملف السابق عند رفع ملف جديد
+                            </p>
+                          </div>
                         )}
 
                         <div className="flex flex-wrap gap-3">
-{/* PDF Upload */}
-<div>
-  <input
-    id={`pdf-${hw.id}`}
-    type="file"
-    accept=".pdf"
-    hidden
-    disabled={!canUpload || uploading}
-    onChange={async (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
+                          {/* PDF Upload */}
+                          <div>
+                            <input
+                              id={`pdf-${hw.id}`}
+                              type="file"
+                              accept=".pdf"
+                              hidden
+                              disabled={!canUpload || uploading}
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
 
-      await uploadHomework(file, hw.id);
+                                await uploadHomework(file, hw.id);
 
-      // يسمح برفع نفس الملف مرة أخرى
-      e.target.value = "";
-    }}
-  />
+                                // يسمح برفع نفس الملف مرة أخرى
+                                e.target.value = "";
+                              }}
+                            />
 
-  <label htmlFor={`pdf-${hw.id}`}>
-    <Button
-      size="sm"
-      disabled={!canUpload || uploading}
-      type="button"
-    >
-      <Upload size={14} />
-      {uploading ? "جاري الرفع..." : "رفع PDF"}
-    </Button>
-  </label>
-</div>
+                            <label htmlFor={`pdf-${hw.id}`}>
+                              <Button
+                                size="sm"
+                                disabled={!canUpload || uploading}
+                                type="button"
+                                className="bg-[#B348FE] hover:bg-[#9E2FFF] shadow-md hover:shadow-[0_8px_20px_rgba(179,72,254,.35)] font-bold transition-all duration-300"
+                              >
+                                <Upload size={16} />
+                                {uploading ? "جاري الرفع..." : "رفع PDF"}
+                              </Button>
+                            </label>
+                          </div>
 
-{/* Image Upload */}
-<div>
-  <input
-    id={`image-${hw.id}`}
-    type="file"
-    accept="image/*"
-    hidden
-    disabled={!canUpload || uploading}
-    onChange={async (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
+                          {/* Image Upload */}
+                          <div>
+                            <input
+                              id={`image-${hw.id}`}
+                              type="file"
+                              accept="image/*"
+                              hidden
+                              disabled={!canUpload || uploading}
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
 
-      await uploadHomework(file, hw.id);
+                                await uploadHomework(file, hw.id);
 
-      // يسمح برفع نفس الصورة مرة أخرى
-      e.target.value = "";
-    }}
-  />
+                                // يسمح برفع نفس الصورة مرة أخرى
+                                e.target.value = "";
+                              }}
+                            />
 
-  <label htmlFor={`image-${hw.id}`}>
-    <Button
-      variant="outline"
-      size="sm"
-      disabled={!canUpload || uploading}
-      type="button"
-    >
-      <Upload size={14} />
-      {uploading ? "جاري الرفع..." : "رفع صورة"}
-    </Button>
-  </label>
-</div>
+                            <label htmlFor={`image-${hw.id}`}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={!canUpload || uploading}
+                                type="button"
+                                className="border-2 font-bold hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] hover:border-[#B348FE] transition-all duration-300"
+                              >
+                                <Upload size={16} />
+                                {uploading ? "جاري الرفع..." : "رفع صورة"}
+                              </Button>
+                            </label>
+                          </div>
 
-{hw.status === "interactive" && (
-  <Button variant="success" size="sm">
-    <FileText size={14} />
-    ابدأ الحل
-  </Button>
-)}
+                          {hw.status === "interactive" && (
+                            <Button 
+                              variant="success" 
+                              size="sm"
+                              className="font-bold"
+                            >
+                              <FileText size={16} />
+                              ابدأ الحل
+                            </Button>
+                          )}
                         </div>
-
-                       
                       </div>
                     </div>
                   </CardContent>
