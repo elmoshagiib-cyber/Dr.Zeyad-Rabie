@@ -16,6 +16,9 @@ import { Footer } from "../components/layout/Footer";
 import { useApp } from "../context/AppContext";
 import { supabase } from "../lib/supabase";
 import { useEffect, useState } from "react";
+import { ShieldCheck } from "lucide-react";
+import { Button } from "../components/ui/Button";
+import { FaWhatsapp } from "react-icons/fa";
 
 export function CourseDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -33,6 +36,8 @@ export function CourseDetailPage() {
   const [openUnit, setOpenUnit] = useState<string | null>(null);
   const [units, setUnits] = useState<any[]>([]);
   const [course, setCourse] = useState<any>(null);
+const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+const [subscriptionCode, setSubscriptionCode] = useState("");
 
   const loadCourse = async () => {
     const { data, error } = await supabase
@@ -137,8 +142,7 @@ console.log("IS ENROLLED SHOULD BE =", (data?.length ?? 0) > 0);
 
   // ✅ Fixed: checks existing enrollment before insert to avoid duplicates
   const handleEnroll = async () => {
-     alert("HANDLE");
-      console.log("HANDLE ENROLL CLICKED");
+
 
     if (!user) {
       navigate("/login");
@@ -198,13 +202,100 @@ console.log("INSERT ERROR =", error);
       return;
     }
 
-    // هنا بعدين هنضيف الدفع
+    setShowSubscriptionModal(true);
+return;
   };
 
   const lessonsCount = units.reduce(
     (total, unit) => total + unit.lessons.length,
     0
   );
+
+  const activateSubscription = async () => {
+  if (!course) return;
+
+  const { data, error } = await supabase
+    .from("subscription_codes")
+    .select("*")
+    .eq("code", subscriptionCode)
+    .single();
+
+  if (error || !data) {
+    alert("كود الاشتراك غير صحيح");
+    return;
+  }
+
+  if (data.status !== "active") {
+    alert("هذا الكود غير صالح أو تم استخدامه");
+    return;
+  }
+
+  if (data.course_id !== course.id) {
+    alert("هذا الكود لا يخص هذا الكورس");
+    return;
+  }
+
+  const studentId = getStudentId();
+
+  if (!studentId) {
+    alert("يجب تسجيل الدخول أولاً");
+    return;
+  }
+
+  const { data: existingSubscription } = await supabase
+    .from("student_courses")
+    .select("id")
+    .eq("student_id", studentId)
+    .eq("course_id", course.id)
+    .eq("active", true)
+    .maybeSingle();
+
+  if (existingSubscription) {
+    alert("أنت مشترك بالفعل في هذا الكورس.");
+    return;
+  }
+
+  const { error: enrollError } = await supabase
+    .from("student_courses")
+    .insert({
+      student_id: studentId,
+      course_id: course.id,
+      active: true,
+      subscription_type: "كود اشتراك",
+      expires_at: new Date(
+        Date.now() + data.duration_days * 24 * 60 * 60 * 1000
+      ).toISOString(),
+    });
+
+  if (enrollError) {
+    alert("حدث خطأ أثناء إضافة الاشتراك");
+    return;
+  }
+
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + data.duration_days);
+
+  const { error: codeError } = await supabase
+    .from("subscription_codes")
+    .update({
+      status: "used",
+      student_id: studentId,
+      used_at: new Date().toISOString(),
+      expires_at: expiresAt.toISOString(),
+    })
+    .eq("id", data.id);
+
+  if (codeError) {
+    alert("تم الاشتراك لكن حدث خطأ أثناء تحديث الكود");
+    return;
+  }
+
+  setIsEnrolled(true);
+  setShowSubscriptionModal(false);
+  setSubscriptionCode("");
+
+  alert("تم تفعيل الاشتراك بنجاح ✅");
+};
 
   const videosCount = units.reduce(
     (t, u) => t + u.lessons.filter((l: any) => l.type === "video").length,
@@ -933,6 +1024,166 @@ group-hover:scale-110
           )}
         </div>
       </div>
+
+      {showSubscriptionModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6">
+
+          <div
+            className="
+              w-full
+              max-w-md
+              rounded-[30px]
+              bg-white
+              dark:bg-[#111111]
+              border
+              border-gray-200
+              dark:border-[#2A2A2A]
+              shadow-[0_25px_70px_rgba(15,23,42,.12)]
+              dark:shadow-[0_30px_70px_rgba(0,0,0,.65)]
+              p-8
+            "
+          >
+            <div className="text-center">
+
+              <div
+                className="
+                  mx-auto
+                  mb-6
+                  flex
+                  h-20
+                  w-20
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-[#F6EEFF]
+                  dark:bg-[#2B103D]
+                "
+              >
+                <ShieldCheck
+                  size={36}
+                  className="text-[#B348FE]"
+                />
+              </div>
+
+              <h2 className="text-3xl font-black text-gray-900 dark:text-white">
+                تفعيل الاشتراك
+              </h2>
+
+              <p className="mt-3 text-gray-500 dark:text-gray-400 leading-7">
+                أدخل كود الاشتراك الخاص بك لتفعيل الكورس.
+              </p>
+
+              <div
+                className="
+                  mt-5
+                  rounded-2xl
+                  border
+                  border-[#EAD8FF]
+                  dark:border-[#2A2A2A]
+                  bg-[#F6EEFF]
+                  dark:bg-[#1A1A1A]
+                  px-5
+                  py-4
+                "
+              >
+                <h3 className="text-lg font-black text-[#B348FE] text-center">
+                  {course?.title}
+                </h3>
+              </div>
+
+            </div>
+
+            <input
+              type="text"
+              value={subscriptionCode}
+              onChange={(e) =>
+                setSubscriptionCode(e.target.value.toUpperCase())
+              }
+              placeholder="XXXX-XXXX"
+              className="
+                mt-7
+                w-full
+                rounded-2xl
+                border
+                border-gray-200
+                dark:border-[#2A2A2A]
+                bg-gray-50
+                dark:bg-[#181818]
+                px-5
+                py-4
+                text-center
+                text-lg
+                tracking-[6px]
+                font-black
+                text-[#B348FE]
+                outline-none
+                transition-all
+                duration-300
+                focus:border-[#B348FE]
+                focus:ring-4
+                focus:ring-[#B348FE]/20
+              "
+            />
+
+            <Button
+              className="w-full mt-5"
+              onClick={activateSubscription}
+            >
+              تفعيل الاشتراك
+            </Button>
+
+            <Button
+              variant="outline"
+              className="
+                w-full
+                mt-3
+                bg-green-50
+                border-green-200
+                text-green-700
+                dark:bg-[#16281F]
+                dark:border-[#245D3A]
+                dark:text-green-400
+                hover:bg-green-500
+                hover:text-white
+                flex
+                items-center
+                justify-center
+                gap-2
+              "
+              onClick={() =>
+                window.open(
+                  `https://wa.me/201109414585?text=${encodeURIComponent(
+                    `السلام عليكم، عايز الاشتراك في كورس ${course?.title}`
+                  )}`,
+                  "_blank"
+                )
+              }
+            >
+              <FaWhatsapp className="text-xl" />
+              شراء كود عبر واتساب
+            </Button>
+
+            <Button
+              variant="ghost"
+              className="
+                w-full
+                mt-3
+                text-gray-500
+                dark:text-gray-400
+                hover:text-[#B348FE]
+              "
+              onClick={() => {
+                setShowSubscriptionModal(false);
+                setSubscriptionCode("");
+              }}
+            >
+              إلغاء
+            </Button>
+
+          </div>
+
+        </div>
+      )}
 
       <Footer />
     </div>

@@ -7,7 +7,7 @@ import { Card, CardContent } from "../../ui/Card";
 import { Button } from "../../ui/Button";
 import { BookOpen, Clock, Tag } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
-
+import { ShieldCheck } from "lucide-react";
 interface GradeCoursesContentProps {
   grade: string;
 }
@@ -73,10 +73,14 @@ const handleCourseAction = (course: any) => {
 }
   const user = localStorage.getItem("user");
 
-  if (!user) {
-    setShowAuthModal(true);
-    return;
-  }
+if (!user) {
+  navigate("/login", {
+    state: {
+      redirectTo: window.location.pathname,
+    },
+  });
+  return;
+}
 
   if (course.is_free) {
     navigate(`/courses/${course.id}`);
@@ -511,7 +515,9 @@ to-[#8D2BFF]
         <div className="flex items-center gap-3 mb-5 sm:mb-7">
           <div className={`w-1 h-8 rounded-full ${accent}`} />
           <span className="text-slate-400 dark:text-slate-500">{icon}</span>
-          <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">
+          <h2 className="text-lg sm:text-2xl font-black text-gray-900
+dark:text-white
+text-3xl">
             {title}
           </h2>
           <span className="
@@ -647,46 +653,100 @@ return (
     </div>
 
    {showSubscriptionModal && (
-  <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+  <div
+  className="
+    fixed
+    inset-0
+    z-50
+    flex
+    items-center
+    justify-center
+    bg-black/70
+    backdrop-blur-md
+    p-6
+    animate-in
+    fade-in
+    duration-300
+  "
+>
 
     <div
-      className="
-        w-full max-w-md
-        rounded-3xl
-        bg-white dark:bg-[#1E244F]
-        border border-slate-200 dark:border-white/10
-        shadow-2xl
-        p-8
-      "
+className="
+  w-full
+  max-w-md
+  rounded-[30px]
+  bg-white
+  dark:bg-[#111111]
+  border
+  border-gray-200
+  dark:border-[#2A2A2A]
+  shadow-[0_25px_70px_rgba(15,23,42,.12)]
+  dark:shadow-[0_30px_70px_rgba(0,0,0,.65)]
+  p-8
+  animate-in
+  zoom-in-95
+  duration-300
+"
     >
 
       <div className="text-center">
-
+<div className="space-y-2"> </div>
         <div
-          className="
-            mx-auto mb-5
-            w-16 h-16
-            rounded-full
-            bg-purple-100
-            dark:bg-[#2A0F3B]
-            flex items-center justify-center
-            text-3xl
-          "
-        >
-          🔐
-        </div>
+  className="
+    mx-auto
+    mb-6
+    flex
+    h-20
+    w-20
+    items-center
+    justify-center
+    rounded-full
+    bg-[#F6EEFF]
+    dark:bg-[#2B103D]
+  "
+>
+  <ShieldCheck
+    size={36}
+    className="text-[#B348FE]"
+  />
+</div>
 
         <h2 className="text-2xl font-black text-slate-900 dark:text-white">
           تفعيل الاشتراك
         </h2>
 
-        <p className="mt-3 text-slate-500 dark:text-slate-400 leading-7">
+        <p className="mt-3 text-gray-500
+dark:text-gray-400
+text-[15px]
+leading-7 leading-7">
           أدخل كود الاشتراك الخاص بك لتفعيل الكورس.
         </p>
 
-        <h3 className="mt-2 font-bold text-lg text-[#371143] dark:text-[#B348FE]">
-          {selectedCourse?.title}
-        </h3>
+       <div
+  className="
+    mt-5
+    rounded-2xl
+    border
+    border-[#EAD8FF]
+    dark:border-[#2A2A2A]
+    bg-[#F6EEFF]
+    dark:bg-[#1A1A1A]
+    px-5
+    py-4
+  "
+>
+  <h3
+    className="
+      text-lg
+      font-black
+      text-[#B348FE]
+      text-center
+    "
+  >
+    {selectedCourse?.title}
+  </h3>
+</div>
+
 
       </div>
 
@@ -695,22 +755,29 @@ return (
         value={subscriptionCode}
         onChange={(e) => setSubscriptionCode(e.target.value.toUpperCase())}
         placeholder="XXXX-XXXX"
-        className="
-          mt-8
-          w-full
-          rounded-xl
-          border
-          border-slate-300
-          dark:border-white/10
-          bg-transparent
-          px-4
-          py-3
-          text-center
-          tracking-[4px]
-          font-bold
-          outline-none
-          focus:border-[#B348FE]
-        "
+className="
+  mt-7
+  w-full
+  rounded-2xl
+  border
+  border-gray-200
+  dark:border-[#2A2A2A]
+  bg-gray-50
+  dark:bg-[#181818]
+  px-5
+  py-4
+  text-center
+  text-lg
+  tracking-[6px]
+  font-black
+  text-[#B348FE]
+  outline-none
+  transition-all
+  duration-300
+  focus:border-[#B348FE]
+  focus:ring-4
+  focus:ring-[#B348FE]/20
+"
       />
 
       <Button
@@ -725,10 +792,16 @@ return (
   className="
     w-full
     mt-3
-    border-green-500
-    text-green-600
-    hover:bg-green-500
-    hover:text-white
+bg-green-50
+border-green-200
+text-green-700
+
+dark:bg-[#16281F]
+dark:border-[#245D3A]
+dark:text-green-400
+
+hover:bg-green-500
+hover:text-white
     flex items-center justify-center gap-2
   "
   onClick={() =>
@@ -745,8 +818,14 @@ return (
 </Button>
 
       <Button
-        variant="outline"
-        className="w-full mt-3"
+        variant="ghost"
+        className="
+w-full
+mt-3
+text-gray-500
+dark:text-gray-400
+hover:text-[#B348FE]
+"
         onClick={() => {
           setShowSubscriptionModal(false);
           setSubscriptionCode("");

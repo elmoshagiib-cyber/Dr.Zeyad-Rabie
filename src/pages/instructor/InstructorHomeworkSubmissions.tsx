@@ -11,19 +11,57 @@ import {
   Save,
   Search,
   Filter,
+  ChevronLeft,
+  ChevronRight,
+  User,
+  BookOpen,
+  Calendar,
+  Award,
+  Image as ImageIcon,
+  FileType,
+  X,
 } from "lucide-react";
 
+interface Submission {
+  id: number;
+  student_id: number;
+  homework_id: number;
+  file_url?: string;
+  file_name?: string;
+  text_answer?: string;
+  answer?: string;
+  grade?: number;
+  feedback?: string;
+  submitted_at: string;
+  student_name?: string;
+  homeworks?: {
+    title: string;
+    total_score?: number;
+    course_id?: number;
+  };
+}
+
 export function InstructorHomeworkSubmissions() {
-  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [grades, setGrades] = useState<Record<number, number>>({});
+  const [feedbacks, setFeedbacks] = useState<Record<number, string>>({});
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("الكل");
   const [homeworkFilter, setHomeworkFilter] = useState("الكل");
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     loadSubmissions();
   }, []);
+
+  useEffect(() => {
+    if (filteredSubmissions.length > 0 && !selectedSubmission) {
+      setSelectedSubmission(filteredSubmissions[0]);
+    }
+  }, [submissions]);
 
   const loadSubmissions = async () => {
     setLoading(true);
@@ -86,293 +124,583 @@ export function InstructorHomeworkSubmissions() {
   }, [submissions, search, statusFilter, homeworkFilter]);
 
   const saveGrade = async (id: number) => {
-    if (grades[id] === undefined) {
+    const gradeValue = grades[id];
+    const feedbackValue = feedbacks[id];
+
+    if (gradeValue === undefined || gradeValue === null) {
       alert("من فضلك أدخل الدرجة أولاً");
       return;
     }
 
-    await supabase
+    setSaving(true);
+
+    const updateData: any = { grade: gradeValue };
+    if (feedbackValue !== undefined) {
+      updateData.feedback = feedbackValue;
+    }
+
+    const { error } = await supabase
       .from("homework_submissions")
-      .update({ grade: grades[id] })
+      .update(updateData)
       .eq("id", id);
 
-    alert("✅ تم حفظ الدرجة بنجاح");
-    loadSubmissions();
+    if (error) {
+      console.error(error);
+      alert("حدث خطأ أثناء الحفظ");
+      setSaving(false);
+      return;
+    }
+
+    // Update local state instead of reloading
+    setSubmissions(prev => 
+      prev.map(s => 
+        s.id === id 
+          ? { ...s, grade: gradeValue, feedback: feedbackValue || s.feedback }
+          : s
+      )
+    );
+
+    if (selectedSubmission?.id === id) {
+      setSelectedSubmission(prev => 
+        prev ? { ...prev, grade: gradeValue, feedback: feedbackValue || prev.feedback } : null
+      );
+    }
+
+    setSaving(false);
+    
+    // Clear the inputs
+    const newGrades = { ...grades };
+    delete newGrades[id];
+    setGrades(newGrades);
+    
+    const newFeedbacks = { ...feedbacks };
+    delete newFeedbacks[id];
+    setFeedbacks(newFeedbacks);
   };
 
+  const getFileType = (submission: Submission): "pdf" | "image" | "text" | "none" => {
+    const fileUrl = submission.file_url || submission.answer;
+    const fileName = submission.file_name;
+    
+    if (!fileUrl && !submission.text_answer) return "none";
+    if (!fileUrl && submission.text_answer) return "text";
+    
+    if (fileName) {
+      const ext = fileName.toLowerCase().split('.').pop();
+      if (ext === 'pdf') return 'pdf';
+      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext || '')) return 'image';
+    }
+    
+    if (fileUrl?.includes('.pdf')) return 'pdf';
+    if (fileUrl?.match(/\.(jpg|jpeg|png|gif|webp|svg)/i)) return 'image';
+    
+    return "none";
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('ar-EG', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  };
+
+  const handlePrevious = () => {
+    if (!selectedSubmission) return;
+    const currentIndex = filteredSubmissions.findIndex(s => s.id === selectedSubmission.id);
+    if (currentIndex > 0) {
+      setSelectedSubmission(filteredSubmissions[currentIndex - 1]);
+    }
+  };
+
+  const handleNext = () => {
+    if (!selectedSubmission) return;
+    const currentIndex = filteredSubmissions.findIndex(s => s.id === selectedSubmission.id);
+    if (currentIndex < filteredSubmissions.length - 1) {
+      setSelectedSubmission(filteredSubmissions[currentIndex + 1]);
+    }
+  };
+
+  const currentIndex = selectedSubmission 
+    ? filteredSubmissions.findIndex(s => s.id === selectedSubmission.id) + 1 
+    : 0;
+
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden" dir="rtl">
+    <div className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]" dir="rtl">
       <div className="hidden lg:block flex-shrink-0">
         <DashboardSidebar type="instructor" />
       </div>
 
-      <main className="flex-1 overflow-y-auto p-6">
-        {/* Hero */}
-        <div className="mb-8">
-          <div
-  className="
-  relative
-  overflow-hidden
-  rounded-[32px]
-  bg-[#4C1D95]
-  p-10
-  text-white
-  shadow-xl
-  "
->
-  {/* Background Blur */}
-  <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
-  <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
+      <main className="flex-1 overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] p-6 lg:p-8 text-white relative overflow-hidden flex-shrink-0">
+          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
+          <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
+          
+          <div className="relative z-10">
+            <h1 className="text-2xl lg:text-3xl font-black mb-2">تصحيح الواجبات</h1>
+            <p className="text-white/90 text-sm lg:text-base">مراجعة وتصحيح تسليمات الطلاب</p>
+          </div>
+        </div>
 
-  <div className="relative z-10 flex items-center justify-between">
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4 p-6 bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
+          <div className="text-center">
+            <div className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white">{submissions.length}</div>
+            <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 font-bold mt-1">إجمالي التسليمات</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl lg:text-3xl font-black text-emerald-600">{gradedCount}</div>
+            <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 font-bold mt-1">تم التصحيح</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl lg:text-3xl font-black text-amber-600">{pendingCount}</div>
+            <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 font-bold mt-1">بانتظار التصحيح</div>
+          </div>
+        </div>
 
-    {/* المعلومات */}
-    <div>
-
-      <h1 className="text-5xl font-black">
-        تسليمات الطلاب
-      </h1>
-
-      <div className="mt-4 flex items-center gap-3">
-        <span
-          className="
-          flex
-          items-center
-          gap-2
-          rounded-full
-          bg-emerald-500/20
-          px-3
-          py-1
-          text-sm
-          text-emerald-100
-          "
-        >
-          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-          متصل بقاعدة البيانات
-        </span>
-      </div>
-
-      <p className="mt-4 max-w-xl text-lg text-violet-100">
-        مراجعة جميع تسليمات الطلاب وتصحيح الواجبات ومتابعة الأداء من مكان واحد.
-      </p>
-
-    </div>
-
-    {/* الأيقونة */}
-    <div
-      className="
-      flex
-      h-20
-      w-20
-      items-center
-      justify-center
-      rounded-3xl
-      bg-white/10
-      backdrop-blur
-      "
-    >
-      <FileText size={38} />
-    </div>
-
-  </div>
-</div>
-</div>
         {/* Filters */}
-        <Card className="bg-white rounded-[32px] border border-slate-100 shadow-sm mb-8">
-          <CardContent className="p-8">
-            <div className="mb-6">
-              <h3 className="text-2xl font-black mb-1 flex items-center gap-2">
-                <Filter size={20} />
-                البحث والفلاتر
-              </h3>
-              <p className="text-slate-500">
-                ابحث وقم بتصفية التسليمات بسهولة
-              </p>
+        <div className="p-4 lg:p-6 bg-white dark:bg-[#09090B] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="ابحث عن طالب أو واجب..."
+                className="pr-10 bg-white dark:bg-[#111111] border-gray-200 dark:border-[#2A2A2A] rounded-xl"
+              />
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-4">
-              <div className="relative">
-                <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="اسم الطالب أو الواجب..."
-                  className="pr-10"
-                />
-              </div>
-
-              <select
-                value={homeworkFilter}
-                onChange={(e) => setHomeworkFilter(e.target.value)}
-                className="w-full border border-slate-200 rounded-2xl px-5 py-3 bg-white"
-              >
-                {homeworkOptions.map((hw, idx) => (
-                  <option key={idx}>{hw}</option>
-                ))}
-              </select>
-
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full border border-slate-200 rounded-2xl px-5 py-3 bg-white"
-              >
-                <option>الكل</option>
-                <option>تم التصحيح</option>
-                <option>بانتظار التصحيح</option>
-              </select>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Submissions */}
-        {loading ? (
-          <div className="text-center py-20 text-slate-400">
-            جاري تحميل البيانات...
-          </div>
-        ) : filteredSubmissions.length === 0 ? (
-          <div className="text-center py-20 text-slate-400">
-            لا توجد نتائج مطابقة
-          </div>
-        ) : (
-          filteredSubmissions.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-[28px] border border-slate-100 shadow-sm p-6 mb-6 hover:shadow-md transition"
+            <select
+              value={homeworkFilter}
+              onChange={(e) => setHomeworkFilter(e.target.value)}
+              className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
             >
-              <div className="flex flex-col lg:flex-row-reverse gap-6">
-                {/* Preview */}
-                <div className="lg:w-1/2">
-                  <div className="border rounded-2xl overflow-hidden h-[420px] bg-slate-100">
-                    {item.answer ? (
-                      <iframe
-                        src={item.answer}
-                        title={`submission-${item.id}`}
-                        className="w-full h-full"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-slate-400">
-                        لا يوجد ملف مرفق
-                      </div>
-                    )}
+              {homeworkOptions.map((hw, idx) => (
+                <option key={idx}>{hw}</option>
+              ))}
+            </select>
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+            >
+              <option>الكل</option>
+              <option>تم التصحيح</option>
+              <option>بانتظار التصحيح</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 overflow-hidden flex">
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-12 h-12 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-600 dark:text-gray-400 font-bold">جاري تحميل البيانات...</p>
+              </div>
+            </div>
+          ) : filteredSubmissions.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={64} />
+                <p className="text-gray-600 dark:text-gray-400 font-bold text-lg">لا توجد تسليمات</p>
+                <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">جرب تغيير الفلاتر</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Sidebar - Submissions List */}
+              <div className="w-full lg:w-80 xl:w-96 border-l border-gray-200 dark:border-[#2A2A2A] overflow-y-auto bg-gray-50 dark:bg-[#0A0A0A]">
+                <div className="p-4">
+                  <div className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3">
+                    {filteredSubmissions.length} تسليم
                   </div>
-                </div>
-
-                {/* Details */}
-                <div className="lg:w-1/2 flex flex-col">
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <h2 className="text-2xl font-bold text-slate-900">
-                        {item.student_name}
-                      </h2>
-                      <p className="text-slate-500 mt-1">
-                        {item.homeworks?.title}
-                      </p>
-                    </div>
-
-                    <div
-                      className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                        item.grade !== null
-                          ? "bg-green-100 text-green-700"
-                          : "bg-orange-100 text-orange-700"
-                      }`}
-                    >
-                      {item.grade !== null
-                        ? "تم التصحيح"
-                        : "بانتظار التصحيح"}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 text-sm text-slate-600 mb-6">
-                    <div className="flex justify-between">
-                      <span>رقم التسليم</span>
-                      <span>#{item.id}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>تاريخ التسليم</span>
-                      <span>
-                        {new Date(item.submitted_at).toLocaleDateString("ar-EG")}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-auto">
-                    <label className="block mb-2 font-semibold">
-                      الدرجة
-                    </label>
-
-                    <input
-                      type="number"
-                      placeholder="أدخل الدرجة"
-                      value={grades[item.id] ?? item.grade ?? ""}
-                      onChange={(e) =>
-                        setGrades({
-                          ...grades,
-                          [item.id]: Number(e.target.value),
-                        })
-                      }
-                      className="w-full border border-slate-200 rounded-xl px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-
-                    <div className="flex gap-3">
+                  
+                  <div className="space-y-2">
+                    {filteredSubmissions.map((submission) => (
                       <button
-                        onClick={() => saveGrade(item.id)}
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl py-3 flex items-center justify-center gap-2 transition"
+                        key={submission.id}
+                        onClick={() => setSelectedSubmission(submission)}
+                        className={`w-full text-right p-4 rounded-2xl transition-all duration-200 ${
+                          selectedSubmission?.id === submission.id
+                            ? 'bg-white dark:bg-[#111111] shadow-md border-2 border-[#B348FE]'
+                            : 'bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE] hover:shadow-sm'
+                        }`}
                       >
-                        <Save size={18} />
-                        حفظ الدرجة
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-black text-gray-900 dark:text-white text-sm truncate">
+                              {submission.student_name}
+                            </h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                              {submission.homeworks?.title}
+                            </p>
+                          </div>
+                          
+                          <span
+                            className={`px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap ${
+                              submission.grade !== null
+                                ? "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400"
+                                : "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400"
+                            }`}
+                          >
+                            {submission.grade !== null ? "مُصحح" : "معلق"}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+                          <Calendar size={12} />
+                          <span>{new Date(submission.submitted_at).toLocaleDateString("ar-EG")}</span>
+                        </div>
                       </button>
-
-                      <button
-                        onClick={() =>
-                          item.answer && window.open(item.answer, "_blank")
-                        }
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3 flex items-center justify-center gap-2 transition"
-                      >
-                        <Eye size={18} />
-                        عرض الملف
-                      </button>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </div>
-            </div>
-          ))
-        )}
+
+              {/* Main Panel - Submission Details */}
+              {selectedSubmission && (
+                <div className="flex-1 overflow-y-auto">
+                  <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+                    {/* Navigation */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="text-sm font-bold text-gray-500 dark:text-gray-400">
+                        {currentIndex} من {filteredSubmissions.length}
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handlePrevious}
+                          disabled={currentIndex === 1}
+                          className="p-2 rounded-xl border-2 border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE] hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                        >
+                          <ChevronRight size={20} />
+                        </button>
+                        <button
+                          onClick={handleNext}
+                          disabled={currentIndex === filteredSubmissions.length}
+                          className="p-2 rounded-xl border-2 border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE] hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                        >
+                          <ChevronLeft size={20} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Student Info */}
+                    <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm mb-6">
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className="bg-[#F6EEFF] dark:bg-[#2B103D] p-3 rounded-2xl">
+                            <User className="text-[#B348FE]" size={24} />
+                          </div>
+                          <div className="flex-1">
+                            <h2 className="text-xl font-black text-gray-900 dark:text-white mb-1">
+                              {selectedSubmission.student_name}
+                            </h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              معرّف الطالب: #{selectedSubmission.student_id}
+                            </p>
+                          </div>
+                          
+                          <span
+                            className={`px-4 py-2 rounded-full text-sm font-black border ${
+                              selectedSubmission.grade !== null
+                                ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900"
+                                : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900"
+                            }`}
+                          >
+                            {selectedSubmission.grade !== null ? "تم التصحيح" : "بانتظار التصحيح"}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Homework Info */}
+                    <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm mb-6">
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-2xl">
+                            <BookOpen className="text-blue-600 dark:text-blue-400" size={24} />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-black text-gray-900 dark:text-white mb-3">
+                              {selectedSubmission.homeworks?.title}
+                            </h3>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <span className="text-gray-500 dark:text-gray-400">تاريخ التسليم</span>
+                                <p className="font-bold text-gray-900 dark:text-white mt-1">
+                                  {formatDate(selectedSubmission.submitted_at)}
+                                </p>
+                              </div>
+                              {selectedSubmission.homeworks?.total_score && (
+                                <div>
+                                  <span className="text-gray-500 dark:text-gray-400">الدرجة النهائية</span>
+                                  <p className="font-bold text-gray-900 dark:text-white mt-1">
+                                    {selectedSubmission.homeworks.total_score}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Preview Section */}
+                    <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm mb-6">
+                      <CardContent className="p-6">
+                        <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                          <Eye size={20} className="text-[#B348FE]" />
+                          معاينة الإجابة
+                        </h3>
+
+                        {(() => {
+                          const fileType = getFileType(selectedSubmission);
+                          const fileUrl = selectedSubmission.file_url || selectedSubmission.answer;
+
+                          return (
+                            <div className="space-y-4">
+                              {/* PDF Preview */}
+                              {fileType === 'pdf' && fileUrl && (
+                                <div className="border-2 border-gray-200 dark:border-[#2A2A2A] rounded-2xl overflow-hidden">
+                                  <iframe
+                                    src={fileUrl}
+                                    className="w-full h-[600px]"
+                                    title="PDF Preview"
+                                  />
+                                  <div className="p-3 bg-gray-50 dark:bg-[#1A1A1A] border-t border-gray-200 dark:border-[#2A2A2A]">
+                                    <a
+                                      href={fileUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-sm text-[#B348FE] hover:underline font-bold flex items-center gap-2"
+                                    >
+                                      <Eye size={16} />
+                                      فتح في تبويب جديد
+                                    </a>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Image Preview */}
+                              {fileType === 'image' && fileUrl && (
+                                <div className="border-2 border-gray-200 dark:border-[#2A2A2A] rounded-2xl overflow-hidden">
+                                  <div className="p-4 bg-gray-50 dark:bg-[#1A1A1A]">
+                                    <img
+                                      src={fileUrl}
+                                      alt="Student Submission"
+                                      className="w-full h-auto rounded-xl cursor-pointer hover:scale-[1.02] transition-transform duration-300"
+                                      onClick={() => setImagePreview(fileUrl)}
+                                    />
+                                  </div>
+                                  <div className="p-3 bg-gray-50 dark:bg-[#1A1A1A] border-t border-gray-200 dark:border-[#2A2A2A]">
+                                    <button
+                                      onClick={() => setImagePreview(fileUrl)}
+                                      className="text-sm text-[#B348FE] hover:underline font-bold flex items-center gap-2"
+                                    >
+                                      <Eye size={16} />
+                                      عرض بحجم كامل
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Text Answer */}
+                              {selectedSubmission.text_answer && (
+                                <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#1A1A1A] dark:to-[#151515] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6">
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <FileText className="text-gray-600 dark:text-gray-400" size={18} />
+                                    <h4 className="font-bold text-gray-900 dark:text-white">الإجابة النصية</h4>
+                                  </div>
+                                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                    {selectedSubmission.text_answer}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Empty State */}
+                              {fileType === 'none' && !selectedSubmission.text_answer && (
+                                <div className="text-center py-16 bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl border-2 border-dashed border-gray-300 dark:border-[#2A2A2A]">
+                                  <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={64} />
+                                  <p className="text-gray-500 dark:text-gray-400 font-bold">لم يتم رفع أي ملف</p>
+                                  <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">الطالب لم يقم بإرفاق إجابة</p>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </CardContent>
+                    </Card>
+
+                    {/* Grading Section */}
+                    <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
+                      <CardContent className="p-6">
+                        <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                          <Award size={20} className="text-[#B348FE]" />
+                          التصحيح
+                        </h3>
+
+                        <div className="space-y-4">
+                          {/* Grade Input */}
+                          <div>
+                            <label className="block mb-2 font-bold text-gray-900 dark:text-white text-sm">
+                              الدرجة
+                              {selectedSubmission.homeworks?.total_score && (
+                                <span className="text-gray-500 dark:text-gray-400 font-normal mr-2">
+                                  (من {selectedSubmission.homeworks.total_score})
+                                </span>
+                              )}
+                            </label>
+                            <input
+                              type="number"
+                              placeholder="أدخل الدرجة"
+                              value={grades[selectedSubmission.id] ?? selectedSubmission.grade ?? ""}
+                              onChange={(e) =>
+                                setGrades({
+                                  ...grades,
+                                  [selectedSubmission.id]: Number(e.target.value),
+                                })
+                              }
+                              className="w-full border-2 border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#B348FE] focus:border-[#B348FE] transition-all duration-200"
+                            />
+                          </div>
+
+                          {/* Feedback Textarea */}
+                          <div>
+                            <label className="block mb-2 font-bold text-gray-900 dark:text-white text-sm">
+                              الملاحظات (اختياري)
+                            </label>
+                            <textarea
+                              placeholder="أضف ملاحظات للطالب..."
+                              value={feedbacks[selectedSubmission.id] ?? selectedSubmission.feedback ?? ""}
+                              onChange={(e) =>
+                                setFeedbacks({
+                                  ...feedbacks,
+                                  [selectedSubmission.id]: e.target.value,
+                                })
+                              }
+                              rows={4}
+                              className="w-full border-2 border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#B348FE] focus:border-[#B348FE] resize-none transition-all duration-200"
+                            />
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                            <button
+                              onClick={() => saveGrade(selectedSubmission.id)}
+                              disabled={saving}
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl py-3 px-6 flex items-center justify-center gap-2 transition-all duration-300 font-black shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {saving ? (
+                                <>
+                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  جاري الحفظ...
+                                </>
+                              ) : (
+                                <>
+                                  <Save size={18} />
+                                  حفظ التصحيح
+                                </>
+                              )}
+                            </button>
+
+                            {(selectedSubmission.file_url || selectedSubmission.answer) && (
+                              <button
+                                onClick={() => {
+                                  const url = selectedSubmission.file_url || selectedSubmission.answer;
+                                  if (url) window.open(url, "_blank");
+                                }}
+                                className="flex-1 sm:flex-initial bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-2xl py-3 px-6 flex items-center justify-center gap-2 transition-all duration-300 font-black shadow-md hover:shadow-[0_8px_20px_rgba(179,72,254,.35)]"
+                              >
+                                <Eye size={18} />
+                                عرض الملف
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Current Grade Display */}
+                          {selectedSubmission.grade !== null && selectedSubmission.grade !== undefined && (
+                            <div className="mt-4 p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900 rounded-2xl">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
+                                  الدرجة الحالية
+                                </span>
+                                <span className="text-2xl font-black text-emerald-600 dark:text-emerald-500">
+                                  {selectedSubmission.grade}
+                                  {selectedSubmission.homeworks?.total_score && (
+                                    <span className="text-lg text-gray-500 dark:text-gray-400">
+                                      {" "}/ {selectedSubmission.homeworks.total_score}
+                                    </span>
+                                  )}
+                                </span>
+                              </div>
+                              {selectedSubmission.feedback && (
+                                <div className="mt-3 pt-3 border-t border-emerald-200 dark:border-emerald-900">
+                                  <p className="text-sm text-emerald-700 dark:text-emerald-400 font-bold mb-1">
+                                    الملاحظات السابقة:
+                                  </p>
+                                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                                    {selectedSubmission.feedback}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </main>
-    </div>
-  );
-}
 
-/* Small reusable stat card */
-function StatCard({
-  icon,
-  title,
-  value,
-  color,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  value: number;
-  color: "blue" | "green" | "orange";
-}) {
-  const bg =
-    color === "blue"
-      ? "bg-blue-100"
-      : color === "green"
-      ? "bg-green-100"
-      : "bg-orange-100";
+      {/* Image Preview Modal */}
+      {imagePreview && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => setImagePreview(null)}
+        >
+          <button
+            onClick={() => setImagePreview(null)}
+            className="absolute top-4 left-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all duration-200"
+          >
+            <X className="text-white" size={24} />
+          </button>
+          <img
+            src={imagePreview}
+            alt="Preview"
+            className="max-w-full max-h-full rounded-xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
 
-  return (
-    <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition">
-      <div className="flex items-center gap-4">
-        <div className={`w-14 h-14 rounded-2xl ${bg} flex items-center justify-center`}>
-          {icon}
-        </div>
-        <div>
-          <p className="text-slate-500">{title}</p>
-          <h3 className="text-3xl font-black">{value}</h3>
-        </div>
-      </div>
+      {/* Animations */}
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out;
+        }
+      `}</style>
     </div>
   );
 }

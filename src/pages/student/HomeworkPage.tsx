@@ -1,15 +1,20 @@
-import { Upload, FileText, CheckCircle, Clock, AlertCircle, Download, Eye } from "lucide-react";
+import { FileText, CheckCircle, Clock, AlertCircle, Eye } from "lucide-react";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { useEffect, useState, useRef } from "react";
 import { useApp } from "../../context/AppContext";
 import { supabase } from "../../lib/supabase";
+import { useNavigate } from "react-router-dom";
 
 export function HomeworkPage() {
   const { user } = useApp();
+  
   const [uploading, setUploading] = useState(false);
   const [homeworks, setHomeworks] = useState<any[]>([]);
+const pdfInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+const imageInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+const navigate = useNavigate();
 
   useEffect(() => {
     if (user?.id) {
@@ -414,95 +419,41 @@ export function HomeworkPage() {
                         </div>
                       )}
 
-                      {/* Upload Section */}
-                      <div className="border-t border-gray-200 dark:border-[#2A2A2A] pt-6">
-                        {hw.submitted && canUpload && (
-                          <div className="mb-5 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900">
-                            <p className="text-amber-700 dark:text-amber-400 text-sm font-bold flex items-center gap-2">
-                              <AlertCircle size={18} />
-                              سيتم استبدال الملف السابق عند رفع ملف جديد
-                            </p>
-                          </div>
-                        )}
+{/* Actions */}
+<div className="border-t border-gray-200 dark:border-[#2A2A2A] pt-6">
+  <div className="flex flex-wrap gap-3">
 
-                        <div className="flex flex-wrap gap-3">
-                          {/* PDF Upload */}
-                          <div>
-                            <input
-                              id={`pdf-${hw.id}`}
-                              type="file"
-                              accept=".pdf"
-                              hidden
-                              disabled={!canUpload || uploading}
-                              onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
+    <Button
+      size="sm"
+      className="bg-[#B348FE] hover:bg-[#9E2FFF] font-bold"
+      onClick={() => {
+        navigate(`/dashboard/homework/${hw.course_item_id}`);
+      }}
+    >
+      <Eye size={16} />
+      فتح الواجب
+    </Button>
 
-                                await uploadHomework(file, hw.id);
+    {hw.submission?.answer && (
+      <a
+        href={hw.submission.answer}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <Button
+          size="sm"
+          variant="outline"
+          className="font-bold"
+        >
+          <FileText size={16} />
+          عرض الملف
+        </Button>
+      </a>
+    )}
 
-                                // يسمح برفع نفس الملف مرة أخرى
-                                e.target.value = "";
-                              }}
-                            />
+  </div>
+</div>
 
-                            <label htmlFor={`pdf-${hw.id}`}>
-                              <Button
-                                size="sm"
-                                disabled={!canUpload || uploading}
-                                type="button"
-                                className="bg-[#B348FE] hover:bg-[#9E2FFF] shadow-md hover:shadow-[0_8px_20px_rgba(179,72,254,.35)] font-bold transition-all duration-300"
-                              >
-                                <Upload size={16} />
-                                {uploading ? "جاري الرفع..." : "رفع PDF"}
-                              </Button>
-                            </label>
-                          </div>
-
-                          {/* Image Upload */}
-                          <div>
-                            <input
-                              id={`image-${hw.id}`}
-                              type="file"
-                              accept="image/*"
-                              hidden
-                              disabled={!canUpload || uploading}
-                              onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-
-                                await uploadHomework(file, hw.id);
-
-                                // يسمح برفع نفس الصورة مرة أخرى
-                                e.target.value = "";
-                              }}
-                            />
-
-                            <label htmlFor={`image-${hw.id}`}>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={!canUpload || uploading}
-                                type="button"
-                                className="border-2 font-bold hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] hover:border-[#B348FE] transition-all duration-300"
-                              >
-                                <Upload size={16} />
-                                {uploading ? "جاري الرفع..." : "رفع صورة"}
-                              </Button>
-                            </label>
-                          </div>
-
-                          {hw.status === "interactive" && (
-                            <Button 
-                              variant="success" 
-                              size="sm"
-                              className="font-bold"
-                            >
-                              <FileText size={16} />
-                              ابدأ الحل
-                            </Button>
-                          )}
-                        </div>
-                      </div>
                     </div>
                   </CardContent>
                 </Card>

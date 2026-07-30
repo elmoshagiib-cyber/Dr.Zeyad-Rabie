@@ -33,18 +33,18 @@ export function InstructorStudents() {
   useEffect(() => { loadStudents(); }, []);
 
   const loadStudents = async () => {
-const { data, error } = await supabase
-  .from("students")
-  .select(`
-    *,
-    student_courses(
-      id,
-      active
-    )
-  `);
+    const { data, error } = await supabase
+      .from("students")
+      .select(`
+        *,
+        student_courses(
+          id,
+          active
+        )
+      `);
  
-  console.log(data);
-console.log(error);
+    console.log(data);
+    console.log(error);
     if (!error) setStudents(data || []);
   };
 
@@ -86,50 +86,50 @@ console.log(error);
       label:    "إجمالي الطلاب",
       value:    students.length,
       sub:      "جميع الطلاب المسجلين",
-      subColor: "text-slate-400",
+      subColor: "text-gray-400 dark:text-gray-500",
       icon:     Users,
-      iconBg:   "bg-violet-100",
-      iconColor:"text-violet-600",
+      iconBg:   "bg-[#F6EEFF] dark:bg-[#2B103D]",
+      iconColor:"text-[#B348FE]",
     },
     {
       label:    "الطلاب النشطون",
       value:    students.filter((s) => s.status === "نشط" || s.status === "active").length,
       sub:      "100% من إجمالي الطلاب",
-      subColor: "text-emerald-500",
+      subColor: "text-emerald-500 dark:text-emerald-400",
       icon:     UserCheck,
-      iconBg:   "bg-emerald-100",
-      iconColor:"text-emerald-600",
+      iconBg:   "bg-emerald-50 dark:bg-emerald-950/30",
+      iconColor:"text-emerald-600 dark:text-emerald-500",
     },
     {
       label:    "طلاب هذا الشهر",
       value:    newStudentsThisMonth,
       sub:      "+100% عن الشهر الماضي",
-      subColor: "text-emerald-500",
+      subColor: "text-emerald-500 dark:text-emerald-400",
       icon:     GraduationCap,
-      iconBg:   "bg-orange-100",
-      iconColor:"text-orange-500",
+      iconBg:   "bg-amber-50 dark:bg-amber-950/30",
+      iconColor:"text-amber-600 dark:text-amber-500",
     },
   ];
 
   const selectCls = `
-    w-full border border-slate-200 rounded-2xl
-    px-4 py-3 sm:px-5 sm:py-4 bg-white text-sm sm:text-base
-    focus:outline-none focus:border-violet-400
+    w-full border-2 border-gray-200 dark:border-[#2A2A2A] rounded-2xl
+    px-4 py-3 sm:px-5 sm:py-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm sm:text-base
+    focus:outline-none focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20
   `;
 
   return (
     <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
 
-      {/* ── Hero ── */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[32px] bg-[#4C1D95] px-5 sm:px-8 lg:px-10 py-6 sm:py-8 lg:py-10 text-white shadow-xl mb-5 sm:mb-8">
+      {/* Hero */}
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] px-5 sm:px-8 lg:px-10 py-6 sm:py-8 lg:py-10 text-white shadow-xl mb-5 sm:mb-8">
         <div className="relative z-10 flex flex-row-reverse items-center gap-4 sm:gap-6">
           <div className="text-right flex-1">
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black leading-none">الطلاب</h1>
-            <p className="text-blue-100 mt-2 sm:mt-3 text-sm sm:text-lg lg:text-2xl">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight">الطلاب</h1>
+            <p className="text-white/90 mt-2 sm:mt-3 text-sm sm:text-base lg:text-lg">
               إدارة ومتابعة جميع الطلاب بالمنصة
             </p>
           </div>
-          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-[28px] bg-white/10 backdrop-blur-md flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-white/10 backdrop-blur-md flex items-center justify-center shrink-0">
             <UsersRound size={24} className="text-white sm:hidden" />
             <UsersRound size={32} className="text-white hidden sm:block" />
           </div>
@@ -140,21 +140,22 @@ console.log(error);
 
       <div className="space-y-4 sm:space-y-6 lg:space-y-8">
 
-        {/* ── Stats ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 lg:gap-8">
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 lg:gap-6">
           {statCards.map((card) => {
             const Icon = card.icon;
             return (
-              <Card key={card.label} className="bg-white rounded-2xl sm:rounded-[32px] border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                <CardContent className="px-4 sm:px-7 py-4 sm:py-5 flex items-center justify-between gap-4">
-                  <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-[24px] ${card.iconBg} flex items-center justify-center shrink-0`}>
-                    <Icon size={22} className={`sm:hidden ${card.iconColor}`} />
-                    <Icon size={30} className={`hidden sm:block ${card.iconColor}`} />
+              <Card key={card.label} className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#B348FE] transition-all duration-300">
+                <CardContent className="px-4 sm:px-6 lg:px-7 py-4 sm:py-5 lg:py-6 flex items-center justify-between gap-4">
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl ${card.iconBg} flex items-center justify-center shrink-0`}>
+                    <Icon size={20} className={`sm:hidden ${card.iconColor}`} />
+                    <Icon size={24} className={`hidden sm:block lg:hidden ${card.iconColor}`} />
+                    <Icon size={28} className={`hidden lg:block ${card.iconColor}`} />
                   </div>
                   <div className="text-right">
-                    <p className="text-slate-500 text-xs sm:text-sm mb-1 sm:mb-2">{card.label}</p>
-                    <p className="text-4xl sm:text-5xl lg:text-6xl font-black leading-none">{card.value}</p>
-                    <p className={`text-xs sm:text-sm mt-2 sm:mt-3 ${card.subColor}`}>{card.sub}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-bold mb-1 sm:mb-2">{card.label}</p>
+                    <p className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white leading-none">{card.value}</p>
+                    <p className={`text-xs sm:text-sm mt-2 font-bold ${card.subColor}`}>{card.sub}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -162,20 +163,20 @@ console.log(error);
           })}
         </div>
 
-        {/* ── Search & filters ── */}
-        <Card className="bg-white rounded-2xl sm:rounded-[32px] border border-slate-100 shadow-sm">
+        {/* Search & filters */}
+        <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
           <CardContent className="p-4 sm:p-6 lg:p-8">
             <div className="flex items-start justify-between mb-4 sm:mb-6 gap-3">
               <Button
                 variant="outline"
                 onClick={() => { setSearchTerm(""); setGradeFilter(""); setStatusFilter(""); setTypeFilter(""); }}
-                className="h-10 sm:h-12 px-4 sm:px-6 rounded-xl sm:rounded-2xl text-sm shrink-0"
+                className="h-10 sm:h-12 px-4 sm:px-6 rounded-2xl text-sm font-bold border-2 hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] hover:border-[#B348FE] shrink-0"
               >
                 إعادة تعيين
               </Button>
               <div className="text-right">
-                <h3 className="text-lg sm:text-2xl font-black mb-0.5 sm:mb-1">البحث والفلاتر</h3>
-                <p className="text-slate-500 text-xs sm:text-sm">ابحث عن طالب معين أو استخدم الفلاتر</p>
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 dark:text-white mb-0.5 sm:mb-1">البحث والفلاتر</h3>
+                <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">ابحث عن طالب معين أو استخدم الفلاتر</p>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -184,6 +185,7 @@ console.log(error);
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 icon={<Search size={18} />}
+                className="bg-white dark:bg-[#1A1A1A] border-gray-200 dark:border-[#2A2A2A]"
               />
               <select className={selectCls} value={gradeFilter} onChange={(e) => setGradeFilter(e.target.value)}>
                 <option value="">كل الصفوف</option>
@@ -203,23 +205,23 @@ console.log(error);
           </CardContent>
         </Card>
 
-        {/* ── List header ── */}
+        {/* List header */}
         <div className="flex items-center gap-3">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black">قائمة الطلاب</h2>
-          <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs sm:text-sm font-bold">
+          <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">قائمة الطلاب</h2>
+          <span className="px-3 py-1.5 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] text-xs sm:text-sm font-black border border-[#EAD8FF] dark:border-[#2A2A2A]">
             {filteredStudents.length} طالب
           </span>
         </div>
 
-        {/* ── Table ── */}
-        <Card className="bg-white border border-slate-100 rounded-2xl sm:rounded-[32px] overflow-hidden shadow-sm">
+        {/* Table */}
+        <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl overflow-hidden shadow-sm">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[700px]">
                 <thead>
-                  <tr className="bg-[#f8f9fc] border-b border-slate-100">
+                  <tr className="bg-gray-50 dark:bg-[#1A1A1A] border-b border-gray-100 dark:border-[#2A2A2A]">
                     {["الطالب","الإيميل","الصف الدراسي","النوع","الحالة","تاريخ التسجيل","الكورسات","الإجراءات"].map((h, i) => (
-                      <th key={h} className={`px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-xs sm:text-sm font-bold text-slate-500 ${i === 7 ? "text-center" : "text-right"}`}>
+                      <th key={h} className={`px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-xs sm:text-sm font-black text-gray-600 dark:text-gray-400 ${i === 7 ? "text-center" : "text-right"}`}>
                         {h}
                       </th>
                     ))}
@@ -227,17 +229,17 @@ console.log(error);
                 </thead>
                 <tbody>
                   {filteredStudents.map((student) => (
-                    <tr key={student.id} className="border-b border-slate-100 hover:bg-[#f8fbff] transition-colors duration-200">
+                    <tr key={student.id} className="border-b border-gray-100 dark:border-[#2A2A2A] hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] transition-colors duration-200">
 
                       {/* الطالب */}
                       <td className="px-4 sm:px-8 py-3 sm:py-5">
                         <div className="flex items-center gap-2 sm:gap-4">
                           <Avatar name={student.full_name || student.name} size="sm" />
                           <div>
-                            <p className="font-semibold text-slate-900 text-sm sm:text-[17px]">
+                            <p className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">
                               {student.full_name || student.name}
                             </p>
-                            <p className="text-xs text-slate-400 mt-0.5 sm:mt-1">
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 sm:mt-1">
                               {student.phone || "لا يوجد رقم"}
                             </p>
                           </div>
@@ -245,21 +247,23 @@ console.log(error);
                       </td>
 
                       {/* الإيميل */}
-                      <td className="px-4 sm:px-6 py-3 sm:py-5 text-slate-700 font-medium text-xs sm:text-sm whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-3 sm:py-5 text-gray-700 dark:text-gray-300 font-medium text-xs sm:text-sm whitespace-nowrap">
                         {student.email}
                       </td>
 
                       {/* الصف */}
                       <td className="px-4 sm:px-6 py-3 sm:py-5">
-                        <span className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs sm:text-sm font-medium whitespace-nowrap">
+                        <span className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs sm:text-sm font-bold whitespace-nowrap border border-gray-200 dark:border-gray-700">
                           {student.grade}
                         </span>
                       </td>
 
                       {/* النوع */}
                       <td className="px-4 sm:px-6 py-3 sm:py-5">
-                        <span className={`px-2.5 sm:px-3 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-medium ${
-                          student.type === "أونلاين" ? "bg-violet-100 text-violet-700" : "bg-orange-100 text-orange-700"
+                        <span className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-black border ${
+                          student.type === "أونلاين" 
+                            ? "bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] border-[#EAD8FF] dark:border-[#2A2A2A]" 
+                            : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900"
                         }`}>
                           {student.type || "سنتر"}
                         </span>
@@ -267,23 +271,23 @@ console.log(error);
 
                       {/* الحالة */}
                       <td className="px-4 sm:px-6 py-3 sm:py-5">
-                        <span className={`px-2.5 sm:px-3 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-medium ${
+                        <span className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-black border ${
                           student.status === "نشط" || student.status === "active"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-red-100 text-red-700"
+                            ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900"
+                            : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900"
                         }`}>
                           {student.status === "نشط" || student.status === "active" ? "نشط" : "موقوف"}
                         </span>
                       </td>
 
                       {/* تاريخ التسجيل */}
-                      <td className="px-4 sm:px-6 py-3 sm:py-5 text-slate-700 text-xs sm:text-sm whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-3 sm:py-5 text-gray-700 dark:text-gray-300 text-xs sm:text-sm whitespace-nowrap font-medium">
                         {student.created_at ? new Date(student.created_at).toLocaleDateString("ar-EG") : "-"}
                       </td>
 
                       {/* الكورسات */}
                       <td className="px-4 sm:px-6 py-3 sm:py-5">
-                        <span className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs sm:text-sm font-medium">
+                        <span className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs sm:text-sm font-bold border border-gray-200 dark:border-gray-700">
                           {student.student_courses?.length || 0} كورس
                         </span>
                       </td>
@@ -292,15 +296,15 @@ console.log(error);
                       <td className="px-4 sm:px-6 py-3 sm:py-5">
                         <div className="flex justify-center gap-1.5 sm:gap-2 flex-row-reverse">
                           <Button size="sm" onClick={() => navigate(`/instructor/students/${student.id}`)}
-                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-violet-100 text-violet-600 hover:bg-violet-200 border-0 shadow-none p-0">
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] hover:bg-[#EAD8FF] dark:hover:bg-[#3D1952] border-0 shadow-none p-0">
                             <Eye size={14} />
                           </Button>
                           <Button size="sm" onClick={() => toggleStudentStatus(student.id, student.status)}
-                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-orange-100 text-orange-600 hover:bg-orange-200 border-0 shadow-none p-0">
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900/40 border-0 shadow-none p-0">
                             <Power size={14} />
                           </Button>
                           <Button size="sm"
-                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-red-100 text-red-600 hover:bg-red-200 border-0 shadow-none p-0"
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 border-0 shadow-none p-0"
                             onClick={() => { if (confirm("هل أنت متأكد من حذف الطالب؟")) deleteStudent(student.id); }}>
                             <Trash2 size={13} />
                           </Button>
