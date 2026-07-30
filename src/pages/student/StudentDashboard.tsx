@@ -353,7 +353,12 @@ return (
             {/* Enhanced Right Column */}
             <div className="space-y-5">
               {/* Enhanced Upcoming Tasks */}
-              <Card className="border-0 shadow-lg">
+              <Card className="bg-white
+dark:bg-[#111111]
+border
+border-gray-200
+dark:border-[#2A2A2A]
+shadow-xl">
   <CardContent className="py-16 text-center">
     <Activity
       size={48}
@@ -377,7 +382,12 @@ return (
 </Card>
 
               {/* Enhanced Leaderboard */}
-              <Card className="border-0 shadow-lg overflow-hidden">
+              <Card className="bg-white
+dark:bg-[#111111]
+border
+border-gray-200
+dark:border-[#2A2A2A]
+shadow-xl overflow-hidden">
                 <div className="bg-gradient-to-r from-amber-400 to-orange-400 p-4">
                   <div className="flex items-center justify-between text-white">
                     <h3 className="font-black text-lg flex items-center gap-2">
@@ -416,7 +426,12 @@ return (
           </div>
 
           {/* Enhanced Announcements Section */}
-         <Card className="border-0 shadow-lg">
+         <Card className="bg-white
+dark:bg-[#111111]
+border
+border-gray-200
+dark:border-[#2A2A2A]
+shadow-xl">
   <CardContent className="py-16 text-center">
     <Bell
       size={48}

@@ -194,7 +194,20 @@ const avatar = user.avatar_url || "/images/default-avatar.png";
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className="absolute left-0 mt-3 w-[300px] origin-top-left z-50"
           >
-            <div className="bg-white dark:bg-gray-900 rounded-[28px] shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div
+  className="
+    bg-white
+    dark:bg-[#111111]
+    rounded-[28px]
+    overflow-hidden
+    border
+    border-gray-200
+    dark:border-[#2A2A2A]
+    shadow-[0_20px_60px_rgba(0,0,0,.08)]
+    dark:shadow-[0_20px_60px_rgba(0,0,0,.55)]
+    backdrop-blur-xl
+  "
+>
               <div className="p-6">
                 <div className="flex flex-col items-center text-center">
 <div
@@ -223,7 +236,7 @@ const avatar = user.avatar_url || "/images/default-avatar.png";
                 </div>
               </div>
 
-              <div className="h-px bg-gray-200 dark:bg-gray-700 mx-4" />
+              <div className="h-px bg-gray-200 dark:bg-[#2A2A2A] mx-5" />
 
               <div className="py-2 px-2">
                 {menuItems.map((item, index) => {
@@ -241,7 +254,7 @@ const avatar = user.avatar_url || "/images/default-avatar.png";
                 })}
               </div>
 
-              <div className="h-px bg-gray-200 dark:bg-gray-700 mx-4" />
+              <div className="h-px bg-gray-200 dark:bg-[#2A2A2A] mx-5" />
 
               <div className="py-2 px-2">
                 <button
