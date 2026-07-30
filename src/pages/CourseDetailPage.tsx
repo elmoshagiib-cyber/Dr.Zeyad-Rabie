@@ -237,167 +237,235 @@ console.log("INSERT ERROR =", error);
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-[#0b0715]" dir="rtl">
+    <div className="min-h-screen bg-white dark:bg-[#09090B]" dir="rtl">
       <Navbar />
 
-      {/* ══════════════════════════════════════
+ {/* ══════════════════════════════════════
           HERO SECTION
       ══════════════════════════════════════ */}
-      <div
-        className="
-          relative
-          overflow-hidden
-          bg-[#371143]
-          pt-30
-          lg:pt-30
-          pb-50
-        "
-      >
-        {/* Pattern on left only */}
-        <div
-          className="
-            absolute
-            inset-y-0
-            left-0
-            w-[55%]
-            opacity-[0.08]
-            pointer-events-none
-          "
-        >
-          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern
-                id="triangles"
-                x="0"
-                y="0"
-                width="40"
-                height="40"
-                patternUnits="userSpaceOnUse"
-              >
-                <polygon
-                  points="20,5 35,35 5,35"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="1"
-                />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#triangles)" />
-          </svg>
-        </div>
+<div
+  className="
+    relative
+    overflow-hidden
+    pt-32
+    lg:pt-32
+    pb-56
+  "
+>
 
-        <div
-          className="
-            absolute
-            inset-y-0
-            left-[45%]
-            w-[18%]
-            bg-gradient-to-r
-            from-transparent
-            to-[#371143]
-            pointer-events-none
-          "
-        />
+  {/* Hero Background */}
+  <img
+    src={
+      course.thumbnail ||
+      course.cover_image ||
+      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1600"
+    }
+    alt={course.title}
+    className="
+      absolute
+      inset-0
+      w-full
+      h-full
+      object-cover
+      object-center
+      select-none
+      pointer-events-none
+    "
+  />
+
+  {/* Dark Overlay */}
+  <div
+    className="
+      absolute
+      inset-0
+      bg-black/65
+    "
+  />
+
+{/* Dark Overlay */}
+<div
+  className="
+    absolute
+    inset-0
+    bg-black/55
+  "
+/>
+
+
+       
 
         <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-start">
 
-            {/* ── Stats badges ── */}
-            <div className="flex flex-wrap justify-start gap-3 sm:gap-4 mb-10 sm:mb-12">
+{/* ── Stats badges ── */}
+<div className="flex flex-wrap justify-start gap-3 mb-8">
 
-              <div className="flex items-center gap-2 bg-[#1a1a2e] text-white rounded-full px-4 py-2 text-sm font-bold shadow-lg">
-                <span>فيديوهات</span>
-                <Play size={14} className="text-yellow-400" />
-                <span className="bg-yellow-400 text-black rounded-full px-2.5 py-1 text-xs font-black">
-                  +{videosCount}
-                </span>
-              </div>
+  {[
+    {
+      label: "فيديوهات",
+      value: videosCount,
+      icon: <Play size={14} />,
+    },
+    {
+      label: "امتحانات",
+      value: examsCount,
+      icon: <ClipboardList size={14} />,
+    },
+    {
+      label: "واجبات",
+      value: homeworksCount,
+      icon: <ClipboardCheck size={14} />,
+    },
+    {
+      label: "ملفات",
+      value: filesCount,
+      icon: <FileText size={14} />,
+    },
+  ].map((item) => (
+    <div
+      key={item.label}
+      className="
+        flex
+        items-center
+        gap-2
+        rounded-full
+        bg-white/10
+        backdrop-blur-md
+        border
+        border-white/10
+        px-4
+        py-2
+        text-white
+        shadow-lg
+      "
+    >
+      <span className="text-sm font-bold">
+        {item.label}
+      </span>
 
-              <div className="flex items-center gap-2 bg-[#1a1a2e] text-white rounded-full px-4 py-2 text-sm font-bold shadow-lg">
-                <span>امتحانات</span>
-                <ClipboardList size={14} className="text-yellow-400" />
-                <span className="bg-yellow-400 text-black rounded-full px-2.5 py-1 text-xs font-black">
-                  +{examsCount}
-                </span>
-              </div>
+      <span className="text-[#FFD54A]">
+        {item.icon}
+      </span>
 
-              <div className="flex items-center gap-2 bg-[#1a1a2e] text-white rounded-full px-4 py-2 text-sm font-bold shadow-lg">
-                <span>واجبات</span>
-                <ClipboardCheck size={14} className="text-yellow-400" />
-                <span className="bg-yellow-400 text-black rounded-full px-2.5 py-1 text-xs font-black">
-                  +{homeworksCount}
-                </span>
-              </div>
+      <span
+        className="
+          rounded-full
+          bg-[#B348FE]
+          text-white
+          px-2.5
+          py-1
+          text-[11px]
+          font-black
+        "
+      >
+        +{item.value}
+      </span>
+    </div>
+  ))}
 
-              <div className="flex items-center gap-2 bg-cyan-400 text-[#1a1a2e] rounded-full px-4 py-2 text-sm font-bold shadow-lg">
-                <span>ملفات</span>
-                <FileText size={14} />
-                <span className="bg-[#1a1a2e] text-white rounded-full px-2.5 py-1 text-xs font-black">
-                  +{filesCount}
-                </span>
-              </div>
+</div>
 
-            </div>
+{/* ── Title & grade ── */}
+<div className="text-left mb-7">
 
-            {/* ── Title & grade ── */}
-            <div className="text-left mb-8 sm:mb-10">
-              <h1
-                className="
-                  text-[2rem]
-                  sm:text-[2.8rem]
-                  lg:text-[3.8rem]
-                  xl:text-[4.4rem]
-                  font-black
-                  leading-none
-                  text-white
-                  drop-shadow-lg
-                "
-              >
-                {course.title}
-              </h1>
-              <p className="mt-4 text-xl lg:text-2xl font-bold text-white/90">
-                {gradeLabels[course.grade] || course.grade}
-              </p>
-            </div>
+  <h1
+    className="
+      text-[2.2rem]
+      sm:text-[3rem]
+      lg:text-[4.2rem]
+      xl:text-[5rem]
+      font-black
+      leading-[1]
+      tracking-tight
+      text-white
+      drop-shadow-[0_6px_20px_rgba(0,0,0,.35)]
+    "
+  >
+    {course.title}
+  </h1>
 
-            {/* ── Dates ── */}
-            <div className="flex flex-wrap justify-start gap-4 sm:gap-6">
+  <p
+    className="
+      mt-3
+      text-lg
+      sm:text-xl
+      font-bold
+      text-white/75
+    "
+  >
+    {gradeLabels[course.grade] || course.grade}
+  </p>
 
-              <div className="flex items-center gap-2 text-white">
-                <span className="font-semibold text-sm sm:text-base">
-                  تاريخ إنشاء الكورس
-                </span>
-                <span className="bg-yellow-400 text-black rounded-full px-4 py-1 text-sm font-black">
-                  {new Date(course.created_at || Date.now()).toLocaleDateString(
-                    "ar-EG",
-                    {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    }
-                  )}
-                </span>
-              </div>
+</div>
 
-              <div className="flex items-center gap-2 text-white">
-                <span className="font-semibold text-sm sm:text-base">
-                  آخر تحديث للكورس
-                </span>
-                <span className="bg-cyan-300 text-black rounded-full px-4 py-1 text-sm font-black">
-                  {new Date(course.updated_at || Date.now()).toLocaleDateString(
-                    "ar-EG",
-                    {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    }
-                  )}
-                </span>
-              </div>
+{/* ── Dates ── */}
+<div className="flex flex-wrap justify-start gap-5">
 
-            </div>
+  <div className="flex items-center gap-3">
+
+    <span className="text-white font-bold">
+      تاريخ الإنشاء
+    </span>
+
+    <span
+      className="
+        rounded-full
+        bg-[#B348FE]
+        text-white
+        px-4
+        py-1.5
+        text-sm
+        font-black
+      "
+    >
+      {new Date(course.created_at || Date.now()).toLocaleDateString(
+        "ar-EG",
+        {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }
+      )}
+    </span>
+
+  </div>
+
+  <div className="flex items-center gap-3">
+
+    <span className="text-white font-bold">
+      آخر تحديث
+    </span>
+
+    <span
+      className="
+        rounded-full
+        bg-white/15
+        backdrop-blur-md
+        text-white
+        border
+        border-white/15
+        px-4
+        py-1.5
+        text-sm
+        font-black
+      "
+    >
+      {new Date(course.updated_at || Date.now()).toLocaleDateString(
+        "ar-EG",
+        {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }
+      )}
+    </span>
+
+  </div>
+
+</div>
+
 
           </div>
         </div>
@@ -406,12 +474,15 @@ console.log("INSERT ERROR =", error);
       {/* ══════════════════════════════════════
           OVERLAP AREA: Course Image + Subscription Card
       ══════════════════════════════════════ */}
-      <div className="relative z-20 max-w-[1400px] mx-auto px-8 lg:px-10 -mt-44">
+      <div className="relative z-20 max-w-[1400px] mx-auto px-8 lg:px-10 -mt-56">
         <div className="flex justify-between items-start">
 
           {/* Subscription Card */}
           <div className="max-w-[430px] w-full ml-0 mr-auto">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.25)] border border-gray-100 dark:border-gray-700">
+            <div className="bg-white dark:bg-[#151515] rounded-2xl sm:rounded-3xl overflow-hidden
+            shadow-[0_20px_60px_rgba(15,23,42,.12)]
+dark:shadow-[0_25px_70px_rgba(0,0,0,.75)]
+ border border-gray-100 dark:border-[#2A2A2A]">
 
               {/* Card image */}
               <img
@@ -421,10 +492,10 @@ console.log("INSERT ERROR =", error);
                   "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800"
                 }
                 alt={course.title}
-                className="w-full h-[220px] sm:h-[250px] object-cover"
+                className="w-full h-[240px] sm:h-[270px] object-cover"
               />
 
-              <div className="p-6">
+              <div className="p-6 bg-white dark:bg-[#1A1A1A]">
 
 {/* Price / enroll button */}
 {course.is_free ? (
@@ -437,9 +508,10 @@ console.log("INSERT ERROR =", error);
     className="
       w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white
       text-lg sm:text-xl font-black
-      bg-[#43164f] hover:bg-[#542061]
-      shadow-lg hover:shadow-rose-300
-      transition-all duration-300 hover:scale-[1.02]
+bg-[#B348FE]
+hover:bg-[#9E2FFF]
+shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)]
+      transition-all duration-300 hover:scale-[1.015]
       mb-3 sm:mb-4
     "
   >
@@ -456,7 +528,7 @@ console.log("INSERT ERROR =", error);
         <span className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white">
           {course.price}
         </span>
-        <span className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mr-1">
+        <span className="text-base sm:text-lg text-slate-500 dark:text-slate-400 mr-1">
           جنيه
         </span>
       </div>
@@ -479,10 +551,10 @@ console.log("INSERT ERROR =", error);
   className="
     w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white
     text-lg sm:text-xl font-black
-    bg-gradient-to-r from-rose-500 to-pink-500
-    hover:from-rose-600 hover:to-pink-600
-    shadow-lg hover:shadow-rose-300
-    transition-all duration-300 hover:scale-[1.02]
+    bg-[#B348FE]
+hover:bg-[#9E2FFF]
+shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)]
+    transition-all duration-300 hover:scale-[1.015]
     mb-3
   "
 >
@@ -505,7 +577,7 @@ console.log("INSERT ERROR =", error);
                       mb-3 sm:mb-4
                     "
                   >
-                    <Play size={16} className="text-rose-500" />
+                    <Play size={16} className="text-[#B348FE]" />
                     <span>مشاهدة المقدمة</span>
                   </button>
                 )}
@@ -542,14 +614,16 @@ console.log("INSERT ERROR =", error);
       {/* ══════════════════════════════════════
           COURSE CONTENT SECTION
       ══════════════════════════════════════ */}
-      <div className="bg-gray-100 dark:bg-gray-900 pt-10 pb-8 sm:pt-14 sm:pb-10">
+      <div className="bg-white dark:bg-[#09090B] pt-10 pb-8 sm:pt-14 sm:pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* Section heading card */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8 mb-4 sm:mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="bg-[#FCFCFD] dark:bg-[#111111] rounded-2xl sm:rounded-3xl p-5 sm:p-8 mb-4 sm:mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
             <h2 className="text-2xl sm:text-3xl xl:text-4xl font-black text-right">
               <span className="text-gray-900 dark:text-white">محتوى </span>
-              <span className="text-rose-500">الكورس</span>
+              <span className="text-[#B348FE] dark:text-[#B348FE]">
+  الكورس
+</span>
             </h2>
           </div>
 
@@ -561,72 +635,120 @@ console.log("INSERT ERROR =", error);
               return (
                 <div
                   key={unit.id}
-                  className="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-300"
+                  className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-300"
                 >
                   {/* ── Unit header button ── */}
-                  <button
-                    onClick={() => setOpenUnit(isOpen ? null : unit.id)}
-                    className={`
-                      w-full flex items-center justify-between
-                      px-4 sm:px-6 py-4 sm:py-5
-                      transition-colors duration-200
-                      ${
-                        isOpen
-                          ? "bg-rose-50 dark:bg-rose-900/20"
-                          : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                      }
-                    `}
-                  >
-                    {/* Chevron — على اليسار */}
-                    <div
-                      className={`
-                        flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2
-                        flex items-center justify-center transition-all duration-300
-                        ${
-                          isOpen
-                            ? "border-rose-400 bg-rose-50 dark:bg-rose-900/30"
-                            : "border-gray-300 dark:border-gray-600"
-                        }
-                      `}
-                    >
-                      {isOpen ? (
-                        <ChevronUp size={18} className="text-rose-500" />
-                      ) : (
-                        <ChevronDown
-                          size={18}
-                          className="text-gray-500 dark:text-gray-400"
-                        />
-                      )}
-                    </div>
+<button
+  onClick={() => setOpenUnit(isOpen ? null : unit.id)}
+className={`
+    group
+    w-full
+    flex
+    flex-row-reverse
+    items-center
+    justify-between
+    px-4 sm:px-6
+    py-4 sm:py-5
+transition-all
+duration-300
+group-hover:scale-110
+    hover:scale-[1.01]
 
-                    {/* Title block — على اليمين */}
-                    <div className="flex items-center gap-3 sm:gap-4 text-right flex-1 mr-3 sm:mr-4">
-                      <div className="flex flex-col items-end flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-base sm:text-xl xl:text-2xl font-black text-gray-900 dark:text-white truncate">
-                            {unit.title} 💪
-                          </h3>
-                          <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-rose-100 dark:bg-rose-900/30 rounded-lg sm:rounded-xl flex items-center justify-center">
-                            <LayoutGrid
-                              size={16}
-                              className="text-rose-500 sm:hidden"
-                            />
-                            <LayoutGrid
-                              size={20}
-                              className="text-rose-500 hidden sm:block"
-                            />
-                          </div>
-                        </div>
-                        <p className="text-xs sm:text-sm text-gray-400 mt-0.5 truncate max-w-full">
-                          {unit.title} 💪
-                        </p>
-                      </div>
-                    </div>
-                  </button>
+    ${
+      isOpen
+        ? "bg-[#F6EEFF] dark:bg-[#2B103D]"
+        : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
+    }
+  `}
+>
 
+  {/* السهم - شمال */}
+  <div
+className={`
+group
+relative
+overflow-hidden
+w-full
+flex
+flex-row-reverse
+items-center
+justify-between
+px-4
+sm:px-6
+py-4
+sm:py-5
+transition-all
+duration-300
+${
+isOpen
+? "bg-[#F6EEFF] dark:bg-[#2B103D]"
+: "hover:bg-[#FAF7FF] dark:hover:bg-[#18181B]"
+}
+`}
+  >
+    <ChevronDown
+  size={18}
+  className={`
+    transition-all
+    duration-300
+    ${isOpen ? "rotate-180 text-[#B348FE]" : "rotate-0 text-gray-500 dark:text-gray-400"}
+  `}
+/>
+  </div>
+
+  {/* العنوان - يمين */}
+<div className="flex flex-row-reverse items-center justify-start gap-3">
+
+  <h3
+    className="
+      text-base
+      sm:text-xl
+      xl:text-2xl
+      font-black
+      text-gray-900
+dark:text-white
+group-hover:text-[#B348FE]
+transition-all
+duration-300
+ease-out
+truncate
+    "
+  >
+{unit.title}
+  </h3>
+
+  <div
+    className="
+      flex-shrink-0
+      w-8
+      h-8
+      sm:w-10
+      sm:h-10
+      rounded-xl
+      bg-[#F6EEFF]
+      dark:bg-[#2B103D]
+      flex
+      items-center
+      justify-center
+    "
+  >
+    <LayoutGrid
+      size={16}
+      className="sm:hidden text-[#B348FE]"
+    />
+
+    <LayoutGrid
+      size={20}
+      className="hidden sm:block text-[#B348FE]"
+    />
+  </div>
+
+</div>
+
+</button>
                   {/* ── Lessons list ── */}
                   {isOpen && (
-                    <div className="border-t border-gray-100 dark:border-gray-700">
+                    <div className="border-t border-slate-200 dark:border-[#262626]">
                       {unit.lessons.map((lesson: any, idx: number) => {
                         const isVideo = lesson.type === "video";
                         const isFile = lesson.type === "pdf";
@@ -637,15 +759,18 @@ console.log("INSERT ERROR =", error);
                           <div
                             key={lesson.id}
                             className={`
-                              flex items-center justify-between
+                              flex flex-row-reverse items-center justify-between
                               px-3 sm:px-6 py-3 sm:py-5 gap-2 sm:gap-4
                               ${
                                 idx !== unit.lessons.length - 1
                                   ? "border-b border-gray-100 dark:border-gray-700"
                                   : ""
                               }
-                              hover:bg-gray-50 dark:hover:bg-gray-700/30
-                              transition-colors duration-200
+hover:bg-[#FAF7FF]
+dark:hover:bg-[#171717]
+transition-all
+duration-300
+hover:pr-8
                             `}
                           >
                  {/* Action button — على اليسار */}
@@ -741,9 +866,20 @@ console.log("INSERT ERROR =", error);
 </div>
 
                             {/* Title + icon — على اليمين */}
-                            <div className="flex items-center gap-2 sm:gap-3 text-right flex-1 min-w-0">
+                            <div className="flex flex-row-reverse items-center gap-3 text-right flex-1 min-w-0">
                               <div className="flex-1 min-w-0">
-                                <h4 className="text-sm sm:text-base xl:text-lg font-bold text-gray-900 dark:text-white truncate">
+                                <h4 className="
+text-sm
+sm:text-base
+xl:text-lg
+font-bold
+text-[#111827]
+dark:text-white
+truncate
+transition-colors
+duration-300
+group-hover:text-[#B348FE]
+">
                                   {lesson.title}
                                 </h4>
                                 {isVideo && lesson.duration && (
@@ -763,6 +899,9 @@ console.log("INSERT ERROR =", error);
                                 className={`
                                   flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl
                                   flex items-center justify-center
+                                  transition-all
+duration-300
+group-hover:scale-110
                                   ${isVideo ? "bg-yellow-100 text-yellow-500" : ""}
                                   ${isFile ? "bg-blue-100   text-blue-500" : ""}
                                   ${isHomework ? "bg-green-100  text-green-500" : ""}

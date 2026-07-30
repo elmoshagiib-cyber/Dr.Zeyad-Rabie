@@ -51,7 +51,7 @@ const handleScroll = () => {
     z-50
     w-full
     bg-white
-    dark:bg-[#111111]
+    dark:bg-[#09090B]
     transition-all
     duration-300
     ${
@@ -157,9 +157,9 @@ p-0
       transition={{ duration: 0.2 }}
       className="flex flex-col justify-center gap-[5px]"
     >
-      <span className="block w-7 h-[3px] rounded-full bg-[#FF4D73]" />
-      <span className="block w-7 h-[3px] rounded-full bg-[#FF4D73]" />
-      <span className="block w-7 h-[3px] rounded-full bg-[#FF4D73]" />
+      <span className="block w-7 h-[3px] rounded-full bg-[#B348FE]" />
+      <span className="block w-7 h-[3px] rounded-full bg-[#B348FE]" />
+      <span className="block w-7 h-[3px] rounded-full bg-[#B348FE]" />
     </motion.div>
   ) : (
     <motion.div
@@ -179,7 +179,7 @@ p-0
 >
   <FaReact
     size={28}
-    className="text-[#FF4D73]"
+    className="text-[#B348FE]"
   />
 </motion.div>
 
@@ -204,9 +204,9 @@ w-full
 h-[52px]
 rounded-xl
 border
-border-[#422E91]
-text-[#422E91]
-hover:bg-[#422E91]
+border-[#B348FE]
+text-[#B348FE]
+hover:bg-[#B348FE]
 hover:text-white
 transition-all
 duration-300
@@ -225,8 +225,8 @@ overflow-hidden
 w-full
 h-[52px]
 rounded-xl
-bg-[#422E91]
-hover:bg-[#5340A8]
+bg-[#B348FE]
+hover:bg-[#9A2EFF]
 text-white
 font-semibold
 transition-all
@@ -277,7 +277,7 @@ duration-300
       "
     >
       <motion.div
-        className="h-full bg-[#422E91]"
+        className="h-full bg-[#B348FE]"
         initial={{ width: "0%" }}
         animate={{ width: `${scrollProgress}%` }}
         transition={{

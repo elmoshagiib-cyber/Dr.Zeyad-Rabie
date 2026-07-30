@@ -178,19 +178,29 @@ alert("تم تفعيل الاشتراك بنجاح ✅");
 
 
   const CourseCard = ({ course }: { course: any }) => (
-    <Card
-      hover
-      className="
-        group overflow-hidden rounded-2xl
-        border border-slate-200 dark:border-white/10
-        bg-white dark:bg-[#1E244F]
-        shadow-md hover:shadow-xl
-        flex flex-col
-        transition-all duration-500
-        hover:-translate-y-1
-      "
-    >
-      <div className="relative overflow-hidden aspect-video w-full">
+<Card
+  hover
+  className="
+    group
+    overflow-visible
+    bg-transparent
+    dark:bg-transparent
+    border-0
+    shadow-none
+    rounded-none
+    p-0
+"
+>
+
+<div
+  className="
+  relative
+  overflow-hidden
+  aspect-video
+  w-full
+  rounded-[32px]
+"
+>
         <img
           src={
             course.thumbnail ||
@@ -198,31 +208,47 @@ alert("تم تفعيل الاشتراك بنجاح ✅");
           }
           alt={course.title}
           className="
-            w-full h-full object-cover
-            transition-transform duration-700
-            group-hover:scale-105
-            brightness-95 group-hover:brightness-100
-          "
+w-full
+h-full
+object-cover
+transition-all
+duration-700
+ease-out
+group-hover:scale-[1.06]
+group-hover:brightness-110
+group-hover:saturate-110
+"
         />
 
         {course.is_free && (
-          <span className="
-            absolute top-3 right-3
-            bg-blue-500 text-white
-            text-xs sm:text-sm font-bold
-            px-3 py-1 rounded-lg
-            shadow
-          ">
-            مجاني
-          </span>
+       <span
+  className="
+    absolute
+    top-4
+    right-4
+    rounded-full
+    bg-gradient-to-r
+from-[#B348FE]
+to-[#8D2BFF]
+    text-white
+    text-xs
+    font-black
+    px-4
+    py-2
+    shadow-[0_10px_25px_rgba(16,185,129,.35)]
+  "
+>
+  مجاني
+</span>
         )}
 
         {course.category && (
           <span className="
             absolute top-3 left-3
-            bg-black/50 backdrop-blur-sm text-white
+            bg-black/70
+backdrop-blur-md backdrop-blur-sm text-white
             text-xs font-semibold
-            px-2.5 py-1 rounded-lg
+            px-2.5 py-1 rounded-full
           ">
             {course.category === 'term1' && 'الترم الأول'}
             {course.category === 'term2' && 'الترم الثاني'}
@@ -240,92 +266,230 @@ alert("تم تفعيل الاشتراك بنجاح ✅");
         " />
       </div>
 
-      <CardContent className="p-4 sm:p-5 flex flex-col flex-1 gap-3">
-        <h3 className="
-          text-base sm:text-lg font-black
-          text-slate-900 dark:text-white
-          line-clamp-2
-          group-hover:text-[#5C1D75] dark:group-hover:text-[#F6AC08]
-          transition-colors duration-300
-        ">
-          {course.title}
-        </h3>
-
-        <p className="
-          text-sm text-slate-500 dark:text-slate-400
-          line-clamp-2 flex-1
-        ">
-          {course.description}
-        </p>
-
-        <div className="
-          flex items-center justify-between
-          text-xs sm:text-sm text-slate-400 dark:text-slate-500
-          border-t border-slate-100 dark:border-white/10
-          pt-3
-        ">
-          <span className="flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5" />
-            17 أبريل 2026
-          </span>
-          <span className="flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5" />
-            5 مايو 2026
-          </span>
-        </div>
-
-        {course.price > 0 && (
-          <div className="flex items-center gap-1.5">
-  <Tag className="w-4 h-4 text-purple-500" />
-
-  <span
-    className={`text-base sm:text-lg font-black ${
-      course.is_free
-        ? "text-emerald-600"
-        : "text-purple-600 dark:text-purple-400"
-    }`}
-  >
-    {course.is_free ? "مجاني" : `${course.price} جنيه`}
-  </span>
-</div>
-        )}
-
-     {course.is_free ? (
-  <Button
-    className="
-      w-full
-      text-sm sm:text-base
-      py-2.5 sm:py-3
-      bg-[#371143]
-      hover:bg-[#4A175B]
-      text-white
-      transition-all duration-300
-      hover:scale-[1.02]
-    "
-    onClick={() => navigate(`/courses/${course.id}`)}
-  >
-    الدخول للكورس
-  </Button>
-) : (
-  <div className="flex gap-2 sm:gap-3 mt-1">
-
-<Button
-  onClick={() => handleCourseAction(course)}
+<CardContent
+  className="
+  relative
+  z-20
+  -mt-12
+  mx-6
+  mb-5
+  rounded-[28px]
+  bg-white
+  dark:bg-[#111111]
+  border
+  border-gray-200
+  dark:border-[#262626]
+  p-5
+  flex
+  flex-col
+  flex-1
+  gap-3
+  shadow-xl
+dark:shadow-[0_20px_45px_rgba(0,0,0,.45)]
+"
 >
-  {myCourses.includes(course.id)
-  ? "الدخول للكورس"
-  : "اشترك الآن"}
+<h3
+  className="
+    text-[21px]
+    sm:text-[24px]
+    leading-tight
+    font-black
+    text-slate-900
+    dark:text-white
+    line-clamp-2
+    group-hover:text-[#9F3FFF]
+    dark:group-hover:text-[#C36CFF]
+    transition-colors
+    duration-300
+  "
+>
+  {course.title}
+</h3>
+
+<div className="h-[2px] w-full rounded-full bg-[#B348FE]" />
+
+
+<div className="mt-4">
+
+  <div className="grid grid-cols-[minmax(0,1fr)_180px] gap-6">
+    
+<div>
+
+  <p
+    className="
+      text-[15px]
+      leading-8
+      text-slate-500
+      dark:text-slate-300
+    "
+  >
+    {course.description}
+  </p>
+
+</div>
+
+    {/* الأزرار */}
+   <div className="flex flex-col items-center gap-2.5">
+
+     <Button
+  className={`
+    w-[140px]
+    h-9
+    rounded-lg
+    text-[14px]
+    font-bold
+    transition-all
+    duration-300
+    ${
+      course.is_free
+        ? "border-2 border-[#19C7B7] bg-transparent text-[#19C7B7] hover:bg-[#19C7B7] hover:text-white"
+        : "bg-[#B348FE] hover:bg-[#9E2FFF] text-white"
+    }
+  `}
+  onClick={() =>
+    course.is_free
+      ? navigate(`/courses/${course.id}`)
+      : handleCourseAction(course)
+  }
+>
+  {course.is_free
+    ? "الدخول للكورس"
+    : myCourses.includes(course.id)
+    ? "الدخول للكورس"
+    : "اشترك الآن"}
 </Button>
 
-    <Button
-      variant="outline"
-      className="flex-1 text-xs sm:text-sm py-2 sm:py-2.5"
-      onClick={() => navigate(`/courses/${course.id}`)}
-    >
-      تفاصيل
-    </Button>
+      {!course.is_free && (
+       <Button
+  variant="outline"
+  className="
+    w-[140px]
+    h-9
+    rounded-lg
+    text-[14px]
+    font-bold
+    border-[#343434]
+bg-slate-100
+text-slate-700
+hover:bg-slate-200
+
+dark:bg-[#1E1E1E]
+dark:text-white
+dark:hover:bg-[#292929]
+  "
+  onClick={() => navigate(`/courses/${course.id}`)}
+>
+  تفاصيل
+</Button>
+      )}
+
+    </div>
+
   </div>
-)}
+
+{/* السعر + التاريخ */}
+<div
+  className="
+    mt-6
+    pt-5
+    border-t
+    border-gray-200
+    dark:border-[#262626]
+  "
+>
+
+  {course.is_free ? (
+
+    <div className="flex justify-end">
+      <span
+        className="
+          rounded-full
+          bg-gradient-to-r
+         from-[#B348FE]
+to-[#8D2BFF]
+          text-white
+          px-5
+          py-2
+          text-sm
+          font-black
+        "
+      >
+        كورس مجاني !
+      </span>
+    </div>
+
+  ) : (
+
+<div className="flex items-start justify-between gap-6">
+
+  {/* السعر */}
+<div
+  className="
+    inline-flex
+    items-center
+    gap-1
+    rounded-xl
+    bg-[#B348FE]
+    p-1
+    shrink-0
+  "
+>
+
+  {/* الرقم */}
+  <span
+    className="
+      bg-white
+      text-[#111111]
+      rounded-md
+      px-3
+      py-[5px]
+      min-w-[46px]
+      text-center
+      text-[13px]
+      font-black
+      leading-none
+    "
+  >
+    {course.price}
+  </span>
+
+  {/* كلمة جنيه */}
+  <span
+    className="
+      px-2
+      text-[13px]
+      font-black
+      text-white
+      whitespace-nowrap
+    "
+  >
+    جنيه
+  </span>
+
+</div>
+
+  {/* التاريخ */}
+  <div className="space-y-3">
+
+    <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+      <Clock className="w-4 h-4" />
+      <span>17 أبريل 2026</span>
+    </div>
+
+    <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+      <Clock className="w-4 h-4" />
+      <span>5 مايو 2026</span>
+    </div>
+
+  </div>
+
+</div>
+
+  )}
+
+</div>
+
+</div>
       </CardContent>
     </Card>
   );
@@ -520,7 +684,7 @@ return (
           أدخل كود الاشتراك الخاص بك لتفعيل الكورس.
         </p>
 
-        <h3 className="mt-2 font-bold text-lg text-[#371143] dark:text-[#F6AC08]">
+        <h3 className="mt-2 font-bold text-lg text-[#371143] dark:text-[#B348FE]">
           {selectedCourse?.title}
         </h3>
 
@@ -545,7 +709,7 @@ return (
           tracking-[4px]
           font-bold
           outline-none
-          focus:border-purple-500
+          focus:border-[#B348FE]
         "
       />
 

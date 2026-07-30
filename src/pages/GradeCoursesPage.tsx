@@ -7,7 +7,7 @@ export default function GradeCoursesPage() {
   const { grade } = useParams();
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0715]" dir="rtl">
+    <div className="min-h-screen bg-white dark:bg-[#09090B]" dir="rtl">
       <Navbar />
 
       <div className="pt-24 sm:pt-28">

@@ -11,7 +11,7 @@ export function SearchButton({ onClick }: SearchButtonProps) {
       whileHover={{ scale: 1.06 }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className="
+className="
 w-11
 h-11
 rounded-full
@@ -22,8 +22,8 @@ flex
 items-center
 justify-center
 text-slate-700
-hover:border-[#F59E0B]
-hover:text-[#F59E0B]
+hover:border-[#B348FE]
+hover:text-[#B348FE]
 transition-all
 duration-300
 shadow-sm

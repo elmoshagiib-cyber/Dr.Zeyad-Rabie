@@ -114,22 +114,35 @@ export default function GradesPage() {
                 whileHover={{ y: -8, scale: 1.015 }}
                 onClick={() => navigate(`/grade/${grade.id}`)}
                 className="
-                  bg-white
-                  dark:bg-[#1E244F]
-                  rounded-[24px]
-                  sm:rounded-[28px]
-                  lg:rounded-[32px]
-                  overflow-hidden
-                  cursor-pointer
-                  group
-                  shadow-[0_6px_18px_rgba(0,0,0,.08)]
-                  hover:shadow-[0_10px_28px_rgba(0,0,0,.12)]
-                  transition-all
-                  duration-500
-                "
+    bg-white
+    dark:bg-[#111111]
+    border
+    border-gray-200
+    dark:border-[#262626]
+    rounded-[24px]
+    sm:rounded-[28px]
+    lg:rounded-[32px]
+    overflow-hidden
+    cursor-pointer
+    group
+    shadow-[0_10px_30px_rgba(0,0,0,.08)]
+    dark:shadow-[0_15px_40px_rgba(0,0,0,.45)]
+    hover:-translate-y-2
+    hover:shadow-[0_18px_45px_rgba(0,0,0,.15)]
+    dark:hover:shadow-[0_20px_50px_rgba(0,0,0,.6)]
+    transition-all
+    duration-500
+  "
               >
                 {/* Image */}
-                <div className="overflow-hidden relative aspect-video">
+                <div className="
+overflow-hidden
+relative
+aspect-video
+border-b
+border-gray-200
+dark:border-[#262626]
+">
                   <img
                     src={grade.image}
                     alt={grade.title}
@@ -175,8 +188,8 @@ export default function GradesPage() {
 
                  <button
   className="
-    bg-[#F8B605]
-    hover:bg-[#E6A600]
+    bg-[#F6AC08]
+hover:bg-[#E29E00]
     text-white
     h-10
     sm:h-11

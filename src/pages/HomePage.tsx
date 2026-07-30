@@ -254,12 +254,12 @@ ease:[0.22,1,0.36,1]
   font-bold
   leading-tight
   tracking-[-1px]
-  text-[#422E91]
-  dark:text-[#5D49B3]
+  text-[#F6AC08]
   "
 >
-      مستر زياد ربيع
-    </span>
+  مستر زياد ربيع
+</span>
+
   </h1>
 
   <p
@@ -312,15 +312,16 @@ ease:[0.22,1,0.36,1]
       sm:px-7
       lg:px-9
       rounded-xl
-      bg-[#422e91]
-      hover:bg-[#5340A8]
+      bg-[#422E91]
+bg-[#B348FE]
+hover:bg-[#9A2EFF]
       border-0
       text-white
       text-[14px]
       sm:text-[16px]
       lg:text-[18px]
       font-semibold
-      shadow-[0_14px_35px_rgba(66,46,145,.35)]
+      shadow-[0_14px_35px_rgba(179,72,254,.35)]
       hover:scale-[1.03]
       transition-all
       duration-300
@@ -489,21 +490,24 @@ object-contain
         whileHover={{
           y: -8,
         }}
-        className="
-        group
-        relative
-        overflow-hidden
-        rounded-3xl
-        border
-        border-[#E7E4F7]
-        dark:border-[#2D356F]
-        bg-white
-        dark:bg-[#1E244F]
-        p-7
-        shadow-[0_15px_45px_rgba(15,23,42,.08)]
-        hover:shadow-[0_25px_60px_rgba(66,46,145,.18)]
-        transition-all
-        duration-300
+className="
+group
+relative
+overflow-hidden
+rounded-3xl
+border
+border-gray-200
+dark:border-[#262626]
+bg-white
+dark:bg-[#111111]
+p-7
+shadow-[0_8px_30px_rgba(0,0,0,.08)]
+dark:shadow-[0_10px_35px_rgba(0,0,0,.35)]
+hover:-translate-y-2
+hover:shadow-[0_18px_45px_rgba(0,0,0,.12)]
+dark:hover:shadow-[0_18px_45px_rgba(0,0,0,.55)]
+transition-all
+duration-300
         "
       >
 
@@ -525,23 +529,24 @@ object-contain
 
         <div
           className="
-          w-16
-          h-16
-          rounded-2xl
-          bg-[#422E91]
-          flex
-          items-center
-          justify-center
-          mb-6
-          group-hover:scale-110
-          transition-transform
-          duration-300
-          "
+w-16
+h-16
+rounded-2xl
+bg-[#B348FE]/10
+dark:bg-[#B348FE]/15
+flex
+items-center
+justify-center
+mb-6
+group-hover:scale-110
+transition-all
+duration-300
+"
         >
-          <Icon
-            className="text-white"
-            size={30}
-          />
+         <Icon
+  className="text-[#B348FE]"
+  size={30}
+/>
         </div>
 
         <h3
@@ -657,19 +662,36 @@ object-contain
             </div>
 
             {/* Card info */}
-            <div className="
-              bg-white dark:bg-[#1E244F]
-              rounded-[16px] sm:rounded-[24px]
-              shadow-xl
-              w-[80%] sm:w-[78%]
-              mx-auto -mt-7 sm:-mt-10
-              relative z-10
-              py-4 sm:py-5
-              px-4 sm:px-6
-              text-center
-              group-hover:-translate-y-2
-              transition-transform duration-300
-            ">
+            <div 
+className="
+bg-white
+dark:bg-[#111111]
+border
+border-gray-200
+dark:border-[#262626]
+rounded-[16px]
+sm:rounded-[24px]
+shadow-[0_10px_30px_rgba(0,0,0,.08)]
+dark:shadow-[0_15px_40px_rgba(0,0,0,.45)]
+w-[80%]
+sm:w-[78%]
+mx-auto
+-mt-7
+sm:-mt-10
+relative
+z-10
+py-4
+sm:py-5
+px-4
+sm:px-6
+text-center
+group-hover:-translate-y-2
+group-hover:shadow-[0_18px_45px_rgba(0,0,0,.15)]
+dark:group-hover:shadow-[0_18px_45px_rgba(0,0,0,.6)]
+transition-all
+duration-300
+"
+>
               <h3 className="
                 text-[18px] sm:text-[22px] lg:text-[26px]
                 font-black mb-3 sm:mb-4
@@ -719,19 +741,36 @@ object-contain
             </div>
 
             {/* Card info */}
-            <div className="
-              bg-white dark:bg-[#1E244F]
-              rounded-[16px] sm:rounded-[24px]
-              shadow-xl
-              w-[80%] sm:w-[78%]
-              mx-auto -mt-7 sm:-mt-10
-              relative z-10
-              py-4 sm:py-5
-              px-4 sm:px-6
-              text-center
-              group-hover:-translate-y-2
-              transition-transform duration-300
-            ">
+            <div
+className="
+bg-white
+dark:bg-[#111111]
+border
+border-gray-200
+dark:border-[#262626]
+rounded-[16px]
+sm:rounded-[24px]
+shadow-[0_10px_30px_rgba(0,0,0,.08)]
+dark:shadow-[0_15px_40px_rgba(0,0,0,.45)]
+w-[80%]
+sm:w-[78%]
+mx-auto
+-mt-7
+sm:-mt-10
+relative
+z-10
+py-4
+sm:py-5
+px-4
+sm:px-6
+text-center
+group-hover:-translate-y-2
+group-hover:shadow-[0_18px_45px_rgba(0,0,0,.15)]
+dark:group-hover:shadow-[0_18px_45px_rgba(0,0,0,.6)]
+transition-all
+duration-300
+"
+>
               <h3 className="
                 text-[18px] sm:text-[22px] lg:text-[26px]
                 font-black mb-3 sm:mb-4

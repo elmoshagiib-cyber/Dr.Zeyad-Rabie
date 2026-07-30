@@ -13,9 +13,9 @@ export function Card({ children, className, hover, glass, onClick }: CardProps) 
     <div
   onClick={onClick}
   className={cn(
-    "rounded-[32px] border border-slate-100 bg-white shadow-[0_4px_20px_rgba(15,23,42,0.05)] dark:bg-[#1b0d34] dark:border-purple-500/20",
+    "rounded-[32px] border border-slate-200 bg-white shadow-[0_4px_20px_rgba(15,23,42,0.05)] dark:bg-[#111111] dark:border-[#262626]",
     hover &&
-      "cursor-pointer hover:-translate-y-0.5 transition-all duration-300 hover:shadow-[0_10px_35px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_0_45px_rgba(168,85,247,0.25)]",
+      "cursor-pointer hover:-translate-y-0.5 transition-all duration-300 hover:shadow-[0_10px_35px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_18px_45px_rgba(0,0,0,.55)]",
     glass &&
       "bg-white dark:bg-[#1b0d34]/80 backdrop-blur-sm",
     onClick && "cursor-pointer",

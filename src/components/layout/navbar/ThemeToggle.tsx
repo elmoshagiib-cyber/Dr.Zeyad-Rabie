@@ -27,7 +27,7 @@ export function ThemeToggle({
         stiffness: 400,
         damping: 25,
       }}
-      className="
+className="
 relative
 flex
 items-center
@@ -38,11 +38,11 @@ sm:h-9
 px-1
 rounded-full
 overflow-hidden
-bg-amber-400
+bg-[#B348FE]
 cursor-pointer
 focus-visible:outline-none
 focus-visible:ring-2
-focus-visible:ring-teal-400
+focus-visible:ring-[#B348FE]
 focus-visible:ring-offset-2
 shrink-0
 "

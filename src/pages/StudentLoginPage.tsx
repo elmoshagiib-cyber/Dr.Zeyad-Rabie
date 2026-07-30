@@ -30,7 +30,8 @@ const LoginPage = () => {
   password?: string;
 }>({});
 
-  const fieldIcon = "w-4 h-4 text-[#F6AC08] flex-shrink-0";
+const fieldIcon =
+"w-4 h-4 text-[#B348FE] flex-shrink-0";
 
   const validate = () => {
     const e: {
@@ -148,7 +149,15 @@ setErrors({
     <>
       <Navbar />
 
-      <div className={`min-h-screen pt-[62px] sm:pt-16 ${isDark ? 'bg-gray-950' : 'bg-white'}`}>
+      <div
+  className={`
+    min-h-screen
+    pt-[62px]
+    sm:pt-16
+    bg-white
+    dark:bg-[#09090B]
+  `}
+>
 
         {/* ── outer flex wrapper ── */}
         <div className="flex flex-col lg:flex-row lg:min-h-[calc(100vh-64px)]">
@@ -208,10 +217,10 @@ overflow-hidden
                 transition={{ delay: 0.1, duration: 0.45 }}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <LogIn className="w-6 h-6 sm:w-7 sm:h-7 text-[#F6AC08] flex-shrink-0" />
+                 <LogIn className="w-6 h-6 sm:w-7 sm:h-7 text-[#B348FE]" />
                   <h1 className={`text-2xl sm:text-3xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     تسجيل{' '}
-                    <span className="text-[#F6AC08]">الدخول</span>
+                   <span className="text-[#B348FE]">الدخول</span>
                     {' '}:
                   </h1>
                 </div>
@@ -239,8 +248,8 @@ overflow-hidden
                       ${errors.phone
                         ? 'border-red-400'
                         : isDark
-                          ? 'border-gray-700 focus-within:border-[#F6AC08]'
-                          : 'border-gray-200 focus-within:border-[#F6AC08]'
+                          ? 'border-gray-700 focus-within:border-[#B348FE]'
+                          : 'border-gray-200 focus-within:border-[#B348FE]'
                       }
                     `}
                   >
@@ -278,8 +287,8 @@ overflow-hidden
                       ${errors.password
                         ? 'border-red-400'
                         : isDark
-                          ? 'border-gray-700 focus-within:border-[#F6AC08]'
-                          : 'border-gray-200 focus-within:border-[#F6AC08]'
+                          ? 'border-gray-700 focus-within:border-[#B348FE]'
+                          : 'border-gray-200 focus-within:border-[#B348FE]'
                       }
                     `}
                   >
@@ -328,7 +337,7 @@ overflow-hidden
                         w-11 h-6 rounded-full
                         transition-colors duration-300
                         ${rememberMe
-                          ? 'bg-[#421651]'
+                          ? 'bg-[#B348FE]'
                           : isDark ? 'bg-gray-700' : 'bg-gray-200'
                         }
                       `}
@@ -347,7 +356,8 @@ overflow-hidden
                   {/* Forgot password */}
                   <button
                     type="button"
-                    className="text-xs sm:text-sm font-semibold text-[#F6AC08] hover:text-[#E5A000] transition-colors"
+                    className="text-xs sm:text-sm font-semibold text-[#B348FE]
+hover:text-[#9E2FFF] transition-colors"
                   >
                     نسيت كلمة المرور؟
                   </button>
@@ -361,15 +371,15 @@ className="
 w-full
 py-3 sm:py-3.5
 rounded-xl
-bg-[#421651]
-hover:bg-[#532065]
+bg-[#B348FE]
+hover:bg-[#9E2FFF]
 text-white
 font-bold
 text-sm sm:text-base
 flex items-center justify-center gap-2
 disabled:opacity-70
-shadow-[0_12px_30px_rgba(66,22,81,.25)]
-hover:shadow-[0_16px_35px_rgba(66,22,81,.35)]
+shadow-[0_12px_35px_rgba(179,72,254,.30)]
+hover:shadow-[0_18px_45px_rgba(179,72,254,.45)]
 transition-all
 duration-300
 "
@@ -420,7 +430,9 @@ duration-300
                 <button
                   type="button"
                   onClick={() => navigate('/register')}
-                  className="font-bold text-[#F6AC08] hover:text-[#E5A000] transition-colors"
+                  className="font-bold text-[#B348FE]
+hover:text-[#9E2FFF]
+ transition-colors"
                 >
                   أنشئ حسابك الآن !
                 </button>

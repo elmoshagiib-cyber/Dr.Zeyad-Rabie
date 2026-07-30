@@ -59,7 +59,7 @@ p-0
       className="flex flex-col justify-center gap-[5px]"
     >
       <motion.span
-  className="block h-[3px] w-7 rounded-full bg-[#FF4D73]"
+  className="block h-[3px] w-7 rounded-full bg-[#B348FE]"
   whileHover={{ x: -2 }}
 />
       <motion.span
@@ -89,7 +89,7 @@ p-0
 >
   <TbAtom2
     size={28}
-    className="text-[#FF4D73]"
+    className="text-[#B348FE]"
   />
 </motion.div>
 
@@ -133,7 +133,7 @@ p-0
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.92 }}
                   transition={{ type: "spring", stiffness: 400, damping: 22 }}
-                  className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+                  className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B348FE]"
                 >
                   <X size={18} strokeWidth={2} className="text-gray-500" aria-hidden="true" />
                 </motion.button>
@@ -161,8 +161,8 @@ p-0
                       className={[
                         "flex items-center px-4 py-3 rounded-xl text-[15px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400",
                         isActive
-                          ? "bg-teal-50 text-teal-600"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-teal-600",
+  ? "bg-[#B348FE]/10 text-[#B348FE]"
+  : "text-gray-700 hover:bg-[#B348FE]/10 hover:text-[#B348FE]"
                       ].join(" ")}
                     >
                       {item.label}

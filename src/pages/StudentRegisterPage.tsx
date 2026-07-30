@@ -66,12 +66,12 @@ const GOVERNORATES = [
         ${
           error
             ? "border-red-400"
-            : "border-gray-200 focus-within:border-[#421651]"
+            : "border-gray-200 focus-within:border-[#B348FE]"
         }
-        ${isDark ? "border-gray-700 focus-within:border-[#421651]" : ""}
+        ${isDark ? "border-gray-700 focus-within:border-[#B348FE]" : ""}
       `}
     >
-      <Icon className="w-4 h-4 text-[#F6AC08] flex-shrink-0" />
+      <Icon className="w-4 h-4 text-[#B348FE] flex-shrink-0" />
 
       <input
         type={type}
@@ -120,11 +120,11 @@ const GOVERNORATES = [
     <div className="flex flex-col gap-0.5 w-full">
       <div
         className={`flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
-          ${error ? 'border-red-400' : 'border-gray-200 focus-within:border-[#421651]'}
-          ${isDark ? 'border-gray-700 focus-within:border-[#421651]' : ''}
+          ${error ? 'border-red-400' : 'border-gray-200 focus-within:border-[#B348FE]'}
+          ${isDark ? 'border-gray-700 focus-within:border-[#B348FE]' : ''}
         `}
       >
-        <Icon className="w-4 h-4 text-[#F6AC08] flex-shrink-0" />
+        <Icon className="w-4 h-4 text-[#B348FE] flex-shrink-0" />
         <select
           value={value}
           onChange={e => onChange(e.target.value)}
@@ -298,7 +298,7 @@ replace: true,
         <Navbar />
         <div
           className={`min-h-screen pt-16 flex items-center justify-center px-4
-            ${isDark ? 'bg-gray-950' : 'bg-white'}`}
+            bg-white dark:bg-[#09090B]`}
         >
           <motion.div
             className="flex flex-col items-center gap-6 text-center"
@@ -347,7 +347,7 @@ pt-20
 sm:pt-24
 lg:pt-24
 xl:pt-24
-    ${isDark ? "bg-gray-950" : "bg-white"}
+    bg-white dark:bg-[#09090B]
   `}
 >
 
@@ -408,13 +408,23 @@ xl:pt-24
                 transition={{ delay: 0.1, duration: 0.45 }}
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <UserCheck className="w-6 h-6 sm:w-7 sm:h-7 text-[#421651] flex-shrink-0" />
-                  <h1 className={`text-xl sm:text-2xl font-black
-                    ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    {' '}
-                    <span className="text-[#F6AC08]">انشاء حساب</span>
-                    {' '}:
-                  </h1>
+                  <UserCheck className="w-6 h-6 sm:w-7 sm:h-7 text-[#B348FE] flex-shrink-0" />
+<h1
+  className={`
+    text-xl
+    sm:text-2xl
+    font-black
+    ${isDark ? "text-white" : "text-gray-900"}
+  `}
+>
+  <span className={isDark ? "text-white" : "text-gray-900"}>
+    إنشاء
+  </span>{" "}
+  <span className="text-[#B348FE]">
+    حساب
+  </span>
+  {" :"}
+</h1>
                 </div>
                 <p className={`text-xs sm:text-sm
                   ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -585,12 +595,12 @@ xl:pt-24
                       className={`flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
                         ${errors.password
                           ? 'border-red-400'
-                          : 'border-gray-200 focus-within:border-[#421651]'
+                          : 'border-gray-200 focus-within:border-[#B348FE]'
                         }
-                        ${isDark ? 'border-gray-700 focus-within:border-[#421651]' : ''}
+                        ${isDark ? 'border-gray-700 focus-within:border-[#B348FE]' : ''}
                       `}
                     >
-                      <Lock className="w-4 h-4 text-[#F6AC08] flex-shrink-0" />
+                      <Lock className="w-4 h-4 text-[#B348FE] flex-shrink-0" />
                       <input
                         type={showPassword ? 'text' : 'password'}
                         placeholder="كلمة السر"
@@ -657,12 +667,12 @@ xl:pt-24
                           ? 'border-red-400'
                           : form.confirmPassword && form.password === form.confirmPassword
                             ? 'border-green-400'
-                            : 'border-gray-200 focus-within:border-[#421651]'
+                            : 'border-gray-200 focus-within:border-[#B348FE]'
                         }
                         ${isDark ? 'border-gray-700' : ''}
                       `}
                     >
-                      <Lock className="w-4 h-4 text-[#F6AC08] flex-shrink-0" />
+                      <Lock className="w-4 h-4 text-[#B348FE] flex-shrink-0" />
                       <input
                         type={showConfirm ? 'text' : 'password'}
                         placeholder="تأكيد كلمة السر"
@@ -713,16 +723,16 @@ xl:pt-24
     w-full
     py-3 sm:py-3.5
     rounded-xl
-    bg-[#421651]
-    hover:bg-[#4E1B61]
+bg-[#B348FE]
+hover:bg-[#9E2FFF]
     text-white
     font-bold
     text-sm sm:text-base
     flex items-center justify-center gap-2
     mt-1
     disabled:opacity-70
-    shadow-[0_12px_30px_rgba(66,22,81,.25)]
-    hover:shadow-[0_16px_35px_rgba(66,22,81,.35)]
+shadow-[0_12px_35px_rgba(179,72,254,.35)]
+hover:shadow-[0_16px_40px_rgba(179,72,254,.45)]
     transition-all
     duration-300
   "
@@ -752,7 +762,8 @@ xl:pt-24
                 <button
                   type="button"
                   onClick={() => navigate("/login")}
-                  className="font-bold text-[#F6AC08] hover:text-[#E5A000] transition-colors"
+                  className="font-bold text-[#B348FE]
+hover:text-[#9E2FFF] transition-colors"
                 >
                   ادخل إلى حسابك الآن !
                 </button>
