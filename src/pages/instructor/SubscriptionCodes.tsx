@@ -352,9 +352,9 @@ return (
           className="
             rounded-3xl
             bg-gradient-to-r
-            from-blue-700
-            via-blue-600
-            to-blue-500
+from-[#C65CFF]
+via-[#B348FE]
+to-[#9E2FFF]
             shadow-xl
             p-8
             flex
@@ -422,7 +422,7 @@ return (
               إدارة أكواد الوصول 🔑
             </h1>
 
-            <p className="text-blue-100 mt-2 text-sm">
+            <p className="text-white/90 mt-2 text-sm">
               إنشاء وإدارة أكواد اشتراك الطلاب بسهولة تامة
             </p>
           </div>
@@ -444,8 +444,8 @@ return (
       </h2>
     </div>
 
-    <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center">
-      <Database className="text-blue-600" size={28} />
+    <div className="w-14 h-14 rounded-2xl bg-violet-100 flex items-center justify-center">
+      <Database className="text-violet-600" size={28} />
     </div>
   </div>
 
@@ -608,8 +608,8 @@ return (
    <button
   onClick={generateCodes}
   className="
-    bg-blue-600
-    hover:bg-blue-700
+bg-violet-600
+hover:bg-violet-700
     text-white
     font-bold
     rounded-xl
@@ -932,8 +932,8 @@ return (
     <button
       className="
         mt-6
-        bg-blue-600
-        hover:bg-blue-700
+bg-violet-600
+hover:bg-violet-700
         text-white
         rounded-xl
         h-12

@@ -982,26 +982,103 @@ duration-300
     left-6
     z-50
     group
+    flex
+    items-center
+    gap-3
   "
 >
+
+  {/* Message */}
+  <div
+    className="
+      flex
+      items-center
+      gap-2
+
+      opacity-0
+      -translate-x-4
+
+      group-hover:opacity-100
+      group-hover:translate-x-0
+
+      transition-all
+      duration-300
+      pointer-events-none
+    "
+  >
+
+    {/* Bubble */}
+    <div
+      className="
+        whitespace-nowrap
+
+        rounded-xl
+
+        bg-[#3A3A3A]
+
+        text-white
+
+       px-6 py-3
+
+        text-[17px]
+        font-bold
+
+        shadow-xl
+      "
+    >
+      تواصل معنا عبر واتساب
+    </div>
+
+   <svg
+  width="42"
+  height="42"
+  viewBox="0 0 42 42"
+  fill="none"
+  className="shrink-0"
+>
+  <path
+    d="M5 34C12 18 22 10 35 9"
+    stroke="#25D366"
+    strokeWidth="3"
+    strokeLinecap="round"
+  />
+
+  <path
+    d="M28 5L35 9L31 16"
+    stroke="#25D366"
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  />
+</svg>
+
+  </div>
+
+  {/* WhatsApp */}
   <div
     className="
       w-16
       h-16
       rounded-full
+
       bg-[#25D366]
+
       flex
       items-center
       justify-center
+
       shadow-[0_12px_30px_rgba(37,211,102,.35)]
+
       transition-all
       duration-300
+
       group-hover:scale-110
       group-hover:shadow-[0_18px_40px_rgba(37,211,102,.45)]
     "
   >
     <FaWhatsapp className="text-white text-[34px]" />
   </div>
+
 </a>
 
 <Footer />

@@ -1509,6 +1509,28 @@ storagePath: filePath,
             {renderItemTypeBadge("pdf")}
           </div>
           <div className="flex items-center gap-1">
+            <button
+  type="button"
+  onClick={() => toggleItemCollapse(item.id)}
+  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+  title="إظهار / إخفاء"
+>
+  <svg
+    className={`w-4 h-4 transition-transform duration-300 ${
+      collapsedItems[item.id] ? "" : "rotate-180"
+    }`}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M19 9l-7 7-7-7"
+    />
+  </svg>
+</button>
             <button onClick={() => moveItem(sectionId, itemIndex, "up")} disabled={itemIndex === 0} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
             </button>
@@ -1521,7 +1543,9 @@ storagePath: filePath,
           </div>
         </div>
 
-        <div className="p-5 space-y-4">
+        {!collapsedItems[item.id] && (
+
+<div className="p-5 space-y-4">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">عنوان الملف</label>
             <input
@@ -1585,6 +1609,7 @@ storagePath: filePath,
             <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">السماح بتحميل الملف</span>
           </label>
         </div>
+        )}
       </div>
       
     );
@@ -1603,6 +1628,28 @@ storagePath: filePath,
             {renderItemTypeBadge("quiz")}
           </div>
           <div className="flex items-center gap-1">
+            <button
+  type="button"
+  onClick={() => toggleItemCollapse(item.id)}
+  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+  title="إظهار / إخفاء"
+>
+  <svg
+    className={`w-4 h-4 transition-transform duration-300 ${
+      collapsedItems[item.id] ? "" : "rotate-180"
+    }`}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M19 9l-7 7-7-7"
+    />
+  </svg>
+</button>
             <button onClick={() => moveItem(sectionId, itemIndex, "up")} disabled={itemIndex === 0} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
             </button>
@@ -1614,7 +1661,9 @@ storagePath: filePath,
             </button>
           </div>
         </div>
-        <div className="p-5 space-y-5">
+        {!collapsedItems[item.id] && (
+
+<div className="p-5 space-y-5">
           {/* Quiz Meta */}
           <div className="grid grid-cols-1 gap-4">
             <div>
@@ -1848,6 +1897,7 @@ storagePath: filePath,
             </div>
           </div>
         </div>
+        )}
       </div>
     );
   }
@@ -1887,6 +1937,28 @@ storagePath: filePath,
             {renderItemTypeBadge("homework")}
           </div>
           <div className="flex items-center gap-1">
+            <button
+  type="button"
+  onClick={() => toggleItemCollapse(item.id)}
+  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+  title="إظهار / إخفاء"
+>
+  <svg
+    className={`w-4 h-4 transition-transform duration-300 ${
+      collapsedItems[item.id] ? "" : "rotate-180"
+    }`}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M19 9l-7 7-7-7"
+    />
+  </svg>
+</button>
             <button onClick={() => moveItem(sectionId, itemIndex, "up")} disabled={itemIndex === 0} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
             </button>
@@ -1898,7 +1970,9 @@ storagePath: filePath,
             </button>
           </div>
         </div>
-        <div className="p-5 space-y-4">
+        {!collapsedItems[item.id] && (
+
+<div className="p-5 space-y-4">
           <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">عنوان الواجب</label>
@@ -1973,6 +2047,7 @@ storagePath: filePath,
           </div>
 
         </div>
+        )}
       </div>
     );
   }

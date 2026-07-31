@@ -95,15 +95,40 @@ export function InstructorStudents() {
 
   return (
     <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-      <div className="flex flex-col h-full bg-[#09090B] min-h-screen">
+      <div className="flex flex-col h-full bg-slate-50 min-h-screen">
         {/* Header - مطابق لتصميم صفحة التسليمات */}
-        <div className="bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] p-6 lg:p-8 text-white relative overflow-hidden flex-shrink-0">
-          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
-          <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
+        <div
+  className="
+    relative
+    overflow-hidden
+
+    rounded-[36px]
+
+    bg-gradient-to-r
+    from-[#C65CFF]
+    via-[#B348FE]
+    to-[#9E2FFF]
+
+    px-6
+    lg:px-8
+
+    py-6
+    lg:py-7
+
+    text-white
+
+    shadow-[0_18px_45px_rgba(179,72,254,.22)]
+
+    mx-6
+    mt-6
+  "
+>
+          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/10 blur-[120px]" />
+          <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/10 blur-[120px]" />
           
           <div className="relative z-10 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-black mb-2">الطلاب</h1>
+              <h1 className="text-3xl lg:text-4xl tracking-tight font-black mb-2">الطلاب</h1>
               <p className="text-white/90 text-sm lg:text-base">إدارة ومتابعة جميع الطلاب بالمنصة</p>
             </div>
             <div className="h-14 w-14 lg:h-16 lg:w-16 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center">
@@ -113,29 +138,98 @@ export function InstructorStudents() {
         </div>
 
         {/* Stats - كروت مضغوطة مثل صفحة التسليمات */}
-        <div className="grid grid-cols-3 gap-4 p-6 bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
-          <div className="text-center">
-            <div className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white">{students.length}</div>
-            <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 font-bold mt-1">إجمالي الطلاب</div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 px-6 py-6">
+          <div
+  className="
+    bg-white
+
+    rounded-3xl
+
+    border
+    border-slate-200
+
+    shadow-sm
+
+    hover:shadow-lg
+
+    transition
+
+    p-6
+
+    flex
+
+    items-center
+
+    justify-between
+  "
+>
+            <div className="text-2xl lg:text-3xl font-black text-slate-900">{students.length}</div>
+            <div className="text-xs lg:text-sm text-slate-500 font-bold mt-1">إجمالي الطلاب</div>
           </div>
-          <div className="text-center">
+          <div
+  className="
+    bg-white
+
+    rounded-3xl
+
+    border
+    border-slate-200
+
+    shadow-sm
+
+    hover:shadow-lg
+
+    transition
+
+    p-6
+
+    flex
+
+    items-center
+
+    justify-between
+  "
+>
             <div className="text-2xl lg:text-3xl font-black text-emerald-600">
               {students.filter((s) => s.status === "نشط" || s.status === "active").length}
             </div>
-            <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 font-bold mt-1">النشطون</div>
+            <div className="text-xs lg:text-sm text-slate-500 font-bold mt-1">النشطون</div>
           </div>
-          <div className="text-center">
+          <div
+  className="
+    bg-white
+
+    rounded-3xl
+
+    border
+    border-slate-200
+
+    shadow-sm
+
+    hover:shadow-lg
+
+    transition
+
+    p-6
+
+    flex
+
+    items-center
+
+    justify-between
+  "
+>
             <div className="text-2xl lg:text-3xl font-black text-amber-600">{newStudentsThisMonth}</div>
-            <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 font-bold mt-1">هذا الشهر</div>
+            <div className="text-xs lg:text-sm text-slate-500 font-bold mt-1">هذا الشهر</div>
           </div>
         </div>
 
         {/* Filters - مطابقة لتصميم صفحة التسليمات */}
-        <div className="p-4 lg:p-6 bg-white dark:bg-[#09090B] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
+        <div className="p-4 lg:p-6 bg-white border-b border-slate-200 flex-shrink-0">
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Filter size={18} className="text-[#B348FE]" />
-              <h3 className="text-base font-black text-gray-900 dark:text-white">البحث والفلاتر</h3>
+              <h3 className="text-base font-black text-slate-900">البحث والفلاتر</h3>
             </div>
             <button
               onClick={() => { setSearchTerm(""); setGradeFilter(""); setStatusFilter(""); setTypeFilter(""); }}
@@ -152,14 +246,14 @@ export function InstructorStudents() {
                 placeholder="اسم الطالب أو الكود..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pr-10 bg-white dark:bg-[#111111] border-gray-200 dark:border-[#2A2A2A] rounded-xl h-12"
+                className="pr-10 bg-white border-slate-200 rounded-xl h-12"
               />
             </div>
 
             <select 
               value={gradeFilter} 
               onChange={(e) => setGradeFilter(e.target.value)}
-              className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+              className="w-full h-12 border border-slate-200 rounded-xl px-4 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
             >
               <option value="">كل الصفوف</option>
               {grades.map((g) => <option key={g} value={g}>{g}</option>)}
@@ -168,7 +262,7 @@ export function InstructorStudents() {
             <select 
               value={statusFilter} 
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+              className="w-full h-12 border border-slate-200 rounded-xl px-4 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
             >
               <option value="">جميع الحالات</option>
               <option value="نشط">نشط</option>
@@ -178,7 +272,7 @@ export function InstructorStudents() {
             <select 
               value={typeFilter} 
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+              className="w-full h-12 border border-slate-200 rounded-xl px-4 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
             >
               <option value="">جميع الأنواع</option>
               <option value="center">سنتر</option>
@@ -188,77 +282,70 @@ export function InstructorStudents() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-4 lg:p-6 bg-[#09090B]">
+        <div className="flex-1 overflow-auto p-4 lg:p-6 bg-slate-50">
           {/* Header with count */}
           <div className="flex items-center gap-3 mb-4">
-            <h2 className="text-lg font-black text-gray-900 dark:text-white">قائمة الطلاب</h2>
-            <span className="px-2.5 py-1 rounded-lg bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] text-xs font-black border border-[#EAD8FF] dark:border-[#2A2A2A]">
+            <h2 className="text-lg font-black text-slate-900">قائمة الطلاب</h2>
+            <span className="px-2.5 py-1 rounded-lg bg-[#F6EEFF] text-[#B348FE] text-xs font-black border border-[#EAD8FF]">
               {filteredStudents.length} طالب
             </span>
           </div>
 
           {filteredStudents.length === 0 ? (
             <div className="text-center py-16">
-              <Users className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />
-              <p className="text-gray-600 dark:text-gray-400 font-bold">لا يوجد طلاب</p>
+              <Users className="mx-auto text-slate-300 mb-4" size={48} />
+              <p className="text-slate-600 font-bold">لا يوجد طلاب</p>
             </div>
           ) : (
             <>
               {/* Desktop & Tablet Table */}
               <div className="hidden md:block">
-                <Card className="
-bg-[#111111]
-border
-border-[#2A2A2A]
-rounded-[28px]
-shadow-none
-overflow-hidden
-">
+                <Card className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
                   <CardContent className="p-0">
                     <table className="w-full">
                       <thead>
-                        <tr className="bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#2A2A2A]">
-                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الطالب</th>
-                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الإيميل</th>
-                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الصف</th>
-                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">النوع</th>
-                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الحالة</th>
-                          <th className="px-4 py-3 text-right text-xs font-black text-gray-600 dark:text-gray-400">الكورسات</th>
-                          <th className="px-4 py-3 text-center text-xs font-black text-gray-600 dark:text-gray-400">الإجراءات</th>
+                        <tr className="bg-slate-50 border-b border-slate-200">
+                          <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الطالب</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الإيميل</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الصف</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-slate-600">النوع</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الحالة</th>
+                          <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الكورسات</th>
+                          <th className="px-4 py-3 text-center text-xs font-black text-slate-600">الإجراءات</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredStudents.map((student) => (
                           <tr 
                             key={student.id} 
-                            className="border-b border-gray-100 dark:border-[#2A2A2A] hover:bg-[#F6EEFF]/50 dark:hover:bg-[#2B103D]/50 transition-all duration-200"
+                            className="border-b border-slate-100 hover:bg-slate-50 transition-all duration-200"
                           >
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
                                 <Avatar name={student.full_name || student.name} size="sm" className="h-8 w-8 text-xs" />
                                 <div>
-                                  <p className="font-bold text-gray-900 dark:text-white text-sm">
+                                  <p className="font-bold text-slate-900 text-sm">
                                     {student.full_name || student.name}
                                   </p>
-                                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                                  <p className="text-xs text-slate-500">
                                     {student.phone || "لا يوجد رقم"}
                                   </p>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs font-medium truncate max-w-[150px]">
+                            <td className="px-4 py-3 text-slate-700 text-xs font-medium truncate max-w-[150px]">
                               {student.email}
                             </td>
                             <td className="px-4 py-3">
-                              <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-bold border border-gray-200 dark:border-gray-700">
+                              <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
                                 {student.grade}
                               </span>
                             </td>
                             <td className="px-4 py-3">
                               <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
                                 student.type === "online" 
-                                  ? "bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] border-[#EAD8FF] dark:border-[#2A2A2A]" 
-                                  : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900"
+                                  ? "bg-[#F6EEFF] text-[#B348FE] border-[#EAD8FF]" 
+                                  : "bg-amber-50 text-amber-700 border-amber-200"
                               }`}>
                                 {getStudentTypeLabel(student.type)}
                               </span>
@@ -266,14 +353,14 @@ overflow-hidden
                             <td className="px-4 py-3">
                               <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
                                 student.status === "نشط" || student.status === "active"
-                                  ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900"
-                                  : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900"
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                  : "bg-red-50 text-red-700 border-red-200"
                               }`}>
                                 {student.status === "نشط" || student.status === "active" ? "نشط" : "موقوف"}
                               </span>
                             </td>
                             <td className="px-4 py-3">
-                              <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-bold border border-gray-200 dark:border-gray-700">
+                              <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
                                 {student.student_courses?.length || 0}
                               </span>
                             </td>
@@ -281,19 +368,19 @@ overflow-hidden
                               <div className="flex justify-center gap-1">
                                 <button
                                   onClick={() => navigate(`/instructor/students/${student.id}`)}
-                                  className="w-8 h-8 rounded-lg bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] hover:bg-[#EAD8FF] dark:hover:bg-[#3D1952] flex items-center justify-center transition-all duration-200"
+                                  className="w-8 h-8 rounded-lg bg-[#F6EEFF] text-[#B348FE] hover:bg-[#EAD8FF] flex items-center justify-center transition-all duration-200"
                                 >
                                   <Eye size={14} />
                                 </button>
                                 <button
                                   onClick={() => toggleStudentStatus(student.id, student.status)}
-                                  className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900/40 flex items-center justify-center transition-all duration-200"
+                                  className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 flex items-center justify-center transition-all duration-200"
                                 >
                                   <Power size={14} />
                                 </button>
                                 <button
                                   onClick={() => { if (confirm("هل أنت متأكد من حذف الطالب؟")) deleteStudent(student.id); }}
-                                  className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 flex items-center justify-center transition-all duration-200"
+                                  className="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition-all duration-200"
                                 >
                                   <Trash2 size={14} />
                                 </button>
@@ -312,52 +399,52 @@ overflow-hidden
                 {filteredStudents.map((student) => (
                   <Card 
                     key={student.id} 
-                    className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl overflow-hidden"
+                    className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm"
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <Avatar name={student.full_name || student.name} size="sm" className="h-10 w-10" />
                           <div>
-                            <h3 className="font-black text-gray-900 dark:text-white text-sm">
+                            <h3 className="font-black text-slate-900 text-sm">
                               {student.full_name || student.name}
                             </h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            <p className="text-xs text-slate-500 mt-0.5">
                               {student.email}
                             </p>
                           </div>
                         </div>
                         <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
                           student.status === "نشط" || student.status === "active"
-                            ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900"
-                            : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : "bg-red-50 text-red-700 border-red-200"
                         }`}>
                           {student.status === "نشط" || student.status === "active" ? "نشط" : "موقوف"}
                         </span>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-2.5">
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">الصف</p>
-                          <p className="text-xs font-bold text-gray-900 dark:text-white">{student.grade}</p>
+                        <div className="bg-slate-50 rounded-xl p-2.5">
+                          <p className="text-xs text-slate-500 mb-1">الصف</p>
+                          <p className="text-xs font-bold text-slate-900">{student.grade}</p>
                         </div>
-                        <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-2.5">
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">النوع</p>
+                        <div className="bg-slate-50 rounded-xl p-2.5">
+                          <p className="text-xs text-slate-500 mb-1">النوع</p>
                           <span className={`text-xs font-black ${
                             student.type === "online" ? "text-[#B348FE]" : "text-amber-600"
                           }`}>
                             {getStudentTypeLabel(student.type)}
                           </span>
                         </div>
-                        <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-2.5">
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">الكورسات</p>
-                          <p className="text-xs font-bold text-gray-900 dark:text-white">
+                        <div className="bg-slate-50 rounded-xl p-2.5">
+                          <p className="text-xs text-slate-500 mb-1">الكورسات</p>
+                          <p className="text-xs font-bold text-slate-900">
                             {student.student_courses?.length || 0}
                           </p>
                         </div>
-                        <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-2.5">
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">الهاتف</p>
-                          <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                        <div className="bg-slate-50 rounded-xl p-2.5">
+                          <p className="text-xs text-slate-500 mb-1">الهاتف</p>
+                          <p className="text-xs font-bold text-slate-900 truncate">
                             {student.phone || "-"}
                           </p>
                         </div>

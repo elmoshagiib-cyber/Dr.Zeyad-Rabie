@@ -320,9 +320,34 @@ const sendAnnouncement = async () => {
 
       <main className="flex-1 overflow-y-auto">
         {/* Header */}
-        <div className="bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] p-6 lg:p-10 text-white relative overflow-hidden flex-shrink-0">
-          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
-          <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
+        <div
+  className="
+    relative
+    overflow-hidden
+
+    rounded-[36px]
+
+    bg-gradient-to-r
+    from-[#C65CFF]
+    via-[#B348FE]
+    to-[#9E2FFF]
+
+    px-6
+    lg:px-8
+
+    py-6
+    lg:py-7
+
+    text-white
+
+    shadow-[0_18px_45px_rgba(179,72,254,.22)]
+
+    mx-6
+    mt-6
+  "
+>
+          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/10 blur-[120px]" />
+          <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/10 blur-[120px]" />
 
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-4">
@@ -337,7 +362,11 @@ const sendAnnouncement = async () => {
 
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center text-3xl font-black border-2 border-white/20">
+                <div className="w-16 h-16 rounded-[24px]
+bg-white/15
+backdrop-blur-xl
+border
+border-white/20">
                   {student.avatar_url ? (
                     <img src={student.avatar_url} alt={student.full_name} className="w-full h-full object-cover rounded-2xl" />
                   ) : (
@@ -345,7 +374,7 @@ const sendAnnouncement = async () => {
                   )}
                 </div>
                 <div>
-                  <h1 className="text-2xl lg:text-3xl font-black mb-2">{student.full_name}</h1>
+                  <h1 className="text-3xl lg:text-4xl tracking-tight font-black mb-2">{student.full_name}</h1>
                   <div className="flex flex-wrap gap-2 text-white/90 text-sm">
                     <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full">
                       <div className={`w-2 h-2 rounded-full ${student.is_blocked ? "bg-red-400" : "bg-emerald-400"}`} />
@@ -362,7 +391,10 @@ const sendAnnouncement = async () => {
 
               <Button
                 onClick={() => navigate(`/instructor/students/edit/${student.id}`)}
-                className="bg-white text-[#B348FE] hover:bg-white/90 rounded-xl font-black px-6 shadow-lg h-12"
+                className="bg-white text-[#B348FE] hover:bg-white/90 rounded-2xl font-black px-6 shadow-lg h-12 shadow-lg
+hover:shadow-xl
+transition-all
+hover:-translate-y-0.5"
               >
                 تعديل الطالب
               </Button>

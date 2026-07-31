@@ -291,29 +291,128 @@ const filteredSubmissions = useMemo(() => {
 
       <main className="flex-1 overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] p-6 lg:p-8 text-white relative overflow-hidden flex-shrink-0">
-          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
-          <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
+        <div className="
+relative
+overflow-hidden
+
+rounded-[36px]
+
+bg-gradient-to-r
+from-[#C65CFF]
+via-[#B348FE]
+to-[#9E2FFF]
+
+px-6
+lg:px-8
+
+py-6
+lg:py-7
+
+text-white
+
+shadow-[0_18px_45px_rgba(179,72,254,.22)]
+
+mx-6
+mt-6
+">
+          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/10
+ blur-3xl" />
+          <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full blur-[120px] blur-3xl" />
           
           <div className="relative z-10">
-            <h1 className="text-2xl lg:text-3xl font-black mb-2">تصحيح الواجبات</h1>
+            <h1 className="text-3xl lg:text-4xl font-black tracking-tight">تصحيح الواجبات</h1>
             <p className="text-white/90 text-sm lg:text-base">مراجعة وتصحيح تسليمات الطلاب</p>
           </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 p-6 bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
-          <div className="text-center">
+          <div
+className="
+bg-white
+
+rounded-3xl
+
+border
+border-slate-200
+
+shadow-sm
+
+hover:shadow-lg
+
+transition
+
+p-6
+
+flex
+
+items-center
+
+justify-between
+"
+>
             <div className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white">{submissions.length}</div>
-            <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 font-bold mt-1">إجمالي التسليمات</div>
+            <div className="w-14 h-14 rounded-2xl bg-violet-100 flex items-center justify-center">
+    <FileText className="text-violet-600" size={28}/>
+</div>
           </div>
-          <div className="text-center">
+          <div
+className="
+bg-white
+
+rounded-3xl
+
+border
+border-slate-200
+
+shadow-sm
+
+hover:shadow-lg
+
+transition
+
+p-6
+
+flex
+
+items-center
+
+justify-between
+"
+>
             <div className="text-2xl lg:text-3xl font-black text-emerald-600">{gradedCount}</div>
-            <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 font-bold mt-1">تم التصحيح</div>
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center">
+    <CheckCircle className="text-emerald-600" size={28}/>
+</div>
           </div>
-          <div className="text-center">
+          <div
+className="
+bg-white
+
+rounded-3xl
+
+border
+border-slate-200
+
+shadow-sm
+
+hover:shadow-lg
+
+transition
+
+p-6
+
+flex
+
+items-center
+
+justify-between
+"
+>
             <div className="text-2xl lg:text-3xl font-black text-amber-600">{pendingCount}</div>
-            <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 font-bold mt-1">بانتظار التصحيح</div>
+            <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center">
+    <Clock className="text-amber-600" size={28}/>
+</div>
           </div>
         </div>
 
@@ -367,14 +466,60 @@ const filteredSubmissions = useMemo(() => {
         <div className="flex-1 overflow-hidden flex">
           {loading ? (
             <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
+              <div
+className="
+bg-white
+
+rounded-3xl
+
+border
+border-slate-200
+
+shadow-sm
+
+hover:shadow-lg
+
+transition
+
+p-6
+
+flex
+
+items-center
+
+justify-between
+"
+>
                 <div className="w-12 h-12 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                 <p className="text-gray-600 dark:text-gray-400 font-bold">جاري تحميل البيانات...</p>
               </div>
             </div>
           ) : filteredSubmissions.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
+              <div
+className="
+bg-white
+
+rounded-3xl
+
+border
+border-slate-200
+
+shadow-sm
+
+hover:shadow-lg
+
+transition
+
+p-6
+
+flex
+
+items-center
+
+justify-between
+"
+>
                 <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={64} />
                 <p className="text-gray-600 dark:text-gray-400 font-bold text-lg">لا توجد تسليمات</p>
                 <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">جرب تغيير الفلاتر</p>

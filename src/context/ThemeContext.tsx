@@ -22,19 +22,25 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
     return saved || "light";
   });
 
-  useEffect(() => {
-    console.log("THEME EFFECT =", theme);
+useEffect(() => {
+  const root = document.documentElement;
 
-    const root = document.documentElement;
+  const isInstructorDashboard =
+    window.location.pathname.startsWith("/instructor");
 
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
+  if (isInstructorDashboard) {
+    root.classList.remove("dark");
+    return;
+  }
 
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+  if (theme === "dark") {
+    root.classList.add("dark");
+  } else {
+    root.classList.remove("dark");
+  }
+
+  localStorage.setItem("theme", theme);
+}, [theme]);
 
   const toggleTheme = () => {
     console.log("CLICKED");

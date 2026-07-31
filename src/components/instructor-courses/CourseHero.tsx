@@ -40,72 +40,37 @@ return (
   relative
   overflow-hidden
   rounded-[32px]
-  bg-[#4C1D95]
-  p-5 md:p-7 lg:p-8
+  bg-gradient-to-r
+from-[#C65CFF]
+via-[#B348FE]
+to-[#9E2FFF]
+  py-6
+px-6
+
+lg:px-8
+lg:py-7
   text-white
-  shadow-xl
+  shadow-[0_18px_45px_rgba(179,72,254,.22)]
 "
   >
     {/* Background Blur */}
-<div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
-<div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
+<div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
+<div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/10 blur-3xl" />
 
     <div className="relative z-10 flex flex-col-reverse lg:flex-row items-start justify-between gap-6">
       {/* المعلومات */}
       <div className="flex-1">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-black">
+        <h1 className="text-3xl lg:text-4xl font-black">
           إدارة الكورسات
         </h1>
 
-        <div className="mt-4 flex items-center gap-3">
-          <span
-            className="
-              flex
-              items-center
-              gap-2
-              rounded-full
-              bg-emerald-500/20
-              px-3
-              py-1
-              text-sm
-              text-emerald-100
-            "
-          >
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            متصل بقاعدة البيانات
-          </span>
-        </div>
+
 
         <p className="mt-3 max-w-xl text-sm md:text-base text-violet-100">
-          تحكم في جميع الكورسات والمحاضرات والطلاب
-          من مكان واحد بسهولة.
+         أنشئ الكورسات، نظّم المحتوى، وتابع جميع المواد التعليمية الخاصة بك.
         </p>
 
 
-        {/* Divider */}
-        <div className="mt-8 h-px bg-white/10" />
-
-        {/* حالة النظام */}
-        <div className="mt-6 flex items-center gap-6 text-sm text-violet-100">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            جميع البيانات متزامنة
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="font-bold">
-              {publishedCourses}
-            </span>
-
-            <span>من</span>
-
-            <span className="font-bold">
-              {totalCourses}
-            </span>
-
-            <span>كورس منشور</span>
-          </div>
-        </div>
       </div>
 
       {/* الأزرار */}
@@ -114,7 +79,7 @@ return (
           onClick={onCreateCourse}
           className="
             h-12 md:h-14
-            rounded-2xl
+            rounded-[20px]
             bg-white
             px-8
             font-bold
@@ -133,17 +98,19 @@ return (
 
 
         {/* View */}
-        <div
-          className="
-            flex
-            rounded-2xl
-            border
-            border-white/10
-            bg-white/10
-            p-1
-            backdrop-blur
-          "
-        >
+<div
+  className="
+    inline-flex
+    w-fit
+    rounded-2xl
+    border
+    border-white/10
+    bg-white/10
+    p-1
+    backdrop-blur-xl
+    self-end
+  "
+>
           <button
             onClick={() => setView("grid")}
             className={`

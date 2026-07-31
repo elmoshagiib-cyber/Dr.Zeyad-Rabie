@@ -181,9 +181,15 @@ alert("تم تفعيل الاشتراك بنجاح ✅");
 
 
 
-  const CourseCard = ({ course }: { course: any }) => (
+ const CourseCard = ({ course }: { course: any }) => {
+
+  const hasAccess =
+    course.is_free || myCourses.includes(course.id);
+
+  return (
+   
 <Card
-  hover
+  
   className="
     group
     overflow-visible
@@ -197,12 +203,18 @@ alert("تم تفعيل الاشتراك بنجاح ✅");
 >
 
 <div
-  className="
+className="
   relative
   overflow-hidden
-  aspect-video
-  w-full
-  rounded-[32px]
+  h-[220px]
+  sm:h-[260px]
+  lg:h-[320px]
+  rounded-[24px]
+  sm:rounded-[28px]
+  lg:rounded-[32px]
+  -mx-4
+  sm:-mx-8
+  lg:-mx-20
 "
 >
         <img
@@ -275,7 +287,9 @@ backdrop-blur-md backdrop-blur-sm text-white
   relative
   z-20
   -mt-12
-  mx-6
+-mx-2
+sm:-mx-4
+lg:-mx-10
   mb-5
   rounded-[28px]
   bg-white
@@ -283,7 +297,9 @@ backdrop-blur-md backdrop-blur-sm text-white
   border
   border-gray-200
   dark:border-[#262626]
-  p-5
+ p-4
+sm:p-5
+lg:p-6
   flex
   flex-col
   flex-1
@@ -315,82 +331,90 @@ dark:shadow-[0_20px_45px_rgba(0,0,0,.45)]
 
 <div className="mt-4">
 
-  <div className="grid grid-cols-[minmax(0,1fr)_180px] gap-6">
+  <div className="space-y-5">
     
-<div>
 
-  <p
-    className="
-      text-[15px]
-      leading-8
-      text-slate-500
-      dark:text-slate-300
-    "
-  >
-    {course.description}
-  </p>
 
-</div>
-
-    {/* الأزرار */}
-   <div className="flex flex-col items-center gap-2.5">
-
-     <Button
-  className={`
-    w-[140px]
-    h-9
-    rounded-lg
-    text-[14px]
+{/* الوصف */}
+<p
+  className="
+   text-sm
+sm:text-base
+leading-7
+sm:leading-8
+    text-slate-500
+    dark:text-slate-300
+    whitespace-pre-line
+    break-words
+  "
+>
+  {course.description}
+</p>
+<div className="flex flex-col gap-3 items-start"></div>
+<div className="border-t border-slate-200 pt-5">
+{/* الأزرار */}
+<div
+  className="
+    flex
+    flex-col
+    sm:flex-row
+    gap-3
+  "
+>
+<Button
+  className="
+    w-full
+sm:flex-1
+h-11
+    rounded-xl
+    text-[15px]
     font-bold
+    text-white
+    bg-gradient-to-r
+    from-[#B348FE]
+    to-[#8D2BFF]
+    hover:from-[#9E2FFF]
+    hover:to-[#7E22CE]
     transition-all
     duration-300
-    ${
-      course.is_free
-        ? "border-2 border-[#19C7B7] bg-transparent text-[#19C7B7] hover:bg-[#19C7B7] hover:text-white"
-        : "bg-[#B348FE] hover:bg-[#9E2FFF] text-white"
-    }
-  `}
+    shadow-lg
+    shadow-[#B348FE]/30
+  "
   onClick={() =>
-    course.is_free
+    hasAccess
       ? navigate(`/courses/${course.id}`)
       : handleCourseAction(course)
   }
 >
-  {course.is_free
-    ? "الدخول للكورس"
-    : myCourses.includes(course.id)
-    ? "الدخول للكورس"
-    : "اشترك الآن"}
+  {hasAccess ? "الدخول للكورس" : "اشترك الآن"}
 </Button>
 
-      {!course.is_free && (
-       <Button
+  {!course.is_free && !myCourses.includes(course.id) && (
+<Button
   variant="outline"
   className="
-    w-[140px]
-    h-9
-    rounded-lg
-    text-[14px]
+    flex-1
+    h-11
+    rounded-xl
+    text-[15px]
     font-bold
     border-[#343434]
-bg-slate-100
-text-slate-700
-hover:bg-slate-200
+    bg-slate-100
+    text-slate-700
+    hover:bg-slate-200
 
-dark:bg-[#1E1E1E]
-dark:text-white
-dark:hover:bg-[#292929]
+    dark:bg-[#1E1E1E]
+    dark:text-white
+    dark:hover:bg-[#292929]
   "
-  onClick={() => navigate(`/courses/${course.id}`)}
 >
-  تفاصيل
+  عرض المحتوى
 </Button>
-      )}
-
-    </div>
-
-  </div>
-
+)}
+  
+</div>
+</div>
+</div>
 {/* السعر + التاريخ */}
 <div
   className="
@@ -402,94 +426,81 @@ dark:hover:bg-[#292929]
   "
 >
 
-  {course.is_free ? (
+{hasAccess ? (
 
-    <div className="flex justify-end">
-      <span
-        className="
-          rounded-full
-          bg-gradient-to-r
-         from-[#B348FE]
-to-[#8D2BFF]
-          text-white
-          px-5
-          py-2
-          text-sm
-          font-black
-        "
-      >
-        كورس مجاني !
-      </span>
-    </div>
-
-  ) : (
-
-<div className="flex items-start justify-between gap-6">
-
-  {/* السعر */}
-<div
-  className="
-    inline-flex
-    items-center
-    gap-1
-    rounded-xl
-    bg-[#B348FE]
-    p-1
-    shrink-0
-  "
->
-
-  {/* الرقم */}
+<div className="flex justify-end">
   <span
     className="
-      bg-white
-      text-[#111111]
-      rounded-md
-      px-3
-      py-[5px]
-      min-w-[46px]
-      text-center
-      text-[13px]
+      inline-flex
+      items-center
+      gap-2
+      rounded-xl
+      border
+      border-[#B348FE]
+      bg-[#F8F1FF]
+      dark:bg-[#241132]
+      dark:border-[#B348FE]
+      text-[#B348FE]
+      px-5
+      py-2
+      text-sm
       font-black
-      leading-none
     "
   >
-    {course.price}
+    ✓ تم الاشتراك
   </span>
-
-  {/* كلمة جنيه */}
-  <span
-    className="
-      px-2
-      text-[13px]
-      font-black
-      text-white
-      whitespace-nowrap
-    "
-  >
-    جنيه
-  </span>
-
 </div>
 
-  {/* التاريخ */}
-  <div className="space-y-3">
+) : (
 
-    <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-      <Clock className="w-4 h-4" />
-      <span>17 أبريل 2026</span>
-    </div>
+  <div className="flex items-start justify-between gap-6">
 
-    <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-      <Clock className="w-4 h-4" />
-      <span>5 مايو 2026</span>
+    <div
+      className="
+        inline-flex
+        items-center
+        gap-1
+        rounded-xl
+        bg-[#B348FE]
+        p-1
+        shrink-0
+      "
+    >
+      <span
+        className="
+          bg-white
+          text-[#111111]
+          rounded-md
+          px-3
+          py-[5px]
+          min-w-[46px]
+          text-center
+          text-[13px]
+          font-black
+          leading-none
+        "
+      >
+        {course.price}
+      </span>
+
+      <span
+        className="
+          px-2
+          text-[13px]
+          font-black
+          text-white
+          whitespace-nowrap
+        "
+      >
+        جنيه
+      </span>
     </div>
 
   </div>
 
-</div>
+)}
 
-  )}
+
 
 </div>
 
@@ -497,7 +508,7 @@ to-[#8D2BFF]
       </CardContent>
     </Card>
   );
-
+};
   const CourseSection = ({
     title,
     icon,
@@ -533,8 +544,8 @@ text-3xl">
         <div className="
           grid
           grid-cols-1
-          sm:grid-cols-2
-          xl:grid-cols-3
+md:grid-cols-2
+2xl:grid-cols-3
           gap-4 sm:gap-6
         ">
           {list.map(c => <CourseCard key={c.id} course={c} />)}
@@ -553,9 +564,10 @@ text-3xl">
 
   const hasSections = term1.length || term2.length || revision.length || free.length;
 
+ 
 return (
   <>
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+    <div className="max-w-[1600px] mx-auto px-6 lg:px-10 py-8 sm:py-12 lg:py-16">
 
       {loading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">

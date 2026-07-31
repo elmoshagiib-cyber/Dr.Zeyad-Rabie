@@ -320,22 +320,111 @@ const quickActions = [
     <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
 
       {/* ── Hero header ── */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[36px] bg-gradient-to-r from-[#4C1D95] via-[#5B21B6] to-[#7C3AED] px-4 sm:px-7 lg:px-10 py-5 sm:py-7 lg:py-10 text-white shadow-[0_16px_48px_rgba(91,33,182,.35)] mb-4 sm:mb-6">
+     <div
+  className="
+    relative
+    overflow-hidden
+    rounded-[36px]
+
+    bg-gradient-to-r
+    from-[#C65CFF]
+    via-[#B348FE]
+    to-[#9E2FFF]
+
+    px-6
+    sm:px-8
+    lg:px-10
+
+    py-7
+    sm:py-8
+    lg:py-10
+
+    text-white
+
+    shadow-[0_18px_45px_rgba(179,72,254,.22)]
+
+    mb-6
+  "
+>
         {/* single glow — no duplicates */}
-        <div className="absolute -top-20 -left-20 w-72 h-72 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-<div className="absolute -bottom-20 right-0 w-72 h-72 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+{/* Top Left Glow */}
+<div
+  className="
+    absolute
+    -top-28
+    -left-20
+
+    w-[360px]
+    h-[360px]
+
+    rounded-full
+
+    bg-white/12
+
+    blur-[120px]
+
+    pointer-events-none
+  "
+/>
+
+{/* Bottom Right Glow */}
+<div
+  className="
+    absolute
+    -bottom-32
+    -right-20
+
+    w-[340px]
+    h-[340px]
+
+    rounded-full
+
+    bg-white/10
+
+    blur-[120px]
+
+    pointer-events-none
+  "
+/>
+
+
+
 
         <div className="relative z-10 flex items-center justify-between gap-4">
           {/* icon */}
-          <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-2xl sm:rounded-3xl bg-white/10 flex items-center justify-center shrink-0">
+          <div className="
+w-14 h-14
+sm:w-16 sm:h-16
+lg:w-20 lg:h-20
+
+rounded-[26px]
+
+flex
+items-center
+justify-center
+
+bg-white/15
+
+backdrop-blur-xl
+
+border
+
+border-white/20
+
+shadow-[0_8px_30px_rgba(255,255,255,.15)]
+
+shrink-0
+">
             <BarChart2 className="text-white" size={22} />
           </div>
           {/* text — RTL so text is on the right */}
           <div className="text-right flex-1">
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white leading-none">
+            <h1 className="text-2xl sm:text-4xl lg:text-4xl lg:text-5xl
+tracking-tight font-black text-white leading-none">
               لوحة التحكم
             </h1>
-            <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm lg:text-base text-white/80">
+            <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm lg:text-base text-white/90
+font-medium">
               {greeting}، د. {user?.name}
             </p>
           </div>
@@ -381,30 +470,7 @@ const quickActions = [
 
 
 
-            {/* Recent activities */}
-            <Card className="rounded-2xl sm:rounded-3xl lg:rounded-[36px] border-0 shadow-lg sm:shadow-xl">
-              <CardContent className="p-4 sm:p-6 lg:p-8">
-                <div className="flex items-center justify-between mb-5 sm:mb-8 gap-3">
-                  <Button variant="outline" className="text-xs sm:text-sm shrink-0">عرض الكل</Button>
-                  <div className="text-right">
-                    <h2 className="text-xl sm:text-3xl font-black">آخر النشاطات</h2>
-                    <p className="text-slate-500 text-xs sm:text-sm mt-0.5">كل ما يحدث داخل المنصة</p>
-                  </div>
-                </div>
-                <div className="divide-y divide-slate-100">
-                  {recentActivities.map((item, index) => (
-                    <div key={index} className="flex items-start gap-3 sm:gap-5 group py-3 sm:py-5">
-                      <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ring-4 ring-white rounded-full mt-1.5 sm:mt-2 shrink-0 ${item.color} group-hover:scale-125 transition-all`} />
-                      <div className="flex-1 border-r-2 border-slate-100 pr-3 sm:pr-5 text-right">
-                        <h3 className="font-bold text-sm sm:text-base lg:text-lg">{item.title}</h3>
-                        <p className="text-slate-500 mt-0.5 sm:mt-1 text-xs sm:text-sm">{item.description}</p>
-                        <span className="text-xs text-slate-400 mt-1 sm:mt-2 block">{item.time}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+           
 
             {/* Quick actions */}
             <div>

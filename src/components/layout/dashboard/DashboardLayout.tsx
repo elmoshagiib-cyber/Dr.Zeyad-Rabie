@@ -18,13 +18,13 @@ export function DashboardLayout({
   return (
 <div
   dir="rtl"
-  className="
-    flex
-    items-stretch
-    min-h-screen
-    bg-[#09090B]
-    text-white
-  "
+className="
+  flex
+  items-stretch
+  min-h-screen
+  bg-slate-50
+  text-slate-900
+"
 >
       {/* ───────── Desktop Sidebar (Instructor & Admin only) ───────── */}
       {type !== "student" && (
@@ -91,13 +91,12 @@ export function DashboardLayout({
       )}
 
       {/* ───────── Main Content ───────── */}
-      <main
+<main
   className="
     flex-1
     overflow-y-auto
-    bg-[#09090B]
-    px-3
-    py-3
+    bg-slate-50
+    p-4
     sm:px-4
     sm:py-4
     md:px-6
@@ -106,7 +105,7 @@ export function DashboardLayout({
     lg:py-6
   "
 >
-        <DashboardTopbar onMenuClick={() => setSidebarOpen(true)} />
+        
 
         <div className="max-w-[1600px] mx-auto w-full">
           {children}

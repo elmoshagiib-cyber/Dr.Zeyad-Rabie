@@ -115,25 +115,98 @@ export function CreateCourse() {
 
   return (
     <InstructorLayout>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-5 sm:pt-6 lg:pt-8 pb-16">
 
-        {/* ── Header ── */}
-        <div className="mb-8 sm:mb-10">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-2xl bg-violet-100 flex items-center justify-center">
-              <Sparkles size={20} className="text-violet-600" />
-            </div>
-            <span className="text-sm font-bold text-violet-600 bg-violet-50 px-3 py-1 rounded-full">
-              كورس جديد
-            </span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900">
-            إنشاء كورس جديد
-          </h1>
-          <p className="mt-2 text-slate-500 text-base sm:text-lg">
-            قم بإدخال بيانات الكورس الأساسية ثم انشره ليظهر داخل المنصة.
-          </p>
-        </div>
+{/* ── Hero ── */}
+<div
+  className="
+    relative
+    overflow-hidden
+    rounded-[36px]
+
+    bg-gradient-to-r
+    from-[#C65CFF]
+    via-[#B348FE]
+    to-[#9E2FFF]
+
+    px-6
+    lg:px-8
+
+    py-6
+    lg:py-7
+
+    text-white
+
+    shadow-[0_18px_45px_rgba(179,72,254,.22)]
+
+    mb-6
+  "
+>
+  {/* Glow */}
+  <div
+    className="
+      absolute
+      -top-24
+      -left-20
+      w-[320px]
+      h-[320px]
+      rounded-full
+      bg-white/10
+      blur-[120px]
+      pointer-events-none
+    "
+  />
+
+  <div
+    className="
+      absolute
+      -bottom-28
+      -right-20
+      w-[300px]
+      h-[300px]
+      rounded-full
+      bg-white/10
+      blur-[120px]
+      pointer-events-none
+    "
+  />
+
+  <div className="relative z-10 flex items-center justify-between gap-5">
+
+    {/* Icon */}
+    <div
+      className="
+        w-16
+        h-16
+
+        rounded-[24px]
+
+        flex
+        items-center
+        justify-center
+
+        bg-white/15
+        backdrop-blur-xl
+        border
+        border-white/20
+      "
+    >
+      <Sparkles size={28} />
+    </div>
+
+    {/* Text */}
+    <div className="flex-1 text-right">
+      <h1 className="text-3xl lg:text-4xl font-black tracking-tight">
+        إنشاء كورس جديد
+      </h1>
+
+      <p className="mt-2 text-sm lg:text-base text-white/90">
+        أضف بيانات الكورس الأساسية ثم انتقل لإدارة المحتوى والمحاضرات.
+      </p>
+    </div>
+
+  </div>
+</div>
 
         {/* ── Grid ── */}
         <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 items-start">
