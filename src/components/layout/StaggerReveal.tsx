@@ -1,25 +1,38 @@
 import { ReactNode } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+
+interface StaggerItemProps {
+  children: ReactNode;
+}
 
 export function StaggerItem({
   children,
-}: {
-  children: ReactNode;
-}) {
+}: StaggerItemProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <motion.div
-      variants={{
-        hidden: {
-          opacity: 0,
-          y: 60,
-        },
-        show: {
-          opacity: 1,
-          y: 0,
-        },
-      }}
+      variants={
+        prefersReducedMotion
+          ? {}
+          : {
+              hidden: {
+                opacity: 0,
+                y: 24,
+                scale: 0.97,
+                filter: "blur(6px)",
+              },
+              show: {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                filter: "blur(0px)",
+              },
+            }
+      }
       transition={{
-        duration: 0.7,
+        duration: 0.55,
+        ease: [0.22, 1, 0.36, 1],
       }}
     >
       {children}

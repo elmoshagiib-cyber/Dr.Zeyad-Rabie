@@ -1,28 +1,45 @@
 import { ReactNode } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+
+interface ScrollRevealProps {
+  children: ReactNode;
+  delay?: number;
+}
 
 export function ScrollReveal({
   children,
-}: {
-  children: ReactNode;
-}) {
+  delay = 0,
+}: ScrollRevealProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <motion.div
-      initial={{
-        opacity: 0,
-        y: 80,
-      }}
-      whileInView={{
-        opacity: 1,
-        y: 0,
-      }}
+      initial={
+        prefersReducedMotion
+          ? false
+          : {
+              opacity: 0,
+              y: 40,
+              scale: 0.98,
+            }
+      }
+      whileInView={
+        prefersReducedMotion
+          ? {}
+          : {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+            }
+      }
       viewport={{
         once: true,
-        amount: 0.15,
+        amount: 0.2,
       }}
       transition={{
-        duration: 0.9,
-        ease: "easeOut",
+        duration: 0.65,
+        delay,
+        ease: [0.22, 1, 0.36, 1],
       }}
     >
       {children}

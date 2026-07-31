@@ -9,7 +9,7 @@ import StudentRegisterPage from "./pages/StudentRegisterPage";
 import GradesPage from "./pages/student/GradesPage";
 import { StaffLoginPage } from "./pages/StaffLoginPage";
 import { useState } from "react";
-import SplashScreen from "./components/SplashScreen";
+
 /* Student */
 import { StudentDashboard } from "./pages/student/StudentDashboard";
 import { LessonPlayer } from "./pages/student/LessonPlayer";
@@ -316,20 +316,16 @@ function AppRoutes() {
 }
 <main className="pt-[80px]"></main>
 export default function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  
 
   return (
     <AppProvider>
       <ThemeProvider>
         <BrowserRouter>
           {/* هنا بنمنع أي عنصر يتعدى عرض الشاشة */}
-          <div className="overflow-x-hidden w-full">
-            {showSplash ? (
-              <SplashScreen onFinish={() => setShowSplash(false)} />
-            ) : (
-              <AppRoutes />
-            )}
-          </div>
+         <div className="overflow-x-hidden w-full">
+  <AppRoutes />
+</div>
         </BrowserRouter>
       </ThemeProvider>
     </AppProvider>
