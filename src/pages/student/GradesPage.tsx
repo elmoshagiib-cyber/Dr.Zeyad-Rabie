@@ -188,8 +188,14 @@ dark:border-[#262626]
 
                  <button
   className="
-    bg-[#F6AC08]
-hover:bg-[#E29E00]
+bg-gradient-to-r
+from-[#C65CFF]
+via-[#B348FE]
+to-[#9E2FFF]
+
+hover:from-[#B348FE]
+hover:via-[#A238F5]
+hover:to-[#8D28E8]
     text-white
     h-10
     sm:h-11
@@ -206,8 +212,8 @@ hover:bg-[#E29E00]
     sm:gap-2
     text-sm
     sm:text-base
-    shadow-[0_6px_18px_rgba(248,182,5,.25)]
-    hover:shadow-[0_10px_28px_rgba(248,182,5,.35)]
+shadow-[0_8px_22px_rgba(179,72,254,.28)]
+hover:shadow-[0_12px_30px_rgba(179,72,254,.4)]
     transition-all
     duration-300
     group-hover:scale-105
