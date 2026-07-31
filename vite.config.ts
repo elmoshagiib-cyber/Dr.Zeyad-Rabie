@@ -66,7 +66,7 @@ manifest: {
   scope: "/",
 
   display: "standalone",
-  
+  orientation: "landscape",
 
   theme_color: "#421651",
   background_color: "#ffffff",

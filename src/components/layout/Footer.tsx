@@ -2,10 +2,34 @@ import { useNavigate } from "react-router-dom";
 import { FaFacebookF, FaYoutube, FaInstagram, FaTiktok } from "react-icons/fa";
 
 const SOCIAL_LINKS = [
-  { icon: FaFacebookF, href: "#", label: "Facebook",  hover: "hover:bg-blue-600  hover:shadow-[0_0_22px_rgba(37,99,235,.5)]"  },
-  { icon: FaYoutube,   href: "#", label: "YouTube",   hover: "hover:bg-red-600   hover:shadow-[0_0_22px_rgba(220,38,38,.5)]"   },
-  { icon: FaInstagram, href: "#", label: "Instagram",  hover: "hover:bg-pink-600  hover:shadow-[0_0_22px_rgba(219,39,119,.5)]"  },
-  { icon: FaTiktok,    href: "#", label: "TikTok",    hover: "hover:bg-slate-700 hover:shadow-[0_0_22px_rgba(100,116,139,.5)]" },
+  {
+    icon: FaFacebookF,
+    href: "https://www.facebook.com/zeyad.rabi3?locale=ar_AR",
+    label: "Facebook",
+    hover:
+      "hover:bg-blue-600 hover:shadow-[0_0_22px_rgba(37,99,235,.5)]",
+  },
+  {
+    icon: FaInstagram,
+    href: "https://www.instagram.com/zeyad_rabi33/",
+    label: "Instagram",
+    hover:
+      "hover:bg-pink-600 hover:shadow-[0_0_22px_rgba(219,39,119,.5)]",
+  },
+  {
+    icon: FaYoutube,
+    href: "https://www.youtube.com/@zeyadrabie10",
+    label: "YouTube",
+    hover:
+      "hover:bg-red-600 hover:shadow-[0_0_22px_rgba(220,38,38,.5)]",
+  },
+  {
+    icon: FaTiktok,
+    href: "https://www.tiktok.com/@zeyadrabie172?lang=en",
+    label: "TikTok",
+    hover:
+      "hover:bg-slate-700 hover:shadow-[0_0_22px_rgba(100,116,139,.5)]",
+  },
 ];
 
 export function Footer() {
@@ -83,32 +107,62 @@ export function Footer() {
 
 
         {/* Credits card */}
-        <div className="
-          mt-10 sm:mt-12
-          mx-auto max-w-sm
-          rounded-2xl sm:rounded-3xl
-          border border-white/10
-          bg-white/5
-          backdrop-blur-xl
-          px-6 sm:px-8
-          py-6 sm:py-7
-        ">
-          <p className="text-slate-400 text-[11px] sm:text-[12px] tracking-widest uppercase mb-1">
-            Designed &amp; Developed by
-          </p>
-          <h3 className="text-[22px] sm:text-[26px] font-black text-[#F6AC08] mt-1">
-            Ahmed Dev
-          </h3>
-          <p className="text-slate-400 text-[12px] sm:text-[13px] mt-1">
-            Full Stack Developer
-          </p>
+{/* Developer Credits */}
+<div
+  className="
+    mt-8
+    w-fit
+    mx-auto
+    flex
+    items-center
+    justify-center
+    gap-3
+    rounded-2xl
+    bg-white/5
+    border
+    border-white/10
+    backdrop-blur-xl
+    px-5
+    py-3
+    text-[14px]
+    sm:text-[15px]
+    font-semibold
+  "
+>
+  <span className="text-white/85 whitespace-nowrap font-semibold">
+       &lt; All Rights Reserved ©2026 &gt;
 
-          <div className="h-px bg-white/10 my-4 sm:my-5" />
+  </span>
 
-          <p className="text-slate-500 text-[11px] sm:text-[12px]">
-            © 2026 منصة مستر زياد ربيع — جميع الحقوق محفوظة
-          </p>
-        </div>
+  <a
+    href="https://www.facebook.com/ahmedcysec?locale=ar_AR"
+    target="_blank"
+    rel="noopener noreferrer"
+   className="
+  px-5
+  py-2
+  rounded-2xl
+  bg-white/10
+  border
+  border-white/10
+  backdrop-blur-md
+  text-white
+  hover:bg-white/20
+  hover:border-white/20
+  hover:-translate-y-1
+  hover:scale-105
+  transition-all
+  duration-300
+"
+  >
+     Team Code Reapers
+  </a>
+
+
+  <span className="text-white/85 whitespace-nowrap font-semibold">
+       &lt; Developed By &gt;
+  </span>
+</div>
 
       </div>
     </footer>
