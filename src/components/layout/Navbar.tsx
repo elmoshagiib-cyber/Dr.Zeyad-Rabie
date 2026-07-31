@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GuestActions } from "./navbar/GuestActions";
 import { ThemeToggle } from "./navbar/ThemeToggle";
-import { SearchButton } from "./navbar/SearchButton";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { UserMenu } from "./navbar/UserMenu";
 
@@ -117,10 +117,7 @@ const handleScroll = () => {
     toggleTheme={toggleTheme}
   />
 
-  {/* Desktop Only */}
-  <div className="hidden md:block">
-    <SearchButton />
-  </div>
+  
 
 </div>
           {/* Right Side */}

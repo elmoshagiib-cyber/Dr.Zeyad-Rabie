@@ -10,7 +10,10 @@ import {
   ClipboardCheck,
   LayoutGrid,
 } from "lucide-react";
-
+import {
+  HiOutlineCalendarDays,
+  HiOutlineFolder,
+} from "react-icons/hi2";
 import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
 import { useApp } from "../context/AppContext";
@@ -327,6 +330,19 @@ return;
     );
   }
 
+
+
+  const formatDate = (date: string) => {
+  if (!date) return "";
+
+  return new Date(date).toLocaleDateString("ar-EG", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
   return (
     <div className="min-h-screen bg-white dark:bg-[#09090B]" dir="rtl">
       <Navbar />
@@ -459,13 +475,14 @@ return;
 {/* ── Title & grade ── */}
 <div className="text-left mb-7">
 
-  <h1
-    className="
-      text-[2.2rem]
-      sm:text-[3rem]
-      lg:text-[4.2rem]
-      xl:text-[5rem]
-      font-black
+<h1
+  className="
+text-[2rem]
+sm:text-[2.8rem]
+lg:text-[3.8rem]
+xl:text-[4.5rem]
+
+font-extrabold
       leading-[1]
       tracking-tight
       text-white
@@ -477,11 +494,12 @@ return;
 
   <p
     className="
-      mt-3
+      mt-6
       text-lg
       sm:text-xl
       font-bold
-      text-white/75
+      text-right
+      text-white
     "
   >
     {gradeLabels[course.grade] || course.grade}
@@ -673,27 +691,9 @@ shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)]
                   </button>
                 )}
 
-                {/* Stats rows */}
-                <div className="border-t border-gray-100 dark:border-gray-700 pt-3 sm:pt-4 space-y-2 sm:space-y-3">
-                  <div className="flex items-center justify-between text-xs sm:text-sm">
-                    <span className="font-bold text-gray-800 dark:text-gray-100">
-                      + 11 ساعة
-                    </span>
-                    <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                      <span>المحتوى</span>
-                      <BookOpen size={14} className="text-gray-400" />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between text-xs sm:text-sm">
-                    <span className="font-bold text-gray-800 dark:text-gray-100">
-                      + {lessonsCount} درس
-                    </span>
-                    <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                      <span>إجمالي الدروس</span>
-                      <ClipboardList size={14} className="text-gray-400" />
-                    </div>
-                  </div>
-                </div>
+
+
+
 
               </div>
             </div>

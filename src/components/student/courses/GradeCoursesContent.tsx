@@ -8,6 +8,9 @@ import { Button } from "../../ui/Button";
 import { BookOpen, Clock, Tag } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { ShieldCheck } from "lucide-react";
+
+import { HiOutlineCalendarDays } from "react-icons/hi2";
+import { HiOutlineFolder } from "react-icons/hi2";
 interface GradeCoursesContentProps {
   grade: string;
 }
@@ -180,6 +183,16 @@ alert("تم تفعيل الاشتراك بنجاح ✅");
 };
 
 
+const formatDate = (date: string) => {
+  if (!date) return "";
+
+  return new Date(date).toLocaleDateString("ar-EG", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
 
  const CourseCard = ({ course }: { course: any }) => {
 
@@ -206,15 +219,14 @@ alert("تم تفعيل الاشتراك بنجاح ✅");
 className="
   relative
   overflow-hidden
-  h-[220px]
-  sm:h-[260px]
-  lg:h-[320px]
+aspect-video
+w-full
   rounded-[24px]
   sm:rounded-[28px]
   lg:rounded-[32px]
-  -mx-4
-  sm:-mx-8
-  lg:-mx-20
+mx-0
+sm:mx-0
+lg:mx-0
 "
 >
         <img
@@ -287,9 +299,9 @@ backdrop-blur-md backdrop-blur-sm text-white
   relative
   z-20
   -mt-12
--mx-2
-sm:-mx-4
-lg:-mx-10
+mx-3
+sm:mx-5
+lg:mx-7
   mb-5
   rounded-[28px]
   bg-white
@@ -362,24 +374,24 @@ sm:leading-8
   "
 >
 <Button
-  className="
-    w-full
-sm:flex-1
-h-11
-    rounded-xl
-    text-[15px]
-    font-bold
-    text-white
-    bg-gradient-to-r
-    from-[#B348FE]
-    to-[#8D2BFF]
-    hover:from-[#9E2FFF]
-    hover:to-[#7E22CE]
-    transition-all
-    duration-300
-    shadow-lg
-    shadow-[#B348FE]/30
-  "
+className="
+  flex-1
+  h-12
+  rounded-2xl
+  font-black
+  text-[15px]
+  text-white
+
+  bg-[#B348FE]
+  hover:bg-[#9E2FFF]
+
+  shadow-lg
+  shadow-[#B348FE]/25
+
+  transition-all
+  duration-300
+  hover:-translate-y-0.5
+"
   onClick={() =>
     hasAccess
       ? navigate(`/courses/${course.id}`)
@@ -392,21 +404,30 @@ h-11
   {!course.is_free && !myCourses.includes(course.id) && (
 <Button
   variant="outline"
-  className="
-    flex-1
-    h-11
-    rounded-xl
-    text-[15px]
-    font-bold
-    border-[#343434]
-    bg-slate-100
-    text-slate-700
-    hover:bg-slate-200
+className="
+  flex-1
+  h-12
+  rounded-2xl
+  font-black
+  text-[15px]
 
-    dark:bg-[#1E1E1E]
-    dark:text-white
-    dark:hover:bg-[#292929]
-  "
+  border-2
+  border-[#B348FE]
+
+  bg-transparent
+  text-[#B348FE]
+
+  hover:bg-transparent
+  hover:text-[#B348FE]
+  hover:border-[#B348FE]
+
+  active:bg-transparent
+
+  shadow-none
+  transition-all
+  duration-300
+"
+  onClick={() => navigate(`/courses/${course.id}`)}
 >
   عرض المحتوى
 </Button>
@@ -453,50 +474,74 @@ h-11
 
 ) : (
 
-  <div className="flex items-start justify-between gap-6">
+<div className="flex items-end justify-between gap-6">
 
-    <div
+  {/* السعر */}
+  <div
+    className="
+      inline-flex
+      items-center
+      gap-1
+      rounded-xl
+      bg-[#B348FE]
+      p-1
+      shrink-0
+    "
+  >
+    <span
       className="
-        inline-flex
-        items-center
-        gap-1
-        rounded-xl
-        bg-[#B348FE]
-        p-1
-        shrink-0
+        bg-white
+        text-[#111111]
+        rounded-md
+        px-3
+        py-[5px]
+        min-w-[46px]
+        text-center
+        text-[13px]
+        font-black
+        leading-none
       "
     >
-      <span
-        className="
-          bg-white
-          text-[#111111]
-          rounded-md
-          px-3
-          py-[5px]
-          min-w-[46px]
-          text-center
-          text-[13px]
-          font-black
-          leading-none
-        "
-      >
-        {course.price}
-      </span>
+      {Number(course.price).toFixed(2)}
+    </span>
 
-      <span
-        className="
-          px-2
-          text-[13px]
-          font-black
-          text-white
-          whitespace-nowrap
-        "
-      >
-        جنيه
-      </span>
-    </div>
-
+    <span
+      className="
+        px-2
+        text-[13px]
+        font-black
+        text-white
+        whitespace-nowrap
+      "
+    >
+      جنيه
+    </span>
   </div>
+
+  {/* التاريخ */}
+<div className="flex flex-col gap-2">
+
+  <div className="flex items-center text-slate-500 dark:text-slate-400">
+    <span className="text-[13px] font-medium">
+      {formatDate(course.created_at)}
+    </span>
+
+    <HiOutlineCalendarDays className="mr-2 text-[17px] shrink-0" />
+  </div>
+
+  <div className="flex items-center text-slate-500 dark:text-slate-400">
+    <span className="text-[13px] font-medium">
+      {formatDate(course.updated_at)}
+    </span>
+
+    <HiOutlineFolder className="mr-2 text-[17px] shrink-0" />
+  </div>
+
+</div>
+
+</div>
+
+
 
 )}
 
@@ -543,8 +588,8 @@ text-3xl">
 
         <div className="
           grid
-          grid-cols-1
-md:grid-cols-2
+grid-cols-1
+lg:grid-cols-2
 2xl:grid-cols-3
           gap-4 sm:gap-6
         ">
@@ -567,7 +612,7 @@ md:grid-cols-2
  
 return (
   <>
-    <div className="max-w-[1600px] mx-auto px-6 lg:px-10 py-8 sm:py-12 lg:py-16">
+    <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-8 sm:py-12 lg:py-16">
 
       {loading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">

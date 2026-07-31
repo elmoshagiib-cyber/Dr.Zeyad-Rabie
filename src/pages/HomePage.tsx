@@ -230,6 +230,19 @@ const formatAnnouncementDate = (date: string) => {
   });
 };
 
+const [scrollY, setScrollY] = useState(0);
+
+useEffect(() => {
+  const handleScroll = () => {
+    setScrollY(window.scrollY);
+  };
+
+  window.addEventListener("scroll", handleScroll);
+
+  return () =>
+    window.removeEventListener("scroll", handleScroll);
+}, []);
+
 return (
     <div className="min-h-screen bg-white dark:bg-[#0b0715]" dir="rtl">
      <Navbar />
@@ -392,6 +405,10 @@ duration:.8,
 delay:.25,
 ease:[0.22,1,0.36,1]
 }}
+style={{
+  y: scrollY * 0.18,
+  opacity: Math.max(1 - scrollY / 700, 0),
+}}
   className="
   mt-4
   sm:mt-6
@@ -412,6 +429,8 @@ ease:[0.22,1,0.36,1]
     md:text-[44px]
     lg:text-[52px]
     font-bold
+    text-center
+lg:text-center
     leading-[1.25]
     tracking-[-0.5px]
     text-slate-900
@@ -425,12 +444,14 @@ ease:[0.22,1,0.36,1]
   block
   mt-1.5
   sm:mt-2
-  text-[32px]
-  xs:text-[36px]
-  sm:text-[44px]
-  md:text-[54px]
-  lg:text-[64px]
-  font-bold
+    text-[26px]
+    xs:text-[28px]
+    sm:text-[36px]
+    md:text-[44px]
+    lg:text-[52px]
+  font-semibold
+  text-center
+lg:text-center
   leading-tight
   tracking-[-1px]
   text-[#F6AC08]
@@ -452,6 +473,7 @@ ease:[0.22,1,0.36,1]
     lg:max-w-[620px]
     mx-auto
     lg:mx-0
+    
     text-[15px]
     sm:text-[17px]
     lg:text-[20px]
@@ -559,6 +581,10 @@ transition={{
 duration:1,
 delay:.45,
 ease:[0.22,1,0.36,1]
+}}
+style={{
+  y: scrollY * -0.08,
+  scale: Math.max(1 - scrollY / 3500, 0.94),
 }}
   className="
 mt-10
