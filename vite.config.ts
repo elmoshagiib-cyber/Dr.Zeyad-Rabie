@@ -11,7 +11,41 @@ const __dirname = path.dirname(__filename);
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), VitePWA({
-  registerType: "prompt",
+  registerType: "autoUpdate",
+
+workbox: {
+  cleanupOutdatedCaches: true,
+  clientsClaim: true,
+  skipWaiting: true,
+
+  navigateFallback: "/index.html",
+
+  runtimeCaching: [
+    {
+      urlPattern: ({ request }) =>
+        request.destination === "image",
+
+      handler: "CacheFirst",
+
+      options: {
+        cacheName: "images",
+
+        expiration: {
+          maxEntries: 150,
+          maxAgeSeconds: 60 * 60 * 24 * 30,
+        },
+      },
+    },
+
+    {
+      urlPattern: ({ request }) =>
+        request.destination === "script" ||
+        request.destination === "style",
+
+      handler: "StaleWhileRevalidate",
+    },
+  ],
+},
 
   includeAssets: [
   "favicon.png",
@@ -32,7 +66,7 @@ manifest: {
   scope: "/",
 
   display: "standalone",
-  orientation: "portrait",
+  
 
   theme_color: "#421651",
   background_color: "#ffffff",

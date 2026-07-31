@@ -15,6 +15,7 @@ import { Avatar } from "../components/ui/Avatar";
 import { Download } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import GradeCoursesContent from "../components/student/courses/GradeCoursesContent";
+import toast from "react-hot-toast";
 import {
   ChevronRight,
   Play,
@@ -36,6 +37,8 @@ import {
   ANNOUNCEMENTS,
   GRADES,
 } from "../data/mockData";
+
+import InstallToast from "../components/ui/InstallToast";
 
 const gradeColors: Record<string, string> = {
   sec_3: "rose",
@@ -93,15 +96,30 @@ const loadCourses = async () => {
   }
 };
 
+
+
 const installApp = async () => {
-  if (!deferredPrompt) return;
+  if (!deferredPrompt) {
+    toast("التطبيق مثبت بالفعل أو غير متاح للتثبيت.");
+    return;
+  }
+
+  toast.custom(<InstallToast type="loading" />, {
+    id: "install",
+    duration: Infinity,
+  });
 
   deferredPrompt.prompt();
 
   const { outcome } = await deferredPrompt.userChoice;
 
   if (outcome === "accepted") {
-    console.log("PWA Installed");
+    toast.custom(<InstallToast type="success" />, {
+      id: "install",
+      duration: 4000,
+    });
+  } else {
+    toast.dismiss("install");
   }
 
   setDeferredPrompt(null);

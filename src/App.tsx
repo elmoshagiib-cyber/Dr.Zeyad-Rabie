@@ -9,7 +9,7 @@ import StudentRegisterPage from "./pages/StudentRegisterPage";
 import GradesPage from "./pages/student/GradesPage";
 import { StaffLoginPage } from "./pages/StaffLoginPage";
 import { useState } from "react";
-
+import { Toaster } from "react-hot-toast";
 /* Student */
 import { StudentDashboard } from "./pages/student/StudentDashboard";
 import { LessonPlayer } from "./pages/student/LessonPlayer";
@@ -321,12 +321,38 @@ export default function App() {
   return (
     <AppProvider>
       <ThemeProvider>
-        <BrowserRouter>
-          {/* هنا بنمنع أي عنصر يتعدى عرض الشاشة */}
-         <div className="overflow-x-hidden w-full">
-  <AppRoutes />
-</div>
-        </BrowserRouter>
+       <BrowserRouter>
+  <Toaster
+    position="top-center"
+    toastOptions={{
+      duration: 4000,
+      style: {
+        direction: "rtl",
+        borderRadius: "16px",
+        background: "#ffffff",
+        color: "#111827",
+        fontWeight: 600,
+        boxShadow: "0 15px 40px rgba(0,0,0,.12)",
+      },
+      success: {
+        iconTheme: {
+          primary: "#B348FE",
+          secondary: "#ffffff",
+        },
+      },
+      error: {
+        iconTheme: {
+          primary: "#EF4444",
+          secondary: "#ffffff",
+        },
+      },
+    }}
+  />
+
+  <div className="overflow-x-hidden w-full">
+    <AppRoutes />
+  </div>
+</BrowserRouter>
       </ThemeProvider>
     </AppProvider>
   );
