@@ -35,6 +35,8 @@ import { InstructorAttendance } from "./pages/instructor/InstructorAttendance";
 import { EditCourse } from "./pages/instructor/EditCourse";
 import SubscriptionCodes from "./pages/instructor/SubscriptionCodes";
 import { HomeworkDetailsPage } from "./pages/student/HomeworkDetailsPage";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 /* Admin */
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 
@@ -64,6 +66,35 @@ function ProtectedRoute({
   }
 
   return <>{children}</>;
+}
+
+function DomainRedirect() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const host = window.location.hostname;
+
+    const isAdminDomain = host === "admin.zeyadrabie.com";
+    const isMainDomain =
+      host === "zeyadrabie.com" ||
+      host === "www.zeyadrabie.com" ||
+      host === "dr-zeyad-rabie.vercel.app";
+
+    // لو فتح admin من غير مسار
+    if (isAdminDomain && location.pathname === "/") {
+      navigate("/staff-login", { replace: true });
+      return;
+    }
+
+    // منع فتح صفحة staff-login من الموقع الرئيسي
+    if (isMainDomain && location.pathname === "/staff-login") {
+      window.location.replace("https://admin.zeyadrabie.com");
+      return;
+    }
+  }, [location.pathname, navigate]);
+
+  return null;
 }
 
 function AppRoutes() {
@@ -349,9 +380,12 @@ export default function App() {
     }}
   />
 
-  <div className="overflow-x-hidden w-full">
-    <AppRoutes />
-  </div>
+<DomainRedirect />
+
+<div className="overflow-x-hidden w-full">
+  <AppRoutes />
+</div>
+
 </BrowserRouter>
       </ThemeProvider>
     </AppProvider>
