@@ -31,11 +31,13 @@ export default async function handler(req: any, res: any) {
       Key: key,
       ContentType: fileType,
     });
-
+console.log("R2_ENDPOINT =", process.env.R2_ENDPOINT);
+console.log("R2_BUCKET_NAME =", process.env.R2_BUCKET_NAME);
+console.log("R2_PUBLIC_URL =", process.env.R2_PUBLIC_URL);
     const uploadUrl = await getSignedUrl(client, command, {
       expiresIn: 60 * 5,
     });
-
+console.log("UPLOAD URL =", uploadUrl);
     return res.status(200).json({
       uploadUrl,
       key,
