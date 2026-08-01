@@ -975,40 +975,13 @@ async function handleThumbnailChange(
     );
   }
 
-  // ── Video Upload ─────────────────────────────────────────
+// ── Video Upload ─────────────────────────────────────────
 async function uploadVideo(
   sectionId: string,
   itemId: string,
   file: File
 ) {
   if (!course) return;
-setCourse((prev) => {
-  if (!prev) return prev;
-
-  return {
-    ...prev,
-    sections: prev.sections.map((section) => ({
-      ...section,
-      items: section.items.map((item) => {
-        if (item.id !== itemId) return item;
-
-        return {
-          ...item,
-          fileName: file.name,
-          fileSize: file.size,
-          status: "uploading",
-          uploadProgress: 0,
-        };
-      }),
-    })),
-  };
-});
-  
-  const fileExt = file.name.split(".").pop();
- const data = await uploadToR2(
-  file,
-  `course-videos/${course.id}/${sectionId}`
-);
 
   setCourse((prev) => {
     if (!prev) return prev;
@@ -1022,17 +995,107 @@ setCourse((prev) => {
 
           return {
             ...item,
-videoUrl: data.url,
-storagePath: data.key,
             fileName: file.name,
             fileSize: file.size,
-            uploadProgress: 100,
-            status: "done",
+            status: "uploading",
+            uploadProgress: 0,
           };
         }),
       })),
     };
   });
+
+  // ── محاكاة تقدم الرفع بشكل تدريجي حتى 90% ──
+  const progressInterval = setInterval(() => {
+    setCourse((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        sections: prev.sections.map((section) => ({
+          ...section,
+          items: section.items.map((item) => {
+            if (item.id !== itemId || item.type !== "video") return item;
+            if (item.status !== "uploading") return item;
+
+            const next = Math.min(item.uploadProgress + Math.random() * 12 + 3, 90);
+
+            return {
+              ...item,
+              uploadProgress: next,
+            };
+          }),
+        })),
+      };
+    });
+  }, 400);
+
+  try {
+    const data = await uploadToR2(
+      file,
+      `course-videos/${course.id}/${sectionId}`
+    );
+
+    clearInterval(progressInterval);
+
+    setCourse((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        sections: prev.sections.map((section) => ({
+          ...section,
+          items: section.items.map((item) => {
+            if (item.id !== itemId) return item;
+
+            return {
+              ...item,
+              videoUrl: data.url,
+              storagePath: data.key,
+              fileName: file.name,
+              fileSize: file.size,
+              uploadProgress: 100,
+              status: "done",
+            };
+          }),
+        })),
+      };
+    });
+  } catch (err: any) {
+    clearInterval(progressInterval);
+
+    setCourse((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        sections: prev.sections.map((section) => ({
+          ...section,
+          items: section.items.map((item) => {
+            if (item.id !== itemId) return item;
+
+            return {
+              ...item,
+              status: "error",
+              uploadProgress: 0,
+            };
+          }),
+        })),
+      };
+    });
+
+    console.error("Video Upload Error:", err);
+    console.log("Message:", err?.message);
+    console.log("Name:", err?.name);
+    console.log("Response:", err?.response);
+    console.log("Status:", err?.status || err?.statusCode);
+    console.log("Stack:", err?.stack);
+
+    alert(
+      "فشل رفع الفيديو: " +
+        (err?.message || err?.toString() || "خطأ غير معروف")
+    );
+  }
 }
 
   // ── PDF Upload ───────────────────────────────────────────
@@ -1043,24 +1106,6 @@ async function uploadPdf(
 ) {
   if (!course) return;
 
-  const fileExt = file.name.split(".").pop();
-  const filePath = `${course.id}/${sectionId}/${Date.now()}.${fileExt}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from("course-files")
-    .upload(filePath, file, {
-      upsert: true,
-    });
-
-  if (uploadError) {
-    alert(uploadError.message);
-    return;
-  }
-
-  const { data } = supabase.storage
-    .from("course-files")
-    .getPublicUrl(filePath);
-
   setCourse((prev) => {
     if (!prev) return prev;
 
@@ -1073,17 +1118,106 @@ async function uploadPdf(
 
           return {
             ...item,
-            pdfUrl: data.publicUrl,
-storagePath: filePath,
             fileName: file.name,
             fileSize: file.size,
-            uploadProgress: 100,
-            status: "done",
+            status: "uploading",
+            uploadProgress: 0,
           };
         }),
       })),
     };
   });
+
+  const progressInterval = setInterval(() => {
+    setCourse((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        sections: prev.sections.map((section) => ({
+          ...section,
+          items: section.items.map((item) => {
+            if (item.id !== itemId || item.type !== "pdf") return item;
+            if (item.status !== "uploading") return item;
+
+            const next = Math.min(item.uploadProgress + Math.random() * 12 + 3, 90);
+
+            return {
+              ...item,
+              uploadProgress: next,
+            };
+          }),
+        })),
+      };
+    });
+  }, 400);
+
+  try {
+    const data = await uploadToR2(
+      file,
+      `course-videos/${course.id}/${sectionId}`
+    );
+
+    clearInterval(progressInterval);
+
+    setCourse((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        sections: prev.sections.map((section) => ({
+          ...section,
+          items: section.items.map((item) => {
+            if (item.id !== itemId) return item;
+
+            return {
+              ...item,
+              pdfUrl: data.url,
+              storagePath: data.key,
+              fileName: file.name,
+              fileSize: file.size,
+              uploadProgress: 100,
+              status: "done",
+            };
+          }),
+        })),
+      };
+    });
+  } catch (err: any) {
+    clearInterval(progressInterval);
+
+    setCourse((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        sections: prev.sections.map((section) => ({
+          ...section,
+          items: section.items.map((item) => {
+            if (item.id !== itemId) return item;
+
+            return {
+              ...item,
+              status: "error",
+              uploadProgress: 0,
+            };
+          }),
+        })),
+      };
+    });
+
+    console.error("PDF Upload Error:", err);
+    console.log("Message:", err?.message);
+    console.log("Name:", err?.name);
+    console.log("Response:", err?.response);
+    console.log("Status:", err?.status || err?.statusCode);
+    console.log("Stack:", err?.stack);
+
+    alert(
+      "فشل رفع الملف: " +
+        (err?.message || err?.toString() || "خطأ غير معروف")
+    );
+  }
 }
 
   // ── Quiz Helpers ─────────────────────────────────────────

@@ -75,30 +75,32 @@ export function ThemeToggle({ isDark, toggleTheme }: ThemeToggleProps) {
         padding: TRACK.padding,
       }}
       className="
-        group
-        relative
-        isolate
-        flex
-        items-center
-        shrink-0
-        rounded-full
-        cursor-pointer
-        overflow-hidden
-        bg-gradient-to-r
-        from-[#C65CFF]
-        via-[#B348FE]
-        to-[#9E2FFF]
-        shadow-[0_4px_14px_-2px_rgba(179,72,254,0.45),inset_0_1px_0_0_rgba(255,255,255,0.25)]
-        hover:shadow-[0_6px_20px_-2px_rgba(179,72,254,0.55),inset_0_1px_0_0_rgba(255,255,255,0.3)]
-        transition-shadow
-        duration-300
-        focus-visible:outline-none
-        focus-visible:ring-2
-        focus-visible:ring-[#B348FE]
-        focus-visible:ring-offset-2
-        focus-visible:ring-offset-white
-        dark:focus-visible:ring-offset-neutral-950
-      "
+  group
+  relative
+  isolate
+  flex
+  items-center
+  shrink-0
+  rounded-full
+  cursor-pointer
+  overflow-hidden
+
+  bg-[#B348FE]
+
+  shadow-[0_4px_14px_rgba(179,72,254,.35)]
+  hover:bg-[#A63AF7]
+  hover:shadow-[0_6px_20px_rgba(179,72,254,.45)]
+
+  transition-all
+  duration-300
+
+  focus-visible:outline-none
+  focus-visible:ring-2
+  focus-visible:ring-[#B348FE]
+  focus-visible:ring-offset-2
+  focus-visible:ring-offset-white
+  dark:focus-visible:ring-offset-neutral-950
+"
     >
       {/* Subtle inner glow */}
       <span
