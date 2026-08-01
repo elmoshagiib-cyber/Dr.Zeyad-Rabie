@@ -354,6 +354,44 @@ const response = await fetch("/api/video-url", {
     }
   };
 
+
+  
+  const openPdf = async (lessonId: string) => {
+  if (!lessonId) {
+    alert("الملف غير متوفر");
+    return;
+  }
+
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const response = await fetch("/api/pdf-url", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.access_token}`,
+      },
+      body: JSON.stringify({
+        lessonId,
+      }),
+    });
+
+    if (!response.ok) {
+      alert("تعذر فتح الملف");
+      return;
+    }
+
+    const { url } = await response.json();
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  } catch (error) {
+    console.error(error);
+    alert("حدث خطأ أثناء فتح الملف");
+  }
+};
+
   const closeVideoPlayer = () => {
     setVideoPlayerOpen(false);
     setVideoPlayerUrl("");
@@ -880,18 +918,7 @@ hover:pr-8
 
                                   {isFile && (
                                     <button
-                                      onClick={() => {
-                                        if (!lesson.url) {
-                                          alert("رابط الملف غير موجود");
-                                          return;
-                                        }
-
-                                        window.open(
-                                          lesson.url,
-                                          "_blank",
-                                          "noopener,noreferrer"
-                                        );
-                                      }}
+onClick={() => openPdf(lesson.id)}
                                       className="flex items-center gap-1.5 sm:gap-2 bg-blue-500 hover:bg-blue-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-blue-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                     >
                                       <FileText size={13} />
