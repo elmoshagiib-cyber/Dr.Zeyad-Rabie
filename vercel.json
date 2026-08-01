@@ -5,19 +5,7 @@
       "destination": "/api/$1"
     },
     {
-      "source": "/instructor/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/student/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/staff-login",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/(.*)",
+      "source": "/((?!api|assets|fonts|images|favicon.ico|favicon.png|manifest.webmanifest|sw.js|workbox-.*).*)",
       "destination": "/index.html"
     }
   ]
