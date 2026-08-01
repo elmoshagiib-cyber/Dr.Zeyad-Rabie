@@ -350,6 +350,21 @@ body {
   }
 }
 
+@keyframes uploadPulse {
+  0% {
+    margin-left: 0%;
+    width: 30%;
+  }
+  50% {
+    margin-left: 60%;
+    width: 40%;
+  }
+  100% {
+    margin-left: 0%;
+    width: 30%;
+  }
+}
+
 .animate-float {
   animation: floatPremium 6s ease-in-out infinite;
   transform-origin: center center;

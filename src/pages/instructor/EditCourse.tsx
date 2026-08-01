@@ -1471,19 +1471,16 @@ async function uploadPdf(
               </label>
             ) : item.status === "uploading" ? (
               <div className="w-full p-5 border border-blue-200 rounded-2xl bg-blue-50 space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2 text-blue-700 font-medium">
-                    <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    جاري الرفع...
-                  </div>
-                  <span className="text-blue-600 font-bold">{item.uploadProgress}%</span>
+                <div className="flex items-center gap-2 text-blue-700 font-medium text-sm">
+                  <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  جاري رفع الفيديو، قد يستغرق بعض الوقت...
                 </div>
-                <div className="w-full bg-blue-200 rounded-full h-2">
+                <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
                   <div
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${item.uploadProgress}%` }}
+                    className="h-2 bg-blue-600 rounded-full animate-[uploadPulse_1.4s_ease-in-out_infinite]"
+                    style={{ width: "40%" }}
                   />
                 </div>
                 <p className="text-xs text-blue-600 truncate">{item.fileName} — {formatFileSize(item.fileSize)}</p>
@@ -1527,7 +1524,7 @@ async function uploadPdf(
     );
   }
 
-  // ── Render PDF Item ──────────────────────────────────────
+ // ── Render PDF Item ──────────────────────────────────────
   function renderPdfItem(sectionId: string, item: PdfItem, itemIndex: number, totalItems: number) {
     return (
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:border-slate-300">
@@ -1601,12 +1598,12 @@ async function uploadPdf(
               </label>
             ) : item.status === "uploading" ? (
               <div className="w-full p-5 border border-rose-200 rounded-2xl bg-rose-50 space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-rose-700 font-medium">جاري الرفع...</span>
-                  <span className="text-rose-600 font-bold">{item.uploadProgress}%</span>
-                </div>
-                <div className="w-full bg-rose-200 rounded-full h-2">
-                  <div className="bg-rose-600 h-2 rounded-full transition-all duration-300" style={{ width: `${item.uploadProgress}%` }} />
+                <span className="text-rose-700 font-medium text-sm">جاري رفع الملف، قد يستغرق بعض الوقت...</span>
+                <div className="w-full bg-rose-200 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="h-2 bg-rose-600 rounded-full animate-[uploadPulse_1.4s_ease-in-out_infinite]"
+                    style={{ width: "40%" }}
+                  />
                 </div>
                 <p className="text-xs text-rose-600 truncate">{item.fileName}</p>
               </div>
@@ -1644,7 +1641,7 @@ async function uploadPdf(
       
     );
   }
-
+  
   // ── Render Quiz Item ─────────────────────────────────────
   function renderQuizItem(sectionId: string, item: QuizItem, itemIndex: number, totalItems: number) {
     return (
