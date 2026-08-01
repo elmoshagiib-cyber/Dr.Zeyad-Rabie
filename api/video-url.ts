@@ -125,11 +125,17 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({
       url: signedUrl,
     });
-  } catch (err) {
-    console.error(err);
+} catch (err: any) {
+  console.error("========== VIDEO API ERROR ==========");
+  console.error(err);
+  console.error("MESSAGE:", err?.message);
+  console.error("STACK:", err?.stack);
+  console.error("CAUSE:", err?.cause);
 
-    return res.status(500).json({
-      error: "Failed to generate signed url",
-    });
-  }
+  return res.status(500).json({
+    success: false,
+    message: err?.message || "Unknown error",
+    stack: err?.stack || null,
+  });
+}
 }
