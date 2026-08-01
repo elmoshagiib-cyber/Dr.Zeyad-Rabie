@@ -9,6 +9,7 @@ import {
   ClipboardList,
   ClipboardCheck,
   LayoutGrid,
+  X,
 } from "lucide-react";
 import {
   HiOutlineCalendarDays,
@@ -39,8 +40,12 @@ export function CourseDetailPage() {
   const [openUnit, setOpenUnit] = useState<string | null>(null);
   const [units, setUnits] = useState<any[]>([]);
   const [course, setCourse] = useState<any>(null);
-const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-const [subscriptionCode, setSubscriptionCode] = useState("");
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [subscriptionCode, setSubscriptionCode] = useState("");
+
+  const [videoPlayerOpen, setVideoPlayerOpen] = useState(false);
+  const [videoPlayerUrl, setVideoPlayerUrl] = useState("");
+  const [videoPlayerTitle, setVideoPlayerTitle] = useState("");
 
   const loadCourse = async () => {
     const { data, error } = await supabase
@@ -96,14 +101,12 @@ const [subscriptionCode, setSubscriptionCode] = useState("");
     setUnits(units);
   };
 
-  // ✅ Always resolves the numeric student id from auth_id
-const getStudentId = (): number | null => {
-  if (!user) return null;
+  const getStudentId = (): number | null => {
+    if (!user) return null;
 
-  return Number(user.id);
-};
+    return Number(user.id);
+  };
 
-  // ✅ Fixed: uses getStudentId() instead of Number(user.id)
   const checkEnrollment = async () => {
     if (!user || !course) return;
 
@@ -116,20 +119,20 @@ const getStudentId = (): number | null => {
 
     console.log("checkEnrollment → studentId:", studentId, "course.id:", course.id);
 
-const { data, error } = await supabase
-  .from("student_courses")
-  .select("*")
-  .eq("student_id", studentId)
-  .eq("course_id", course.id)
-  .eq("active", true);
+    const { data, error } = await supabase
+      .from("student_courses")
+      .select("*")
+      .eq("student_id", studentId)
+      .eq("course_id", course.id)
+      .eq("active", true);
 
-console.log("CHECK DATA =", data);
-console.log("CHECK ERROR =", error);
-console.log("COURSE ID =", course.id);
-console.log("STUDENT ID =", studentId);
+    console.log("CHECK DATA =", data);
+    console.log("CHECK ERROR =", error);
+    console.log("COURSE ID =", course.id);
+    console.log("STUDENT ID =", studentId);
 
-setIsEnrolled((data?.length ?? 0) > 0);
-console.log("IS ENROLLED SHOULD BE =", (data?.length ?? 0) > 0);
+    setIsEnrolled((data?.length ?? 0) > 0);
+    console.log("IS ENROLLED SHOULD BE =", (data?.length ?? 0) > 0);
   };
 
   useEffect(() => {
@@ -143,10 +146,7 @@ console.log("IS ENROLLED SHOULD BE =", (data?.length ?? 0) > 0);
     }
   }, [user, course]);
 
-  // ✅ Fixed: checks existing enrollment before insert to avoid duplicates
   const handleEnroll = async () => {
-
-
     if (!user) {
       navigate("/login");
       return;
@@ -162,7 +162,6 @@ console.log("IS ENROLLED SHOULD BE =", (data?.length ?? 0) > 0);
         return;
       }
 
-      // Check if already enrolled before inserting
       const { data: existing } = await supabase
         .from("student_courses")
         .select("id")
@@ -178,17 +177,17 @@ console.log("IS ENROLLED SHOULD BE =", (data?.length ?? 0) > 0);
       }
 
       const { data, error } = await supabase
-  .from("student_courses")
-  .insert({
-    student_id: studentId,
-    course_id: course.id,
-    active: true,
-    subscription_type: "مجاني",
-  })
-  .select();
+        .from("student_courses")
+        .insert({
+          student_id: studentId,
+          course_id: course.id,
+          active: true,
+          subscription_type: "مجاني",
+        })
+        .select();
 
-console.log("INSERT DATA =", data);
-console.log("INSERT ERROR =", error);
+      console.log("INSERT DATA =", data);
+      console.log("INSERT ERROR =", error);
       console.log("INSERT DATA =", data);
       console.log("INSERT ERROR =", error);
       console.log("ERROR CODE =", error?.code);
@@ -206,7 +205,7 @@ console.log("INSERT ERROR =", error);
     }
 
     setShowSubscriptionModal(true);
-return;
+    return;
   };
 
   const lessonsCount = units.reduce(
@@ -215,90 +214,90 @@ return;
   );
 
   const activateSubscription = async () => {
-  if (!course) return;
+    if (!course) return;
 
-  const { data, error } = await supabase
-    .from("subscription_codes")
-    .select("*")
-    .eq("code", subscriptionCode)
-    .single();
+    const { data, error } = await supabase
+      .from("subscription_codes")
+      .select("*")
+      .eq("code", subscriptionCode)
+      .single();
 
-  if (error || !data) {
-    alert("كود الاشتراك غير صحيح");
-    return;
-  }
+    if (error || !data) {
+      alert("كود الاشتراك غير صحيح");
+      return;
+    }
 
-  if (data.status !== "active") {
-    alert("هذا الكود غير صالح أو تم استخدامه");
-    return;
-  }
+    if (data.status !== "active") {
+      alert("هذا الكود غير صالح أو تم استخدامه");
+      return;
+    }
 
-  if (data.course_id !== course.id) {
-    alert("هذا الكود لا يخص هذا الكورس");
-    return;
-  }
+    if (data.course_id !== course.id) {
+      alert("هذا الكود لا يخص هذا الكورس");
+      return;
+    }
 
-  const studentId = getStudentId();
+    const studentId = getStudentId();
 
-  if (!studentId) {
-    alert("يجب تسجيل الدخول أولاً");
-    return;
-  }
+    if (!studentId) {
+      alert("يجب تسجيل الدخول أولاً");
+      return;
+    }
 
-  const { data: existingSubscription } = await supabase
-    .from("student_courses")
-    .select("id")
-    .eq("student_id", studentId)
-    .eq("course_id", course.id)
-    .eq("active", true)
-    .maybeSingle();
+    const { data: existingSubscription } = await supabase
+      .from("student_courses")
+      .select("id")
+      .eq("student_id", studentId)
+      .eq("course_id", course.id)
+      .eq("active", true)
+      .maybeSingle();
 
-  if (existingSubscription) {
-    alert("أنت مشترك بالفعل في هذا الكورس.");
-    return;
-  }
+    if (existingSubscription) {
+      alert("أنت مشترك بالفعل في هذا الكورس.");
+      return;
+    }
 
-  const { error: enrollError } = await supabase
-    .from("student_courses")
-    .insert({
-      student_id: studentId,
-      course_id: course.id,
-      active: true,
-      subscription_type: "كود اشتراك",
-      expires_at: new Date(
-        Date.now() + data.duration_days * 24 * 60 * 60 * 1000
-      ).toISOString(),
-    });
+    const { error: enrollError } = await supabase
+      .from("student_courses")
+      .insert({
+        student_id: studentId,
+        course_id: course.id,
+        active: true,
+        subscription_type: "كود اشتراك",
+        expires_at: new Date(
+          Date.now() + data.duration_days * 24 * 60 * 60 * 1000
+        ).toISOString(),
+      });
 
-  if (enrollError) {
-    alert("حدث خطأ أثناء إضافة الاشتراك");
-    return;
-  }
+    if (enrollError) {
+      alert("حدث خطأ أثناء إضافة الاشتراك");
+      return;
+    }
 
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + data.duration_days);
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + data.duration_days);
 
-  const { error: codeError } = await supabase
-    .from("subscription_codes")
-    .update({
-      status: "used",
-      student_id: studentId,
-      used_at: new Date().toISOString(),
-      expires_at: expiresAt.toISOString(),
-    })
-    .eq("id", data.id);
+    const { error: codeError } = await supabase
+      .from("subscription_codes")
+      .update({
+        status: "used",
+        student_id: studentId,
+        used_at: new Date().toISOString(),
+        expires_at: expiresAt.toISOString(),
+      })
+      .eq("id", data.id);
 
-  if (codeError) {
-    alert("تم الاشتراك لكن حدث خطأ أثناء تحديث الكود");
-    return;
-  }
+    if (codeError) {
+      alert("تم الاشتراك لكن حدث خطأ أثناء تحديث الكود");
+      return;
+    }
 
-  setIsEnrolled(true);
-  setShowSubscriptionModal(false);
-  setSubscriptionCode("");
+    setIsEnrolled(true);
+    setShowSubscriptionModal(false);
+    setSubscriptionCode("");
 
-  alert("تم تفعيل الاشتراك بنجاح ✅");
-};
+    alert("تم تفعيل الاشتراك بنجاح ✅");
+  };
 
   const videosCount = units.reduce(
     (t, u) => t + u.lessons.filter((l: any) => l.type === "video").length,
@@ -317,6 +316,61 @@ return;
     0
   );
 
+  const openVideoPlayer = async (lessonId: string, title: string) => {
+    if (!lessonId) {
+      alert("الفيديو غير متوفر");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/video-url", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          key: lessonId,
+        }),
+      });
+
+      if (!response.ok) {
+        alert("تعذر فتح الفيديو");
+        return;
+      }
+
+      const { url } = await response.json();
+
+      setVideoPlayerUrl(url);
+      setVideoPlayerTitle(title);
+      setVideoPlayerOpen(true);
+    } catch (error) {
+      console.error("Error opening video:", error);
+      alert("حدث خطأ أثناء فتح الفيديو");
+    }
+  };
+
+  const closeVideoPlayer = () => {
+    setVideoPlayerOpen(false);
+    setVideoPlayerUrl("");
+    setVideoPlayerTitle("");
+  };
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && videoPlayerOpen) {
+        closeVideoPlayer();
+      }
+    };
+
+    if (videoPlayerOpen) {
+      document.addEventListener("keydown", handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [videoPlayerOpen]);
+
   if (!course) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0b0715]">
@@ -330,45 +384,38 @@ return;
     );
   }
 
-
-
   const formatDate = (date: string) => {
-  if (!date) return "";
+    if (!date) return "";
 
-  return new Date(date).toLocaleDateString("ar-EG", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-};
+    return new Date(date).toLocaleDateString("ar-EG", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#09090B]" dir="rtl">
       <Navbar />
 
- {/* ══════════════════════════════════════
-          HERO SECTION
-      ══════════════════════════════════════ */}
-<div
-  className="
+      <div
+        className="
     relative
     overflow-hidden
     pt-32
     lg:pt-32
     pb-56
   "
->
-
-  {/* Hero Background */}
-  <img
-    src={
-      course.thumbnail ||
-      course.cover_image ||
-      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1600"
-    }
-    alt={course.title}
-    className="
+      >
+        <img
+          src={
+            course.thumbnail ||
+            course.cover_image ||
+            "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1600"
+          }
+          alt={course.title}
+          className="
       absolute
       inset-0
       w-full
@@ -378,60 +425,52 @@ return;
       select-none
       pointer-events-none
     "
-  />
+        />
 
-  {/* Dark Overlay */}
-  <div
-    className="
+        <div
+          className="
       absolute
       inset-0
       bg-black/65
     "
-  />
+        />
 
-{/* Dark Overlay */}
-<div
-  className="
+        <div
+          className="
     absolute
     inset-0
     bg-black/55
   "
-/>
-
-
-       
+        />
 
         <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-start">
-
-{/* ── Stats badges ── */}
-<div className="flex flex-wrap justify-start gap-3 mb-8">
-
-  {[
-    {
-      label: "فيديوهات",
-      value: videosCount,
-      icon: <Play size={14} />,
-    },
-    {
-      label: "امتحانات",
-      value: examsCount,
-      icon: <ClipboardList size={14} />,
-    },
-    {
-      label: "واجبات",
-      value: homeworksCount,
-      icon: <ClipboardCheck size={14} />,
-    },
-    {
-      label: "ملفات",
-      value: filesCount,
-      icon: <FileText size={14} />,
-    },
-  ].map((item) => (
-    <div
-      key={item.label}
-      className="
+            <div className="flex flex-wrap justify-start gap-3 mb-8">
+              {[
+                {
+                  label: "فيديوهات",
+                  value: videosCount,
+                  icon: <Play size={14} />,
+                },
+                {
+                  label: "امتحانات",
+                  value: examsCount,
+                  icon: <ClipboardList size={14} />,
+                },
+                {
+                  label: "واجبات",
+                  value: homeworksCount,
+                  icon: <ClipboardCheck size={14} />,
+                },
+                {
+                  label: "ملفات",
+                  value: filesCount,
+                  icon: <FileText size={14} />,
+                },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="
         flex
         items-center
         gap-2
@@ -445,17 +484,13 @@ return;
         text-white
         shadow-lg
       "
-    >
-      <span className="text-sm font-bold">
-        {item.label}
-      </span>
+                >
+                  <span className="text-sm font-bold">{item.label}</span>
 
-      <span className="text-[#FFD54A]">
-        {item.icon}
-      </span>
+                  <span className="text-[#FFD54A]">{item.icon}</span>
 
-      <span
-        className="
+                  <span
+                    className="
           rounded-full
           bg-[#B348FE]
           text-white
@@ -464,19 +499,16 @@ return;
           text-[11px]
           font-black
         "
-      >
-        +{item.value}
-      </span>
-    </div>
-  ))}
+                  >
+                    +{item.value}
+                  </span>
+                </div>
+              ))}
+            </div>
 
-</div>
-
-{/* ── Title & grade ── */}
-<div className="text-left mb-7">
-
-<h1
-  className="
+            <div className="text-left mb-7">
+              <h1
+                className="
 text-[2rem]
 sm:text-[2.8rem]
 lg:text-[3.8rem]
@@ -488,12 +520,12 @@ font-extrabold
       text-white
       drop-shadow-[0_6px_20px_rgba(0,0,0,.35)]
     "
-  >
-    {course.title}
-  </h1>
+              >
+                {course.title}
+              </h1>
 
-  <p
-    className="
+              <p
+                className="
       mt-6
       text-lg
       sm:text-xl
@@ -501,23 +533,17 @@ font-extrabold
       text-right
       text-white
     "
-  >
-    {gradeLabels[course.grade] || course.grade}
-  </p>
+              >
+                {gradeLabels[course.grade] || course.grade}
+              </p>
+            </div>
 
-</div>
+            <div className="flex flex-wrap justify-start gap-5">
+              <div className="flex items-center gap-3">
+                <span className="text-white font-bold">تاريخ الإنشاء</span>
 
-{/* ── Dates ── */}
-<div className="flex flex-wrap justify-start gap-5">
-
-  <div className="flex items-center gap-3">
-
-    <span className="text-white font-bold">
-      تاريخ الإنشاء
-    </span>
-
-    <span
-      className="
+                <span
+                  className="
         rounded-full
         bg-[#B348FE]
         text-white
@@ -526,28 +552,24 @@ font-extrabold
         text-sm
         font-black
       "
-    >
-      {new Date(course.created_at || Date.now()).toLocaleDateString(
-        "ar-EG",
-        {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }
-      )}
-    </span>
+                >
+                  {new Date(course.created_at || Date.now()).toLocaleDateString(
+                    "ar-EG",
+                    {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    }
+                  )}
+                </span>
+              </div>
 
-  </div>
+              <div className="flex items-center gap-3">
+                <span className="text-white font-bold">آخر تحديث</span>
 
-  <div className="flex items-center gap-3">
-
-    <span className="text-white font-bold">
-      آخر تحديث
-    </span>
-
-    <span
-      className="
+                <span
+                  className="
         rounded-full
         bg-white/15
         backdrop-blur-md
@@ -559,41 +581,30 @@ font-extrabold
         text-sm
         font-black
       "
-    >
-      {new Date(course.updated_at || Date.now()).toLocaleDateString(
-        "ar-EG",
-        {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }
-      )}
-    </span>
-
-  </div>
-
-</div>
-
-
+                >
+                  {new Date(course.updated_at || Date.now()).toLocaleDateString(
+                    "ar-EG",
+                    {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    }
+                  )}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ══════════════════════════════════════
-          OVERLAP AREA: Course Image + Subscription Card
-      ══════════════════════════════════════ */}
       <div className="relative z-20 max-w-[1400px] mx-auto px-8 lg:px-10 -mt-56">
         <div className="flex justify-between items-start">
-
-          {/* Subscription Card */}
           <div className="max-w-[430px] w-full ml-0 mr-auto">
             <div className="bg-white dark:bg-[#151515] rounded-2xl sm:rounded-3xl overflow-hidden
             shadow-[0_20px_60px_rgba(15,23,42,.12)]
 dark:shadow-[0_25px_70px_rgba(0,0,0,.75)]
  border border-gray-100 dark:border-[#2A2A2A]">
-
-              {/* Card image */}
               <img
                 src={
                   course.thumbnail ||
@@ -605,16 +616,14 @@ dark:shadow-[0_25px_70px_rgba(0,0,0,.75)]
               />
 
               <div className="p-6 bg-white dark:bg-[#1A1A1A]">
-
-{/* Price / enroll button */}
-{course.is_free ? (
-  <button
-    onClick={() => {
-      alert("BUTTON CLICKED");
-      console.log("BUTTON CLICKED");
-      handleEnroll();
-    }}
-    className="
+                {course.is_free ? (
+                  <button
+                    onClick={() => {
+                      alert("BUTTON CLICKED");
+                      console.log("BUTTON CLICKED");
+                      handleEnroll();
+                    }}
+                    className="
       w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white
       text-lg sm:text-xl font-black
 bg-[#B348FE]
@@ -623,45 +632,47 @@ shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)]
       transition-all duration-300 hover:scale-[1.015]
       mb-3 sm:mb-4
     "
-  >
-    {isEnrolled ? "الدخول للكورس 🎉" : "اشترك مجانًا"}
-  </button>
-) : (
-  <>
-    {isEnrolled ? (
-      <div className="text-center mb-4">
-        
-      </div>
-    ) : (
-      <div className="text-center mb-3 sm:mb-4">
-        <span className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white">
-          {course.price}
-        </span>
-        <span className="text-base sm:text-lg text-slate-500 dark:text-slate-400 mr-1">
-          جنيه
-        </span>
-      </div>
-    )}
+                  >
+                    {isEnrolled ? "الدخول للكورس 🎉" : "اشترك مجانًا"}
+                  </button>
+                ) : (
+                  <>
+                    {isEnrolled ? (
+                      <div className="text-center mb-4"></div>
+                    ) : (
+                      <div className="text-center mb-3 sm:mb-4">
+                        <span className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white">
+                          {course.price}
+                        </span>
+                        <span className="text-base sm:text-lg text-slate-500 dark:text-slate-400 mr-1">
+                          جنيه
+                        </span>
+                      </div>
+                    )}
 
-   <button
-  onClick={async () => {
-    if (isEnrolled) {
-      const firstLesson = units[0]?.lessons[0];
+                    <button
+                      onClick={async () => {
+                        if (isEnrolled) {
+                          const firstLesson = units[0]?.lessons[0];
 
-if (!firstLesson?.url) {
-  alert("الفيديو غير متوفر");
-  return;
-}
+                          if (!firstLesson) {
+                            alert("لا يوجد دروس متاحة");
+                            return;
+                          }
 
-window.open(firstLesson.url, "_blank", "noopener,noreferrer");
-      
+                          if (firstLesson.type === "video") {
+                       await openVideoPlayer(
+    firstLesson.id,
+    firstLesson.title
+);
+                          }
 
-      return;
-    }
+                          return;
+                        }
 
-    handleEnroll();
-  }}
-  className="
+                        handleEnroll();
+                      }}
+                      className="
     w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white
     text-lg sm:text-xl font-black
     bg-[#B348FE]
@@ -670,14 +681,12 @@ shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)]
     transition-all duration-300 hover:scale-[1.015]
     mb-3
   "
->
-  {isEnrolled ? "مشترك" : "اشترك الآن"}
-</button>
+                    >
+                      {isEnrolled ? "مشترك" : "اشترك الآن"}
+                    </button>
+                  </>
+                )}
 
-  </>
-)}
-
-                {/* Intro video button */}
                 {course.intro_video && (
                   <button
                     onClick={() => window.open(course.intro_video)}
@@ -694,35 +703,21 @@ shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)]
                     <span>مشاهدة المقدمة</span>
                   </button>
                 )}
-
-
-
-
-
               </div>
             </div>
           </div>
-
         </div>
       </div>
 
-      {/* ══════════════════════════════════════
-          COURSE CONTENT SECTION
-      ══════════════════════════════════════ */}
       <div className="bg-white dark:bg-[#09090B] pt-10 pb-8 sm:pt-14 sm:pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          {/* Section heading card */}
           <div className="bg-[#FCFCFD] dark:bg-[#111111] rounded-2xl sm:rounded-3xl p-5 sm:p-8 mb-4 sm:mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
             <h2 className="text-2xl sm:text-3xl xl:text-4xl font-black text-right">
               <span className="text-gray-900 dark:text-white">محتوى </span>
-              <span className="text-[#B348FE] dark:text-[#B348FE]">
-  الكورس
-</span>
+              <span className="text-[#B348FE] dark:text-[#B348FE]">الكورس</span>
             </h2>
           </div>
 
-          {/* Units list */}
           <div className="space-y-3 sm:space-y-4">
             {units.map((unit) => {
               const isOpen = openUnit === unit.id;
@@ -732,10 +727,9 @@ shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)]
                   key={unit.id}
                   className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-300"
                 >
-                  {/* ── Unit header button ── */}
-<button
-  onClick={() => setOpenUnit(isOpen ? null : unit.id)}
-className={`
+                  <button
+                    onClick={() => setOpenUnit(isOpen ? null : unit.id)}
+                    className={`
     group
     w-full
     flex
@@ -755,11 +749,9 @@ group-hover:scale-110
         : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
     }
   `}
->
-
-  {/* السهم - شمال */}
-  <div
-className={`
+                  >
+                    <div
+                      className={`
 group
 relative
 overflow-hidden
@@ -775,27 +767,25 @@ sm:py-5
 transition-all
 duration-300
 ${
-isOpen
-? "bg-[#F6EEFF] dark:bg-[#2B103D]"
-: "hover:bg-[#FAF7FF] dark:hover:bg-[#18181B]"
+  isOpen
+    ? "bg-[#F6EEFF] dark:bg-[#2B103D]"
+    : "hover:bg-[#FAF7FF] dark:hover:bg-[#18181B]"
 }
 `}
-  >
-    <ChevronDown
-  size={18}
-  className={`
+                    >
+                      <ChevronDown
+                        size={18}
+                        className={`
     transition-all
     duration-300
     ${isOpen ? "rotate-180 text-[#B348FE]" : "rotate-0 text-gray-500 dark:text-gray-400"}
   `}
-/>
-  </div>
+                      />
+                    </div>
 
-  {/* العنوان - يمين */}
-<div className="flex flex-row-reverse items-center justify-start gap-3">
-
-  <h3
-    className="
+                    <div className="flex flex-row-reverse items-center justify-start gap-3">
+                      <h3
+                        className="
       text-base
       sm:text-xl
       xl:text-2xl
@@ -808,12 +798,12 @@ duration-300
 ease-out
 truncate
     "
-  >
-{unit.title}
-  </h3>
+                      >
+                        {unit.title}
+                      </h3>
 
-  <div
-    className="
+                      <div
+                        className="
       flex-shrink-0
       w-8
       h-8
@@ -826,22 +816,19 @@ truncate
       items-center
       justify-center
     "
-  >
-    <LayoutGrid
-      size={16}
-      className="sm:hidden text-[#B348FE]"
-    />
+                      >
+                        <LayoutGrid
+                          size={16}
+                          className="sm:hidden text-[#B348FE]"
+                        />
 
-    <LayoutGrid
-      size={20}
-      className="hidden sm:block text-[#B348FE]"
-    />
-  </div>
-
-</div>
-
-</button>
-                  {/* ── Lessons list ── */}
+                        <LayoutGrid
+                          size={20}
+                          className="hidden sm:block text-[#B348FE]"
+                        />
+                      </div>
+                    </div>
+                  </button>
                   {isOpen && (
                     <div className="border-t border-slate-200 dark:border-[#262626]">
                       {unit.lessons.map((lesson: any, idx: number) => {
@@ -868,104 +855,103 @@ duration-300
 hover:pr-8
                             `}
                           >
-                 {/* Action button — على اليسار */}
-<div className="flex-shrink-0">
-  {isEnrolled ? (
-    <>
-      {isVideo && (
-        <button
-        onClick={async () => {
-console.log("LESSON =", lesson);
-console.log("URL =", lesson.url);
+                            <div className="flex-shrink-0">
+                              {isEnrolled ? (
+                                <>
+                                  {isVideo && (
+                                    <button
+                                      onClick={() =>
+                                     openVideoPlayer(
+    lesson.id,
+    lesson.title
+)
+                                      }
+                                      className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                    >
+                                      <Play size={13} />
+                                      <span>مشاهدة الفيديو</span>
+                                    </button>
+                                  )}
 
-if (!lesson.url) {
-  alert("الفيديو غير موجود");
-  return;
-}
+                                  {isFile && (
+                                    <button
+                                      onClick={() => {
+                                        if (!lesson.url) {
+                                          alert("رابط الملف غير موجود");
+                                          return;
+                                        }
 
-window.open(lesson.url, "_blank", "noopener,noreferrer");
+                                        window.open(
+                                          lesson.url,
+                                          "_blank",
+                                          "noopener,noreferrer"
+                                        );
+                                      }}
+                                      className="flex items-center gap-1.5 sm:gap-2 bg-blue-500 hover:bg-blue-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-blue-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                    >
+                                      <FileText size={13} />
+                                      <span>تحميل الملف</span>
+                                    </button>
+                                  )}
 
+                                  {isHomework && (
+                                    <button
+                                      onClick={() =>
+                                        navigate(
+                                          `/dashboard/homework/${lesson.id}`,
+                                          {
+                                            state: {
+                                              fromCourse: true,
+                                              courseId: slug,
+                                            },
+                                          }
+                                        )
+                                      }
+                                      className="flex items-center gap-1.5 sm:gap-2 bg-green-500 hover:bg-green-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-green-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                    >
+                                      <ClipboardCheck size={13} />
+                                      <span>حل الواجب</span>
+                                    </button>
+                                  )}
 
-          }}
-          className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-        >
-          <Play size={13} />
-          <span>مشاهدة الفيديو</span>
-        </button>
-      )}
+                                  {isExam && (
+                                    <button
+                                      onClick={async () => {
+                                        const { data, error } = await supabase
+                                          .from("exams")
+                                          .select("id")
+                                          .eq("course_item_id", lesson.id)
+                                          .single();
 
-      {isFile && (
-        <button
-          onClick={() => {
-            if (!lesson.url) {
-              alert("رابط الملف غير موجود");
-              return;
-            }
+                                        if (error || !data) {
+                                          console.error(error);
+                                          alert("الامتحان غير موجود");
+                                          return;
+                                        }
 
-            window.open(lesson.url, "_blank", "noopener,noreferrer");
-          }}
-          className="flex items-center gap-1.5 sm:gap-2 bg-blue-500 hover:bg-blue-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-blue-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-        >
-          <FileText size={13} />
-          <span>تحميل الملف</span>
-        </button>
-      )}
+                                        navigate(`/dashboard/exams/${data.id}`);
+                                      }}
+                                      className="flex items-center gap-1.5 sm:gap-2 bg-red-500 hover:bg-red-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-red-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                    >
+                                      <ClipboardList size={13} />
+                                      <span>ابدأ الكويز</span>
+                                    </button>
+                                  )}
+                                </>
+                              ) : (
+                                <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl">
+                                  <Lock size={14} />
+                                  <span className="text-xs sm:text-sm font-bold">
+                                    مقفل
+                                  </span>
+                                </div>
+                              )}
+                            </div>
 
-      {isHomework && (
-        <button
-          onClick={() =>
-  navigate(`/dashboard/homework/${lesson.id}`, {
-    state: {
-      fromCourse: true,
-      courseId: slug,
-    },
-  })
-}
-          className="flex items-center gap-1.5 sm:gap-2 bg-green-500 hover:bg-green-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-green-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-        >
-          <ClipboardCheck size={13} />
-          <span>حل الواجب</span>
-        </button>
-      )}
-
-{isExam && (
-  <button
-    onClick={async () => {
-      const { data, error } = await supabase
-        .from("exams")
-        .select("id")
-        .eq("course_item_id", lesson.id)
-        .single();
-
-      if (error || !data) {
-        console.error(error);
-        alert("الامتحان غير موجود");
-        return;
-      }
-
-      navigate(`/dashboard/exams/${data.id}`);
-    }}
-    className="flex items-center gap-1.5 sm:gap-2 bg-red-500 hover:bg-red-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-red-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-  >
-    <ClipboardList size={13} />
-    <span>ابدأ الكويز</span>
-  </button>
-)}
-    </>
-  ) : (
-    <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl">
-      <Lock size={14} />
-      <span className="text-xs sm:text-sm font-bold">
-        مقفل
-      </span>
-    </div>
-  )}
-</div>
-
-                            {/* Title + icon — على اليمين */}
                             <div className="flex flex-row-reverse items-center gap-3 text-right flex-1 min-w-0">
                               <div className="flex-1 min-w-0">
-                                <h4 className="
+                                <h4
+                                  className="
 text-sm
 sm:text-base
 xl:text-lg
@@ -976,7 +962,8 @@ truncate
 transition-colors
 duration-300
 group-hover:text-[#B348FE]
-">
+"
+                                >
                                   {lesson.title}
                                 </h4>
                                 {isVideo && lesson.duration && (
@@ -991,7 +978,6 @@ group-hover:text-[#B348FE]
                                 )}
                               </div>
 
-                              {/* Type icon badge */}
                               <div
                                 className={`
                                   flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl
@@ -1021,7 +1007,6 @@ group-hover:scale-110
             })}
           </div>
 
-          {/* Empty state */}
           {units.length === 0 && (
             <div className="text-center py-16 sm:py-20 text-gray-400">
               <BookOpen size={48} className="mx-auto mb-4 opacity-40" />
@@ -1033,7 +1018,6 @@ group-hover:scale-110
 
       {showSubscriptionModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6">
-
           <div
             className="
               w-full
@@ -1050,7 +1034,6 @@ group-hover:scale-110
             "
           >
             <div className="text-center">
-
               <div
                 className="
                   mx-auto
@@ -1065,10 +1048,7 @@ group-hover:scale-110
                   dark:bg-[#2B103D]
                 "
               >
-                <ShieldCheck
-                  size={36}
-                  className="text-[#B348FE]"
-                />
+                <ShieldCheck size={36} className="text-[#B348FE]" />
               </div>
 
               <h2 className="text-3xl font-black text-gray-900 dark:text-white">
@@ -1096,7 +1076,6 @@ group-hover:scale-110
                   {course?.title}
                 </h3>
               </div>
-
             </div>
 
             <input
@@ -1131,10 +1110,7 @@ group-hover:scale-110
               "
             />
 
-            <Button
-              className="w-full mt-5"
-              onClick={activateSubscription}
-            >
+            <Button className="w-full mt-5" onClick={activateSubscription}>
               تفعيل الاشتراك
             </Button>
 
@@ -1185,9 +1161,47 @@ group-hover:scale-110
             >
               إلغاء
             </Button>
-
           </div>
+        </div>
+      )}
 
+      {videoPlayerOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={closeVideoPlayer}
+        >
+          <div
+            className="relative w-full max-w-5xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between bg-gray-800 px-6 py-4 border-b border-gray-700">
+              <button
+                onClick={closeVideoPlayer}
+                className="text-white hover:text-gray-300 transition-colors"
+              >
+                <X size={24} />
+              </button>
+
+              <h3 className="text-white font-bold text-lg text-right flex-1 mr-4 truncate">
+                {videoPlayerTitle}
+              </h3>
+            </div>
+
+            <div className="relative bg-black" style={{ paddingBottom: "56.25%" }}>
+              <video
+                key={videoPlayerUrl}
+                src={videoPlayerUrl}
+                controls
+                controlsList="nodownload"
+                disablePictureInPicture
+                preload="metadata"
+                playsInline
+                onContextMenu={(e) => e.preventDefault()}
+                className="absolute inset-0 w-full h-full"
+                autoPlay
+              />
+            </div>
+          </div>
         </div>
       )}
 
