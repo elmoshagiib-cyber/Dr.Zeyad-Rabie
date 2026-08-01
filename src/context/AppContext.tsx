@@ -11,6 +11,8 @@ export type UserRole = "student" | "instructor" | "admin";
 
 export interface AppUser {
   id: string;
+  studentId?: number;
+
   name: string;
   role: UserRole;
 

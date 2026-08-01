@@ -101,11 +101,11 @@ export function CourseDetailPage() {
     setUnits(units);
   };
 
-  const getStudentId = (): number | null => {
-    if (!user) return null;
+const getStudentId = (): number | null => {
+  if (!user?.studentId) return null;
 
-    return Number(user.id);
-  };
+  return user.studentId;
+};
 
   const checkEnrollment = async () => {
     if (!user || !course) return;

@@ -131,7 +131,9 @@ if (studentError || !student) {
 }
 
 login({
-  id: authData.user.id, // ✅ UUID الخاص بـ Supabase Auth
+  id: authData.user.id,
+  studentId: student.id,
+
   name: student.full_name,
   role: "student",
   grade: student.grade,
