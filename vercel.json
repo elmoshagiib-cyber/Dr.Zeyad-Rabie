@@ -5,7 +5,7 @@
       "destination": "/api/$1"
     },
     {
-      "source": "/((?!api|assets|fonts|images|favicon.ico|favicon.png|manifest.webmanifest|sw.js|workbox-.*).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
