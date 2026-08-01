@@ -81,15 +81,18 @@ function DomainRedirect() {
       host === "www.zeyadrabie.com" ||
       host === "dr-zeyad-rabie.vercel.app";
 
-    // لو فتح admin من غير مسار
-    if (isAdminDomain && location.pathname === "/") {
+    if (
+  isAdminDomain &&
+  (location.pathname === "/" || location.pathname === "/index.html")
+) {
       navigate("/staff-login", { replace: true });
       return;
     }
 
-    // منع فتح صفحة staff-login من الموقع الرئيسي
     if (isMainDomain && location.pathname === "/staff-login") {
-      window.location.replace("https://admin.zeyadrabie.com");
+      window.location.replace(
+        "https://admin.zeyadrabie.com/staff-login"
+      );
       return;
     }
   }, [location.pathname, navigate]);
