@@ -323,15 +323,20 @@ export function CourseDetailPage() {
     }
 
     try {
-      const response = await fetch("/api/video-url", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          key: lessonId,
-        }),
-      });
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+const response = await fetch("/api/video-url", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${session?.access_token}`,
+  },
+  body: JSON.stringify({
+    lessonId,
+  }),
+});
 
       if (!response.ok) {
         alert("تعذر فتح الفيديو");
