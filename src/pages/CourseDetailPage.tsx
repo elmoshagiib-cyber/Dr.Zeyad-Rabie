@@ -378,10 +378,19 @@ const response = await fetch("/api/video-url", {
       }),
     });
 
-    if (!response.ok) {
-      alert("تعذر فتح الملف");
-      return;
-    }
+if (!response.ok) {
+  const error = await response.json();
+
+  console.error("PDF ERROR:", error);
+
+  alert(
+    error.error ||
+    error.message ||
+    "تعذر فتح الملف"
+  );
+
+  return;
+}
 
     const { url } = await response.json();
 
