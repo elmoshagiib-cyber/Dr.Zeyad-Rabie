@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactElement } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import InstructorLayout from "../../layouts/InstructorLayout";
 import { supabase } from "../../lib/supabase";
-
+import { uploadToR2 } from "@/lib/r2";
 // ============================================================
 // TYPES & INTERFACES
 // ============================================================
@@ -797,42 +797,26 @@ if (deletedItemIds.length > 0) {
   }
 
   // ── Thumbnail ────────────────────────────────────────────
- async function handleThumbnailChange(
+async function handleThumbnailChange(
   e: React.ChangeEvent<HTMLInputElement>
 ) {
   const file = e.target.files?.[0];
   if (!file || !course) return;
 
   setThumbnailFile(file);
-if ((course as any).thumbnailPath) {
-  await supabase.storage
-    .from("course-thumbnails")
-    .remove([(course as any).thumbnailPath]);
-}
 
+  try {
+    const data = await uploadToR2(file, "course-thumbnails");
 
-  const fileExt = file.name.split(".").pop();
-  const filePath = `${course.id}/${Date.now()}.${fileExt}`;
+    setThumbnailPreview(data.url);
 
-  const { error: uploadError } = await supabase.storage
-    .from("course-thumbnails")
-    .upload(filePath, file, {
-      upsert: true,
-    });
+    updateCourseField("thumbnailUrl", data.url);
 
-  if (uploadError) {
-    alert(uploadError.message);
-    return;
+    (course as any).thumbnailPath = data.key;
+  } catch (err) {
+    console.error(err);
+    alert("فشل رفع الصورة");
   }
-
-  const { data } = supabase.storage
-    .from("course-thumbnails")
-    .getPublicUrl(filePath);
-
-  setThumbnailPreview(data.publicUrl);
-
-  updateCourseField("thumbnailUrl", data.publicUrl);
-  (course as any).thumbnailPath = filePath;
 }
 
   // ── Sections ─────────────────────────────────────────────
@@ -1021,22 +1005,10 @@ setCourse((prev) => {
 });
   
   const fileExt = file.name.split(".").pop();
-  const filePath = `${course.id}/${sectionId}/${Date.now()}.${fileExt}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from("course-videos")
-    .upload(filePath, file,{
-      upsert: true,
-    });
-
-  if (uploadError) {
-    alert(uploadError.message);
-    return;
-  }
-
-  const { data } = supabase.storage
-    .from("course-videos")
-    .getPublicUrl(filePath);
+ const data = await uploadToR2(
+  file,
+  `course-videos/${course.id}/${sectionId}`
+);
 
   setCourse((prev) => {
     if (!prev) return prev;
@@ -1050,8 +1022,8 @@ setCourse((prev) => {
 
           return {
             ...item,
-            videoUrl: data.publicUrl,
-storagePath: filePath,
+videoUrl: data.url,
+storagePath: data.key,
             fileName: file.name,
             fileSize: file.size,
             uploadProgress: 100,

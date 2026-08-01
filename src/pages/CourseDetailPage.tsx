@@ -644,12 +644,21 @@ shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)]
     )}
 
    <button
-  onClick={() => {
+  onClick={async () => {
     if (isEnrolled) {
       const firstLesson = units[0]?.lessons[0];
 
       if (firstLesson?.video_url) {
-        window.open(firstLesson.video_url, "_blank");
+        const { data, error } = await supabase.storage
+  .from("course-videos")
+  .createSignedUrl(firstLesson.storage_path, 60);
+
+if (error || !data) {
+  alert("تعذر فتح الفيديو");
+  return;
+}
+
+window.open(data.signedUrl, "_blank");
       }
 
       return;
@@ -870,7 +879,7 @@ hover:pr-8
     <>
       {isVideo && (
         <button
-        onClick={() => {
+        onClick={async () => {
   console.log("LESSON =", lesson);
   console.log("URL =", lesson.url);
 
@@ -879,7 +888,16 @@ hover:pr-8
     return;
   }
 
-            window.open(lesson.url, "_blank", "noopener,noreferrer");
+            const { data, error } = await supabase.storage
+  .from("course-videos")
+  .createSignedUrl(lesson.storage_path, 60);
+
+if (error || !data) {
+  alert("تعذر فتح الفيديو");
+  return;
+}
+
+window.open(data.signedUrl, "_blank", "noopener,noreferrer");
           }}
           className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
         >

@@ -6,6 +6,7 @@ import {
   useEffect,
 } from "react";
 import { supabase } from "../lib/supabase";
+
 export type UserRole = "student" | "instructor" | "admin";
 
 export interface AppUser {
@@ -56,6 +57,28 @@ useEffect(() => {
 
 
     if (savedUser) {
+      const savedToken = localStorage.getItem("session_token");
+
+const { data: student } = await supabase
+  .from("students")
+  .select("session_token")
+  .eq("auth_id", session.user.id)
+  .single();
+
+if (
+  student &&
+  student.session_token !== savedToken
+) {
+  await supabase.auth.signOut();
+
+  localStorage.removeItem("user");
+  localStorage.removeItem("session_token");
+
+  setUser(null);
+  setLoading(false);
+
+  return;
+}
       setUser(JSON.parse(savedUser));
     }
 
@@ -63,6 +86,32 @@ useEffect(() => {
   };
 
   checkUser();
+const interval = setInterval(async () => {
+  const savedToken = localStorage.getItem("session_token");
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!savedToken || !session) return;
+
+  const { data: student } = await supabase
+    .from("students")
+    .select("session_token")
+    .eq("auth_id", session.user.id)
+    .single();
+
+  if (!student) return;
+
+  if (student.session_token !== savedToken) {
+    await supabase.auth.signOut();
+
+    localStorage.clear();
+
+    window.location.href = "/login";
+  }
+}, 3000);
+
 
   const {
     data: { subscription },
@@ -73,9 +122,11 @@ useEffect(() => {
     }
   });
 
-  return () => {
-    subscription.unsubscribe();
-  };
+return () => {
+  clearInterval(interval);
+  subscription.unsubscribe();
+};
+
 }, []);  const savedUser = localStorage.getItem("user");
 
 

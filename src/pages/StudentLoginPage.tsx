@@ -97,7 +97,29 @@ const { data: student, error: studentError } = await supabase
   .eq("auth_id", authData.user.id)
   .single();
 
+  const sessionToken = crypto.randomUUID();
+
+await supabase
+  .from("students")
+  .update({
+    session_token: sessionToken,
+    last_login: new Date().toISOString(),
+  })
+  .eq("id", student.id);
+
+localStorage.setItem("session_token", sessionToken);
+
 if (studentError || !student) {
+  if (student.status !== "approved") {
+  await supabase.auth.signOut();
+
+  setErrors({
+    phone: "الحساب لم يتم تفعيله بعد.",
+  });
+
+  setLoading(false);
+  return;
+}
   await supabase.auth.signOut();
 
   setErrors({
@@ -117,19 +139,7 @@ login({
   governorate: student.governorate,
 });
 
-await supabase
-  .from("students")
-  .update({
-    last_login: new Date().toISOString(),
-  })
-  .eq("auth_id", authData.user.id);
 
-     await supabase
-  .from("students")
-  .update({
-    last_login: new Date().toISOString(),
-  })
-  .eq("id", student.id);
 
       setSuccess(true);
       setTimeout(() => navigate("/"), 1200);
