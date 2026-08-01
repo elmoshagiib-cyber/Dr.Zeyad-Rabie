@@ -216,17 +216,15 @@ const formatDate = (date: string) => {
 >
 
 <div
-className="
+  className="
   relative
   overflow-hidden
-aspect-video
-w-full
+  aspect-video
+w-[127%]
+-mr-[15%]
   rounded-[24px]
   sm:rounded-[28px]
   lg:rounded-[32px]
-mx-0
-sm:mx-0
-lg:mx-0
 "
 >
         <img
@@ -296,29 +294,27 @@ backdrop-blur-md backdrop-blur-sm text-white
 
 <CardContent
   className="
-  relative
-  z-20
-  -mt-12
-mx-3
-sm:mx-5
-lg:mx-7
-  mb-5
-  rounded-[28px]
-  bg-white
-  dark:bg-[#111111]
-  border
-  border-gray-200
-  dark:border-[#262626]
- p-4
-sm:p-5
-lg:p-6
-  flex
-  flex-col
-  flex-1
-  gap-3
-  shadow-xl
-dark:shadow-[0_20px_45px_rgba(0,0,0,.45)]
-"
+    relative
+    z-20
+    -mt-12
+    -mx-7
+    mb-5
+    rounded-[28px]
+    bg-white
+    dark:bg-[#111111]
+    border
+    border-gray-200
+    dark:border-[#262626]
+    p-4
+    sm:p-5
+    lg:p-6
+    flex
+    flex-col
+    flex-1
+    gap-3
+    shadow-xl
+    dark:shadow-[0_20px_45px_rgba(0,0,0,.45)]
+  "
 >
 <h3
   className="
@@ -447,104 +443,82 @@ className="
   "
 >
 
-{hasAccess ? (
-
-<div className="flex justify-end">
-  <span
-    className="
-      inline-flex
-      items-center
-      gap-2
-      rounded-xl
-      border
-      border-[#B348FE]
-      bg-[#F8F1FF]
-      dark:bg-[#241132]
-      dark:border-[#B348FE]
-      text-[#B348FE]
-      px-5
-      py-2
-      text-sm
-      font-black
-    "
-  >
-    ✓ تم الاشتراك
-  </span>
-</div>
-
-) : (
-
 <div className="flex items-end justify-between gap-6">
 
-  {/* السعر */}
-  <div
-    className="
-      inline-flex
-      items-center
-      gap-1
-      rounded-xl
-      bg-[#B348FE]
-      p-1
-      shrink-0
-    "
-  >
+  {hasAccess ? (
     <span
       className="
-        bg-white
-        text-[#111111]
-        rounded-md
-        px-3
-        py-[5px]
-        min-w-[46px]
-        text-center
-        text-[13px]
+        inline-flex
+        items-center
+        gap-2
+        rounded-xl
+        border
+        border-[#B348FE]
+        bg-[#F8F1FF]
+        dark:bg-[#241132]
+        text-[#B348FE]
+        px-5
+        py-2
+        text-sm
         font-black
-        leading-none
+        shrink-0
       "
     >
-      {Number(course.price).toFixed(2)}
+      ✓ تم الاشتراك
     </span>
-
-    <span
+  ) : (
+    <div
       className="
-        px-2
-        text-[13px]
-        font-black
-        text-white
-        whitespace-nowrap
+        inline-flex
+        items-center
+        gap-1
+        rounded-xl
+        bg-[#B348FE]
+        p-1
+        shrink-0
       "
     >
-      جنيه
-    </span>
-  </div>
+      <span
+        className="
+          bg-white
+          text-[#111111]
+          rounded-md
+          px-3
+          py-[5px]
+          min-w-[46px]
+          text-center
+          text-[13px]
+          font-black
+        "
+      >
+        {Number(course.price).toFixed(2)}
+      </span>
 
-  {/* التاريخ */}
-<div className="flex flex-col gap-2">
+      <span className="px-2 text-[13px] font-black text-white">
+        جنيه
+      </span>
+    </div>
+  )}
 
-  <div className="flex items-center text-slate-500 dark:text-slate-400">
-    <span className="text-[13px] font-medium">
-      {formatDate(course.created_at)}
-    </span>
+  <div className="flex flex-col gap-2">
 
-    <HiOutlineCalendarDays className="mr-2 text-[17px] shrink-0" />
-  </div>
+    <div className="flex items-center text-slate-500 dark:text-slate-400">
+      <span className="text-[13px] font-medium">
+        {formatDate(course.created_at)}
+      </span>
+      <HiOutlineCalendarDays className="mr-2 text-[17px]" />
+    </div>
 
-  <div className="flex items-center text-slate-500 dark:text-slate-400">
-    <span className="text-[13px] font-medium">
-      {formatDate(course.updated_at)}
-    </span>
+    <div className="flex items-center text-slate-500 dark:text-slate-400">
+      <span className="text-[13px] font-medium">
+        {formatDate(course.updated_at)}
+      </span>
+      <HiOutlineFolder className="mr-2 text-[17px]" />
+    </div>
 
-    <HiOutlineFolder className="mr-2 text-[17px] shrink-0" />
   </div>
 
 </div>
-
-</div>
-
-
-
-)}
-
 
 
 </div>
