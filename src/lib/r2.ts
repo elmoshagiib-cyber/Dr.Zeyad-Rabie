@@ -3,9 +3,12 @@ export interface UploadResult {
   key: string;
 }
 
+export type ProgressCallback = (loadedBytes: number, totalBytes: number) => void;
+
 export async function uploadToR2(
   file: File,
-  folder = "uploads"
+  folder = "uploads",
+  onProgress?: ProgressCallback
 ): Promise<UploadResult> {
   // اطلب رابط الرفع من الـ API
   const response = await fetch("/api/upload-url", {
@@ -26,18 +29,33 @@ export async function uploadToR2(
 
   const { uploadUrl, publicUrl, key } = await response.json();
 
-  // ارفع الملف مباشرة إلى Cloudflare R2
-  const uploadResponse = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      "Content-Type": file.type,
-    },
-    body: file,
-  });
+  // ارفع الملف مباشرة إلى Cloudflare R2 مع تتبع التقدم الحقيقي
+  await new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
 
-  if (!uploadResponse.ok) {
-    throw new Error("Failed to upload file");
-  }
+    xhr.open("PUT", uploadUrl, true);
+    xhr.setRequestHeader("Content-Type", file.type);
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && onProgress) {
+        onProgress(event.loaded, event.total);
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve();
+      } else {
+        reject(new Error(`Failed to upload file (status ${xhr.status})`));
+      }
+    };
+
+    xhr.onerror = () => {
+      reject(new Error("Network error during upload"));
+    };
+
+    xhr.send(file);
+  });
 
   return {
     url: publicUrl,

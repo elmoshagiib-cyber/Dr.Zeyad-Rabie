@@ -20,6 +20,8 @@ interface VideoItem {
   freePreview: boolean;
   allowDownload: boolean;
   uploadProgress: number;
+  uploadedBytes: number;
+  totalBytes: number;
   status: "idle" | "uploading" | "done" | "error";
   videoUrl: string;
 thumbnailUrl: string;
@@ -35,6 +37,8 @@ interface PdfItem {
   fileSize: number;
   allowDownload: boolean;
   uploadProgress: number;
+  uploadedBytes: number;
+  totalBytes: number;
   status: "idle" | "uploading" | "done" | "error";
   pdfUrl: string;
 storagePath: string;
@@ -128,6 +132,8 @@ function createDefaultVideo(): VideoItem {
     freePreview: false,
     allowDownload: false,
     uploadProgress: 0,
+    uploadedBytes: 0,
+    totalBytes: 0,
     status: "idle",
     videoUrl: "",
 thumbnailUrl: "",
@@ -144,6 +150,8 @@ function createDefaultPdf(): PdfItem {
     fileSize: 0,
     allowDownload: true,
     uploadProgress: 0,
+    uploadedBytes: 0,
+    totalBytes: 0,
     status: "idle",
     pdfUrl: "",
 storagePath: "",
@@ -294,37 +302,41 @@ const loadedCourse: Course = {
       .filter((item) => item.section_id === section.id)
       .map((item) => {
         switch (item.type) {
-          case "video":
-            return {
-              type: "video",
-              id: item.id,
-              title: item.title || "",
-              description: item.description || "",
-              fileName: "",
-              fileSize: item.file_size || 0,
-              duration: item.duration || "",
-              freePreview: item.is_preview || false,
-              allowDownload: item.allow_download || false,
-              uploadProgress: 100,
-              status: "done",
-              videoUrl: item.url || "",
-              thumbnailUrl: item.thumbnail || "",
-              storagePath: item.storage_path || "",
-            };
+case "video":
+  return {
+    type: "video",
+    id: item.id,
+    title: item.title || "",
+    description: item.description || "",
+    fileName: "",
+    fileSize: item.file_size || 0,
+    duration: item.duration || "",
+    freePreview: item.is_preview || false,
+    allowDownload: item.allow_download || false,
+    uploadProgress: 100,
+    uploadedBytes: item.file_size || 0,
+    totalBytes: item.file_size || 0,
+    status: "done",
+    videoUrl: item.url || "",
+    thumbnailUrl: item.thumbnail || "",
+    storagePath: item.storage_path || "",
+  };
 
-  case "pdf":
-    return {
-      type: "pdf",
-      id: item.id,
-      title: item.title || "",
-      fileName: "",
-      fileSize: item.file_size || 0,
-      allowDownload: item.allow_download || false,
-      uploadProgress: 100,
-      status: "done",
-      pdfUrl: item.url || "",
-      storagePath: item.storage_path || "",
-    };
+case "pdf":
+  return {
+    type: "pdf",
+    id: item.id,
+    title: item.title || "",
+    fileName: "",
+    fileSize: item.file_size || 0,
+    allowDownload: item.allow_download || false,
+    uploadProgress: 100,
+    uploadedBytes: item.file_size || 0,
+    totalBytes: item.file_size || 0,
+    status: "done",
+    pdfUrl: item.url || "",
+    storagePath: item.storage_path || "",
+  };
 
   case "quiz": {
     const exam = (examsData || []).find(
@@ -999,6 +1011,8 @@ async function uploadVideo(
             fileSize: file.size,
             status: "uploading",
             uploadProgress: 0,
+            uploadedBytes: 0,
+            totalBytes: file.size,
           };
         }),
       })),
@@ -1008,7 +1022,31 @@ async function uploadVideo(
   try {
     const data = await uploadToR2(
       file,
-      `course-videos/${course.id}/${sectionId}`
+      `course-videos/${course.id}/${sectionId}`,
+      (loadedBytes, totalBytes) => {
+        const percent = Math.round((loadedBytes / totalBytes) * 100);
+
+        setCourse((prev) => {
+          if (!prev) return prev;
+
+          return {
+            ...prev,
+            sections: prev.sections.map((section) => ({
+              ...section,
+              items: section.items.map((item) => {
+                if (item.id !== itemId || item.type !== "video") return item;
+
+                return {
+                  ...item,
+                  uploadProgress: percent,
+                  uploadedBytes: loadedBytes,
+                  totalBytes: totalBytes,
+                };
+              }),
+            })),
+          };
+        });
+      }
     );
 
     setCourse((prev) => {
@@ -1028,6 +1066,8 @@ async function uploadVideo(
               fileName: file.name,
               fileSize: file.size,
               uploadProgress: 100,
+              uploadedBytes: file.size,
+              totalBytes: file.size,
               status: "done",
             };
           }),
@@ -1049,6 +1089,7 @@ async function uploadVideo(
               ...item,
               status: "error",
               uploadProgress: 0,
+              uploadedBytes: 0,
             };
           }),
         })),
@@ -1084,6 +1125,8 @@ async function uploadPdf(
             fileSize: file.size,
             status: "uploading",
             uploadProgress: 0,
+            uploadedBytes: 0,
+            totalBytes: file.size,
           };
         }),
       })),
@@ -1093,7 +1136,31 @@ async function uploadPdf(
   try {
     const data = await uploadToR2(
       file,
-      `course-videos/${course.id}/${sectionId}`
+      `course-videos/${course.id}/${sectionId}`,
+      (loadedBytes, totalBytes) => {
+        const percent = Math.round((loadedBytes / totalBytes) * 100);
+
+        setCourse((prev) => {
+          if (!prev) return prev;
+
+          return {
+            ...prev,
+            sections: prev.sections.map((section) => ({
+              ...section,
+              items: section.items.map((item) => {
+                if (item.id !== itemId || item.type !== "pdf") return item;
+
+                return {
+                  ...item,
+                  uploadProgress: percent,
+                  uploadedBytes: loadedBytes,
+                  totalBytes: totalBytes,
+                };
+              }),
+            })),
+          };
+        });
+      }
     );
 
     setCourse((prev) => {
@@ -1113,6 +1180,8 @@ async function uploadPdf(
               fileName: file.name,
               fileSize: file.size,
               uploadProgress: 100,
+              uploadedBytes: file.size,
+              totalBytes: file.size,
               status: "done",
             };
           }),
@@ -1134,6 +1203,7 @@ async function uploadPdf(
               ...item,
               status: "error",
               uploadProgress: 0,
+              uploadedBytes: 0,
             };
           }),
         })),
@@ -1144,6 +1214,8 @@ async function uploadPdf(
     alert("فشل رفع الملف: " + (err?.message || "خطأ غير معروف"));
   }
 }
+
+
   // ── Quiz Helpers ─────────────────────────────────────────
   function addQuestion(sectionId: string, quizId: string) {
     setCourse((prev) =>
@@ -1470,22 +1542,33 @@ async function uploadPdf(
                 />
               </label>
             ) : item.status === "uploading" ? (
-              <div className="w-full p-5 border border-blue-200 rounded-2xl bg-blue-50 space-y-3">
-                <div className="flex items-center gap-2 text-blue-700 font-medium text-sm">
-                  <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  جاري رفع الفيديو، قد يستغرق بعض الوقت...
-                </div>
-                <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
-                  <div
-                    className="h-2 bg-blue-600 rounded-full animate-[uploadPulse_1.4s_ease-in-out_infinite]"
-                    style={{ width: "40%" }}
-                  />
-                </div>
-                <p className="text-xs text-blue-600 truncate">{item.fileName} — {formatFileSize(item.fileSize)}</p>
-              </div>
-            ) : (
+  <div className="w-full p-5 border border-blue-200 rounded-2xl bg-blue-50 space-y-3">
+    <div className="flex items-center justify-between text-sm">
+      <div className="flex items-center gap-2 text-blue-700 font-medium">
+        <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        جاري الرفع...
+      </div>
+      <span className="text-blue-600 font-bold">{item.uploadProgress}%</span>
+    </div>
+    <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
+      <div
+        className="bg-blue-600 h-2 rounded-full transition-all duration-200"
+        style={{ width: `${item.uploadProgress}%` }}
+      />
+    </div>
+    <div className="flex items-center justify-between text-xs text-blue-600">
+      <span className="truncate">{item.fileName}</span>
+      <span className="flex-shrink-0 mr-2 font-medium">
+        {formatFileSize(item.uploadedBytes)} / {formatFileSize(item.totalBytes)}
+      </span>
+    </div>
+    <p className="text-xs text-blue-500">
+      متبقي: {formatFileSize(item.totalBytes - item.uploadedBytes)}
+    </p>
+  </div>
+) : (
               <div className="w-full p-4 border border-emerald-200 rounded-2xl bg-emerald-50 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -1596,18 +1679,29 @@ async function uploadPdf(
                   if (file) uploadPdf(sectionId, item.id, file);
                 }} />
               </label>
-            ) : item.status === "uploading" ? (
-              <div className="w-full p-5 border border-rose-200 rounded-2xl bg-rose-50 space-y-3">
-                <span className="text-rose-700 font-medium text-sm">جاري رفع الملف، قد يستغرق بعض الوقت...</span>
-                <div className="w-full bg-rose-200 rounded-full h-2 overflow-hidden">
-                  <div
-                    className="h-2 bg-rose-600 rounded-full animate-[uploadPulse_1.4s_ease-in-out_infinite]"
-                    style={{ width: "40%" }}
-                  />
-                </div>
-                <p className="text-xs text-rose-600 truncate">{item.fileName}</p>
-              </div>
-            ) : (
+) : item.status === "uploading" ? (
+  <div className="w-full p-5 border border-rose-200 rounded-2xl bg-rose-50 space-y-3">
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-rose-700 font-medium">جاري الرفع...</span>
+      <span className="text-rose-600 font-bold">{item.uploadProgress}%</span>
+    </div>
+    <div className="w-full bg-rose-200 rounded-full h-2 overflow-hidden">
+      <div
+        className="bg-rose-600 h-2 rounded-full transition-all duration-200"
+        style={{ width: `${item.uploadProgress}%` }}
+      />
+    </div>
+    <div className="flex items-center justify-between text-xs text-rose-600">
+      <span className="truncate">{item.fileName}</span>
+      <span className="flex-shrink-0 mr-2 font-medium">
+        {formatFileSize(item.uploadedBytes)} / {formatFileSize(item.totalBytes)}
+      </span>
+    </div>
+    <p className="text-xs text-rose-500">
+      متبقي: {formatFileSize(item.totalBytes - item.uploadedBytes)}
+    </p>
+  </div>
+) : (
               <div className="w-full p-4 border border-emerald-200 rounded-2xl bg-emerald-50 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -1641,7 +1735,7 @@ async function uploadPdf(
       
     );
   }
-  
+
   // ── Render Quiz Item ─────────────────────────────────────
   function renderQuizItem(sectionId: string, item: QuizItem, itemIndex: number, totalItems: number) {
     return (
