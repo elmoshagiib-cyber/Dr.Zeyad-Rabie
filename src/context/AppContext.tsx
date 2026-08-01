@@ -24,6 +24,7 @@ export interface AppUser {
   status?: "pending" | "approved";
 }
 
+
 interface AppContextType {
   user: AppUser | null;
   loading: boolean;

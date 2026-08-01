@@ -101,6 +101,7 @@ export function UserMenu() {
     };
   }, [isOpen, showHint]);
 
+  
   if (!user) return null;
 const avatar = user.avatar_url || "/images/default-avatar.png";
   const menuItems = [
