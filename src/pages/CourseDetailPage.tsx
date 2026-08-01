@@ -393,6 +393,7 @@ if (!response.ok) {
 }
 
     const { url } = await response.json();
+console.log("PDF URL =", url);
 
     window.open(url, "_blank", "noopener,noreferrer");
   } catch (error) {
