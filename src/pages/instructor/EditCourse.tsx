@@ -1005,38 +1005,11 @@ async function uploadVideo(
     };
   });
 
-  // ── محاكاة تقدم الرفع بشكل تدريجي حتى 90% ──
-  const progressInterval = setInterval(() => {
-    setCourse((prev) => {
-      if (!prev) return prev;
-
-      return {
-        ...prev,
-        sections: prev.sections.map((section) => ({
-          ...section,
-          items: section.items.map((item) => {
-            if (item.id !== itemId || item.type !== "video") return item;
-            if (item.status !== "uploading") return item;
-
-            const next = Math.min(item.uploadProgress + Math.random() * 12 + 3, 90);
-
-            return {
-              ...item,
-              uploadProgress: next,
-            };
-          }),
-        })),
-      };
-    });
-  }, 400);
-
   try {
     const data = await uploadToR2(
       file,
       `course-videos/${course.id}/${sectionId}`
     );
-
-    clearInterval(progressInterval);
 
     setCourse((prev) => {
       if (!prev) return prev;
@@ -1062,8 +1035,6 @@ async function uploadVideo(
       };
     });
   } catch (err: any) {
-    clearInterval(progressInterval);
-
     setCourse((prev) => {
       if (!prev) return prev;
 
@@ -1085,16 +1056,7 @@ async function uploadVideo(
     });
 
     console.error("Video Upload Error:", err);
-    console.log("Message:", err?.message);
-    console.log("Name:", err?.name);
-    console.log("Response:", err?.response);
-    console.log("Status:", err?.status || err?.statusCode);
-    console.log("Stack:", err?.stack);
-
-    alert(
-      "فشل رفع الفيديو: " +
-        (err?.message || err?.toString() || "خطأ غير معروف")
-    );
+    alert("فشل رفع الفيديو: " + (err?.message || "خطأ غير معروف"));
   }
 }
 
@@ -1128,37 +1090,11 @@ async function uploadPdf(
     };
   });
 
-  const progressInterval = setInterval(() => {
-    setCourse((prev) => {
-      if (!prev) return prev;
-
-      return {
-        ...prev,
-        sections: prev.sections.map((section) => ({
-          ...section,
-          items: section.items.map((item) => {
-            if (item.id !== itemId || item.type !== "pdf") return item;
-            if (item.status !== "uploading") return item;
-
-            const next = Math.min(item.uploadProgress + Math.random() * 12 + 3, 90);
-
-            return {
-              ...item,
-              uploadProgress: next,
-            };
-          }),
-        })),
-      };
-    });
-  }, 400);
-
   try {
     const data = await uploadToR2(
       file,
       `course-videos/${course.id}/${sectionId}`
     );
-
-    clearInterval(progressInterval);
 
     setCourse((prev) => {
       if (!prev) return prev;
@@ -1184,8 +1120,6 @@ async function uploadPdf(
       };
     });
   } catch (err: any) {
-    clearInterval(progressInterval);
-
     setCourse((prev) => {
       if (!prev) return prev;
 
@@ -1207,19 +1141,9 @@ async function uploadPdf(
     });
 
     console.error("PDF Upload Error:", err);
-    console.log("Message:", err?.message);
-    console.log("Name:", err?.name);
-    console.log("Response:", err?.response);
-    console.log("Status:", err?.status || err?.statusCode);
-    console.log("Stack:", err?.stack);
-
-    alert(
-      "فشل رفع الملف: " +
-        (err?.message || err?.toString() || "خطأ غير معروف")
-    );
+    alert("فشل رفع الملف: " + (err?.message || "خطأ غير معروف"));
   }
 }
-
   // ── Quiz Helpers ─────────────────────────────────────────
   function addQuestion(sectionId: string, quizId: string) {
     setCourse((prev) =>
