@@ -112,12 +112,38 @@ function generateId(): string {
   return Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
 }
 
+
+
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 بايت";
   const k = 1024;
   const sizes = ["بايت", "كيلوبايت", "ميغابايت", "غيغابايت"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+
+function getVideoDuration(file: File): Promise<string> {
+  return new Promise((resolve) => {
+    const video = document.createElement("video");
+    video.preload = "metadata";
+
+    video.onloadedmetadata = () => {
+      window.URL.revokeObjectURL(video.src);
+
+      const totalSeconds = Math.floor(video.duration);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+
+      const formatted = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+      resolve(formatted);
+    };
+
+    video.onerror = () => {
+      resolve("");
+    };
+
+    video.src = URL.createObjectURL(file);
+  });
 }
 
 function createDefaultVideo(): VideoItem {
@@ -998,7 +1024,10 @@ async function uploadVideo(
 ) {
   if (!course) return;
 
-  setCourse((prev) => {
+  // ── حساب مدة الفيديو تلقائيًا من الملف نفسه ──
+  const autoDuration = await getVideoDuration(file);
+
+setCourse((prev) => {
     if (!prev) return prev;
 
     return {
@@ -1006,17 +1035,18 @@ async function uploadVideo(
       sections: prev.sections.map((section) => ({
         ...section,
         items: section.items.map((item) => {
-          if (item.id !== itemId) return item;
+          if (item.id !== itemId || item.type !== "video") return item;
 
           return {
             ...item,
             fileName: file.name,
             fileSize: file.size,
+            duration: autoDuration || item.duration,
             status: "uploading",
             uploadProgress: 0,
             uploadedBytes: 0,
             totalBytes: file.size,
-          };
+          } as VideoItem;
         }),
       })),
     };
@@ -1510,7 +1540,7 @@ async function uploadPdf(
                 placeholder="أدخل عنوان الفيديو"
               />
             </div>
-            <div>
+<div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">الوصف</label>
               <textarea
                 value={item.description}
@@ -1518,6 +1548,16 @@ async function uploadPdf(
                 rows={2}
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm resize-none"
                 placeholder="وصف مختصر للفيديو"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">مدة الفيديو</label>
+              <input
+                type="text"
+                value={item.duration}
+                onChange={(e) => updateItem(sectionId, item.id, { duration: e.target.value } as Partial<VideoItem>)}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm"
+                placeholder="مثال: 15:30 أو 15 دقيقة"
               />
             </div>
           </div>
