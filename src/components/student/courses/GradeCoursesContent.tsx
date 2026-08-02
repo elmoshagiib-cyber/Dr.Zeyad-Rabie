@@ -8,7 +8,7 @@ import { Button } from "../../ui/Button";
 import { BookOpen, Clock, Tag } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { ShieldCheck } from "lucide-react";
-
+import { motion } from "framer-motion";
 import { HiOutlineCalendarDays } from "react-icons/hi2";
 import { HiOutlineFolder } from "react-icons/hi2";
 interface GradeCoursesContentProps {
@@ -199,9 +199,10 @@ const formatDate = (date: string) => {
   const hasAccess =
     course.is_free || myCourses.includes(course.id);
 
-  return (
-   
-<Card
+
+return (
+
+    <Card
   
   className="
     group
@@ -209,7 +210,9 @@ const formatDate = (date: string) => {
     bg-transparent
     dark:bg-transparent
     border-0
-    shadow-none
+    transition-all
+duration-300
+hover:shadow-[0_25px_60px_rgba(179,72,254,0.18)]
     rounded-none
     p-0
 "
@@ -217,15 +220,28 @@ const formatDate = (date: string) => {
 
 <div
   className="
-  relative
-  overflow-hidden
-  aspect-video
-w-[127%]
--mr-[15%]
-  rounded-[24px]
-  sm:rounded-[28px]
-  lg:rounded-[32px]
-"
+    relative
+
+    aspect-[16/9.5]
+
+    w-[108%]
+    -mr-[4%]
+
+    sm:w-[114%]
+    sm:-mr-[7%]
+
+    lg:w-[120%]
+    lg:-mr-[10%]
+
+    xl:w-[127%]
+    xl:-mr-[15%]
+
+    rounded-[24px]
+    sm:rounded-[28px]
+    lg:rounded-[32px]
+
+    overflow-hidden
+  "
 >
         <img
           src={
@@ -233,13 +249,18 @@ w-[127%]
             "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=800"
           }
           alt={course.title}
-          className="
+className="
 w-full
 h-full
-object-cover
+object-cover object-center
+object-top
+translate-y-[-6px]
+
 transition-all
-duration-700
+duration-300
 ease-out
+
+group-hover:translate-y-[-14px]
 group-hover:scale-[1.06]
 group-hover:brightness-110
 group-hover:saturate-110
@@ -288,7 +309,7 @@ backdrop-blur-md backdrop-blur-sm text-white
           transition-opacity duration-700
           bg-gradient-to-r from-transparent via-white/15 to-transparent
           -translate-x-full group-hover:translate-x-full
-          transition-transform duration-1000
+          transition-transform duration-500
         " />
       </div>
 
@@ -296,8 +317,11 @@ backdrop-blur-md backdrop-blur-sm text-white
   className="
     relative
     z-20
-    -mt-12
-    -mx-7
+    -mt-9
+    -mx-2
+sm:-mx-4
+lg:-mx-5
+xl:-mx-7
     mb-5
     rounded-[28px]
     bg-white
@@ -526,6 +550,7 @@ className="
 </div>
       </CardContent>
     </Card>
+   
   );
 };
   const CourseSection = ({
@@ -563,8 +588,8 @@ text-3xl">
         <div className="
           grid
 grid-cols-1
-lg:grid-cols-2
-2xl:grid-cols-3
+md:grid-cols-2
+xl:grid-cols-3
           gap-4 sm:gap-6
         ">
           {list.map(c => <CourseCard key={c.id} course={c} />)}

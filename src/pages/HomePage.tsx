@@ -262,7 +262,13 @@ useEffect(() => {
 }, []);
 
 return (
-    <div className="min-h-screen bg-white dark:bg-[#0b0715]" dir="rtl">
+    <motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: .5 }}
+  className="min-h-screen bg-white dark:bg-[#0b0715]"
+  dir="rtl"
+>
      <Navbar />
 
 {user && announcement && (
@@ -411,21 +417,24 @@ lg:py-20
 {/* TEXT */}
 <motion.div
 initial={{
-opacity:0,
-y:40
+  opacity: 0,
+  x: 100,
 }}
+
 animate={{
-opacity:1,
-y:0
+  opacity: 1,
+  x: 0,
 }}
+
 transition={{
 duration:.8,
 delay:.25,
 ease:[0.22,1,0.36,1]
 }}
+
 style={{
-  y: scrollY * 0.18,
-  opacity: Math.max(1 - scrollY / 700, 0),
+  y: scrollY * 0.22,
+  opacity: Math.max(1 - scrollY / 650, 0),
 }}
   className="
   mt-4
@@ -584,24 +593,24 @@ hover:bg-[#9A2EFF]
       {/* IMAGE */}
       <motion.div
 initial={{
-opacity:0,
-x:80,
-scale:.95
+  opacity: 0,
+  x: -120,
+  scale: 0.95,
 }}
 
 animate={{
-opacity:1,
-x:0,
-scale:1
+  opacity: 1,
+  x: 0,
+  scale: 1,
 }}
 
 transition={{
-duration:1,
-delay:.45,
-ease:[0.22,1,0.36,1]
+  duration: 0.9,
+  delay: 0.2,
+  ease: [0.16, 1, 0.3, 1],
 }}
 style={{
-  y: scrollY * -0.08,
+  y: scrollY * -0.06,
   scale: Math.max(1 - scrollY / 3500, 0.94),
 }}
   className="
@@ -853,15 +862,25 @@ duration-300
         ">
 
           {/* الثانوية */}
-          <div
-            onClick={() => navigate("/stage/secondary")}
-            className="cursor-pointer group"
-          >
+<motion.div
+  initial={{ opacity: 0, y: 60 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, amount: 0.2 }}
+  transition={{
+    duration: 0.6,
+    ease: [0.22, 1, 0.36, 1],
+  }}
+  onClick={() => navigate("/stage/secondary")}
+  className="cursor-pointer group"
+>
             {/* Image */}
             <div className="relative overflow-hidden rounded-[20px] sm:rounded-[28px] shadow-xl">
               <motion.img
                 whileHover={{ scale: 1.07 }}
-                transition={{ duration: 0.5 }}
+                transition={{
+  duration: 0.25,
+  ease: [0.22, 1, 0.36, 1],
+}}
                 src="/images/secondary-stage.jpg"
                 alt="المرحلة الثانوية"
                 className="
@@ -929,18 +948,29 @@ duration-300
                 الصف الأول والثاني والثالث الثانوي
               </p>
             </div>
-          </div>
+</motion.div>
 
           {/* الإعدادي */}
-          <div
-            onClick={() => navigate("/stage/prep")}
-            className="cursor-pointer group"
-          >
+<motion.div
+  initial={{ opacity: 0, y: 60 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, amount: 0.2 }}
+  transition={{
+    duration: 0.6,
+    delay: 0.15,
+    ease: [0.22, 1, 0.36, 1],
+  }}
+  onClick={() => navigate("/stage/prep")}
+  className="cursor-pointer group"
+>
             {/* Image */}
             <div className="relative overflow-hidden rounded-[20px] sm:rounded-[28px] shadow-xl">
               <motion.img
                 whileHover={{ scale: 1.07 }}
-                transition={{ duration: 0.5 }}
+                transition={{
+  duration: 0.25,
+  ease: [0.22, 1, 0.36, 1],
+}}
                 src="/images/prep-stage.jpg"
                 alt="المرحلة الإعدادية"
                 className="
@@ -1008,7 +1038,7 @@ duration-300
                 الصف الأول والثاني والثالث الإعدادي
               </p>
             </div>
-          </div>
+</motion.div>
 
         </div>
       )}
@@ -1126,6 +1156,6 @@ duration-300
 </a>
 
 <Footer />
-</div>
+</motion.div>
 );
 }
