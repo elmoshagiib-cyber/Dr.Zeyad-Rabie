@@ -74,7 +74,7 @@ export function ThemeToggle({ isDark, toggleTheme }: ThemeToggleProps) {
         height: TRACK.height,
         padding: TRACK.padding,
       }}
-      className="
+className="
   group
   relative
   isolate
@@ -87,9 +87,8 @@ export function ThemeToggle({ isDark, toggleTheme }: ThemeToggleProps) {
 
   bg-[#B348FE]
 
-  shadow-[0_4px_14px_rgba(179,72,254,.35)]
-  hover:bg-[#A63AF7]
-  hover:shadow-[0_6px_20px_rgba(179,72,254,.45)]
+  shadow-lg
+  hover:bg-[#B348FE]
 
   transition-all
   duration-300
