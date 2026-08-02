@@ -43,9 +43,10 @@ export function CourseDetailPage() {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscriptionCode, setSubscriptionCode] = useState("");
 
-  const [videoPlayerOpen, setVideoPlayerOpen] = useState(false);
+const [videoPlayerOpen, setVideoPlayerOpen] = useState(false);
   const [videoPlayerUrl, setVideoPlayerUrl] = useState("");
   const [videoPlayerTitle, setVideoPlayerTitle] = useState("");
+  const [watermarkPosition, setWatermarkPosition] = useState({ top: "10%", left: "10%" });
 
   const loadCourse = async () => {
     const { data, error } = await supabase
@@ -105,6 +106,18 @@ const getStudentId = (): number | null => {
   if (!user?.studentId) return null;
 
   return user.studentId;
+};
+
+const getWatermarkText = (): string => {
+  if (!user) return "";
+
+  const name = (user as any).name || (user as any).full_name || "";
+  const phone = (user as any).phone || (user as any).phone_number || "";
+  const email = (user as any).email || "";
+
+  const identifier = phone || email || name || `طالب #${(user as any).studentId || ""}`;
+
+  return `${name ? name + " - " : ""}${identifier}`.trim();
 };
 
   const checkEnrollment = async () => {
@@ -409,7 +422,7 @@ alert(url);
     setVideoPlayerTitle("");
   };
 
-  useEffect(() => {
+useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && videoPlayerOpen) {
         closeVideoPlayer();
@@ -423,6 +436,30 @@ alert(url);
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
+  }, [videoPlayerOpen]);
+
+  // ── Watermark: تحريك موقعه كل بضع ثواني لصعوبة إزالته بالقص ──
+  useEffect(() => {
+    if (!videoPlayerOpen) return;
+
+    const positions = [
+      { top: "8%", left: "8%" },
+      { top: "8%", left: "70%" },
+      { top: "80%", left: "8%" },
+      { top: "80%", left: "70%" },
+      { top: "45%", left: "40%" },
+      { top: "15%", left: "45%" },
+      { top: "70%", left: "20%" },
+    ];
+
+    let index = 0;
+
+    const interval = setInterval(() => {
+      index = (index + 1) % positions.length;
+      setWatermarkPosition(positions[index]);
+    }, 4000);
+
+    return () => clearInterval(interval);
   }, [videoPlayerOpen]);
 
   if (!course) {
@@ -1212,6 +1249,8 @@ group-hover:scale-110
         <div
           className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
           onClick={closeVideoPlayer}
+          onContextMenu={(e) => e.preventDefault()}
+          style={{ userSelect: "none" }}
         >
           <div
             className="relative w-full max-w-5xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
@@ -1230,12 +1269,16 @@ group-hover:scale-110
               </h3>
             </div>
 
-            <div className="relative bg-black" style={{ paddingBottom: "56.25%" }}>
+            <div
+              className="relative bg-black"
+              style={{ paddingBottom: "56.25%" }}
+              onContextMenu={(e) => e.preventDefault()}
+            >
               <video
                 key={videoPlayerUrl}
                 src={videoPlayerUrl}
                 controls
-                controlsList="nodownload"
+                controlsList="nodownload noremoteplayback"
                 disablePictureInPicture
                 preload="metadata"
                 playsInline
@@ -1243,6 +1286,26 @@ group-hover:scale-110
                 className="absolute inset-0 w-full h-full"
                 autoPlay
               />
+
+              {/* ── Watermark متحرك: يحتوي على بيانات الطالب لردع نشر الفيديو ── */}
+              <div
+                className="absolute pointer-events-none select-none transition-all duration-1000 ease-in-out z-10"
+                style={{
+                  top: watermarkPosition.top,
+                  left: watermarkPosition.left,
+                }}
+              >
+                <div
+                  className="px-3 py-1.5 rounded-lg text-white text-xs sm:text-sm font-bold whitespace-nowrap"
+                  style={{
+                    background: "rgba(0,0,0,0.35)",
+                    textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+                    opacity: 0.55,
+                  }}
+                >
+                  {getWatermarkText()}
+                </div>
+              </div>
             </div>
           </div>
         </div>
