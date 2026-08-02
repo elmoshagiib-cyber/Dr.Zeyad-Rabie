@@ -552,6 +552,9 @@ Object.assign(payload,{
     // PDF
     // ==========================
     if (item.type === "pdf") {
+        console.log("PDF ITEM BEFORE SAVE =", item);
+  console.log("PDF URL =", item.pdfUrl);
+  console.log("PDF STORAGE =", item.storagePath);
       Object.assign(payload, {
         url: item.pdfUrl || "",
         storage_path: item.storagePath || "",
