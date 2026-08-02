@@ -23,7 +23,7 @@ const [showAuthModal, setShowAuthModal] = useState(false);
 const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 const [subscriptionCode, setSubscriptionCode] = useState("");
 const [selectedCourse, setSelectedCourse] = useState<any>(null);
-const [myCourses, setMyCourses] = useState<number[]>([]);
+const [myCourses, setMyCourses] = useState<string[]>([]);
 
 useEffect(() => {
   loadCourses();
@@ -55,7 +55,7 @@ const loadMyCourses = async () => {
 const { data } = await supabase
   .from("student_courses")
   .select("course_id, expires_at")
-  .eq("student_id", currentUser.id)
+  .eq("student_id", currentUser.studentId)
   .eq("active", true);
 
 const validCourses =
@@ -65,15 +65,16 @@ const validCourses =
     })
     .map((item: any) => item.course_id) || [];
 
-  setMyCourses(validCourses);
+setMyCourses(validCourses);
 };
 
 const handleCourseAction = (course: any) => {
 
-  if (myCourses.includes(course.id)) {
+if (myCourses.includes(course.id)) {
   navigate(`/courses/${course.id}`);
   return;
 }
+
   const user = localStorage.getItem("user");
 
 if (!user) {
@@ -119,7 +120,7 @@ const activateSubscription = async () => {
 
   const currentUser = JSON.parse(localStorage.getItem("user")!);
 
-const studentId = Number(currentUser.id);
+const studentId = currentUser.studentId;
 
 // التحقق أولًا هل الطالب مشترك بالفعل
 const { data: existingSubscription } = await supabase
@@ -196,13 +197,14 @@ const formatDate = (date: string) => {
 
  const CourseCard = ({ course }: { course: any }) => {
 
-  const hasAccess =
-    course.is_free || myCourses.includes(course.id);
+const hasAccess =
+  course.is_free ||
+  myCourses.map(String).includes(String(course.id));
 
 
 return (
 
-    <Card
+<Card
   
   className="
     group
@@ -211,10 +213,13 @@ return (
     dark:bg-transparent
     border-0
     transition-all
-duration-300
-hover:shadow-[0_25px_60px_rgba(179,72,254,0.18)]
+    duration-300
+    ease-out
+    hover:-translate-y-2
+    hover:shadow-[0_25px_60px_rgba(179,72,254,0.18)]
     rounded-none
     p-0
+    cursor-pointer
 "
 >
 
@@ -336,8 +341,6 @@ xl:-mx-7
     flex-col
     flex-1
     gap-3
-    shadow-xl
-    dark:shadow-[0_20px_45px_rgba(0,0,0,.45)]
   "
 >
 <h3
@@ -393,67 +396,61 @@ sm:leading-8
     gap-3
   "
 >
-<Button
-className="
-  flex-1
-  h-12
-  rounded-2xl
-  font-black
-  text-[15px]
-  text-white
+  {!hasAccess && (
+    <Button
+      className="
+        flex-1
+        h-12
+        rounded-2xl
+        font-black
+        text-[15px]
+        text-white
+        bg-[#B348FE]
+        hover:bg-[#9E2FFF]
+        shadow-lg
+        shadow-[#B348FE]/25
+        transition-all
+        duration-300
+        hover:-translate-y-0.5
+      "
+      onClick={() => handleCourseAction(course)}
+    >
+      اشترك الآن
+    </Button>
+  )}
 
-  bg-[#B348FE]
-  hover:bg-[#9E2FFF]
+  <Button
+    variant="outline"
+    className="
+      flex-1
+      h-12
+      rounded-2xl
+      font-black
+      text-[15px]
 
-  shadow-lg
-  shadow-[#B348FE]/25
+      border-2
+      border-[#B348FE]
 
-  transition-all
-  duration-300
-  hover:-translate-y-0.5
-"
-  onClick={() =>
-    hasAccess
-      ? navigate(`/courses/${course.id}`)
-      : handleCourseAction(course)
-  }
->
-  {hasAccess ? "الدخول للكورس" : "اشترك الآن"}
-</Button>
+      bg-transparent
+      text-[#B348FE]
 
-  {!course.is_free && !myCourses.includes(course.id) && (
-<Button
-  variant="outline"
-className="
-  flex-1
-  h-12
-  rounded-2xl
-  font-black
-  text-[15px]
+      hover:bg-transparent
+      hover:text-[#B348FE]
+      hover:border-[#B348FE]
 
-  border-2
-  border-[#B348FE]
+      active:bg-transparent
 
-  bg-transparent
-  text-[#B348FE]
-
-  hover:bg-transparent
-  hover:text-[#B348FE]
-  hover:border-[#B348FE]
-
-  active:bg-transparent
-
-  shadow-none
-  transition-all
-  duration-300
-"
-  onClick={() => navigate(`/courses/${course.id}`)}
->
-  عرض المحتوى
-</Button>
-)}
-  
+      shadow-none
+      transition-all
+      duration-300
+    "
+    onClick={() => navigate(`/courses/${course.id}`)}
+  >
+    عرض المحتوى
+  </Button>
 </div>
+
+
 </div>
 </div>
 {/* السعر + التاريخ */}
@@ -469,39 +466,53 @@ className="
 
 <div className="flex items-end justify-between gap-6">
 
-  {hasAccess ? (
+<div
+  className={`
+    inline-flex
+    items-center
+    gap-1
+    rounded-xl
+    p-1
+    shrink-0
+    ${hasAccess ? "" : "bg-[#B348FE]"}
+  `}
+>
+  
+{hasAccess ? (
     <span
-      className="
-        inline-flex
+className="
+        flex
         items-center
-        gap-2
-        rounded-xl
-        border
-        border-[#B348FE]
-        bg-[#F8F1FF]
-        dark:bg-[#241132]
-        text-[#B348FE]
-        px-5
-        py-2
-        text-sm
+        gap-1.5
+        bg-emerald-50
+        dark:bg-emerald-500/10
+        text-emerald-600
+        dark:text-emerald-400
+        rounded-md
+        px-4
+        py-[6px]
+        text-[13px]
         font-black
-        shrink-0
+        whitespace-nowrap
+        cursor-default
+        select-none
       "
     >
-      ✓ تم الاشتراك
+      <svg
+        className="w-4 h-4 shrink-0"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M20 6L9 17l-5-5" />
+      </svg>
+      تم الاشتراك
     </span>
   ) : (
-    <div
-      className="
-        inline-flex
-        items-center
-        gap-1
-        rounded-xl
-        bg-[#B348FE]
-        p-1
-        shrink-0
-      "
-    >
+    <>
       <span
         className="
           bg-white
@@ -521,8 +532,9 @@ className="
       <span className="px-2 text-[13px] font-black text-white">
         جنيه
       </span>
-    </div>
+    </>
   )}
+</div>
 
   <div className="flex flex-col gap-2">
 
