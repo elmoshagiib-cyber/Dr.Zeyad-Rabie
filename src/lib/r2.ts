@@ -54,6 +54,12 @@ export async function uploadToR2(
       reject(new Error("Network error during upload"));
     };
 
+    console.log("========== UPLOAD ==========");
+console.log("NAME =", file.name);
+console.log("TYPE =", file.type);
+console.log("SIZE =", file.size);
+console.log(file);
+
     xhr.send(file);
   });
 
