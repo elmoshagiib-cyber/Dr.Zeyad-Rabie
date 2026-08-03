@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Camera, Edit2, CheckCircle, Star, Trophy, BookOpen, Award, Shield } from "lucide-react";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import StudentLayout from "./StudentLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
@@ -121,13 +121,8 @@ updateUser({
 };
 
 const fileInputRef = useRef<HTMLInputElement>(null);
-  return (
-    <div className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]" dir="rtl">
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="student" />
-      </div>
-
-      <main className="flex-1 overflow-y-auto">
+return (
+  <StudentLayout>
         <div className="max-w-5xl mx-auto p-6 lg:p-8 space-y-6 lg:space-y-8">
           <input
   ref={fileInputRef}
@@ -287,7 +282,6 @@ const fileInputRef = useRef<HTMLInputElement>(null);
             </div>
           </div>
         </div>
-      </main>
-    </div>
-  );
+  </StudentLayout>
+);
 }

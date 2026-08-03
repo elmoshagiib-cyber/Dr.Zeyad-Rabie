@@ -1,10 +1,9 @@
 
 import { useNavigate } from "react-router-dom";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { Button } from "../../components/ui/Button";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
-
+import StudentLayout from "./StudentLayout";
 export function ExamsPage() {
   const navigate = useNavigate();
 
@@ -65,14 +64,8 @@ export function ExamsPage() {
     setExams(finalData);
   };
 
-  return (
-    <div
-      className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]"
-      dir="rtl"
-    >
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="student" />
-      </div>
+return (
+  <StudentLayout>
 
       <main className="flex-1 overflow-y-auto">
         <div className="px-6 lg:px-8 py-6 lg:py-8">
@@ -142,7 +135,8 @@ export function ExamsPage() {
             ))}
           </div>
         </div>
-      </main>
-    </div>
+    </main>
+  </StudentLayout>
+
   );
 }

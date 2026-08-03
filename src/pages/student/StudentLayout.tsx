@@ -66,9 +66,10 @@ duration-300
             <div className="flex items-center justify-between">
 
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setSidebarOpen(true)}
-                  className="
+<button
+  onClick={() => setSidebarOpen(true)}
+  className="
+lg:hidden
 p-2.5
 rounded-xl
 text-gray-700
@@ -78,7 +79,7 @@ dark:hover:bg-[#111111]
 transition-all
 duration-300
 "
-                >
+>
                   <Menu size={22} />
                 </button>
 

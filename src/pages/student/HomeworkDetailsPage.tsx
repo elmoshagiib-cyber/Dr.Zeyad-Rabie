@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Upload, FileText, CheckCircle, Eye, AlertCircle, ArrowRight, Image as ImageIcon, FileType } from "lucide-react";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+
 import { Card, CardContent } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { useApp } from "../../context/AppContext";
 import { supabase } from "../../lib/supabase";
 import { useRef } from "react";
+import StudentLayout from "./StudentLayout";
 
 export function HomeworkDetailsPage() {
   const { id } = useParams();
@@ -236,11 +237,9 @@ const { error: submitError } = await supabase
   const canUpload = homework.allow_file_upload && status !== "corrected";
   const fileType = submission?.file_name ? getFileType(submission.file_name) : 'unknown';
 
-  return (
-    <div className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]" dir="rtl">
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="student" />
-      </div>
+return (
+  <StudentLayout>
+    <>
 
       <main className="flex-1 overflow-y-auto">
         {/* Header */}
@@ -702,6 +701,8 @@ const { error: submitError } = await supabase
           animation: fadeIn 0.3s ease-out;
         }
       `}</style>
-    </div>
-  );
+  </>
+  </StudentLayout>
+);
+  
 }

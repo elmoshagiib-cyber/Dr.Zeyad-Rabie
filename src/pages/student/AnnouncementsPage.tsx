@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { Badge } from "../../components/ui/Badge";
-
+import StudentLayout from "./StudentLayout";
 export function AnnouncementsPage() {
   const [loading, setLoading] = useState(true);
   const [announcements, setAnnouncements] = useState<any[]>([]);
@@ -20,14 +19,8 @@ export function AnnouncementsPage() {
     loadAnnouncements();
   }, []);
 
-  return (
-    <div
-      className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]"
-      dir="rtl"
-    >
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="student" />
-      </div>
+return (
+  <StudentLayout>
 
       <main className="flex-1 overflow-y-auto">
         {/* Header */}
@@ -106,7 +99,7 @@ export function AnnouncementsPage() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+    </main>
+  </StudentLayout>
   );
 }

@@ -1,5 +1,5 @@
 import { FileText, CheckCircle, Clock, AlertCircle, Eye } from "lucide-react";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import StudentLayout from "./StudentLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { useEffect, useState, useRef } from "react";
@@ -157,16 +157,9 @@ const { error: submitError } = await supabase
     return url?.toLowerCase().includes(".pdf");
   };
 
-  return (
-    <div
-      className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]"
-      dir="rtl"
-    >
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="student" />
-      </div>
+return (
+  <StudentLayout>
 
-      <main className="flex-1 overflow-y-auto">
         {/* Header */}
         <div className="bg-white dark:bg-[#09090B] border-b border-gray-100 dark:border-[#2A2A2A] px-6 lg:px-8 py-6">
           <h1 className="text-3xl lg:text-4xl font-black text-gray-900 dark:text-white mb-2">
@@ -461,7 +454,6 @@ const { error: submitError } = await supabase
             })}
           </div>
         </div>
-      </main>
-    </div>
+  </StudentLayout>
   );
 }

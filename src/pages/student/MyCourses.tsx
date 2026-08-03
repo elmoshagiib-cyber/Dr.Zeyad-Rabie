@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { BookOpen, Play, CheckCircle, Clock, ChevronRight } from "lucide-react";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import StudentLayout from "./StudentLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
@@ -49,22 +49,10 @@ const loadCourses = async () => {
   setLoading(false);
 };
 
-  return (
-    <div
-  className="
-    flex
-    h-screen
-    overflow-hidden
-    bg-[#FCFCFD]
-    dark:bg-[#09090B]
-    transition-colors
-  "
-  dir="rtl"
->
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="student" />
-      </div>
-      <main className="flex-1 overflow-y-auto">
+return (
+  <StudentLayout>
+     
+     <>
         <div
   className="
     bg-white
@@ -172,7 +160,7 @@ dark:bg-[#1F1F1F] group-hover:bg-[#EEDBFF] rounded-2xl flex items-center justify
             <p className="text-sm text-gray-500 dark:text-gray-400">تصفح جميع الكورسات المتاحة وأضف ما يناسبك</p>
           </div>
         </div>
-      </main>
-    </div>
-  );
+      </>
+  </StudentLayout>
+);
 }
