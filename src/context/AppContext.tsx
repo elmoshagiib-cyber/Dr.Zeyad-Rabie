@@ -72,6 +72,8 @@ if (
   student &&
   student.session_token !== savedToken
 ) {
+  alert("تم تسجيل خروجك لأنه تم تسجيل الدخول بحسابك من جهاز آخر");
+
   await supabase.auth.signOut();
 
   localStorage.removeItem("user");
@@ -82,6 +84,7 @@ if (
 
   return;
 }
+
       setUser(JSON.parse(savedUser));
     }
 
@@ -106,7 +109,9 @@ const interval = setInterval(async () => {
 
   if (!student) return;
 
-  if (student.session_token !== savedToken) {
+if (student.session_token !== savedToken) {
+    alert("تم تسجيل خروجك لأنه تم تسجيل الدخول بحسابك من جهاز آخر");
+
     await supabase.auth.signOut();
 
     localStorage.clear();
@@ -114,7 +119,6 @@ const interval = setInterval(async () => {
     window.location.href = "/login";
   }
 }, 3000);
-
 
   const {
     data: { subscription },
