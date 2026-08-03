@@ -227,19 +227,19 @@ return (
   className="
     relative
 
-    aspect-[16/8]
+aspect-[16/10]
 
-   w-[118%]
--mr-[9%]
+   w-[128%]
+-mr-[14%]
 
-sm:w-[124%]
-sm:-mr-[12%]
+sm:w-[134%]
+sm:-mr-[17%]
 
-lg:w-[128%]
-lg:-mr-[14%]
+lg:w-[140%]
+lg:-mr-[20%]
 
-xl:w-[132%]
-xl:-mr-[16%]
+xl:w-[144%]
+xl:-mr-[22%]
     rounded-[24px]
     sm:rounded-[28px]
     lg:rounded-[32px]
@@ -322,11 +322,11 @@ backdrop-blur-md backdrop-blur-sm text-white
   className="
     relative
     z-20
-    -mt-9
-    -mx-2
-sm:-mx-4
-lg:-mx-5
-xl:-mx-7
+-mt-7
+    -mx-3
+sm:-mx-5
+lg:-mx-6
+xl:-mx-8
     mb-5
     rounded-[28px]
     bg-white
