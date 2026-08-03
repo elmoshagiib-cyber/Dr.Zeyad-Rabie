@@ -205,16 +205,20 @@ const hasAccess =
 return (
 
 <Card
+  
   className="
     group
-    overflow-hidden
+    overflow-visible
     bg-transparent
     dark:bg-transparent
     border-0
-    shadow-none
+    transition-all
+    duration-300
+    ease-out
+    hover:-translate-y-2
+    hover:shadow-[0_25px_60px_rgba(179,72,254,0.18)]
     rounded-none
     p-0
-    h-fit
     cursor-pointer
 "
 >
