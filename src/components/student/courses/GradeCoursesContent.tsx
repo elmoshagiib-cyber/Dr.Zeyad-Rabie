@@ -603,7 +603,10 @@ text-3xl">
     grid-cols-1
     md:grid-cols-2
     xl:grid-cols-3
-    gap-x-16
+    gap-x-24
+    sm:gap-x-28
+    lg:gap-x-32
+    xl:gap-x-40
     gap-y-12
   "
 >
@@ -710,15 +713,20 @@ return (
         </>
       ) : (
         !loading && courses.length > 0 && (
-          <div className="
-            grid
-            grid-cols-1
-            sm:grid-cols-2
-            xl:grid-cols-3
-            gap-4 sm:gap-6
-          ">
-            {courses.map(c => <CourseCard key={c.id} course={c} />)}
-          </div>
+<div className="
+  grid
+  grid-cols-1
+  sm:grid-cols-2
+  xl:grid-cols-3
+  gap-x-24
+  sm:gap-x-28
+  lg:gap-x-32
+  xl:gap-x-40
+  gap-y-8
+  sm:gap-y-10
+">
+  {courses.map(c => <CourseCard key={c.id} course={c} />)}
+</div>
         )
       )}
     </div>
