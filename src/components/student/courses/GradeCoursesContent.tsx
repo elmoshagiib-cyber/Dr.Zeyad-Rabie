@@ -328,7 +328,7 @@ backdrop-blur-md backdrop-blur-sm text-white
 sm:-mx-4
 lg:-mx-5
 xl:-mx-7
-    -mb-2
+    mb-5
     rounded-[28px]
     bg-white
     dark:bg-[#111111]
