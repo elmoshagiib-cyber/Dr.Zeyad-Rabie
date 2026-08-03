@@ -31,6 +31,7 @@ interface AppContextType {
   user: AppUser | null;
   loading: boolean;
   login: (user: AppUser) => void;
+  updateUser: (data: Partial<AppUser>) => void;
   logout: () => Promise<void>;
 }
 
@@ -38,12 +39,31 @@ const AppContext = createContext<AppContextType>({
   user: null,
   loading: true,
   login: () => {},
+  updateUser: () => {},
   logout: async () => {},
 });
+
+
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
+const savedUser = localStorage.getItem("user");
+
+  const updateUser = (data: Partial<AppUser>) => {
+  setUser((prev) => {
+    if (!prev) return prev;
+
+    const updated = {
+      ...prev,
+      ...data,
+    };
+
+    localStorage.setItem("user", JSON.stringify(updated));
+
+    return updated;
+  });
+};
 
 useEffect(() => {
   const checkUser = async () => {
@@ -134,7 +154,7 @@ return () => {
   subscription.unsubscribe();
 };
 
-}, []);  const savedUser = localStorage.getItem("user");
+}, []);  
 
 
   const login = (u: AppUser) => {
@@ -151,14 +171,15 @@ const logout = async () => {
 };
 
   return (
-    <AppContext.Provider
-      value={{
-        user,
-        loading,
-        login,
-        logout,
-      }}
-    >
+<AppContext.Provider
+  value={{
+    user,
+    loading,
+    login,
+    updateUser,
+    logout,
+  }}
+>
       {children}
     </AppContext.Provider>
   );

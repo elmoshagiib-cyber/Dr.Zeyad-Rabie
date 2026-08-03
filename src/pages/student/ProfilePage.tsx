@@ -11,7 +11,7 @@ import { CURRENT_STUDENT, COURSES, LEADERBOARD } from "../../data/mockData";
 import { supabase } from "../../lib/supabase";
 
 export function ProfilePage() {
-  const { user } = useApp();
+  const { user, updateUser } = useApp();
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(user?.name || CURRENT_STUDENT.name);
   const [saved, setSaved] = useState(false);
@@ -100,6 +100,9 @@ const handleAvatarUpload = async (
     if (error) throw error;
 
     setAvatarUrl(avatar);
+updateUser({
+  avatar_url: avatar,
+});
 
     alert("تم تحديث الصورة بنجاح");
   } catch (err) {
@@ -154,11 +157,12 @@ const fileInputRef = useRef<HTMLInputElement>(null);
     className="w-full h-full object-cover rounded-3xl"
   />
 ) : (
-  <Avatar
-    name={displayUser.name}
-    size="xl"
-    className="w-full h-full rounded-3xl"
-  />
+<Avatar
+  name={displayUser.name}
+  src={avatarUrl || displayUser.avatar_url}
+  size="xl"
+  className="w-full h-full rounded-3xl"
+/>
 )}
                 </div>
 <button
