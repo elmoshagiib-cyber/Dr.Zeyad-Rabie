@@ -136,9 +136,12 @@ login({
 
   name: student.full_name,
   role: "student",
+
   grade: student.grade,
   phone: student.phone,
   governorate: student.governorate,
+
+  avatar_url: student.avatar_url,
 });
 
 
