@@ -227,20 +227,19 @@ return (
   className="
     relative
 
-    aspect-[16/9.5]
+    aspect-[16/8]
 
-    w-[112%]
-    -mr-[6%]
+   w-[118%]
+-mr-[9%]
 
-    sm:w-[116%]
-    sm:-mr-[8%]
+sm:w-[124%]
+sm:-mr-[12%]
 
-    lg:w-[118%]
-    lg:-mr-[9%]
+lg:w-[128%]
+lg:-mr-[14%]
 
-    xl:w-[120%]
-    xl:-mr-[10%]
-
+xl:w-[132%]
+xl:-mr-[16%]
     rounded-[24px]
     sm:rounded-[28px]
     lg:rounded-[32px]
