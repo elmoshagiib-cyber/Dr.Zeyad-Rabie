@@ -229,17 +229,17 @@ return (
 
     aspect-[16/9.5]
 
-    w-[104%]
-    -mr-[2%]
+    w-[112%]
+    -mr-[6%]
 
-    sm:w-[106%]
-    sm:-mr-[3%]
+    sm:w-[116%]
+    sm:-mr-[8%]
 
-    lg:w-[108%]
-    lg:-mr-[4%]
+    lg:w-[118%]
+    lg:-mr-[9%]
 
-    xl:w-[110%]
-    xl:-mr-[5%]
+    xl:w-[120%]
+    xl:-mr-[10%]
 
     rounded-[24px]
     sm:rounded-[28px]
@@ -604,10 +604,10 @@ text-3xl">
     grid-cols-1
     md:grid-cols-2
     xl:grid-cols-3
-    gap-x-10
-    sm:gap-x-12
-    lg:gap-x-14
-    xl:gap-x-16
+    gap-x-16
+    sm:gap-x-20
+    lg:gap-x-24
+    xl:gap-x-28
     gap-y-12
   "
 >
@@ -719,10 +719,10 @@ return (
   grid-cols-1
   sm:grid-cols-2
   xl:grid-cols-3
-  gap-x-10
-  sm:gap-x-12
-  lg:gap-x-14
-  xl:gap-x-16
+  gap-x-16
+  sm:gap-x-20
+  lg:gap-x-24
+  xl:gap-x-28
   gap-y-8
   sm:gap-y-10
 ">
