@@ -1304,18 +1304,18 @@ group-hover:scale-110
               style={{ paddingBottom: isFullscreen ? "0" : "56.25%" }}
               onContextMenu={(e) => e.preventDefault()}
             >
-              <video
-                key={videoPlayerUrl}
-                src={videoPlayerUrl}
-                controls
-                controlsList="nodownload noremoteplayback nofullscreen"
-                disablePictureInPicture
-                preload="metadata"
-                playsInline
-                onContextMenu={(e) => e.preventDefault()}
-                className={isFullscreen ? "w-full h-full" : "absolute inset-0 w-full h-full"}
-                autoPlay
-              />
+<video
+  key={videoPlayerUrl}
+  src={videoPlayerUrl}
+  controls
+  controlsList="nodownload noremoteplayback"
+  disablePictureInPicture
+  preload="metadata"
+  playsInline
+  onContextMenu={(e) => e.preventDefault()}
+  className={isFullscreen ? "w-full h-full" : "absolute inset-0 w-full h-full"}
+  autoPlay
+/>
 
               {/* ── زرار ملء الشاشة المخصص: يحافظ على ظهور الـ Watermark ── */}
               <button
