@@ -10,6 +10,8 @@ import {
   ClipboardCheck,
   LayoutGrid,
   X,
+  Maximize,
+  Minimize,
 } from "lucide-react";
 import {
   HiOutlineCalendarDays,
@@ -19,7 +21,7 @@ import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
 import { useApp } from "../context/AppContext";
 import { supabase } from "../lib/supabase";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ShieldCheck } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { FaWhatsapp } from "react-icons/fa";
@@ -47,6 +49,8 @@ const [videoPlayerOpen, setVideoPlayerOpen] = useState(false);
   const [videoPlayerUrl, setVideoPlayerUrl] = useState("");
   const [videoPlayerTitle, setVideoPlayerTitle] = useState("");
   const [watermarkPosition, setWatermarkPosition] = useState({ top: "10%", left: "10%" });
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const videoWrapperRef = useRef<HTMLDivElement>(null);
 
   const loadCourse = async () => {
     const { data, error } = await supabase
@@ -415,15 +419,28 @@ console.log("PDF URL =", url);
   }
 };
 
-  const closeVideoPlayer = () => {
+const closeVideoPlayer = () => {
     setVideoPlayerOpen(false);
     setVideoPlayerUrl("");
     setVideoPlayerTitle("");
   };
 
+  // ── تبديل وضع ملء الشاشة على الـ wrapper كله (فيديو + Watermark) ──
+  const toggleFullscreen = () => {
+    if (!videoWrapperRef.current) return;
+
+    if (!document.fullscreenElement) {
+      videoWrapperRef.current.requestFullscreen().catch((err) => {
+        console.error("Fullscreen error:", err);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
 useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && videoPlayerOpen) {
+      if (e.key === "Escape" && videoPlayerOpen && !document.fullscreenElement) {
         closeVideoPlayer();
       }
     };
@@ -436,6 +453,19 @@ useEffect(() => {
       document.removeEventListener("keydown", handleEscape);
     };
   }, [videoPlayerOpen]);
+
+  // ── متابعة حالة ملء الشاشة عشان نغيّر الأيقونة ──
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
 
   // ── Watermark: تحريك موقعه كل بضع ثواني لصعوبة إزالته بالقص ──
   useEffect(() => {
@@ -1269,22 +1299,32 @@ group-hover:scale-110
             </div>
 
             <div
+              ref={videoWrapperRef}
               className="relative bg-black"
-              style={{ paddingBottom: "56.25%" }}
+              style={{ paddingBottom: isFullscreen ? "0" : "56.25%" }}
               onContextMenu={(e) => e.preventDefault()}
             >
               <video
                 key={videoPlayerUrl}
                 src={videoPlayerUrl}
                 controls
-                controlsList="nodownload noremoteplayback"
+                controlsList="nodownload noremoteplayback nofullscreen"
                 disablePictureInPicture
                 preload="metadata"
                 playsInline
                 onContextMenu={(e) => e.preventDefault()}
-                className="absolute inset-0 w-full h-full"
+                className={isFullscreen ? "w-full h-full" : "absolute inset-0 w-full h-full"}
                 autoPlay
               />
+
+              {/* ── زرار ملء الشاشة المخصص: يحافظ على ظهور الـ Watermark ── */}
+              <button
+                onClick={toggleFullscreen}
+                className="absolute bottom-4 left-4 z-20 bg-black/50 hover:bg-black/70 text-white p-2.5 rounded-xl transition-all backdrop-blur-sm"
+                title={isFullscreen ? "الخروج من ملء الشاشة" : "ملء الشاشة"}
+              >
+                {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+              </button>
 
               {/* ── Watermark متحرك: يحتوي على بيانات الطالب لردع نشر الفيديو ── */}
               <div
