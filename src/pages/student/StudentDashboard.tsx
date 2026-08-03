@@ -46,8 +46,8 @@ export function StudentDashboard() {
     loadAnnouncements();
   }, []);
 
-  useEffect(() => {
-    if (user?.id) {
+useEffect(() => {
+    if (user?.studentId) {
       loadStudentCourses();
     }
   }, [user]);
@@ -86,8 +86,8 @@ export function StudentDashboard() {
     }
   };
 
-  const loadStudentCourses = async () => {
-    if (!user?.id) return;
+const loadStudentCourses = async () => {
+    if (!user?.studentId) return;
 
     try {
       setLoading(true);
@@ -95,7 +95,7 @@ export function StudentDashboard() {
       const { data: enrollments, error: enrollError } = await supabase
         .from("student_courses")
         .select("course_id")
-        .eq("student_id", Number(user.id))
+        .eq("student_id", user.studentId)
         .eq("active", true);
 
       if (enrollError) throw enrollError;
