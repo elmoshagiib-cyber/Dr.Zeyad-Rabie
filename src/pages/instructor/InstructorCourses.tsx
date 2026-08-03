@@ -120,6 +120,31 @@ console.log(coursesWithStudents);
 console.log("COURSE =", data?.[0]);
 };
 
+
+const toggleFeature = async (id: string) => {
+  const course = courses.find((c) => c.id === id);
+  if (!course) return;
+
+  const newValue = !course.is_featured;
+
+  const { error } = await supabase
+    .from("courses")
+    .update({ is_featured: newValue })
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    alert("حدث خطأ أثناء تحديث الكورس");
+    return;
+  }
+
+  setCourses((prev) =>
+    prev.map((c) =>
+      c.id === id ? { ...c, is_featured: newValue } : c
+    )
+  );
+};
+
 const deleteCourse = async (id: string) => {
   if (!confirm("هل أنت متأكد من حذف الكورس؟")) return;
 
@@ -175,9 +200,10 @@ return (
           setView={setView}
           resultsCount={filteredCourses.length}
         />
-        <CourseGrid
+<CourseGrid
           courses={filteredCourses}
           onDelete={deleteCourse}
+          onFeature={toggleFeature}
           view={view}
         />
       </div>

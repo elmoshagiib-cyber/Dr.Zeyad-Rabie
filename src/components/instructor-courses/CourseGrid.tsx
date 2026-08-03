@@ -3,12 +3,14 @@ import { CourseCard } from "./CourseCard";
 type Props = {
   courses: any[];
   onDelete: (id: string) => void;
+  onFeature?: (id: string) => void;
   view: "grid" | "list";
 };
 
 export function CourseGrid({
   courses,
   onDelete,
+  onFeature,
   view,
 }: Props) {
 
@@ -43,10 +45,11 @@ export function CourseGrid({
   }
 >
       {courses.map((course) => (
-       <CourseCard
+<CourseCard
     key={course.id}
     course={course}
     onDelete={onDelete}
+    onFeature={onFeature}
     view={view}
 />
       ))}

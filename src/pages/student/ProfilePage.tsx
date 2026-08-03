@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Camera, Edit2, CheckCircle, Star, Trophy, BookOpen, Award, Shield } from "lucide-react";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { Card, CardContent } from "../../components/ui/Card";
@@ -8,6 +8,7 @@ import { ProgressBar } from "../../components/ui/ProgressBar";
 import { Avatar } from "../../components/ui/Avatar";
 import { useApp } from "../../context/AppContext";
 import { CURRENT_STUDENT, COURSES, LEADERBOARD } from "../../data/mockData";
+import { supabase } from "../../lib/supabase";
 
 export function ProfilePage() {
   const { user } = useApp();
@@ -37,7 +38,7 @@ export function ProfilePage() {
     { icon: "🚀", title: "سريع التعلم", desc: "أتممت كورس في أسبوع واحد", earned: false },
   ];
 
-  const displayUser = user || { 
+  const displayUser: any = user || { 
     name: CURRENT_STUDENT.name, 
     code: CURRENT_STUDENT.code, 
     grade: CURRENT_STUDENT.grade, 
@@ -46,6 +47,70 @@ export function ProfilePage() {
     phone: CURRENT_STUDENT.phone 
   };
 
+  const [avatarUrl, setAvatarUrl] = useState(
+  displayUser.avatar_url || ""
+);
+
+const [uploadingAvatar, setUploadingAvatar] = useState(false);
+const handleAvatarUpload = async (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = e.target.files?.[0];
+
+  if (!file) return;
+
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    alert("يرجى اختيار صورة بصيغة JPG أو PNG أو WEBP");
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    alert("حجم الصورة يجب ألا يتجاوز 5MB");
+    return;
+  }
+
+  try {
+    setUploadingAvatar(true);
+
+    const extension = file.type.split("/")[1];
+
+    const filePath = `${user?.id}/avatar.${extension}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, {
+        upsert: true,
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(filePath);
+
+    const avatar = `${data.publicUrl}?t=${Date.now()}`;
+
+    const { error } = await supabase
+      .from("students")
+      .update({
+        avatar_url: avatar,
+      })
+      .eq("auth_id", user?.id);
+
+    if (error) throw error;
+
+    setAvatarUrl(avatar);
+
+    alert("تم تحديث الصورة بنجاح");
+  } catch (err) {
+    console.error(err);
+    alert("حدث خطأ أثناء رفع الصورة");
+  } finally {
+    setUploadingAvatar(false);
+  }
+};
+
+const fileInputRef = useRef<HTMLInputElement>(null);
   return (
     <div className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]" dir="rtl">
       <div className="hidden lg:block flex-shrink-0">
@@ -54,6 +119,13 @@ export function ProfilePage() {
 
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto p-6 lg:p-8 space-y-6 lg:space-y-8">
+          <input
+  ref={fileInputRef}
+  type="file"
+  accept="image/jpeg,image/png,image/webp"
+  className="hidden"
+  onChange={handleAvatarUpload}
+/>
           {/* Success Message */}
           {saved && (
             <div className="bg-emerald-50 dark:bg-emerald-950/30 border-2 border-emerald-200 dark:border-emerald-900 rounded-2xl p-4 lg:p-5 flex items-center gap-3">
@@ -75,11 +147,49 @@ export function ProfilePage() {
               {/* Avatar */}
               <div className="relative flex-shrink-0">
                 <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-3xl overflow-hidden border-4 border-white/20 shadow-lg">
-                  <Avatar name={displayUser.name} size="xl" className="w-full h-full rounded-3xl" />
+                 {avatarUrl ? (
+  <img
+    src={avatarUrl}
+    alt={displayUser.name}
+    className="w-full h-full object-cover rounded-3xl"
+  />
+) : (
+  <Avatar
+    name={displayUser.name}
+    size="xl"
+    className="w-full h-full rounded-3xl"
+  />
+)}
                 </div>
-                <button className="absolute -bottom-2 -left-2 w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                  <Camera size={18} className="text-[#B348FE]" />
-                </button>
+<button
+  onClick={() => fileInputRef.current?.click()}
+  disabled={uploadingAvatar}
+  className="
+    absolute
+    -bottom-2
+    -left-2
+    w-10
+    h-10
+    bg-white
+    rounded-2xl
+    flex
+    items-center
+    justify-center
+    shadow-lg
+    hover:shadow-xl
+    hover:scale-105
+    transition-all
+    duration-300
+    disabled:opacity-50
+    disabled:cursor-not-allowed
+  "
+>
+  {uploadingAvatar ? (
+    <div className="w-5 h-5 border-2 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
+  ) : (
+    <Camera size={18} className="text-[#B348FE]" />
+  )}
+</button>
               </div>
 
               {/* Info */}
