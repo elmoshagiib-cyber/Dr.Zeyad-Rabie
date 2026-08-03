@@ -72,6 +72,10 @@ const handleAvatarUpload = async (
   try {
     setUploadingAvatar(true);
 
+    if (!user?.id) {
+  alert("يجب تسجيل الدخول أولاً");
+  return;
+}
     const extension = file.type.split("/")[1];
 
     const filePath = `${user?.id}/avatar.${extension}`;
@@ -105,6 +109,9 @@ updateUser({
 });
 
     alert("تم تحديث الصورة بنجاح");
+    if (fileInputRef.current) {
+  fileInputRef.current.value = "";
+}
   } catch (err) {
     console.error(err);
     alert("حدث خطأ أثناء رفع الصورة");
