@@ -229,17 +229,18 @@ return (
 
 aspect-[16/10]
 
-   w-[128%]
--mr-[14%]
+w-[106%]
+-mr-[3%]
 
-sm:w-[134%]
-sm:-mr-[17%]
+sm:w-[108%]
+sm:-mr-[4%]
 
-lg:w-[140%]
-lg:-mr-[20%]
+lg:w-[110%]
+lg:-mr-[5%]
 
-xl:w-[144%]
-xl:-mr-[22%]
+xl:w-[111%]
+xl:-mr-[5.5%]
+
     rounded-[24px]
     sm:rounded-[28px]
     lg:rounded-[32px]
@@ -322,11 +323,11 @@ backdrop-blur-md backdrop-blur-sm text-white
   className="
     relative
     z-20
--mt-7
-    -mx-3
-sm:-mx-5
-lg:-mx-6
-xl:-mx-8
+-mt-8
+    -mx-1
+sm:-mx-2
+lg:-mx-3
+xl:-mx-4
     mb-5
     rounded-[28px]
     bg-white
@@ -603,10 +604,10 @@ text-3xl">
     grid-cols-1
     md:grid-cols-2
     xl:grid-cols-3
-    gap-x-16
-    sm:gap-x-20
-    lg:gap-x-24
-    xl:gap-x-28
+gap-x-20
+    sm:gap-x-24
+    lg:gap-x-28
+    xl:gap-x-32
     gap-y-12
   "
 >
