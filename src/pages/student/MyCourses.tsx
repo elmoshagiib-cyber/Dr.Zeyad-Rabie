@@ -22,14 +22,14 @@ const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
 }, []);
 
 const loadCourses = async () => {
-  if (!user) return;
+  if (!user?.studentId) return;
 
   setLoading(true);
 
   const { data: enrollments } = await supabase
     .from("student_courses")
     .select("course_id")
-    .eq("student_id", Number(user.id))
+    .eq("student_id", user.studentId)
     .eq("active", true);
 
   if (!enrollments || enrollments.length === 0) {

@@ -16,8 +16,8 @@ const pdfInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 const imageInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 const navigate = useNavigate();
 
-  useEffect(() => {
-    if (user?.id) {
+useEffect(() => {
+    if (user?.studentId) {
       loadHomeworks();
     }
   }, [user]);
@@ -44,13 +44,13 @@ const navigate = useNavigate();
   const pending = homeworks.filter(h => !h.submitted).length;
   const interactive = 0;
 
-  const loadHomeworks = async () => {
-    if (!user?.id) return;
+const loadHomeworks = async () => {
+    if (!user?.studentId) return;
 
     const { data: enrollments } = await supabase
       .from("student_courses")
       .select("course_id")
-      .eq("student_id", Number(user.id));
+      .eq("student_id", user.studentId);
 
     if (!enrollments) return;
 
@@ -61,10 +61,10 @@ const navigate = useNavigate();
       .select("*")
       .in("course_id", courseIds);
 
-    const { data: submissions } = await supabase
+const { data: submissions } = await supabase
       .from("homework_submissions")
       .select("*")
-      .eq("student_id", Number(user.id));
+      .eq("student_id", user.studentId);
 
     const submissionsMap =
       submissions?.reduce((acc, item) => {
@@ -84,11 +84,11 @@ const navigate = useNavigate();
     setHomeworks(finalHomeworks);
   };
 
-  const uploadHomework = async (
+const uploadHomework = async (
     file: File,
     homeworkId: number
   ) => {
-    if (!user?.id) return;
+    if (!user?.studentId) return;
 
     try {
       setUploading(true);
@@ -108,11 +108,11 @@ const navigate = useNavigate();
         .from("homework-files")
         .getPublicUrl(fileName);
 
-      const { data: existing } = await supabase
+const { data: existing } = await supabase
         .from("homework_submissions")
         .select("*")
         .eq("homework_id", homeworkId)
-        .eq("student_id", Number(user.id))
+        .eq("student_id", user.studentId)
         .maybeSingle();
 
       if (existing) {
@@ -129,11 +129,11 @@ const navigate = useNavigate();
           return;
         }
       } else {
-        const { error: submitError } = await supabase
+const { error: submitError } = await supabase
           .from("homework_submissions")
           .insert({
             homework_id: homeworkId,
-            student_id: Number(user.id),
+            student_id: user.studentId,
             answer: data.publicUrl
           });
 

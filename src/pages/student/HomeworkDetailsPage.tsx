@@ -27,8 +27,8 @@ export function HomeworkDetailsPage() {
     loadHomework();
   }, [id]);
 
-  const loadHomework = async () => {
-    if (!id || !user?.id) return;
+const loadHomework = async () => {
+    if (!id || !user?.studentId) return;
 
     setLoading(true);
 
@@ -48,7 +48,7 @@ export function HomeworkDetailsPage() {
         .from("homework_submissions")
         .select("*")
         .eq("homework_id", hw.id)
-        .eq("student_id", Number(user.id))
+        .eq("student_id", user.studentId)
         .maybeSingle();
 
       setSubmission(sub);
@@ -57,8 +57,8 @@ export function HomeworkDetailsPage() {
     setLoading(false);
   };
 
-  const uploadHomework = async (file: File) => {
-    if (!user?.id || !homework?.id) return;
+const uploadHomework = async (file: File) => {
+    if (!user?.studentId || !homework?.id) return;
 
     const isReplacement = !!submission;
 
@@ -104,11 +104,11 @@ export function HomeworkDetailsPage() {
 
       setUploadProgress(75);
 
-      const { data: existing } = await supabase
+const { data: existing } = await supabase
         .from("homework_submissions")
         .select("*")
         .eq("homework_id", homework.id)
-        .eq("student_id", Number(user.id))
+        .eq("student_id", user.studentId)
         .maybeSingle();
 
       if (existing) {
@@ -131,12 +131,12 @@ setUploadError(submitError.message);
           return;
         }
       } else {
-        const { error: submitError } = await supabase
+const { error: submitError } = await supabase
           .from("homework_submissions")
           
           .insert({
             homework_id: homework.id,
-            student_id: Number(user.id),
+            student_id: user.studentId,
             file_url: data.publicUrl,
             file_name: file.name
           });
