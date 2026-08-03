@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Trophy, Star, TrendingUp } from "lucide-react";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import StudentLayout from "./StudentLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Avatar } from "../../components/ui/Avatar";
 import { Badge } from "../../components/ui/Badge";
@@ -18,13 +18,10 @@ export function LeaderboardPage() {
   const podiumHeights = ["h-24", "h-32", "h-20"];
   const podiumBgs = ["bg-slate-400", "bg-amber-400", "bg-amber-600"];
 
-  return (
-    <div className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]" dir="rtl">
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="student" />
-      </div>
-      
-      <main className="flex-1 overflow-y-auto flex items-center justify-center p-6 lg:p-8">
+return (
+  <StudentLayout>
+
+    <div className="flex items-center justify-center p-6 lg:p-8">
         <Card className="max-w-3xl w-full bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-xl">
           <CardContent className="py-16 lg:py-24 px-6 lg:px-12 text-center">
             {/* Trophy Icon */}
@@ -49,7 +46,7 @@ export function LeaderboardPage() {
             </Badge>
           </CardContent>
         </Card>
-      </main>
     </div>
-  );
+  </StudentLayout>
+);
 }
