@@ -229,17 +229,17 @@ return (
 
     aspect-[16/9.5]
 
-    w-[108%]
-    -mr-[4%]
+    w-[104%]
+    -mr-[2%]
 
-    sm:w-[114%]
-    sm:-mr-[7%]
+    sm:w-[106%]
+    sm:-mr-[3%]
 
-    lg:w-[120%]
-    lg:-mr-[10%]
+    lg:w-[108%]
+    lg:-mr-[4%]
 
-    xl:w-[127%]
-    xl:-mr-[15%]
+    xl:w-[110%]
+    xl:-mr-[5%]
 
     rounded-[24px]
     sm:rounded-[28px]
@@ -248,6 +248,7 @@ return (
     overflow-hidden
   "
 >
+
         <img
           src={
             course.thumbnail ||
@@ -603,10 +604,10 @@ text-3xl">
     grid-cols-1
     md:grid-cols-2
     xl:grid-cols-3
-    gap-x-24
-    sm:gap-x-28
-    lg:gap-x-32
-    xl:gap-x-40
+    gap-x-10
+    sm:gap-x-12
+    lg:gap-x-14
+    xl:gap-x-16
     gap-y-12
   "
 >
@@ -718,10 +719,10 @@ return (
   grid-cols-1
   sm:grid-cols-2
   xl:grid-cols-3
-  gap-x-24
-  sm:gap-x-28
-  lg:gap-x-32
-  xl:gap-x-40
+  gap-x-10
+  sm:gap-x-12
+  lg:gap-x-14
+  xl:gap-x-16
   gap-y-8
   sm:gap-y-10
 ">
