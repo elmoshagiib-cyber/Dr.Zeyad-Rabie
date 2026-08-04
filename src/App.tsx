@@ -5,6 +5,7 @@ import { CourseDetailPage } from "./pages/CourseDetailPage";
 import { ThemeProvider } from "./context/ThemeContext";
 import { InstructorHomeworkSubmissions } from "./pages/instructor/InstructorHomeworkSubmissions";
 import StudentLoginPage from "./pages/StudentLoginPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import StudentRegisterPage from "./pages/StudentRegisterPage";
 import GradesPage from "./pages/student/GradesPage";
 import { StaffLoginPage } from "./pages/StaffLoginPage";
@@ -116,6 +117,11 @@ function AppRoutes() {
 <Route
   path="/register"
   element={<StudentRegisterPage />}
+/>
+
+<Route
+  path="/reset-password"
+  element={<ResetPasswordPage />}
 />
 
             {/* Student */}

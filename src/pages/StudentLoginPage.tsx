@@ -25,11 +25,16 @@ const LoginPage = () => {
   phone: "",
   password: "",
 });
-  const [errors, setErrors] = useState<{
+const [errors, setErrors] = useState<{
   phone?: string;
   password?: string;
 }>({});
 
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotPhone, setForgotPhone] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState("");
+  const [forgotSuccess, setForgotSuccess] = useState(false);
 const fieldIcon =
 "w-4 h-4 text-[#B348FE] flex-shrink-0";
 
@@ -49,6 +54,47 @@ else if (
     setErrors(e);
     return Object.keys(e).length === 0;
   };
+
+  const handleForgotPassword = async () => {
+    setForgotError("");
+
+    if (!/^01[0125][0-9]{8}$/.test(forgotPhone.trim())) {
+      setForgotError("رقم الهاتف غير صحيح");
+      return;
+    }
+
+    setForgotLoading(true);
+
+    const { data: studentByPhone, error: phoneError } = await supabase
+      .from("students")
+      .select("email")
+      .eq("phone", forgotPhone.trim())
+      .single();
+
+    if (phoneError || !studentByPhone) {
+      setForgotError("رقم الهاتف غير مسجل");
+      setForgotLoading(false);
+      return;
+    }
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+      studentByPhone.email,
+      {
+        redirectTo: "https://www.zeyadrabie.com/reset-password",
+      }
+    );
+
+    if (resetError) {
+      setForgotError("حدث خطأ أثناء إرسال الرابط، حاول مرة أخرى");
+      setForgotLoading(false);
+      return;
+    }
+
+    setForgotSuccess(true);
+    setForgotLoading(false);
+  };
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -368,9 +414,16 @@ overflow-hidden
                     </span>
                   </div>
 
-                  {/* Forgot password */}
+                
+{/* Forgot password */}
                   <button
                     type="button"
+                    onClick={() => {
+                      setShowForgotModal(true);
+                      setForgotPhone("");
+                      setForgotError("");
+                      setForgotSuccess(false);
+                    }}
                     className="text-xs sm:text-sm font-semibold text-[#B348FE]
 hover:text-[#9E2FFF] transition-colors"
                   >
@@ -458,6 +511,116 @@ hover:text-[#9E2FFF]
 
         
         </div>
+
+
+        {/* ═══════════════ FORGOT PASSWORD MODAL ═══════════════ */}
+        <AnimatePresence>
+          {showForgotModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md p-6"
+              onClick={() => setShowForgotModal(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                onClick={(e) => e.stopPropagation()}
+                className={`
+                  w-full max-w-md rounded-[30px] p-8
+                  ${isDark ? "bg-[#111111] border border-[#2A2A2A]" : "bg-white border border-gray-200"}
+                  shadow-[0_25px_70px_rgba(15,23,42,.15)]
+                `}
+                dir="rtl"
+              >
+                {forgotSuccess ? (
+                  <div className="text-center">
+                    <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-500/10">
+                      <CheckCircle2 size={36} className="text-emerald-500" />
+                    </div>
+                    <h2 className={`text-xl font-black ${isDark ? "text-white" : "text-gray-900"}`}>
+                      تم إرسال الرابط بنجاح
+                    </h2>
+                    <p className={`mt-3 text-sm leading-7 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                      افتح بريدك الإلكتروني ودوس على الرابط لتعيين كلمة مرور جديدة.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotModal(false)}
+                      className="mt-6 w-full py-3 rounded-xl bg-[#B348FE] hover:bg-[#9E2FFF] text-white font-bold transition-colors"
+                    >
+                      حسنًا
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-center mb-6">
+                      <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#F6EEFF] dark:bg-[#2B103D]">
+                        <Lock size={32} className="text-[#B348FE]" />
+                      </div>
+                      <h2 className={`text-xl font-black ${isDark ? "text-white" : "text-gray-900"}`}>
+                        نسيت كلمة المرور؟
+                      </h2>
+                      <p className={`mt-2 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                        أدخل رقم هاتفك وسنرسل لك رابط إعادة تعيين كلمة المرور على بريدك الإلكتروني.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <div
+                        className={`flex items-center gap-3 border-b-2 py-2.5 transition-colors duration-200
+                          ${forgotError ? "border-red-400" : isDark ? "border-gray-700 focus-within:border-[#B348FE]" : "border-gray-200 focus-within:border-[#B348FE]"}
+                        `}
+                      >
+                        <Phone className="w-4 h-4 text-[#B348FE] flex-shrink-0" />
+                        <input
+                          type="tel"
+                          placeholder="رقم الهاتف"
+                          value={forgotPhone}
+                          onChange={(e) => {
+                            setForgotPhone(e.target.value);
+                            setForgotError("");
+                          }}
+                          dir="ltr"
+                          className={`flex-1 min-w-0 bg-transparent border-0 outline-none text-sm sm:text-base py-0.5 placeholder-gray-400 ${isDark ? "text-white placeholder-gray-500" : "text-gray-700"}`}
+                        />
+                      </div>
+                      {forgotError && (
+                        <p className="text-xs text-red-500 text-right">{forgotError}</p>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={forgotLoading}
+                      onClick={handleForgotPassword}
+                      className="mt-6 w-full py-3 rounded-xl bg-[#B348FE] hover:bg-[#9E2FFF] text-white font-bold flex items-center justify-center gap-2 disabled:opacity-70 transition-colors"
+                    >
+                      {forgotLoading ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          جاري الإرسال...
+                        </>
+                      ) : (
+                        "إرسال رابط إعادة التعيين"
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotModal(false)}
+                      className={`mt-3 w-full py-2 text-sm font-semibold ${isDark ? "text-gray-400 hover:text-white" : "text-gray-500 hover:text-gray-800"} transition-colors`}
+                    >
+                      إلغاء
+                    </button>
+                  </>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <Footer />
       </div>

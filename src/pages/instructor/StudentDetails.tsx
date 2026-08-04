@@ -15,8 +15,11 @@ import {
   Mail,
   CheckCircle2,
   XCircle,
-  AlertCircle,
-  ArrowRight
+AlertCircle,
+  ArrowRight,
+  KeyRound,
+  Copy,
+  Check
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
@@ -42,8 +45,14 @@ const [announcementMessage, setAnnouncementMessage] = useState("");
 const [announcementPriority, setAnnouncementPriority] =
   useState("important");
   
-  const [selectedCourse, setSelectedCourse] = useState("");
+const [selectedCourse, setSelectedCourse] = useState("");
   const [availableCourses, setAvailableCourses] = useState<any[]>([]);
+
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const gradeMap: Record<string, string> = {
     "الصف الأول الثانوي": "sec_1",
@@ -232,6 +241,50 @@ const sendAnnouncement = async () => {
   setAnnouncementPriority("important");
   setShowAnnouncementModal(false);
 };
+
+const generateNewPassword = async () => {
+    setPasswordError("");
+    setPasswordLoading(true);
+    setNewPassword("");
+    setCopied(false);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const response = await fetch(
+        "https://ffkuhskhzmhjwrbyswjm.supabase.co/functions/v1/admin-reset-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ phone: student.phone }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setPasswordError(result.error || "حدث خطأ أثناء توليد كلمة المرور");
+        setPasswordLoading(false);
+        return;
+      }
+
+      setNewPassword(result.new_password);
+      setPasswordLoading(false);
+    } catch (err) {
+      setPasswordError("حدث خطأ في الاتصال بالسيرفر");
+      setPasswordLoading(false);
+    }
+  };
+
+  const copyPassword = () => {
+    navigator.clipboard.writeText(newPassword);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
 
   const toggleStudentStatus = async () => {
     const confirmed = window.confirm(
@@ -422,6 +475,20 @@ hover:-translate-y-0.5"
                   <Bell size={18} className="ml-2" />
                   إرسال إشعار
                 </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowPasswordModal(true);
+                    setNewPassword("");
+                    setPasswordError("");
+                  }}
+                  className="border-2 border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-900 dark:text-blue-400 dark:hover:bg-blue-950/30 rounded-xl font-bold h-12 transition-all duration-300"
+                >
+                  <KeyRound size={18} className="ml-2" />
+                  توليد باسورد جديد
+                </Button>
+
                 <Button
                   variant="outline"
                   onClick={toggleStudentStatus}
@@ -887,6 +954,106 @@ hover:-translate-y-0.5"
     </div>
   </div>
 )}
+
+{/* Password Reset Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#111111] w-full max-w-[480px] rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-[#2A2A2A]">
+            <div className="p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
+                  <KeyRound className="text-blue-600" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-gray-900 dark:text-white">
+                    توليد كلمة مرور جديدة
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    للطالب: {student.full_name}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {!newPassword && !passwordLoading && (
+                <p className="text-sm text-gray-600 dark:text-gray-300 leading-7">
+                  سيتم توليد كلمة مرور عشوائية جديدة لهذا الطالب وتحديثها فورًا.
+                  تأكد من إرسالها للطالب مباشرة بعد النسخ (عبر واتساب مثلاً)، حيث لن تظهر هذه الكلمة مرة أخرى.
+                </p>
+              )}
+
+              {passwordLoading && (
+                <div className="flex flex-col items-center justify-center py-6 gap-3">
+                  <div className="w-8 h-8 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">جاري توليد كلمة المرور...</p>
+                </div>
+              )}
+
+              {passwordError && (
+                <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl p-4">
+                  <p className="text-sm text-red-700 dark:text-red-400 font-bold">{passwordError}</p>
+                </div>
+              )}
+
+              {newPassword && (
+                <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900 rounded-2xl p-5">
+                  <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-2">
+                    كلمة المرور الجديدة:
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span
+                      dir="ltr"
+                      className="flex-1 bg-white dark:bg-[#1A1A1A] rounded-xl px-4 py-3 font-black text-lg tracking-wider text-gray-900 dark:text-white text-center border border-gray-200 dark:border-[#2A2A2A]"
+                    >
+                      {newPassword}
+                    </span>
+                    <button
+                      onClick={copyPassword}
+                      className="h-12 w-12 flex-shrink-0 rounded-xl bg-[#B348FE] hover:bg-[#9E2FFF] text-white flex items-center justify-center transition-colors"
+                    >
+                      {copied ? <Check size={20} /> : <Copy size={20} />}
+                    </button>
+                  </div>
+                  {copied && (
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold mt-2 text-center">
+                      تم النسخ بنجاح ✓
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-100 dark:border-[#2A2A2A] flex gap-3">
+              {!newPassword ? (
+                <>
+                  <Button
+                    onClick={generateNewPassword}
+                    disabled={passwordLoading}
+                    className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl h-12 font-black disabled:opacity-70"
+                  >
+                    {passwordLoading ? "جاري التوليد..." : "توليد كلمة المرور"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowPasswordModal(false)}
+                    className="flex-1 rounded-xl h-12 font-black"
+                  >
+                    إلغاء
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={() => setShowPasswordModal(false)}
+                  className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl h-12 font-black"
+                >
+                  تم
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Course Modal */}
       {showCourseModal && (
