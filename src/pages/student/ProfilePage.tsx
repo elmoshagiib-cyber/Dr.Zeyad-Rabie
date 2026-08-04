@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Camera, Edit2, CheckCircle, Star, Trophy, BookOpen, Award, Shield } from "lucide-react";
+import { Camera, Edit2, CheckCircle, Star, Trophy, BookOpen, Award, Shield, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import StudentLayout from "./StudentLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
@@ -121,6 +121,62 @@ updateUser({
 };
 
 const fileInputRef = useRef<HTMLInputElement>(null);
+
+const [showPassword, setShowPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const [newPassword, setNewPassword] = useState("");
+const [confirmPassword, setConfirmPassword] = useState("");
+const [passwordLoading, setPasswordLoading] = useState(false);
+const [passwordError, setPasswordError] = useState("");
+const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+const passwordStrength = () => {
+  const p = newPassword;
+  if (!p) return null;
+  let s = 0;
+  if (p.length >= 8) s++;
+  if (/[A-Z]/.test(p)) s++;
+  if (/[0-9]/.test(p)) s++;
+  if (/[^A-Za-z0-9]/.test(p)) s++;
+  if (s <= 1) return { label: "ضعيفة", color: "#ef4444", width: "25%" };
+  if (s === 2) return { label: "متوسطة", color: "#f59e0b", width: "55%" };
+  if (s === 3) return { label: "جيدة", color: "#3b82f6", width: "75%" };
+  return { label: "قوية جداً", color: "#22c55e", width: "100%" };
+};
+
+const strength = passwordStrength();
+
+const handleChangePassword = async () => {
+  setPasswordError("");
+
+  if (newPassword.length < 8) {
+    setPasswordError("كلمة المرور يجب أن تكون 8 أحرف على الأقل");
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    setPasswordError("كلمتا المرور غير متطابقتين");
+    return;
+  }
+
+  setPasswordLoading(true);
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+  if (error) {
+    setPasswordError("حدث خطأ أثناء تحديث كلمة المرور، حاول مرة أخرى");
+    setPasswordLoading(false);
+    return;
+  }
+
+  setPasswordSuccess(true);
+  setNewPassword("");
+  setConfirmPassword("");
+  setPasswordLoading(false);
+
+  setTimeout(() => setPasswordSuccess(false), 4000);
+};
+
 return (
   <StudentLayout>
         <div className="max-w-5xl mx-auto p-6 lg:p-8 space-y-6 lg:space-y-8">
@@ -249,6 +305,121 @@ return (
                         </p>
                       </div>
                     ))}
+
+                 </div>
+                </CardContent>
+              </Card>
+
+              {/* Change Password */}
+              <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
+                <CardContent className="p-6 lg:p-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-11 h-11 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                      <Lock size={20} className="text-[#B348FE]" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl lg:text-2xl font-black text-gray-900 dark:text-white">
+                        تغيير كلمة المرور
+                      </h2>
+                      <p className="text-xs lg:text-sm text-gray-400 dark:text-gray-500">
+                        اختر كلمة مرور جديدة لحسابك
+                      </p>
+                    </div>
+                  </div>
+
+                  {passwordSuccess && (
+                    <div className="bg-emerald-50 dark:bg-emerald-950/30 border-2 border-emerald-200 dark:border-emerald-900 rounded-2xl p-4 mb-5 flex items-center gap-3">
+                      <CheckCircle size={20} className="text-emerald-600 dark:text-emerald-400" />
+                      <p className="text-emerald-700 dark:text-emerald-400 font-bold text-sm">
+                        تم تغيير كلمة المرور بنجاح!
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="space-y-4">
+                    {/* New Password */}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-3 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl px-4 py-3 focus-within:border-[#B348FE] transition-colors">
+                        <Lock size={16} className="text-[#B348FE] flex-shrink-0" />
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="كلمة المرور الجديدة"
+                          value={newPassword}
+                          onChange={(e) => {
+                            setNewPassword(e.target.value);
+                            setPasswordError("");
+                          }}
+                          dir="ltr"
+                          className="flex-1 min-w-0 bg-transparent border-0 outline-none text-sm text-gray-900 dark:text-white placeholder-gray-400"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                        >
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+
+                      {strength && (
+                        <div className="mt-1.5">
+                          <div className="h-1 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+                            <div
+                              className="h-full rounded-full transition-all duration-300"
+                              style={{ background: strength.color, width: strength.width }}
+                            />
+                          </div>
+                          <p className="text-[11px] text-gray-400 mt-1">
+                            قوة كلمة المرور:{" "}
+                            <span style={{ color: strength.color, fontWeight: 700 }}>
+                              {strength.label}
+                            </span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Confirm Password */}
+                    <div className="flex items-center gap-3 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl px-4 py-3 focus-within:border-[#B348FE] transition-colors">
+                      <Lock size={16} className="text-[#B348FE] flex-shrink-0" />
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="تأكيد كلمة المرور"
+                        value={confirmPassword}
+                        onChange={(e) => {
+                          setConfirmPassword(e.target.value);
+                          setPasswordError("");
+                        }}
+                        dir="ltr"
+                        className="flex-1 min-w-0 bg-transparent border-0 outline-none text-sm text-gray-900 dark:text-white placeholder-gray-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                      >
+                        {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+
+                    {passwordError && (
+                      <p className="text-xs text-red-500 font-bold">{passwordError}</p>
+                    )}
+
+                    <Button
+                      onClick={handleChangePassword}
+                      disabled={passwordLoading || !newPassword || !confirmPassword}
+                      className="w-full bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-2xl h-12 font-black disabled:opacity-60"
+                    >
+                      {passwordLoading ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <Loader2 size={18} className="animate-spin" />
+                          جاري الحفظ...
+                        </span>
+                      ) : (
+                        "حفظ كلمة المرور الجديدة"
+                      )}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

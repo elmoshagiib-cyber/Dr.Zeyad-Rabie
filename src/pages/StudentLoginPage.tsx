@@ -126,8 +126,10 @@ const { data: authData, error: authError } =
   });
 
 if (authError) {
+  console.log("AUTH ERROR DETAILS:", authError.message, authError);
+
   setErrors({
-    password: "كلمة المرور غير صحيحة",
+    password: `خطأ: ${authError.message}`,
   });
 
   setLoading(false);
