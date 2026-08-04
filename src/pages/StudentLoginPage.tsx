@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import HeroSection from '../components/HeroSection';
+import { FaWhatsapp } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
@@ -537,88 +538,42 @@ hover:text-[#9E2FFF]
                 `}
                 dir="rtl"
               >
-                {forgotSuccess ? (
-                  <div className="text-center">
-                    <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-500/10">
-                      <CheckCircle2 size={36} className="text-emerald-500" />
-                    </div>
-                    <h2 className={`text-xl font-black ${isDark ? "text-white" : "text-gray-900"}`}>
-                      تم إرسال الرابط بنجاح
-                    </h2>
-                    <p className={`mt-3 text-sm leading-7 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                      افتح بريدك الإلكتروني ودوس على الرابط لتعيين كلمة مرور جديدة.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setShowForgotModal(false)}
-                      className="mt-6 w-full py-3 rounded-xl bg-[#B348FE] hover:bg-[#9E2FFF] text-white font-bold transition-colors"
-                    >
-                      حسنًا
-                    </button>
+<div className="text-center">
+                  <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#F6EEFF] dark:bg-[#2B103D]">
+                    <Lock size={32} className="text-[#B348FE]" />
                   </div>
-                ) : (
-                  <>
-                    <div className="text-center mb-6">
-                      <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#F6EEFF] dark:bg-[#2B103D]">
-                        <Lock size={32} className="text-[#B348FE]" />
-                      </div>
-                      <h2 className={`text-xl font-black ${isDark ? "text-white" : "text-gray-900"}`}>
-                        نسيت كلمة المرور؟
-                      </h2>
-                      <p className={`mt-2 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                        أدخل رقم هاتفك وسنرسل لك رابط إعادة تعيين كلمة المرور على بريدك الإلكتروني.
-                      </p>
-                    </div>
+                  <h2 className={`text-xl font-black ${isDark ? "text-white" : "text-gray-900"}`}>
+                    نسيت كلمة المرور؟
+                  </h2>
+                  <p className={`mt-3 text-sm leading-7 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                    تواصل مع فريق الدعم الفني عبر واتساب وسنقوم بمساعدتك
+                    في استعادة الدخول لحسابك في أسرع وقت.
+                  </p>
 
-                    <div className="flex flex-col gap-1">
-                      <div
-                        className={`flex items-center gap-3 border-b-2 py-2.5 transition-colors duration-200
-                          ${forgotError ? "border-red-400" : isDark ? "border-gray-700 focus-within:border-[#B348FE]" : "border-gray-200 focus-within:border-[#B348FE]"}
-                        `}
-                      >
-                        <Phone className="w-4 h-4 text-[#B348FE] flex-shrink-0" />
-                        <input
-                          type="tel"
-                          placeholder="رقم الهاتف"
-                          value={forgotPhone}
-                          onChange={(e) => {
-                            setForgotPhone(e.target.value);
-                            setForgotError("");
-                          }}
-                          dir="ltr"
-                          className={`flex-1 min-w-0 bg-transparent border-0 outline-none text-sm sm:text-base py-0.5 placeholder-gray-400 ${isDark ? "text-white placeholder-gray-500" : "text-gray-700"}`}
-                        />
-                      </div>
-                      {forgotError && (
-                        <p className="text-xs text-red-500 text-right">{forgotError}</p>
-                      )}
-                    </div>
+                  <a
+                    href="https://wa.me/201109414585?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%D8%8C%20%D9%86%D8%B3%D9%8A%D8%AA%20%D9%83%D9%84%D9%85%D8%A9%20%D8%A7%D9%84%D9%85%D8%B1%D9%88%D8%B1%20%D9%88%D8%A7%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D9%81%D9%8A%20%D8%A7%D8%B3%D8%AA%D8%B9%D8%A7%D8%AF%D8%A9%20%D8%A7%D9%84%D8%AF%D8%AE%D9%88%D9%84"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="
+                      mt-6 w-full py-3 rounded-xl
+                      bg-emerald-500 hover:bg-emerald-600
+                      text-white font-bold
+                      flex items-center justify-center gap-2
+                      transition-colors
+                    "
+                  >
+                    <FaWhatsapp className="text-xl" />
+                    تواصل عبر واتساب
+                  </a>
 
-                    <button
-                      type="button"
-                      disabled={forgotLoading}
-                      onClick={handleForgotPassword}
-                      className="mt-6 w-full py-3 rounded-xl bg-[#B348FE] hover:bg-[#9E2FFF] text-white font-bold flex items-center justify-center gap-2 disabled:opacity-70 transition-colors"
-                    >
-                      {forgotLoading ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          جاري الإرسال...
-                        </>
-                      ) : (
-                        "إرسال رابط إعادة التعيين"
-                      )}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowForgotModal(false)}
-                      className={`mt-3 w-full py-2 text-sm font-semibold ${isDark ? "text-gray-400 hover:text-white" : "text-gray-500 hover:text-gray-800"} transition-colors`}
-                    >
-                      إلغاء
-                    </button>
-                  </>
-                )}
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotModal(false)}
+                    className={`mt-3 w-full py-2 text-sm font-semibold ${isDark ? "text-gray-400 hover:text-white" : "text-gray-500 hover:text-gray-800"} transition-colors`}
+                  >
+                    إغلاق
+                  </button>
+                </div>
               </motion.div>
             </motion.div>
           )}
