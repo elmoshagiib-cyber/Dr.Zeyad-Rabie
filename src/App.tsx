@@ -1,6 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider, useApp } from "./context/AppContext";
 import { HomePage } from "./pages/HomePage";
+import { MaintenanceMode } from "./components/MaintenanceMode";
+
+// غيّر true/false هنا عشان تشغّل أو توقف وضع الصيانة
+const MAINTENANCE_MODE = true;
+
 import { CourseDetailPage } from "./pages/CourseDetailPage";
 import { ThemeProvider } from "./context/ThemeContext";
 import { InstructorHomeworkSubmissions } from "./pages/instructor/InstructorHomeworkSubmissions";
@@ -356,10 +361,14 @@ function AppRoutes() {
 }
 <main className="pt-[80px]"></main>
 export default function App() {
-  
+
+  if (MAINTENANCE_MODE) {
+    return <MaintenanceMode />;
+  }
 
   return (
     <AppProvider>
+
       <ThemeProvider>
        <BrowserRouter>
   <Toaster
