@@ -409,6 +409,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
     try {
       const watchedSeconds = Math.floor(currentTime);
+      const lastPosition = Math.floor(currentTime);
       const progressPercent = duration > 0 ? Math.round((currentTime / duration) * 100) : 0;
 
       console.log("SAVE PROGRESS ATTEMPT →", { studentId, currentLessonId, currentTime, watchedSeconds });
@@ -417,7 +418,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
         .from("lesson_progress")
         .update({
           watched_seconds: watchedSeconds,
-          last_position: currentTime,
+          last_position: lastPosition,
           progress_percent: progressPercent,
           last_watched_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
