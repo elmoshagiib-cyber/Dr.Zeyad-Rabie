@@ -1471,11 +1471,12 @@ duration-300
       transition={{ duration: 0.25 }}
       onClick={(e) => e.stopPropagation()}
       dir="rtl"
-      className="
+className="
         w-full
         max-w-[92%]
         sm:max-w-xl
-        md:max-w-3xl
+        md:max-w-4xl
+        lg:max-w-5xl
         h-[560px]
         sm:h-[600px]
         max-h-[85vh]
@@ -1493,24 +1494,25 @@ duration-300
       "
     >
       {/* Side Image - fixed, always visible */}
-      <div
+     <div
         className="
           hidden
           md:block
-          w-[240px]
-          lg:w-[280px]
+          w-[320px]
+          lg:w-[380px]
           flex-shrink-0
           relative
           overflow-hidden
         "
       >
-<img
-     src="/images/notebook-teacher.png"
-     alt="مستر زياد ربيع"
+        <img
+          src="/images/notebook-photo.png"
+          alt="مستر زياد ربيع"
           className="
             absolute inset-0
             w-full h-full
             object-cover
+            object-top
           "
         />
       </div>
