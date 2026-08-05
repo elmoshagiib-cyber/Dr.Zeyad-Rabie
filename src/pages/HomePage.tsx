@@ -1519,7 +1519,8 @@ duration-300
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
 
       {/* Header */}
-      <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-[#262626] flex-shrink-0">
+<div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-[#262626] flex-shrink-0">
+        <div className="flex items-center gap-2.5">
           <div className="w-10 h-10 rounded-xl bg-[#B348FE]/10 flex items-center justify-center">
             <NotebookPen className="text-[#B348FE] w-5 h-5" />
           </div>
@@ -1937,7 +1938,7 @@ duration-300
         </button>
       </div>
 )}
-      
+       </div>
     </motion.div>
   </div>
 )}
