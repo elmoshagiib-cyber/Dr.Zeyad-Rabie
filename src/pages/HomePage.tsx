@@ -192,18 +192,33 @@ const FEATURES = [
 const loadAnnouncement = async () => {
   if (!user) return;
 
-  const { data } = await supabase
-    .from("student_announcements")
-    .select("*")
-    .eq("student_id", user.id)
-    .eq("is_active", true)
-    .eq("dismissed", false)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
+const { data } = await supabase
+.from("student_notifications")
+.select(`
+id,
+student_id,
+is_read,
+notifications (
+id,
+title,
+content,
+type,
+icon,
+color,
+is_pinned,
+created_at
+)
+`)
+.eq("student_id", user.studentId)
+.eq("is_read", false)
+.order("created_at", {
+  ascending: false,
+  foreignTable: "notifications",
+})
+.limit(1);
 
   if (data) {
-    setAnnouncement(data);
+    setAnnouncement(data?.[0] ?? null);
   }
   console.log("Announcement =", data);
 };
@@ -212,11 +227,11 @@ const dismissAnnouncement = async () => {
   if (!announcement) return;
 
   const { error } = await supabase
-    .from("student_announcements")
-    .update({
-      dismissed: true,
-      dismissed_at: new Date().toISOString(),
-    })
+    .from("student_notifications")
+.update({
+is_read: true,
+read_at: new Date().toISOString(),
+})
     .eq("id", announcement.id);
 
   if (error) {
@@ -271,7 +286,7 @@ return (
 >
      <Navbar />
 
-{user && announcement && (
+{user && announcement?.notifications && (
   <div
     className="
       fixed
@@ -330,13 +345,13 @@ return (
                 رسالة من مستر زياد ربيع
               </span>
 
-              {announcement.priority === "important" && (
+              {announcement.notifications?.type === "important" && (
                 <span className="px-2 py-1 rounded-full bg-[#B348FE] text-white text-[10px] font-bold">
                   مهم
                 </span>
               )}
 
-              {announcement.priority === "urgent" && (
+              {announcement.notifications?.type === "urgent" && (
                 <span className="px-2 py-1 rounded-full bg-red-500 text-white text-[10px] font-bold">
                   عاجل
                 </span>
@@ -345,7 +360,7 @@ return (
             </div>
 
             <p className="mt-2 text-[14px] text-gray-700 dark:text-gray-300 leading-7 whitespace-pre-line">
-              {announcement.message}
+              {announcement.notifications?.content}
             </p>
 
             <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
@@ -353,7 +368,7 @@ return (
               <Clock3 size={14} />
 
               <span>
-                {formatAnnouncementDate(announcement.created_at)}
+                {formatAnnouncementDate(announcement.notifications?.created_at)}
               </span>
 
             </div>
