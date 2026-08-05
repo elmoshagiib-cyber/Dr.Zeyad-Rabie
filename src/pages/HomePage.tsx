@@ -73,7 +73,9 @@ const [newTaskText, setNewTaskText] = useState("");
 const [newTaskPriority, setNewTaskPriority] = useState<"normal" | "important" | "urgent">("normal");
 const [newTaskDueDate, setNewTaskDueDate] = useState("");
 const [addingTask, setAddingTask] = useState(false);
-
+const [taskSearch, setTaskSearch] = useState("");
+const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
+const [editingTaskText, setEditingTaskText] = useState("");
 
 useEffect(() => {
   console.log("Deferred Prompt =", deferredPrompt);
@@ -271,10 +273,11 @@ const loadTasks = async () => {
   if (!user) return;
   setTasksLoading(true);
 
-  const { data, error } = await supabase
+const { data, error } = await supabase
     .from("student_tasks")
     .select("*")
     .eq("student_id", user.studentId)
+    .order("position", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: true });
 
   if (!error) {
@@ -293,9 +296,11 @@ const { data, error } = await supabase
     .insert({
       student_id: user.studentId,
       content: newTaskText.trim(),
-      priority: newTaskPriority,
+priority: newTaskPriority,
       due_date: newTaskDueDate || null,
+      position: tasks.length,
     })
+
     .select()
     .single();
 
@@ -327,6 +332,106 @@ const toggleTask = async (taskId: number, current: boolean) => {
       prev.map((t) => (t.id === taskId ? { ...t, is_done: current } : t))
     );
   }
+};
+
+const clearCompletedTasks = async () => {
+  const completedIds = tasks.filter((t) => t.is_done).map((t) => t.id);
+  if (completedIds.length === 0) return;
+
+  const prevTasks = tasks;
+  setTasks((prev) => prev.filter((t) => !t.is_done));
+
+  const { error } = await supabase
+    .from("student_tasks")
+    .delete()
+    .in("id", completedIds);
+
+  if (error) {
+    toast.error("حصل خطأ أثناء مسح المهام المكتملة");
+    setTasks(prevTasks);
+  }
+};
+
+const priorityOrder: Record<string, number> = {
+  urgent: 0,
+  important: 1,
+  normal: 2,
+};
+
+const sortedTasks = [...tasks]
+  .filter((t) =>
+    taskSearch.trim() ? t.content.toLowerCase().includes(taskSearch.trim().toLowerCase()) : true
+  )
+  .sort((a, b) => {
+    if (a.is_done !== b.is_done) return a.is_done ? 1 : -1;
+    const pa = priorityOrder[a.priority ?? "normal"] ?? 2;
+    const pb = priorityOrder[b.priority ?? "normal"] ?? 2;
+    if (pa !== pb) return pa - pb;
+    return 0;
+  });
+
+const startEditTask = (task: any) => {
+  setEditingTaskId(task.id);
+  setEditingTaskText(task.content);
+};
+
+const cancelEditTask = () => {
+  setEditingTaskId(null);
+  setEditingTaskText("");
+};
+
+const saveEditTask = async (taskId: number) => {
+  if (!editingTaskText.trim()) return;
+
+  const prevTasks = tasks;
+  setTasks((prev) =>
+    prev.map((t) => (t.id === taskId ? { ...t, content: editingTaskText.trim() } : t))
+  );
+  setEditingTaskId(null);
+
+  const { error } = await supabase
+    .from("student_tasks")
+    .update({ content: editingTaskText.trim() })
+    .eq("id", taskId);
+
+  if (error) {
+    toast.error("حصل خطأ أثناء تعديل المهمة");
+    setTasks(prevTasks);
+  }
+};
+
+const moveTask = async (taskId: number, direction: "up" | "down") => {
+  const idx = tasks.findIndex((t) => t.id === taskId);
+  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (idx === -1 || swapIdx < 0 || swapIdx >= tasks.length) return;
+
+  const newTasks = [...tasks];
+  [newTasks[idx], newTasks[swapIdx]] = [newTasks[swapIdx], newTasks[idx]];
+  setTasks(newTasks);
+
+  const updates = [
+    { id: newTasks[idx].id, position: idx },
+    { id: newTasks[swapIdx].id, position: swapIdx },
+  ];
+
+  for (const u of updates) {
+    await supabase.from("student_tasks").update({ position: u.position }).eq("id", u.id);
+  }
+};
+
+const exportTasksAsText = () => {
+  const lines = tasks.map((t) => {
+    const status = t.is_done ? "[تم]" : "[لسه]";
+    const due = t.due_date ? ` - ${t.due_date}` : "";
+    return `${status} ${t.content}${due}`;
+  });
+  const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "مهامي.txt";
+  a.click();
+  URL.revokeObjectURL(url);
 };
 
 const deleteTask = async (taskId: number) => {
@@ -1591,17 +1696,80 @@ duration-300
                 </p>
               </div>
             ) : (
+             <>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={taskSearch}
+                  onChange={(e) => setTaskSearch(e.target.value)}
+                  placeholder="ابحث في مهامك..."
+                  className="
+                    flex-1 min-w-0
+                    rounded-xl
+                    border border-gray-200 dark:border-[#262626]
+                    bg-gray-50 dark:bg-[#0b0b0b]
+                    text-slate-700 dark:text-gray-200
+                    placeholder-gray-400
+                    px-3 py-2
+                    text-xs
+                    outline-none
+                    focus:border-[#B348FE]
+                  "
+                />
+                <button
+                  onClick={exportTasksAsText}
+                  className="text-[11px] font-bold text-gray-400 hover:text-[#B348FE] transition-colors whitespace-nowrap"
+                >
+                  تصدير
+                </button>
+              </div>
+
+              {tasks.some((t) => t.is_done) && (
+                <div className="flex justify-end">
+                  <button
+                    onClick={clearCompletedTasks}
+                    className="text-[11px] font-bold text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    مسح المكتمل
+                  </button>
+                </div>
+              )}
               <div className="flex flex-col gap-2 max-h-[260px] sm:max-h-[320px] overflow-y-auto pr-0.5">
-                {tasks.map((task) => (
+                {sortedTasks.map((task) => {
+                  const isOverdue =
+                    task.due_date &&
+                    !task.is_done &&
+                    new Date(task.due_date) < new Date(new Date().toDateString());
+
+                 return (
                   <div
                     key={task.id}
-                    className="
-                      flex items-center gap-2.5
-                      rounded-xl border border-gray-200 dark:border-[#262626]
+                    className={`
+                      flex items-center gap-2
+                      rounded-xl border
                       bg-gray-50 dark:bg-[#0b0b0b]
                       px-3.5 py-2.5
-                    "
+                      ${isOverdue
+                        ? "border-red-300 dark:border-red-900/60 bg-red-50 dark:bg-red-950/20"
+                        : "border-gray-200 dark:border-[#262626]"
+                      }
+                    `}
                   >
+                    <div className="flex flex-col gap-0.5 flex-shrink-0">
+                      <button
+                        onClick={() => moveTask(task.id, "up")}
+                        className="text-gray-300 hover:text-[#B348FE] transition-colors"
+                      >
+                        <ChevronRight className="w-3.5 h-3.5 rotate-90" />
+                      </button>
+                      <button
+                        onClick={() => moveTask(task.id, "down")}
+                        className="text-gray-300 hover:text-[#B348FE] transition-colors"
+                      >
+                        <ChevronRight className="w-3.5 h-3.5 -rotate-90" />
+                      </button>
+                    </div>
+
                     <button
                       onClick={() => toggleTask(task.id, task.is_done)}
                       className={`
@@ -1622,17 +1790,47 @@ duration-300
                     </button>
 
                     <div className="flex-1 min-w-0">
-                      <span
-                        className={`
-                          text-sm leading-6
-                          ${task.is_done
-                            ? "line-through text-gray-400"
-                            : "text-slate-700 dark:text-gray-200"
-                          }
-                        `}
-                      >
-                        {task.content}
-                      </span>
+                      {editingTaskId === task.id ? (
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="text"
+                            value={editingTaskText}
+                            onChange={(e) => setEditingTaskText(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") saveEditTask(task.id);
+                              if (e.key === "Escape") cancelEditTask();
+                            }}
+                            autoFocus
+                            className="
+                              flex-1 min-w-0 text-sm
+                              rounded-lg border border-[#B348FE]
+                              bg-white dark:bg-[#111111]
+                              text-slate-800 dark:text-white
+                              px-2 py-1
+                              outline-none
+                            "
+                          />
+                          <button onClick={() => saveEditTask(task.id)} className="text-[#B348FE]">
+                            <Save className="w-4 h-4" />
+                          </button>
+                          <button onClick={cancelEditTask} className="text-gray-400">
+                            <CloseIcon className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <span
+                          onClick={() => startEditTask(task)}
+                          className={`
+                            text-sm leading-6 cursor-text
+                            ${task.is_done
+                              ? "line-through text-gray-400"
+                              : "text-slate-700 dark:text-gray-200"
+                            }
+                          `}
+                        >
+                          {task.content}
+                        </span>
+                      )}
 
                       <div className="flex items-center gap-2 mt-1">
                         {task.priority === "urgent" && (
@@ -1646,7 +1844,8 @@ duration-300
                           </span>
                         )}
                         {task.due_date && (
-                          <span className="text-[10px] text-gray-400">
+                          <span className={`text-[10px] ${isOverdue ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                            {isOverdue && "متأخرة • "}
                             {new Date(task.due_date).toLocaleDateString("ar-EG", {
                               day: "numeric",
                               month: "short",
@@ -1663,9 +1862,12 @@ duration-300
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
+              </>
             )}
+
           </div>
         )}
       </div>
