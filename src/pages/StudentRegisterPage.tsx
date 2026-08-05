@@ -731,8 +731,6 @@ hover:bg-[#9E2FFF]
     flex items-center justify-center gap-2
     mt-1
     disabled:opacity-70
-shadow-[0_12px_35px_rgba(179,72,254,.35)]
-hover:shadow-[0_16px_40px_rgba(179,72,254,.45)]
     transition-all
     duration-300
   "

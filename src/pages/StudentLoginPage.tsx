@@ -449,8 +449,6 @@ font-bold
 text-sm sm:text-base
 flex items-center justify-center gap-2
 disabled:opacity-70
-shadow-[0_12px_35px_rgba(179,72,254,.30)]
-hover:shadow-[0_18px_45px_rgba(179,72,254,.45)]
 transition-all
 duration-300
 "
