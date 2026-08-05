@@ -170,8 +170,6 @@ animate={{
 
   bg-white
 
-  shadow-[0_8px_18px_rgba(0,0,0,.18)]
-
   ring-1
   ring-black/5
 "
