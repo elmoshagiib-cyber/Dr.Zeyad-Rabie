@@ -1346,7 +1346,7 @@ duration-300
 </button>
 
 <a
-  href="https://wa.me/201109414585"
+href="https://wa.me/201109414585"
   target="_blank"
   rel="noopener noreferrer"
   className="
@@ -1357,99 +1357,80 @@ duration-300
     group
     flex
     items-center
-    gap-3
+    gap-2
   "
 >
 
-  {/* Message */}
-  <div
-    className="
-      flex
-      items-center
-      gap-2
-
-      opacity-0
-      -translate-x-4
-
-      group-hover:opacity-100
-      group-hover:translate-x-0
-
-      transition-all
-      duration-300
-      pointer-events-none
-    "
-  >
+  {/* Message + Arrow */}
+  <div className="flex items-center gap-1.5">
 
     {/* Bubble */}
     <div
       className="
         whitespace-nowrap
-
-        rounded-xl
-
+        rounded-full
         bg-[#3A3A3A]
-
         text-white
-
-       px-6 py-3
-
-        text-[17px]
+        px-4 py-2.5
+        sm:px-5
+        sm:py-3
+        text-[12px]
+        sm:text-[14px]
         font-bold
-
         shadow-xl
+        transition-all
+        duration-300
+        group-hover:bg-[#2A2A2A]
       "
     >
-      تواصل معنا عبر واتساب
+      تواصل مع الدعم الفني هنا
     </div>
 
-   <svg
-  width="42"
-  height="42"
-  viewBox="0 0 42 42"
-  fill="none"
-  className="shrink-0"
->
-  <path
-    d="M5 34C12 18 22 10 35 9"
-    stroke="#25D366"
-    strokeWidth="3"
-    strokeLinecap="round"
-  />
-
-  <path
-    d="M28 5L35 9L31 16"
-    stroke="#25D366"
-    strokeWidth="3"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  />
-</svg>
+    {/* Arrow */}
+    <svg
+      width="26"
+      height="26"
+      viewBox="0 0 42 42"
+      fill="none"
+      className="shrink-0 -translate-y-1"
+    >
+      <path
+        d="M5 34C12 18 22 10 35 9"
+        stroke="#25D366"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <path
+        d="M28 5L35 9L31 16"
+        stroke="#25D366"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
 
   </div>
 
   {/* WhatsApp */}
   <div
     className="
-      w-16
-      h-16
+      w-14
+      h-14
+      sm:w-16
+      sm:h-16
       rounded-full
-
       bg-[#25D366]
-
       flex
       items-center
       justify-center
-
       shadow-[0_12px_30px_rgba(37,211,102,.35)]
-
       transition-all
       duration-300
-
       group-hover:scale-110
       group-hover:shadow-[0_18px_40px_rgba(37,211,102,.45)]
     "
   >
-    <FaWhatsapp className="text-white text-[34px]" />
+    <FaWhatsapp className="text-white text-[28px] sm:text-[34px]" />
   </div>
 
 </a>
