@@ -39,6 +39,7 @@ import {
 } from "../data/mockData";
 
 import InstallToast from "../components/ui/InstallToast";
+import { NotebookPen, X as CloseIcon, Loader2, Save } from "lucide-react";
 
 const gradeColors: Record<string, string> = {
   sec_3: "rose",
@@ -58,6 +59,13 @@ const { user } = useApp();
     const [courses, setCourses] = useState<any[]>([]);
     const [announcement, setAnnouncement] = useState<any>(null);
 const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+const [showNotesModal, setShowNotesModal] = useState(false);
+const [noteContent, setNoteContent] = useState("");
+const [noteLoading, setNoteLoading] = useState(false);
+const [noteSaving, setNoteSaving] = useState(false);
+const [noteSavedAt, setNoteSavedAt] = useState<string | null>(null);
+
 
 useEffect(() => {
   console.log("Deferred Prompt =", deferredPrompt);
@@ -221,6 +229,57 @@ created_at
     setAnnouncement(data?.[0] ?? null);
   }
   console.log("Announcement =", data);
+};
+
+const openNotesModal = async () => {
+  if (!user) {
+    toast("سجل دخولك الأول عشان تقدر تستخدم النوتة");
+    return;
+  }
+  setShowNotesModal(true);
+  setNoteLoading(true);
+
+  const { data, error } = await supabase
+    .from("student_notes")
+    .select("content, updated_at")
+    .eq("student_id", user.studentId)
+    .maybeSingle();
+
+  if (!error && data) {
+    setNoteContent(data.content ?? "");
+    setNoteSavedAt(data.updated_at ?? null);
+  } else {
+    setNoteContent("");
+    setNoteSavedAt(null);
+  }
+
+  setNoteLoading(false);
+};
+
+const saveNote = async () => {
+  if (!user) return;
+  setNoteSaving(true);
+
+  const { data, error } = await supabase
+    .from("student_notes")
+    .upsert(
+      {
+        student_id: user.studentId,
+        content: noteContent,
+      },
+      { onConflict: "student_id" }
+    )
+    .select("updated_at")
+    .single();
+
+  if (error) {
+    toast.error("حصل خطأ أثناء حفظ النوتة");
+  } else {
+    setNoteSavedAt(data?.updated_at ?? new Date().toISOString());
+    toast.success("تم حفظ النوتة");
+  }
+
+  setNoteSaving(false);
 };
 
 const dismissAnnouncement = async () => {
@@ -1059,6 +1118,35 @@ duration-300
   </section>
 </ScrollReveal>
 
+{/* Student Notebook Button */}
+<button
+  onClick={openNotesModal}
+  className="
+    fixed
+    bottom-[104px]
+    sm:bottom-[112px]
+    left-6
+    z-50
+    w-14
+    h-14
+    sm:w-16
+    sm:h-16
+    rounded-full
+    bg-[#B348FE]
+    flex
+    items-center
+    justify-center
+    shadow-[0_12px_30px_rgba(179,72,254,.35)]
+    hover:scale-110
+    hover:shadow-[0_18px_40px_rgba(179,72,254,.45)]
+    transition-all
+    duration-300
+  "
+  aria-label="نوتة الطالب"
+>
+  <NotebookPen className="text-white w-6 h-6 sm:w-7 sm:h-7" />
+</button>
+
 <a
   href="https://wa.me/201109414585"
   target="_blank"
@@ -1167,6 +1255,148 @@ duration-300
   </div>
 
 </a>
+
+{showNotesModal && (
+  <div
+    className="
+      fixed inset-0 z-[10000]
+      flex items-center justify-center
+      bg-black/60 backdrop-blur-sm
+      p-4
+    "
+    onClick={() => setShowNotesModal(false)}
+  >
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.25 }}
+      onClick={(e) => e.stopPropagation()}
+      dir="rtl"
+      className="
+        w-full
+        max-w-[92%]
+        sm:max-w-md
+        md:max-w-lg
+        max-h-[85vh]
+        rounded-[24px]
+        bg-white
+        dark:bg-[#111111]
+        border
+        border-gray-200
+        dark:border-[#262626]
+        shadow-[0_25px_70px_rgba(15,23,42,.25)]
+        flex
+        flex-col
+        overflow-hidden
+      "
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-[#262626]">
+        <div className="flex items-center gap-2.5">
+          <div className="w-10 h-10 rounded-xl bg-[#B348FE]/10 flex items-center justify-center">
+            <NotebookPen className="text-[#B348FE] w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-black text-[16px] sm:text-[18px] text-slate-900 dark:text-white">
+              نوتتي
+            </h3>
+            {noteSavedAt && (
+              <p className="text-[11px] text-gray-400">
+                آخر حفظ:{" "}
+                {new Date(noteSavedAt).toLocaleString("ar-EG", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  day: "numeric",
+                  month: "short",
+                })}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <button
+          onClick={() => setShowNotesModal(false)}
+          className="w-9 h-9 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-[#232323] hover:text-red-500 transition-all"
+        >
+          <CloseIcon size={18} />
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-4">
+        {noteLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 text-[#B348FE] animate-spin" />
+          </div>
+        ) : (
+          <textarea
+            value={noteContent}
+            onChange={(e) => setNoteContent(e.target.value)}
+            placeholder="اكتب ملاحظاتك هنا... (مراجعة، تذكيرات، أفكار)"
+            className="
+              w-full
+              min-h-[220px]
+              sm:min-h-[280px]
+              resize-none
+              rounded-2xl
+              border
+              border-gray-200
+              dark:border-[#262626]
+              bg-gray-50
+              dark:bg-[#0b0b0b]
+              text-slate-800
+              dark:text-white
+              placeholder-gray-400
+              p-4
+              text-sm
+              sm:text-[15px]
+              leading-7
+              outline-none
+              focus:border-[#B348FE]
+              transition-colors
+            "
+          />
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="px-5 sm:px-6 py-4 border-t border-gray-100 dark:border-[#262626]">
+        <button
+          onClick={saveNote}
+          disabled={noteSaving || noteLoading}
+          className="
+            w-full
+            py-3
+            rounded-xl
+            bg-[#B348FE]
+            hover:bg-[#9E2FFF]
+            text-white
+            font-bold
+            text-sm
+            sm:text-base
+            flex items-center justify-center gap-2
+            disabled:opacity-70
+            transition-all
+            duration-300
+          "
+        >
+          {noteSaving ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              جاري الحفظ...
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4" />
+              حفظ النوتة
+            </>
+          )}
+        </button>
+      </div>
+    </motion.div>
+  </div>
+)}
 
 <Footer />
 </motion.div>
