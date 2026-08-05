@@ -500,15 +500,27 @@ export function CourseDetailPage() {
     }
 
     try {
-      const {
+      let {
         data: { session },
       } = await supabase.auth.getSession();
+
+      // لو الـ session مفقودة، حاول تحدّثها قبل ما تستسلم
+      if (!session?.access_token) {
+        const { data: refreshed } = await supabase.auth.refreshSession();
+        session = refreshed.session;
+      }
+
+      if (!session?.access_token) {
+        alert("انتهت جلسة الدخول، برجاء تسجيل الدخول مرة أخرى");
+        navigate("/login");
+        return;
+      }
 
       const response = await fetch("/api/video-url", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           lessonId,
@@ -516,7 +528,9 @@ export function CourseDetailPage() {
       });
 
       if (!response.ok) {
-        alert("تعذر فتح الفيديو");
+        const errData = await response.json().catch(() => null);
+        console.error("Video URL error:", errData);
+        alert("تعذر فتح الفيديو، حاول مرة أخرى");
         return;
       }
 
