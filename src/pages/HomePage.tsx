@@ -70,6 +70,8 @@ const [activeNotebookTab, setActiveNotebookTab] = useState<"notes" | "tasks">("n
 const [tasks, setTasks] = useState<any[]>([]);
 const [tasksLoading, setTasksLoading] = useState(false);
 const [newTaskText, setNewTaskText] = useState("");
+const [newTaskPriority, setNewTaskPriority] = useState<"normal" | "important" | "urgent">("normal");
+const [newTaskDueDate, setNewTaskDueDate] = useState("");
 const [addingTask, setAddingTask] = useState(false);
 
 
@@ -77,9 +79,10 @@ useEffect(() => {
   console.log("Deferred Prompt =", deferredPrompt);
 }, [deferredPrompt]);
 
-   useEffect(() => {
+useEffect(() => {
   loadCourses();
   loadAnnouncement();
+  if (user) loadTasks();
 }, [user]);
 
 useEffect(() => {
@@ -285,11 +288,13 @@ const addTask = async () => {
   if (!user || !newTaskText.trim()) return;
   setAddingTask(true);
 
-  const { data, error } = await supabase
+const { data, error } = await supabase
     .from("student_tasks")
     .insert({
       student_id: user.studentId,
       content: newTaskText.trim(),
+      priority: newTaskPriority,
+      due_date: newTaskDueDate || null,
     })
     .select()
     .single();
@@ -299,6 +304,8 @@ const addTask = async () => {
   } else {
     setTasks((prev) => [...prev, data]);
     setNewTaskText("");
+    setNewTaskPriority("normal");
+    setNewTaskDueDate("");
   }
 
   setAddingTask(false);
@@ -1203,6 +1210,7 @@ duration-300
 <button
   onClick={openNotesModal}
   className="
+    relative
     fixed
     bottom-[104px]
     sm:bottom-[112px]
@@ -1226,6 +1234,11 @@ duration-300
   aria-label="نوتة الطالب"
 >
   <NotebookPen className="text-white w-6 h-6 sm:w-7 sm:h-7" />
+  {tasks.filter((t) => !t.is_done).length > 0 && (
+    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+      {tasks.filter((t) => !t.is_done).length}
+    </span>
+  )}
 </button>
 
 <a
@@ -1380,7 +1393,7 @@ duration-300
           </div>
           <div>
             <h3 className="font-black text-[16px] sm:text-[18px] text-slate-900 dark:text-white">
-              نوتتي
+              نوتة
             </h3>
             {noteSavedAt && (
               <p className="text-[11px] text-gray-400">
@@ -1528,6 +1541,44 @@ duration-300
               </button>
             </div>
 
+            <div className="flex items-center gap-2">
+              <select
+                value={newTaskPriority}
+                onChange={(e) => setNewTaskPriority(e.target.value as any)}
+                className="
+                  rounded-xl
+                  border border-gray-200 dark:border-[#262626]
+                  bg-gray-50 dark:bg-[#0b0b0b]
+                  text-slate-700 dark:text-gray-200
+                  px-3 py-2
+                  text-xs
+                  outline-none
+                  focus:border-[#B348FE]
+                "
+              >
+                <option value="normal">عادي</option>
+                <option value="important">مهم</option>
+                <option value="urgent">عاجل</option>
+              </select>
+
+              <input
+                type="date"
+                value={newTaskDueDate}
+                onChange={(e) => setNewTaskDueDate(e.target.value)}
+                className="
+                  flex-1
+                  rounded-xl
+                  border border-gray-200 dark:border-[#262626]
+                  bg-gray-50 dark:bg-[#0b0b0b]
+                  text-slate-700 dark:text-gray-200
+                  px-3 py-2
+                  text-xs
+                  outline-none
+                  focus:border-[#B348FE]
+                "
+              />
+            </div>
+
             {/* Tasks list */}
             {tasksLoading ? (
               <div className="flex items-center justify-center py-12">
@@ -1571,17 +1622,40 @@ duration-300
                       )}
                     </button>
 
-                    <span
-                      className={`
-                        flex-1 text-sm leading-6
-                        ${task.is_done
-                          ? "line-through text-gray-400"
-                          : "text-slate-700 dark:text-gray-200"
-                        }
-                      `}
-                    >
-                      {task.content}
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      <span
+                        className={`
+                          text-sm leading-6
+                          ${task.is_done
+                            ? "line-through text-gray-400"
+                            : "text-slate-700 dark:text-gray-200"
+                          }
+                        `}
+                      >
+                        {task.content}
+                      </span>
+
+                      <div className="flex items-center gap-2 mt-1">
+                        {task.priority === "urgent" && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-500 text-white">
+                            عاجل
+                          </span>
+                        )}
+                        {task.priority === "important" && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#F6AC08] text-white">
+                            مهم
+                          </span>
+                        )}
+                        {task.due_date && (
+                          <span className="text-[10px] text-gray-400">
+                            {new Date(task.due_date).toLocaleDateString("ar-EG", {
+                              day: "numeric",
+                              month: "short",
+                            })}
+                          </span>
+                        )}
+                      </div>
+                    </div>
 
                     <button
                       onClick={() => deleteTask(task.id)}
