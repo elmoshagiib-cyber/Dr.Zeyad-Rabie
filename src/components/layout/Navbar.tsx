@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { UserMenu } from "./navbar/UserMenu";
 
 import { FaReact } from "react-icons/fa6";
+import { Bell } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { useTheme } from "../../context/ThemeContext";
 export function Navbar() {
@@ -62,9 +63,9 @@ const handleScroll = () => {
   `}
 >
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
         <div className="relative h-24 flex items-center justify-between">
-<div className="flex items-center gap-3 pr-3">
+<div className="flex items-center gap-3 pr-1 sm:pr-3">
 
   {/* Mobile Center Logo */}
 <div
@@ -121,13 +122,62 @@ const handleScroll = () => {
 
 </div>
           {/* Right Side */}
-          <div className="flex items-center gap-4">
-           
-          {user ? (
-  <UserMenu />
-) : (
-  <GuestActions navigate={navigate} />
-)}
+         <div className="flex items-center gap-2 sm:gap-3">
+
+  {user ? (
+    <>
+      {/* Notification */}
+      <button
+        className="
+          relative
+          flex
+          items-center
+          justify-center
+
+          w-11
+          h-11
+          sm:w-12
+          sm:h-12
+
+          rounded-full
+
+          border
+          border-gray-200
+          dark:border-[#2A2A2A]
+
+          bg-white
+          dark:bg-[#111111]
+
+          hover:border-[#B348FE]
+          hover:text-[#B348FE]
+
+          transition-all
+          duration-300
+        "
+      >
+        <Bell className="w-5 h-5" />
+
+        {/* Badge */}
+        <span
+          className="
+            absolute
+            top-2
+            right-2
+
+            w-2.5
+            h-2.5
+
+            rounded-full
+            bg-red-500
+          "
+        />
+      </button>
+
+      <UserMenu />
+    </>
+  ) : (
+    <GuestActions navigate={navigate} />
+  )}
        
             {/* Mobile Menu Toggle */}
            {!user && (

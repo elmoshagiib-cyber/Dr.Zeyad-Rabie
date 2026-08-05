@@ -16,13 +16,13 @@ interface ThemeToggleProps {
 // Design tokens (avoid magic numbers)
 // ────────────────────────────────────────────────
 const TRACK = {
-  width: 76,
-  height: 38,
+  width: 68,
+  height: 34,
   padding: 3,
 } as const;
 
 const KNOB = {
-  size: 32,
+  size: 28,
 } as const;
 
 const KNOB_TRAVEL = TRACK.width - KNOB.size - TRACK.padding * 2; // = 38
@@ -127,7 +127,7 @@ className="
     transition={iconTransition}
     className="text-white drop-shadow-sm"
   >
-    <Moon size={15} strokeWidth={2.4} />
+    <Moon size={13} strokeWidth={2.4} />
   </motion.span>
 
   {/* الشمس على اليمين */}
@@ -140,7 +140,7 @@ className="
     transition={iconTransition}
     className="text-white drop-shadow-sm"
   >
-    <Sun size={16} strokeWidth={2.4} />
+    <Sun size={14} strokeWidth={2.4} />
   </motion.span>
 </span>
 
@@ -187,7 +187,7 @@ animate={{
     className="text-[#B348FE]"
   >
     <Moon
-      size={16}
+      size={14}
       strokeWidth={2.5}
       fill="currentColor"
     />
@@ -202,7 +202,7 @@ animate={{
     className="text-[#B348FE]"
   >
     <Sun
-      size={16}
+      size={14}
       strokeWidth={2.5}
     />
   </motion.span>
