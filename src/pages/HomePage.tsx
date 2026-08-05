@@ -564,7 +564,6 @@ hover:bg-[#9A2EFF]
       sm:text-[16px]
       lg:text-[18px]
       font-semibold
-      shadow-[0_14px_35px_rgba(179,72,254,.35)]
       hover:scale-[1.03]
       transition-all
       duration-300
@@ -590,7 +589,6 @@ hover:bg-[#9A2EFF]
         hover:bg-[#E29E00]
         text-[#ffffff]
         font-bold
-        shadow-[0_12px_30px_rgba(246,172,8,.45)]
         hover:scale-[1.03]
         transition-all
         duration-300
