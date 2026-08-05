@@ -1210,7 +1210,6 @@ duration-300
 <button
   onClick={openNotesModal}
   className="
-    relative
     fixed
     bottom-[104px]
     sm:bottom-[112px]
