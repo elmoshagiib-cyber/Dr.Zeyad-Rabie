@@ -1506,8 +1506,8 @@ className="
         "
       >
         <img
-          src="/images/notebook-photo.png"
-          alt="مستر زياد ربيع"
+     src="/images/notebook-teacher.png"
+     alt="مستر زياد ربيع"
           className="
             absolute inset-0
             w-full h-full
