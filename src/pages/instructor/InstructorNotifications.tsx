@@ -27,14 +27,14 @@ import { supabase } from "../../lib/supabase";
 import toast from "react-hot-toast";
 
 interface Notification {
-  id: string;
+  id: number;
   title: string;
   content: string;
   type: string;
   target_type: string;
   target_value: string | null;
   recipient_count: number;
-  created_by: string;
+  created_by: string | null;
   is_sent: boolean;
   sent_at: string | null;
   is_pinned: boolean;
@@ -174,6 +174,18 @@ export default function InstructorNotifications() {
         supabase.from("notification_settings").select("*"),
       ]);
 
+      if (notificationsRes.error) {
+  console.error(notificationsRes.error);
+}
+
+if (studentsRes.error) {
+  console.error(studentsRes.error);
+}
+
+if (settingsRes.error) {
+  console.error(settingsRes.error);
+}
+
       if (notificationsRes.error) throw notificationsRes.error;
       if (studentsRes.error) throw studentsRes.error;
       if (settingsRes.error) throw settingsRes.error;
@@ -231,11 +243,17 @@ export default function InstructorNotifications() {
     return notifications.filter((n) => n.type === activeFilter);
   }, [notifications, activeFilter]);
 
-  const getStageFromGrade = (grade: string): string => {
-    if (grade.includes("ثانوي")) return "الثانوية";
-    if (grade.includes("إعدادي")) return "الإعدادية";
-    return "";
-  };
+const getStageFromGrade = (grade: string): string => {
+  if (grade.includes("ثانوي")) return "الثانوية";
+
+  if (
+    grade.includes("إعدادي") ||
+    grade.includes("الإعدادي")
+  )
+    return "الإعدادية";
+
+  return "";
+};
 
   const recipientCount = useMemo(() => {
     if (formData.targetType === "all") {
@@ -297,6 +315,7 @@ export default function InstructorNotifications() {
 
       const { data: notification, error: notifError } = await supabase
         .from("notifications")
+        
         .insert({
           title: formData.title,
           content: formData.content,
@@ -309,8 +328,17 @@ export default function InstructorNotifications() {
           sent_at: new Date().toISOString(),
           is_pinned: formData.isPinned,
           is_active: true,
-          icon: null,
-          color: formData.color || null,
+          icon:
+  formData.type === "lecture"
+    ? "book"
+    : formData.type === "exam"
+    ? "file"
+    : formData.type === "homework"
+    ? "calendar"
+    : formData.type === "offer"
+    ? "gift"
+    : "bell",
+          color: formData.color,
         })
         .select()
         .single();
@@ -368,7 +396,7 @@ export default function InstructorNotifications() {
     toast.success("تم نسخ الإشعار");
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (!confirm("هل أنت متأكد من حذف هذا الإشعار؟")) return;
 
     try {
