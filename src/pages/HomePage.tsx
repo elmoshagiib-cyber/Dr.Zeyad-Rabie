@@ -1474,8 +1474,10 @@ duration-300
       className="
         w-full
         max-w-[92%]
-        sm:max-w-md
-        md:max-w-lg
+        sm:max-w-xl
+        md:max-w-3xl
+        h-[560px]
+        sm:h-[600px]
         max-h-[85vh]
         rounded-[24px]
         bg-white
@@ -1486,12 +1488,38 @@ duration-300
         shadow-[0_25px_70px_rgba(15,23,42,.25)]
         flex
         flex-col
+        md:flex-row
         overflow-hidden
       "
     >
+      {/* Side Image - fixed, always visible */}
+      <div
+        className="
+          hidden
+          md:block
+          w-[240px]
+          lg:w-[280px]
+          flex-shrink-0
+          relative
+          overflow-hidden
+        "
+      >
+        <img
+          src="/images/notebook-photo.png"
+          alt="مستر زياد ربيع"
+          className="
+            absolute inset-0
+            w-full h-full
+            object-cover
+          "
+        />
+      </div>
+
+      {/* Right Panel: header + tabs + body + footer */}
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+
       {/* Header */}
-      <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-[#262626]">
-        <div className="flex items-center gap-2.5">
+      <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-[#262626] flex-shrink-0">
           <div className="w-10 h-10 rounded-xl bg-[#B348FE]/10 flex items-center justify-center">
             <NotebookPen className="text-[#B348FE] w-5 h-5" />
           </div>
@@ -1872,9 +1900,9 @@ duration-300
         )}
       </div>
 
-      {/* Footer */}
+{/* Footer */}
       {activeNotebookTab === "notes" && (
-      <div className="px-5 sm:px-6 py-4 border-t border-gray-100 dark:border-[#262626]">
+      <div className="px-5 sm:px-6 py-4 border-t border-gray-100 dark:border-[#262626] flex-shrink-0">
         <button
 
           onClick={saveNote}
@@ -1908,7 +1936,8 @@ duration-300
           )}
         </button>
       </div>
-      )}
+)}
+      
     </motion.div>
   </div>
 )}
