@@ -1345,31 +1345,38 @@ duration-300
   )}
 </button>
 
-<a
-href="https://wa.me/201109414585"
-  target="_blank"
-  rel="noopener noreferrer"
+
+<div
   className="
     fixed
     bottom-6
     left-6
     z-50
-    group
     flex
     items-center
     gap-2
   "
 >
 
-  {/* Message + Arrow */}
-  <div className="flex items-center gap-1.5">
+  {/* Message + Arrow - not clickable, just a visual hint */}
+  <div
+    className="
+      flex items-center gap-1.5
+      pointer-events-none
+      sm:pointer-events-auto
+      hover:opacity-0
+      transition-opacity
+      duration-300
+    "
+  >
 
     {/* Bubble */}
     <div
       className="
         whitespace-nowrap
         rounded-full
-        bg-[#3A3A3A]
+        bg-[#3A3A3A]/70
+        backdrop-blur-sm
         text-white
         px-4 py-2.5
         sm:px-5
@@ -1378,9 +1385,6 @@ href="https://wa.me/201109414585"
         sm:text-[14px]
         font-bold
         shadow-xl
-        transition-all
-        duration-300
-        group-hover:bg-[#2A2A2A]
       "
     >
       تواصل مع الدعم الفني هنا
@@ -1411,9 +1415,13 @@ href="https://wa.me/201109414585"
 
   </div>
 
-  {/* WhatsApp */}
-  <div
+  {/* WhatsApp - the only clickable part */}
+  <a
+    href="https://wa.me/201109414585"
+    target="_blank"
+    rel="noopener noreferrer"
     className="
+      group
       w-14
       h-14
       sm:w-16
@@ -1426,14 +1434,14 @@ href="https://wa.me/201109414585"
       shadow-[0_12px_30px_rgba(37,211,102,.35)]
       transition-all
       duration-300
-      group-hover:scale-110
-      group-hover:shadow-[0_18px_40px_rgba(37,211,102,.45)]
+      hover:scale-110
+      hover:shadow-[0_18px_40px_rgba(37,211,102,.45)]
     "
   >
     <FaWhatsapp className="text-white text-[28px] sm:text-[34px]" />
-  </div>
+  </a>
 
-</a>
+</div>
 
 {showNotesModal && (
   <div
