@@ -39,7 +39,7 @@ import {
 } from "../data/mockData";
 
 import InstallToast from "../components/ui/InstallToast";
-import { NotebookPen, X as CloseIcon, Loader2, Save } from "lucide-react";
+import { NotebookPen, X as CloseIcon, Loader2, Save, Plus, Trash2, ListChecks, StickyNote } from "lucide-react";
 
 const gradeColors: Record<string, string> = {
   sec_3: "rose",
@@ -65,6 +65,12 @@ const [noteContent, setNoteContent] = useState("");
 const [noteLoading, setNoteLoading] = useState(false);
 const [noteSaving, setNoteSaving] = useState(false);
 const [noteSavedAt, setNoteSavedAt] = useState<string | null>(null);
+
+const [activeNotebookTab, setActiveNotebookTab] = useState<"notes" | "tasks">("notes");
+const [tasks, setTasks] = useState<any[]>([]);
+const [tasksLoading, setTasksLoading] = useState(false);
+const [newTaskText, setNewTaskText] = useState("");
+const [addingTask, setAddingTask] = useState(false);
 
 
 useEffect(() => {
@@ -236,8 +242,10 @@ const openNotesModal = async () => {
     toast("سجل دخولك الأول عشان تقدر تستخدم النوتة");
     return;
   }
-  setShowNotesModal(true);
+setShowNotesModal(true);
+  setActiveNotebookTab("notes");
   setNoteLoading(true);
+  loadTasks();
 
   const { data, error } = await supabase
     .from("student_notes")
@@ -254,6 +262,79 @@ const openNotesModal = async () => {
   }
 
   setNoteLoading(false);
+};
+
+const loadTasks = async () => {
+  if (!user) return;
+  setTasksLoading(true);
+
+  const { data, error } = await supabase
+    .from("student_tasks")
+    .select("*")
+    .eq("student_id", user.studentId)
+    .order("created_at", { ascending: true });
+
+  if (!error) {
+    setTasks(data || []);
+  }
+
+  setTasksLoading(false);
+};
+
+const addTask = async () => {
+  if (!user || !newTaskText.trim()) return;
+  setAddingTask(true);
+
+  const { data, error } = await supabase
+    .from("student_tasks")
+    .insert({
+      student_id: user.studentId,
+      content: newTaskText.trim(),
+    })
+    .select()
+    .single();
+
+  if (error) {
+    toast.error("حصل خطأ أثناء إضافة المهمة");
+  } else {
+    setTasks((prev) => [...prev, data]);
+    setNewTaskText("");
+  }
+
+  setAddingTask(false);
+};
+
+const toggleTask = async (taskId: number, current: boolean) => {
+  setTasks((prev) =>
+    prev.map((t) => (t.id === taskId ? { ...t, is_done: !current } : t))
+  );
+
+  const { error } = await supabase
+    .from("student_tasks")
+    .update({ is_done: !current })
+    .eq("id", taskId);
+
+  if (error) {
+    toast.error("حصل خطأ أثناء تحديث المهمة");
+    setTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, is_done: current } : t))
+    );
+  }
+};
+
+const deleteTask = async (taskId: number) => {
+  const prevTasks = tasks;
+  setTasks((prev) => prev.filter((t) => t.id !== taskId));
+
+  const { error } = await supabase
+    .from("student_tasks")
+    .delete()
+    .eq("id", taskId);
+
+  if (error) {
+    toast.error("حصل خطأ أثناء حذف المهمة");
+    setTasks(prevTasks);
+  }
 };
 
 const saveNote = async () => {
@@ -1323,9 +1404,49 @@ duration-300
         </button>
       </div>
 
-      {/* Body */}
+      {/* Tabs */}
+      <div className="flex items-center gap-2 px-5 sm:px-6 pt-3">
+        <button
+          onClick={() => setActiveNotebookTab("notes")}
+          className={`
+            flex-1 flex items-center justify-center gap-1.5
+            py-2.5 rounded-xl text-[13px] sm:text-sm font-bold
+            transition-all duration-200
+            ${activeNotebookTab === "notes"
+              ? "bg-[#B348FE] text-white"
+              : "bg-gray-100 dark:bg-[#1c1c1c] text-gray-500 dark:text-gray-400"
+            }
+          `}
+        >
+          <StickyNote className="w-4 h-4" />
+          نوتتي
+        </button>
+        <button
+          onClick={() => setActiveNotebookTab("tasks")}
+          className={`
+            flex-1 flex items-center justify-center gap-1.5
+            py-2.5 rounded-xl text-[13px] sm:text-sm font-bold
+            transition-all duration-200
+            ${activeNotebookTab === "tasks"
+              ? "bg-[#B348FE] text-white"
+              : "bg-gray-100 dark:bg-[#1c1c1c] text-gray-500 dark:text-gray-400"
+            }
+          `}
+        >
+          <ListChecks className="w-4 h-4" />
+          مهامي
+          {tasks.filter((t) => !t.is_done).length > 0 && (
+            <span className="bg-white/25 text-[10px] px-1.5 py-0.5 rounded-full">
+              {tasks.filter((t) => !t.is_done).length}
+            </span>
+          )}
+        </button>
+      </div>
+
+     {/* Body */}
       <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-4">
-        {noteLoading ? (
+        {activeNotebookTab === "notes" ? (
+  noteLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 text-[#B348FE] animate-spin" />
           </div>
@@ -1356,13 +1477,131 @@ duration-300
               focus:border-[#B348FE]
               transition-colors
             "
-          />
+/>
+  )
+) : (
+  
+          <div className="flex flex-col gap-3">
+            {/* Add task input */}
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={newTaskText}
+                onChange={(e) => setNewTaskText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addTask();
+                  }
+                }}
+                placeholder="مثال: مراجعة الفصل الثالث بكرا"
+                className="
+                  flex-1 min-w-0
+                  rounded-xl
+                  border border-gray-200 dark:border-[#262626]
+                  bg-gray-50 dark:bg-[#0b0b0b]
+                  text-slate-800 dark:text-white
+                  placeholder-gray-400
+                  px-3.5 py-2.5
+                  text-sm
+                  outline-none
+                  focus:border-[#B348FE]
+                  transition-colors
+                "
+              />
+              <button
+                onClick={addTask}
+                disabled={addingTask || !newTaskText.trim()}
+                className="
+                  w-10 h-10 flex-shrink-0 rounded-xl
+                  bg-[#B348FE] hover:bg-[#9E2FFF]
+                  text-white flex items-center justify-center
+                  disabled:opacity-50
+                  transition-all
+                "
+              >
+                {addingTask ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Plus className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+
+            {/* Tasks list */}
+            {tasksLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-6 h-6 text-[#B348FE] animate-spin" />
+              </div>
+            ) : tasks.length === 0 ? (
+              <div className="text-center py-10">
+                <ListChecks className="w-9 h-9 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                <p className="text-sm text-gray-400">
+                  مفيش مهام لسه، ضيف أول مهمة ليك
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2 max-h-[260px] sm:max-h-[320px] overflow-y-auto pr-0.5">
+                {tasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="
+                      flex items-center gap-2.5
+                      rounded-xl border border-gray-200 dark:border-[#262626]
+                      bg-gray-50 dark:bg-[#0b0b0b]
+                      px-3.5 py-2.5
+                    "
+                  >
+                    <button
+                      onClick={() => toggleTask(task.id, task.is_done)}
+                      className={`
+                        w-5 h-5 flex-shrink-0 rounded-md border-2
+                        flex items-center justify-center
+                        transition-all duration-200
+                        ${task.is_done
+                          ? "bg-[#B348FE] border-[#B348FE]"
+                          : "border-gray-300 dark:border-gray-600"
+                        }
+                      `}
+                    >
+                      {task.is_done && (
+                        <svg width="11" height="9" viewBox="0 0 12 10" fill="none">
+                          <path d="M1 5L4.5 8.5L11 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </button>
+
+                    <span
+                      className={`
+                        flex-1 text-sm leading-6
+                        ${task.is_done
+                          ? "line-through text-gray-400"
+                          : "text-slate-700 dark:text-gray-200"
+                        }
+                      `}
+                    >
+                      {task.content}
+                    </span>
+
+                    <button
+                      onClick={() => deleteTask(task.id)}
+                      className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
       {/* Footer */}
+      {activeNotebookTab === "notes" && (
       <div className="px-5 sm:px-6 py-4 border-t border-gray-100 dark:border-[#262626]">
         <button
+
           onClick={saveNote}
           disabled={noteSaving || noteLoading}
           className="
@@ -1394,10 +1633,10 @@ duration-300
           )}
         </button>
       </div>
+      )}
     </motion.div>
   </div>
 )}
-
 <Footer />
 </motion.div>
 );
