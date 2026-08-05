@@ -403,7 +403,7 @@ export function CourseDetailPage() {
     }
   };
 
-  const saveProgress = async (currentTime: number, duration: number) => {
+const saveProgress = async (currentTime: number, duration: number) => {
     const studentId = getStudentId();
     if (!studentId || !currentLessonId || !slug) return;
 
@@ -411,7 +411,9 @@ export function CourseDetailPage() {
       const watchedSeconds = Math.floor(currentTime);
       const progressPercent = duration > 0 ? Math.round((currentTime / duration) * 100) : 0;
 
-      await supabase
+      console.log("SAVE PROGRESS ATTEMPT →", { studentId, currentLessonId, currentTime, watchedSeconds });
+
+      const { data, error, count } = await supabase
         .from("lesson_progress")
         .update({
           watched_seconds: watchedSeconds,
@@ -421,7 +423,10 @@ export function CourseDetailPage() {
           updated_at: new Date().toISOString(),
         })
         .eq("student_id", studentId)
-        .eq("lesson_id", currentLessonId);
+        .eq("lesson_id", currentLessonId)
+        .select();
+
+      console.log("SAVE PROGRESS RESULT →", { data, error, rowsAffected: data?.length });
 
       await supabase
         .from("students")
