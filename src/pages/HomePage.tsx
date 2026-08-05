@@ -1504,9 +1504,9 @@ duration-300
           overflow-hidden
         "
       >
-        <img
-          src="/images/notebook-photo.png"
-          alt="مستر زياد ربيع"
+<img
+     src="/images/notebook-teacher.png"
+     alt="مستر زياد ربيع"
           className="
             absolute inset-0
             w-full h-full
