@@ -26,6 +26,21 @@ import { ShieldCheck } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { FaWhatsapp } from "react-icons/fa";
 
+interface LessonProgress {
+  student_id: number;
+  lesson_id: string;
+  course_id: string;
+  watched_seconds: number;
+  video_duration: number;
+  progress_percent: number;
+  is_completed: boolean;
+  watch_count: number;
+  last_position: number;
+  last_watched_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export function CourseDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   console.log("SLUG =", slug);
@@ -45,12 +60,17 @@ export function CourseDetailPage() {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscriptionCode, setSubscriptionCode] = useState("");
 
-const [videoPlayerOpen, setVideoPlayerOpen] = useState(false);
+  const [videoPlayerOpen, setVideoPlayerOpen] = useState(false);
   const [videoPlayerUrl, setVideoPlayerUrl] = useState("");
   const [videoPlayerTitle, setVideoPlayerTitle] = useState("");
+  const [currentLessonId, setCurrentLessonId] = useState<string>("");
   const [watermarkPosition, setWatermarkPosition] = useState({ top: "10%", left: "10%" });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lessonProgressRef = useRef<LessonProgress | null>(null);
+  const hasIncrementedWatchedLessonsRef = useRef(false);
 
   const loadCourse = async () => {
     const { data, error } = await supabase
@@ -106,23 +126,22 @@ const [videoPlayerOpen, setVideoPlayerOpen] = useState(false);
     setUnits(units);
   };
 
-const getStudentId = (): number | null => {
-  if (!user?.studentId) return null;
+  const getStudentId = (): number | null => {
+    if (!user?.studentId) return null;
+    return user.studentId;
+  };
 
-  return user.studentId;
-};
+  const getWatermarkText = (): string => {
+    if (!user) return "";
 
-const getWatermarkText = (): string => {
-  if (!user) return "";
+    const name = (user as any).name || (user as any).full_name || "";
+    const phone = (user as any).phone || (user as any).phone_number || "";
+    const email = (user as any).email || "";
 
-  const name = (user as any).name || (user as any).full_name || "";
-  const phone = (user as any).phone || (user as any).phone_number || "";
-  const email = (user as any).email || "";
+    const identifier = phone || email || name || `طالب #${(user as any).studentId || ""}`;
 
-  const identifier = phone || email || name || `طالب #${(user as any).studentId || ""}`;
-
-  return `${name ? name + " - " : ""}${identifier}`.trim();
-};
+    return `${name ? name + " - " : ""}${identifier}`.trim();
+  };
 
   const checkEnrollment = async () => {
     if (!user || !course) return;
@@ -333,27 +352,168 @@ const getWatermarkText = (): string => {
     0
   );
 
+  const loadOrCreateLessonProgress = async (
+    studentId: number,
+    lessonId: string,
+    courseId: string
+  ): Promise<LessonProgress | null> => {
+    try {
+      const { data: existing, error: fetchError } = await supabase
+        .from("lesson_progress")
+        .select("*")
+        .eq("student_id", studentId)
+        .eq("lesson_id", lessonId)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error("Error fetching lesson progress:", fetchError);
+        return null;
+      }
+
+      if (existing) {
+        return existing as LessonProgress;
+      }
+
+      const { data: newProgress, error: insertError } = await supabase
+        .from("lesson_progress")
+        .insert({
+          student_id: studentId,
+          lesson_id: lessonId,
+          course_id: courseId,
+          watched_seconds: 0,
+          video_duration: 0,
+          progress_percent: 0,
+          is_completed: false,
+          watch_count: 1,
+          last_position: 0,
+          last_watched_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error("Error creating lesson progress:", insertError);
+        return null;
+      }
+
+      return newProgress as LessonProgress;
+    } catch (error) {
+      console.error("Error in loadOrCreateLessonProgress:", error);
+      return null;
+    }
+  };
+
+  const saveProgress = async (currentTime: number, duration: number) => {
+    const studentId = getStudentId();
+    if (!studentId || !currentLessonId || !slug) return;
+
+    try {
+      const watchedSeconds = Math.floor(currentTime);
+      const progressPercent = duration > 0 ? Math.round((currentTime / duration) * 100) : 0;
+
+      await supabase
+        .from("lesson_progress")
+        .update({
+          watched_seconds: watchedSeconds,
+          last_position: currentTime,
+          progress_percent: progressPercent,
+          last_watched_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("student_id", studentId)
+        .eq("lesson_id", currentLessonId);
+
+      await supabase
+        .from("students")
+        .update({
+          last_activity: new Date().toISOString(),
+        })
+        .eq("id", studentId);
+    } catch (error) {
+      console.error("Error saving progress:", error);
+    }
+  };
+
+  const markAsCompleted = async () => {
+    const studentId = getStudentId();
+    if (!studentId || !currentLessonId || !slug || !lessonProgressRef.current) return;
+
+    if (lessonProgressRef.current.is_completed) {
+      return;
+    }
+
+    try {
+      await supabase
+        .from("lesson_progress")
+        .update({
+          is_completed: true,
+          progress_percent: 100,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("student_id", studentId)
+        .eq("lesson_id", currentLessonId);
+
+      if (!hasIncrementedWatchedLessonsRef.current) {
+        const { data: studentData } = await supabase
+          .from("students")
+          .select("watched_lessons, total_watch_minutes")
+          .eq("id", studentId)
+          .single();
+
+        if (studentData) {
+          const videoDuration = videoRef.current?.duration || 0;
+          const additionalMinutes = Math.floor(videoDuration / 60);
+
+          await supabase
+            .from("students")
+            .update({
+              watched_lessons: (studentData.watched_lessons || 0) + 1,
+              last_activity: new Date().toISOString(),
+              last_watched_lesson_id: currentLessonId,
+              total_watch_minutes: (studentData.total_watch_minutes || 0) + additionalMinutes,
+            })
+            .eq("id", studentId);
+
+          hasIncrementedWatchedLessonsRef.current = true;
+        }
+      }
+
+      lessonProgressRef.current = {
+        ...lessonProgressRef.current,
+        is_completed: true,
+      };
+    } catch (error) {
+      console.error("Error marking as completed:", error);
+    }
+  };
+
   const openVideoPlayer = async (lessonId: string, title: string) => {
     if (!lessonId) {
       alert("الفيديو غير متوفر");
       return;
     }
 
-    try {
-const {
-  data: { session },
-} = await supabase.auth.getSession();
+    const studentId = getStudentId();
+    if (!studentId || !slug) {
+      alert("يجب تسجيل الدخول أولاً");
+      return;
+    }
 
-const response = await fetch("/api/video-url", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${session?.access_token}`,
-  },
-  body: JSON.stringify({
-    lessonId,
-  }),
-});
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const response = await fetch("/api/video-url", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          lessonId,
+        }),
+      });
 
       if (!response.ok) {
         alert("تعذر فتح الفيديو");
@@ -362,6 +522,11 @@ const response = await fetch("/api/video-url", {
 
       const { url } = await response.json();
 
+      const progress = await loadOrCreateLessonProgress(studentId, lessonId, slug);
+      lessonProgressRef.current = progress;
+      hasIncrementedWatchedLessonsRef.current = progress?.is_completed || false;
+
+      setCurrentLessonId(lessonId);
       setVideoPlayerUrl(url);
       setVideoPlayerTitle(title);
       setVideoPlayerOpen(true);
@@ -371,61 +536,62 @@ const response = await fetch("/api/video-url", {
     }
   };
 
-
-  
   const openPdf = async (lessonId: string) => {
-  if (!lessonId) {
-    alert("الملف غير متوفر");
-    return;
-  }
+    if (!lessonId) {
+      alert("الملف غير متوفر");
+      return;
+    }
 
-  try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-    const response = await fetch("/api/pdf-url", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.access_token}`,
-      },
-      body: JSON.stringify({
-        lessonId,
-      }),
-    });
+      const response = await fetch("/api/pdf-url", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          lessonId,
+        }),
+      });
 
-if (!response.ok) {
-  const error = await response.json();
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("PDF ERROR:", error);
+        alert(error.error || error.message || "تعذر فتح الملف");
+        return;
+      }
 
-  console.error("PDF ERROR:", error);
+      const { url } = await response.json();
+      console.log("PDF URL =", url);
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error(error);
+      alert("حدث خطأ أثناء فتح الملف");
+    }
+  };
 
-  alert(
-    error.error ||
-    error.message ||
-    "تعذر فتح الملف"
-  );
+  const closeVideoPlayer = async () => {
+    if (videoRef.current && currentLessonId) {
+      await saveProgress(videoRef.current.currentTime, videoRef.current.duration);
+    }
 
-  return;
-}
+    if (updateIntervalRef.current) {
+      clearInterval(updateIntervalRef.current);
+      updateIntervalRef.current = null;
+    }
 
-    const { url } = await response.json();
-console.log("PDF URL =", url);
-
-    window.open(url, "_blank", "noopener,noreferrer");
-  } catch (error) {
-    console.error(error);
-    alert("حدث خطأ أثناء فتح الملف");
-  }
-};
-
-const closeVideoPlayer = () => {
     setVideoPlayerOpen(false);
     setVideoPlayerUrl("");
     setVideoPlayerTitle("");
+    setCurrentLessonId("");
+    lessonProgressRef.current = null;
+    hasIncrementedWatchedLessonsRef.current = false;
   };
 
-  // ── تبديل وضع ملء الشاشة على الـ wrapper كله (فيديو + Watermark) ──
   const toggleFullscreen = () => {
     if (!videoWrapperRef.current) return;
 
@@ -438,7 +604,7 @@ const closeVideoPlayer = () => {
     }
   };
 
-useEffect(() => {
+  useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && videoPlayerOpen && !document.fullscreenElement) {
         closeVideoPlayer();
@@ -454,7 +620,6 @@ useEffect(() => {
     };
   }, [videoPlayerOpen]);
 
-  // ── متابعة حالة ملء الشاشة عشان نغيّر الأيقونة ──
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -467,7 +632,6 @@ useEffect(() => {
     };
   }, []);
 
-  // ── Watermark: تحريك موقعه كل بضع ثواني لصعوبة إزالته بالقص ──
   useEffect(() => {
     if (!videoPlayerOpen) return;
 
@@ -490,6 +654,95 @@ useEffect(() => {
 
     return () => clearInterval(interval);
   }, [videoPlayerOpen]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !videoPlayerOpen) return;
+
+    const handleLoadedMetadata = async () => {
+      const duration = video.duration;
+      const studentId = getStudentId();
+
+      if (studentId && currentLessonId && duration > 0) {
+        try {
+          await supabase
+            .from("lesson_progress")
+            .update({
+              video_duration: Math.floor(duration),
+            })
+            .eq("student_id", studentId)
+            .eq("lesson_id", currentLessonId);
+        } catch (error) {
+          console.error("Error saving video duration:", error);
+        }
+      }
+
+      if (lessonProgressRef.current && lessonProgressRef.current.last_position > 0) {
+        video.currentTime = lessonProgressRef.current.last_position;
+      }
+    };
+
+    const handlePlay = () => {
+      if (updateIntervalRef.current) {
+        clearInterval(updateIntervalRef.current);
+      }
+
+      updateIntervalRef.current = setInterval(() => {
+        if (video && !video.paused) {
+          saveProgress(video.currentTime, video.duration);
+        }
+      }, 10000);
+    };
+
+    const handlePause = async () => {
+      if (updateIntervalRef.current) {
+        clearInterval(updateIntervalRef.current);
+        updateIntervalRef.current = null;
+      }
+
+      await saveProgress(video.currentTime, video.duration);
+    };
+
+    const handleEnded = async () => {
+      if (updateIntervalRef.current) {
+        clearInterval(updateIntervalRef.current);
+        updateIntervalRef.current = null;
+      }
+
+      await markAsCompleted();
+    };
+
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("ended", handleEnded);
+
+    return () => {
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("ended", handleEnded);
+
+      if (updateIntervalRef.current) {
+        clearInterval(updateIntervalRef.current);
+        updateIntervalRef.current = null;
+      }
+    };
+  }, [videoPlayerOpen, currentLessonId]);
+
+  useEffect(() => {
+    const handleBeforeUnload = async () => {
+      if (videoRef.current && currentLessonId) {
+        await saveProgress(videoRef.current.currentTime, videoRef.current.duration);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [currentLessonId]);
 
   if (!course) {
     return (
@@ -519,15 +772,7 @@ useEffect(() => {
     <div className="min-h-screen bg-white dark:bg-[#09090B]" dir="rtl">
       <Navbar />
 
-      <div
-        className="
-    relative
-    overflow-hidden
-    pt-32
-    lg:pt-32
-    pb-56
-  "
-      >
+      <div className="relative overflow-hidden pt-32 lg:pt-32 pb-56">
         <img
           src={
             course.thumbnail ||
@@ -535,33 +780,11 @@ useEffect(() => {
             "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1600"
           }
           alt={course.title}
-          className="
-      absolute
-      inset-0
-      w-full
-      h-full
-      object-cover
-      object-center
-      select-none
-      pointer-events-none
-    "
+          className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
         />
 
-        <div
-          className="
-      absolute
-      inset-0
-      bg-black/65
-    "
-        />
-
-        <div
-          className="
-    absolute
-    inset-0
-    bg-black/55
-  "
-        />
+        <div className="absolute inset-0 bg-black/65" />
+        <div className="absolute inset-0 bg-black/55" />
 
         <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-start">
@@ -590,36 +813,11 @@ useEffect(() => {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="
-        flex
-        items-center
-        gap-2
-        rounded-full
-        bg-white/10
-        backdrop-blur-md
-        border
-        border-white/10
-        px-4
-        py-2
-        text-white
-        shadow-lg
-      "
+                  className="flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2 text-white shadow-lg"
                 >
                   <span className="text-sm font-bold">{item.label}</span>
-
                   <span className="text-[#FFD54A]">{item.icon}</span>
-
-                  <span
-                    className="
-          rounded-full
-          bg-[#B348FE]
-          text-white
-          px-2.5
-          py-1
-          text-[11px]
-          font-black
-        "
-                  >
+                  <span className="rounded-full bg-[#B348FE] text-white px-2.5 py-1 text-[11px] font-black">
                     +{item.value}
                   </span>
                 </div>
@@ -627,33 +825,11 @@ useEffect(() => {
             </div>
 
             <div className="text-left mb-7">
-              <h1
-                className="
-text-[2rem]
-sm:text-[2.8rem]
-lg:text-[3.8rem]
-xl:text-[4.5rem]
-
-font-extrabold
-      leading-[1]
-      tracking-tight
-      text-white
-      drop-shadow-[0_6px_20px_rgba(0,0,0,.35)]
-    "
-              >
+              <h1 className="text-[2rem] sm:text-[2.8rem] lg:text-[3.8rem] xl:text-[4.5rem] font-extrabold leading-[1] tracking-tight text-white drop-shadow-[0_6px_20px_rgba(0,0,0,.35)]">
                 {course.title}
               </h1>
 
-              <p
-                className="
-      mt-6
-      text-lg
-      sm:text-xl
-      font-bold
-      text-right
-      text-white
-    "
-              >
+              <p className="mt-6 text-lg sm:text-xl font-bold text-right text-white">
                 {gradeLabels[course.grade] || course.grade}
               </p>
             </div>
@@ -661,18 +837,7 @@ font-extrabold
             <div className="flex flex-wrap justify-start gap-5">
               <div className="flex items-center gap-3">
                 <span className="text-white font-bold">تاريخ الإنشاء</span>
-
-                <span
-                  className="
-        rounded-full
-        bg-[#B348FE]
-        text-white
-        px-4
-        py-1.5
-        text-sm
-        font-black
-      "
-                >
+                <span className="rounded-full bg-[#B348FE] text-white px-4 py-1.5 text-sm font-black">
                   {new Date(course.created_at || Date.now()).toLocaleDateString(
                     "ar-EG",
                     {
@@ -687,21 +852,7 @@ font-extrabold
 
               <div className="flex items-center gap-3">
                 <span className="text-white font-bold">آخر تحديث</span>
-
-                <span
-                  className="
-        rounded-full
-        bg-white/15
-        backdrop-blur-md
-        text-white
-        border
-        border-white/15
-        px-4
-        py-1.5
-        text-sm
-        font-black
-      "
-                >
+                <span className="rounded-full bg-white/15 backdrop-blur-md text-white border border-white/15 px-4 py-1.5 text-sm font-black">
                   {new Date(course.updated_at || Date.now()).toLocaleDateString(
                     "ar-EG",
                     {
@@ -721,10 +872,7 @@ font-extrabold
       <div className="relative z-20 max-w-[1400px] mx-auto px-8 lg:px-10 -mt-56">
         <div className="flex justify-between items-start">
           <div className="max-w-[430px] w-full ml-0 mr-auto">
-            <div className="bg-white dark:bg-[#151515] rounded-2xl sm:rounded-3xl overflow-hidden
-            shadow-[0_20px_60px_rgba(15,23,42,.12)]
-dark:shadow-[0_25px_70px_rgba(0,0,0,.75)]
- border border-gray-100 dark:border-[#2A2A2A]">
+            <div className="bg-white dark:bg-[#151515] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(15,23,42,.12)] dark:shadow-[0_25px_70px_rgba(0,0,0,.75)] border border-gray-100 dark:border-[#2A2A2A]">
               <img
                 src={
                   course.thumbnail ||
@@ -743,15 +891,7 @@ dark:shadow-[0_25px_70px_rgba(0,0,0,.75)]
                       console.log("BUTTON CLICKED");
                       handleEnroll();
                     }}
-                    className="
-      w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white
-      text-lg sm:text-xl font-black
-bg-[#B348FE]
-hover:bg-[#9E2FFF]
-shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)]
-      transition-all duration-300 hover:scale-[1.015]
-      mb-3 sm:mb-4
-    "
+                    className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#B348FE] hover:bg-[#9E2FFF] shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)] transition-all duration-300 hover:scale-[1.015] mb-3 sm:mb-4"
                   >
                     {isEnrolled ? "الدخول للكورس 🎉" : "اشترك مجانًا"}
                   </button>
@@ -781,10 +921,7 @@ shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)]
                           }
 
                           if (firstLesson.type === "video") {
-                       await openVideoPlayer(
-    firstLesson.id,
-    firstLesson.title
-);
+                            await openVideoPlayer(firstLesson.id, firstLesson.title);
                           }
 
                           return;
@@ -792,15 +929,7 @@ shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)]
 
                         handleEnroll();
                       }}
-                      className="
-    w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white
-    text-lg sm:text-xl font-black
-    bg-[#B348FE]
-hover:bg-[#9E2FFF]
-shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)]
-    transition-all duration-300 hover:scale-[1.015]
-    mb-3
-  "
+                      className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#B348FE] hover:bg-[#9E2FFF] shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)] transition-all duration-300 hover:scale-[1.015] mb-3"
                     >
                       {isEnrolled ? "مشترك" : "اشترك الآن"}
                     </button>
@@ -810,14 +939,7 @@ shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)]
                 {course.intro_video && (
                   <button
                     onClick={() => window.open(course.intro_video)}
-                    className="
-                      w-full py-2.5 sm:py-3 rounded-xl sm:rounded-2xl
-                      text-gray-700 dark:text-gray-200 font-bold text-sm sm:text-base
-                      border-2 border-gray-200 dark:border-gray-600 hover:border-rose-300
-                      flex items-center justify-center gap-2
-                      hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all duration-300
-                      mb-3 sm:mb-4
-                    "
+                    className="w-full py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-gray-700 dark:text-gray-200 font-bold text-sm sm:text-base border-2 border-gray-200 dark:border-gray-600 hover:border-rose-300 flex items-center justify-center gap-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all duration-300 mb-3 sm:mb-4"
                   >
                     <Play size={16} className="text-[#B348FE]" />
                     <span>مشاهدة المقدمة</span>
@@ -849,99 +971,39 @@ shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)]
                 >
                   <button
                     onClick={() => setOpenUnit(isOpen ? null : unit.id)}
-                    className={`
-    group
-    w-full
-    flex
-    flex-row-reverse
-    items-center
-    justify-between
-    px-4 sm:px-6
-    py-4 sm:py-5
-transition-all
-duration-300
-group-hover:scale-110
-    hover:scale-[1.01]
-
-    ${
-      isOpen
-        ? "bg-[#F6EEFF] dark:bg-[#2B103D]"
-        : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
-    }
-  `}
+                    className={`group w-full flex flex-row-reverse items-center justify-between px-4 sm:px-6 py-4 sm:py-5 transition-all duration-300 group-hover:scale-110 hover:scale-[1.01] ${
+                      isOpen
+                        ? "bg-[#F6EEFF] dark:bg-[#2B103D]"
+                        : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    }`}
                   >
                     <div
-                      className={`
-group
-relative
-overflow-hidden
-w-full
-flex
-flex-row-reverse
-items-center
-justify-between
-px-4
-sm:px-6
-py-4
-sm:py-5
-transition-all
-duration-300
-${
-  isOpen
-    ? "bg-[#F6EEFF] dark:bg-[#2B103D]"
-    : "hover:bg-[#FAF7FF] dark:hover:bg-[#18181B]"
-}
-`}
+                      className={`group relative overflow-hidden w-full flex flex-row-reverse items-center justify-between px-4 sm:px-6 py-4 sm:py-5 transition-all duration-300 ${
+                        isOpen
+                          ? "bg-[#F6EEFF] dark:bg-[#2B103D]"
+                          : "hover:bg-[#FAF7FF] dark:hover:bg-[#18181B]"
+                      }`}
                     >
                       <ChevronDown
                         size={18}
-                        className={`
-    transition-all
-    duration-300
-    ${isOpen ? "rotate-180 text-[#B348FE]" : "rotate-0 text-gray-500 dark:text-gray-400"}
-  `}
+                        className={`transition-all duration-300 ${
+                          isOpen
+                            ? "rotate-180 text-[#B348FE]"
+                            : "rotate-0 text-gray-500 dark:text-gray-400"
+                        }`}
                       />
                     </div>
 
                     <div className="flex flex-row-reverse items-center justify-start gap-3">
-                      <h3
-                        className="
-      text-base
-      sm:text-xl
-      xl:text-2xl
-      font-black
-      text-gray-900
-dark:text-white
-group-hover:text-[#B348FE]
-transition-all
-duration-300
-ease-out
-truncate
-    "
-                      >
+                      <h3 className="text-base sm:text-xl xl:text-2xl font-black text-gray-900 dark:text-white group-hover:text-[#B348FE] transition-all duration-300 ease-out truncate">
                         {unit.title}
                       </h3>
 
-                      <div
-                        className="
-      flex-shrink-0
-      w-8
-      h-8
-      sm:w-10
-      sm:h-10
-      rounded-xl
-      bg-[#F6EEFF]
-      dark:bg-[#2B103D]
-      flex
-      items-center
-      justify-center
-    "
-                      >
+                      <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
                         <LayoutGrid
                           size={16}
                           className="sm:hidden text-[#B348FE]"
                         />
-
                         <LayoutGrid
                           size={20}
                           className="hidden sm:block text-[#B348FE]"
@@ -960,32 +1022,18 @@ truncate
                         return (
                           <div
                             key={lesson.id}
-                            className={`
-                              flex flex-row-reverse items-center justify-between
-                              px-3 sm:px-6 py-3 sm:py-5 gap-2 sm:gap-4
-                              ${
-                                idx !== unit.lessons.length - 1
-                                  ? "border-b border-gray-100 dark:border-gray-700"
-                                  : ""
-                              }
-hover:bg-[#FAF7FF]
-dark:hover:bg-[#171717]
-transition-all
-duration-300
-hover:pr-8
-                            `}
+                            className={`flex flex-row-reverse items-center justify-between px-3 sm:px-6 py-3 sm:py-5 gap-2 sm:gap-4 ${
+                              idx !== unit.lessons.length - 1
+                                ? "border-b border-gray-100 dark:border-gray-700"
+                                : ""
+                            } hover:bg-[#FAF7FF] dark:hover:bg-[#171717] transition-all duration-300 hover:pr-8`}
                           >
                             <div className="flex-shrink-0">
                               {isEnrolled ? (
                                 <>
                                   {isVideo && (
                                     <button
-                                      onClick={() =>
-                                     openVideoPlayer(
-    lesson.id,
-    lesson.title
-)
-                                      }
+                                      onClick={() => openVideoPlayer(lesson.id, lesson.title)}
                                       className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                     >
                                       <Play size={13} />
@@ -995,7 +1043,7 @@ hover:pr-8
 
                                   {isFile && (
                                     <button
-onClick={() => openPdf(lesson.id)}
+                                      onClick={() => openPdf(lesson.id)}
                                       className="flex items-center gap-1.5 sm:gap-2 bg-blue-500 hover:bg-blue-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-blue-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                     >
                                       <FileText size={13} />
@@ -1006,15 +1054,12 @@ onClick={() => openPdf(lesson.id)}
                                   {isHomework && (
                                     <button
                                       onClick={() =>
-                                        navigate(
-                                          `/dashboard/homework/${lesson.id}`,
-                                          {
-                                            state: {
-                                              fromCourse: true,
-                                              courseId: slug,
-                                            },
-                                          }
-                                        )
+                                        navigate(`/dashboard/homework/${lesson.id}`, {
+                                          state: {
+                                            fromCourse: true,
+                                            courseId: slug,
+                                          },
+                                        })
                                       }
                                       className="flex items-center gap-1.5 sm:gap-2 bg-green-500 hover:bg-green-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-green-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                     >
@@ -1050,29 +1095,14 @@ onClick={() => openPdf(lesson.id)}
                               ) : (
                                 <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl">
                                   <Lock size={14} />
-                                  <span className="text-xs sm:text-sm font-bold">
-                                    مقفل
-                                  </span>
+                                  <span className="text-xs sm:text-sm font-bold">مقفل</span>
                                 </div>
                               )}
                             </div>
 
                             <div className="flex flex-row-reverse items-center gap-3 text-right flex-1 min-w-0">
                               <div className="flex-1 min-w-0">
-                                <h4
-                                  className="
-text-sm
-sm:text-base
-xl:text-lg
-font-bold
-text-[#111827]
-dark:text-white
-truncate
-transition-colors
-duration-300
-group-hover:text-[#B348FE]
-"
-                                >
+                                <h4 className="text-sm sm:text-base xl:text-lg font-bold text-[#111827] dark:text-white truncate transition-colors duration-300 group-hover:text-[#B348FE]">
                                   {lesson.title}
                                 </h4>
                                 {isVideo && lesson.duration && (
@@ -1088,17 +1118,11 @@ group-hover:text-[#B348FE]
                               </div>
 
                               <div
-                                className={`
-                                  flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl
-                                  flex items-center justify-center
-                                  transition-all
-duration-300
-group-hover:scale-110
-                                  ${isVideo ? "bg-yellow-100 text-yellow-500" : ""}
-                                  ${isFile ? "bg-blue-100   text-blue-500" : ""}
-                                  ${isHomework ? "bg-green-100  text-green-500" : ""}
-                                  ${isExam ? "bg-red-100    text-red-500" : ""}
-                                `}
+                                className={`flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${
+                                  isVideo ? "bg-yellow-100 text-yellow-500" : ""
+                                } ${isFile ? "bg-blue-100   text-blue-500" : ""} ${
+                                  isHomework ? "bg-green-100  text-green-500" : ""
+                                } ${isExam ? "bg-red-100    text-red-500" : ""}`}
                               >
                                 {isVideo && <Play size={15} />}
                                 {isFile && <FileText size={15} />}
@@ -1127,36 +1151,9 @@ group-hover:scale-110
 
       {showSubscriptionModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6">
-          <div
-            className="
-              w-full
-              max-w-md
-              rounded-[30px]
-              bg-white
-              dark:bg-[#111111]
-              border
-              border-gray-200
-              dark:border-[#2A2A2A]
-              shadow-[0_25px_70px_rgba(15,23,42,.12)]
-              dark:shadow-[0_30px_70px_rgba(0,0,0,.65)]
-              p-8
-            "
-          >
+          <div className="w-full max-w-md rounded-[30px] bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] shadow-[0_25px_70px_rgba(15,23,42,.12)] dark:shadow-[0_30px_70px_rgba(0,0,0,.65)] p-8">
             <div className="text-center">
-              <div
-                className="
-                  mx-auto
-                  mb-6
-                  flex
-                  h-20
-                  w-20
-                  items-center
-                  justify-center
-                  rounded-full
-                  bg-[#F6EEFF]
-                  dark:bg-[#2B103D]
-                "
-              >
+              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#F6EEFF] dark:bg-[#2B103D]">
                 <ShieldCheck size={36} className="text-[#B348FE]" />
               </div>
 
@@ -1168,19 +1165,7 @@ group-hover:scale-110
                 أدخل كود الاشتراك الخاص بك لتفعيل الكورس.
               </p>
 
-              <div
-                className="
-                  mt-5
-                  rounded-2xl
-                  border
-                  border-[#EAD8FF]
-                  dark:border-[#2A2A2A]
-                  bg-[#F6EEFF]
-                  dark:bg-[#1A1A1A]
-                  px-5
-                  py-4
-                "
-              >
+              <div className="mt-5 rounded-2xl border border-[#EAD8FF] dark:border-[#2A2A2A] bg-[#F6EEFF] dark:bg-[#1A1A1A] px-5 py-4">
                 <h3 className="text-lg font-black text-[#B348FE] text-center">
                   {course?.title}
                 </h3>
@@ -1190,33 +1175,9 @@ group-hover:scale-110
             <input
               type="text"
               value={subscriptionCode}
-              onChange={(e) =>
-                setSubscriptionCode(e.target.value.toUpperCase())
-              }
+              onChange={(e) => setSubscriptionCode(e.target.value.toUpperCase())}
               placeholder="XXXX-XXXX"
-              className="
-                mt-7
-                w-full
-                rounded-2xl
-                border
-                border-gray-200
-                dark:border-[#2A2A2A]
-                bg-gray-50
-                dark:bg-[#181818]
-                px-5
-                py-4
-                text-center
-                text-lg
-                tracking-[6px]
-                font-black
-                text-[#B348FE]
-                outline-none
-                transition-all
-                duration-300
-                focus:border-[#B348FE]
-                focus:ring-4
-                focus:ring-[#B348FE]/20
-              "
+              className="mt-7 w-full rounded-2xl border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#181818] px-5 py-4 text-center text-lg tracking-[6px] font-black text-[#B348FE] outline-none transition-all duration-300 focus:border-[#B348FE] focus:ring-4 focus:ring-[#B348FE]/20"
             />
 
             <Button className="w-full mt-5" onClick={activateSubscription}>
@@ -1225,22 +1186,7 @@ group-hover:scale-110
 
             <Button
               variant="outline"
-              className="
-                w-full
-                mt-3
-                bg-green-50
-                border-green-200
-                text-green-700
-                dark:bg-[#16281F]
-                dark:border-[#245D3A]
-                dark:text-green-400
-                hover:bg-green-500
-                hover:text-white
-                flex
-                items-center
-                justify-center
-                gap-2
-              "
+              className="w-full mt-3 bg-green-50 border-green-200 text-green-700 dark:bg-[#16281F] dark:border-[#245D3A] dark:text-green-400 hover:bg-green-500 hover:text-white flex items-center justify-center gap-2"
               onClick={() =>
                 window.open(
                   `https://wa.me/201109414585?text=${encodeURIComponent(
@@ -1256,13 +1202,7 @@ group-hover:scale-110
 
             <Button
               variant="ghost"
-              className="
-                w-full
-                mt-3
-                text-gray-500
-                dark:text-gray-400
-                hover:text-[#B348FE]
-              "
+              className="w-full mt-3 text-gray-500 dark:text-gray-400 hover:text-[#B348FE]"
               onClick={() => {
                 setShowSubscriptionModal(false);
                 setSubscriptionCode("");
@@ -1304,20 +1244,20 @@ group-hover:scale-110
               style={{ paddingBottom: isFullscreen ? "0" : "56.25%" }}
               onContextMenu={(e) => e.preventDefault()}
             >
-<video
-  key={videoPlayerUrl}
-  src={videoPlayerUrl}
-  controls
-  controlsList="nodownload noremoteplayback"
-  disablePictureInPicture
-  preload="metadata"
-  playsInline
-  onContextMenu={(e) => e.preventDefault()}
-  className={isFullscreen ? "w-full h-full" : "absolute inset-0 w-full h-full"}
-  autoPlay
-/>
+              <video
+                ref={videoRef}
+                key={videoPlayerUrl}
+                src={videoPlayerUrl}
+                controls
+                controlsList="nodownload noremoteplayback"
+                disablePictureInPicture
+                preload="metadata"
+                playsInline
+                onContextMenu={(e) => e.preventDefault()}
+                className={isFullscreen ? "w-full h-full" : "absolute inset-0 w-full h-full"}
+                autoPlay
+              />
 
-              {/* ── زرار ملء الشاشة المخصص: يحافظ على ظهور الـ Watermark ── */}
               <button
                 onClick={toggleFullscreen}
                 className="absolute bottom-4 left-4 z-20 bg-black/50 hover:bg-black/70 text-white p-2.5 rounded-xl transition-all backdrop-blur-sm"
@@ -1326,7 +1266,6 @@ group-hover:scale-110
                 {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
               </button>
 
-              {/* ── Watermark متحرك: يحتوي على بيانات الطالب لردع نشر الفيديو ── */}
               <div
                 className="absolute pointer-events-none select-none transition-all duration-1000 ease-in-out z-10"
                 style={{
