@@ -184,7 +184,7 @@ const handleScroll = () => {
     <>
 {/* Notification */}
       <button
-        onClick={() => navigate("/announcements")}
+        onClick={() => navigate("/dashboard/announcements")}
         className="
           relative
           flex

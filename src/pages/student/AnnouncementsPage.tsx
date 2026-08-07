@@ -112,12 +112,6 @@ return (
                 سيظهر هنا مباشرة.
               </p>
 
-              <Badge
-                variant="purple"
-                className="mt-6 inline-flex"
-              >
-                🚧 سيتم تفعيلها بعد الانتهاء من لوحة تحكم المستر
-              </Badge>
             </div>
          ) : (
             <div className="space-y-4 lg:space-y-5">
