@@ -258,10 +258,14 @@ const loadCoursesWithProgress = async () => {
     const courseIds = courses.map((c) => c.course_id);
 
     // الخطوة 1: هات كل الـ sections بتاعة الكورسات دي
-    const { data: sectionsData } = await supabase
+console.log("PROGRESS DEBUG → courseIds:", courseIds);
+
+    const { data: sectionsData, error: sectionsErr } = await supabase
       .from("course_sections")
       .select("id, course_id")
       .in("course_id", courseIds);
+
+    console.log("PROGRESS DEBUG → sectionsData:", sectionsData, "error:", sectionsErr);
 
     const sectionIds = (sectionsData || []).map((s: any) => s.id);
 
@@ -275,11 +279,13 @@ const loadCoursesWithProgress = async () => {
     // الخطوة 3: هات تقدم الطالب في كل الدروس دي
     const lessonIds = (lessonsData || []).map((l: any) => l.id);
 
-    const { data: progressData } = await supabase
+const { data: progressData, error: progressErr } = await supabase
       .from("lesson_progress")
       .select("*")
       .eq("student_id", Number(id))
       .in("lesson_id", lessonIds.length ? lessonIds : ["00000000-0000-0000-0000-000000000000"]);
+
+    console.log("PROGRESS DEBUG → progressData:", progressData, "error:", progressErr);
 
     const coursesWithStats: CourseWithProgress[] = courses.map((course) => {
       // sections بتاعة الكورس ده تحديدًا
