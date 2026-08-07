@@ -327,9 +327,8 @@ const { data: progressData, error: progressErr } = await supabase
       };
     });
 
-console.log("PROGRESS DEBUG → FINAL coursesWithStats:", coursesWithStats);
+console.log("🔥🔥🔥 TEST DEPLOY WORKING → coursesWithStats:", coursesWithStats);
     setCoursesWithProgress(coursesWithStats);
-  };
 
   const loadExamResults = async () => {
     const { data } = await supabase
