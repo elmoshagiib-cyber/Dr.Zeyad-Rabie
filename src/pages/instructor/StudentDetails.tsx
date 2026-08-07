@@ -964,7 +964,29 @@ const coursesWithStats: CourseWithProgress[] = courses.map((course) => {
                             </p>
                           )}
                         </div>
-                        <div className="flex gap-2 flex-shrink-0">
+<div className="flex gap-2 flex-shrink-0">
+                          {(course.needsFollowup || course.isStalled) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const phone = (student.phone || "").replace(/^0/, "20");
+                                const courseName = course.courseData?.title || "الكورس";
+                                const reason = course.followupNote
+                                  ? ` (${course.followupNote})`
+                                  : "";
+                                const message = `السلام عليكم ${student.full_name}، لاحظنا إنك متأخر شوية في متابعة "${courseName}"${reason}. محتاج أي مساعدة أو فيه حاجة مش واضحة؟`;
+                                window.open(
+                                  `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
+                                  "_blank"
+                                );
+                              }}
+                              className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-400 dark:hover:bg-emerald-950/30 rounded-lg text-xs font-bold h-8"
+                            >
+                              <Phone size={14} className="ml-1" />
+                              واتساب
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant="outline"
