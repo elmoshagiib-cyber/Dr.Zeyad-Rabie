@@ -10,6 +10,7 @@ import { FaReact } from "react-icons/fa6";
 import { Bell, Search } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { useTheme } from "../../context/ThemeContext";
+import { supabase } from "../../lib/supabase";
 export function Navbar() {
 const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -19,6 +20,28 @@ const [scrollProgress, setScrollProgress] = useState(0);
   const { user } = useApp();
   const { isDark, toggleTheme } = useTheme();
 const [isScrolled, setIsScrolled] = useState(false);
+const [unreadCount, setUnreadCount] = useState(0);
+
+useEffect(() => {
+  const loadUnreadCount = async () => {
+    if (!user) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const { count, error } = await supabase
+      .from("notification_reads")
+      .select("id", { count: "exact", head: true })
+      .eq("student_id", user.studentId)
+      .is("read_at", null);
+
+    if (!error) {
+      setUnreadCount(count || 0);
+    }
+  };
+
+  loadUnreadCount();
+}, [user]);
 
 useEffect(() => {
 const handleScroll = () => {
@@ -159,8 +182,9 @@ const handleScroll = () => {
 
   {user ? (
     <>
-      {/* Notification */}
+{/* Notification */}
       <button
+        onClick={() => navigate("/announcements")}
         className="
           relative
           flex
@@ -191,19 +215,21 @@ const handleScroll = () => {
         <Bell className="w-5 h-5" />
 
         {/* Badge */}
-        <span
-          className="
-            absolute
-            top-2
-            right-2
+        {unreadCount > 0 && (
+          <span
+            className="
+              absolute
+              top-2
+              right-2
 
-            w-2.5
-            h-2.5
+              w-2.5
+              h-2.5
 
-            rounded-full
-            bg-red-500
-          "
-        />
+              rounded-full
+              bg-red-500
+            "
+          />
+        )}
       </button>
 
       <UserMenu />
