@@ -212,11 +212,11 @@ const loadAnnouncement = async () => {
   if (!user) return;
 
 const { data } = await supabase
-.from("student_notifications")
+.from("notification_reads")
 .select(`
 id,
 student_id,
-is_read,
+read_at,
 notifications (
 id,
 title,
@@ -229,7 +229,7 @@ created_at
 )
 `)
 .eq("student_id", user.studentId)
-.eq("is_read", false)
+.is("read_at", null)
 .order("created_at", {
   ascending: false,
   foreignTable: "notifications",
@@ -479,9 +479,8 @@ const dismissAnnouncement = async () => {
   if (!announcement) return;
 
   const { error } = await supabase
-    .from("student_notifications")
+    .from("notification_reads")
 .update({
-is_read: true,
 read_at: new Date().toISOString(),
 })
     .eq("id", announcement.id);
@@ -493,7 +492,6 @@ read_at: new Date().toISOString(),
 
   setAnnouncement(null);
 };
-
 
 const formatAnnouncementDate = (date: string) => {
   const created = new Date(date);

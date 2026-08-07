@@ -345,15 +345,14 @@ const getStageFromGrade = (grade: string): string => {
 
       if (notifError) throw notifError;
 
-      const studentNotifications = recipientIds.map((studentId) => ({
+const studentNotifications = recipientIds.map((studentId) => ({
         notification_id: notification.id,
         student_id: studentId,
-        is_read: false,
         read_at: null,
       }));
 
       const { error: studentNotifError } = await supabase
-        .from("student_notifications")
+        .from("notification_reads")
         .insert(studentNotifications);
 
       if (studentNotifError) throw studentNotifError;
@@ -400,8 +399,8 @@ const getStageFromGrade = (grade: string): string => {
     if (!confirm("هل أنت متأكد من حذف هذا الإشعار؟")) return;
 
     try {
-      const { error: studentNotifError } = await supabase
-        .from("student_notifications")
+const { error: studentNotifError } = await supabase
+        .from("notification_reads")
         .delete()
         .eq("notification_id", id);
 
@@ -686,11 +685,16 @@ const getStageFromGrade = (grade: string): string => {
                             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
                           >
                             <option value="">اختر الصف</option>
-                            {grades.map((grade) => (
-                              <option key={grade} value={grade}>
-                                {grade}
-                              </option>
-                            ))}
+                            <optgroup label="المرحلة الإعدادية">
+                              <option value="الصف الأول الإعدادي">الصف الأول الإعدادي</option>
+                              <option value="الصف الثاني الإعدادي">الصف الثاني الإعدادي</option>
+                              <option value="الصف الثالث الإعدادي">الصف الثالث الإعدادي</option>
+                            </optgroup>
+                            <optgroup label="المرحلة الثانوية">
+                              <option value="الصف الأول الثانوي">الصف الأول الثانوي</option>
+                              <option value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
+                              <option value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
+                            </optgroup>
                           </select>
                         </div>
                       )}
