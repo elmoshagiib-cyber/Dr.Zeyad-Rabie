@@ -121,12 +121,28 @@ interface CourseItem {
   title: string;
 }
 
+interface LessonDetail {
+  id: string;
+  title: string;
+  sortOrder: number;
+  isCompleted: boolean;
+  progressPercent: number;
+  lastWatchedAt: string | null;
+  watchedSeconds: number;
+  videoDuration: number;
+}
+
 interface CourseWithProgress extends StudentCourse {
   totalLessons: number;
   completedLessons: number;
   completionPercent: number;
   lastLesson: string;
   lastWatchedAt: string | null;
+  lessons: LessonDetail[];
+  daysSinceLastWatch: number | null;
+  isStalled: boolean;
+  needsFollowup: boolean;
+  followupNote: string | null;
 }
 
 export function StudentDetails() {
@@ -270,11 +286,12 @@ console.log("PROGRESS DEBUG → courseIds:", courseIds);
     const sectionIds = (sectionsData || []).map((s: any) => s.id);
 
     // الخطوة 2: هات كل دروس الفيديو (type = video) اللي جوه الـ sections دي
-    const { data: lessonsData } = await supabase
+const { data: lessonsData } = await supabase
       .from("course_items")
-      .select("id, section_id, title, type")
+      .select("id, section_id, title, type, sort_order")
       .in("section_id", sectionIds)
-      .eq("type", "video");
+      .eq("type", "video")
+      .order("sort_order", { ascending: true });
 
     // الخطوة 3: هات تقدم الطالب في كل الدروس دي
     const lessonIds = (lessonsData || []).map((l: any) => l.id);
@@ -287,7 +304,7 @@ const { data: progressData, error: progressErr } = await supabase
 
     console.log("PROGRESS DEBUG → progressData:", progressData, "error:", progressErr);
 
-    const coursesWithStats: CourseWithProgress[] = courses.map((course) => {
+const coursesWithStats: CourseWithProgress[] = courses.map((course) => {
       // sections بتاعة الكورس ده تحديدًا
       const courseSectionIds = (sectionsData || [])
         .filter((s: any) => s.course_id === course.course_id)
@@ -317,6 +334,40 @@ const { data: progressData, error: progressErr } = await supabase
         ? courseLessons.find((l: any) => l.id === lastProgress.lesson_id)
         : null;
 
+      // قائمة تفصيلية لكل درس
+      const lessons: LessonDetail[] = courseLessons.map((l: any) => {
+        const p = courseProgress.find((pr: any) => pr.lesson_id === l.id);
+        return {
+          id: l.id,
+          title: l.title,
+          sortOrder: l.sort_order || 0,
+          isCompleted: p?.is_completed || false,
+          progressPercent: p?.progress_percent || 0,
+          lastWatchedAt: p?.last_watched_at || null,
+          watchedSeconds: p?.watched_seconds || 0,
+          videoDuration: p?.video_duration || 0,
+        };
+      });
+
+      // حساب عدد الأيام منذ آخر مشاهدة
+      const daysSinceLastWatch = lastProgress?.last_watched_at
+        ? Math.floor(
+            (Date.now() - new Date(lastProgress.last_watched_at).getTime()) / (1000 * 60 * 60 * 24)
+          )
+        : null;
+
+      // هل الطالب متعثر؟
+      // - اشترك من أكتر من 5 أيام ومفيش أي مشاهدة خالص
+      // - أو آخر مشاهدة كانت من أكتر من 5 أيام والكورس لسه مش مكتمل
+      const daysSinceEnrolled = course.created_at
+        ? Math.floor((Date.now() - new Date(course.created_at).getTime()) / (1000 * 60 * 60 * 24))
+        : 0;
+
+      const isStalled =
+        completionPercent < 100 &&
+        ((!lastProgress && daysSinceEnrolled >= 5) ||
+          (daysSinceLastWatch !== null && daysSinceLastWatch >= 5));
+
       return {
         ...course,
         totalLessons,
@@ -324,10 +375,14 @@ const { data: progressData, error: progressErr } = await supabase
         completionPercent,
         lastLesson: lastLesson?.title || "-",
         lastWatchedAt: lastProgress?.last_watched_at || null,
+        lessons,
+        daysSinceLastWatch,
+        isStalled,
+        needsFollowup: (course as any).needs_followup || false,
+        followupNote: (course as any).followup_note || null,
       };
     });
 
-console.log("🔥🔥🔥 TEST DEPLOY WORKING → coursesWithStats:", coursesWithStats);
     setCoursesWithProgress(coursesWithStats);
   };
 
@@ -354,6 +409,33 @@ console.log("🔥🔥🔥 TEST DEPLOY WORKING → coursesWithStats:", coursesWit
       setHomeworkResults(data as HomeworkSubmission[]);
     }
   };
+
+  const toggleFollowup = async (course: CourseWithProgress) => {
+    const newValue = !course.needsFollowup;
+    let note = course.followupNote;
+
+    if (newValue) {
+      note = window.prompt("اكتب ملاحظة قصيرة عن سبب المتابعة (اختياري):", course.followupNote || "") || "";
+    }
+
+    const { error } = await supabase
+      .from("student_courses")
+      .update({
+        needs_followup: newValue,
+        followup_note: newValue ? note : null,
+        followup_flagged_at: newValue ? new Date().toISOString() : null,
+      })
+      .eq("id", course.id);
+
+    if (error) {
+      alert("حصل خطأ أثناء تحديث حالة المتابعة");
+      return;
+    }
+
+    loadCoursesWithProgress();
+  };
+
+  const [expandedCourseId, setExpandedCourseId] = useState<number | null>(null);
 
   const deleteCourse = async (courseId: number) => {
     const confirmed = window.confirm("هل أنت متأكد من حذف الكورس؟");
@@ -840,26 +922,71 @@ console.log("🔥🔥🔥 TEST DEPLOY WORKING → coursesWithStats:", coursesWit
                 </div>
               </div>
 
-              {coursesWithProgress.length > 0 ? (
+{coursesWithProgress.length > 0 ? (
                 <div className="p-6 space-y-4">
                   {coursesWithProgress.map((course) => (
-                    <div key={course.id} className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE] transition-all">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <h4 className="font-black text-gray-900 dark:text-white mb-1">{course.courseData?.title}</h4>
+                    <div
+                      key={course.id}
+                      className={`rounded-2xl p-5 border transition-all ${
+                        course.needsFollowup
+                          ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900"
+                          : course.isStalled
+                          ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900"
+                          : "bg-gray-50 dark:bg-[#1A1A1A] border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE]"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-4 flex-wrap gap-2">
+                        <div className="flex-1 min-w-[200px]">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <h4 className="font-black text-gray-900 dark:text-white">{course.courseData?.title}</h4>
+                            {course.needsFollowup && (
+                              <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold">
+                                يحتاج متابعة
+                              </span>
+                            )}
+                            {!course.needsFollowup && course.isStalled && (
+                              <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold">
+                                متعثر
+                              </span>
+                            )}
+                          </div>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             {course.courseData?.grade} • اشترك في {course.created_at ? new Date(course.created_at).toLocaleDateString("ar-EG") : "-"}
                           </p>
+                          {course.needsFollowup && course.followupNote && (
+                            <p className="text-xs text-red-600 dark:text-red-400 font-bold mt-1.5">
+                              ملاحظة: {course.followupNote}
+                            </p>
+                          )}
+                          {course.daysSinceLastWatch !== null && (
+                            <p className="text-xs text-gray-400 mt-1">
+                              آخر مشاهدة منذ {course.daysSinceLastWatch === 0 ? "اليوم" : `${course.daysSinceLastWatch} يوم`}
+                            </p>
+                          )}
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => deleteCourse(course.id)}
-                          className="text-red-600 border-red-200 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/30 rounded-lg text-xs font-bold h-8"
-                        >
-                          <Trash2 size={14} className="ml-1" />
-                          حذف
-                        </Button>
+                        <div className="flex gap-2 flex-shrink-0">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => toggleFollowup(course)}
+                            className={`rounded-lg text-xs font-bold h-8 ${
+                              course.needsFollowup
+                                ? "text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-400"
+                                : "text-amber-600 border-amber-200 hover:bg-amber-50 dark:border-amber-900 dark:text-amber-400"
+                            }`}
+                          >
+                            {course.needsFollowup ? "إلغاء المتابعة" : "تحتاج متابعة"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => deleteCourse(course.id)}
+                            className="text-red-600 border-red-200 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/30 rounded-lg text-xs font-bold h-8"
+                          >
+                            <Trash2 size={14} className="ml-1" />
+                            حذف
+                          </Button>
+                        </div>
                       </div>
                       
                       <div className="mb-3">
@@ -875,7 +1002,7 @@ console.log("🔥🔥🔥 TEST DEPLOY WORKING → coursesWithStats:", coursesWit
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-3 gap-3 mb-3">
                         <div className="bg-white dark:bg-[#111111] rounded-xl p-3 border border-gray-100 dark:border-[#2A2A2A]">
                           <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold mb-1">محاضرات مكتملة</p>
                           <p className="font-black text-sm text-gray-900 dark:text-white">{course.completedLessons} / {course.totalLessons}</p>
@@ -885,10 +1012,64 @@ console.log("🔥🔥🔥 TEST DEPLOY WORKING → coursesWithStats:", coursesWit
                           <p className="font-bold text-xs text-gray-900 dark:text-white truncate">{course.lastLesson}</p>
                         </div>
                       </div>
+
+                      {course.lessons.length > 0 && (
+                        <button
+                          onClick={() =>
+                            setExpandedCourseId(expandedCourseId === course.id ? null : course.id)
+                          }
+                          className="text-xs font-bold text-[#B348FE] hover:text-[#9E2FFF] transition-colors"
+                        >
+                          {expandedCourseId === course.id ? "إخفاء تفاصيل المحاضرات ▲" : "عرض تفاصيل كل محاضرة ▼"}
+                        </button>
+                      )}
+
+                      {expandedCourseId === course.id && (
+                        <div className="mt-3 space-y-2">
+                          {course.lessons.map((lesson) => (
+                            <div
+                              key={lesson.id}
+                              className="flex items-center justify-between bg-white dark:bg-[#111111] rounded-xl p-3 border border-gray-100 dark:border-[#2A2A2A]"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                {lesson.isCompleted ? (
+                                  <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
+                                ) : lesson.progressPercent > 0 ? (
+                                  <Clock size={16} className="text-amber-500 flex-shrink-0" />
+                                ) : (
+                                  <XCircle size={16} className="text-gray-300 flex-shrink-0" />
+                                )}
+                                <p className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">
+                                  {lesson.title}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-3 flex-shrink-0">
+                                <span className="text-[10px] text-gray-400">
+                                  {lesson.lastWatchedAt
+                                    ? new Date(lesson.lastWatchedAt).toLocaleDateString("ar-EG")
+                                    : "لم يشاهد"}
+                                </span>
+                                <span
+                                  className={`text-xs font-black ${
+                                    lesson.isCompleted
+                                      ? "text-emerald-600"
+                                      : lesson.progressPercent > 0
+                                      ? "text-amber-600"
+                                      : "text-gray-400"
+                                  }`}
+                                >
+                                  {lesson.progressPercent}%
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               ) : (
+                
                 <div className="py-16 text-center">
                   <BookOpen className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />
                   <p className="text-gray-500 dark:text-gray-400 font-bold">لا توجد اشتراكات حالياً</p>
