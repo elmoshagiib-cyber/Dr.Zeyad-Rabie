@@ -101,8 +101,8 @@ interface HomeworkSubmission {
 interface LessonProgress {
   id: number;
   student_id: number;
-  lesson_id: number;
-  course_id: number;
+  lesson_id: string;
+  course_id: string;
   watched_seconds: number;
   video_duration: number;
   progress_percent: number;
@@ -115,8 +115,8 @@ interface LessonProgress {
 }
 
 interface CourseItem {
-  id: number;
-  course_id: number;
+  id: string;
+  section_id: string;
   type: string;
   title: string;
 }
@@ -249,7 +249,7 @@ export function StudentDetails() {
     setLessonProgress((data as LessonProgress[]) || []);
   };
 
-  const loadCoursesWithProgress = async () => {
+const loadCoursesWithProgress = async () => {
     if (!courses.length) {
       setCoursesWithProgress([]);
       return;
@@ -257,24 +257,59 @@ export function StudentDetails() {
 
     const courseIds = courses.map((c) => c.course_id);
 
-    const [lessonsData, progressData] = await Promise.all([
-      supabase.from("course_items").select("*").in("course_id", courseIds).eq("type", "lesson"),
-      supabase.from("lesson_progress").select("*").eq("student_id", Number(id)).in("course_id", courseIds)
-    ]);
+    // الخطوة 1: هات كل الـ sections بتاعة الكورسات دي
+    const { data: sectionsData } = await supabase
+      .from("course_sections")
+      .select("id, course_id")
+      .in("course_id", courseIds);
+
+    const sectionIds = (sectionsData || []).map((s: any) => s.id);
+
+    // الخطوة 2: هات كل دروس الفيديو (type = video) اللي جوه الـ sections دي
+    const { data: lessonsData } = await supabase
+      .from("course_items")
+      .select("id, section_id, title, type")
+      .in("section_id", sectionIds)
+      .eq("type", "video");
+
+    // الخطوة 3: هات تقدم الطالب في كل الدروس دي
+    const lessonIds = (lessonsData || []).map((l: any) => l.id);
+
+    const { data: progressData } = await supabase
+      .from("lesson_progress")
+      .select("*")
+      .eq("student_id", Number(id))
+      .in("lesson_id", lessonIds.length ? lessonIds : ["00000000-0000-0000-0000-000000000000"]);
 
     const coursesWithStats: CourseWithProgress[] = courses.map((course) => {
-      const courseLessons = (lessonsData.data as CourseItem[] || []).filter((l) => l.course_id === course.course_id);
-      const courseProgress = (progressData.data as LessonProgress[] || []).filter((p) => p.course_id === course.course_id);
-      
+      // sections بتاعة الكورس ده تحديدًا
+      const courseSectionIds = (sectionsData || [])
+        .filter((s: any) => s.course_id === course.course_id)
+        .map((s: any) => s.id);
+
+      // دروس الكورس ده تحديدًا
+      const courseLessons = (lessonsData || []).filter((l: any) =>
+        courseSectionIds.includes(l.section_id)
+      );
+
+      const courseLessonIds = courseLessons.map((l: any) => l.id);
+
+      // تقدم الطالب في دروس الكورس ده بس
+      const courseProgress = (progressData || []).filter((p: any) =>
+        courseLessonIds.includes(p.lesson_id)
+      );
+
       const totalLessons = courseLessons.length;
-      const completedLessons = courseProgress.filter((p) => p.is_completed).length;
+      const completedLessons = courseProgress.filter((p: any) => p.is_completed).length;
       const completionPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-      
-      const lastProgress = courseProgress.sort((a, b) => 
+
+      const lastProgress = [...courseProgress].sort((a: any, b: any) =>
         new Date(b.last_watched_at || 0).getTime() - new Date(a.last_watched_at || 0).getTime()
       )[0];
 
-      const lastLesson = lastProgress ? courseLessons.find((l) => l.id === lastProgress.lesson_id) : null;
+      const lastLesson = lastProgress
+        ? courseLessons.find((l: any) => l.id === lastProgress.lesson_id)
+        : null;
 
       return {
         ...course,
@@ -282,12 +317,13 @@ export function StudentDetails() {
         completedLessons,
         completionPercent,
         lastLesson: lastLesson?.title || "-",
-        lastWatchedAt: lastProgress?.last_watched_at || null
+        lastWatchedAt: lastProgress?.last_watched_at || null,
       };
     });
 
     setCoursesWithProgress(coursesWithStats);
   };
+
 
   const loadExamResults = async () => {
     const { data } = await supabase
