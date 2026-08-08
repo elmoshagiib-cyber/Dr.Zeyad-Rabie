@@ -4,7 +4,7 @@ import { HomePage } from "./pages/HomePage";
 import { MaintenanceMode } from "./components/MaintenanceMode";
 
 // غيّر true/false هنا عشان تشغّل أو توقف وضع الصيانة
-const MAINTENANCE_MODE = false;
+const MAINTENANCE_MODE = true;
 
 import { CourseDetailPage } from "./pages/CourseDetailPage";
 import { ThemeProvider } from "./context/ThemeContext";
