@@ -112,11 +112,7 @@ const instructorNav: NavItem[] = [
     icon: <Users size={20} />,
   },
 
-  {
-    label: "التحليلات",
-    path: "/instructor/analytics",
-    icon: <BarChart2 size={20} />,
-  },
+
 ];
 
 const adminNav: NavItem[] = [
