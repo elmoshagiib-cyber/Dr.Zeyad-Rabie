@@ -322,7 +322,7 @@ export function InstructorStudents() {
                           >
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
-                                <Avatar name={student.full_name || student.name} size="sm" className="h-8 w-8 text-xs" />
+                                <Avatar name={student.full_name || student.name} src={student.avatar_url} size="sm" className="h-8 w-8 text-xs" />
                                 <div>
                                   <p className="font-bold text-slate-900 text-sm">
                                     {student.full_name || student.name}
@@ -404,7 +404,7 @@ export function InstructorStudents() {
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
-                          <Avatar name={student.full_name || student.name} size="sm" className="h-10 w-10" />
+                          <Avatar name={student.full_name || student.name} src={student.avatar_url} size="sm" className="h-10 w-10" />
                           <div>
                             <h3 className="font-black text-slate-900 text-sm">
                               {student.full_name || student.name}
