@@ -149,7 +149,7 @@ if (studentError || !student) {
   return;
 }
 
-if (student.status !== "approved") {
+if (student.status !== "نشط") {
   await supabase.auth.signOut();
 
   setErrors({
