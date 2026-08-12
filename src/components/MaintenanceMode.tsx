@@ -1,146 +1,141 @@
 import { useEffect, useState } from "react";
-import { Wrench, Sparkles } from "lucide-react";
 
-// غيّر التاريخ ده بس لتاريخ ووقت الإطلاق المتوقع (بتوقيت القاهرة)
 const LAUNCH_DATE = new Date("2026-08-20T19:00:00+02:00");
 
 function getTimeLeft() {
-  const now = new Date().getTime();
-  const distance = LAUNCH_DATE.getTime() - now;
-
-  if (distance <= 0) {
-    return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-  }
-
+  const diff = LAUNCH_DATE.getTime() - Date.now();
+  if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
   return {
-    days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-    hours: Math.floor((distance / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((distance / (1000 * 60)) % 60),
-    seconds: Math.floor((distance / 1000) % 60),
+    days: Math.floor(diff / 864e5),
+    hours: Math.floor((diff / 36e5) % 24),
+    minutes: Math.floor((diff / 6e4) % 60),
+    seconds: Math.floor((diff / 1e3) % 60),
   };
 }
 
 export function MaintenanceMode() {
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft());
-
+  const [t, setT] = useState(getTimeLeft());
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft(getTimeLeft());
-    }, 1000);
-
-    return () => clearInterval(interval);
+    const id = setInterval(() => setT(getTimeLeft()), 1000);
+    return () => clearInterval(id);
   }, []);
 
-  const timeUnits = [
-    { label: "يوم", value: timeLeft.days },
-    { label: "ساعة", value: timeLeft.hours },
-    { label: "دقيقة", value: timeLeft.minutes },
-    { label: "ثانية", value: timeLeft.seconds },
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  const units = [
+    { label: "يوم", value: t.days },
+    { label: "ساعة", value: t.hours },
+    { label: "دقيقة", value: t.minutes },
+    { label: "ثانية", value: t.seconds },
   ];
 
   return (
     <div
       dir="rtl"
-      className="
-        fixed inset-0 z-[99999]
-        flex items-center justify-center
-        bg-gradient-to-br from-[#1a0b2e] via-[#2d1155] to-[#0b0715]
-        overflow-hidden
-        px-6
-      "
+      className="fixed inset-0 z-[99999] flex items-center justify-center overflow-hidden px-6"
+      style={{ background: "#0d0717", fontFamily: "'Cairo', sans-serif" }}
     >
-      <div className="absolute top-1/4 -right-20 w-96 h-96 bg-[#B348FE]/30 rounded-full blur-[120px]" />
-      <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-[#F6AC08]/20 rounded-full blur-[120px]" />
+      {/* Grid background */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(179,72,254,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(179,72,254,0.06) 1px,transparent 1px)",
+          backgroundSize: "48px 48px",
+        }}
+      />
+      <div className="absolute top-0 left-0 right-0 h-32" style={{ background: "linear-gradient(#0d0717,transparent)" }} />
+      <div className="absolute bottom-0 left-0 right-0 h-32" style={{ background: "linear-gradient(transparent,#0d0717)" }} />
+      <div className="absolute rounded-full" style={{ top:"30%", left:"-80px", width:"320px", height:"320px", background:"rgba(179,72,254,0.12)", filter:"blur(90px)" }} />
+      <div className="absolute rounded-full" style={{ bottom:"20%", right:"-80px", width:"260px", height:"260px", background:"rgba(246,172,8,0.08)", filter:"blur(90px)" }} />
 
-      <div className="relative z-10 text-center max-w-lg mx-auto">
+      <div className="relative z-10 text-center w-full max-w-lg mx-auto">
+
+        {/* Eyebrow */}
         <div
-          className="
-            w-20 h-20 sm:w-24 sm:h-24
-            mx-auto mb-8
-            rounded-3xl
-            bg-gradient-to-br from-[#B348FE] to-[#7C1FE0]
-            flex items-center justify-center
-            shadow-[0_20px_60px_rgba(179,72,254,.5)]
-            animate-bounce
-          "
-          style={{ animationDuration: "2.5s" }}
+          className="inline-flex items-center gap-2 mb-7 px-5 py-2 rounded-full"
+          style={{ border: "1px solid rgba(179,72,254,0.35)" }}
         >
-          <Wrench className="text-white w-10 h-10 sm:w-12 sm:h-12" />
-        </div>
-
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <Sparkles className="text-[#F6AC08] w-5 h-5" />
-          <span className="text-[#F6AC08] font-bold text-sm sm:text-base">
+          <span
+            className="w-2 h-2 rounded-full animate-pulse"
+            style={{ background: "#B348FE" }}
+          />
+          <span className="text-xs font-bold tracking-wider" style={{ color: "#B348FE" }}>
             جاري التطوير
           </span>
-          <Sparkles className="text-[#F6AC08] w-5 h-5" />
         </div>
 
-        <h1 className="text-white text-[26px] sm:text-[36px] font-black leading-tight mb-4">
+        {/* Headline */}
+        <h1 className="text-white font-black leading-tight mb-4" style={{ fontSize: "clamp(22px,5vw,38px)" }}>
           المنصة بتتحدث دلوقتي
           <br />
-          <span className="text-[#B348FE]">عشان تبقى أحسن ليك</span>
+          <span
+            style={{
+              background: "linear-gradient(90deg,#B348FE,#F6AC08)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            عشان تبقى أحسن ليك
+          </span>
         </h1>
 
-        <p className="text-slate-300 text-[15px] sm:text-[17px] leading-8 mb-8">
+        {/* Divider */}
+        <div
+          className="mx-auto mb-8 rounded-full"
+          style={{ width: "48px", height: "2px", background: "linear-gradient(90deg,#B348FE,#F6AC08)" }}
+        />
+
+        <p className="text-sm leading-loose mb-9 max-w-sm mx-auto" style={{ color: "#8b8b9a" }}>
           إحنا شغالين على تحسينات جديدة هتفيدك في رحلتك الدراسية.
-          هنرجع تاني قريبًا جدًا، استنونا شوية 
+          هنرجع تاني قريبًا جدًا.
         </p>
 
         {/* Countdown */}
-        <div className="flex items-center justify-center gap-3 sm:gap-4 mb-8">
-          {timeUnits.map((unit, index) => (
+        <div className="grid grid-cols-4 gap-3 mb-8">
+          {units.map((u) => (
             <div
-              key={index}
-              className="
-                w-16 h-16 sm:w-20 sm:h-20
-                rounded-2xl
-                bg-white/5
-                border border-[#B348FE]/30
-                backdrop-blur-sm
-                flex flex-col items-center justify-center
-                shadow-[0_10px_30px_rgba(179,72,254,.15)]
-              "
+              key={u.label}
+              className="flex flex-col items-center justify-center py-4 rounded-xl gap-1"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+              }}
             >
-              <span className="text-white text-xl sm:text-2xl font-black tabular-nums">
-                {String(unit.value).padStart(2, "0")}
+              <span className="text-white font-black text-2xl sm:text-3xl tabular-nums">
+                {pad(u.value)}
               </span>
-              <span className="text-slate-400 text-[10px] sm:text-xs font-bold mt-0.5">
-                {unit.label}
+              <span className="text-xs font-bold" style={{ color: "#555568" }}>
+                {u.label}
               </span>
             </div>
           ))}
         </div>
 
-        <p className="text-slate-400 text-xs sm:text-sm mb-6">
+        {/* Launch date */}
+        <p className="text-xs mb-7" style={{ color: "#555568" }}>
           الإطلاق يوم{" "}
-          {LAUNCH_DATE.toLocaleDateString("ar-EG", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}{" "}
-          الساعة{" "}
-          {LAUNCH_DATE.toLocaleTimeString("ar-EG", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}{" "}
+          {LAUNCH_DATE.toLocaleDateString("ar-EG", { day: "numeric", month: "long", year: "numeric" })}{" "}
+          — الساعة{" "}
+          {LAUNCH_DATE.toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}{" "}
           بتوقيت القاهرة
         </p>
 
-        {/* Status */}
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <span className="w-2 h-2 rounded-full bg-[#B348FE] animate-pulse" />
-          <span className="text-slate-300 text-xs sm:text-sm font-bold">
-            حالة النظام: التحديث جاري في السكة
-          </span>
-        </div>
-
-        <div className="w-full max-w-xs mx-auto h-1.5 rounded-full bg-white/10 overflow-hidden">
+        {/* Progress */}
+        <div
+          className="w-full max-w-xs mx-auto mb-4 rounded-full overflow-hidden"
+          style={{ height: "3px", background: "rgba(255,255,255,0.07)" }}
+        >
           <div
-            className="h-full rounded-full bg-gradient-to-r from-[#B348FE] to-[#F6AC08] transition-all duration-1000"
-            style={{ width: "45%" }}
+            className="h-full rounded-full"
+            style={{ width: "62%", background: "linear-gradient(90deg,#B348FE,#F6AC08)" }}
           />
         </div>
+
+        <p className="text-xs font-bold tracking-widest" style={{ color: "#555568" }}>
+          التحديث جاي في السكة
+        </p>
       </div>
     </div>
   );
