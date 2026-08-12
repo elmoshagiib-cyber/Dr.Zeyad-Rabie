@@ -322,9 +322,13 @@ const coursesWithStats: CourseWithProgress[] = courses.map((course) => {
         courseLessonIds.includes(p.lesson_id)
       );
 
-      const totalLessons = courseLessons.length;
+const totalLessons = courseLessons.length;
       const completedLessons = courseProgress.filter((p: any) => p.is_completed).length;
-      const completionPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+      const sumProgress = courseLessons.reduce((sum: number, l: any) => {
+        const p = courseProgress.find((pr: any) => pr.lesson_id === l.id);
+        return sum + (p?.progress_percent || 0);
+      }, 0);
+      const completionPercent = totalLessons > 0 ? Math.round(sumProgress / totalLessons) : 0;
 
       const lastProgress = [...courseProgress].sort((a: any, b: any) =>
         new Date(b.last_watched_at || 0).getTime() - new Date(a.last_watched_at || 0).getTime()
@@ -1065,14 +1069,26 @@ const coursesWithStats: CourseWithProgress[] = courses.map((course) => {
                                   {lesson.title}
                                 </p>
                               </div>
-                              <div className="flex items-center gap-3 flex-shrink-0">
-                                <span className="text-[10px] text-gray-400">
+                              <div className="flex items-center gap-3 flex-shrink-0 min-w-[140px]">
+                                <span className="text-[10px] text-gray-400 whitespace-nowrap">
                                   {lesson.lastWatchedAt
                                     ? new Date(lesson.lastWatchedAt).toLocaleDateString("ar-EG")
                                     : "لم يشاهد"}
                                 </span>
+                                <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden min-w-[50px]">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-500 ${
+                                      lesson.isCompleted
+                                        ? "bg-emerald-500"
+                                        : lesson.progressPercent > 0
+                                        ? "bg-amber-500"
+                                        : "bg-gray-300"
+                                    }`}
+                                    style={{ width: `${lesson.progressPercent}%` }}
+                                  />
+                                </div>
                                 <span
-                                  className={`text-xs font-black ${
+                                  className={`text-xs font-black w-9 text-left ${
                                     lesson.isCompleted
                                       ? "text-emerald-600"
                                       : lesson.progressPercent > 0
