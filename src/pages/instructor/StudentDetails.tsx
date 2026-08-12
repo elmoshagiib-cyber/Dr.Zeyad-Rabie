@@ -441,15 +441,29 @@ const totalLessons = courseLessons.length;
 
   const [expandedCourseId, setExpandedCourseId] = useState<number | null>(null);
 
-  const deleteCourse = async (courseId: number) => {
+const deleteCourse = async (courseId: number) => {
     const confirmed = window.confirm("هل أنت متأكد من حذف الكورس؟");
     if (!confirmed) return;
 
     await supabase.from("student_courses").delete().eq("id", courseId);
-    loadCourses();
-  };
 
-  const addCourse = async () => {
+    const { data: remainingCourses } = await supabase
+      .from("student_courses")
+      .select("id")
+      .eq("student_id", Number(id));
+
+    if (!remainingCourses || remainingCourses.length === 0) {
+      await supabase
+        .from("students")
+        .update({ subscription_status: "expired" })
+        .eq("id", id);
+    }
+
+    await loadCourses();
+    await loadStudent();
+  };
+  
+const addCourse = async () => {
     if (!selectedCourse) return;
 
     const alreadyExists = courses.some((c) => String(c.course_id) === String(selectedCourse));
@@ -474,9 +488,15 @@ const totalLessons = courseLessons.length;
       return;
     }
 
+    await supabase
+      .from("students")
+      .update({ subscription_status: "active" })
+      .eq("id", id);
+
     setShowCourseModal(false);
     setSelectedCourse("");
     await loadCourses();
+    await loadStudent();
   };
 
   const sendAnnouncement = async () => {
