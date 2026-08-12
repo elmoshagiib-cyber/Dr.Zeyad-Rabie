@@ -738,14 +738,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   <Plus size={18} className="ml-2" />
                   إضافة كورس
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowAnnouncementModal(true)}
-                  className="border-2 border-gray-200 dark:border-[#2A2A2A] hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] hover:border-[#B348FE] rounded-xl font-bold h-12 transition-all duration-300"
-                >
-                  <Bell size={18} className="ml-2" />
-                  إرسال إشعار
-                </Button>
+
                 <Button
                   variant="outline"
                   onClick={() => {
