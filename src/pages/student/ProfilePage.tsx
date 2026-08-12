@@ -440,10 +440,10 @@ export function ProfilePage() {
           </div>
         )}
 
-        {/* Profile Header */}
-        <div className="rounded-3xl overflow-hidden shadow-xl">
-          {/* Cover Photo */}
-          <div className="relative w-full h-28 sm:h-40 lg:h-52 bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] overflow-hidden">
+{/* Profile Header */}
+<div className="rounded-3xl shadow-xl">
+  {/* Cover Photo */}
+  <div className="relative w-full h-28 sm:h-40 lg:h-52 bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] overflow-hidden rounded-t-3xl">
             {coverUrl && (
               <img src={coverUrl} alt="cover" className="w-full h-full object-cover" />
             )}
@@ -462,8 +462,8 @@ export function ProfilePage() {
             </button>
           </div>
 
-          {/* Info panel */}
-          <div className="bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] px-6 lg:px-8 pt-0 pb-6 lg:pb-8 relative overflow-hidden">
+         {/* Info panel */}
+<div className="bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] px-6 lg:px-8 pt-0 pb-6 lg:pb-8 relative overflow-hidden rounded-b-3xl">
             <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
             <div className="absolute bottom-0 right-0 w-48 h-48 bg-white/5 rounded-full translate-x-1/3 translate-y-1/3"></div>
 
@@ -701,32 +701,6 @@ export function ProfilePage() {
             </Card>
           </div>
 
-          {/* Right: Achievements */}
-          <div className="space-y-6">
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
-              <CardContent className="py-12 lg:py-16 text-center px-6">
-                <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center mx-auto mb-5">
-                  <Award
-                    size={36}
-                    className="text-amber-500"
-                  />
-                </div>
-
-                <h3 className="text-xl lg:text-2xl font-black text-gray-900 dark:text-white mb-3">
-                  الإنجازات
-                </h3>
-
-                <p className="text-gray-500 dark:text-gray-400 leading-7 lg:leading-8 mb-6 text-sm lg:text-base">
-                  سيتم إضافة نظام الإنجازات والشارات
-                  قريبًا بعد إطلاق نظام النقاط.
-                </p>
-
-                <Badge variant="amber" className="inline-flex">
-                  🚧 تحت التطوير
-                </Badge>
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </div>
     </StudentLayout>
