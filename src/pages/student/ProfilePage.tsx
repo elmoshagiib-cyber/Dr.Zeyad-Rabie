@@ -443,103 +443,104 @@ export function ProfilePage() {
 {/* Profile Header */}
 <div className="rounded-3xl shadow-xl">
   {/* Cover Photo */}
-  <div className="relative w-full h-28 sm:h-40 lg:h-52 bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] overflow-hidden rounded-t-3xl">
-            {coverUrl && (
-              <img src={coverUrl} alt="cover" className="w-full h-full object-cover" />
-            )}
-            <div className="absolute inset-0 bg-black/10" />
-            <button
-              onClick={() => coverFileInputRef.current?.click()}
-              disabled={uploadingCover}
-              className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 bg-white/90 hover:bg-white text-[#B348FE] rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-4 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-bold shadow-lg transition-all disabled:opacity-60"
-            >
-              {uploadingCover ? (
-                <div className="w-4 h-4 border-2 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Camera size={14} className="sm:w-[16px] sm:h-[16px]" />
-              )}
-              <span className="hidden xs:inline sm:inline">تغيير الغلاف</span>
-            </button>
-          </div>
-
-         {/* Info panel */}
-<div className="bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] px-6 lg:px-8 pt-0 pb-6 lg:pb-8 relative overflow-hidden rounded-b-3xl">
-            <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-            <div className="absolute bottom-0 right-0 w-48 h-48 bg-white/5 rounded-full translate-x-1/3 translate-y-1/3"></div>
-
-<div className="relative flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6 lg:gap-8">
-  {/* Avatar */}
-  <div className="relative flex-shrink-0 -mt-12 sm:-mt-14 lg:-mt-16 z-10">
-    <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-3xl overflow-hidden border-4 border-white shadow-lg bg-white">
-      {avatarUrl ? (
-        <img
-          src={avatarUrl}
-          alt={displayUser.name}
-          className="w-full h-full object-cover rounded-3xl"
-        />
-      ) : (
-        <Avatar
-          name={displayUser.name}
-          src={avatarUrl || displayUser.avatar_url}
-          size="xl"
-          className="w-full h-full rounded-3xl"
-        />
-      )}
-    </div>
+  <div className="relative w-full h-32 sm:h-44 lg:h-56 bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] overflow-hidden rounded-t-3xl">
+    {coverUrl && (
+      <img src={coverUrl} alt="cover" className="w-full h-full object-cover" />
+    )}
+    <div className="absolute inset-0 bg-black/10" />
     <button
-      onClick={() => fileInputRef.current?.click()}
-      disabled={uploadingAvatar}
-      className="
-        absolute
-        -bottom-2
-        -left-2
-        w-9
-        h-9
-        sm:w-10
-        sm:h-10
-        bg-white
-        rounded-2xl
-        flex
-        items-center
-        justify-center
-        shadow-lg
-        hover:shadow-xl
-        hover:scale-105
-        transition-all
-        duration-300
-        disabled:opacity-50
-        disabled:cursor-not-allowed
-      "
+      onClick={() => coverFileInputRef.current?.click()}
+      disabled={uploadingCover}
+      className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-white/90 hover:bg-white text-[#B348FE] rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-4 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-bold shadow-lg transition-all disabled:opacity-60"
     >
-      {uploadingAvatar ? (
-        <div className="w-5 h-5 border-2 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
+      {uploadingCover ? (
+        <div className="w-4 h-4 border-2 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
       ) : (
-        <Camera size={18} className="text-[#B348FE]" />
+        <Camera size={14} className="sm:w-[16px] sm:h-[16px]" />
       )}
+      <span className="hidden xs:inline sm:inline">تغيير الغلاف</span>
     </button>
   </div>
 
-  {/* Info */}
-  <div className="flex-1 flex flex-col justify-center text-center sm:text-right pb-1 sm:pb-2">
-    {editing ? (
-      <div className="mb-2">
-        <input
-          value={editName}
-          onChange={e => setEditName(e.target.value)}
-          className="bg-white/10 border-2 border-white/30 rounded-2xl px-4 lg:px-5 py-2.5 lg:py-3 text-white text-xl lg:text-2xl font-black focus:outline-none focus:ring-2 focus:ring-white/50 w-full sm:w-auto backdrop-blur-sm"
-        />
+  {/* Info panel */}
+  <div className="bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] px-6 lg:px-8 pt-14 sm:pt-16 lg:pt-20 pb-6 lg:pb-8 relative overflow-hidden rounded-b-3xl">
+    <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+    <div className="absolute bottom-0 right-0 w-48 h-48 bg-white/5 rounded-full translate-x-1/3 translate-y-1/3"></div>
+
+    {/* Avatar - centered, half over cover */}
+    <div className="absolute left-1/2 -translate-x-1/2 -top-12 sm:-top-14 lg:-top-16 z-10">
+      <div className="relative">
+        <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={displayUser.name}
+              className="w-full h-full object-cover rounded-full"
+            />
+          ) : (
+            <Avatar
+              name={displayUser.name}
+              src={avatarUrl || displayUser.avatar_url}
+              size="xl"
+              className="w-full h-full rounded-full"
+            />
+          )}
+        </div>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploadingAvatar}
+          className="
+            absolute
+            -bottom-1
+            -left-1
+            w-9
+            h-9
+            sm:w-10
+            sm:h-10
+            bg-white
+            rounded-full
+            flex
+            items-center
+            justify-center
+            shadow-lg
+            hover:shadow-xl
+            hover:scale-105
+            transition-all
+            duration-300
+            disabled:opacity-50
+            disabled:cursor-not-allowed
+          "
+        >
+          {uploadingAvatar ? (
+            <div className="w-5 h-5 border-2 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Camera size={18} className="text-[#B348FE]" />
+          )}
+        </button>
       </div>
-    ) : (
-      <h1 className="text-2xl lg:text-3xl font-black text-white mb-2">
-        {editName}
-      </h1>
-    )}
-    <p className="text-white/80 text-sm lg:text-base font-medium">
-      مرحبا بك في منصة مستر زياد ربيع
-    </p>
-  </div>
-</div>
+    </div>
+
+    {/* Info - centered below avatar */}
+    <div className="relative flex flex-col items-center text-center">
+      {editing ? (
+        <div className="mb-2 w-full flex justify-center">
+          <input
+            value={editName}
+            onChange={e => setEditName(e.target.value)}
+            className="bg-white/10 border-2 border-white/30 rounded-2xl px-4 lg:px-5 py-2.5 lg:py-3 text-white text-xl lg:text-2xl font-black focus:outline-none focus:ring-2 focus:ring-white/50 w-full sm:w-auto backdrop-blur-sm text-center"
+          />
+        </div>
+      ) : (
+        <h1 className="text-2xl lg:text-3xl font-black text-white mb-2">
+          {editName}
+        </h1>
+      )}
+      <p className="text-white/80 text-sm lg:text-base font-medium">
+        مرحبا بك في منصة مستر زياد ربيع
+      </p>
+    </div>
           </div>
+          
         </div>
 
         {cropFile && (
