@@ -22,45 +22,29 @@ export function LoginPage({ staffMode = false }: { staffMode?: boolean }) {
     e.preventDefault();
     setLoading(true);
     setError("");
-    await new Promise((r) => setTimeout(r, 1200));
 
-    if (activeRole === "student") {
-      login({
-        id: CURRENT_STUDENT.id,
-        name: CURRENT_STUDENT.name,
-        role: "student",
-        grade: CURRENT_STUDENT.grade,
-        gradeLabel: CURRENT_STUDENT.gradeLabel,
-        code: CURRENT_STUDENT.code,
-        governorate: CURRENT_STUDENT.governorate,
-        phone: CURRENT_STUDENT.phone,
-        status: "approved",
-      });
-      navigate("/dashboard");
-    } else if (activeRole === "instructor") {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) { setError(error.message); setLoading(false); return; }
-
-      const { data: instructor, error: instructorError } = await supabase
-        .from("instructors").select("*").eq("auth_id", data.user.id).single();
-
-      if (instructorError || !instructor) {
-        setError("هذا الحساب ليس مدرساً");
-        setLoading(false);
-        return;
-      }
-      login({ id: instructor.id, name: instructor.full_name, role: "instructor", phone: instructor.phone });
-      navigate("/instructor");
-    } else {
-      login({ id: "admin1", name: "مدير النظام", role: "admin" });
-      navigate("/admin");
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
     }
+
+    const { data: instructor, error: instructorError } = await supabase
+      .from("instructors").select("*").eq("auth_id", data.user.id).single();
+
+    if (instructorError || !instructor) {
+      setError("هذا الحساب ليس مدرساً");
+      await supabase.auth.signOut();
+      setLoading(false);
+      return;
+    }
+
+    login({ id: instructor.id, name: instructor.full_name, role: "instructor", phone: instructor.phone });
+    navigate("/instructor");
     setLoading(false);
   };
 
-  const roles = staffMode
-    ? [{ key: "instructor" as LoginRole, label: "مدرّس" }, { key: "admin" as LoginRole, label: "مدير" }]
-    : [];
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#07060E] flex items-center justify-center relative overflow-hidden p-4">
@@ -107,29 +91,6 @@ export function LoginPage({ staffMode = false }: { staffMode?: boolean }) {
                 {staffMode ? "تسجيل الدخول لإدارة المنصة" : "سجّل دخولك للوصول إلى كورساتك"}
               </p>
             </div>
-
-            {/* Role switcher (staff only) */}
-            {staffMode && (
-              <div className="mb-7 p-1 bg-white/5 border border-white/8 rounded-2xl flex gap-1">
-                {roles.map((r) => (
-                  <button
-                    key={r.key}
-                    onClick={() => setActiveRole(r.key)}
-                    className={`relative flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${
-                      activeRole === r.key ? "text-white" : "text-white/35 hover:text-white/60"
-                    }`}
-                  >
-                    {activeRole === r.key && (
-                      <motion.span
-                        layoutId="roleTab"
-                        className="absolute inset-0 rounded-xl bg-gradient-to-b from-[#9333EA] to-[#7C1DCC] shadow-lg shadow-purple-900/50"
-                      />
-                    )}
-                    <span className="relative z-10">{r.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
 
             {/* Form */}
             <form onSubmit={handleLogin} className="space-y-4">
