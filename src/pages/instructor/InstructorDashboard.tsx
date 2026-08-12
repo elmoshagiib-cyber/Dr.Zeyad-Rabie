@@ -276,13 +276,7 @@ const quickActions = [
     path: "/instructor/students",
   },
 
-  {
-    title: "الحضور",
-    subtitle: "QR Code",
-    icon: QrCode,
-    color: "from-violet-500 to-fuchsia-500",
-    path: "/instructor/attendance",
-  },
+
 
   {
     title: "تسليمات الطلاب",

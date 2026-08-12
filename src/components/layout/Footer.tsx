@@ -195,7 +195,7 @@ export function Footer() {
                 whitespace-nowrap
               "
             >
-              Team Code Reapers
+               Code Reapers
             </a>
 
             <div className="hidden sm:block w-px h-4 sm:h-5 lg:h-6 bg-white/20" />

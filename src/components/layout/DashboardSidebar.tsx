@@ -111,11 +111,7 @@ const instructorNav: NavItem[] = [
     path: "/instructor/students",
     icon: <Users size={20} />,
   },
-  {
-    label: "الحضور والانصراف",
-    path: "/instructor/attendance",
-    icon: <QrCode size={20} />,
-  },
+
   {
     label: "التحليلات",
     path: "/instructor/analytics",

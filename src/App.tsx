@@ -37,7 +37,6 @@ import InstructorNotifications from "./pages/instructor/InstructorNotifications"
 import { InstructorAnalytics } from "./pages/instructor/InstructorAnalytics";
 import { StudentDetails } from "./pages/instructor/StudentDetails";
 import { EditStudent } from "./pages/instructor/EditStudent";
-import { InstructorAttendance } from "./pages/instructor/InstructorAttendance";
 import { EditCourse } from "./pages/instructor/EditCourse";
 import SubscriptionCodes from "./pages/instructor/SubscriptionCodes";
 import { HomeworkDetailsPage } from "./pages/student/HomeworkDetailsPage";
@@ -312,11 +311,6 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-
-<Route
-  path="/instructor/attendance"
-  element={<InstructorAttendance />}
-/>
 
 
 <Route
