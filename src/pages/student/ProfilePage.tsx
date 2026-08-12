@@ -441,17 +441,16 @@ export function ProfilePage() {
         )}
 
 {/* Profile Header */}
-<div className="rounded-3xl shadow-xl">
+<div className="rounded-3xl shadow-sm border border-gray-100 dark:border-[#2A2A2A] overflow-hidden">
   {/* Cover Photo */}
-  <div className="relative w-full h-32 sm:h-44 lg:h-56 bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] overflow-hidden rounded-t-3xl">
+  <div className="relative w-full h-32 sm:h-44 lg:h-56 bg-gray-100 dark:bg-[#1A1A1A] overflow-hidden">
     {coverUrl && (
       <img src={coverUrl} alt="cover" className="w-full h-full object-cover" />
     )}
-    <div className="absolute inset-0 bg-black/10" />
     <button
       onClick={() => coverFileInputRef.current?.click()}
       disabled={uploadingCover}
-      className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-white/90 hover:bg-white text-[#B348FE] rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-4 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-bold shadow-lg transition-all disabled:opacity-60"
+      className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-white dark:bg-[#111111] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] text-[#B348FE] rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-4 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-bold shadow-lg border border-gray-200 dark:border-[#2A2A2A] transition-all disabled:opacity-60"
     >
       {uploadingCover ? (
         <div className="w-4 h-4 border-2 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
@@ -463,16 +462,11 @@ export function ProfilePage() {
   </div>
 
   {/* Info panel */}
-  <div className="bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] px-6 lg:px-8 pt-14 sm:pt-16 lg:pt-20 pb-6 lg:pb-8 relative rounded-b-3xl">
-    <div className="absolute inset-0 overflow-hidden rounded-b-3xl pointer-events-none">
-      <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-      <div className="absolute bottom-0 right-0 w-48 h-48 bg-white/5 rounded-full translate-x-1/3 translate-y-1/3"></div>
-    </div>
-
+  <div className="bg-white dark:bg-[#111111] px-6 lg:px-8 pt-14 sm:pt-16 lg:pt-20 pb-6 lg:pb-8 relative">
     {/* Avatar - centered, half over cover */}
     <div className="absolute left-1/2 -translate-x-1/2 -top-12 sm:-top-14 lg:-top-16 z-10">
       <div className="relative">
-        <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
+        <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full overflow-hidden border-4 border-white dark:border-[#111111] shadow-lg bg-white dark:bg-[#1A1A1A]">
           {avatarUrl ? (
             <img
               src={avatarUrl}
@@ -500,6 +494,10 @@ export function ProfilePage() {
             sm:w-10
             sm:h-10
             bg-white
+            dark:bg-[#1A1A1A]
+            border
+            border-gray-200
+            dark:border-[#2A2A2A]
             rounded-full
             flex
             items-center
@@ -529,19 +527,19 @@ export function ProfilePage() {
           <input
             value={editName}
             onChange={e => setEditName(e.target.value)}
-            className="bg-white/10 border-2 border-white/30 rounded-2xl px-4 lg:px-5 py-2.5 lg:py-3 text-white text-xl lg:text-2xl font-black focus:outline-none focus:ring-2 focus:ring-white/50 w-full sm:w-auto backdrop-blur-sm text-center"
+            className="bg-gray-50 dark:bg-[#1A1A1A] border-2 border-gray-200 dark:border-[#2A2A2A] rounded-2xl px-4 lg:px-5 py-2.5 lg:py-3 text-gray-900 dark:text-white text-xl lg:text-2xl font-black focus:outline-none focus:ring-2 focus:ring-[#B348FE]/50 w-full sm:w-auto text-center"
           />
         </div>
       ) : (
-        <h1 className="text-2xl lg:text-3xl font-black text-white mb-2">
+        <h1 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">
           {editName}
         </h1>
       )}
-      <p className="text-white/80 text-sm lg:text-base font-medium">
+      <p className="text-gray-500 dark:text-gray-400 text-sm lg:text-base font-medium">
         مرحبا بك في منصة مستر زياد ربيع
       </p>
     </div>
-          </div>
+  </div>
 
         </div>
 
