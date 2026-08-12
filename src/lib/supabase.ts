@@ -5,7 +5,13 @@ const supabaseAnonKey = "sb_publishable_JvhoPTfpS-3K2_Ctz8H8nQ_y6YqUzvA";
 
 export const supabase = createClient(
   supabaseUrl,
-  supabaseAnonKey
+  supabaseAnonKey,
+  {
+    global: {
+      headers: {
+        "x-session-token": localStorage.getItem("session_token") || "",
+      },
+    },
+  }
 );
-
 console.log("SUPABASE URL =", supabaseUrl);
