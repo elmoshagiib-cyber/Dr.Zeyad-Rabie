@@ -163,17 +163,12 @@ if (student.status !== "نشط") {
 // دلوقتي بس، بعد التأكد من صحة الحساب، نسجل الـ session_token
 const sessionToken = crypto.randomUUID();
 
-const { data: updateResult, error: updateError } = await supabase
-  .from("students")
-  .update({
-    session_token: sessionToken,
-    last_login: new Date().toISOString(),
-  })
-  .eq("id", student.id)
-  .select();
+const { error: updateError } = await supabase
+  .rpc("update_my_session_token", { new_token: sessionToken });
 
-console.log("UPDATE RESULT:", updateResult);
-console.log("UPDATE ERROR:", updateError);
+if (updateError) {
+  console.error("SESSION TOKEN UPDATE ERROR:", updateError);
+}
 
 localStorage.setItem("session_token", sessionToken);
 
