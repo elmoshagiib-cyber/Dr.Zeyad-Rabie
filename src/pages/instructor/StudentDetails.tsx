@@ -635,11 +635,20 @@ const totalLessons = courseLessons.length;
     );
   }
 
-  const uniqueCourses = [...new Set(courses.map((c) => c.course_id))];
-  const lessonsPercent = student.total_lessons > 0 ? Math.round((student.watched_lessons / student.total_lessons) * 100) : 0;
+const uniqueCourses = [...new Set(courses.map((c) => c.course_id))];
+
+  // نحسب دلوقتي من بيانات coursesWithProgress الحقيقية بدل الأعمدة المخزنة القديمة
+  const realTotalLessons = coursesWithProgress.reduce((sum, c) => sum + c.totalLessons, 0);
+  const realWatchedLessons = coursesWithProgress.reduce((sum, c) => sum + c.completedLessons, 0);
+  const lessonsPercent = realTotalLessons > 0 ? Math.round((realWatchedLessons / realTotalLessons) * 100) : 0;
+
+  const realTotalWatchMinutes = Math.round(
+    lessonProgress.reduce((sum, p) => sum + (p.watched_seconds || 0), 0) / 60
+  );
+
   const homeworkPercent = student.total_homework > 0 ? Math.round((student.completed_homework / student.total_homework) * 100) : 0;
   const overallProgress = Math.round((lessonsPercent + homeworkPercent) / 2);
-  
+
   const totalScores = examResults.reduce((sum, exam) => sum + (exam.score || 0), 0);
   const averageScore = examResults.length > 0 ? Math.round(totalScores / examResults.length) : 0;
   const highestScore = examResults.length > 0 ? Math.max(...examResults.map((e) => e.score || 0)) : 0;
@@ -654,9 +663,8 @@ const totalLessons = courseLessons.length;
     ? Math.round(homeworkScores.reduce((sum, h) => sum + (h.score || 0), 0) / homeworkScores.length)
     : 0;
 
-  const totalWatchMinutes = student.total_watch_minutes || 0;
-  const totalWatchHours = Math.floor(totalWatchMinutes / 60);
-  const remainingMinutes = totalWatchMinutes % 60;
+const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
+  const remainingMinutes = realTotalWatchMinutes % 60;
 
   const lastWatchedProgress = lessonProgress.sort((a, b) => 
     new Date(b.last_watched_at || 0).getTime() - new Date(a.last_watched_at || 0).getTime()
@@ -704,7 +712,7 @@ const totalLessons = courseLessons.length;
                       {student.type === "online" ? "أونلاين" : student.type === "center" ? "سنتر" : "نوع"}
                     </span>
                     <span className="bg-white/10 px-3 py-1 rounded-full">{uniqueCourses.length} كورس</span>
-                    <span className="bg-white/10 px-3 py-1 rounded-full">{student.watched_lessons || 0} محاضرة</span>
+                    <span className="bg-white/10 px-3 py-1 rounded-full">{realWatchedLessons} محاضرة</span>
                   </div>
                 </div>
               </div>
@@ -772,7 +780,7 @@ const totalLessons = courseLessons.length;
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">محاضرة مشاهدة</p>
-                    <h3 className="text-2xl lg:text-3xl font-black text-[#B348FE]">{student.watched_lessons || 0}</h3>
+                    <h3 className="text-2xl lg:text-3xl font-black text-[#B348FE]">{realWatchedLessons}</h3>
                   </div>
                   <div className="w-12 h-12 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
                     <BookOpen className="text-[#B348FE]" size={24} />
@@ -886,7 +894,7 @@ const totalLessons = courseLessons.length;
                   <div className="bg-white dark:bg-[#111111] rounded-xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
                     <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">المحاضرات</p>
                     <p className="text-gray-900 dark:text-white font-black text-sm">
-                      {student.watched_lessons || 0} / {student.total_lessons || 0}
+                      {realWatchedLessons} / {realTotalLessons}
                     </p>
                   </div>
                   <div className="bg-white dark:bg-[#111111] rounded-xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
@@ -1129,8 +1137,8 @@ const totalLessons = courseLessons.length;
                     <PlayCircle className="text-[#B348FE]" size={18} />
                     <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">محاضرات مشاهدة</p>
                   </div>
-                  <p className="text-2xl font-black text-gray-900 dark:text-white">{student.watched_lessons || 0}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">من أصل {student.total_lessons || 0}</p>
+                  <p className="text-2xl font-black text-gray-900 dark:text-white">{realWatchedLessons}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">من أصل {realTotalLessons}</p>
                 </div>
 
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
