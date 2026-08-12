@@ -16,7 +16,8 @@ export interface AppUser {
   name: string;
   role: UserRole;
 
-  avatar_url?: string;
+avatar_url?: string;
+  cover_url?: string;
 
   grade?: string;
   gradeLabel?: string;
