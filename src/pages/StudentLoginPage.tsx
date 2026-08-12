@@ -66,20 +66,17 @@ else if (
 
     setForgotLoading(true);
 
-    const { data: studentByPhone, error: phoneError } = await supabase
-      .from("students")
-      .select("email")
-      .eq("phone", forgotPhone.trim())
-      .single();
+const { data: email, error: phoneError } = await supabase
+      .rpc("get_email_by_phone", { p_phone: forgotPhone.trim() });
 
-    if (phoneError || !studentByPhone) {
+    if (phoneError || !email) {
       setForgotError("رقم الهاتف غير مسجل");
       setForgotLoading(false);
       return;
     }
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      studentByPhone.email,
+      email,
       {
         redirectTo: "https://www.zeyadrabie.com/reset-password",
       }
@@ -103,14 +100,11 @@ else if (
     setLoading(true);
 
     try {
-// البحث عن الطالب برقم الهاتف
-const { data: studentByPhone, error: phoneError } = await supabase
-  .from("students")
-  .select("id, auth_id, full_name, phone, email, grade, status")
-  .eq("phone", loginForm.phone.trim())
-  .single();
+// البحث عن الإيميل المرتبط برقم الهاتف (عن طريق دالة آمنة)
+const { data: email, error: phoneError } = await supabase
+  .rpc("get_email_by_phone", { p_phone: loginForm.phone.trim() });
 
-if (phoneError || !studentByPhone) {
+if (phoneError || !email) {
   setErrors({
     phone: "رقم الهاتف غير مسجل",
   });
@@ -119,10 +113,10 @@ if (phoneError || !studentByPhone) {
   return;
 }
 
-// تسجيل الدخول باستخدام الإيميل المخزن في قاعدة البيانات
+// تسجيل الدخول باستخدام الإيميل
 const { data: authData, error: authError } =
   await supabase.auth.signInWithPassword({
-    email: studentByPhone.email,
+    email,
     password: loginForm.password,
   });
 
@@ -137,16 +131,37 @@ if (authError) {
   return;
 }
 
-
-
-
+// دلوقتي عندنا جلسة Auth حقيقية، نقدر نجيب بيانات الطالب
 const { data: student, error: studentError } = await supabase
   .from("students")
   .select("*")
   .eq("auth_id", authData.user.id)
   .single();
 
-  const sessionToken = crypto.randomUUID();
+if (studentError || !student) {
+  await supabase.auth.signOut();
+
+  setErrors({
+    phone: "بيانات الطالب غير موجودة",
+  });
+
+  setLoading(false);
+  return;
+}
+
+if (student.status !== "approved") {
+  await supabase.auth.signOut();
+
+  setErrors({
+    phone: "الحساب لم يتم تفعيله بعد.",
+  });
+
+  setLoading(false);
+  return;
+}
+
+// دلوقتي بس، بعد التأكد من صحة الحساب، نسجل الـ session_token
+const sessionToken = crypto.randomUUID();
 
 await supabase
   .from("students")
@@ -157,27 +172,6 @@ await supabase
   .eq("id", student.id);
 
 localStorage.setItem("session_token", sessionToken);
-
-if (studentError || !student) {
-  if (student.status !== "approved") {
-  await supabase.auth.signOut();
-
-  setErrors({
-    phone: "الحساب لم يتم تفعيله بعد.",
-  });
-
-  setLoading(false);
-  return;
-}
-  await supabase.auth.signOut();
-
-  setErrors({
-    phone: "بيانات الطالب غير موجودة",
-  });
-
-  setLoading(false);
-  return;
-}
 
 login({
   id: authData.user.id,
@@ -192,8 +186,6 @@ login({
 
   avatar_url: student.avatar_url,
 });
-
-
 
       setSuccess(true);
       setTimeout(() => navigate("/"), 1200);
