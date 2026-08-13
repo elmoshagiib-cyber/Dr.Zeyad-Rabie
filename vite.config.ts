@@ -10,6 +10,9 @@ const __dirname = path.dirname(__filename);
 
 // https://vite.dev/config/
 export default defineConfig({
+  esbuild: {
+    drop: ["console", "debugger"],
+  },
   plugins: [react(), tailwindcss(), VitePWA({
   registerType: "autoUpdate",
 
