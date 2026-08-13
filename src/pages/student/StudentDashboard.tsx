@@ -36,15 +36,21 @@ export function StudentDashboard() {
   const navigate = useNavigate();
   const { user } = useApp();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [announcements, setAnnouncements] = useState<any[]>([]);
-  const [studentCourses, setStudentCourses] = useState<any[]>([]);
-  const [homeworks, setHomeworks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [notifications, setNotifications] = useState<any[]>([]);
+const [activities, setActivities] = useState<any[]>([]);
+const [studentCourses, setStudentCourses] = useState<any[]>([]);
+const [homeworks, setHomeworks] = useState<any[]>([]);
+const [loading, setLoading] = useState(true);
+const [activityLoading, setActivityLoading] = useState(true);
+const [notificationsLoading, setNotificationsLoading] = useState(true);
 
   // Load data effects
-  useEffect(() => {
-    loadAnnouncements();
-  }, []);
+useEffect(() => {
+  if (user?.studentId) {
+    loadNotifications();
+    loadActivities();
+  }
+}, [user]);
 
 useEffect(() => {
     if (user?.studentId) {
@@ -57,18 +63,198 @@ useEffect(() => {
   }, []);
 
   // Data loading functions
-  const loadAnnouncements = async () => {
-    try {
-      const { data } = await supabase
-        .from("announcements")
+const loadNotifications = async () => {
+  if (!user?.studentId) return;
+
+  try {
+    setNotificationsLoading(true);
+
+    // هات الإشعارات الخاصة بالطالب
+    const { data: reads, error: readsError } = await supabase
+      .from("notification_reads")
+      .select("notification_id, read_at")
+      .eq("student_id", user.studentId);
+
+    if (readsError) throw readsError;
+
+    if (!reads || reads.length === 0) {
+      setNotifications([]);
+      return;
+    }
+
+    const notificationIds = reads.map(
+      (item: any) => item.notification_id
+    );
+
+    // هات بيانات الإشعارات نفسها
+    const { data: notificationData, error: notificationsError } =
+      await supabase
+        .from("notifications")
         .select("*")
+        .in("id", notificationIds)
+        .eq("is_active", true)
         .order("created_at", { ascending: false })
         .limit(6);
-      setAnnouncements(data || []);
-    } catch (error) {
-      console.error("Error loading announcements:", error);
+
+    if (notificationsError) throw notificationsError;
+
+    const mergedNotifications = (notificationData || []).map(
+      (notification: any) => {
+        const readInfo = reads.find(
+          (r: any) => r.notification_id === notification.id
+        );
+
+        return {
+          ...notification,
+          read_at: readInfo?.read_at || null,
+        };
+      }
+    );
+
+    setNotifications(mergedNotifications);
+  } catch (error) {
+    console.error("Error loading notifications:", error);
+    setNotifications([]);
+  } finally {
+    setNotificationsLoading(false);
+  }
+};
+
+const loadActivities = async () => {
+  if (!user?.studentId) return;
+
+  try {
+    setActivityLoading(true);
+
+    // =========================
+    // 1. آخر مشاهدة للدروس
+    // =========================
+    const { data: lessonProgress, error: lessonError } =
+      await supabase
+        .from("lesson_progress")
+        .select(
+          "lesson_id, last_watched_at, progress_percent, is_completed"
+        )
+        .eq("student_id", user.studentId)
+        .not("last_watched_at", "is", null)
+        .order("last_watched_at", { ascending: false })
+        .limit(10);
+
+    if (lessonError) throw lessonError;
+
+    // هات أسماء الدروس
+    const lessonIds = (lessonProgress || []).map(
+      (item: any) => item.lesson_id
+    );
+
+    let lessonsMap: Record<string, string> = {};
+
+    if (lessonIds.length > 0) {
+      const { data: lessons } = await supabase
+        .from("course_items")
+        .select("id, title")
+        .in("id", lessonIds);
+
+      (lessons || []).forEach((lesson: any) => {
+        lessonsMap[lesson.id] = lesson.title;
+      });
     }
-  };
+
+    // =========================
+    // 2. آخر الامتحانات
+    // =========================
+    const { data: examResults, error: examError } =
+      await supabase
+        .from("exam_results")
+        .select("id, exam_id, score, submitted_at, exams(title)")
+        .eq("student_id", user.studentId)
+        .not("submitted_at", "is", null)
+        .order("submitted_at", { ascending: false })
+        .limit(10);
+
+    if (examError) throw examError;
+
+    // =========================
+    // 3. آخر الواجبات
+    // =========================
+    const { data: homeworkResults, error: homeworkError } =
+      await supabase
+        .from("homework_submissions")
+        .select("id, homework_id, score, submitted_at")
+        .eq("student_id", user.studentId)
+        .not("submitted_at", "is", null)
+        .order("submitted_at", { ascending: false })
+        .limit(10);
+
+    if (homeworkError) throw homeworkError;
+
+    // هات أسماء الواجبات
+    const homeworkIds = (homeworkResults || []).map(
+      (item: any) => item.homework_id
+    );
+
+    let homeworkMap: Record<string, string> = {};
+
+    if (homeworkIds.length > 0) {
+      const { data: homeworkData } = await supabase
+        .from("homeworks")
+        .select("id, title")
+        .in("id", homeworkIds);
+
+      (homeworkData || []).forEach((homework: any) => {
+        homeworkMap[homework.id] = homework.title;
+      });
+    }
+
+    // =========================
+    // تجميع النشاطات
+    // =========================
+    const activityList = [
+      ...(lessonProgress || []).map((item: any) => ({
+        id: `lesson-${item.lesson_id}-${item.last_watched_at}`,
+        type: "lesson",
+        title: lessonsMap[item.lesson_id] || "درس",
+        description: item.is_completed
+          ? "أكملت مشاهدة الدرس"
+          : `شاهدت ${Math.round(item.progress_percent || 0)}% من الدرس`,
+        date: item.last_watched_at,
+      })),
+
+      ...(examResults || []).map((item: any) => ({
+        id: `exam-${item.id}`,
+        type: "exam",
+        title: item.exams?.title || "امتحان",
+        description: `حصلت على ${item.score ?? 0} درجة`,
+        date: item.submitted_at,
+      })),
+
+      ...(homeworkResults || []).map((item: any) => ({
+        id: `homework-${item.id}`,
+        type: "homework",
+        title: homeworkMap[item.homework_id] || "واجب",
+        description:
+          item.score !== null && item.score !== undefined
+            ? `تم التسليم - الدرجة ${item.score}`
+            : "تم تسليم الواجب",
+        date: item.submitted_at,
+      })),
+    ];
+
+    // ترتيب من الأحدث للأقدم
+    activityList.sort(
+      (a, b) =>
+        new Date(b.date).getTime() -
+        new Date(a.date).getTime()
+    );
+
+    setActivities(activityList.slice(0, 6));
+  } catch (error) {
+    console.error("Error loading activities:", error);
+    setActivities([]);
+  } finally {
+    setActivityLoading(false);
+  }
+};
 
   const loadHomeworks = async () => {
     try {
@@ -188,6 +374,38 @@ const loadStudentCourses = async () => {
         };
     }
   };
+
+
+  const getTimeAgo = (date: string) => {
+  if (!date) return "";
+
+  const now = new Date().getTime();
+  const time = new Date(date).getTime();
+
+  const diff = Math.floor((now - time) / 1000);
+
+  if (diff < 60) return "منذ لحظات";
+
+  const minutes = Math.floor(diff / 60);
+  if (minutes < 60) {
+    return `منذ ${minutes} دقيقة`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return `منذ ${hours} ساعة`;
+  }
+
+  const days = Math.floor(hours / 24);
+
+  if (days === 1) return "أمس";
+  if (days < 7) return `منذ ${days} أيام`;
+
+  return new Date(date).toLocaleDateString("ar-EG", {
+    day: "numeric",
+    month: "short",
+  });
+};
 
   return (
     <StudentLayout>
@@ -328,29 +546,107 @@ const loadStudentCourses = async () => {
 
             {/* Enhanced Right Column */}
             <div className="space-y-5">
-              {/* Enhanced Upcoming Tasks */}
-              <Card className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm">
-                <CardContent className="py-16 text-center">
-                  <Activity
-                    size={48}
-                    className="mx-auto text-[#B348FE] mb-4"
+             {/* آخر النشاطات */}
+<Card className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
+  <CardContent className="p-5">
+
+    <div className="flex items-center justify-between mb-5">
+      <h3 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+        <Activity className="text-[#B348FE]" size={22} />
+        آخر النشاطات
+      </h3>
+    </div>
+
+    {activityLoading ? (
+      <div className="space-y-3">
+        {[1, 2, 3].map((item) => (
+          <div
+            key={item}
+            className="animate-pulse flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-[#0B0B0B]"
+          >
+            <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-800" />
+
+            <div className="flex-1 space-y-2">
+              <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-3/4" />
+              <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded w-1/2" />
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : activities.length === 0 ? (
+      <div className="py-10 text-center">
+        <Activity
+          size={38}
+          className="mx-auto text-gray-300 dark:text-gray-700 mb-3"
+        />
+
+        <p className="text-sm font-bold text-gray-500 dark:text-gray-400">
+          مفيش نشاطات لسه
+        </p>
+
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+          نشاطات مشاهدة الدروس والامتحانات والواجبات هتظهر هنا
+        </p>
+      </div>
+    ) : (
+      <div className="space-y-2">
+        {activities.map((activity) => {
+          const isLesson = activity.type === "lesson";
+          const isExam = activity.type === "exam";
+
+          return (
+            <div
+              key={activity.id}
+              className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-[#0B0B0B] border border-gray-100 dark:border-[#222222]"
+            >
+              <div
+                className={`w-10 h-10 flex-shrink-0 rounded-xl flex items-center justify-center ${
+                  isLesson
+                    ? "bg-[#F6EEFF] dark:bg-[#2B103D]"
+                    : isExam
+                    ? "bg-rose-50 dark:bg-rose-950/20"
+                    : "bg-amber-50 dark:bg-amber-950/20"
+                }`}
+              >
+                {isLesson ? (
+                  <BookOpen
+                    size={18}
+                    className="text-[#B348FE]"
                   />
+                ) : isExam ? (
+                  <FileText
+                    size={18}
+                    className="text-rose-500"
+                  />
+                ) : (
+                  <CheckCircle2
+                    size={18}
+                    className="text-amber-500"
+                  />
+                )}
+              </div>
 
-                  <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-3">
-                    آخر النشاطات
-                  </h3>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-sm text-gray-900 dark:text-white truncate">
+                  {activity.title}
+                </p>
 
-                  <p className="text-gray-500 dark:text-gray-400 leading-8 mb-5">
-                    سيتم عرض آخر مشاهدة للدروس
-                    وآخر الامتحانات والواجبات
-                    بعد الانتهاء من نظام تتبع النشاط.
-                  </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                  {activity.description}
+                </p>
+              </div>
 
-                  <Badge variant="blue">
-                    🚧 تحت التطوير
-                  </Badge>
-                </CardContent>
-              </Card>
+              <div className="flex-shrink-0 flex items-center gap-1 text-[11px] text-gray-400">
+                <Clock size={12} />
+                {getTimeAgo(activity.date)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </CardContent>
+</Card>
 
               {/* Enhanced Leaderboard */}
               <Card className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
