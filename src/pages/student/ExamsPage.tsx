@@ -31,11 +31,11 @@ export function ExamsPage() {
       // ==========================================
       // 1. جلب الطالب الحقيقي من جدول students
       // ==========================================
-      const { data: student, error: studentError } = await supabase
-        .from("students")
-        .select("id")
-        .eq("auth_id", user.id)
-        .single();
+const { data: student, error: studentError } = await supabase
+  .from("students")
+  .select("auth_id")
+  .eq("auth_id", user.id)
+  .single();
 
       if (studentError || !student) {
         console.error("Error loading student:", studentError);
@@ -67,32 +67,14 @@ export function ExamsPage() {
         return;
       }
 
-      // ==========================================
-      // 3. جلب نتائج الطالب باستخدام students.id
-      // ==========================================
+    // ==========================================
+// 3. جلب نتائج الطالب
+// ==========================================
 const { data: results, error: resultsError } = await supabase
   .from("exam_results")
-  .select(`
-    id,
-    exam_id,
-    student_id,
-    score,
-    percentage,
-    passed,
-    submitted_at,
-    correct_answers,
-    wrong_answers,
-    total_questions
-  `)
-  .eq("student_id", student.id);
+  .select("*")
+  .eq("student_id", student.auth_id);
 
-console.log("========== EXAM RESULTS DEBUG ==========");
-console.log("Auth User ID:", user.id);
-console.log("Student ID:", student.id);
-console.log("Student ID Type:", typeof student.id);
-console.log("Results:", results);
-console.log("Results Error:", resultsError);
-console.log("=========================================");
 
       // ==========================================
       // 4. دمج الامتحانات مع نتائج الطالب

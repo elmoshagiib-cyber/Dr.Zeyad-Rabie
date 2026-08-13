@@ -108,7 +108,9 @@ const loadCourses = async () => {
     .from("courses")
     .select("*")
     .eq("is_published", true)
-.eq("is_hidden", false);
+    .eq("is_hidden", false)
+    .eq("is_featured", true)
+    .order("created_at", { ascending: false });
 
   if (!error) {
     setCourses(data || []);
@@ -1308,6 +1310,287 @@ duration-300
     </div>
   </section>
 </ScrollReveal>
+
+
+{/* ================= SUGGESTED COURSES ================= */}
+{courses.length > 0 && (
+  <ScrollReveal>
+    <section
+      className="
+        relative
+        py-14 sm:py-20 lg:py-24
+        bg-white
+        dark:bg-[#09090B]
+      "
+    >
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Title */}
+        <div className="text-center mb-8 sm:mb-12">
+
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <div
+              className="
+                w-11 h-11
+                rounded-2xl
+                bg-[#F6AC08]/10
+                flex items-center justify-center
+              "
+            >
+              <Star
+                className="text-[#F6AC08]"
+                size={24}
+                fill="currentColor"
+              />
+            </div>
+          </div>
+
+          <h2
+            className="
+              text-2xl
+              sm:text-3xl
+              lg:text-4xl
+              font-black
+              text-slate-900
+              dark:text-white
+            "
+          >
+            الكورسات المقترحة
+          </h2>
+
+          <p
+            className="
+              mt-3
+              text-sm
+              sm:text-base
+              text-slate-500
+              dark:text-slate-400
+            "
+          >
+            كورسات مختارة ومقترحة لك
+          </p>
+
+        </div>
+
+        {/* Courses Grid */}
+        <div
+          className="
+            grid
+            grid-cols-1
+            sm:grid-cols-2
+            lg:grid-cols-3
+            gap-5
+            sm:gap-6
+          "
+        >
+
+          {courses.map((course) => (
+            <Card
+              key={course.id}
+              hover
+              className="
+                group
+                overflow-hidden
+                rounded-[22px]
+                border
+                border-gray-200
+                dark:border-[#262626]
+                bg-white
+                dark:bg-[#111111]
+                shadow-[0_10px_30px_rgba(0,0,0,.08)]
+                dark:shadow-[0_15px_40px_rgba(0,0,0,.4)]
+                transition-all
+                duration-300
+                hover:-translate-y-2
+                hover:shadow-[0_18px_45px_rgba(0,0,0,.14)]
+                dark:hover:shadow-[0_20px_50px_rgba(0,0,0,.55)]
+              "
+            >
+
+              {/* Image */}
+              <div
+                className="
+                  relative
+                  overflow-hidden
+                  aspect-[16/9]
+                  w-full
+                "
+              >
+
+                <img
+                  src={
+                    course.thumbnail ||
+                    course.cover_image ||
+                    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3"
+                  }
+                  alt={course.title}
+                  className="
+                    w-full
+                    h-full
+                    object-cover
+                    transition-transform
+                    duration-700
+                    group-hover:scale-[1.06]
+                  "
+                />
+
+                {/* Featured Badge */}
+                <div
+                  className="
+                    absolute
+                    top-3
+                    right-3
+                    flex
+                    items-center
+                    gap-1.5
+                    bg-[#F6AC08]
+                    text-white
+                    text-xs
+                    font-bold
+                    px-3
+                    py-1.5
+                    rounded-full
+                    shadow-lg
+                  "
+                >
+                  <Star
+                    size={13}
+                    fill="currentColor"
+                  />
+                  مقترح
+                </div>
+
+                {/* Grade */}
+                {course.grade && (
+                  <div
+                    className="
+                      absolute
+                      bottom-3
+                      right-3
+                      bg-black/55
+                      backdrop-blur-sm
+                      text-white
+                      text-xs
+                      font-bold
+                      px-3
+                      py-1.5
+                      rounded-lg
+                    "
+                  >
+                    {course.grade}
+                  </div>
+                )}
+
+              </div>
+
+              {/* Content */}
+              <CardContent
+                className="
+                  p-4
+                  sm:p-5
+                  flex
+                  flex-col
+                  gap-3
+                "
+              >
+
+                {/* Title */}
+                <h3
+                  className="
+                    text-base
+                    sm:text-lg
+                    font-black
+                    text-slate-900
+                    dark:text-white
+                    line-clamp-2
+                    leading-snug
+                    group-hover:text-[#B348FE]
+                    transition-colors
+                  "
+                >
+                  {course.title}
+                </h3>
+
+                {/* Description */}
+                {course.description && (
+                  <p
+                    className="
+                      text-xs
+                      sm:text-sm
+                      text-slate-500
+                      dark:text-slate-400
+                      line-clamp-2
+                      min-h-[40px]
+                    "
+                  >
+                    {course.description}
+                  </p>
+                )}
+
+                {/* Bottom Info */}
+                <div
+                  className="
+                    flex
+                    items-center
+                    justify-between
+                    gap-3
+                    pt-3
+                    border-t
+                    border-gray-100
+                    dark:border-[#262626]
+                  "
+                >
+
+                  {/* Price */}
+                  <span
+                    className={`
+                      text-lg
+                      sm:text-xl
+                      font-black
+                      ${
+                        course.is_free
+                          ? "text-emerald-600"
+                          : "text-[#F6AC08]"
+                      }
+                    `}
+                  >
+                    {course.is_free
+                      ? "مجاني"
+                      : `${course.price} ج.م`}
+                  </span>
+
+                  {/* View Course */}
+                  <Button
+                    onClick={() => navigate(`/courses/${course.id}`)}
+                    className="
+                      bg-[#B348FE]
+                      hover:bg-[#9E2FFF]
+                      text-white
+                      font-bold
+                      rounded-xl
+                      px-4
+                      py-2.5
+                      text-xs
+                      sm:text-sm
+                      transition-all
+                      hover:scale-[1.03]
+                    "
+                  >
+                    عرض الكورس
+                  </Button>
+
+                </div>
+
+              </CardContent>
+            </Card>
+          ))}
+
+        </div>
+
+      </div>
+    </section>
+  </ScrollReveal>
+)}
 
 {/* Student Notebook Button */}
 <button

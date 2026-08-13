@@ -246,16 +246,16 @@ export function QuizPage() {
     // Save to Supabase
     if (studentId && id) {
       try {
-        const resultData = {
-          exam_id: quiz.id,
-          student_id: Number(studentId),
-          score: result.percentage,
-          percentage: result.percentage,
-          passed,
-          correct_answers: result.correct,
-          wrong_answers: result.wrong,
-          total_questions: result.total,
-        };
+const resultData = {
+  exam_id: quiz.id,
+  student_id: studentId,
+  score: result.percentage,
+  percentage: result.percentage,
+  passed,
+  correct_answers: result.correct,
+  wrong_answers: result.wrong,
+  total_questions: result.total,
+};
         const { error: insertError } = await supabase
           .from("exam_results")
           .insert([resultData]);
