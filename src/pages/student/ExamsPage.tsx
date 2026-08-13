@@ -70,14 +70,29 @@ export function ExamsPage() {
       // ==========================================
       // 3. جلب نتائج الطالب باستخدام students.id
       // ==========================================
-      const { data: results, error: resultsError } = await supabase
-        .from("exam_results")
-        .select("*")
-        .eq("student_id", student.id);
+const { data: results, error: resultsError } = await supabase
+  .from("exam_results")
+  .select(`
+    id,
+    exam_id,
+    student_id,
+    score,
+    percentage,
+    passed,
+    submitted_at,
+    correct_answers,
+    wrong_answers,
+    total_questions
+  `)
+  .eq("student_id", student.id);
 
-      if (resultsError) {
-        console.error("Error loading exam results:", resultsError);
-      }
+console.log("========== EXAM RESULTS DEBUG ==========");
+console.log("Auth User ID:", user.id);
+console.log("Student ID:", student.id);
+console.log("Student ID Type:", typeof student.id);
+console.log("Results:", results);
+console.log("Results Error:", resultsError);
+console.log("=========================================");
 
       // ==========================================
       // 4. دمج الامتحانات مع نتائج الطالب
@@ -90,10 +105,17 @@ export function ExamsPage() {
 
           if (!exam) return null;
 
-          const result =
-            results?.find(
-              (r: any) => String(r.exam_id) === String(exam.id)
-            ) || null;
+const result = results?.find((r: any) => {
+  console.log(
+    "Comparing:",
+    "result exam_id =",
+    r.exam_id,
+    "exam id =",
+    exam.id
+  );
+
+  return String(r.exam_id) === String(exam.id);
+}) || null;
 
           return {
             ...exam,
