@@ -129,7 +129,11 @@ const GOVERNORATES = [
           value={value}
           onChange={e => onChange(e.target.value)}
           required={required}
-          style={{ appearance: 'none', WebkitAppearance: 'none' }}
+          style={{
+            appearance: 'none',
+            WebkitAppearance: 'none',
+            colorScheme: isDark ? 'dark' : 'light',
+          }}
           className={`
             flex-1 min-w-0 bg-transparent border-0 outline-none
             text-sm md:text-base py-0.5 cursor-pointer
@@ -178,9 +182,8 @@ const RegisterPage = () => {
     if (!form.lastName.trim()) e.lastName = 'الاسم الأخير مطلوب';
     if (!form.phone.match(/^(010|011|012|015)\d{8}$/)) e.phone = 'رقم الهاتف غير صحيح';
     if (form.parentPhone && !form.parentPhone.match(/^(010|011|012|015)\d{8}$/)) e.parentPhone = 'رقم هاتف ولي الأمر غير صحيح';
-    if (!form.email.trim()) {
-  e.email = "البريد الإلكتروني مطلوب";
-} else if (
+    if (
+  form.email.trim() &&
   !form.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
 ) {
   e.email = "البريد الإلكتروني غير صحيح";
@@ -198,10 +201,37 @@ const RegisterPage = () => {
     ev.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    try {
+
+    const phone = form.phone.trim();
+
+   try {
+      // التحقق أولاً هل مسموح بمحاولة تسجيل جديدة من نفس الرقم
+      const { data: allowed, error: allowedError } = await supabase.rpc(
+        "check_register_allowed",
+        { p_identifier: phone }
+      );
+
+      if (allowedError) {
+        console.error("REGISTER RATE LIMIT CHECK ERROR:", allowedError);
+      }
+
+      if (allowed === false) {
+        alert("تم إيقاف إنشاء الحسابات مؤقتًا من هذا الرقم بسبب محاولات كثيرة، حاول بعد 30 دقيقة");
+        setLoading(false);
+        return;
+      }
+
+      // نسجل المحاولة قبل ما نكمل (بغض النظر عن النتيجة، عشان نمنع السبام حتى لو فشل كل مرة)
+      await supabase.rpc("record_register_attempt", { p_identifier: phone });
+
+      // لو الإيميل فاضي، نولّد إيميل داخلي وهمي مبني على رقم الهاتف عشان Supabase Auth يشتغل
+      const finalEmail = form.email.trim()
+        ? form.email.trim().toLowerCase()
+        : `${phone}@students.zeyadrabie.com`;
+
 const { data: authData, error: authError } =
   await supabase.auth.signUp({
-    email: form.email.trim().toLowerCase(),
+    email: finalEmail,
     password: form.password,
     options: {
       data: {
@@ -221,7 +251,7 @@ if (!authData.user) {
         full_name: `${form.firstName} ${form.secondName} ${form.thirdName} ${form.lastName}`,
         phone: form.phone,
         parent_phone: form.parentPhone,
-        email: form.email,
+        email: form.email.trim() || null,
         grade: form.grade,
         governorate: form.governorate,
         type: form.studentType,
@@ -532,13 +562,12 @@ xl:pt-24
                 <InputField
                   isDark={isDark}
                   icon={Mail}
-                  placeholder="البريد الإلكتروني"
+                  placeholder="البريد الإلكتروني (اختياري)"
                   value={form.email}
                   onChange={v => setForm(p => ({ ...p, email: v }))}
                   type="email"
                   dir="ltr"
                   error={errors.email}
-                  required
                 />
 
                 {/* Governorate */}
