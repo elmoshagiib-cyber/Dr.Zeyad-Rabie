@@ -173,7 +173,11 @@ const calcScore = useCallback(() => {
     const selected = answers[String(q.id)];
 
     if (selected) {
-      if (selected === q.correct_answer) {
+      const correctChoice = (q.question_choices || []).find(
+        (c: any) => String(c.sort_order - 1) === String(q.correct_answer)
+      );
+
+      if (correctChoice && selected === correctChoice.id) {
         correct++;
       } else {
         wrong++;
@@ -599,7 +603,7 @@ student_id: Number(studentId),
       const selected = answers[String(q.id)];
 
       const correctChoice = (q.question_choices || []).find(
-        (c: any) => c.is_correct
+        (c: any) => String(c.sort_order - 1) === String(q.correct_answer)
       );
 
       const isRight = selected === correctChoice?.id;
