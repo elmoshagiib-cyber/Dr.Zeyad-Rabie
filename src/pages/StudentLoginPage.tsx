@@ -100,11 +100,33 @@ const { data: email, error: phoneError } = await supabase
     setLoading(true);
 
     try {
+const phone = loginForm.phone.trim();
+
+// التحقق أولاً هل الرقم محظور مؤقتًا بسبب محاولات فاشلة كتيرة
+const { data: allowed, error: allowedError } = await supabase.rpc(
+  "check_login_allowed",
+  { p_phone: phone }
+);
+
+if (allowedError) {
+  console.error("RATE LIMIT CHECK ERROR:", allowedError);
+}
+
+if (allowed === false) {
+  setErrors({
+    password: "تم إيقاف الدخول مؤقتًا بسبب محاولات كثيرة خاطئة، حاول بعد 15 دقيقة",
+  });
+  setLoading(false);
+  return;
+}
+
 // البحث عن الإيميل المرتبط برقم الهاتف (عن طريق دالة آمنة)
 const { data: email, error: phoneError } = await supabase
-  .rpc("get_email_by_phone", { p_phone: loginForm.phone.trim() });
+  .rpc("get_email_by_phone", { p_phone: phone });
 
 if (phoneError || !email) {
+  await supabase.rpc("record_failed_login", { p_phone: phone });
+
   setErrors({
     phone: "رقم الهاتف غير مسجل",
   });
@@ -122,6 +144,8 @@ const { data: authData, error: authError } =
 
 if (authError) {
   console.log("AUTH ERROR DETAILS:", authError.message, authError);
+
+  await supabase.rpc("record_failed_login", { p_phone: phone });
 
   setErrors({
     password: `خطأ: ${authError.message}`,
@@ -172,7 +196,11 @@ if (updateError) {
 
 localStorage.setItem("session_token", sessionToken);
 
+// تسجيل الدخول نجح، نصفّر عداد المحاولات الفاشلة
+await supabase.rpc("reset_login_attempts", { p_phone: phone });
+
 login({
+  
   id: authData.user.id,
   studentId: student.id,
 
