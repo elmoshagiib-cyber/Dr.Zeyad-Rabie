@@ -22,15 +22,75 @@ export function CreateCourse() {
   const navigate = useNavigate();
   const { user } = useApp();
   const [loading, setLoading] = useState(false);
+const [uploadProgress, setUploadProgress] = useState(0);
+
+
+const uploadThumbnailWithProgress = async (
+  file: File,
+  fileName: string,
+  accessToken: string
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    const uploadUrl = `${supabaseUrl}/storage/v1/object/course-thumbnails/${fileName}`;
+
+    xhr.open("POST", uploadUrl, true);
+
+    xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
+    xhr.setRequestHeader("apikey", supabaseAnonKey);
+    xhr.setRequestHeader("Content-Type", file.type);
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const progress = Math.round(
+          (event.loaded / event.total) * 100
+        );
+
+        setUploadProgress(progress);
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const publicUrl =
+          supabase.storage
+            .from("course-thumbnails")
+            .getPublicUrl(fileName).data.publicUrl;
+
+        resolve(publicUrl);
+      } else {
+        reject(
+          new Error(
+            `فشل رفع الصورة: ${xhr.responseText || xhr.statusText}`
+          )
+        );
+      }
+    };
+
+    xhr.onerror = () => {
+      reject(new Error("حدث خطأ أثناء رفع الصورة"));
+    };
+
+    xhr.onabort = () => {
+      reject(new Error("تم إلغاء رفع الصورة"));
+    };
+
+    xhr.send(file);
+  });
+};
 
   const createCourse = async () => {
     try {
       setLoading(true);
 
-      if (!title || !description || !grade) {
-        alert("اكمل جميع البيانات");
-        return;
-      }
+if (!title || !grade) {
+  alert("من فضلك أدخل اسم الكورس واختر الصف الدراسي");
+  return;
+}
 
       let thumbnailUrl = "";
       const {
@@ -39,20 +99,24 @@ export function CreateCourse() {
 
       console.log("SESSION =", session);
 
-      if (thumbnail) {
-        const ext = thumbnail.name.split(".").pop();
-        const fileName = `${crypto.randomUUID()}.${ext}`;
+    if (thumbnail) {
+  setUploadProgress(0);
 
-        const { error: uploadError } = await supabase.storage
-          .from("course-thumbnails")
-          .upload(fileName, thumbnail);
+  const ext = thumbnail.name.split(".").pop();
+  const fileName = `${crypto.randomUUID()}.${ext}`;
 
-        if (uploadError) throw uploadError;
+  if (!session?.access_token) {
+    throw new Error("جلسة المستخدم غير موجودة");
+  }
 
-        thumbnailUrl = supabase.storage
-          .from("course-thumbnails")
-          .getPublicUrl(fileName).data.publicUrl;
-      }
+  thumbnailUrl = await uploadThumbnailWithProgress(
+    thumbnail,
+    fileName,
+    session.access_token
+  );
+
+  setUploadProgress(100);
+}
 
       const slug = `${title
         .trim()
@@ -504,17 +568,33 @@ export function CreateCourse() {
                 flex items-center justify-center gap-3
               "
             >
-              {loading ? (
-                <>
-                  <Loader2 size={22} className="animate-spin" />
-                  <span>جاري الإنشاء...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles size={20} />
-                  <span>إنشاء الكورس</span>
-                </>
-              )}
+             {loading ? (
+  <div className="w-full flex flex-col items-center gap-2">
+    <div className="flex items-center gap-2">
+      <Loader2 size={20} className="animate-spin" />
+
+      <span>
+        {thumbnail && uploadProgress < 100
+          ? `جاري رفع الصورة... ${uploadProgress}%`
+          : "جاري إنشاء الكورس..."}
+      </span>
+    </div>
+
+    {thumbnail && uploadProgress < 100 && (
+      <div className="w-full max-w-xs h-1.5 bg-white/20 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-white rounded-full transition-all duration-200"
+          style={{ width: `${uploadProgress}%` }}
+        />
+      </div>
+    )}
+  </div>
+) : (
+  <>
+    <Sparkles size={20} />
+    <span>إنشاء الكورس</span>
+  </>
+)}
             </button>
           </div>
 
