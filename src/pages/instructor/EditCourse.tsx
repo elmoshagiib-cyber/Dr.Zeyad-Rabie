@@ -698,9 +698,9 @@ for (let qIndex = 0; qIndex < item.questions.length; qIndex++) {
       sort_order: qIndex + 1,
 
       // للمقالي احفظ الإجابة النموذجية
-      correct_answer: isEssay
-        ? ((question as any).correctText || "")
-        : String(question.correctAnswer),
+correct_answer: isEssay
+  ? ((question as any).correctText || "")
+  : question.correctAnswer,
     })
     .select()
     .single();
