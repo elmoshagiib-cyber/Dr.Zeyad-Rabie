@@ -37,22 +37,22 @@ export function StudentDashboard() {
   const { user } = useApp();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
-const [activities, setActivities] = useState<any[]>([]);
-const [studentCourses, setStudentCourses] = useState<any[]>([]);
-const [homeworks, setHomeworks] = useState<any[]>([]);
-const [loading, setLoading] = useState(true);
-const [activityLoading, setActivityLoading] = useState(true);
-const [notificationsLoading, setNotificationsLoading] = useState(true);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [studentCourses, setStudentCourses] = useState<any[]>([]);
+  const [homeworks, setHomeworks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activityLoading, setActivityLoading] = useState(true);
+  const [notificationsLoading, setNotificationsLoading] = useState(true);
 
   // Load data effects
-useEffect(() => {
-  if (user?.studentId) {
-    loadNotifications();
-    loadActivities();
-  }
-}, [user]);
+  useEffect(() => {
+    if (user?.studentId) {
+      loadNotifications();
+      loadActivities();
+    }
+  }, [user]);
 
-useEffect(() => {
+  useEffect(() => {
     if (user?.studentId) {
       loadStudentCourses();
     }
@@ -63,198 +63,199 @@ useEffect(() => {
   }, []);
 
   // Data loading functions
-const loadNotifications = async () => {
-  if (!user?.studentId) return;
+  const loadNotifications = async () => {
+    if (!user?.studentId) return;
 
-  try {
-    setNotificationsLoading(true);
+    try {
+      setNotificationsLoading(true);
 
-    // هات الإشعارات الخاصة بالطالب
-    const { data: reads, error: readsError } = await supabase
-      .from("notification_reads")
-      .select("notification_id, read_at")
-      .eq("student_id", user.studentId);
+      // هات الإشعارات الخاصة بالطالب
+      const { data: reads, error: readsError } = await supabase
+        .from("notification_reads")
+        .select("notification_id, read_at")
+        .eq("student_id", user.studentId);
 
-    if (readsError) throw readsError;
+      if (readsError) throw readsError;
 
-    if (!reads || reads.length === 0) {
-      setNotifications([]);
-      return;
-    }
-
-    const notificationIds = reads.map(
-      (item: any) => item.notification_id
-    );
-
-    // هات بيانات الإشعارات نفسها
-    const { data: notificationData, error: notificationsError } =
-      await supabase
-        .from("notifications")
-        .select("*")
-        .in("id", notificationIds)
-        .eq("is_active", true)
-        .order("created_at", { ascending: false })
-        .limit(6);
-
-    if (notificationsError) throw notificationsError;
-
-    const mergedNotifications = (notificationData || []).map(
-      (notification: any) => {
-        const readInfo = reads.find(
-          (r: any) => r.notification_id === notification.id
-        );
-
-        return {
-          ...notification,
-          read_at: readInfo?.read_at || null,
-        };
+      if (!reads || reads.length === 0) {
+        setNotifications([]);
+        setNotificationsLoading(false);
+        return;
       }
-    );
 
-    setNotifications(mergedNotifications);
-  } catch (error) {
-    console.error("Error loading notifications:", error);
-    setNotifications([]);
-  } finally {
-    setNotificationsLoading(false);
-  }
-};
+      const notificationIds = reads.map(
+        (item: any) => item.notification_id
+      );
 
-const loadActivities = async () => {
-  if (!user?.studentId) return;
+      // هات بيانات الإشعارات نفسها
+      const { data: notificationData, error: notificationsError } =
+        await supabase
+          .from("notifications")
+          .select("*")
+          .in("id", notificationIds)
+          .eq("is_active", true)
+          .order("created_at", { ascending: false })
+          .limit(6);
 
-  try {
-    setActivityLoading(true);
+      if (notificationsError) throw notificationsError;
 
-    // =========================
-    // 1. آخر مشاهدة للدروس
-    // =========================
-    const { data: lessonProgress, error: lessonError } =
-      await supabase
-        .from("lesson_progress")
-        .select(
-          "lesson_id, last_watched_at, progress_percent, is_completed"
-        )
-        .eq("student_id", user.studentId)
-        .not("last_watched_at", "is", null)
-        .order("last_watched_at", { ascending: false })
-        .limit(10);
+      const mergedNotifications = (notificationData || []).map(
+        (notification: any) => {
+          const readInfo = reads.find(
+            (r: any) => r.notification_id === notification.id
+          );
 
-    if (lessonError) throw lessonError;
+          return {
+            ...notification,
+            read_at: readInfo?.read_at || null,
+          };
+        }
+      );
 
-    // هات أسماء الدروس
-    const lessonIds = (lessonProgress || []).map(
-      (item: any) => item.lesson_id
-    );
-
-    let lessonsMap: Record<string, string> = {};
-
-    if (lessonIds.length > 0) {
-      const { data: lessons } = await supabase
-        .from("course_items")
-        .select("id, title")
-        .in("id", lessonIds);
-
-      (lessons || []).forEach((lesson: any) => {
-        lessonsMap[lesson.id] = lesson.title;
-      });
+      setNotifications(mergedNotifications);
+    } catch (error) {
+      console.error("Error loading notifications:", error);
+      setNotifications([]);
+    } finally {
+      setNotificationsLoading(false);
     }
+  };
 
-    // =========================
-    // 2. آخر الامتحانات
-    // =========================
-    const { data: examResults, error: examError } =
-      await supabase
-        .from("exam_results")
-        .select("id, exam_id, score, submitted_at, exams(title)")
-        .eq("student_id", user.studentId)
-        .not("submitted_at", "is", null)
-        .order("submitted_at", { ascending: false })
-        .limit(10);
+  const loadActivities = async () => {
+    if (!user?.studentId) return;
 
-    if (examError) throw examError;
+    try {
+      setActivityLoading(true);
 
-    // =========================
-    // 3. آخر الواجبات
-    // =========================
-    const { data: homeworkResults, error: homeworkError } =
-      await supabase
-        .from("homework_submissions")
-        .select("id, homework_id, score, submitted_at")
-        .eq("student_id", user.studentId)
-        .not("submitted_at", "is", null)
-        .order("submitted_at", { ascending: false })
-        .limit(10);
+      // =========================
+      // 1. آخر مشاهدة للدروس
+      // =========================
+      const { data: lessonProgress, error: lessonError } =
+        await supabase
+          .from("lesson_progress")
+          .select(
+            "lesson_id, last_watched_at, progress_percent, is_completed"
+          )
+          .eq("student_id", user.studentId)
+          .not("last_watched_at", "is", null)
+          .order("last_watched_at", { ascending: false })
+          .limit(10);
 
-    if (homeworkError) throw homeworkError;
+      if (lessonError) throw lessonError;
 
-    // هات أسماء الواجبات
-    const homeworkIds = (homeworkResults || []).map(
-      (item: any) => item.homework_id
-    );
+      // هات أسماء الدروس
+      const lessonIds = (lessonProgress || []).map(
+        (item: any) => item.lesson_id
+      );
 
-    let homeworkMap: Record<string, string> = {};
+      let lessonsMap: Record<string, string> = {};
 
-    if (homeworkIds.length > 0) {
-      const { data: homeworkData } = await supabase
-        .from("homeworks")
-        .select("id, title")
-        .in("id", homeworkIds);
+      if (lessonIds.length > 0) {
+        const { data: lessons } = await supabase
+          .from("course_items")
+          .select("id, title")
+          .in("id", lessonIds);
 
-      (homeworkData || []).forEach((homework: any) => {
-        homeworkMap[homework.id] = homework.title;
-      });
+        (lessons || []).forEach((lesson: any) => {
+          lessonsMap[lesson.id] = lesson.title;
+        });
+      }
+
+      // =========================
+      // 2. آخر الامتحانات
+      // =========================
+      const { data: examResults, error: examError } =
+        await supabase
+          .from("exam_results")
+          .select("id, exam_id, score, submitted_at, exams(title)")
+          .eq("student_id", user.studentId)
+          .not("submitted_at", "is", null)
+          .order("submitted_at", { ascending: false })
+          .limit(10);
+
+      if (examError) throw examError;
+
+      // =========================
+      // 3. آخر الواجبات
+      // =========================
+      const { data: homeworkResults, error: homeworkError } =
+        await supabase
+          .from("homework_submissions")
+          .select("id, homework_id, score, submitted_at")
+          .eq("student_id", user.studentId)
+          .not("submitted_at", "is", null)
+          .order("submitted_at", { ascending: false })
+          .limit(10);
+
+      if (homeworkError) throw homeworkError;
+
+      // هات أسماء الواجبات
+      const homeworkIds = (homeworkResults || []).map(
+        (item: any) => item.homework_id
+      );
+
+      let homeworkMap: Record<string, string> = {};
+
+      if (homeworkIds.length > 0) {
+        const { data: homeworkData } = await supabase
+          .from("homeworks")
+          .select("id, title")
+          .in("id", homeworkIds);
+
+        (homeworkData || []).forEach((homework: any) => {
+          homeworkMap[homework.id] = homework.title;
+        });
+      }
+
+      // =========================
+      // تجميع النشاطات
+      // =========================
+      const activityList = [
+        ...(lessonProgress || []).map((item: any) => ({
+          id: `lesson-${item.lesson_id}-${item.last_watched_at}`,
+          type: "lesson",
+          title: lessonsMap[item.lesson_id] || "درس",
+          description: item.is_completed
+            ? "أكملت مشاهدة الدرس"
+            : `شاهدت ${Math.round(item.progress_percent || 0)}% من الدرس`,
+          date: item.last_watched_at,
+        })),
+
+        ...(examResults || []).map((item: any) => ({
+          id: `exam-${item.id}`,
+          type: "exam",
+          title: item.exams?.title || "امتحان",
+          description: `حصلت على ${item.score ?? 0} درجة`,
+          date: item.submitted_at,
+        })),
+
+        ...(homeworkResults || []).map((item: any) => ({
+          id: `homework-${item.id}`,
+          type: "homework",
+          title: homeworkMap[item.homework_id] || "واجب",
+          description:
+            item.score !== null && item.score !== undefined
+              ? `تم التسليم - الدرجة ${item.score}`
+              : "تم تسليم الواجب",
+          date: item.submitted_at,
+        })),
+      ];
+
+      // ترتيب من الأحدث للأقدم
+      activityList.sort(
+        (a, b) =>
+          new Date(b.date).getTime() -
+          new Date(a.date).getTime()
+      );
+
+      setActivities(activityList.slice(0, 6));
+    } catch (error) {
+      console.error("Error loading activities:", error);
+      setActivities([]);
+    } finally {
+      setActivityLoading(false);
     }
-
-    // =========================
-    // تجميع النشاطات
-    // =========================
-    const activityList = [
-      ...(lessonProgress || []).map((item: any) => ({
-        id: `lesson-${item.lesson_id}-${item.last_watched_at}`,
-        type: "lesson",
-        title: lessonsMap[item.lesson_id] || "درس",
-        description: item.is_completed
-          ? "أكملت مشاهدة الدرس"
-          : `شاهدت ${Math.round(item.progress_percent || 0)}% من الدرس`,
-        date: item.last_watched_at,
-      })),
-
-      ...(examResults || []).map((item: any) => ({
-        id: `exam-${item.id}`,
-        type: "exam",
-        title: item.exams?.title || "امتحان",
-        description: `حصلت على ${item.score ?? 0} درجة`,
-        date: item.submitted_at,
-      })),
-
-      ...(homeworkResults || []).map((item: any) => ({
-        id: `homework-${item.id}`,
-        type: "homework",
-        title: homeworkMap[item.homework_id] || "واجب",
-        description:
-          item.score !== null && item.score !== undefined
-            ? `تم التسليم - الدرجة ${item.score}`
-            : "تم تسليم الواجب",
-        date: item.submitted_at,
-      })),
-    ];
-
-    // ترتيب من الأحدث للأقدم
-    activityList.sort(
-      (a, b) =>
-        new Date(b.date).getTime() -
-        new Date(a.date).getTime()
-    );
-
-    setActivities(activityList.slice(0, 6));
-  } catch (error) {
-    console.error("Error loading activities:", error);
-    setActivities([]);
-  } finally {
-    setActivityLoading(false);
-  }
-};
+  };
 
   const loadHomeworks = async () => {
     try {
@@ -272,7 +273,7 @@ const loadActivities = async () => {
     }
   };
 
-const loadStudentCourses = async () => {
+  const loadStudentCourses = async () => {
     if (!user?.studentId) return;
 
     try {
@@ -288,6 +289,7 @@ const loadStudentCourses = async () => {
 
       if (!enrollments?.length) {
         setStudentCourses([]);
+        setLoading(false);
         return;
       }
 
@@ -375,37 +377,62 @@ const loadStudentCourses = async () => {
     }
   };
 
-
   const getTimeAgo = (date: string) => {
-  if (!date) return "";
+    if (!date) return "";
 
-  const now = new Date().getTime();
-  const time = new Date(date).getTime();
+    const now = new Date().getTime();
+    const time = new Date(date).getTime();
 
-  const diff = Math.floor((now - time) / 1000);
+    const diff = Math.floor((now - time) / 1000);
 
-  if (diff < 60) return "منذ لحظات";
+    if (diff < 60) return "منذ لحظات";
 
-  const minutes = Math.floor(diff / 60);
-  if (minutes < 60) {
-    return `منذ ${minutes} دقيقة`;
-  }
+    const minutes = Math.floor(diff / 60);
+    if (minutes < 60) {
+      return `منذ ${minutes} دقيقة`;
+    }
 
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) {
-    return `منذ ${hours} ساعة`;
-  }
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) {
+      return `منذ ${hours} ساعة`;
+    }
 
-  const days = Math.floor(hours / 24);
+    const days = Math.floor(hours / 24);
 
-  if (days === 1) return "أمس";
-  if (days < 7) return `منذ ${days} أيام`;
+    if (days === 1) return "أمس";
+    if (days < 7) return `منذ ${days} أيام`;
 
-  return new Date(date).toLocaleDateString("ar-EG", {
-    day: "numeric",
-    month: "short",
-  });
-};
+    return new Date(date).toLocaleDateString("ar-EG", {
+      day: "numeric",
+      month: "short",
+    });
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "exam":
+        return <AlertCircle className="text-rose-500" size={18} />;
+      case "lesson":
+        return <BookOpen className="text-[#B348FE]" size={18} />;
+      case "homework":
+        return <FileText className="text-amber-500" size={18} />;
+      default:
+        return <Bell className="text-gray-500 dark:text-gray-400" size={18} />;
+    }
+  };
+
+  const getNotificationBg = (type: string) => {
+    switch (type) {
+      case "exam":
+        return "bg-rose-50 dark:bg-rose-950/20";
+      case "lesson":
+        return "bg-[#F6EEFF] dark:bg-[#2B103D]";
+      case "homework":
+        return "bg-amber-50 dark:bg-amber-950/20";
+      default:
+        return "bg-gray-100 dark:bg-gray-800";
+    }
+  };
 
   return (
     <StudentLayout>
@@ -546,107 +573,102 @@ const loadStudentCourses = async () => {
 
             {/* Enhanced Right Column */}
             <div className="space-y-5">
-             {/* آخر النشاطات */}
-<Card className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
-  <CardContent className="p-5">
+              {/* آخر النشاطات */}
+              <Card className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                      <Activity className="text-[#B348FE]" size={22} />
+                      آخر النشاطات
+                    </h3>
+                  </div>
 
-    <div className="flex items-center justify-between mb-5">
-      <h3 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-        <Activity className="text-[#B348FE]" size={22} />
-        آخر النشاطات
-      </h3>
-    </div>
+                  {activityLoading ? (
+                    <div className="space-y-3">
+                      {[1, 2, 3].map((item) => (
+                        <div
+                          key={item}
+                          className="animate-pulse flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-[#0B0B0B]"
+                        >
+                          <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-800" />
+                          <div className="flex-1 space-y-2">
+                            <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-3/4" />
+                            <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded w-1/2" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : activities.length === 0 ? (
+                    <div className="py-10 text-center">
+                      <Activity
+                        size={38}
+                        className="mx-auto text-gray-300 dark:text-gray-700 mb-3"
+                      />
+                      <p className="text-sm font-bold text-gray-500 dark:text-gray-400">
+                        مفيش نشاطات لسه
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        نشاطات مشاهدة الدروس والامتحانات والواجبات هتظهر هنا
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {activities.map((activity) => {
+                        const isLesson = activity.type === "lesson";
+                        const isExam = activity.type === "exam";
 
-    {activityLoading ? (
-      <div className="space-y-3">
-        {[1, 2, 3].map((item) => (
-          <div
-            key={item}
-            className="animate-pulse flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-[#0B0B0B]"
-          >
-            <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-800" />
+                        return (
+                          <div
+                            key={activity.id}
+                            className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-[#0B0B0B] border border-gray-100 dark:border-[#222222]"
+                          >
+                            <div
+                              className={`w-10 h-10 flex-shrink-0 rounded-xl flex items-center justify-center ${
+                                isLesson
+                                  ? "bg-[#F6EEFF] dark:bg-[#2B103D]"
+                                  : isExam
+                                  ? "bg-rose-50 dark:bg-rose-950/20"
+                                  : "bg-amber-50 dark:bg-amber-950/20"
+                              }`}
+                            >
+                              {isLesson ? (
+                                <BookOpen
+                                  size={18}
+                                  className="text-[#B348FE]"
+                                />
+                              ) : isExam ? (
+                                <FileText
+                                  size={18}
+                                  className="text-rose-500"
+                                />
+                              ) : (
+                                <CheckCircle2
+                                  size={18}
+                                  className="text-amber-500"
+                                />
+                              )}
+                            </div>
 
-            <div className="flex-1 space-y-2">
-              <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-3/4" />
-              <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded w-1/2" />
-            </div>
-          </div>
-        ))}
-      </div>
-    ) : activities.length === 0 ? (
-      <div className="py-10 text-center">
-        <Activity
-          size={38}
-          className="mx-auto text-gray-300 dark:text-gray-700 mb-3"
-        />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-sm text-gray-900 dark:text-white truncate">
+                                {activity.title}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                                {activity.description}
+                              </p>
+                            </div>
 
-        <p className="text-sm font-bold text-gray-500 dark:text-gray-400">
-          مفيش نشاطات لسه
-        </p>
-
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-          نشاطات مشاهدة الدروس والامتحانات والواجبات هتظهر هنا
-        </p>
-      </div>
-    ) : (
-      <div className="space-y-2">
-        {activities.map((activity) => {
-          const isLesson = activity.type === "lesson";
-          const isExam = activity.type === "exam";
-
-          return (
-            <div
-              key={activity.id}
-              className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-[#0B0B0B] border border-gray-100 dark:border-[#222222]"
-            >
-              <div
-                className={`w-10 h-10 flex-shrink-0 rounded-xl flex items-center justify-center ${
-                  isLesson
-                    ? "bg-[#F6EEFF] dark:bg-[#2B103D]"
-                    : isExam
-                    ? "bg-rose-50 dark:bg-rose-950/20"
-                    : "bg-amber-50 dark:bg-amber-950/20"
-                }`}
-              >
-                {isLesson ? (
-                  <BookOpen
-                    size={18}
-                    className="text-[#B348FE]"
-                  />
-                ) : isExam ? (
-                  <FileText
-                    size={18}
-                    className="text-rose-500"
-                  />
-                ) : (
-                  <CheckCircle2
-                    size={18}
-                    className="text-amber-500"
-                  />
-                )}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm text-gray-900 dark:text-white truncate">
-                  {activity.title}
-                </p>
-
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
-                  {activity.description}
-                </p>
-              </div>
-
-              <div className="flex-shrink-0 flex items-center gap-1 text-[11px] text-gray-400">
-                <Clock size={12} />
-                {getTimeAgo(activity.date)}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    )}
-  </CardContent>
-</Card>
+                            <div className="flex-shrink-0 flex items-center gap-1 text-[11px] text-gray-400">
+                              <Clock size={12} />
+                              {getTimeAgo(activity.date)}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Enhanced Leaderboard */}
               <Card className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
@@ -668,15 +690,12 @@ const loadStudentCourses = async () => {
                 <CardContent className="p-5">
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <div className="text-5xl mb-4">🏆</div>
-
                     <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">
                       قريبًا
                     </h3>
-
                     <p className="text-gray-500 dark:text-gray-400 leading-7 max-w-xs">
                       يتم العمل حاليًا على نظام المتصدرين وترتيب الطلاب حسب الأداء والدرجات.
                     </p>
-
                     <span className="mt-5 px-4 py-2 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 font-bold text-sm">
                       🚧 تحت التطوير
                     </span>
@@ -686,26 +705,94 @@ const loadStudentCourses = async () => {
             </div>
           </div>
 
-          {/* Enhanced Announcements Section */}
+          {/* آخر الإشعارات */}
           <Card className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm">
-            <CardContent className="py-16 text-center">
-              <Bell
-                size={48}
-                className="mx-auto text-[#B348FE] mb-4"
-              />
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                  <Bell className="text-[#B348FE]" size={22} />
+                  آخر الإشعارات
+                </h3>
+              </div>
 
-              <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-3">
-                آخر الإشعارات
-              </h3>
+              {notificationsLoading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((item) => (
+                    <div
+                      key={item}
+                      className="animate-pulse flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-[#0B0B0B]"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-800" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-3/4" />
+                        <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded w-1/2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className="py-16 text-center">
+                  <Bell
+                    size={48}
+                    className="mx-auto text-gray-300 dark:text-gray-700 mb-4"
+                  />
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white mb-2">
+                    لا توجد إشعارات
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400 leading-7">
+                    سيتم عرض أحدث الإشعارات التي ينشرها المستر مباشرة هنا
+                  </p>
+                  <Badge variant="blue" className="mt-4">
+                    🚧 سيتم تفعيلها مع لوحة تحكم المستر
+                  </Badge>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {notifications.map((notification) => {
+                    const notifType = notification.type || "general";
+                    const isUnread = !notification.read_at;
 
-              <p className="text-gray-500 dark:text-gray-400 leading-8 mb-5">
-                سيتم عرض أحدث الاشعارات
-                التي ينشرها المستر مباشرة هنا.
-              </p>
+                    return (
+                      <div
+                        key={notification.id}
+                        className={`flex items-start gap-3 p-4 rounded-xl border transition-all ${
+                          isUnread
+                            ? "bg-[#F6EEFF] dark:bg-[#2B103D] border-[#B348FE]"
+                            : "bg-gray-50 dark:bg-[#0B0B0B] border-gray-100 dark:border-[#222222]"
+                        }`}
+                      >
+                        <div
+                          className={`w-10 h-10 flex-shrink-0 rounded-xl flex items-center justify-center ${getNotificationBg(
+                            notifType
+                          )}`}
+                        >
+                          {getNotificationIcon(notifType)}
+                        </div>
 
-              <Badge variant="blue">
-                🚧 سيتم تفعيلها مع لوحة تحكم المستر
-              </Badge>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-bold text-sm text-gray-900 dark:text-white">
+                              {notification.title || "إشعار"}
+                            </p>
+                            {isUnread && (
+                              <div className="w-2 h-2 rounded-full bg-[#B348FE] flex-shrink-0 mt-1.5" />
+                            )}
+                          </div>
+
+                          <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">
+                            {notification.message || notification.content || ""}
+                          </p>
+
+                          <div className="flex items-center gap-1 text-[11px] text-gray-400 mt-2">
+                            <Clock size={11} />
+                            {getTimeAgo(notification.created_at)}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
