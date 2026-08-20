@@ -29,13 +29,15 @@ export function ExamsPage() {
       }
 
       // ==========================================
-      // 1. جلب الطالب الحقيقي من جدول students
+      // 1. جلب id الطالب الحقيقي من جدول students
+      //    (ملاحظة: exam_results.student_id بيخزن
+      //     students.id مش students.auth_id)
       // ==========================================
-const { data: student, error: studentError } = await supabase
-  .from("students")
-  .select("id")
-  .eq("auth_id", user.id)
-  .single();
+      const { data: student, error: studentError } = await supabase
+        .from("students")
+        .select("id")
+        .eq("auth_id", user.id)
+        .single();
 
       if (studentError || !student) {
         console.error("Error loading student:", studentError);
@@ -67,37 +69,29 @@ const { data: student, error: studentError } = await supabase
         return;
       }
 
-    // ==========================================
-// 3. جلب نتائج الطالب
-// ==========================================
-const { data: results, error: resultsError } = await supabase
-  .from("exam_results")
-  .select("*")
-  .eq("student_id", student.id);
+      // ==========================================
+      // 3. جلب نتائج الطالب (بالـ id الصح)
+      // ==========================================
+      const { data: results, error: resultsError } = await supabase
+        .from("exam_results")
+        .select("*")
+        .eq("student_id", student.id);
 
+      if (resultsError) {
+        console.error("Error loading results:", resultsError);
+      }
 
       // ==========================================
       // 4. دمج الامتحانات مع نتائج الطالب
       // ==========================================
       const finalData = (examsData || [])
         .map((item: any) => {
-          const exam = Array.isArray(item.exams)
-            ? item.exams[0]
-            : item.exams;
+          const exam = Array.isArray(item.exams) ? item.exams[0] : item.exams;
 
           if (!exam) return null;
 
-const result = results?.find((r: any) => {
-  console.log(
-    "Comparing:",
-    "result exam_id =",
-    r.exam_id,
-    "exam id =",
-    exam.id
-  );
-
-  return String(r.exam_id) === String(exam.id);
-}) || null;
+          const result =
+            results?.find((r: any) => String(r.exam_id) === String(exam.id)) || null;
 
           return {
             ...exam,
@@ -119,13 +113,11 @@ const result = results?.find((r: any) => {
     <StudentLayout>
       <main className="flex-1 overflow-y-auto">
         <div className="px-6 lg:px-8 py-6 lg:py-8">
-
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl lg:text-4xl font-black text-gray-900 dark:text-white mb-2">
               الامتحانات
             </h1>
-
             <p className="text-gray-500 dark:text-gray-400 text-sm lg:text-base">
               جميع الاختبارات والنتائج الخاصة بك
             </p>
@@ -142,7 +134,6 @@ const result = results?.find((r: any) => {
               <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2">
                 لا توجد امتحانات
               </h2>
-
               <p className="text-gray-500 dark:text-gray-400">
                 لا توجد امتحانات متاحة حالياً.
               </p>
@@ -152,143 +143,106 @@ const result = results?.find((r: any) => {
             <div className="space-y-5 lg:space-y-6">
               {exams.map((exam: any) => {
                 const hasResult = !!exam.result;
+                const passed = exam.result?.passed;
 
                 return (
                   <div
                     key={exam.id}
-                    className="
-                      bg-white
-                      dark:bg-[#111111]
-                      border
-                      border-gray-100
-                      dark:border-[#2A2A2A]
-                      rounded-3xl
-                      p-6
-                      lg:p-8
-                      shadow-sm
-                      hover:shadow-xl
-                      hover:border-[#B348FE]
-                      transition-all
-                      duration-300
-                    "
+                    className={`bg-white dark:bg-[#111111] border rounded-3xl p-6 lg:p-8 shadow-sm hover:shadow-xl transition-all duration-300 ${
+                      hasResult
+                        ? passed
+                          ? "border-emerald-200 dark:border-emerald-900 hover:border-emerald-400"
+                          : "border-rose-200 dark:border-rose-900 hover:border-rose-400"
+                        : "border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE]"
+                    }`}
                   >
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-
                       {/* Exam Info */}
                       <div className="flex-1 space-y-3">
-
-                        <h2 className="text-xl lg:text-2xl font-black text-gray-900 dark:text-white">
-                          {exam.title}
-                        </h2>
+                        <div className="flex items-center gap-3">
+                          <h2 className="text-xl lg:text-2xl font-black text-gray-900 dark:text-white">
+                            {exam.title}
+                          </h2>
+                          {hasResult && (
+                            <span
+                              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black ${
+                                passed
+                                  ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
+                                  : "bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400"
+                              }`}
+                            >
+                              {passed ? "✓ ناجح" : "✕ راسب"}
+                            </span>
+                          )}
+                        </div>
 
                         <p className="text-sm lg:text-base text-gray-500 dark:text-gray-400">
                           {exam.lessonTitle}
                         </p>
 
                         <div className="flex flex-wrap gap-4 text-sm font-bold text-gray-500 dark:text-gray-400">
-                          <span>
-                            📝 {exam.exam_questions?.length || 0} أسئلة
-                          </span>
-
-                          <span>
-                            ⏱️ {exam.duration} دقيقة
-                          </span>
+                          <span>📝 {exam.exam_questions?.length || 0} أسئلة</span>
+                          <span>⏱️ {exam.duration} دقيقة</span>
                         </div>
 
-                        {/* Result */}
                         {hasResult && (
-                          <div className="flex flex-wrap items-center gap-3 pt-2">
+                          <div className="flex flex-wrap items-center gap-3 pt-1">
+                            <span className="text-sm font-bold text-gray-500 dark:text-gray-400">
+                              عدد الإجابات الصحيحة: {exam.result.correct_answers ?? "-"} / {exam.result.total_questions ?? exam.exam_questions?.length ?? "-"}
+                            </span>
+                          </div>
+                        )}
+                      </div>
 
+                      {/* Action / Score */}
+                      <div className="flex-shrink-0 flex items-center gap-4">
+                        {hasResult ? (
+                          <>
+                            {/* Score Circle */}
                             <div
-                              className={`
-                                inline-flex
-                                items-center
-                                gap-2
-                                px-4
-                                py-2
-                                rounded-xl
-                                font-black
-                                ${
-                                  exam.result.passed
-                                    ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
-                                    : "bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400"
-                                }
-                              `}
+                              className={`w-20 h-20 rounded-2xl border-4 flex flex-col items-center justify-center flex-shrink-0 ${
+                                passed
+                                  ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-950/20"
+                                  : "border-rose-400 bg-rose-50 dark:bg-rose-950/20"
+                              }`}
                             >
-                              {exam.result.passed
-                                ? "✓ ناجح"
-                                : "✕ راسب"}
-
-                              <span>
+                              <span
+                                className={`text-xl font-black ${
+                                  passed
+                                    ? "text-emerald-600 dark:text-emerald-400"
+                                    : "text-rose-600 dark:text-rose-400"
+                                }`}
+                              >
                                 {exam.result.percentage}%
+                              </span>
+                              <span className="text-[10px] text-gray-500 dark:text-gray-400 font-bold mt-0.5">
+                                {exam.result.score} درجة
                               </span>
                             </div>
 
-                            <span className="text-sm font-bold text-gray-500 dark:text-gray-400">
-                              الدرجة: {exam.result.score}
-                            </span>
-
-                          </div>
-                        )}
-
-                      </div>
-
-                      {/* Action */}
-                      <div className="flex-shrink-0">
-
-                        {hasResult ? (
-                          <Button
-                            variant="outline"
-                            onClick={() =>
-                              navigate(`/dashboard/exams/${exam.id}`)
-                            }
-                            className="
-                              w-full
-                              lg:w-auto
-                              border-2
-                              border-[#B348FE]
-                              text-[#B348FE]
-                              font-bold
-                              hover:bg-[#F6EEFF]
-                              dark:hover:bg-[#2B103D]
-                              hover:border-[#B348FE]
-                              transition-all
-                              duration-300
-                            "
-                          >
-                            عرض النتيجة
-                          </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => navigate(`/dashboard/exams/${exam.id}`)}
+                              className="w-full lg:w-auto border-2 border-gray-200 dark:border-[#2A2A2A] text-gray-600 dark:text-gray-300 font-bold hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-all duration-300"
+                            >
+                              التفاصيل
+                            </Button>
+                          </>
                         ) : (
                           <Button
-                            onClick={() =>
-                              navigate(`/dashboard/exams/${exam.id}`)
-                            }
-                            className="
-                              w-full
-                              lg:w-auto
-                              bg-[#B348FE]
-                              hover:bg-[#9E2FFF]
-                              text-white
-                              shadow-md
-                              hover:shadow-[0_8px_20px_rgba(179,72,254,.35)]
-                              font-bold
-                              transition-all
-                              duration-300
-                            "
+                            onClick={() => navigate(`/dashboard/exams/${exam.id}`)}
+                            className="w-full lg:w-auto bg-[#B348FE] hover:bg-[#9E2FFF] text-white shadow-md hover:shadow-[0_8px_20px_rgba(179,72,254,.35)] font-bold transition-all duration-300"
                           >
                             ابدأ الامتحان
                           </Button>
                         )}
-
                       </div>
-
                     </div>
                   </div>
                 );
               })}
             </div>
           )}
-
         </div>
       </main>
     </StudentLayout>
