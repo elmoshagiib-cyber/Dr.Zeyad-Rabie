@@ -33,7 +33,7 @@ export function ExamsPage() {
       // ==========================================
 const { data: student, error: studentError } = await supabase
   .from("students")
-  .select("auth_id")
+  .select("id")
   .eq("auth_id", user.id)
   .single();
 
@@ -73,7 +73,7 @@ const { data: student, error: studentError } = await supabase
 const { data: results, error: resultsError } = await supabase
   .from("exam_results")
   .select("*")
-  .eq("student_id", student.auth_id);
+  .eq("student_id", student.id);
 
 
       // ==========================================

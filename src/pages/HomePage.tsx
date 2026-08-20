@@ -1345,18 +1345,18 @@ duration-300
             </div>
           </div>
 
-          <h2
-            className="
-              text-2xl
-              sm:text-3xl
-              lg:text-4xl
-              font-black
-              text-slate-900
-              dark:text-white
-            "
-          >
-            الكورسات المقترحة
-          </h2>
+<h2
+  className="
+    text-[26px]
+    sm:text-[32px]
+    lg:text-[40px]
+    font-black
+    text-slate-900
+    dark:text-white
+  "
+>
+  الكورسات المقترحة
+</h2>
 
           <p
             className="
