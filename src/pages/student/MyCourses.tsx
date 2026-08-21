@@ -65,14 +65,14 @@ export function MyCoursesPage() {
   return (
     <StudentLayout>
       <>
-        <div className="p-4 sm:p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-6 bg-white min-h-screen">
 
           {/* Header */}
           <div className="text-right">
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900">
               كورساتي
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+            <p className="text-slate-500 text-sm mt-1">
               {enrolledCourses.length} كورس مشترك فيه
             </p>
           </div>
@@ -83,20 +83,20 @@ export function MyCoursesPage() {
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-[420px] rounded-3xl bg-slate-100 dark:bg-[#1a1a1a] animate-pulse"
+                  className="h-[420px] rounded-3xl bg-slate-100 animate-pulse"
                 />
               ))}
             </div>
           ) : enrolledCourses.length === 0 ? (
             /* Empty state */
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-20 h-20 rounded-full bg-[#F6EEFF] dark:bg-[#B348FE]/10 flex items-center justify-center mb-5">
+              <div className="w-20 h-20 rounded-full bg-[#F6EEFF] flex items-center justify-center mb-5">
                 <BookOpen className="text-[#B348FE]" size={36} />
               </div>
-              <h3 className="text-lg font-black text-slate-800 dark:text-white">
+              <h3 className="text-lg font-black text-slate-800">
                 لسه مشتركتش في أي كورس
               </h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 max-w-xs">
+              <p className="text-slate-500 text-sm mt-2 max-w-xs">
                 تصفح الكورسات المتاحة وابدأ رحلتك التعليمية دلوقتي
               </p>
             </div>
@@ -120,15 +120,12 @@ export function MyCoursesPage() {
                     key={course.id}
                     className="
                       bg-white
-                      dark:bg-[#111111]
                       border
-                      border-emerald-100
-                      dark:border-[#1f3a2c]
+                      border-[#EAD8FF]
                       rounded-[26px]
                       overflow-hidden
                       shadow-[0_4px_20px_rgba(15,23,42,.06)]
-                      dark:shadow-[0_4px_20px_rgba(0,0,0,.3)]
-                      hover:shadow-[0_18px_40px_rgba(16,185,129,.15)]
+                      hover:shadow-[0_18px_40px_rgba(179,72,254,.15)]
                       transition-all
                       duration-300
                     "
@@ -171,7 +168,7 @@ export function MyCoursesPage() {
                       {/* زرار تشغيل */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <div className="w-12 h-12 rounded-full bg-white/95 flex items-center justify-center shadow-xl">
-                          <Play className="text-emerald-600 mr-[-2px]" size={18} fill="currentColor" />
+                          <Play className="text-[#B348FE] mr-[-2px]" size={18} fill="currentColor" />
                         </div>
                       </div>
                     </div>
@@ -180,9 +177,9 @@ export function MyCoursesPage() {
                     <div className="p-4 sm:p-5">
                       <h3
                         className="
-                          font-black text-slate-900 dark:text-white
+                          font-black text-slate-900
                           text-[16px] sm:text-[18px] leading-snug
-                          cursor-pointer hover:text-emerald-600 transition-colors
+                          cursor-pointer hover:text-[#B348FE] transition-colors
                           mb-2
                         "
                         onClick={() => navigate(`/courses/${course.id}`)}
@@ -196,7 +193,7 @@ export function MyCoursesPage() {
                           <p
                             className={`
                               text-[13px] sm:text-sm leading-6
-                              text-slate-500 dark:text-slate-400
+                              text-slate-500
                               whitespace-pre-line
                               ${!isExpanded && isLongDescription ? "line-clamp-3" : ""}
                             `}
@@ -211,8 +208,8 @@ export function MyCoursesPage() {
                               }
                               className="
                                 mt-1 inline-flex items-center gap-1
-                                text-[13px] font-bold text-emerald-600
-                                hover:text-emerald-700
+                                text-[13px] font-bold text-[#B348FE]
+                                hover:text-[#9E2FFF]
                                 transition-colors
                               "
                             >
@@ -232,11 +229,11 @@ export function MyCoursesPage() {
 
                       {/* التواريخ */}
                       <div className="flex flex-col gap-1.5 mb-4">
-                        <div className="flex items-center justify-end gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+                        <div className="flex items-center justify-end gap-1.5 text-xs text-slate-400">
                           <span>{formatDate(course.created_at)}</span>
                           <HiOutlineCalendarDays size={15} />
                         </div>
-                        <div className="flex items-center justify-end gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+                        <div className="flex items-center justify-end gap-1.5 text-xs text-slate-400">
                           <span>{formatDate(course.updated_at || course.created_at)}</span>
                           <HiOutlineFolder size={15} />
                         </div>
@@ -249,8 +246,8 @@ export function MyCoursesPage() {
                           w-full
                           py-3
                           rounded-2xl
-                          bg-emerald-500
-                          hover:bg-emerald-600
+                          bg-[#B348FE]
+                          hover:bg-[#9E2FFF]
                           text-white
                           font-black
                           text-sm
