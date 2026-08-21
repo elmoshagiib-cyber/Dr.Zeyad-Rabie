@@ -94,8 +94,13 @@ interface HomeworkSubmission {
   id: number;
   student_id: number;
   homework_id: number;
-  score: number | null;
+  grade: number | null;
+  feedback?: string | null;
   submitted_at: string | null;
+  homeworks?: {
+    title: string;
+    total_score?: number;
+  };
 }
 
 interface LessonProgress {
@@ -405,7 +410,7 @@ const totalLessons = courseLessons.length;
   const loadHomeworkResults = async () => {
     const { data } = await supabase
       .from("homework_submissions")
-      .select("*")
+      .select("*, homeworks(title, total_score)")
       .eq("student_id", Number(id))
       .order("submitted_at", { ascending: false });
 
@@ -674,13 +679,22 @@ const uniqueCourses = [...new Set(courses.map((c) => c.course_id))];
   const highestScore = examResults.length > 0 ? Math.max(...examResults.map((e) => e.score || 0)) : 0;
   const lowestScore = examResults.length > 0 ? Math.min(...examResults.map((e) => e.score || 0)) : 0;
   
-  const completedHomework = student.completed_homework || 0;
-  const totalHomework = student.total_homework || 0;
-  const remainingHomework = totalHomework - completedHomework;
-  
-  const homeworkScores = homeworkResults.filter((h) => h.score !== null && h.score !== undefined);
-  const avgHomeworkScore = homeworkScores.length > 0 
-    ? Math.round(homeworkScores.reduce((sum, h) => sum + (h.score || 0), 0) / homeworkScores.length)
+  // الواجبات المسلّمة فعليًا (submitted_at موجود)
+  const completedHomework = homeworkResults.length;
+  const totalHomework = student.total_homework || completedHomework;
+  const remainingHomework = Math.max(totalHomework - completedHomework, 0);
+
+  // متوسط الدرجات كنسبة مئوية من الدرجة الكلية لكل واجب
+  const homeworkScores = homeworkResults.filter(
+    (h) => h.grade !== null && h.grade !== undefined
+  );
+  const avgHomeworkScore = homeworkScores.length > 0
+    ? Math.round(
+        homeworkScores.reduce((sum, h) => {
+          const total = h.homeworks?.total_score || 100;
+          return sum + (h.grade! / total) * 100;
+        }, 0) / homeworkScores.length
+      )
     : 0;
 
 const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
@@ -807,7 +821,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">واجب محلول</p>
-                    <h3 className="text-2xl lg:text-3xl font-black text-emerald-600">{student.completed_homework || 0}</h3>
+                    <h3 className="text-2xl lg:text-3xl font-black text-emerald-600">{completedHomework}</h3>
                   </div>
                   <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
                     <CheckCircle2 className="text-emerald-600" size={24} />
@@ -1216,24 +1230,39 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 {homeworkResults.length > 0 ? (
                   <div className="space-y-3">
                     <h4 className="font-black text-gray-900 dark:text-white text-sm mb-3">آخر الواجبات</h4>
-                    {homeworkResults.slice(0, 5).map((hw) => (
-                      <div key={hw.id} className="flex items-center justify-between bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-3 border border-gray-100 dark:border-[#2A2A2A]">
-                        <div className="flex-1">
-                          <p className="text-sm font-bold text-gray-900 dark:text-white">واجب #{hw.homework_id}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            {hw.submitted_at ? new Date(hw.submitted_at).toLocaleDateString("ar-EG") : "-"}
-                          </p>
+                    {homeworkResults.slice(0, 5).map((hw) => {
+                      const total = hw.homeworks?.total_score || 100;
+                      const hasGrade = hw.grade !== null && hw.grade !== undefined;
+                      const percent = hasGrade ? Math.round((hw.grade! / total) * 100) : null;
+
+                      return (
+                        <div key={hw.id} className="flex items-center justify-between bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-3 border border-gray-100 dark:border-[#2A2A2A]">
+                          <div className="flex-1">
+                            <p className="text-sm font-bold text-gray-900 dark:text-white">
+                              {hw.homeworks?.title || `واجب #${hw.homework_id}`}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                              {hw.submitted_at ? new Date(hw.submitted_at).toLocaleDateString("ar-EG") : "-"}
+                            </p>
+                          </div>
+                          <div className="text-left">
+                            {hasGrade ? (
+                              <p className={`text-lg font-black ${
+                                percent! >= 80 ? "text-emerald-600" :
+                                percent! >= 50 ? "text-amber-600" : "text-red-600"
+                              }`}>
+                                {hw.grade}
+                                <span className="text-xs text-gray-400 font-bold"> / {total}</span>
+                              </p>
+                            ) : (
+                              <span className="text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/30 px-2 py-1 rounded-lg">
+                                بانتظار التصحيح
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-left">
-                          <p className={`text-lg font-black ${
-                            (hw.score || 0) >= 80 ? "text-emerald-600" :
-                            (hw.score || 0) >= 50 ? "text-amber-600" : "text-red-600"
-                          }`}>
-                            {hw.score || 0}%
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="py-8 text-center">
