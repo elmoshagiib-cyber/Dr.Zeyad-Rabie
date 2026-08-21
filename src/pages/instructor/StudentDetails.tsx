@@ -453,13 +453,19 @@ const totalLessons = courseLessons.length;
     );
     if (!confirmed) return;
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("student_courses")
       .update({ active: newActive })
-      .eq("id", course.id);
+      .eq("id", course.id)
+      .select();
 
     if (error) {
-      alert("حصل خطأ أثناء تحديث حالة الكورس");
+      alert("حصل خطأ أثناء تحديث حالة الكورس: " + error.message);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      alert("لم يتم التحديث. غالبًا صلاحيات قاعدة البيانات (RLS) لا تسمح بتعديل هذا الجدول.");
       return;
     }
 
