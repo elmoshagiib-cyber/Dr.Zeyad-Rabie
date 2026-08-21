@@ -43,6 +43,7 @@ import SubscriptionCodes from "./pages/instructor/SubscriptionCodes";
 import { HomeworkDetailsPage } from "./pages/student/HomeworkDetailsPage";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useVisitTracker } from "./hooks/useVisitTracker";
 /* Admin */
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 
@@ -72,6 +73,11 @@ function ProtectedRoute({
   }
 
   return <>{children}</>;
+}
+
+function VisitTracker() {
+  useVisitTracker();
+  return null;
 }
 
 function DomainRedirect() {
@@ -392,6 +398,7 @@ export default function App() {
   />
 
 <DomainRedirect />
+<VisitTracker />
 
 <div className="overflow-x-hidden w-full">
   <AppRoutes />

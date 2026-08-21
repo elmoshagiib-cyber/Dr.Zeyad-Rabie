@@ -147,11 +147,7 @@ const adminNav: NavItem[] = [
     path: "/admin/analytics",
     icon: <BarChart2 size={20} />,
   },
-  {
-    label: "الإعدادات",
-    path: "/admin/settings",
-    icon: <Settings size={20} />,
-  },
+
 
 ];
 

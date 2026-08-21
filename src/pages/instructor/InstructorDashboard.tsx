@@ -45,6 +45,7 @@ export function InstructorDashboard() {
   const [homeworks, setHomeworks] = useState<any[]>([]);
 const [exams, setExams] = useState<any[]>([]);
   const [studentCourses, setStudentCourses] = useState<any[]>([]);
+  const [visits, setVisits] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen]     = useState(false);
   const [loading, setLoading]             = useState(true);
 
@@ -70,6 +71,7 @@ const [
   studentCoursesRes,
   homeworksRes,
   examsRes,
+  visitsRes,
 ] = await Promise.all([
 
   supabase
@@ -102,6 +104,10 @@ supabase
   .select("title, created_at")
   .order("created_at", { ascending: false }),
 
+  supabase
+    .from("site_visits")
+    .select("visitor_id, created_at"),
+
 ]);
 
     setCourses(coursesRes.data || []);
@@ -109,6 +115,7 @@ supabase
     setNotifications(notificationsRes.data || []);
     setHomeworks(homeworksRes.data || []);
 setExams(examsRes.data || []);
+setVisits(visitsRes.data || []);
     setStudentCourses(studentCoursesRes.data || []);
     setLoading(false);
     console.log("Courses", coursesRes.data);
@@ -130,7 +137,45 @@ console.log("Student Courses", studentCoursesRes.data);
   const totalNotifications = notifications.length;
   const totalSubscriptions = studentCourses.length;
   const recentStudents     = students.slice(0, 10);
+ const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const today = startOfDay(new Date());
+  const yesterdayStart = new Date(today); yesterdayStart.setDate(today.getDate() - 1);
+  const weekStart = new Date(today); weekStart.setDate(today.getDate() - today.getDay());
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const yearStart = new Date(today.getFullYear(), 0, 1);
 
+  const inRange = (start: Date, end?: Date) =>
+    visits.filter((v) => {
+      const t = new Date(v.created_at);
+      return t >= start && (!end || t < end);
+    });
+
+  const uniqueCount = (arr: any[]) => new Set(arr.map((v) => v.visitor_id)).size;
+
+  const visitStats = {
+    today:     { total: inRange(today).length,          unique: uniqueCount(inRange(today)) },
+    yesterday: { total: inRange(yesterdayStart, today).length, unique: uniqueCount(inRange(yesterdayStart, today)) },
+    week:      { total: inRange(weekStart).length,       unique: uniqueCount(inRange(weekStart)) },
+    month:     { total: inRange(monthStart).length,       unique: uniqueCount(inRange(monthStart)) },
+    year:      { total: inRange(yearStart).length,        unique: uniqueCount(inRange(yearStart)) },
+  };
+
+  const changeVsYesterday = visitStats.yesterday.total > 0
+    ? Math.round(((visitStats.today.total - visitStats.yesterday.total) / visitStats.yesterday.total) * 100)
+    : (visitStats.today.total > 0 ? 100 : 0);
+
+  const changeMonthVsPrev = 0; // ممكن تحسبها لو عندك بيانات الشهر اللي فات
+
+  const last7DaysVisits = Array.from({ length: 7 }).map((_, i) => {
+    const day = new Date(today); day.setDate(day.getDate() - (6 - i));
+    const nextDay = new Date(day); nextDay.setDate(day.getDate() + 1);
+    const dayVisits = inRange(day, nextDay);
+    return {
+      day: day.toLocaleDateString("ar-EG", { weekday: "short", day: "2-digit", month: "2-digit" }),
+      إجمالي: dayVisits.length,
+      فريد: uniqueCount(dayVisits),
+    };
+  });
   const courseStudentsMap = new Map<string, number>();
   studentCourses.forEach((item) => {
     courseStudentsMap.set(item.course_id, (courseStudentsMap.get(item.course_id) || 0) + 1);
@@ -428,6 +473,60 @@ font-medium">
       </div>
 
       <div className="space-y-4 sm:space-y-6">
+
+        {/* ── Visitors stats ── */}
+        <Card className="bg-white border border-slate-100 rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+                <BarChart2 className="text-indigo-600" size={18} />
+              </div>
+              <div className="text-right">
+                <h2 className="text-lg sm:text-xl font-black text-slate-900">إحصائيات الزوار</h2>
+                <p className="text-slate-400 text-xs mt-0.5">تتبع حركة الزوار الحقيقية على المنصة</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-6">
+              {[
+                { label: "هذا العام",   data: visitStats.year },
+                { label: "هذا الشهر",  data: visitStats.month },
+                { label: "هذا الأسبوع", data: visitStats.week },
+                { label: "أمس",        data: visitStats.yesterday },
+                { label: "اليوم",      data: visitStats.today },
+              ].map((item, i) => (
+                <div key={i} className="rounded-2xl border border-slate-100 p-3 sm:p-4 text-center">
+                  <p className="text-xs text-slate-500 font-bold">{item.label}</p>
+                  <p className="text-2xl sm:text-3xl font-black mt-1">{item.data.total}</p>
+                  <p className="text-xs text-slate-400">زيارة</p>
+                  <p className="text-xs text-slate-500 mt-1">{item.data.unique} فريد</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="text-right mb-2">
+              <h3 className="font-bold text-slate-900 text-sm sm:text-base">الزوار — آخر 7 أيام</h3>
+              <p className="text-xs text-slate-400">مقارنة الزيارات الكلية والزوار الفريدين يومياً</p>
+            </div>
+            <div className="h-56 sm:h-64" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={last7DaysVisits}>
+                  <defs>
+                    <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="day" fontSize={11} />
+                  <Tooltip />
+                  <Area type="monotone" dataKey="إجمالي" stroke="#6366f1" fill="url(#colorTotal)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="فريد" stroke="#a855f7" fill="transparent" strokeWidth={2} strokeDasharray="4 4" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* ── Stats grid ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
