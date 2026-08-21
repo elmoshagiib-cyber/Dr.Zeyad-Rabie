@@ -113,14 +113,15 @@ const targetTypeMap: Record<string, string> = {
   student: "طالب محدد",
 };
 
-const predefinedColors = [
-  { name: "بنفسجي", value: "#B348FE" },
-  { name: "أزرق", value: "#3B82F6" },
-  { name: "أخضر", value: "#10B981" },
-  { name: "برتقالي", value: "#F59E0B" },
-  { name: "أحمر", value: "#EF4444" },
-  { name: "وردي", value: "#EC4899" },
-];
+const typeColorMap: Record<string, string> = {
+  lecture: "#3B82F6",
+  exam: "#8B5CF6",
+  homework: "#F59E0B",
+  live: "#EF4444",
+  announcement: "#10B981",
+  offer: "#A855F7",
+  general: "#B348FE",
+};
 
 const filterOptions = [
   { key: "all", label: "الكل" },
@@ -150,10 +151,10 @@ export default function InstructorNotifications() {
     content: "",
     type: "general",
     isPinned: false,
-    color: "#B348FE",
     targetType: "all",
     targetValue: "",
   });
+  const [historySearch, setHistorySearch] = useState("");
 
   const loadData = useCallback(async () => {
     try {
@@ -239,9 +240,20 @@ if (settingsRes.error) {
   }, [students, studentSearch]);
 
   const filteredNotifications = useMemo(() => {
-    if (activeFilter === "all") return notifications;
-    return notifications.filter((n) => n.type === activeFilter);
-  }, [notifications, activeFilter]);
+    let result = notifications;
+    if (activeFilter !== "all") {
+      result = result.filter((n) => n.type === activeFilter);
+    }
+    if (historySearch.trim()) {
+      const q = historySearch.trim().toLowerCase();
+      result = result.filter(
+        (n) =>
+          n.title.toLowerCase().includes(q) ||
+          n.content.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [notifications, activeFilter, historySearch]);
 
 const getStageFromGrade = (grade: string): string => {
   if (grade.includes("ثانوي")) return "الثانوية";
@@ -338,7 +350,7 @@ const getStageFromGrade = (grade: string): string => {
     : formData.type === "offer"
     ? "gift"
     : "bell",
-          color: formData.color,
+          color: typeColorMap[formData.type] || "#B348FE",
         })
         .select()
         .single();
@@ -364,7 +376,6 @@ const studentNotifications = recipientIds.map((studentId) => ({
         content: "",
         type: "general",
         isPinned: false,
-        color: "#B348FE",
         targetType: "all",
         targetValue: "",
       });
@@ -386,7 +397,6 @@ const studentNotifications = recipientIds.map((studentId) => ({
       content: notification.content,
       type: notification.type,
       isPinned: notification.is_pinned,
-      color: notification.color || "#B348FE",
       targetType: notification.target_type,
       targetValue: notification.target_value || "",
     });
@@ -464,10 +474,58 @@ const { error: studentNotifError } = await supabase
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="relative overflow-hidden rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-6 lg:px-8 py-6 text-white shadow-lg mb-8"
           >
-            <h1 className="text-3xl font-black text-slate-900 mb-2">مركز الإشعارات</h1>
-            <p className="text-slate-600">إدارة وإرسال الإشعارات للطلاب</p>
+            <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+            <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+
+            <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
+                  <Bell className="text-amber-400" size={22} />
+                </div>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-black">سجل الإشعارات</h1>
+                  <p className="text-white/60 text-sm mt-0.5">متابعة جميع الإشعارات المرسلة للطلاب عبر المنصة</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {notifications.length > 0 && (
+                  <button
+                    onClick={async () => {
+                      if (!confirm("هل أنت متأكد من مسح كل السجل؟ لا يمكن التراجع عن هذا الإجراء.")) return;
+                      try {
+                        await supabase.from("notification_reads").delete().neq("id", 0);
+                        await supabase.from("notifications").delete().neq("id", 0);
+                        toast.success("تم مسح السجل بنجاح");
+                        await loadData();
+                      } catch (error) {
+                        toast.error("حدث خطأ أثناء مسح السجل");
+                      }
+                    }}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-500/90 hover:bg-red-500 text-white text-sm font-bold transition-colors"
+                  >
+                    <Trash2 size={16} />
+                    مسح السجل
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowSendForm(!showSendForm)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors"
+                >
+                  <Send size={16} />
+                  إرسال إشعار يدوي
+                </button>
+                <button
+                  onClick={() => setShowSettings(!showSettings)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-slate-900 text-sm font-bold hover:bg-white/90 transition-colors"
+                >
+                  <Settings size={16} />
+                  الإعدادات
+                </button>
+              </div>
+            </div>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -579,44 +637,21 @@ const { error: studentNotifError } = await supabase
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-bold text-slate-700 mb-2">
-                            نوع الإشعار
-                          </label>
-                          <select
-                            value={formData.type}
-                            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
-                          >
-                            {Object.entries(notificationTypeMap).map(([key, value]) => (
-                              <option key={key} value={key}>
-                                {value.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-bold text-slate-700 mb-2">
-                            اللون
-                          </label>
-                          <div className="flex gap-2 flex-wrap">
-                            {predefinedColors.map((color) => (
-                              <button
-                                key={color.value}
-                                onClick={() => setFormData({ ...formData, color: color.value })}
-                                className={`w-10 h-10 rounded-lg border-2 transition-all ${
-                                  formData.color === color.value
-                                    ? "border-slate-900 scale-110"
-                                    : "border-slate-200 hover:scale-105"
-                                }`}
-                                style={{ backgroundColor: color.value }}
-                                title={color.name}
-                              />
-                            ))}
-                          </div>
-                        </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                          نوع الإشعار
+                        </label>
+                        <select
+                          value={formData.type}
+                          onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
+                        >
+                          {Object.entries(notificationTypeMap).map(([key, value]) => (
+                            <option key={key} value={key}>
+                              {value.label}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       <div>
@@ -861,10 +896,17 @@ const { error: studentNotifError } = await supabase
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6"
           >
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
               <h2 className="text-xl font-black text-slate-900">سجل الإشعارات</h2>
-              <div className="flex items-center gap-2">
-                <Filter size={18} className="text-slate-400" />
+              <div className="relative w-full sm:w-72">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <input
+                  type="text"
+                  value={historySearch}
+                  onChange={(e) => setHistorySearch(e.target.value)}
+                  placeholder="عنوان الإشعار، محتوى، أو اسم الطالب..."
+                  className="w-full pr-9 pl-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
+                />
               </div>
             </div>
 
