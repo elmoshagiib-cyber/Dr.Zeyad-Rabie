@@ -977,11 +977,11 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
             <CardContent className="p-6 lg:p-8">
               <div className="mb-6">
-                <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">تقدم الطالب</h2>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">نظرة شاملة على إنجاز ومتابعة الطالب</p>
+                <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">نظرة عامة على الأداء</h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">ملخص شامل لتقدم ونشاط الطالب</p>
               </div>
 
-              <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-6 border border-gray-100 dark:border-[#2A2A2A]">
+              <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-6 border border-gray-100 dark:border-[#2A2A2A] mb-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-black text-gray-900 dark:text-white">التقدم الكلي في جميع الكورسات</h3>
                   <span className="text-3xl font-black text-[#B348FE]">{overallProgress}%</span>
@@ -992,33 +992,47 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     style={{ width: `${overallProgress}%` }}
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                  <div className="bg-white dark:bg-[#111111] rounded-xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">المحاضرات</p>
-                    <p className="text-gray-900 dark:text-white font-black text-sm">
-                      {realWatchedLessons} / {realTotalLessons}
-                    </p>
-                  </div>
-                  <div className="bg-white dark:bg-[#111111] rounded-xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">الواجبات</p>
-                    <p className="text-gray-900 dark:text-white font-black text-sm">
-                      {student.completed_homework || 0} / {student.total_homework || 0}
-                    </p>
-                  </div>
-                  <div className="bg-white dark:bg-[#111111] rounded-xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">الحضور</p>
-                    <p className={`font-black text-sm ${
-                      (student.attendance_percentage || 0) >= 80
-                        ? "text-emerald-600"
-                        : (student.attendance_percentage || 0) >= 50
-                        ? "text-amber-600"
-                        : "text-red-600"
-                    }`}>
-                      {student.attendance_percentage || 0}%
-                    </p>
-                  </div>
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">المحاضرات</p>
+                  <p className="text-gray-900 dark:text-white font-black text-lg">
+                    {realTotalLessons > 0 ? `${realWatchedLessons} / ${realTotalLessons}` : "لا يوجد دروس بعد"}
+                  </p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">الواجبات</p>
+                  <p className="text-gray-900 dark:text-white font-black text-lg">
+                    {student.completed_homework || 0} / {student.total_homework || 0}
+                  </p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">الحضور</p>
+                  <p className={`font-black text-lg ${
+                    (student.attendance_percentage || 0) >= 80
+                      ? "text-emerald-600"
+                      : (student.attendance_percentage || 0) >= 50
+                      ? "text-amber-600"
+                      : "text-red-600"
+                  }`}>
+                    {student.attendance_percentage || 0}%
+                  </p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">وقت المشاهدة</p>
+                  <p className="text-gray-900 dark:text-white font-black text-lg">
+                    {totalWatchHours}س {remainingMinutes}د
+                  </p>
                 </div>
               </div>
+
+              {lastWatchedProgress?.last_watched_at && (
+                <div className="mt-4 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                  <Calendar size={14} />
+                  آخر مشاهدة: {new Date(lastWatchedProgress.last_watched_at).toLocaleDateString("ar-EG")}
+                </div>
+              )}
             </CardContent>
           </Card>
 
