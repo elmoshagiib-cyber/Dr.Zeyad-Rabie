@@ -65,14 +65,14 @@ export function MyCoursesPage() {
   return (
     <StudentLayout>
       <>
-        <div className="p-4 sm:p-6 space-y-6 bg-white min-h-screen">
+        <div className="p-4 sm:p-6 space-y-6 min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#0B0B0B] dark:via-[#111111] dark:to-[#0B0B0B]">
 
           {/* Header */}
           <div className="text-right">
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white dark:text-white">
               كورساتي
             </h1>
-            <p className="text-slate-500 text-sm mt-1">
+            <p className="text-slate-500 dark:text-gray-400 text-sm mt-1">
               {enrolledCourses.length} كورس مشترك فيه
             </p>
           </div>
@@ -83,20 +83,20 @@ export function MyCoursesPage() {
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-[420px] rounded-3xl bg-slate-100 animate-pulse"
+                  className="h-[420px] rounded-3xl bg-slate-100 dark:bg-[#1A1A1A] animate-pulse"
                 />
               ))}
             </div>
           ) : enrolledCourses.length === 0 ? (
             /* Empty state */
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-20 h-20 rounded-full bg-[#F6EEFF] flex items-center justify-center mb-5">
+              <div className="w-20 h-20 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center mb-5">
                 <BookOpen className="text-[#B348FE]" size={36} />
               </div>
-              <h3 className="text-lg font-black text-slate-800">
+              <h3 className="text-lg font-black text-slate-800 dark:text-white">
                 لسه مشتركتش في أي كورس
               </h3>
-              <p className="text-slate-500 text-sm mt-2 max-w-xs">
+              <p className="text-slate-500 dark:text-gray-400 text-sm mt-2 max-w-xs">
                 تصفح الكورسات المتاحة وابدأ رحلتك التعليمية دلوقتي
               </p>
             </div>
@@ -118,17 +118,17 @@ export function MyCoursesPage() {
                 return (
                   <div
                     key={course.id}
-                    className="
-                      bg-white
-                      border
-                      border-[#EAD8FF]
-                      rounded-[26px]
-                      overflow-hidden
-                      shadow-[0_4px_20px_rgba(15,23,42,.06)]
-                      hover:shadow-[0_18px_40px_rgba(179,72,254,.15)]
-                      transition-all
-                      duration-300
-                    "
+                   className="
+  bg-white dark:bg-[#111111]
+  border
+  border-[#EAD8FF] dark:border-[#2A2A2A]
+  rounded-[26px]
+  overflow-hidden
+  shadow-[0_4px_20px_rgba(15,23,42,.06)]
+  hover:shadow-[0_18px_40px_rgba(179,72,254,.15)]
+  transition-all
+  duration-300
+"
                   >
                     {/* Thumbnail */}
                     <div
@@ -229,11 +229,11 @@ export function MyCoursesPage() {
 
                       {/* التواريخ */}
                       <div className="flex flex-col gap-1.5 mb-4">
-                        <div className="flex items-center justify-end gap-1.5 text-xs text-slate-400">
+                        <div className="flex items-center justify-end gap-1.5 text-xs text-slate-400 dark:text-gray-500">
                           <span>{formatDate(course.created_at)}</span>
                           <HiOutlineCalendarDays size={15} />
                         </div>
-                        <div className="flex items-center justify-end gap-1.5 text-xs text-slate-400">
+                        <div className="flex items-center justify-end gap-1.5 text-xs text-slate-400 dark:text-gray-500">
                           <span>{formatDate(course.updated_at || course.created_at)}</span>
                           <HiOutlineFolder size={15} />
                         </div>
