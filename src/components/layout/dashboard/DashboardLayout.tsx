@@ -22,7 +22,7 @@ className="
   flex
   items-stretch
   min-h-screen
-  bg-slate-50
+  bg-white
   text-slate-900
 "
 >
@@ -95,7 +95,7 @@ className="
   className="
     flex-1
     overflow-y-auto
-    bg-slate-50
+    bg-white
     p-4
     sm:px-4
     sm:py-4
