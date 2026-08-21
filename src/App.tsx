@@ -26,6 +26,7 @@ import { LeaderboardPage } from "./pages/student/LeaderboardPage";
 import { MyCoursesPage } from "./pages/student/MyCourses";
 import { HomeworkPage } from "./pages/student/HomeworkPage";
 import { ExamsPage } from "./pages/student/ExamsPage";
+import ForumPage from "./pages/student/ForumPage";
 import GradeCoursesPage from "./pages/GradeCoursesPage";
 
 /* Instructor */
@@ -192,22 +193,31 @@ function AppRoutes() {
 />
 
       <Route
-        path="/dashboard/announcements"
-        element={
-          <ProtectedRoute roles={["student"]}>
-            <AnnouncementsPage />
-          </ProtectedRoute>
-        }
-      />
+  path="/dashboard/announcements"
+  element={
+    <ProtectedRoute roles={["student"]}>
+      <AnnouncementsPage />
+    </ProtectedRoute>
+  }
+/>
 
-      <Route
-        path="/dashboard/leaderboard"
-        element={
-          <ProtectedRoute roles={["student"]}>
-            <LeaderboardPage />
-          </ProtectedRoute>
-        }
-      />
+<Route
+  path="/dashboard/forum"
+  element={
+    <ProtectedRoute roles={["student"]}>
+      <ForumPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/dashboard/leaderboard"
+  element={
+    <ProtectedRoute roles={["student"]}>
+      <LeaderboardPage />
+    </ProtectedRoute>
+  }
+/>
 
       <Route
         path="/profile"

@@ -20,6 +20,7 @@ import {
   Video,
   QrCode,
   Home,
+  MessageCircle,
 } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { useState, useEffect } from "react";
@@ -32,6 +33,11 @@ interface NavItem {
 }
 
 const studentNav: NavItem[] = [
+  {
+    label: "الرئيسية",
+    path: "/",
+    icon: <Home size={20} />,
+  },
   {
     label: "كورساتي",
     path: "/dashboard/courses",
@@ -48,26 +54,25 @@ const studentNav: NavItem[] = [
     icon: <ClipboardList size={20} />,
   },
   {
+    label: "المنتدى",
+    path: "/dashboard/forum",
+    icon: <MessageCircle size={20} />,
+  },
+  {
     label: "المتصدرون",
     path: "/dashboard/leaderboard",
     icon: <Trophy size={20} />,
   },
   {
-    label: "الاشعارات",
+    label: "الإشعارات",
     path: "/dashboard/announcements",
     icon: <Bell size={20} />,
-    
   },
   {
     label: "ملفي الشخصي",
     path: "/profile",
     icon: <User size={20} />,
   },
-  {
-  label: "الرئيسية",
-  path: "/",
-  icon: <Home size={20} />,
-},
 ];
 
 const instructorNav: NavItem[] = [
