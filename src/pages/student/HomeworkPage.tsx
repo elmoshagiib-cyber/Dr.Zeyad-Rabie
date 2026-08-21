@@ -359,7 +359,7 @@ return (
                       )}
 
                       {/* Teacher Feedback */}
-                      {hw.submission?.teacher_comment && (
+                      {hw.submission?.feedback && (
                         <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-5 lg:p-6">
                           <div className="flex items-start gap-4">
                             <div className="bg-[#F6EEFF] dark:bg-[#2B103D] p-3 rounded-xl flex-shrink-0">
@@ -370,7 +370,7 @@ return (
                                 ملاحظات المعلم
                               </p>
                               <p className="text-sm lg:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-                                {hw.submission.teacher_comment}
+                                {hw.submission.feedback}
                               </p>
                             </div>
                           </div>
