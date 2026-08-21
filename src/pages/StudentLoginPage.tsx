@@ -13,6 +13,59 @@ import HeroSection from '../components/HeroSection';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 
+function parseDeviceInfo() {
+  const ua = navigator.userAgent;
+
+  let deviceType = "Desktop";
+  if (/Mobi|Android/i.test(ua) && !/Tablet|iPad/i.test(ua)) deviceType = "Mobile";
+  else if (/Tablet|iPad/i.test(ua)) deviceType = "Tablet";
+
+  let os = "Unknown";
+  if (/Windows NT 10/i.test(ua)) os = "Windows 10/11";
+  else if (/Windows NT/i.test(ua)) os = "Windows";
+  else if (/Mac OS X/i.test(ua)) os = "macOS";
+  else if (/Android/i.test(ua)) {
+    const m = ua.match(/Android\s([0-9.]+)/);
+    os = m ? `Android ${m[1]}` : "Android";
+  } else if (/iPhone|iPad|iPod/i.test(ua)) {
+    const m = ua.match(/OS\s([0-9_]+)/);
+    os = m ? `iOS ${m[1].replace(/_/g, ".")}` : "iOS";
+  } else if (/Linux/i.test(ua)) os = "Linux";
+
+  let browser = "Unknown";
+  if (/Edg\//i.test(ua)) {
+    const m = ua.match(/Edg\/([0-9.]+)/);
+    browser = m ? `Edge ${m[1].split(".")[0]}` : "Edge";
+  } else if (/Chrome\//i.test(ua) && !/Chromium/i.test(ua)) {
+    const m = ua.match(/Chrome\/([0-9.]+)/);
+    browser = m ? `Chrome ${m[1].split(".")[0]}` : "Chrome";
+  } else if (/Firefox\//i.test(ua)) {
+    const m = ua.match(/Firefox\/([0-9.]+)/);
+    browser = m ? `Firefox ${m[1].split(".")[0]}` : "Firefox";
+  } else if (/Safari\//i.test(ua) && /Version\//i.test(ua)) {
+    const m = ua.match(/Version\/([0-9.]+)/);
+    browser = m ? `Safari ${m[1].split(".")[0]}` : "Safari";
+  }
+
+  let deviceName = "";
+  const modelMatch = ua.match(/\(([^)]+)\)/);
+  if (deviceType === "Mobile" || deviceType === "Tablet") {
+    const androidModel = ua.match(/;\s([A-Za-z0-9\- ]+)\sBuild\//);
+    if (androidModel) deviceName = androidModel[1].trim();
+    else if (/iPhone/i.test(ua)) deviceName = "iPhone";
+    else if (/iPad/i.test(ua)) deviceName = "iPad";
+  }
+
+  return {
+    device_type: deviceType,
+    device_name: deviceName || null,
+    os,
+    browser,
+    user_agent: ua,
+  };
+}
+
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useApp();
@@ -198,6 +251,31 @@ localStorage.setItem("session_token", sessionToken);
 
 // تسجيل الدخول نجح، نصفّر عداد المحاولات الفاشلة
 await supabase.rpc("reset_login_attempts", { p_phone: phone });
+
+// تسجيل بيانات الجهاز في سجل الجلسات
+try {
+  const deviceInfo = parseDeviceInfo();
+  await supabase.from("student_login_sessions").insert({
+    student_id: student.id,
+    device_type: deviceInfo.device_type,
+    device_name: deviceInfo.device_name,
+    os: deviceInfo.os,
+    browser: deviceInfo.browser,
+    user_agent: deviceInfo.user_agent,
+    last_activity_at: new Date().toISOString(),
+  });
+
+  // تحديث آخر جهاز/دخول في جدول students نفسه (للعرض السريع)
+  await supabase
+    .from("students")
+    .update({
+      last_login: new Date().toISOString(),
+      device_name: `${deviceInfo.device_type} - ${deviceInfo.browser}`,
+    })
+    .eq("id", student.id);
+} catch (sessionErr) {
+  console.log("SESSION LOG ERROR:", sessionErr);
+}
 
 login({
   

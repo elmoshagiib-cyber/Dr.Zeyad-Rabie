@@ -137,6 +137,17 @@ interface LessonDetail {
   videoDuration: number;
 }
 
+interface LoginSession {
+  id: string;
+  device_type: string | null;
+  device_name: string | null;
+  os: string | null;
+  browser: string | null;
+  first_login_at: string;
+  last_activity_at: string;
+}
+
+
 interface CourseWithProgress extends StudentCourse {
   totalLessons: number;
   completedLessons: number;
@@ -160,7 +171,9 @@ export function StudentDetails() {
   const [homeworkResults, setHomeworkResults] = useState<HomeworkSubmission[]>([]);
   const [lessonProgress, setLessonProgress] = useState<LessonProgress[]>([]);
   const [coursesWithProgress, setCoursesWithProgress] = useState<CourseWithProgress[]>([]);
-
+  const [loginSessions, setLoginSessions] = useState<LoginSession[]>([]);
+  const [sessionsPage, setSessionsPage] = useState(1);
+  const sessionsPerPage = 5;
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
 
@@ -256,6 +269,22 @@ export function StudentDetails() {
     setAvailableCourses((data as Course[]) || []);
   };
 
+    const loadLoginSessions = async () => {
+    const { data, error } = await supabase
+      .from("student_login_sessions")
+      .select("*")
+      .eq("student_id", Number(id))
+      .order("last_activity_at", { ascending: false });
+
+    if (error) {
+      console.log("Login Sessions Error:", error);
+      return;
+    }
+
+    setLoginSessions((data as LoginSession[]) || []);
+  };
+
+  
   const loadLessonProgress = async () => {
     const { data, error } = await supabase
       .from("lesson_progress")
@@ -643,7 +672,8 @@ const addCourse = async () => {
         loadCourses(),
         loadExamResults(),
         loadHomeworkResults(),
-        loadLessonProgress()
+        loadLessonProgress(),
+        loadLoginSessions()
       ]);
       setLoading(false);
     };
@@ -1401,7 +1431,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <p className="text-gray-500 dark:text-gray-400 text-sm">آخر الأنشطة والتفاعلات</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A2A]">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
@@ -1417,25 +1447,104 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A2A]">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
-                      <Activity className="text-[#B348FE]" size={20} />
-                    </div>
-                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400">آخر نشاط</p>
-                  </div>
-                  <p className="font-bold text-gray-900 dark:text-white">
-                    {student.last_activity ? new Date(student.last_activity).toLocaleString("ar-EG") : "لا يوجد"}
-                  </p>
-                </div>
-
-                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A2A]">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
                       <Monitor className="text-[#B348FE]" size={20} />
                     </div>
-                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400">الجهاز المستخدم</p>
+                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400">آخر جهاز استخدمه</p>
                   </div>
-                  <p className="font-bold text-gray-900 dark:text-white">{student.device_name || "غير محدد"}</p>
+                  <p className="font-bold text-gray-900 dark:text-white">
+                    {loginSessions[0]
+                      ? `${loginSessions[0].device_type || "-"} • ${loginSessions[0].os || "-"} • ${loginSessions[0].browser || "-"}`
+                      : student.device_name || "غير محدد"}
+                  </p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                    <Monitor className="text-[#B348FE]" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-gray-900 dark:text-white">سجل الأجهزة وتسجيلات الدخول</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{loginSessions.length} تسجيل</p>
+                  </div>
+                </div>
+              </div>
+
+              {loginSessions.length > 0 ? (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400">
+                          <th className="text-right font-bold px-6 py-3 whitespace-nowrap">نوع الجهاز</th>
+                          <th className="text-right font-bold px-6 py-3 whitespace-nowrap">اسم الجهاز</th>
+                          <th className="text-right font-bold px-6 py-3 whitespace-nowrap">نظام التشغيل</th>
+                          <th className="text-right font-bold px-6 py-3 whitespace-nowrap">المتصفح</th>
+                          <th className="text-right font-bold px-6 py-3 whitespace-nowrap">آخر نشاط</th>
+                          <th className="text-right font-bold px-6 py-3 whitespace-nowrap">تاريخ تسجيل الدخول</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {loginSessions
+                          .slice((sessionsPage - 1) * sessionsPerPage, sessionsPage * sessionsPerPage)
+                          .map((s) => (
+                            <tr key={s.id} className="border-t border-gray-100 dark:border-[#2A2A2A]">
+                              <td className="px-6 py-4 font-bold text-gray-900 dark:text-white whitespace-nowrap">{s.device_type || "-"}</td>
+                              <td className="px-6 py-4 text-gray-600 dark:text-gray-300 whitespace-nowrap">{s.device_name || "Unknown"}</td>
+                              <td className="px-6 py-4 text-gray-600 dark:text-gray-300 whitespace-nowrap">{s.os || "-"}</td>
+                              <td className="px-6 py-4 text-gray-600 dark:text-gray-300 whitespace-nowrap">{s.browser || "-"}</td>
+                              <td className="px-6 py-4 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                {new Date(s.last_activity_at).toLocaleString("ar-EG")}
+                              </td>
+                              <td className="px-6 py-4 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                {new Date(s.first_login_at).toLocaleString("ar-EG")}
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 dark:border-[#2A2A2A]">
+                    <span className="text-xs font-bold text-emerald-600">
+                      {(sessionsPage - 1) * sessionsPerPage + 1} - {Math.min(sessionsPage * sessionsPerPage, loginSessions.length)} من {loginSessions.length}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setSessionsPage((p) => Math.max(1, p - 1))}
+                        disabled={sessionsPage === 1}
+                        className="w-8 h-8 rounded-lg border border-gray-200 dark:border-[#2A2A2A] flex items-center justify-center disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-[#1A1A1A]"
+                      >
+                        ‹
+                      </button>
+                      <span className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-black">
+                        {sessionsPage}
+                      </span>
+                      <button
+                        onClick={() =>
+                          setSessionsPage((p) =>
+                            p * sessionsPerPage < loginSessions.length ? p + 1 : p
+                          )
+                        }
+                        disabled={sessionsPage * sessionsPerPage >= loginSessions.length}
+                        className="w-8 h-8 rounded-lg border border-gray-200 dark:border-[#2A2A2A] flex items-center justify-center disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-[#1A1A1A]"
+                      >
+                        ›
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="py-16 text-center">
+                  <Monitor className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />
+                  <p className="text-gray-500 dark:text-gray-400 font-bold">لا يوجد سجل تسجيل دخول بعد</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
