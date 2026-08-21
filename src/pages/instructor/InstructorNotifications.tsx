@@ -51,7 +51,7 @@ interface Student {
 }
 
 interface NotificationSetting {
-  id: string;
+  id: number;
   setting_key: string;
   enabled: boolean;
 }
@@ -431,7 +431,7 @@ const { error: studentNotifError } = await supabase
     }
   };
 
-  const toggleSetting = async (id: string, currentEnabled: boolean) => {
+  const toggleSetting = async (id: number, currentEnabled: boolean) => {
     try {
       const { error } = await supabase
         .from("notification_settings")

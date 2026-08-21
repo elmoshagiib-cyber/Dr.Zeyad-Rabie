@@ -41,7 +41,7 @@ export function InstructorDashboard() {
 
   const [courses, setCourses]             = useState<any[]>([]);
   const [students, setStudents]           = useState<any[]>([]);
-  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [homeworks, setHomeworks] = useState<any[]>([]);
 const [exams, setExams] = useState<any[]>([]);
   const [studentCourses, setStudentCourses] = useState<any[]>([]);
@@ -54,7 +54,7 @@ const [exams, setExams] = useState<any[]>([]);
       .channel("dashboard-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "students" },      () => loadData())
       .on("postgres_changes", { event: "*", schema: "public", table: "courses" },       () => loadData())
-      .on("postgres_changes", { event: "*", schema: "public", table: "announcements" }, () => loadData())
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, () => loadData())
       .on("postgres_changes", { event: "*", schema: "public", table: "exams" },         () => loadData())
       .on("postgres_changes", { event: "*", schema: "public", table: "student_courses" },() => loadData())
       .subscribe();
@@ -66,7 +66,7 @@ const [exams, setExams] = useState<any[]>([]);
 const [
   coursesRes,
   studentsRes,
-  announcementsRes,
+  notificationsRes,
   studentCoursesRes,
   homeworksRes,
   examsRes,
@@ -83,10 +83,10 @@ const [
     .select("*")
     .order("created_at", { ascending: false }),
 
-  supabase
-    .from("announcements")
-    .select("*")
-    .order("created_at", { ascending: false }),
+supabase
+  .from("notifications")
+  .select("*")
+  .order("created_at", { ascending: false }),
 
   supabase
     .from("student_courses")
@@ -106,7 +106,7 @@ supabase
 
     setCourses(coursesRes.data || []);
     setStudents(studentsRes.data || []);
-    setAnnouncements(announcementsRes.data || []);
+    setNotifications(notificationsRes.data || []);
     setHomeworks(homeworksRes.data || []);
 setExams(examsRes.data || []);
     setStudentCourses(studentCoursesRes.data || []);
@@ -127,7 +127,7 @@ console.log("Student Courses", studentCoursesRes.data);
 );
   const totalStudents      = students.length;
   const totalCourses       = courses.length;
-  const totalAnnouncements = announcements.length;
+  const totalNotifications = notifications.length;
   const totalSubscriptions = studentCourses.length;
   const recentStudents     = students.slice(0, 10);
 
@@ -147,12 +147,12 @@ console.log("Student Courses", studentCoursesRes.data);
   }));
 
 const recentActivities = [
-  ...announcements.map((a) => ({
-    title: "تم نشر إعلان",
-    description: a.title,
-    time: a.created_at,
-    color: "bg-violet-500",
-  })),
+...notifications.map((n) => ({
+  title: "تم إرسال إشعار",
+  description: n.title,
+  time: n.created_at,
+  color: "bg-violet-500",
+})),
 
   ...courses.map((c) => ({
     title: "تم إنشاء كورس",
@@ -238,7 +238,7 @@ const recentActivities = [
 
   {
     title: "الاشعارات",
-    value: totalAnnouncements,
+    value: totalNotifications,
     subtitle: "الاشعارات الحالية",
     icon: Bell,
     color: "bg-pink-50 text-pink-600",

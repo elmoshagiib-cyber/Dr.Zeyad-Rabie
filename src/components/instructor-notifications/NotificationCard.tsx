@@ -140,7 +140,7 @@ export function NotificationCard({
           text-violet-700
           "
         >
-          {notification.target_grade}
+          {notification.target_value}
         </span>
 
         <span

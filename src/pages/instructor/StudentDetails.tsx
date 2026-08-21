@@ -560,29 +560,84 @@ const addCourse = async () => {
     await loadStudent();
   };
 
-  const sendAnnouncement = async () => {
-    if (!announcementMessage.trim()) {
-      alert("اكتب الرسالة أولاً");
+const sendAnnouncement = async () => {
+  if (!student) return;
+
+  if (!announcementMessage.trim()) {
+    alert("اكتب الرسالة أولاً");
+    return;
+  }
+
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      alert("يجب تسجيل الدخول أولاً");
       return;
     }
 
-    const { error } = await supabase.from("student_announcements").insert({
-      student_id: student?.id,
-      message: announcementMessage,
-      priority: announcementPriority,
-    });
+    // 1) إنشاء الإشعار
+    const { data: notification, error: notificationError } =
+      await supabase
+        .from("notifications")
+        .insert({
+          title: "رسالة من المستر",
+          content: announcementMessage,
+          type: "announcement",
+          target_type: "student",
+          target_value: String(student.id),
+          recipient_count: 1,
+          created_by: user.id,
+          is_sent: true,
+          sent_at: new Date().toISOString(),
+          is_pinned: false,
+          is_active: true,
+          icon: "bell",
+          color: "#10B981",
+        })
+        .select()
+        .single();
 
-    if (error) {
-      console.log(error);
-      alert("حدث خطأ أثناء الإرسال");
+    if (notificationError) {
+      console.log(notificationError);
+      alert("حدث خطأ أثناء إنشاء الإشعار");
+      return;
+    }
+
+    // 2) ربط الإشعار بالطالب
+    const { error: readError } = await supabase
+      .from("notification_reads")
+      .insert({
+        notification_id: notification.id,
+        student_id: student.id,
+        read_at: null,
+      });
+
+    if (readError) {
+      console.log(readError);
+
+      // حذف الإشعار لو فشل ربطه بالطالب
+      await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", notification.id);
+
+      alert("حدث خطأ أثناء إرسال الإشعار للطالب");
       return;
     }
 
     alert("تم إرسال الرسالة بنجاح");
+
     setAnnouncementMessage("");
     setAnnouncementPriority("important");
     setShowAnnouncementModal(false);
-  };
+  } catch (error) {
+    console.log(error);
+    alert("حدث خطأ أثناء الإرسال");
+  }
+};
 
   const generateNewPassword = async () => {
     if (!student) return;
@@ -760,77 +815,114 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
   )[0];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]" dir="rtl">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#09090B] dark:via-[#111111] dark:to-[#09090B]" dir="rtl">
       <div className="hidden lg:block flex-shrink-0">
         <DashboardSidebar type="instructor" />
       </div>
 
       <main className="flex-1 overflow-y-auto">
-        <div className="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-[#C65CFF] via-[#B348FE] to-[#8B2FE0] mx-6 mt-6 shadow-[0_20px_50px_rgba(179,72,254,.28)]">
-          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/10 blur-[120px]" />
-          <div className="absolute -right-16 -bottom-24 w-72 h-72 rounded-full bg-black/10 blur-[110px]" />
-          <div className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] bg-[length:22px_22px]" />
+        {/* Hero Section - Enhanced Premium Design */}
+        <div className="relative overflow-hidden rounded-[40px] bg-gradient-to-br from-[#B348FE] via-[#9E2FFF] to-[#7B1FA2] mx-4 sm:mx-6 mt-4 sm:mt-6 shadow-[0_25px_60px_rgba(179,72,254,.35)]">
+          {/* Animated Background Pattern */}
+          <div className="absolute inset-0 opacity-[0.07]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_2px,transparent_0)] bg-[length:30px_30px] animate-pulse"></div>
+          </div>
 
-          <div className="relative z-10 px-6 lg:px-8 pt-6 pb-0">
-            <div className="flex items-center justify-between mb-6">
+          {/* Gradient Overlays */}
+          <div className="absolute -left-32 -top-32 w-80 h-80 rounded-full bg-white/15 blur-[140px] animate-pulse"></div>
+          <div className="absolute -right-24 -bottom-32 w-80 h-80 rounded-full bg-black/15 blur-[130px]"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-purple-500/10 blur-[100px]"></div>
+
+          <div className="relative z-10 px-4 sm:px-6 lg:px-8 pt-6 pb-0">
+            {/* Top Actions Bar */}
+            <div className="flex items-center justify-between mb-8">
               <Button
                 variant="outline"
                 onClick={() => navigate(-1)}
-                className="border-2 border-white/25 hover:bg-white/10 text-white font-bold rounded-xl h-10 px-3"
+                className="border-2 border-white/30 hover:bg-white/15 backdrop-blur-xl text-white font-bold rounded-2xl h-11 px-4 transition-all duration-300 hover:scale-105 hover:border-white/50"
               >
-                <ArrowRight size={16} />
+                <ArrowRight size={18} />
+                <span className="hidden sm:inline mr-2">رجوع</span>
               </Button>
 
               <Button
                 onClick={() => navigate(`/instructor/students/edit/${student.id}`)}
-                className="bg-white text-[#B348FE] hover:bg-white/90 rounded-2xl font-black px-5 shadow-lg h-11 hover:shadow-xl transition-all hover:-translate-y-0.5"
+                className="bg-white/95 backdrop-blur-xl text-[#B348FE] hover:bg-white rounded-2xl font-black px-6 shadow-[0_8px_25px_rgba(0,0,0,.15)] h-11 hover:shadow-[0_12px_35px_rgba(0,0,0,.2)] transition-all duration-300 hover:-translate-y-0.5"
               >
-                تعديل الطالب
+                تعديل البيانات
               </Button>
             </div>
 
-            <div className="flex flex-col items-center text-center pb-8">
-              <div className="relative mb-4">
-                <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-[28px] bg-white/15 backdrop-blur-xl border-[3px] border-white/30 flex items-center justify-center text-4xl font-black overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,.15)]">
+            {/* Student Info Section */}
+            <div className="flex flex-col items-center text-center pb-10">
+              {/* Avatar with Glass Effect */}
+              <div className="relative mb-6 group">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-white/10 rounded-[32px] blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
+                <div className="relative w-32 h-32 lg:w-36 lg:h-36 rounded-[32px] bg-white/20 backdrop-blur-2xl border-[3px] border-white/40 flex items-center justify-center text-5xl lg:text-6xl font-black overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,.2)] group-hover:scale-105 transition-all duration-500">
                   {student.avatar_url ? (
                     <img src={student.avatar_url} alt={student.full_name} className="w-full h-full object-cover" />
                   ) : (
-                    student.full_name?.charAt(0)
+                    <span className="text-white">{student.full_name?.charAt(0)}</span>
                   )}
                 </div>
-                <div className={`absolute -bottom-1 -left-1 w-7 h-7 rounded-full border-[3px] border-[#B348FE] ${student.is_blocked ? "bg-red-400" : "bg-emerald-400"}`} />
+                {/* Status Badge */}
+                <div className={`absolute -bottom-2 -left-2 w-9 h-9 rounded-2xl border-[3.5px] border-[#B348FE] shadow-lg ${student.is_blocked ? "bg-red-500" : "bg-emerald-400"} animate-pulse`}>
+                  <div className="absolute inset-0 bg-white/30 rounded-full blur-sm"></div>
+                </div>
               </div>
 
-              <h1 className="text-2xl lg:text-3xl tracking-tight font-black mb-1.5">{student.full_name}</h1>
-              <p className="text-white/70 text-sm font-bold mb-4">
+              {/* Name & Info */}
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl tracking-tight font-black mb-2 text-white drop-shadow-[0_4px_12px_rgba(0,0,0,.15)]">
+                {student.full_name}
+              </h1>
+              <p className="text-white/80 text-base sm:text-lg font-bold mb-6 backdrop-blur-sm">
                 {student.code ? `كود: ${student.code}` : student.grade}
               </p>
 
-              <div className="flex flex-wrap justify-center gap-2 text-white/90 text-xs font-bold">
-                <span className="flex items-center gap-1.5 bg-white/10 border border-white/10 px-3 py-1.5 rounded-full">
-                  <div className={`w-1.5 h-1.5 rounded-full ${student.is_blocked ? "bg-red-400" : "bg-emerald-400"}`} />
+              {/* Status Badges */}
+              <div className="flex flex-wrap justify-center gap-3 text-white/95 text-sm font-bold">
+                <span className="flex items-center gap-2 bg-white/15 backdrop-blur-xl border border-white/20 px-4 py-2 rounded-2xl shadow-lg hover:bg-white/25 transition-all duration-300">
+                  <div className={`w-2 h-2 rounded-full ${student.is_blocked ? "bg-red-400" : "bg-emerald-400"} animate-pulse`}></div>
                   {student.is_blocked ? "موقوف" : "نشط"}
                 </span>
-                <span className="bg-white/10 border border-white/10 px-3 py-1.5 rounded-full">
-                  {student.type === "online" ? "أونلاين" : student.type === "center" ? "سنتر" : "نوع"}
+                <span className="bg-white/15 backdrop-blur-xl border border-white/20 px-4 py-2 rounded-2xl shadow-lg hover:bg-white/25 transition-all duration-300">
+                  {student.type === "online" ? "🌐 أونلاين" : student.type === "center" ? "🏫 سنتر" : "📚 طالب"}
+                </span>
+                <span className={`bg-white/15 backdrop-blur-xl border border-white/20 px-4 py-2 rounded-2xl shadow-lg hover:bg-white/25 transition-all duration-300 ${
+                  student.subscription_status === "active" ? "text-emerald-100" : "text-rose-100"
+                }`}>
+                  {student.subscription_status === "active" ? "✓ اشتراك نشط" : "⚠ اشتراك منتهي"}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="relative z-10 bg-white/95 dark:bg-[#1A1A1A]/95 backdrop-blur-xl mx-4 lg:mx-6 mb-4 rounded-3xl border border-white/40 dark:border-white/5 shadow-[0_-8px_25px_rgba(0,0,0,.05)]">
-            <div className="grid grid-cols-3 divide-x divide-x-reverse divide-gray-100 dark:divide-[#2A2A2A]">
-              <div className="flex flex-col items-center py-4 px-2">
-                <span className="text-xl lg:text-2xl font-black text-[#B348FE]">{uniqueCourses.length}</span>
-                <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5">كورس مشترك</span>
+          {/* Stats Cards with Glass Effect */}
+          <div className="relative z-10 bg-white/98 dark:bg-[#111111]/98 backdrop-blur-2xl mx-4 sm:mx-6 lg:mx-8 mb-6 rounded-[32px] border border-white/60 dark:border-white/10 shadow-[0_-12px_35px_rgba(0,0,0,.08)] overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+            <div className="relative grid grid-cols-3 divide-x divide-x-reverse divide-gray-200 dark:divide-[#2A2A2A]">
+              <div className="flex flex-col items-center py-6 px-3 group hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] rounded-2xl flex items-center justify-center mb-3 shadow-lg group-hover:scale-110 transition-all duration-300">
+                  <BookOpen className="text-white" size={24} />
+                </div>
+                <span className="text-2xl lg:text-3xl font-black text-[#B348FE] mb-1">{uniqueCourses.length}</span>
+                <span className="text-xs font-bold text-gray-600 dark:text-gray-400">كورس مشترك</span>
               </div>
-              <div className="flex flex-col items-center py-4 px-2">
-                <span className="text-xl lg:text-2xl font-black text-[#B348FE]">{realWatchedLessons}</span>
-                <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5">محاضرة مشاهدة</span>
+
+              <div className="flex flex-col items-center py-6 px-3 group hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mb-3 shadow-lg group-hover:scale-110 transition-all duration-300">
+                  <CheckCircle2 className="text-white" size={24} />
+                </div>
+                <span className="text-2xl lg:text-3xl font-black text-emerald-600 dark:text-emerald-400 mb-1">{realWatchedLessons}</span>
+                <span className="text-xs font-bold text-gray-600 dark:text-gray-400">محاضرة مشاهدة</span>
               </div>
-              <div className="flex flex-col items-center py-4 px-2">
-                <span className="text-xl lg:text-2xl font-black text-[#B348FE]">{lessonsPercent}%</span>
-                <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5">نسبة الإنجاز</span>
+
+              <div className="flex flex-col items-center py-6 px-3 group hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center mb-3 shadow-lg group-hover:scale-110 transition-all duration-300">
+                  <TrendingUp className="text-white" size={24} />
+                </div>
+                <span className="text-2xl lg:text-3xl font-black text-amber-600 dark:text-amber-400 mb-1">{lessonsPercent}%</span>
+                <span className="text-xs font-bold text-gray-600 dark:text-gray-400">نسبة الإنجاز</span>
               </div>
             </div>
           </div>
