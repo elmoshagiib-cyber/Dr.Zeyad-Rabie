@@ -30,6 +30,8 @@ import {
   Building2,
   BookOpen,
   QrCode,
+  Eye,
+  ArrowLeft,
 } from "lucide-react";
 
 export function InstructorDashboard() {
@@ -494,6 +496,138 @@ font-medium">
                 })}
               </div>
             </div>
+
+            {/* أحدث الطلاب المسجلين */}
+            <Card className="bg-white border border-slate-100 rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
+              <CardContent className="p-0">
+                <div className="flex items-center justify-between p-4 sm:p-6 border-b border-slate-100">
+                  <button
+                    onClick={() => navigate("/instructor/students")}
+                    className="flex items-center gap-1 text-xs sm:text-sm font-bold text-[#B348FE] hover:text-[#9E2FFF] transition-colors"
+                  >
+                    عرض الكل
+                    <ArrowLeft size={14} />
+                  </button>
+                  <div className="text-right">
+                    <h2 className="text-lg sm:text-xl font-black text-slate-900">أحدث الطلاب المسجلين</h2>
+                    <p className="text-slate-400 text-xs mt-0.5">آخر {recentStudents.length} طالب سجلوا على المنصة</p>
+                  </div>
+                </div>
+
+                {recentStudents.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="mx-auto text-slate-300 mb-3" size={40} />
+                    <p className="text-slate-500 font-bold text-sm">لا يوجد طلاب مسجلين بعد</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Desktop table */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="bg-slate-50 border-b border-slate-200">
+                            <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الطالب</th>
+                            <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الصف</th>
+                            <th className="px-4 py-3 text-right text-xs font-black text-slate-600">النوع</th>
+                            <th className="px-4 py-3 text-right text-xs font-black text-slate-600">تاريخ التسجيل</th>
+                            <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الحالة</th>
+                            <th className="px-4 py-3 text-center text-xs font-black text-slate-600">إجراء</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {recentStudents.map((student) => (
+                            <tr
+                              key={student.id}
+                              className="border-b border-slate-100 hover:bg-slate-50 transition-all duration-200"
+                            >
+                              <td className="px-4 py-3">
+                                <div className="flex items-center gap-3">
+                                  <Avatar name={student.full_name} src={student.avatar_url} size="sm" className="h-8 w-8 text-xs" />
+                                  <div>
+                                    <p className="font-bold text-slate-900 text-sm">{student.full_name}</p>
+                                    <p className="text-xs text-slate-500">{student.phone || "لا يوجد رقم"}</p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
+                                  {student.grade}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
+                                  student.type === "online"
+                                    ? "bg-[#F6EEFF] text-[#B348FE] border-[#EAD8FF]"
+                                    : "bg-amber-50 text-amber-700 border-amber-200"
+                                }`}>
+                                  {student.type === "online" ? "أونلاين" : "سنتر"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className="text-xs font-bold text-slate-600">
+                                  {student.created_at ? new Date(student.created_at).toLocaleDateString("ar-EG") : "-"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
+                                  student.status === "نشط" || student.status === "active"
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                    : "bg-red-50 text-red-700 border-red-200"
+                                }`}>
+                                  {student.status === "نشط" || student.status === "active" ? "نشط" : "موقوف"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="flex justify-center">
+                                  <button
+                                    onClick={() => navigate(`/instructor/students/${student.id}`)}
+                                    className="w-8 h-8 rounded-lg bg-[#F6EEFF] text-[#B348FE] hover:bg-[#EAD8FF] flex items-center justify-center transition-all duration-200"
+                                  >
+                                    <Eye size={14} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile cards */}
+                    <div className="md:hidden space-y-3 p-4">
+                      {recentStudents.map((student) => (
+                        <div
+                          key={student.id}
+                          onClick={() => navigate(`/instructor/students/${student.id}`)}
+                          className="bg-slate-50 rounded-2xl p-4 border border-slate-100 cursor-pointer"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
+                              student.status === "نشط" || student.status === "active"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                : "bg-red-50 text-red-700 border-red-200"
+                            }`}>
+                              {student.status === "نشط" || student.status === "active" ? "نشط" : "موقوف"}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <div>
+                                <p className="font-bold text-slate-900 text-sm text-right">{student.full_name}</p>
+                                <p className="text-xs text-slate-500 text-right">{student.grade}</p>
+                              </div>
+                              <Avatar name={student.full_name} src={student.avatar_url} size="sm" className="h-9 w-9" />
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-slate-500 mt-2 pt-2 border-t border-slate-200">
+                            <span>{student.type === "online" ? "أونلاين" : "سنتر"}</span>
+                            <span>{student.created_at ? new Date(student.created_at).toLocaleDateString("ar-EG") : "-"}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
 
           </div>
         )}
