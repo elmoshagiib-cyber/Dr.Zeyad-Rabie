@@ -142,27 +142,7 @@ lg:py-6
         </Button>
 
         {/* إنشاء كورس جديد للمراحل — primary */}
-        <Button
-          onClick={onCreateCourse}
-          className="
-            h-10 md:h-11
-            rounded-2xl
-            bg-white
-            px-4 md:px-5
-            font-bold
-            text-violet-700
-            shadow-xl
-            transition-all
-            hover:-translate-y-0.5
-            hover:scale-105
-            hover:shadow-2xl
-            active:scale-95
-            whitespace-nowrap
-          "
-        >
-          <Plus size={18} />
-          كورس جديد للمراحل
-        </Button>
+       
       </div>
 
       {/* المعلومات — يمين */}
