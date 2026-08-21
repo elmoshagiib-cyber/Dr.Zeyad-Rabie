@@ -446,7 +446,28 @@ const totalLessons = courseLessons.length;
 
   const [expandedCourseId, setExpandedCourseId] = useState<number | null>(null);
 
-const deleteCourse = async (courseId: number) => {
+    const toggleCourseActive = async (course: CourseWithProgress) => {
+    const newActive = !course.active;
+    const confirmed = window.confirm(
+      newActive ? "هل تريد تفعيل هذا الكورس للطالب؟" : "هل تريد إلغاء تفعيل هذا الكورس للطالب؟"
+    );
+    if (!confirmed) return;
+
+    const { error } = await supabase
+      .from("student_courses")
+      .update({ active: newActive })
+      .eq("id", course.id);
+
+    if (error) {
+      alert("حصل خطأ أثناء تحديث حالة الكورس");
+      return;
+    }
+
+    await loadCourses();
+  };
+
+
+  const deleteCourse = async (courseId: number) => {
     const confirmed = window.confirm("هل أنت متأكد من حذف الكورس؟");
     if (!confirmed) return;
 
@@ -605,9 +626,7 @@ const addCourse = async () => {
   }, [student]);
 
   useEffect(() => {
-    if (courses.length > 0) {
-      loadCoursesWithProgress();
-    }
+    loadCoursesWithProgress();
   }, [courses, lessonProgress]);
 
   useEffect(() => {
@@ -711,52 +730,72 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
       </div>
 
       <main className="flex-1 overflow-y-auto">
-        <div className="relative overflow-hidden rounded-[36px] bg-gradient-to-r from-[#C65CFF] via-[#B348FE] to-[#9E2FFF] px-6 lg:px-8 py-6 lg:py-7 text-white shadow-[0_18px_45px_rgba(179,72,254,.22)] mx-6 mt-6">
+        <div className="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-[#C65CFF] via-[#B348FE] to-[#8B2FE0] mx-6 mt-6 shadow-[0_20px_50px_rgba(179,72,254,.28)]">
           <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/10 blur-[120px]" />
-          <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/10 blur-[120px]" />
+          <div className="absolute -right-16 -bottom-24 w-72 h-72 rounded-full bg-black/10 blur-[110px]" />
+          <div className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] bg-[length:22px_22px]" />
 
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="relative z-10 px-6 lg:px-8 pt-6 pb-0">
+            <div className="flex items-center justify-between mb-6">
               <Button
                 variant="outline"
                 onClick={() => navigate(-1)}
-                className="mb-0 border-2 border-white/30 hover:bg-white/10 text-white font-bold rounded-xl"
+                className="border-2 border-white/25 hover:bg-white/10 text-white font-bold rounded-xl h-10 px-3"
               >
                 <ArrowRight size={16} />
               </Button>
+
+              <Button
+                onClick={() => navigate(`/instructor/students/edit/${student.id}`)}
+                className="bg-white text-[#B348FE] hover:bg-white/90 rounded-2xl font-black px-5 shadow-lg h-11 hover:shadow-xl transition-all hover:-translate-y-0.5"
+              >
+                تعديل الطالب
+              </Button>
             </div>
 
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-[24px] bg-white/15 backdrop-blur-xl border border-white/20 flex items-center justify-center text-2xl font-black overflow-hidden">
+            <div className="flex flex-col items-center text-center pb-8">
+              <div className="relative mb-4">
+                <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-[28px] bg-white/15 backdrop-blur-xl border-[3px] border-white/30 flex items-center justify-center text-4xl font-black overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,.15)]">
                   {student.avatar_url ? (
                     <img src={student.avatar_url} alt={student.full_name} className="w-full h-full object-cover" />
                   ) : (
                     student.full_name?.charAt(0)
                   )}
                 </div>
-                <div>
-                  <h1 className="text-3xl lg:text-4xl tracking-tight font-black mb-2">{student.full_name}</h1>
-                  <div className="flex flex-wrap gap-2 text-white/90 text-sm">
-                    <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full">
-                      <div className={`w-2 h-2 rounded-full ${student.is_blocked ? "bg-red-400" : "bg-emerald-400"}`} />
-                      {student.is_blocked ? "موقوف" : "نشط"}
-                    </span>
-                    <span className="bg-white/10 px-3 py-1 rounded-full">
-                      {student.type === "online" ? "أونلاين" : student.type === "center" ? "سنتر" : "نوع"}
-                    </span>
-                    <span className="bg-white/10 px-3 py-1 rounded-full">{uniqueCourses.length} كورس</span>
-                    <span className="bg-white/10 px-3 py-1 rounded-full">{realWatchedLessons} محاضرة</span>
-                  </div>
-                </div>
+                <div className={`absolute -bottom-1 -left-1 w-7 h-7 rounded-full border-[3px] border-[#B348FE] ${student.is_blocked ? "bg-red-400" : "bg-emerald-400"}`} />
               </div>
 
-              <Button
-                onClick={() => navigate(`/instructor/students/edit/${student.id}`)}
-                className="bg-white text-[#B348FE] hover:bg-white/90 rounded-2xl font-black px-6 shadow-lg h-12 hover:shadow-xl transition-all hover:-translate-y-0.5"
-              >
-                تعديل الطالب
-              </Button>
+              <h1 className="text-2xl lg:text-3xl tracking-tight font-black mb-1.5">{student.full_name}</h1>
+              <p className="text-white/70 text-sm font-bold mb-4">
+                {student.code ? `كود: ${student.code}` : student.grade}
+              </p>
+
+              <div className="flex flex-wrap justify-center gap-2 text-white/90 text-xs font-bold">
+                <span className="flex items-center gap-1.5 bg-white/10 border border-white/10 px-3 py-1.5 rounded-full">
+                  <div className={`w-1.5 h-1.5 rounded-full ${student.is_blocked ? "bg-red-400" : "bg-emerald-400"}`} />
+                  {student.is_blocked ? "موقوف" : "نشط"}
+                </span>
+                <span className="bg-white/10 border border-white/10 px-3 py-1.5 rounded-full">
+                  {student.type === "online" ? "أونلاين" : student.type === "center" ? "سنتر" : "نوع"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative z-10 bg-white/95 dark:bg-[#1A1A1A]/95 backdrop-blur-xl mx-4 lg:mx-6 mb-4 rounded-3xl border border-white/40 dark:border-white/5 shadow-[0_-8px_25px_rgba(0,0,0,.05)]">
+            <div className="grid grid-cols-3 divide-x divide-x-reverse divide-gray-100 dark:divide-[#2A2A2A]">
+              <div className="flex flex-col items-center py-4 px-2">
+                <span className="text-xl lg:text-2xl font-black text-[#B348FE]">{uniqueCourses.length}</span>
+                <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5">كورس مشترك</span>
+              </div>
+              <div className="flex flex-col items-center py-4 px-2">
+                <span className="text-xl lg:text-2xl font-black text-[#B348FE]">{realWatchedLessons}</span>
+                <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5">محاضرة مشاهدة</span>
+              </div>
+              <div className="flex flex-col items-center py-4 px-2">
+                <span className="text-xl lg:text-2xl font-black text-[#B348FE]">{lessonsPercent}%</span>
+                <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5">نسبة الإنجاز</span>
+              </div>
             </div>
           </div>
         </div>
@@ -988,6 +1027,11 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                                 متعثر
                               </span>
                             )}
+                            {!course.active && (
+                              <span className="px-2 py-0.5 rounded-full bg-gray-400 text-white text-[10px] font-bold">
+                                غير مفعّل
+                              </span>
+                            )}
                           </div>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             {course.courseData?.grade} • اشترك في {course.created_at ? new Date(course.created_at).toLocaleDateString("ar-EG") : "-"}
@@ -1037,6 +1081,19 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                             }`}
                           >
                             {course.needsFollowup ? "إلغاء المتابعة" : "تحتاج متابعة"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => toggleCourseActive(course)}
+                            className={`rounded-lg text-xs font-bold h-8 ${
+                              course.active
+                                ? "text-gray-600 border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800/30"
+                                : "text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+                            }`}
+                          >
+                            <Power size={14} className="ml-1" />
+                            {course.active ? "إلغاء التفعيل" : "تفعيل"}
                           </Button>
                           <Button
                             size="sm"
