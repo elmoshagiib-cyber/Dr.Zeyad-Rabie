@@ -24,7 +24,7 @@ export default function ForumPage() {
         {/* Description */}
         <p className="text-gray-500 dark:text-gray-400 text-base leading-7 max-w-lg mx-auto">
           مساحة مخصصة للطلاب لمناقشة الدروس، وطرح الأسئلة،
-          ومشاركة المعرفة والخبرات مع باقي الطلاب والمدرسين.
+         ومشاركة المعرفة والخبرات مع باقي الطلاب والمستر.
         </p>
 
         {/* Coming Soon */}
