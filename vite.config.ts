@@ -20,6 +20,7 @@ workbox: {
   cleanupOutdatedCaches: true,
   clientsClaim: true,
   skipWaiting: true,
+  maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB بدل 2MB الافتراضي
 
   navigateFallback: "/index.html",
 
