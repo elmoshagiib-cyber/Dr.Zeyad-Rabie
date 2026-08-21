@@ -175,6 +175,7 @@ return (
       <div className="p-4 sm:p-5 lg:p-6">
         <CourseHero
           onCreateCourse={() => navigate("/instructor/courses/create")}
+          onCreateGeneralCourse={() => navigate("/instructor/courses/create?type=general")}
           totalCourses={courses.length}
           publishedCourses={courses.filter((c) => c.is_published).length}
           totalStudents={courses.reduce((sum, c) => sum + (c.students_count || 0), 0)}
