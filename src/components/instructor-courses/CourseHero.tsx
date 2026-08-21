@@ -58,7 +58,7 @@ lg:py-6
 
     <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-4 lg:gap-6">
 
-      {/* الأزرار + View toggle — شمال */}
+      {/* الأزرار + View toggle — يمين في RTL يبقى شمال بصرياً */}
       <div className="flex w-full lg:w-auto items-center gap-3 order-2 lg:order-1">
         {/* View toggle */}
         <div
@@ -66,9 +66,11 @@ lg:py-6
             inline-flex
             w-fit
             rounded-2xl
-            bg-white
+            border
+            border-white/20
+            bg-white/10
             p-1
-            shadow-md
+            backdrop-blur-xl
           "
         >
           <button
@@ -85,8 +87,8 @@ lg:py-6
               transition-all
               ${
                 view === "list"
-                  ? "bg-violet-100 text-violet-700"
-                  : "text-slate-400 hover:bg-slate-50"
+                  ? "bg-white text-violet-700 shadow"
+                  : "text-white hover:bg-white/10"
               }
             `}
           >
@@ -107,8 +109,8 @@ lg:py-6
               transition-all
               ${
                 view === "grid"
-                  ? "bg-violet-100 text-violet-700"
-                  : "text-slate-400 hover:bg-slate-50"
+                  ? "bg-white text-violet-700 shadow"
+                  : "text-white hover:bg-white/10"
               }
             `}
           >
@@ -116,20 +118,22 @@ lg:py-6
           </button>
         </div>
 
-        {/* إضافة كورس عام */}
+        {/* إضافة كورس عام — outline */}
         <Button
           onClick={onCreateGeneralCourse}
           className="
             h-10 md:h-11
             rounded-2xl
-            bg-white
+            border
+            border-white/30
+            bg-white/10
             px-4 md:px-5
             font-bold
-            text-violet-700
-            shadow-md
+            text-white
+            backdrop-blur-xl
             transition-all
+            hover:bg-white/20
             hover:-translate-y-0.5
-            hover:shadow-lg
             active:scale-95
             whitespace-nowrap
           "
@@ -137,30 +141,8 @@ lg:py-6
           إضافة كورس عام
         </Button>
 
-        {/* كورس جديد للمراحل — primary مع أيقونة */}
-        <Button
-          onClick={onCreateCourse}
-          className="
-            h-10 md:h-11
-            rounded-2xl
-            bg-white
-            px-4 md:px-5
-            font-bold
-            text-violet-700
-            shadow-md
-            transition-all
-            hover:-translate-y-0.5
-            hover:shadow-lg
-            active:scale-95
-            whitespace-nowrap
-            flex
-            items-center
-            gap-1.5
-          "
-        >
-          كورس جديد للمراحل
-          <Plus size={18} />
-        </Button>
+        {/* إنشاء كورس جديد للمراحل — primary */}
+       
       </div>
 
       {/* المعلومات — يمين */}
