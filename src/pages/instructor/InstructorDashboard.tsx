@@ -16,6 +16,7 @@ import {
   Area,
   CartesianGrid,
   XAxis,
+  YAxis,
   Tooltip,
 } from "recharts";
 import {
@@ -160,11 +161,21 @@ console.log("Student Courses", studentCoursesRes.data);
     year:      { total: inRange(yearStart).length,        unique: uniqueCount(inRange(yearStart)) },
   };
 
-  const changeVsYesterday = visitStats.yesterday.total > 0
-    ? Math.round(((visitStats.today.total - visitStats.yesterday.total) / visitStats.yesterday.total) * 100)
-    : (visitStats.today.total > 0 ? 100 : 0);
+  // الشهر والأسبوع السابقين — لحساب نسب التغيير الحقيقية
+  const prevMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const prevWeekStart = new Date(weekStart); prevWeekStart.setDate(weekStart.getDate() - 7);
 
-  const changeMonthVsPrev = 0; // ممكن تحسبها لو عندك بيانات الشهر اللي فات
+  const prevMonthTotal = inRange(prevMonthStart, monthStart).length;
+  const prevWeekTotal = inRange(prevWeekStart, weekStart).length;
+
+  const calcChange = (current: number, previous: number) => {
+    if (previous > 0) return Math.round(((current - previous) / previous) * 100);
+    return current > 0 ? 100 : 0;
+  };
+
+  const changeVsYesterday = calcChange(visitStats.today.total, visitStats.yesterday.total);
+  const changeMonthVsPrev = calcChange(visitStats.month.total, prevMonthTotal);
+  const changeWeekVsPrev = calcChange(visitStats.week.total, prevWeekTotal);
 
   const last7DaysVisits = Array.from({ length: 7 }).map((_, i) => {
     const day = new Date(today); day.setDate(day.getDate() - (6 - i));
@@ -489,39 +500,132 @@ font-medium">
 
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-6">
               {[
-                { label: "هذا العام",   data: visitStats.year },
-                { label: "هذا الشهر",  data: visitStats.month },
-                { label: "هذا الأسبوع", data: visitStats.week },
-                { label: "أمس",        data: visitStats.yesterday },
-                { label: "اليوم",      data: visitStats.today },
+                {
+                  label: "هذا العام",
+                  data: visitStats.year,
+                  valueColor: "text-violet-600",
+                  badge: null,
+                },
+                {
+                  label: "هذا الشهر",
+                  data: visitStats.month,
+                  valueColor: "text-emerald-600",
+                  badge: {
+                    text: `${changeMonthVsPrev >= 0 ? "+" : ""}${changeMonthVsPrev}% الشهر الماضي`,
+                    color: changeMonthVsPrev >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700",
+                    up: changeMonthVsPrev >= 0,
+                  },
+                },
+                {
+                  label: "هذا الأسبوع",
+                  data: visitStats.week,
+                  valueColor: "text-amber-500",
+                  badge: {
+                    text: `${changeWeekVsPrev >= 0 ? "+" : ""}${changeWeekVsPrev}% الأسبوع الماضي`,
+                    color: changeWeekVsPrev >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700",
+                    up: changeWeekVsPrev >= 0,
+                  },
+                },
+                {
+                  label: "أمس",
+                  data: visitStats.yesterday,
+                  valueColor: "text-slate-900",
+                  badge: null,
+                },
+                {
+                  label: "اليوم",
+                  data: visitStats.today,
+                  valueColor: "text-blue-600",
+                  badge: {
+                    text: `${changeVsYesterday >= 0 ? "+" : ""}${changeVsYesterday}% عن أمس`,
+                    color: changeVsYesterday >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700",
+                    up: changeVsYesterday >= 0,
+                  },
+                },
               ].map((item, i) => (
-                <div key={i} className="rounded-2xl border border-slate-100 p-3 sm:p-4 text-center">
+                <div key={i} className="rounded-2xl border border-slate-100 p-3 sm:p-4 text-center flex flex-col items-center">
                   <p className="text-xs text-slate-500 font-bold">{item.label}</p>
-                  <p className="text-2xl sm:text-3xl font-black mt-1">{item.data.total}</p>
+                  <p className={`text-2xl sm:text-3xl font-black mt-1 ${item.valueColor}`}>
+                    {item.data.total}
+                  </p>
                   <p className="text-xs text-slate-400">زيارة</p>
                   <p className="text-xs text-slate-500 mt-1">{item.data.unique} فريد</p>
+                  {item.badge && (
+                    <span className={`mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold ${item.badge.color}`}>
+                      {item.badge.up ? "▲" : "▼"} {item.badge.text}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
 
-            <div className="text-right mb-2">
-              <h3 className="font-bold text-slate-900 text-sm sm:text-base">الزوار — آخر 7 أيام</h3>
-              <p className="text-xs text-slate-400">مقارنة الزيارات الكلية والزوار الفريدين يومياً</p>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3 text-xs text-slate-500">
+                <span className="flex items-center gap-1">
+                  <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block" />
+                  إجمالي
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2.5 h-2.5 rounded-full bg-violet-400 inline-block" />
+                  فريد
+                </span>
+              </div>
+              <div className="text-right">
+                <h3 className="font-bold text-slate-900 text-sm sm:text-base">الزوار — آخر 7 أيام</h3>
+                <p className="text-xs text-slate-400">مقارنة الزيارات الكلية والزوار الفريدين يومياً</p>
+              </div>
             </div>
+
             <div className="h-56 sm:h-64" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={last7DaysVisits}>
+                <AreaChart data={last7DaysVisits} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.35} />
                       <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="day" fontSize={11} />
-                  <Tooltip />
-                  <Area type="monotone" dataKey="إجمالي" stroke="#6366f1" fill="url(#colorTotal)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="فريد" stroke="#a855f7" fill="transparent" strokeWidth={2} strokeDasharray="4 4" />
+                  <CartesianGrid strokeDasharray="4 4" stroke="#eef0f5" vertical={false} />
+                  <XAxis
+                    dataKey="day"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                    stroke="#94a3b8"
+                  />
+                  <YAxis
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                    stroke="#94a3b8"
+                    width={30}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid #eef0f5",
+                      fontSize: 12,
+                      direction: "rtl",
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="إجمالي"
+                    stroke="#6366f1"
+                    fill="url(#colorTotal)"
+                    strokeWidth={2.5}
+                    dot={{ r: 3, fill: "#6366f1", strokeWidth: 0 }}
+                    activeDot={{ r: 5 }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="فريد"
+                    stroke="#c084fc"
+                    fill="transparent"
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    dot={{ r: 3, fill: "#c084fc", strokeWidth: 0 }}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
