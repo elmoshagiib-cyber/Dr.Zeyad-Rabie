@@ -1,4 +1,4 @@
-import { FileText, CheckCircle, Clock, AlertCircle, Eye } from "lucide-react";
+import { FileText, CheckCircle, Clock, AlertCircle, Eye, Award } from "lucide-react";
 import StudentLayout from "./StudentLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
@@ -9,14 +9,15 @@ import { useNavigate } from "react-router-dom";
 
 export function HomeworkPage() {
   const { user } = useApp();
-  
+
   const [uploading, setUploading] = useState(false);
   const [homeworks, setHomeworks] = useState<any[]>([]);
-const pdfInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
-const imageInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
-const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const pdfInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  const imageInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  const navigate = useNavigate();
 
-useEffect(() => {
+  useEffect(() => {
     if (user?.studentId) {
       loadHomeworks();
     }
@@ -40,28 +41,81 @@ useEffect(() => {
     return "submitted";
   };
 
-  const submitted = homeworks.filter(h => h.submitted).length;
-  const pending = homeworks.filter(h => !h.submitted).length;
-  const interactive = 0;
+  const submitted = homeworks.filter((h) => h.submitted).length;
+  const pending = homeworks.filter((h) => !h.submitted).length;
 
-const loadHomeworks = async () => {
+  // كل الواجبات اللي ليها درجة (تم تصحيحها)
+  const gradedHomeworks = homeworks.filter(
+    (h) => h.submission?.grade !== null && h.submission?.grade !== undefined
+  );
+
+  // المعدل: مجموع (الدرجة / الدرجة الكلية) لكل واجب، كنسبة مئوية
+  const averageGrade =
+    gradedHomeworks.length > 0
+      ? Math.round(
+          gradedHomeworks.reduce((sum, h) => {
+            const total = h.total_score || 100;
+            return sum + (h.submission.grade / total) * 100;
+          }, 0) / gradedHomeworks.length
+        )
+      : null;
+
+  const loadHomeworks = async () => {
     if (!user?.studentId) return;
+
+    setLoading(true);
 
     const { data: enrollments } = await supabase
       .from("student_courses")
       .select("course_id")
       .eq("student_id", user.studentId);
 
-    if (!enrollments) return;
+    if (!enrollments || enrollments.length === 0) {
+      setHomeworks([]);
+      setLoading(false);
+      return;
+    }
 
-    const courseIds = enrollments.map(c => c.course_id);
+    const courseIds = enrollments.map((c) => c.course_id);
 
     const { data: homeworksData } = await supabase
       .from("homeworks")
       .select("*")
       .in("course_id", courseIds);
 
-const { data: submissions } = await supabase
+    if (!homeworksData || homeworksData.length === 0) {
+      setHomeworks([]);
+      setLoading(false);
+      return;
+    }
+
+    // ==========================================
+    // فلترة الواجبات "اليتيمة": أي واجب مالوش
+    // عنصر حقيقي (course_item) مرتبط بيه في الكورس
+    // بيحصل ده لو المدرس مسح العنصر من صفحة تعديل
+    // الدورة من غير ما الصف في جدول homeworks يتمسح
+    // ==========================================
+    const itemIds = homeworksData
+      .map((hw: any) => hw.course_item_id)
+      .filter(Boolean);
+
+    let validItemIds = new Set<string>();
+
+    if (itemIds.length > 0) {
+      const { data: validItems } = await supabase
+        .from("course_items")
+        .select("id")
+        .in("id", itemIds)
+        .eq("type", "homework");
+
+      validItemIds = new Set((validItems || []).map((i: any) => i.id));
+    }
+
+    const validHomeworks = homeworksData.filter((hw: any) =>
+      validItemIds.has(hw.course_item_id)
+    );
+
+    const { data: submissions } = await supabase
       .from("homework_submissions")
       .select("*")
       .eq("student_id", user.studentId);
@@ -72,22 +126,17 @@ const { data: submissions } = await supabase
         return acc;
       }, {} as any) || {};
 
-    const finalHomeworks =
-      homeworksData?.map(hw => ({
-        ...hw,
-        submitted: !!submissionsMap[hw.id],
-        submission: submissionsMap[hw.id]
-      })) || [];
-
-    console.log("HOMEWORKS:", finalHomeworks);
+    const finalHomeworks = validHomeworks.map((hw) => ({
+      ...hw,
+      submitted: !!submissionsMap[hw.id],
+      submission: submissionsMap[hw.id],
+    }));
 
     setHomeworks(finalHomeworks);
+    setLoading(false);
   };
 
-const uploadHomework = async (
-    file: File,
-    homeworkId: number
-  ) => {
+  const uploadHomework = async (file: File, homeworkId: number) => {
     if (!user?.studentId) return;
 
     try {
@@ -104,11 +153,9 @@ const uploadHomework = async (
         return;
       }
 
-      const { data } = supabase.storage
-        .from("homework-files")
-        .getPublicUrl(fileName);
+      const { data } = supabase.storage.from("homework-files").getPublicUrl(fileName);
 
-const { data: existing } = await supabase
+      const { data: existing } = await supabase
         .from("homework_submissions")
         .select("*")
         .eq("homework_id", homeworkId)
@@ -120,7 +167,7 @@ const { data: existing } = await supabase
           .from("homework_submissions")
           .update({
             answer: data.publicUrl,
-            submitted_at: new Date().toISOString()
+            submitted_at: new Date().toISOString(),
           })
           .eq("id", existing.id);
 
@@ -129,13 +176,11 @@ const { data: existing } = await supabase
           return;
         }
       } else {
-const { error: submitError } = await supabase
-          .from("homework_submissions")
-          .insert({
-            homework_id: homeworkId,
-            student_id: user.studentId,
-            answer: data.publicUrl
-          });
+        const { error: submitError } = await supabase.from("homework_submissions").insert({
+          homework_id: homeworkId,
+          student_id: user.studentId,
+          answer: data.publicUrl,
+        });
 
         if (submitError) {
           console.error(submitError);
@@ -157,89 +202,91 @@ const { error: submitError } = await supabase
     return url?.toLowerCase().includes(".pdf");
   };
 
-return (
-  <StudentLayout>
+  return (
+    <StudentLayout>
+      {/* Header */}
+      <div className="bg-white dark:bg-[#09090B] border-b border-gray-100 dark:border-[#2A2A2A] px-6 lg:px-8 py-6">
+        <h1 className="text-3xl lg:text-4xl font-black text-gray-900 dark:text-white mb-2">الواجبات</h1>
+        <p className="text-gray-500 dark:text-gray-400 text-sm lg:text-base">
+          متابعة وتسليم جميع الواجبات الدراسية
+        </p>
+      </div>
 
-        {/* Header */}
-        <div className="bg-white dark:bg-[#09090B] border-b border-gray-100 dark:border-[#2A2A2A] px-6 lg:px-8 py-6">
-          <h1 className="text-3xl lg:text-4xl font-black text-gray-900 dark:text-white mb-2">
-            الواجبات
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm lg:text-base">
-            متابعة وتسليم جميع الواجبات الدراسية
-          </p>
+      <div className="p-6 lg:p-8 space-y-6 lg:space-y-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+          {/* Submitted Card */}
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
+            <CardContent className="p-6 lg:p-7">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-gray-500 dark:text-gray-400 text-sm font-bold mb-2">تم التسليم</p>
+                  <p className="text-4xl lg:text-5xl font-black text-emerald-600">{submitted}</p>
+                </div>
+                <div className="bg-emerald-50 dark:bg-emerald-950/30 p-4 rounded-2xl">
+                  <CheckCircle className="text-emerald-600" size={32} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Pending Card */}
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
+            <CardContent className="p-6 lg:p-7">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-gray-500 dark:text-gray-400 text-sm font-bold mb-2">قيد الانتظار</p>
+                  <p className="text-4xl lg:text-5xl font-black text-amber-600">{pending}</p>
+                </div>
+                <div className="bg-amber-50 dark:bg-amber-950/30 p-4 rounded-2xl">
+                  <Clock className="text-amber-600" size={32} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Average Grade Card */}
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
+            <CardContent className="p-6 lg:p-7">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-gray-500 dark:text-gray-400 text-sm font-bold mb-2">معدل الدرجات</p>
+                  <p className="text-4xl lg:text-5xl font-black text-[#B348FE]">
+                    {averageGrade !== null ? `${averageGrade}%` : "-"}
+                  </p>
+                  {gradedHomeworks.length > 0 && (
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                      بناءً على {gradedHomeworks.length} واجب مُصحح
+                    </p>
+                  )}
+                </div>
+                <div className="bg-[#F6EEFF] dark:bg-[#2B103D] p-4 rounded-2xl">
+                  <Award className="text-[#B348FE]" size={32} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="p-6 lg:p-8 space-y-6 lg:space-y-8">
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-            {/* Submitted Card */}
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
-              <CardContent className="p-6 lg:p-7">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="text-gray-500 dark:text-gray-400 text-sm font-bold mb-2">
-                      تم التسليم
-                    </p>
-                    <p className="text-4xl lg:text-5xl font-black text-emerald-600">
-                      {submitted}
-                    </p>
-                  </div>
-                  <div className="bg-emerald-50 dark:bg-emerald-950/30 p-4 rounded-2xl">
-                    <CheckCircle className="text-emerald-600" size={32} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Pending Card */}
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
-              <CardContent className="p-6 lg:p-7">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="text-gray-500 dark:text-gray-400 text-sm font-bold mb-2">
-                      قيد الانتظار
-                    </p>
-                    <p className="text-4xl lg:text-5xl font-black text-amber-600">
-                      {pending}
-                    </p>
-                  </div>
-                  <div className="bg-amber-50 dark:bg-amber-950/30 p-4 rounded-2xl">
-                    <Clock className="text-amber-600" size={32} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Interactive Card */}
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
-              <CardContent className="p-6 lg:p-7">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="text-gray-500 dark:text-gray-400 text-sm font-bold mb-2">
-                      واجبات تفاعلية
-                    </p>
-                    <p className="text-4xl lg:text-5xl font-black text-[#B348FE]">
-                      {interactive}
-                    </p>
-                  </div>
-                  <div className="bg-[#F6EEFF] dark:bg-[#2B103D] p-4 rounded-2xl">
-                    <AlertCircle className="text-[#B348FE]" size={32} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Homework List */}
-          <div className="space-y-5 lg:space-y-6">
-            {homeworks.map(hw => {
+        {/* Homework List */}
+        <div className="space-y-5 lg:space-y-6">
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="w-10 h-10 border-4 border-[#B348FE]/20 border-t-[#B348FE] rounded-full animate-spin" />
+            </div>
+          ) : homeworks.length === 0 ? (
+            <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl p-10 text-center">
+              <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />
+              <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2">لا توجد واجبات</h2>
+              <p className="text-gray-500 dark:text-gray-400">لا توجد واجبات متاحة حالياً.</p>
+            </div>
+          ) : (
+            homeworks.map((hw) => {
               const status = getHomeworkStatus(hw);
-              const canUpload = hw.allow_file_upload;
 
               return (
-                <Card 
-                  key={hw.id} 
+                <Card
+                  key={hw.id}
                   className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-xl hover:border-[#B348FE] transition-all duration-300"
                 >
                   <CardContent className="p-6 lg:p-8">
@@ -287,23 +334,13 @@ return (
                               <div className="bg-[#B348FE] bg-opacity-10 p-3 rounded-xl">
                                 <FileText className="text-[#B348FE]" size={20} />
                               </div>
-                              <p className="font-black text-gray-900 dark:text-white text-base">
-                                ملفات الواجب
-                              </p>
+                              <p className="font-black text-gray-900 dark:text-white text-base">ملفات الواجب</p>
                             </div>
 
                             <div className="flex flex-wrap gap-3">
                               {hw.attachment_pdf && (
-                                <a
-                                  href={hw.attachment_pdf}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
-                                  <Button 
-                                    size="sm" 
-                                    variant="outline"
-                                    className="font-bold"
-                                  >
+                                <a href={hw.attachment_pdf} target="_blank" rel="noreferrer">
+                                  <Button size="sm" variant="outline" className="font-bold">
                                     <Eye size={16} />
                                     عرض PDF
                                   </Button>
@@ -311,15 +348,8 @@ return (
                               )}
 
                               {hw.attachment_image && (
-                                <a
-                                  href={hw.attachment_image}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
-                                  <Button 
-                                    size="sm"
-                                    className="bg-[#B348FE] hover:bg-[#9E2FFF] font-bold"
-                                  >
+                                <a href={hw.attachment_image} target="_blank" rel="noreferrer">
+                                  <Button size="sm" className="bg-[#B348FE] hover:bg-[#9E2FFF] font-bold">
                                     <Eye size={16} />
                                     عرض الصورة
                                   </Button>
@@ -331,32 +361,33 @@ return (
                       )}
 
                       {/* Grade Display */}
-                      {status === "corrected" && hw.submission?.grade !== null && hw.submission?.grade !== undefined && (
-                        <div className="bg-emerald-50 dark:bg-emerald-950/20 border-2 border-emerald-200 dark:border-emerald-900 rounded-2xl p-5 lg:p-6">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className="bg-emerald-100 dark:bg-emerald-900/30 p-3 rounded-xl">
-                                <CheckCircle className="text-emerald-600 dark:text-emerald-500" size={24} />
+                      {status === "corrected" &&
+                        hw.submission?.grade !== null &&
+                        hw.submission?.grade !== undefined && (
+                          <div className="bg-emerald-50 dark:bg-emerald-950/20 border-2 border-emerald-200 dark:border-emerald-900 rounded-2xl p-5 lg:p-6">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                <div className="bg-emerald-100 dark:bg-emerald-900/30 p-3 rounded-xl">
+                                  <CheckCircle className="text-emerald-600 dark:text-emerald-500" size={24} />
+                                </div>
+                                <div>
+                                  <p className="font-black text-gray-900 dark:text-white text-base">درجة الواجب</p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="font-black text-gray-900 dark:text-white text-base">
-                                  درجة الواجب
+                              <div className="text-left">
+                                <p className="text-3xl lg:text-4xl font-black text-emerald-600 dark:text-emerald-500">
+                                  {hw.submission.grade}
+                                  {hw.total_score && (
+                                    <span className="text-xl lg:text-2xl text-gray-500 dark:text-gray-400 font-bold">
+                                      {" "}
+                                      / {hw.total_score}
+                                    </span>
+                                  )}
                                 </p>
                               </div>
                             </div>
-                            <div className="text-left">
-                              <p className="text-3xl lg:text-4xl font-black text-emerald-600 dark:text-emerald-500">
-                                {hw.submission.grade}
-                                {hw.total_score && (
-                                  <span className="text-xl lg:text-2xl text-gray-500 dark:text-gray-400 font-bold">
-                                    {" "}/ {hw.total_score}
-                                  </span>
-                                )}
-                              </p>
-                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
                       {/* Teacher Feedback */}
                       {hw.submission?.feedback && (
@@ -394,16 +425,8 @@ return (
                                 </p>
                               </div>
                             </div>
-                            <a
-                              href={hw.submission.answer}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                className="font-bold w-full sm:w-auto"
-                              >
+                            <a href={hw.submission.answer} target="_blank" rel="noreferrer">
+                              <Button size="sm" variant="outline" className="font-bold w-full sm:w-auto">
                                 <Eye size={16} />
                                 عرض الملف
                               </Button>
@@ -412,48 +435,38 @@ return (
                         </div>
                       )}
 
-{/* Actions */}
-<div className="border-t border-gray-200 dark:border-[#2A2A2A] pt-6">
-  <div className="flex flex-wrap gap-3">
+                      {/* Actions */}
+                      <div className="border-t border-gray-200 dark:border-[#2A2A2A] pt-6">
+                        <div className="flex flex-wrap gap-3">
+                          <Button
+                            size="sm"
+                            className="bg-[#B348FE] hover:bg-[#9E2FFF] font-bold"
+                            onClick={() => {
+                              navigate(`/dashboard/homework/${hw.course_item_id}`);
+                            }}
+                          >
+                            <Eye size={16} />
+                            فتح الواجب
+                          </Button>
 
-    <Button
-      size="sm"
-      className="bg-[#B348FE] hover:bg-[#9E2FFF] font-bold"
-      onClick={() => {
-        navigate(`/dashboard/homework/${hw.course_item_id}`);
-      }}
-    >
-      <Eye size={16} />
-      فتح الواجب
-    </Button>
-
-    {hw.submission?.answer && (
-      <a
-        href={hw.submission.answer}
-        target="_blank"
-        rel="noreferrer"
-      >
-        <Button
-          size="sm"
-          variant="outline"
-          className="font-bold"
-        >
-          <FileText size={16} />
-          عرض الملف
-        </Button>
-      </a>
-    )}
-
-  </div>
-</div>
-
+                          {hw.submission?.answer && (
+                            <a href={hw.submission.answer} target="_blank" rel="noreferrer">
+                              <Button size="sm" variant="outline" className="font-bold">
+                                <FileText size={16} />
+                                عرض الملف
+                              </Button>
+                            </a>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               );
-            })}
-          </div>
+            })
+          )}
         </div>
-  </StudentLayout>
+      </div>
+    </StudentLayout>
   );
 }
