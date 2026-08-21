@@ -9,6 +9,9 @@ export function ExamsPage() {
 
   const [exams, setExams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [attempts, setAttempts] = useState<any[]>([]);
+  const [attemptsPage, setAttemptsPage] = useState(1);
+  const attemptsPerPage = 5;
 
   useEffect(() => {
     loadExams();
@@ -102,6 +105,23 @@ export function ExamsPage() {
         .filter(Boolean);
 
       setExams(finalData);
+
+      // سجل كل محاولات الامتحانات للطالب مع اسم الامتحان
+      const attemptsWithTitles = (results || []).map((r: any) => {
+        const examMatch = finalData.find((e: any) => String(e.id) === String(r.exam_id));
+        return {
+          ...r,
+          examTitle: examMatch?.title || `امتحان #${r.exam_id}`,
+          totalQ: examMatch?.exam_questions?.length ?? r.total_questions ?? 0,
+        };
+      });
+
+      attemptsWithTitles.sort(
+        (a: any, b: any) =>
+          new Date(b.submitted_at || 0).getTime() - new Date(a.submitted_at || 0).getTime()
+      );
+
+      setAttempts(attemptsWithTitles);
     } catch (error) {
       console.error("Unexpected error loading exams:", error);
     } finally {
@@ -243,6 +263,111 @@ export function ExamsPage() {
               })}
             </div>
           )}
+          {/* سجل محاولات الامتحانات */}
+          <div className="mt-10">
+            <h2 className="text-xl lg:text-2xl font-black text-gray-900 dark:text-white mb-4">
+              سجل نتائج الامتحانات
+            </h2>
+
+            <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl overflow-hidden">
+              {attempts.length === 0 ? (
+                <div className="py-16 text-center">
+                  <p className="text-gray-500 dark:text-gray-400 font-bold">لا توجد بيانات</p>
+                </div>
+              ) : (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400">
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">#</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">اسم الامتحان</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">عدد الأسئلة</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">المحلولة</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">الصحيحة</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">الدرجة</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">النتيجة</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">وقت البدء</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">وقت الانتهاء</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {attempts
+                          .slice((attemptsPage - 1) * attemptsPerPage, attemptsPage * attemptsPerPage)
+                          .map((a, idx) => (
+                            <tr key={a.id} className="border-t border-gray-100 dark:border-[#2A2A2A]">
+                              <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">
+                                {(attemptsPage - 1) * attemptsPerPage + idx + 1}
+                              </td>
+                              <td className="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">
+                                {a.examTitle}
+                              </td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{a.totalQ}</td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
+                                {a.answered_questions ?? "-"}
+                              </td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
+                                {a.correct_answers ?? "-"}
+                              </td>
+                              <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">{a.score ?? "-"}</td>
+                              <td className="px-4 py-3">
+                                <span
+                                  className={`px-2 py-1 rounded-lg text-xs font-black ${
+                                    a.passed
+                                      ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
+                                      : "bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400"
+                                  }`}
+                                >
+                                  {a.passed ? "ناجح" : "راسب"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                {a.started_at ? new Date(a.started_at).toLocaleString("ar-EG") : "-"}
+                              </td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                {a.completed_at
+                                  ? new Date(a.completed_at).toLocaleString("ar-EG")
+                                  : a.submitted_at
+                                  ? new Date(a.submitted_at).toLocaleString("ar-EG")
+                                  : "-"}
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="flex items-center justify-between px-4 py-4 border-t border-gray-100 dark:border-[#2A2A2A]">
+                    <span className="text-xs font-bold text-emerald-600">
+                      {(attemptsPage - 1) * attemptsPerPage + 1} -{" "}
+                      {Math.min(attemptsPage * attemptsPerPage, attempts.length)} من {attempts.length}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setAttemptsPage((p) => Math.max(1, p - 1))}
+                        disabled={attemptsPage === 1}
+                        className="w-8 h-8 rounded-lg border border-gray-200 dark:border-[#2A2A2A] flex items-center justify-center disabled:opacity-40"
+                      >
+                        ‹
+                      </button>
+                      <span className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-black">
+                        {attemptsPage}
+                      </span>
+                      <button
+                        onClick={() =>
+                          setAttemptsPage((p) => (p * attemptsPerPage < attempts.length ? p + 1 : p))
+                        }
+                        disabled={attemptsPage * attemptsPerPage >= attempts.length}
+                        className="w-8 h-8 rounded-lg border border-gray-200 dark:border-[#2A2A2A] flex items-center justify-center disabled:opacity-40"
+                      >
+                        ›
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </main>
     </StudentLayout>
