@@ -901,213 +901,144 @@ hover:bg-violet-700
 
 <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
 
-  {/* Header */}
-  <div className="border-b border-slate-200 bg-slate-50">
-
-    <div
-      className="
-        grid
-        grid-cols-7
-        items-center
-        px-6
-        py-4
-        text-sm
-        font-bold
-        text-slate-600
-      "
-    >
-
-      <div className="text-center">
-        <input type="checkbox" />
-      </div>
-
-      <div className="text-right">
-        الكود
-      </div>
-
-      <div className="text-right">
-        التفاصيل
-      </div>
-
-      <div className="text-center">
-        الحالة
-      </div>
-
-      <div className="text-center">
-        المستخدم
-      </div>
-
-      <div className="text-center">
-        التاريخ
-      </div>
-
-      <div className="text-center">
-        الإجراءات
-      </div>
-
-    </div>
-
-  </div>
-
-  {/* Empty State */}
-
-{filteredCodes.length === 0 ? (
-
-  <div className="py-24 flex flex-col items-center justify-center">
-
-    <div
-      className="
-        w-20
-        h-20
-        rounded-full
-        bg-slate-100
-        flex
-        items-center
-        justify-center
-        text-4xl
-        mb-5
-      "
-    >
-      📦
-    </div>
-
-    <h3 className="text-xl font-black text-slate-700">
-      لا توجد أكواد حالياً
-    </h3>
-
-    <p className="text-slate-500 mt-2">
-      قم بإنشاء أول دفعة أكواد للبدء.
-    </p>
-
-    <button
-      className="
-        mt-6
-bg-violet-600
-hover:bg-violet-700
-        text-white
-        rounded-xl
-        h-12
-        px-8
-        font-bold
-        transition
-      "
-    >
-      ✨ ابدأ بتوليد الأكواد
-    </button>
-
-  </div>
-
-) : (
-
-  filteredCodes.map((item) => (
-
-    <div
-      key={item.id}
-      className="
-        grid
-        grid-cols-7
-        items-center
-        px-6
-        py-4
-        border-b
-        border-slate-100
-        hover:bg-slate-50
-        transition
-      "
-    >
-
-      <div className="text-center">
-        <input type="checkbox" />
-      </div>
-
-      <div className="font-bold tracking-wider">
-        {item.code}
-      </div>
-
-      <div className="text-right">
-  <p className="font-bold text-slate-800">
-    {item.courses?.title}
-  </p>
-
-  <p className="text-xs text-slate-500 mt-1">
-    {item.duration_days === 0
-      ? "اشتراك دائم"
-      : `${item.duration_days} يوم`}
-  </p>
-</div>
-
-
-     <div className="text-center">
-  {getStatusBadge(item.status)}
-</div>
-
-<div className="text-center">
-  {item.students ? (
-    <div>
-      <p className="font-bold text-slate-800">
-        {item.students.full_name}
-      </p>
-
-      <p className="text-xs text-slate-500 mt-1">
-        {item.students.phone}
-      </p>
-    </div>
-  ) : (
-    <span className="text-slate-400">
-      غير مستخدم
+  <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+    <h2 className="text-lg font-black text-slate-800">قائمة الأكواد</h2>
+    <span className="px-3 py-1 rounded-lg bg-violet-100 text-violet-700 text-xs font-black">
+      {filteredCodes.length} كود
     </span>
-  )}
-</div>
-      <div className="text-center text-sm text-slate-500">
-        {new Date(item.created_at).toLocaleDateString("ar-EG")}
+  </div>
+
+  {filteredCodes.length === 0 ? (
+
+    <div className="py-24 flex flex-col items-center justify-center">
+
+      <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center text-4xl mb-5">
+        📦
       </div>
 
-<div className="flex items-center justify-center gap-2">
+      <h3 className="text-xl font-black text-slate-700">
+        لا توجد أكواد حالياً
+      </h3>
 
-  <button
-    onClick={() => copyCode(item.code)}
-    title="نسخ الكود"
-    className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition"
-  >
-    <Copy size={18} />
-  </button>
+      <p className="text-slate-500 mt-2">
+        قم بإنشاء أول دفعة أكواد للبدء.
+      </p>
 
-  <button
-    onClick={() => toggleCodeStatus(item.id, item.status)}
-    title={
-      item.status === "active"
-        ? "تعطيل الكود"
-        : "تفعيل الكود"
-    }
-    className={`p-2 rounded-lg transition ${
-      item.status === "active"
-        ? "text-orange-600 hover:bg-orange-50"
-        : "text-green-600 hover:bg-green-50"
-    }`}
-  >
-    {item.status === "active" ? (
-      <Ban size={18} />
-    ) : (
-      <CheckCircle size={18} />
-    )}
-  </button>
-
-  <button
-    onClick={() => deleteCode(item.id)}
-    title="حذف الكود"
-    className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition"
-  >
-    <Trash2 size={18} />
-  </button>
-
-</div>
-
+      <button
+        onClick={() => document.getElementById("generate-section")?.scrollIntoView({ behavior: "smooth" })}
+        className="mt-6 bg-violet-600 hover:bg-violet-700 text-white rounded-xl h-12 px-8 font-bold transition"
+      >
+        ✨ ابدأ بتوليد الأكواد
+      </button>
 
     </div>
 
-  ))
+  ) : (
 
-)}
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="bg-slate-50 border-b border-slate-200 text-slate-600">
+            <th className="text-right font-bold px-6 py-3 whitespace-nowrap">الكود</th>
+            <th className="text-right font-bold px-6 py-3 whitespace-nowrap">الكورس / المدة</th>
+            <th className="text-center font-bold px-6 py-3 whitespace-nowrap">الحالة</th>
+            <th className="text-right font-bold px-6 py-3 whitespace-nowrap">الطالب المستخدم</th>
+            <th className="text-right font-bold px-6 py-3 whitespace-nowrap">تاريخ الإنشاء</th>
+            <th className="text-right font-bold px-6 py-3 whitespace-nowrap">تاريخ الانتهاء</th>
+            <th className="text-center font-bold px-6 py-3 whitespace-nowrap">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredCodes.map((item) => {
+            const isExpired =
+              item.expires_at && new Date(item.expires_at) < new Date();
+
+            return (
+              <tr
+                key={item.id}
+                className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+              >
+                <td className="px-6 py-4">
+                  <span className="font-black tracking-wider text-slate-900">{item.code}</span>
+                </td>
+
+                <td className="px-6 py-4">
+                  <p className="font-bold text-slate-800">{item.courses?.title || "-"}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {item.duration_days === 0 ? "اشتراك دائم" : `${item.duration_days} يوم`}
+                  </p>
+                </td>
+
+                <td className="px-6 py-4 text-center">
+                  {getStatusBadge(item.status)}
+                </td>
+
+                <td className="px-6 py-4">
+                  {item.students ? (
+                    <div>
+                      <p className="font-bold text-slate-800">{item.students.full_name}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{item.students.phone}</p>
+                    </div>
+                  ) : (
+                    <span className="text-slate-400 text-xs font-bold">غير مستخدم بعد</span>
+                  )}
+                </td>
+
+                <td className="px-6 py-4 text-slate-600 whitespace-nowrap">
+                  {new Date(item.created_at).toLocaleDateString("ar-EG")}
+                </td>
+
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {item.duration_days === 0 ? (
+                    <span className="text-blue-600 font-bold text-xs">♾️ لا ينتهي</span>
+                  ) : item.expires_at ? (
+                    <span className={`font-bold text-xs ${isExpired ? "text-red-600" : "text-emerald-600"}`}>
+                      {isExpired ? "⛔ " : "✅ "}
+                      {new Date(item.expires_at).toLocaleDateString("ar-EG")}
+                    </span>
+                  ) : (
+                    <span className="text-slate-400 text-xs">لم يُستخدم بعد</span>
+                  )}
+                </td>
+
+                <td className="px-6 py-4">
+                  <div className="flex items-center justify-center gap-1">
+                    <button
+                      onClick={() => copyCode(item.code)}
+                      title="نسخ الكود"
+                      className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition"
+                    >
+                      <Copy size={16} />
+                    </button>
+
+                    <button
+                      onClick={() => toggleCodeStatus(item.id, item.status)}
+                      title={item.status === "active" ? "تعطيل الكود" : "تفعيل الكود"}
+                      className={`p-2 rounded-lg transition ${
+                        item.status === "active"
+                          ? "text-orange-600 hover:bg-orange-50"
+                          : "text-green-600 hover:bg-green-50"
+                      }`}
+                    >
+                      {item.status === "active" ? <Ban size={16} /> : <CheckCircle size={16} />}
+                    </button>
+
+                    <button
+                      onClick={() => deleteCode(item.id)}
+                      title="حذف الكود"
+                      className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  )}
 
 </div>
 
