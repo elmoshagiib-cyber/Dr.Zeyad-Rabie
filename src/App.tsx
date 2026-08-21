@@ -17,7 +17,7 @@ import { StaffLoginPage } from "./pages/StaffLoginPage";
 import { useState } from "react";
 import { Toaster } from "react-hot-toast";
 /* Student */
-
+import StudentLayout from "./pages/student/StudentLayout";
 import { LessonPlayer } from "./pages/student/LessonPlayer";
 import { QuizPage } from "./pages/student/QuizPage";
 import { AnnouncementsPage } from "./pages/student/AnnouncementsPage";
@@ -205,7 +205,9 @@ function AppRoutes() {
   path="/dashboard/forum"
   element={
     <ProtectedRoute roles={["student"]}>
-      <ForumPage />
+      <StudentLayout>
+        <ForumPage />
+      </StudentLayout>
     </ProtectedRoute>
   }
 />
