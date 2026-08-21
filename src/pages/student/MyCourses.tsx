@@ -68,82 +68,69 @@ return (
           <p className="text-gray-500 dark:text-gray-400 text-sm">{enrolledCourses.length} كورسات مشترك بها</p>
         </div>
         <div className="p-6 space-y-4">
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 {enrolledCourses.map((course: any) => (
 
-<Card
-  hover
+<div
+  key={course.id}
   className="
     bg-white
     dark:bg-[#111111]
     border
-    border-gray-200
+    border-[#EAD8FF]
     dark:border-[#2A2A2A]
+    rounded-2xl
+    overflow-hidden
+    hover:border-[#B348FE]
+    hover:shadow-lg
+    transition-all
+    duration-300
   "
 >
-  <CardContent className="flex flex-col sm:flex-row gap-5">
-    <img
-      src={
-        course.thumbnail ||
-        "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=400"
-      }
-      alt={course.title}
-      className="w-full sm:w-40 h-32 sm:h-24 rounded-xl object-cover flex-shrink-0"
-      onError={(e) => {
-        (e.target as HTMLImageElement).src =
-          "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=160&h=96&fit=crop";
-      }}
-    />
+  <img
+    src={
+      course.thumbnail ||
+      "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=400"
+    }
+    alt={course.title}
+    className="w-full h-44 object-cover"
+    onError={(e) => {
+      (e.target as HTMLImageElement).src =
+        "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=400&h=220&fit=crop";
+    }}
+  />
 
-    <div className="flex-1 min-w-0">
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <h3 className="font-black text-gray-900 dark:text-white">
-          {course.title}
-        </h3>
+  <div className="p-4">
+    <h3 className="font-black text-gray-900 dark:text-white mb-3 line-clamp-2">
+      {course.title}
+    </h3>
 
-        <Badge variant="blue" className="flex-shrink-0">
-          0%
-        </Badge>
+    <div className="space-y-1.5 mb-4">
+      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+        <BookOpen size={13} className="text-[#B348FE] flex-shrink-0" />
+        <span>{course.grade || "-"}</span>
       </div>
-
-      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-3">
-        <span className="flex items-center gap-1">
-          <BookOpen size={12} />
-          0 درس
+      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+        <Clock size={13} className="text-[#B348FE] flex-shrink-0" />
+        <span>
+          {course.created_at
+            ? new Date(course.created_at).toLocaleDateString("ar-EG")
+            : "-"}
         </span>
-
-        <span className="flex items-center gap-1">
-          <Clock size={12} />
-          آخر نشاط: لا يوجد
-        </span>
-      </div>
-
-      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-        <span className="font-medium text-slate-700">
-          آخر درس:
-        </span>{" "}
-        لم يبدأ بعد
-      </p>
-
-      <div className="flex items-center gap-4">
-        <ProgressBar
-          value={0}
-          className="flex-1"
-          size="sm"
-        />
-
-        <Button
-          size="sm"
-          onClick={() => navigate(`/courses/${course.id}`)}
-        >
-          <Play size={13} />
-          ابدأ
-        </Button>
       </div>
     </div>
-  </CardContent>
-</Card>
+
+    <button
+      onClick={() => navigate(`/courses/${course.id}`)}
+      className="w-full py-2.5 rounded-xl bg-[#B348FE] hover:bg-[#9E2FFF] text-white font-black text-sm transition-colors"
+    >
+      الدخول للكورس
+    </button>
+  </div>
+</div>
           )
 )}
+</div>
 
           {/* Browse more */}
           <div
