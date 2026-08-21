@@ -182,12 +182,11 @@ const RegisterPage = () => {
     if (!form.lastName.trim()) e.lastName = 'الاسم الأخير مطلوب';
     if (!form.phone.match(/^(010|011|012|015)\d{8}$/)) e.phone = 'رقم الهاتف غير صحيح';
     if (form.parentPhone && !form.parentPhone.match(/^(010|011|012|015)\d{8}$/)) e.parentPhone = 'رقم هاتف ولي الأمر غير صحيح';
-    if (
-  form.email.trim() &&
-  !form.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
-) {
-  e.email = "البريد الإلكتروني غير صحيح";
-}
+    if (!form.email.trim()) {
+      e.email = "البريد الإلكتروني مطلوب";
+    } else if (!form.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      e.email = "البريد الإلكتروني غير صحيح";
+    }
     if (!form.grade) e.grade = 'يرجى اختيار الصف الدراسي';
     if (!form.governorate) e.governorate = 'يرجى اختيار المحافظة';
     if (!form.studentType) e.studentType = 'يرجى اختيار نوع الطالب';
@@ -224,10 +223,7 @@ const RegisterPage = () => {
       // نسجل المحاولة قبل ما نكمل (بغض النظر عن النتيجة، عشان نمنع السبام حتى لو فشل كل مرة)
       await supabase.rpc("record_register_attempt", { p_identifier: phone });
 
-      // لو الإيميل فاضي، نولّد إيميل داخلي وهمي مبني على رقم الهاتف عشان Supabase Auth يشتغل
-      const finalEmail = form.email.trim()
-        ? form.email.trim().toLowerCase()
-        : `${phone}@students.zeyadrabie.com`;
+      const finalEmail = form.email.trim().toLowerCase();
 
 const { data: authData, error: authError } =
   await supabase.auth.signUp({
@@ -562,12 +558,13 @@ xl:pt-24
                 <InputField
                   isDark={isDark}
                   icon={Mail}
-                  placeholder="البريد الإلكتروني (اختياري)"
+                  placeholder="البريد الإلكتروني"
                   value={form.email}
                   onChange={v => setForm(p => ({ ...p, email: v }))}
                   type="email"
                   dir="ltr"
                   error={errors.email}
+                  required
                 />
 
                 {/* Governorate */}

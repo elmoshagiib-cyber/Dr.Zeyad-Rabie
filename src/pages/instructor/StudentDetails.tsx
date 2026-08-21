@@ -74,6 +74,7 @@ interface StudentCourse {
   active: boolean;
   subscription_type: string;
   created_at: string;
+  expires_at: string | null;
   courseData?: Course;
 }
 
@@ -1177,6 +1178,17 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                           </div>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             {course.courseData?.grade} • اشترك في {course.created_at ? new Date(course.created_at).toLocaleDateString("ar-EG") : "-"}
+                          </p>
+                          <p className="text-xs font-bold mt-1">
+                            {course.expires_at ? (
+                              new Date(course.expires_at) < new Date() ? (
+                                <span className="text-red-600">⛔ انتهى الاشتراك في {new Date(course.expires_at).toLocaleDateString("ar-EG")}</span>
+                              ) : (
+                                <span className="text-emerald-600">✅ ينتهي في {new Date(course.expires_at).toLocaleDateString("ar-EG")}</span>
+                              )
+                            ) : (
+                              <span className="text-blue-600">♾️ اشتراك دائم</span>
+                            )}
                           </p>
                           {course.needsFollowup && course.followupNote && (
                             <p className="text-xs text-red-600 dark:text-red-400 font-bold mt-1.5">

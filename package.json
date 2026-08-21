@@ -28,6 +28,8 @@
     "formidable": "^3.5.4",
     "framer-motion": "^12.42.2",
     "iconoir-react": "^7.11.1",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "lucide-react": "^1.17.0",
     "motion": "^12.42.2",
     "react": "19.2.6",

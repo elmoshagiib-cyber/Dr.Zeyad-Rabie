@@ -1,4 +1,7 @@
 import { supabase } from "../../lib/supabase";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   Database,
   Users,
@@ -191,6 +194,49 @@ await loadStats();
 alert(`تم إنشاء ${codes.length} كود بنجاح ✅`);
 };
 
+const handleExport = (type: "excel" | "pdf") => {
+  const filtered = codes.filter((item) => {
+    const matchesGrade =
+      !exportGrade ||
+      courses.find((c) => c.id === item.course_id && c.grade === exportGrade);
+    const matchesCourse = !exportCourse || item.course_id === exportCourse;
+    const matchesStatus = !exportStatus || item.status === exportStatus;
+    return matchesGrade && matchesCourse && matchesStatus;
+  });
+
+  if (filtered.length === 0) {
+    alert("لا توجد بيانات مطابقة للتصدير");
+    return;
+  }
+
+  const rows = filtered.map((item) => ({
+    الكود: item.code,
+    الكورس: item.courses?.title || "-",
+    المدة: item.duration_days === 0 ? "دائم" : `${item.duration_days} يوم`,
+    الحالة:
+      item.status === "active" ? "صالح" :
+      item.status === "used" ? "مستخدم" :
+      item.status === "expired" ? "منتهي" : "ملغي",
+    الطالب: item.students?.full_name || "-",
+    الهاتف: item.students?.phone || "-",
+    "تاريخ الإنشاء": new Date(item.created_at).toLocaleDateString("ar-EG"),
+  }));
+
+  if (type === "excel") {
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "الأكواد");
+    XLSX.writeFile(workbook, "subscription-codes.xlsx");
+  } else {
+    const doc = new jsPDF();
+    autoTable(doc, {
+      head: [Object.keys(rows[0])],
+      body: rows.map((r) => Object.values(r)),
+      styles: { font: "helvetica", halign: "right" },
+    });
+    doc.save("subscription-codes.pdf");
+  }
+};
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -367,6 +413,7 @@ to-[#9E2FFF]
           {/* Left Actions */}
           <div className="flex items-center gap-3 flex-wrap">
             <button
+              onClick={() => document.getElementById("generate-section")?.scrollIntoView({ behavior: "smooth" })}
               className="
                 h-11
                 px-6
@@ -383,6 +430,7 @@ to-[#9E2FFF]
             </button>
 
             <button
+              onClick={() => document.getElementById("export-section")?.scrollIntoView({ behavior: "smooth" })}
               className="
                 h-11
                 px-6
@@ -506,7 +554,7 @@ to-[#9E2FFF]
 <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-8">
 
   {/* Generate Codes */}
-  <div className="xl:col-span-3 bg-white rounded-3xl shadow-sm border border-slate-200 p-7">
+  <div id="generate-section" className="xl:col-span-3 bg-white rounded-3xl shadow-sm border border-slate-200 p-7">
 
     <div className="flex items-center justify-between mb-6">
       <h2 className="text-2xl font-black text-slate-800">
@@ -627,7 +675,7 @@ hover:bg-violet-700
 
   {/* Export */}
 
-  <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-7">
+  <div id="export-section" className="bg-white rounded-3xl shadow-sm border border-slate-200 p-7">
 
     <h2 className="text-xl font-black mb-6">
       تصدير البيانات
@@ -679,17 +727,19 @@ hover:bg-violet-700
 
     </div>
 
-    <div className="grid grid-cols-3 gap-3 mt-6">
+    <div className="grid grid-cols-2 gap-3 mt-6">
 
-      <button className="bg-red-500 hover:bg-red-600 text-white rounded-xl h-11 font-bold">
+      <button
+        onClick={() => handleExport("pdf")}
+        className="bg-red-500 hover:bg-red-600 text-white rounded-xl h-11 font-bold"
+      >
         PDF
       </button>
 
-      <button className="bg-green-600 hover:bg-green-700 text-white rounded-xl h-11 font-bold">
-        CSV
-      </button>
-
-      <button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 font-bold">
+      <button
+        onClick={() => handleExport("excel")}
+        className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 font-bold"
+      >
         Excel
       </button>
 
