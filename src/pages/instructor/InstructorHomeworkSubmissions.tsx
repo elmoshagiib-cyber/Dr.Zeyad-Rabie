@@ -10,16 +10,18 @@ import {
   Eye,
   Save,
   Search,
-  Filter,
   ChevronLeft,
   ChevronRight,
+  ArrowRight,
   User,
   BookOpen,
   Calendar,
   Award,
+  TrendingUp,
   Image as ImageIcon,
   FileType,
   X,
+  RotateCcw,
 } from "lucide-react";
 
 interface Submission {
@@ -47,6 +49,25 @@ interface Submission {
   };
 }
 
+const GRADE_LABELS: Record<string, string> = {
+  prep_1: "أولى إعدادي",
+  prep_2: "ثانية إعدادي",
+  prep_3: "ثالثة إعدادي",
+  sec_1: "أولى ثانوي",
+  sec_2: "ثانية ثانوي",
+  sec_3: "ثالثة ثانوي",
+};
+
+const GRADE_OPTIONS = [
+  "الكل",
+  "أولى إعدادي",
+  "ثانية إعدادي",
+  "ثالثة إعدادي",
+  "أولى ثانوي",
+  "ثانية ثانوي",
+  "ثالثة ثانوي",
+];
+
 export function InstructorHomeworkSubmissions() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
@@ -59,33 +80,31 @@ export function InstructorHomeworkSubmissions() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  // على الموبايل: نتحكم هل نعرض القائمة ولا التفاصيل
+  const [mobileView, setMobileView] = useState<"list" | "detail">("list");
 
   useEffect(() => {
     loadSubmissions();
   }, []);
 
-  useEffect(() => {
-    if (filteredSubmissions.length > 0 && !selectedSubmission) {
-      setSelectedSubmission(filteredSubmissions[0]);
-    }
-  }, [submissions]);
-
   const loadSubmissions = async () => {
     setLoading(true);
 
-const { data, error } = await supabase
-  .from("homework_submissions")
-  .select(`
-    *,
-    homeworks (
-      *,
-      courses (
-        grade,
-        title
+    const { data, error } = await supabase
+      .from("homework_submissions")
+      .select(
+        `
+        *,
+        homeworks (
+          *,
+          courses (
+            grade,
+            title
+          )
+        )
+      `
       )
-    )
-  `)
-  .order("submitted_at", { ascending: false });
+      .order("submitted_at", { ascending: false });
 
     if (error) {
       console.error(error);
@@ -112,77 +131,80 @@ const { data, error } = await supabase
     setLoading(false);
   };
 
-  const gradedCount = submissions.filter((s) => s.grade !== null).length;
+  const gradedCount = submissions.filter((s) => s.grade !== null && s.grade !== undefined).length;
   const pendingCount = submissions.length - gradedCount;
-const gradeLabels: Record<string, string> = {
-  prep_1: "أولى إعدادي",
-  prep_2: "ثانية إعدادي",
-  prep_3: "ثالثة إعدادي",
 
-  sec_1: "أولى ثانوي",
-  sec_2: "ثانية ثانوي",
-  sec_3: "ثالثة ثانوي",
-};
+  const averageGrade = useMemo(() => {
+    const graded = submissions.filter(
+      (s) => s.grade !== null && s.grade !== undefined && s.homeworks?.total_score
+    );
+    if (graded.length === 0) return null;
+    const sum = graded.reduce((acc, s) => acc + (s.grade! / (s.homeworks!.total_score || 100)) * 100, 0);
+    return Math.round(sum / graded.length);
+  }, [submissions]);
+
   const homeworkOptions = useMemo(() => {
     const titles = submissions.map((s) => s.homeworks?.title).filter(Boolean);
     return ["الكل", ...Array.from(new Set(titles))];
   }, [submissions]);
 
-  const gradeOptions = [
-  "الكل",
+  const filteredSubmissions = useMemo(() => {
+    return submissions.filter((item) => {
+      const matchesSearch =
+        item.student_name?.toLowerCase().includes(search.toLowerCase()) ||
+        item.homeworks?.title?.toLowerCase().includes(search.toLowerCase());
 
-  "أولى إعدادي",
-  "ثانية إعدادي",
-  "ثالثة إعدادي",
+      const matchesStatus =
+        statusFilter === "الكل" ||
+        (statusFilter === "تم التصحيح" && item.grade !== null && item.grade !== undefined) ||
+        (statusFilter === "بانتظار التصحيح" && (item.grade === null || item.grade === undefined));
 
-  "أولى ثانوي",
-  "ثانية ثانوي",
-  "ثالثة ثانوي",
-];
+      const matchesHomework = homeworkFilter === "الكل" || item.homeworks?.title === homeworkFilter;
 
-const filteredSubmissions = useMemo(() => {
-  return submissions.filter((item) => {
-    const matchesSearch =
-      item.student_name?.toLowerCase().includes(search.toLowerCase()) ||
-      item.homeworks?.title?.toLowerCase().includes(search.toLowerCase());
+      const gradeName = GRADE_LABELS[item.homeworks?.courses?.grade || ""] || "";
+      const matchesGrade = gradeFilter === "الكل" || gradeName === gradeFilter;
 
-    const matchesStatus =
-      statusFilter === "الكل" ||
-      (statusFilter === "تم التصحيح" && item.grade !== null) ||
-      (statusFilter === "بانتظار التصحيح" && item.grade === null);
+      return matchesSearch && matchesStatus && matchesHomework && matchesGrade;
+    });
+  }, [submissions, search, statusFilter, homeworkFilter, gradeFilter]);
 
-    const matchesHomework =
-      homeworkFilter === "الكل" ||
-      item.homeworks?.title === homeworkFilter;
+  const hasActiveFilters =
+    search !== "" || statusFilter !== "الكل" || homeworkFilter !== "الكل" || gradeFilter !== "الكل";
 
-    const gradeName =
-      gradeLabels[item.homeworks?.courses?.grade || ""] || "";
+  const clearFilters = () => {
+    setSearch("");
+    setStatusFilter("الكل");
+    setHomeworkFilter("الكل");
+    setGradeFilter("الكل");
+  };
 
-    const matchesGrade =
-      gradeFilter === "الكل" ||
-      gradeName === gradeFilter;
+  // لو القائمة المفلترة اتغيرت وماعدش فيها العنصر المختار، بنختار أول عنصر تلقائيًا
+  useEffect(() => {
+    if (filteredSubmissions.length === 0) {
+      setSelectedSubmission(null);
+      return;
+    }
 
-    return (
-      matchesSearch &&
-      matchesStatus &&
-      matchesHomework &&
-      matchesGrade
-    );
-  });
+    const stillExists = selectedSubmission
+      ? filteredSubmissions.some((s) => s.id === selectedSubmission.id)
+      : false;
 
-}, [
-  submissions,
-  search,
-  statusFilter,
-  homeworkFilter,
-  gradeFilter,
-]);
+    if (!stillExists) {
+      setSelectedSubmission(filteredSubmissions[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredSubmissions]);
+
+  const selectSubmission = (submission: Submission) => {
+    setSelectedSubmission(submission);
+    setMobileView("detail");
+  };
 
   const saveGrade = async (id: number) => {
     const gradeValue = grades[id];
     const feedbackValue = feedbacks[id];
 
-    if (gradeValue === undefined || gradeValue === null) {
+    if (gradeValue === undefined || gradeValue === null || Number.isNaN(gradeValue)) {
       alert("من فضلك أدخل الدرجة أولاً");
       return;
     }
@@ -194,10 +216,7 @@ const filteredSubmissions = useMemo(() => {
       updateData.feedback = feedbackValue;
     }
 
-    const { error } = await supabase
-      .from("homework_submissions")
-      .update(updateData)
-      .eq("id", id);
+    const { error } = await supabase.from("homework_submissions").update(updateData).eq("id", id);
 
     if (error) {
       console.error(error);
@@ -206,28 +225,22 @@ const filteredSubmissions = useMemo(() => {
       return;
     }
 
-    // Update local state instead of reloading
-    setSubmissions(prev => 
-      prev.map(s => 
-        s.id === id 
-          ? { ...s, grade: gradeValue, feedback: feedbackValue || s.feedback }
-          : s
-      )
+    setSubmissions((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, grade: gradeValue, feedback: feedbackValue ?? s.feedback } : s))
     );
 
     if (selectedSubmission?.id === id) {
-      setSelectedSubmission(prev => 
-        prev ? { ...prev, grade: gradeValue, feedback: feedbackValue || prev.feedback } : null
+      setSelectedSubmission((prev) =>
+        prev ? { ...prev, grade: gradeValue, feedback: feedbackValue ?? prev.feedback } : null
       );
     }
 
     setSaving(false);
-    
-    // Clear the inputs
+
     const newGrades = { ...grades };
     delete newGrades[id];
     setGrades(newGrades);
-    
+
     const newFeedbacks = { ...feedbacks };
     delete newFeedbacks[id];
     setFeedbacks(newFeedbacks);
@@ -236,52 +249,78 @@ const filteredSubmissions = useMemo(() => {
   const getFileType = (submission: Submission): "pdf" | "image" | "text" | "none" => {
     const fileUrl = submission.file_url || submission.answer;
     const fileName = submission.file_name;
-    
+
     if (!fileUrl && !submission.text_answer) return "none";
     if (!fileUrl && submission.text_answer) return "text";
-    
+
     if (fileName) {
-      const ext = fileName.toLowerCase().split('.').pop();
-      if (ext === 'pdf') return 'pdf';
-      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext || '')) return 'image';
+      const ext = fileName.toLowerCase().split(".").pop();
+      if (ext === "pdf") return "pdf";
+      if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext || "")) return "image";
     }
-    
-    if (fileUrl?.includes('.pdf')) return 'pdf';
-    if (fileUrl?.match(/\.(jpg|jpeg|png|gif|webp|svg)/i)) return 'image';
-    
+
+    if (fileUrl?.includes(".pdf")) return "pdf";
+    if (fileUrl?.match(/\.(jpg|jpeg|png|gif|webp|svg)/i)) return "image";
+
     return "none";
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('ar-EG', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Intl.DateTimeFormat("ar-EG", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   };
 
   const handlePrevious = () => {
     if (!selectedSubmission) return;
-    const currentIndex = filteredSubmissions.findIndex(s => s.id === selectedSubmission.id);
-    if (currentIndex > 0) {
-      setSelectedSubmission(filteredSubmissions[currentIndex - 1]);
-    }
+    const currentIdx = filteredSubmissions.findIndex((s) => s.id === selectedSubmission.id);
+    if (currentIdx > 0) setSelectedSubmission(filteredSubmissions[currentIdx - 1]);
   };
 
   const handleNext = () => {
     if (!selectedSubmission) return;
-    const currentIndex = filteredSubmissions.findIndex(s => s.id === selectedSubmission.id);
-    if (currentIndex < filteredSubmissions.length - 1) {
-      setSelectedSubmission(filteredSubmissions[currentIndex + 1]);
-    }
+    const currentIdx = filteredSubmissions.findIndex((s) => s.id === selectedSubmission.id);
+    if (currentIdx < filteredSubmissions.length - 1) setSelectedSubmission(filteredSubmissions[currentIdx + 1]);
   };
 
-  const currentIndex = selectedSubmission 
-    ? filteredSubmissions.findIndex(s => s.id === selectedSubmission.id) + 1 
+  const currentIndex = selectedSubmission
+    ? filteredSubmissions.findIndex((s) => s.id === selectedSubmission.id) + 1
     : 0;
+
+  const statCards = [
+    {
+      label: "إجمالي التسليمات",
+      value: submissions.length,
+      icon: <FileText className="text-violet-600" size={26} />,
+      bg: "bg-violet-100",
+    },
+    {
+      label: "تم التصحيح",
+      value: gradedCount,
+      icon: <CheckCircle className="text-emerald-600" size={26} />,
+      bg: "bg-emerald-100",
+      valueClass: "text-emerald-600",
+    },
+    {
+      label: "بانتظار التصحيح",
+      value: pendingCount,
+      icon: <Clock className="text-amber-600" size={26} />,
+      bg: "bg-amber-100",
+      valueClass: "text-amber-600",
+    },
+    {
+      label: "معدل الدرجات",
+      value: averageGrade !== null ? `${averageGrade}%` : "-",
+      icon: <TrendingUp className="text-[#B348FE]" size={26} />,
+      bg: "bg-[#F6EEFF]",
+      valueClass: "text-[#B348FE]",
+    },
+  ];
 
   return (
     <div className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]" dir="rtl">
@@ -291,135 +330,39 @@ const filteredSubmissions = useMemo(() => {
 
       <main className="flex-1 overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="
-relative
-overflow-hidden
-
-rounded-[36px]
-
-bg-gradient-to-r
-from-[#C65CFF]
-via-[#B348FE]
-to-[#9E2FFF]
-
-px-6
-lg:px-8
-
-py-6
-lg:py-7
-
-text-white
-
-shadow-[0_18px_45px_rgba(179,72,254,.22)]
-
-mx-6
-mt-6
-">
-          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/10
- blur-3xl" />
+        <div className="relative overflow-hidden rounded-[28px] lg:rounded-[36px] bg-gradient-to-r from-[#C65CFF] via-[#B348FE] to-[#9E2FFF] px-5 lg:px-8 py-5 lg:py-7 text-white shadow-[0_18px_45px_rgba(179,72,254,.22)] mx-4 lg:mx-6 mt-4 lg:mt-6 flex-shrink-0">
+          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full blur-[120px] blur-3xl" />
-          
           <div className="relative z-10">
-            <h1 className="text-3xl lg:text-4xl font-black tracking-tight">تصحيح الواجبات</h1>
-            <p className="text-white/90 text-sm lg:text-base">مراجعة وتصحيح تسليمات الطلاب</p>
+            <h1 className="text-2xl lg:text-4xl font-black tracking-tight">تصحيح الواجبات</h1>
+            <p className="text-white/90 text-sm lg:text-base mt-1">مراجعة وتصحيح تسليمات الطلاب</p>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 p-6 bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
-          <div
-className="
-bg-white
-
-rounded-3xl
-
-border
-border-slate-200
-
-shadow-sm
-
-hover:shadow-lg
-
-transition
-
-p-6
-
-flex
-
-items-center
-
-justify-between
-"
->
-            <div className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white">{submissions.length}</div>
-            <div className="w-14 h-14 rounded-2xl bg-violet-100 flex items-center justify-center">
-    <FileText className="text-violet-600" size={28}/>
-</div>
-          </div>
-          <div
-className="
-bg-white
-
-rounded-3xl
-
-border
-border-slate-200
-
-shadow-sm
-
-hover:shadow-lg
-
-transition
-
-p-6
-
-flex
-
-items-center
-
-justify-between
-"
->
-            <div className="text-2xl lg:text-3xl font-black text-emerald-600">{gradedCount}</div>
-            <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center">
-    <CheckCircle className="text-emerald-600" size={28}/>
-</div>
-          </div>
-          <div
-className="
-bg-white
-
-rounded-3xl
-
-border
-border-slate-200
-
-shadow-sm
-
-hover:shadow-lg
-
-transition
-
-p-6
-
-flex
-
-items-center
-
-justify-between
-"
->
-            <div className="text-2xl lg:text-3xl font-black text-amber-600">{pendingCount}</div>
-            <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center">
-    <Clock className="text-amber-600" size={28}/>
-</div>
-          </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 p-4 lg:p-6 bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
+          {statCards.map((stat) => (
+            <div
+              key={stat.label}
+              className="bg-white dark:bg-[#111111] rounded-2xl lg:rounded-3xl border border-slate-200 dark:border-[#2A2A2A] shadow-sm hover:shadow-lg transition p-4 lg:p-6 flex items-center justify-between"
+            >
+              <div>
+                <p className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 font-bold mb-1">{stat.label}</p>
+                <div className={`text-xl lg:text-3xl font-black text-gray-900 dark:text-white ${stat.valueClass || ""}`}>
+                  {stat.value}
+                </div>
+              </div>
+              <div className={`w-11 h-11 lg:w-14 lg:h-14 rounded-xl lg:rounded-2xl ${stat.bg} flex items-center justify-center flex-shrink-0`}>
+                {stat.icon}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Filters */}
         <div className="p-4 lg:p-6 bg-white dark:bg-[#09090B] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-            <div className="relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
+            <div className="relative xl:col-span-2">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <Input
                 value={search}
@@ -434,21 +377,20 @@ justify-between
               onChange={(e) => setHomeworkFilter(e.target.value)}
               className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
             >
-
               {homeworkOptions.map((hw, idx) => (
                 <option key={idx}>{hw}</option>
               ))}
             </select>
 
-<select
-  value={gradeFilter}
-  onChange={(e) => setGradeFilter(e.target.value)}
-  className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
->
-  {gradeOptions.map((grade) => (
-    <option key={grade}>{grade}</option>
-  ))}
-</select>
+            <select
+              value={gradeFilter}
+              onChange={(e) => setGradeFilter(e.target.value)}
+              className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+            >
+              {GRADE_OPTIONS.map((grade) => (
+                <option key={grade}>{grade}</option>
+              ))}
+            </select>
 
             <select
               value={statusFilter}
@@ -460,89 +402,73 @@ justify-between
               <option>بانتظار التصحيح</option>
             </select>
           </div>
+
+          {hasActiveFilters && (
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-bold">
+                {filteredSubmissions.length} نتيجة من {submissions.length}
+              </p>
+              <button
+                onClick={clearFilters}
+                className="flex items-center gap-1.5 text-xs font-bold text-[#B348FE] hover:text-[#9E2FFF] transition-colors"
+              >
+                <RotateCcw size={14} />
+                مسح الفلاتر
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Main Content */}
         <div className="flex-1 overflow-hidden flex">
           {loading ? (
             <div className="flex-1 flex items-center justify-center">
-              <div
-className="
-bg-white
-
-rounded-3xl
-
-border
-border-slate-200
-
-shadow-sm
-
-hover:shadow-lg
-
-transition
-
-p-6
-
-flex
-
-items-center
-
-justify-between
-"
->
+              <div className="text-center">
                 <div className="w-12 h-12 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                 <p className="text-gray-600 dark:text-gray-400 font-bold">جاري تحميل البيانات...</p>
               </div>
             </div>
           ) : filteredSubmissions.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div
-className="
-bg-white
-
-rounded-3xl
-
-border
-border-slate-200
-
-shadow-sm
-
-hover:shadow-lg
-
-transition
-
-p-6
-
-flex
-
-items-center
-
-justify-between
-"
->
+            <div className="flex-1 flex items-center justify-center p-6">
+              <div className="text-center">
                 <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={64} />
                 <p className="text-gray-600 dark:text-gray-400 font-bold text-lg">لا توجد تسليمات</p>
-                <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">جرب تغيير الفلاتر</p>
+                <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">
+                  {hasActiveFilters ? "جرب تغيير الفلاتر" : "لسه محدش سلّم واجب"}
+                </p>
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-[#B348FE] hover:text-[#9E2FFF] transition-colors"
+                  >
+                    <RotateCcw size={14} />
+                    مسح الفلاتر
+                  </button>
+                )}
               </div>
             </div>
           ) : (
             <>
               {/* Sidebar - Submissions List */}
-              <div className="w-full lg:w-80 xl:w-96 border-l border-gray-200 dark:border-[#2A2A2A] overflow-y-auto bg-gray-50 dark:bg-[#0A0A0A]">
+              <div
+                className={`w-full lg:w-80 xl:w-96 border-l border-gray-200 dark:border-[#2A2A2A] overflow-y-auto bg-gray-50 dark:bg-[#0A0A0A] ${
+                  mobileView === "detail" ? "hidden lg:block" : "block"
+                }`}
+              >
                 <div className="p-4">
                   <div className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3">
                     {filteredSubmissions.length} تسليم
                   </div>
-                  
+
                   <div className="space-y-2">
                     {filteredSubmissions.map((submission) => (
                       <button
                         key={submission.id}
-                        onClick={() => setSelectedSubmission(submission)}
+                        onClick={() => selectSubmission(submission)}
                         className={`w-full text-right p-4 rounded-2xl transition-all duration-200 ${
                           selectedSubmission?.id === submission.id
-                            ? 'bg-white dark:bg-[#111111] shadow-md border-2 border-[#B348FE]'
-                            : 'bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE] hover:shadow-sm'
+                            ? "bg-white dark:bg-[#111111] shadow-md border-2 border-[#B348FE]"
+                            : "bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE] hover:shadow-sm"
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3 mb-2">
@@ -550,26 +476,25 @@ justify-between
                             <h3 className="font-black text-gray-900 dark:text-white text-sm truncate">
                               {submission.student_name}
                             </h3>
-<p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
-  {submission.homeworks?.title}
-</p>
-
-<p className="text-[11px] font-bold text-[#B348FE] mt-1">
-  {gradeLabels[submission.homeworks?.courses?.grade || ""] || ""}
-</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                              {submission.homeworks?.title}
+                            </p>
+                            <p className="text-[11px] font-bold text-[#B348FE] mt-1">
+                              {GRADE_LABELS[submission.homeworks?.courses?.grade || ""] || ""}
+                            </p>
                           </div>
-                          
+
                           <span
                             className={`px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap ${
-                              submission.grade !== null
+                              submission.grade !== null && submission.grade !== undefined
                                 ? "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400"
                                 : "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400"
                             }`}
                           >
-                            {submission.grade !== null ? "مُصحح" : "معلق"}
+                            {submission.grade !== null && submission.grade !== undefined ? "مُصحح" : "معلق"}
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
                           <Calendar size={12} />
                           <span>{new Date(submission.submitted_at).toLocaleDateString("ar-EG")}</span>
@@ -582,19 +507,29 @@ justify-between
 
               {/* Main Panel - Submission Details */}
               {selectedSubmission && (
-                <div className="flex-1 overflow-y-auto">
-                  <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+                <div className={`flex-1 overflow-y-auto ${mobileView === "list" ? "hidden lg:block" : "block"}`}>
+                  <div className="p-4 lg:p-8 max-w-5xl mx-auto">
                     {/* Navigation */}
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="text-sm font-bold text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center justify-between mb-6 gap-3">
+                      {/* زرار رجوع للقائمة على الموبايل بس */}
+                      <button
+                        onClick={() => setMobileView("list")}
+                        className="lg:hidden flex items-center gap-1.5 text-sm font-bold text-gray-600 dark:text-gray-300 p-2 rounded-xl border-2 border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE] transition-all"
+                      >
+                        <ArrowRight size={16} />
+                        القائمة
+                      </button>
+
+                      <div className="text-sm font-bold text-gray-500 dark:text-gray-400 hidden lg:block">
                         {currentIndex} من {filteredSubmissions.length}
                       </div>
-                      
+
                       <div className="flex gap-2">
                         <button
                           onClick={handlePrevious}
                           disabled={currentIndex === 1}
                           className="p-2 rounded-xl border-2 border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE] hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                          title="السابق"
                         >
                           <ChevronRight size={20} />
                         </button>
@@ -602,6 +537,7 @@ justify-between
                           onClick={handleNext}
                           disabled={currentIndex === filteredSubmissions.length}
                           className="p-2 rounded-xl border-2 border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE] hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                          title="التالي"
                         >
                           <ChevronLeft size={20} />
                         </button>
@@ -611,11 +547,11 @@ justify-between
                     {/* Student Info */}
                     <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm mb-6">
                       <CardContent className="p-6">
-                        <div className="flex items-start gap-4 mb-4">
+                        <div className="flex items-start gap-4 flex-wrap">
                           <div className="bg-[#F6EEFF] dark:bg-[#2B103D] p-3 rounded-2xl">
                             <User className="text-[#B348FE]" size={24} />
                           </div>
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-[150px]">
                             <h2 className="text-xl font-black text-gray-900 dark:text-white mb-1">
                               {selectedSubmission.student_name}
                             </h2>
@@ -623,15 +559,17 @@ justify-between
                               معرّف الطالب: #{selectedSubmission.student_id}
                             </p>
                           </div>
-                          
+
                           <span
                             className={`px-4 py-2 rounded-full text-sm font-black border ${
-                              selectedSubmission.grade !== null
+                              selectedSubmission.grade !== null && selectedSubmission.grade !== undefined
                                 ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900"
                                 : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900"
                             }`}
                           >
-                            {selectedSubmission.grade !== null ? "تم التصحيح" : "بانتظار التصحيح"}
+                            {selectedSubmission.grade !== null && selectedSubmission.grade !== undefined
+                              ? "تم التصحيح"
+                              : "بانتظار التصحيح"}
                           </span>
                         </div>
                       </CardContent>
@@ -683,14 +621,9 @@ justify-between
 
                           return (
                             <div className="space-y-4">
-                              {/* PDF Preview */}
-                              {fileType === 'pdf' && fileUrl && (
+                              {fileType === "pdf" && fileUrl && (
                                 <div className="border-2 border-gray-200 dark:border-[#2A2A2A] rounded-2xl overflow-hidden">
-                                  <iframe
-                                    src={fileUrl}
-                                    className="w-full h-[600px]"
-                                    title="PDF Preview"
-                                  />
+                                  <iframe src={fileUrl} className="w-full h-[500px] lg:h-[600px]" title="PDF Preview" />
                                   <div className="p-3 bg-gray-50 dark:bg-[#1A1A1A] border-t border-gray-200 dark:border-[#2A2A2A]">
                                     <a
                                       href={fileUrl}
@@ -705,8 +638,7 @@ justify-between
                                 </div>
                               )}
 
-                              {/* Image Preview */}
-                              {fileType === 'image' && fileUrl && (
+                              {fileType === "image" && fileUrl && (
                                 <div className="border-2 border-gray-200 dark:border-[#2A2A2A] rounded-2xl overflow-hidden">
                                   <div className="p-4 bg-gray-50 dark:bg-[#1A1A1A]">
                                     <img
@@ -728,7 +660,6 @@ justify-between
                                 </div>
                               )}
 
-                              {/* Text Answer */}
                               {selectedSubmission.text_answer && (
                                 <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#1A1A1A] dark:to-[#151515] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6">
                                   <div className="flex items-center gap-2 mb-3">
@@ -741,12 +672,13 @@ justify-between
                                 </div>
                               )}
 
-                              {/* Empty State */}
-                              {fileType === 'none' && !selectedSubmission.text_answer && (
+                              {fileType === "none" && !selectedSubmission.text_answer && (
                                 <div className="text-center py-16 bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl border-2 border-dashed border-gray-300 dark:border-[#2A2A2A]">
                                   <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={64} />
                                   <p className="text-gray-500 dark:text-gray-400 font-bold">لم يتم رفع أي ملف</p>
-                                  <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">الطالب لم يقم بإرفاق إجابة</p>
+                                  <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
+                                    الطالب لم يقم بإرفاق إجابة
+                                  </p>
                                 </div>
                               )}
                             </div>
@@ -764,7 +696,6 @@ justify-between
                         </h3>
 
                         <div className="space-y-4">
-                          {/* Grade Input */}
                           <div>
                             <label className="block mb-2 font-bold text-gray-900 dark:text-white text-sm">
                               الدرجة
@@ -788,7 +719,6 @@ justify-between
                             />
                           </div>
 
-                          {/* Feedback Textarea */}
                           <div>
                             <label className="block mb-2 font-bold text-gray-900 dark:text-white text-sm">
                               الملاحظات (اختياري)
@@ -807,7 +737,6 @@ justify-between
                             />
                           </div>
 
-                          {/* Action Buttons */}
                           <div className="flex flex-col sm:flex-row gap-3 pt-2">
                             <button
                               onClick={() => saveGrade(selectedSubmission.id)}
@@ -841,7 +770,6 @@ justify-between
                             )}
                           </div>
 
-                          {/* Current Grade Display */}
                           {selectedSubmission.grade !== null && selectedSubmission.grade !== undefined && (
                             <div className="mt-4 p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900 rounded-2xl">
                               <div className="flex items-center justify-between">
@@ -852,7 +780,8 @@ justify-between
                                   {selectedSubmission.grade}
                                   {selectedSubmission.homeworks?.total_score && (
                                     <span className="text-lg text-gray-500 dark:text-gray-400">
-                                      {" "}/ {selectedSubmission.homeworks.total_score}
+                                      {" "}
+                                      / {selectedSubmission.homeworks.total_score}
                                     </span>
                                   )}
                                 </span>
@@ -904,14 +833,9 @@ justify-between
       {/* Animations */}
       <style>{`
         @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
-        
         .animate-fadeIn {
           animation: fadeIn 0.2s ease-out;
         }
