@@ -53,20 +53,6 @@ return (
   <StudentLayout>
      
      <>
-        <div
-  className="
-    bg-white
-    dark:bg-[#09090B]
-    border-b
-    border-gray-200
-    dark:border-[#2A2A2A]
-    px-6
-    py-5
-  "
->
-          <h1 className="text-xl font-black text-gray-900 dark:text-white">كورساتي</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">{enrolledCourses.length} كورسات مشترك بها</p>
-        </div>
         <div className="p-6 space-y-4">
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 {enrolledCourses.map((course: any) => (
@@ -132,20 +118,7 @@ return (
 )}
 </div>
 
-          {/* Browse more */}
-          <div
-            onClick={() => navigate("/courses")}
-            className="border-2 border-dashed border-[#EAD8FF]
-dark:border-[#2A2A2A] rounded-2xl p-8 text-center cursor-pointer hover:border-[#B348FE] hover:bg-[#F6EEFF]
-dark:hover:bg-[#111111] transition-all group"
-          >
-            <div className="w-14 h-14 bg-[#F6EEFF]
-dark:bg-[#1F1F1F] group-hover:bg-[#EEDBFF] rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors">
-              <ChevronRight size={22} className="text-[#B348FE]" />
-            </div>
-            <p className="font-bold text-gray-900 dark:text-white mb-1">اكتشف كورسات جديدة</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">تصفح جميع الكورسات المتاحة وأضف ما يناسبك</p>
-          </div>
+          
         </div>
       </>
   </StudentLayout>
