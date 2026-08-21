@@ -33,11 +33,6 @@ interface NavItem {
 
 const studentNav: NavItem[] = [
   {
-    label: "لوحة التحكم",
-    path: "/dashboard",
-    icon: <LayoutDashboard size={20} />,
-  },
-  {
     label: "كورساتي",
     path: "/dashboard/courses",
     icon: <BookOpen size={20} />,

@@ -131,13 +131,9 @@ function AppRoutes() {
             {/* Student */}
       <Route
         path="/dashboard"
-        element={
-          <ProtectedRoute roles={["student"]}>
-            <StudentDashboard />
-          </ProtectedRoute>
-        }
+        element={<Navigate to="/dashboard/courses" replace />}
       />
-
+      
 <Route
   path="/dashboard/homework/:id"
   element={
