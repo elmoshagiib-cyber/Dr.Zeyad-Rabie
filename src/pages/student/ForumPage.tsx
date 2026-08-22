@@ -9,10 +9,10 @@ export default function ForumPage() {
       <div className="w-full max-w-2xl text-center">
 
         {/* Icon */}
-        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-500/10">
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#F6EEFF] dark:bg-[#B348FE]/10">
           <MessageCircle
             size={40}
-            className="text-emerald-500"
+            className="text-[#B348FE]"
           />
         </div>
 
@@ -28,7 +28,7 @@ export default function ForumPage() {
         </p>
 
         {/* Coming Soon */}
-        <div className="mt-8 inline-flex items-center gap-2 rounded-full bg-emerald-50 dark:bg-emerald-500/10 px-5 py-3 text-emerald-600 dark:text-emerald-400 font-medium">
+        <div className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#F6EEFF] dark:bg-[#B348FE]/10 px-5 py-3 text-[#B348FE] dark:text-[#C97AFF] font-medium">
           <Clock size={18} />
           <span>المنتدى قريبًا</span>
         </div>
