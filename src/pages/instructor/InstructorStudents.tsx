@@ -300,8 +300,8 @@ export function InstructorStudents() {
               {/* Desktop & Tablet Table */}
               <div className="hidden md:block">
                 <Card className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
-                  <CardContent className="p-0">
-                    <table className="w-full table-fixed">
+                  <CardContent className="p-0 overflow-x-auto">
+                    <table className="w-full min-w-[900px]">
                       <thead>
                         <tr className="bg-slate-50 border-b border-slate-200">
                           <th className="w-[20%] px-4 py-3 text-right text-xs font-black text-slate-600">الطالب</th>
@@ -334,13 +334,13 @@ export function InstructorStudents() {
                             <td className="px-4 py-3 text-slate-700 text-xs font-medium truncate">
                               {student.email}
                             </td>
-                            <td className="px-4 py-3">
-                              <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 whitespace-nowrap">
                                 {student.grade}
                               </span>
                             </td>
-                            <td className="px-4 py-3">
-                              <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              <span className={`px-2 py-1 rounded-lg text-xs font-black border whitespace-nowrap ${
                                 student.type === "online" 
                                   ? "bg-[#F6EEFF] text-[#B348FE] border-[#EAD8FF]" 
                                   : "bg-amber-50 text-amber-700 border-amber-200"
@@ -348,8 +348,8 @@ export function InstructorStudents() {
                                 {getStudentTypeLabel(student.type)}
                               </span>
                             </td>
-                            <td className="px-4 py-3">
-                              <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              <span className={`px-2 py-1 rounded-lg text-xs font-black border whitespace-nowrap ${
                                 student.status === "نشط" || student.status === "active"
                                   ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                   : "bg-red-50 text-red-700 border-red-200"
@@ -357,8 +357,8 @@ export function InstructorStudents() {
                                 {student.status === "نشط" || student.status === "active" ? "نشط" : "موقوف"}
                               </span>
                             </td>
-                            <td className="px-4 py-3">
-                              <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 whitespace-nowrap">
                                 {student.student_courses?.length || 0}
                               </span>
                             </td>
