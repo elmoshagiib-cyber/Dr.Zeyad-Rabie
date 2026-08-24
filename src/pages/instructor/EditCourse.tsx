@@ -394,7 +394,7 @@ case "pdf":
       description: exam?.description || "",
       duration: exam?.duration || 30,
       passingScore: exam?.passing_grade || 60,
-      attempts: 3,
+      attempts: exam?.max_attempts || 1,
       visibility: exam?.is_visible ? "public" : "private",
       published: exam?.is_published || false,
       questions,
@@ -618,6 +618,7 @@ Object.assign(payload,{
         description: item.description || "",
         duration: Number(item.duration) || 30,
         passing_grade: Number(item.passingScore) || 60,
+        max_attempts: Number(item.attempts) || 1,
         total_score: item.questions.reduce(
           (sum, q) => sum + (Number(q.points) || 0),
           0
@@ -792,6 +793,51 @@ const deletedItemIds = (dbItems || [])
   .map((item) => item.id);
 
 if (deletedItemIds.length > 0) {
+  // حذف بيانات الامتحان المرتبط (لو العنصر المحذوف كان اختبار)
+  const { data: examsToDelete } = await supabase
+    .from("exams")
+    .select("id")
+    .in("course_item_id", deletedItemIds);
+
+  const examIdsToDelete = (examsToDelete || []).map((e) => e.id);
+
+  if (examIdsToDelete.length > 0) {
+    const { data: questionsToDelete } = await supabase
+      .from("exam_questions")
+      .select("id")
+      .in("exam_id", examIdsToDelete);
+
+    const questionIdsToDelete = (questionsToDelete || []).map((q) => q.id);
+
+    if (questionIdsToDelete.length > 0) {
+      await supabase
+        .from("question_choices")
+        .delete()
+        .in("question_id", questionIdsToDelete);
+
+      await supabase
+        .from("exam_questions")
+        .delete()
+        .in("id", questionIdsToDelete);
+    }
+
+    await supabase
+      .from("exam_results")
+      .delete()
+      .in("exam_id", examIdsToDelete);
+
+    await supabase
+      .from("exams")
+      .delete()
+      .in("id", examIdsToDelete);
+  }
+
+  // حذف بيانات الواجب المرتبط (لو العنصر المحذوف كان واجب)
+  await supabase
+    .from("homeworks")
+    .delete()
+    .in("course_item_id", deletedItemIds);
+
   const { error } = await supabase
     .from("course_items")
     .delete()
@@ -1833,20 +1879,15 @@ async function uploadPdf(
               <textarea value={item.description} onChange={(e) => updateItem(sectionId, item.id, { description: e.target.value } as Partial<QuizItem>)} rows={2} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm resize-none" placeholder="وصف مختصر للاختبار" />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5">المدة (دقيقة)</label>
               <input type="number" min={1} value={item.duration} onChange={(e) => updateItem(sectionId, item.id, { duration: Number(e.target.value) } as Partial<QuizItem>)} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">درجة النجاح (%)</label>
-              <input type="number" min={0} max={100} value={item.passingScore} onChange={(e) => updateItem(sectionId, item.id, { passingScore: Number(e.target.value) } as Partial<QuizItem>)} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm" />
-            </div>
-            <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5">عدد المحاولات</label>
               <input type="number" min={1} value={item.attempts} onChange={(e) => updateItem(sectionId, item.id, { attempts: Number(e.target.value) } as Partial<QuizItem>)} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm" />
             </div>
-           
           </div>
          
 
@@ -1931,7 +1972,7 @@ async function uploadPdf(
                               >
                                 <option value="multiple_choice">اختيار متعدد</option>
                                 <option value="true_false">صح / خطأ</option>
-                                <option value="essay">مقالي</option>
+                               
                               </select>
                             </div>
                             <div>
@@ -1939,7 +1980,7 @@ async function uploadPdf(
                               <input type="number" min={1} value={q.points} onChange={(e) => updateQuestion(sectionId, item.id, q.id, { points: Number(e.target.value) })} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm" />
                             </div>
                           </div>
-             {q.questionType !== "essay" && (
+             {true && (
   <div>
     <label className="block text-xs font-semibold text-slate-600 mb-2">
       الخيارات والإجابة الصحيحة
@@ -1998,7 +2039,7 @@ async function uploadPdf(
   </div>
 )}
 
-{q.questionType === "essay" && (
+{false && (
   <div>
     <label className="block text-xs font-semibold text-slate-600 mb-2">
       الإجابة النموذجية (اختياري)
