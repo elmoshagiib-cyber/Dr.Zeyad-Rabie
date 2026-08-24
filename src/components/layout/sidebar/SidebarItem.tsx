@@ -89,11 +89,12 @@ shadow-[0_0_12px_rgba(255,255,255,.6)]" />
     bg-white/10
   `
   : `
-    bg-[#F6EEFF]
-    dark:bg-[#1F1F1F]
-    text-[#B348FE]
-    group-hover:bg-[#EEDBFF]
-    dark:group-hover:bg-[#2B103D]
+    bg-gradient-to-br
+    from-[#0F172A]
+    via-[#1E1B3A]
+    to-[#2A1B4D]
+    text-white
+    group-hover:opacity-90
     group-hover:scale-110
   `
           )}

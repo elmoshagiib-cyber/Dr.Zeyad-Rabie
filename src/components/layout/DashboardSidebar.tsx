@@ -72,7 +72,7 @@ const instructorNavGroups: NavGroup[] = [
   {
     label: "الرئيسية",
     items: [
-      { label: "لوحة التحكم", path: "/instructor", icon: <LayoutDashboard size={20} /> },
+      { label: "نظره عامه", path: "/instructor", icon: <LayoutDashboard size={20} /> },
     ],
   },
   {

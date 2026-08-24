@@ -12,6 +12,12 @@ export function SidebarHeader({
   return (
     <div className="border-b border-slate-200 bg-white px-4 py-4">
       <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
+        {!collapsed && (
+          <h2 className="text-[15px] font-black text-slate-900 truncate">
+            منصه زياد ربيع
+          </h2>
+        )}
+
         <button
           onClick={() => setCollapsed(!collapsed)}
           aria-label={collapsed ? "توسيع القائمة" : "طي القائمة"}
@@ -33,12 +39,6 @@ export function SidebarHeader({
         >
           <Menu size={18} strokeWidth={2.3} />
         </button>
-
-        {!collapsed && (
-          <h2 className="text-[15px] font-black text-slate-900 truncate mr-3">
-            منصة زياد ربيع
-          </h2>
-        )}
       </div>
     </div>
   );
