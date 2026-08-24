@@ -57,6 +57,7 @@ export function QuizPage() {
   const [studentId, setStudentId] = useState<string | null>(null);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState(0);
+  const [examStartTime, setExamStartTime] = useState<string | null>(null);
 
   // Get current user
   useEffect(() => {
@@ -246,28 +247,37 @@ export function QuizPage() {
     // Save to Supabase
     if (studentId && id) {
       try {
-const resultData = {
-  exam_id: quiz.id,
-  student_id: studentId,
-  score: result.percentage,
-  percentage: result.percentage,
-  passed,
-  correct_answers: result.correct,
-  wrong_answers: result.wrong,
-  total_questions: result.total,
-};
+        const nowIso = new Date().toISOString();
+
+        const resultData = {
+          exam_id: quiz.id,
+          student_id: studentId,
+          score: result.percentage,
+          percentage: result.percentage,
+          passed,
+          correct_answers: result.correct,
+          wrong_answers: result.wrong,
+          total_questions: result.total,
+          answered_questions: answeredCount,
+          started_at: examStartTime || nowIso,
+          completed_at: nowIso,
+          submitted_at: nowIso,
+        };
+
         const { error: insertError } = await supabase
           .from("exam_results")
           .insert([resultData]);
 
         if (insertError) {
           console.error("Error saving exam result:", insertError);
+          alert("حدث خطأ أثناء حفظ نتيجة الامتحان: " + insertError.message);
         } else {
           // Clear localStorage after successful submission
           localStorage.removeItem(`exam_${id}_answers`);
         }
       } catch (err) {
         console.error("Error submitting exam:", err);
+        alert("حدث خطأ غير متوقع أثناء حفظ النتيجة");
       }
     }
 
@@ -655,7 +665,14 @@ const resultData = {
                   </ul>
                 </div>
 
-                <Button size="lg" onClick={() => setState("active")} className="w-full bg-gradient-to-r from-[#B348FE] to-purple-600 hover:from-[#9E2FFF] hover:to-purple-700 shadow-lg hover:shadow-xl transition-all">
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    setExamStartTime(new Date().toISOString());
+                    setState("active");
+                  }}
+                  className="w-full bg-gradient-to-r from-[#B348FE] to-purple-600 hover:from-[#9E2FFF] hover:to-purple-700 shadow-lg hover:shadow-xl transition-all"
+                >
                   <Play className="mr-2" size={20} />
                   ابدأ الاختبار الآن
                 </Button>
