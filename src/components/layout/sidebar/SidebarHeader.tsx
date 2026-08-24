@@ -25,12 +25,15 @@ export function SidebarHeader({
             shrink-0
             w-10 h-10
             rounded-xl
-            border border-[#EAD8FF]
-            bg-[#F6EEFF]
+            border border-transparent
+            bg-gradient-to-br
+            from-[#0F172A]
+            via-[#1E1B3A]
+            to-[#2A1B4D]
             flex items-center justify-center
-            text-[#B348FE]
-            hover:bg-[#EEDBFF]
-            hover:border-[#B348FE]
+            text-white
+            hover:opacity-90
+            hover:scale-105
             active:scale-95
             transition-all
             duration-200

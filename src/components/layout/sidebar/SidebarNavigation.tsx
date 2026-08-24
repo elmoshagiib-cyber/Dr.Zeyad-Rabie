@@ -128,14 +128,15 @@ w-10
 items-center
 justify-center
 rounded-xl
-bg-[#F6EEFF]
-dark:bg-[#1F1F1F]
-text-[#B348FE]
+bg-gradient-to-br
+from-[#0F172A]
+via-[#1E1B3A]
+to-[#2A1B4D]
+text-white
 transition-all
 duration-300
 group-hover:scale-110
-group-hover:bg-[#EEDBFF]
-dark:group-hover:bg-[#2B103D]
+group-hover:opacity-90
 "
             >
               <Settings size={18} />
