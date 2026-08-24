@@ -53,7 +53,7 @@ export function DashboardTopbar({
           justify-center
           rounded-2xl
           hover:bg-slate-100
-          lg:hidden
+          xl:hidden
           "
         >
           <Menu size={22} />

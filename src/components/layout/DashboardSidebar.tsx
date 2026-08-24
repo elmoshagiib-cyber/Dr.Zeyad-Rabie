@@ -194,6 +194,7 @@ useEffect(() => {
 
     <aside
   className={cn(
+    "overflow-hidden",
     "flex flex-col h-full",
 
     "bg-white",
@@ -218,7 +219,10 @@ useEffect(() => {
       : "w-[280px] sm:w-[300px]"
   )}
 >
-   
+      <SidebarHeader
+        collapsed={collapsed && !mobileOpen}
+        setCollapsed={setCollapsed}
+      />
 
       <SidebarNavigation
         navItems={navItems}
@@ -226,8 +230,6 @@ useEffect(() => {
         currentPath={location.pathname}
         onNavigate={handleNav}
       />
-
-     
     </aside>
   );
 }

@@ -105,7 +105,7 @@ className="
     lg:py-6
   "
 >
-        
+        <DashboardTopbar onMenuClick={() => setSidebarOpen(true)} />
 
         <div className="max-w-[1600px] mx-auto w-full">
           {children}
