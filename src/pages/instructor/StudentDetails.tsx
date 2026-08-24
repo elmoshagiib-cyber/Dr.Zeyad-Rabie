@@ -1412,24 +1412,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">الواجبات</h2>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">إحصائيات وسجل الواجبات المسلّمة</p>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">إجمالي الواجبات</p>
-                    <p className="text-2xl font-black text-gray-900 dark:text-white">{totalHomework}</p>
-                  </div>
-                  <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">واجبات محلولة</p>
-                    <p className="text-2xl font-black text-emerald-600">{completedHomework}</p>
-                  </div>
-                  <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">واجبات متبقية</p>
-                    <p className="text-2xl font-black text-amber-600">{remainingHomework}</p>
-                  </div>
-                  <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">متوسط الدرجات</p>
-                    <p className="text-2xl font-black text-[#B348FE]">{avgHomeworkScore}%</p>
-                  </div>
-                </div>
+               
               </div>
 
               {homeworkResults.length === 0 ? (
@@ -1571,24 +1554,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">الامتحانات</h2>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">نتائج وسجل الاختبارات</p>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">عدد الاختبارات</p>
-                    <p className="text-2xl font-black text-gray-900 dark:text-white">{examResults.length}</p>
-                  </div>
-                  <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">متوسط الدرجات</p>
-                    <p className="text-2xl font-black text-[#B348FE]">{averageScore}%</p>
-                  </div>
-                  <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">أعلى درجة</p>
-                    <p className="text-2xl font-black text-emerald-600">{highestScore}%</p>
-                  </div>
-                  <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">أقل درجة</p>
-                    <p className="text-2xl font-black text-red-600">{examResults.length > 0 ? lowestScore : 0}%</p>
-                  </div>
-                </div>
+             
               </div>
 
               {examResults.length === 0 ? (
