@@ -7,8 +7,10 @@ import {
   Users,
   Clock3,
   Ticket,
+  KeyRound,
 } from "lucide-react";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import {
   Copy,
@@ -393,89 +395,50 @@ return (
       <div className="p-6">
 
       {/* Hero */}
-      <div className="mb-8">
-        <div
-          className="
-            rounded-3xl
-            bg-gradient-to-r
-from-[#C65CFF]
-via-[#B348FE]
-to-[#9E2FFF]
-            shadow-xl
-            p-8
-            flex
-            items-center
-            justify-between
-            gap-6
-            flex-wrap
-          "
-        >
-          {/* Left Actions */}
-          <div className="flex items-center gap-3 flex-wrap">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6 sm:mb-8"
+      >
+        <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-blue-500/10 blur-[100px]" />
+        <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-blue-500/10 blur-[100px]" />
+
+        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
+              <KeyRound className="text-blue-400" size={20} />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black">إدارة أكواد الوصول</h1>
+              <p className="text-white/60 text-xs sm:text-sm mt-0.5">إنشاء وإدارة أكواد اشتراك الطلاب بسهولة تامة</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap w-full lg:w-auto">
             <button
               onClick={() => document.getElementById("generate-section")?.scrollIntoView({ behavior: "smooth" })}
-              className="
-                h-11
-                px-6
-                rounded-xl
-                bg-white
-                text-slate-700
-                font-bold
-                shadow
-                hover:bg-gray-100
-                transition
-              "
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold transition-colors"
             >
               + توليد أكواد جديدة
             </button>
 
             <button
               onClick={() => document.getElementById("export-section")?.scrollIntoView({ behavior: "smooth" })}
-              className="
-                h-11
-                px-6
-                rounded-xl
-                bg-white
-                text-slate-700
-                font-bold
-                shadow
-                hover:bg-gray-100
-                transition
-              "
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white text-slate-900 text-xs sm:text-sm font-bold hover:bg-white/90 transition-colors"
             >
               تصدير الملفات
             </button>
 
             <button
-              className="
-                w-11
-                h-11
-                rounded-xl
-                bg-white
-                flex
-                items-center
-                justify-center
-                shadow
-                hover:bg-gray-100
-                transition
-              "
+              onClick={() => { loadCourses(); loadCodes(); loadStats(); }}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 backdrop-blur border border-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors flex-shrink-0"
             >
               ↻
             </button>
           </div>
-
-          {/* Right Title */}
-          <div className="text-right text-white">
-            <h1 className="text-4xl font-black flex items-center justify-end gap-2">
-              إدارة أكواد الوصول 🔑
-            </h1>
-
-            <p className="text-white/90 mt-2 text-sm">
-              إنشاء وإدارة أكواد اشتراك الطلاب بسهولة تامة
-            </p>
-          </div>
         </div>
-      </div>
+      </motion.div>
 
 {/* Statistics */}
 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
@@ -492,8 +455,8 @@ to-[#9E2FFF]
       </h2>
     </div>
 
-    <div className="w-14 h-14 rounded-2xl bg-violet-100 flex items-center justify-center">
-      <Database className="text-violet-600" size={28} />
+    <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center">
+      <Database className="text-blue-600" size={28} />
     </div>
   </div>
 
@@ -656,8 +619,8 @@ to-[#9E2FFF]
    <button
   onClick={generateCodes}
   className="
-bg-violet-600
-hover:bg-violet-700
+bg-blue-600
+hover:bg-blue-700
     text-white
     font-bold
     rounded-xl
@@ -903,7 +866,7 @@ hover:bg-violet-700
 
   <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
     <h2 className="text-lg font-black text-slate-800">قائمة الأكواد</h2>
-    <span className="px-3 py-1 rounded-lg bg-violet-100 text-violet-700 text-xs font-black">
+    <span className="px-3 py-1 rounded-lg bg-blue-100 text-blue-700 text-xs font-black">
       {filteredCodes.length} كود
     </span>
   </div>
@@ -926,7 +889,7 @@ hover:bg-violet-700
 
       <button
         onClick={() => document.getElementById("generate-section")?.scrollIntoView({ behavior: "smooth" })}
-        className="mt-6 bg-violet-600 hover:bg-violet-700 text-white rounded-xl h-12 px-8 font-bold transition"
+        className="mt-6 bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-12 px-8 font-bold transition"
       >
         ✨ ابدأ بتوليد الأكواد
       </button>
