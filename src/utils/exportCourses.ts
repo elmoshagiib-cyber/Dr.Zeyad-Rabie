@@ -1,8 +1,6 @@
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-console.log(XLSX);
-console.log(saveAs);
 
 export const exportCoursesCSV = (courses: any[]) => {
   const data = courses.map((course) => ({

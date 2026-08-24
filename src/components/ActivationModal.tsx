@@ -125,7 +125,6 @@ try {
 
 } catch (err) {
 
-  console.log(err);
 
   alert("حدث خطأ");
 

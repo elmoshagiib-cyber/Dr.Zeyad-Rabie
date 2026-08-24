@@ -263,9 +263,9 @@ export function BannerCarousel() {
   }, [scrollPrev, scrollNext]);
 
   useEffect(() => {
-    console.log('🎯 BANNERS loaded:', BANNERS.length);
+    
     BANNERS.forEach((banner, index) => {
-      console.log(`📸 Banner ${index + 1}:`, banner.image);
+      
     });
   }, []);
 

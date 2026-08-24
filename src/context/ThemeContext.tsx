@@ -43,11 +43,11 @@ useEffect(() => {
 }, [theme]);
 
   const toggleTheme = () => {
-    console.log("CLICKED");
+    
 
     setTheme((prev) => {
       const next = prev === "light" ? "dark" : "light";
-      console.log("NEW THEME =", next);
+      
       return next;
     });
   };

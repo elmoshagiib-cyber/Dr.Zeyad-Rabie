@@ -233,7 +233,7 @@ export function StudentDetails() {
       .single();
 
     if (error) {
-      console.log("Student Error:", error);
+      
     }
 
     if (data) {
@@ -248,7 +248,7 @@ export function StudentDetails() {
       .eq("student_id", Number(id));
 
     if (error) {
-      console.log(error);
+      
       return;
     }
 
@@ -289,7 +289,7 @@ export function StudentDetails() {
       .eq("grade", gradeKey);
 
     if (error) {
-      console.log(error);
+      
       return;
     }
 
@@ -304,7 +304,7 @@ export function StudentDetails() {
       .order("last_activity_at", { ascending: false });
 
     if (error) {
-      console.log("Login Sessions Error:", error);
+      
       return;
     }
 
@@ -319,7 +319,7 @@ export function StudentDetails() {
       .eq("student_id", Number(id));
 
     if (error) {
-      console.log("Lesson Progress Error:", error);
+      
       return;
     }
 
@@ -335,14 +335,14 @@ const loadCoursesWithProgress = async () => {
     const courseIds = courses.map((c) => c.course_id);
 
     // الخطوة 1: هات كل الـ sections بتاعة الكورسات دي
-console.log("PROGRESS DEBUG → courseIds:", courseIds);
+
 
     const { data: sectionsData, error: sectionsErr } = await supabase
       .from("course_sections")
       .select("id, course_id")
       .in("course_id", courseIds);
 
-    console.log("PROGRESS DEBUG → sectionsData:", sectionsData, "error:", sectionsErr);
+
 
     const sectionIds = (sectionsData || []).map((s: any) => s.id);
 
@@ -363,7 +363,6 @@ const { data: progressData, error: progressErr } = await supabase
       .eq("student_id", Number(id))
       .in("lesson_id", lessonIds.length ? lessonIds : ["00000000-0000-0000-0000-000000000000"]);
 
-    console.log("PROGRESS DEBUG → progressData:", progressData, "error:", progressErr);
 
 const coursesWithStats: CourseWithProgress[] = courses.map((course) => {
       // sections بتاعة الكورس ده تحديدًا
@@ -484,7 +483,6 @@ const totalLessons = courseLessons.length;
       .order("submitted_at", { ascending: false });
 
     if (error) {
-      console.log("Homework Results Error:", error);
       return;
     }
 
@@ -646,7 +644,7 @@ const sendAnnouncement = async () => {
         .single();
 
     if (notificationError) {
-      console.log(notificationError);
+      
       alert("حدث خطأ أثناء إنشاء الإشعار");
       return;
     }
@@ -661,7 +659,6 @@ const sendAnnouncement = async () => {
       });
 
     if (readError) {
-      console.log(readError);
 
       // حذف الإشعار لو فشل ربطه بالطالب
       await supabase
@@ -679,7 +676,7 @@ const sendAnnouncement = async () => {
     setAnnouncementPriority("important");
     setShowAnnouncementModal(false);
   } catch (error) {
-    console.log(error);
+    
     alert("حدث خطأ أثناء الإرسال");
   }
 };

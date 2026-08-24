@@ -196,7 +196,7 @@ const { data: authData, error: authError } =
   });
 
 if (authError) {
-  console.log("AUTH ERROR DETAILS:", authError.message, authError);
+  
 
   await supabase.rpc("record_failed_login", { p_phone: phone });
 
@@ -274,7 +274,7 @@ try {
     })
     .eq("id", student.id);
 } catch (sessionErr) {
-  console.log("SESSION LOG ERROR:", sessionErr);
+
 }
 
 login({

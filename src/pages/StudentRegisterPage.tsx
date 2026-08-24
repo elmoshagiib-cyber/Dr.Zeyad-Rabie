@@ -265,12 +265,7 @@ completed_homework: 0,
 total_homework: 0,
       }]);
 if (insertError) {
-  console.log(insertError);
-console.log(insertError.code);
-console.log(insertError.message);
-console.log(insertError.details);
-console.log(insertError.hint);
-console.log("INSERT ERROR =", insertError);
+
   alert(
     JSON.stringify(insertError, null, 2)
   );

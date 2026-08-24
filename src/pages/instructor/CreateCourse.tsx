@@ -97,7 +97,6 @@ if (!title || !grade) {
         data: { session },
       } = await supabase.auth.getSession();
 
-      console.log("SESSION =", session);
 
     if (thumbnail) {
   setUploadProgress(0);

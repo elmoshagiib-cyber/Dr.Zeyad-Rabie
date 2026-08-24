@@ -578,9 +578,7 @@ Object.assign(payload,{
     // PDF
     // ==========================
     if (item.type === "pdf") {
-        console.log("PDF ITEM BEFORE SAVE =", item);
-  console.log("PDF URL =", item.pdfUrl);
-  console.log("PDF STORAGE =", item.storagePath);
+
       Object.assign(payload, {
         url: item.pdfUrl || "",
         storage_path: item.storagePath || "",
@@ -805,11 +803,7 @@ if (deletedItemIds.length > 0) {
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 3000);
   } catch (err: any) {
-  console.error("Save Error:", err);
-  console.log("Message:", err?.message);
-  console.log("Details:", err?.details);
-  console.log("Hint:", err?.hint);
-  console.log("Code:", err?.code);
+
 
   alert(err?.message || "حدث خطأ أثناء حفظ الدورة");
 } finally {

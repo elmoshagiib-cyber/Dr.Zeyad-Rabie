@@ -49,7 +49,7 @@ const gradeColors: Record<string, string> = {
 };
 
 export function HomePage() {
-    console.log("HOME PAGE RENDERED");
+    
   const navigate = useNavigate();
   
 const { user } = useApp();
@@ -78,7 +78,7 @@ const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
 const [editingTaskText, setEditingTaskText] = useState("");
 
 useEffect(() => {
-  console.log("Deferred Prompt =", deferredPrompt);
+  
 }, [deferredPrompt]);
 
 useEffect(() => {
@@ -89,7 +89,7 @@ useEffect(() => {
 
 useEffect(() => {
 const handler = (e: any) => {
-  console.log("beforeinstallprompt Fired");
+  
 
   e.preventDefault();
 
@@ -169,8 +169,6 @@ const gradeMap = {
 const studentGrade =
   gradeMap[user?.grade as keyof typeof gradeMap];
 
-console.log("USER =", user);
-console.log("GRADE =", user?.grade);
 
 const gradeSlugMap: Record<string, string> = {
   "الصف الأول الثانوي": "sec_1",
@@ -241,7 +239,6 @@ created_at
   if (data) {
     setAnnouncement(data?.[0] ?? null);
   }
-  console.log("Announcement =", data);
 };
 
 const openNotesModal = async () => {

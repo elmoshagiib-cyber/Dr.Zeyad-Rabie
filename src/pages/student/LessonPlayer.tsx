@@ -63,7 +63,7 @@ export function LessonPlayer() {
         .single();
 
       if (lessonError || !lessonData) {
-        console.log("Lesson load error:", lessonError);
+        
         setLoading(false);
         return;
       }
@@ -118,7 +118,7 @@ export function LessonPlayer() {
         .maybeSingle();
 
       if (error) {
-        console.log("Progress load error:", error);
+       
         return;
       }
 
@@ -179,7 +179,6 @@ export function LessonPlayer() {
       .single();
 
     if (error) {
-      console.log("Save progress error:", error);
       return;
     }
 

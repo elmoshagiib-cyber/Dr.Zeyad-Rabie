@@ -33,13 +33,12 @@ export default async function handler(req: any, res: any) {
     }
 
     const token = authHeader.replace("Bearer ", "");
-console.log("TOKEN EXISTS =", !!token);
+
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser(token);
-console.log("USER =", user);
-console.log("AUTH ERROR =", authError);
+
     if (authError || !user) {
       return res.status(401).json({
         error: "Unauthorized - Invalid token",
@@ -59,8 +58,7 @@ console.log("AUTH ERROR =", authError);
       .select("id, storage_path, section_id")
       .eq("id", lessonId)
       .single();
-console.log("LESSON =", lesson);
-console.log("LESSON ERROR =", lessonError);
+;
     if (lessonError || !lesson) {
       return res.status(404).json({
         error: "Lesson not found",
@@ -78,8 +76,7 @@ console.log("LESSON ERROR =", lessonError);
       .select("course_id")
       .eq("id", lesson.section_id)
       .single();
-console.log("SECTION =", section);
-console.log("SECTION ERROR =", sectionError);
+
     if (sectionError || !section) {
       return res.status(404).json({
         error: "Course not found",
@@ -93,8 +90,7 @@ console.log("SECTION ERROR =", sectionError);
       .select("id")
       .eq("auth_id", user.id)
       .single();
-console.log("STUDENT =", students);
-console.log("STUDENT ERROR =", studentsError);
+
     if (studentsError || !students) {
       return res.status(403).json({
         error: "Student profile not found",
@@ -110,8 +106,7 @@ console.log("STUDENT ERROR =", studentsError);
       .eq("course_id", courseId)
       .eq("active", true)
       .single();
-console.log("ENROLLMENT =", enrollment);
-console.log("ENROLLMENT ERROR =", enrollmentError);
+
     if (enrollmentError || !enrollment) {
       return res.status(403).json({
         error: "Forbidden - Not enrolled in this course",
@@ -122,8 +117,7 @@ console.log("ENROLLMENT ERROR =", enrollmentError);
       Bucket: process.env.R2_BUCKET_NAME!,
       Key: lesson.storage_path,
     });
-console.log("KEY =", lesson.storage_path);
-console.log("SIGNED URL CREATED");
+
     const signedUrl = await getSignedUrl(client, command, {
       expiresIn: 300,
     });

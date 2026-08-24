@@ -44,8 +44,7 @@ export function InstructorStudents() {
         )
       `);
  
-    console.log(data);
-    console.log(error);
+
     if (!error) setStudents(data || []);
   };
 
@@ -302,16 +301,17 @@ export function InstructorStudents() {
               <div className="hidden md:block">
                 <Card className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
                   <CardContent className="p-0">
-                    <table className="w-full">
+                    <table className="w-full table-fixed">
                       <thead>
                         <tr className="bg-slate-50 border-b border-slate-200">
-                          <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الطالب</th>
-                          <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الإيميل</th>
-                          <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الصف</th>
-                          <th className="px-4 py-3 text-right text-xs font-black text-slate-600">النوع</th>
-                          <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الحالة</th>
-                          <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الكورسات</th>
-                          <th className="px-4 py-3 text-center text-xs font-black text-slate-600">الإجراءات</th>
+                          <th className="w-[20%] px-4 py-3 text-right text-xs font-black text-slate-600">الطالب</th>
+                          <th className="w-[12%] px-4 py-3 text-right text-xs font-black text-slate-600">رقم الهاتف</th>
+                          <th className="w-[18%] px-4 py-3 text-right text-xs font-black text-slate-600">الإيميل</th>
+                          <th className="w-[14%] px-4 py-3 text-right text-xs font-black text-slate-600">الصف</th>
+                          <th className="w-[8%] px-4 py-3 text-right text-xs font-black text-slate-600">النوع</th>
+                          <th className="w-[8%] px-4 py-3 text-right text-xs font-black text-slate-600">الحالة</th>
+                          <th className="w-[8%] px-4 py-3 text-right text-xs font-black text-slate-600">الكورسات</th>
+                          <th className="w-[12%] px-4 py-3 text-center text-xs font-black text-slate-600">الإجراءات</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -323,17 +323,15 @@ export function InstructorStudents() {
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
                                 <Avatar name={student.full_name || student.name} src={student.avatar_url} size="sm" className="h-8 w-8 text-xs" />
-                                <div>
-                                  <p className="font-bold text-slate-900 text-sm">
-                                    {student.full_name || student.name}
-                                  </p>
-                                  <p className="text-xs text-slate-500">
-                                    {student.phone || "لا يوجد رقم"}
-                                  </p>
-                                </div>
+                                <p className="font-bold text-slate-900 text-sm truncate">
+                                  {student.full_name || student.name}
+                                </p>
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-slate-700 text-xs font-medium truncate max-w-[150px]">
+                            <td className="px-4 py-3 text-slate-700 text-xs font-medium">
+                              {student.phone || "لا يوجد رقم"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-700 text-xs font-medium truncate">
                               {student.email}
                             </td>
                             <td className="px-4 py-3">

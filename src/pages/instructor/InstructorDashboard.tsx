@@ -119,14 +119,8 @@ setExams(examsRes.data || []);
 setVisits(visitsRes.data || []);
     setStudentCourses(studentCoursesRes.data || []);
     setLoading(false);
-    console.log("Courses", coursesRes.data);
-console.log(
-  studentsRes.data?.map((s) => ({
-    name: s.full_name,
-    type: s.type,
-  }))
-);
-console.log("Student Courses", studentCoursesRes.data);
+
+
   };
 
   // ── Derived ─────────────────────────────────────────────────────────────────

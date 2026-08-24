@@ -23,9 +23,9 @@ const [view, setView] = useState<"grid" | "list">("grid");
 
 useEffect(() => {
   if (user) {
-    console.log("APP USER =", user);
+  
     loadCourses();
-    console.log("Teacher ID =", user?.id);
+    
   }
 }, [user]);
 
@@ -88,7 +88,7 @@ const { data, error } = await supabase
   .select("student_id, course_id, active");
 
 if (error) {
-  console.log("ERROR =", error);
+  
   return;
 }
 
@@ -113,11 +113,6 @@ const coursesWithStudents = (data || []).map((course) => {
 
 setCourses(coursesWithStudents);
 
-console.log(coursesWithStudents);
-
-  console.log("COURSES =", data);
-  console.log("GRADE =", data?.[0]?.grade);
-console.log("COURSE =", data?.[0]);
 };
 
 

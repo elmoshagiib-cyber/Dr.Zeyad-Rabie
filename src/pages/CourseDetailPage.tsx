@@ -43,7 +43,7 @@ interface LessonProgress {
 
 export function CourseDetailPage() {
   const { slug } = useParams<{ slug: string }>();
-  console.log("SLUG =", slug);
+  
   const navigate = useNavigate();
   const { user } = useApp();
 
@@ -79,12 +79,7 @@ export function CourseDetailPage() {
       .eq("id", slug)
       .single();
 
-    console.log(error);
-    console.log(error?.message);
-    console.log(error?.details);
-    console.log(error?.hint);
-    console.log(error?.code);
-    console.log("data =", data);
+
 
     if (data) {
       setCourse(data);
@@ -97,8 +92,7 @@ export function CourseDetailPage() {
       .select("*")
       .eq("course_id", slug);
 
-    console.log("SECTIONS", sections);
-    console.log("SECTIONS ERROR", sectionsError);
+
 
     if (!sections?.length) return;
 
@@ -111,10 +105,6 @@ export function CourseDetailPage() {
         .eq("section_id", section.id)
         .order("sort_order");
 
-      console.log("SECTION ID =", section.id);
-      console.log("ITEMS =", items);
-      console.log("ITEMS ERROR =", itemsError);
-
       units.push({
         id: section.id,
         title: section.title,
@@ -122,7 +112,6 @@ export function CourseDetailPage() {
       });
     }
 
-    console.log("FINAL =", units);
     setUnits(units);
   };
 
@@ -153,7 +142,7 @@ export function CourseDetailPage() {
       return;
     }
 
-    console.log("checkEnrollment → studentId:", studentId, "course.id:", course.id);
+  
 
     const { data, error } = await supabase
       .from("student_courses")
@@ -162,13 +151,10 @@ export function CourseDetailPage() {
       .eq("course_id", course.id)
       .eq("active", true);
 
-    console.log("CHECK DATA =", data);
-    console.log("CHECK ERROR =", error);
-    console.log("COURSE ID =", course.id);
-    console.log("STUDENT ID =", studentId);
+
 
     setIsEnrolled((data?.length ?? 0) > 0);
-    console.log("IS ENROLLED SHOULD BE =", (data?.length ?? 0) > 0);
+    
   };
 
   useEffect(() => {
@@ -207,7 +193,7 @@ export function CourseDetailPage() {
         .maybeSingle();
 
       if (existing) {
-        console.log("Already enrolled, skipping insert");
+        
         setIsEnrolled(true);
         return;
       }
@@ -221,15 +207,6 @@ export function CourseDetailPage() {
           subscription_type: "مجاني",
         })
         .select();
-
-      console.log("INSERT DATA =", data);
-      console.log("INSERT ERROR =", error);
-      console.log("INSERT DATA =", data);
-      console.log("INSERT ERROR =", error);
-      console.log("ERROR CODE =", error?.code);
-      console.log("ERROR MESSAGE =", error?.message);
-      console.log("ERROR DETAILS =", error?.details);
-      console.log("ERROR HINT =", error?.hint);
 
       if (error && error.code !== "23505") {
         console.error("Insert failed:", error);
@@ -412,7 +389,6 @@ const saveProgress = async (currentTime: number, duration: number) => {
       const lastPosition = Math.floor(currentTime);
       const progressPercent = duration > 0 ? Math.round((currentTime / duration) * 100) : 0;
 
-      console.log("SAVE PROGRESS ATTEMPT →", { studentId, currentLessonId, currentTime, watchedSeconds });
 
       const { data, error, count } = await supabase
         .from("lesson_progress")
@@ -586,7 +562,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
       }
 
       const { url } = await response.json();
-      console.log("PDF URL =", url);
+      
       window.open(url, "_blank", "noopener,noreferrer");
     } catch (error) {
       console.error(error);
@@ -908,7 +884,6 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   <button
                     onClick={() => {
                       alert("BUTTON CLICKED");
-                      console.log("BUTTON CLICKED");
                       handleEnroll();
                     }}
                     className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#B348FE] hover:bg-[#9E2FFF] shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)] transition-all duration-300 hover:scale-[1.015] mb-3 sm:mb-4"
