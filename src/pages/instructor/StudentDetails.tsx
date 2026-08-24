@@ -867,7 +867,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
 
       <main className="flex-1 overflow-y-auto">
         {/* Hero Section - Enhanced Premium Design */}
-        <div className="relative overflow-hidden rounded-[40px] bg-gradient-to-br from-[#B348FE] via-[#9E2FFF] to-[#7B1FA2] mx-4 sm:mx-6 mt-4 sm:mt-6 shadow-[0_25px_60px_rgba(179,72,254,.35)]">
+        <div className="relative overflow-hidden rounded-[24px] sm:rounded-[32px] lg:rounded-[40px] bg-gradient-to-br from-[#B348FE] via-[#9E2FFF] to-[#7B1FA2] mx-3 sm:mx-6 mt-3 sm:mt-6 shadow-[0_15px_40px_rgba(179,72,254,.3)] sm:shadow-[0_25px_60px_rgba(179,72,254,.35)]">
           {/* Animated Background Pattern */}
           <div className="absolute inset-0 opacity-[0.07]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_2px,transparent_0)] bg-[length:30px_30px] animate-pulse"></div>
@@ -878,32 +878,32 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
           <div className="absolute -right-24 -bottom-32 w-80 h-80 rounded-full bg-black/15 blur-[130px]"></div>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-purple-500/10 blur-[100px]"></div>
 
-          <div className="relative z-10 px-4 sm:px-6 lg:px-8 pt-6 pb-0">
+          <div className="relative z-10 px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-0">
             {/* Top Actions Bar */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-4 sm:mb-8 gap-2">
               <Button
                 variant="outline"
                 onClick={() => navigate(-1)}
-                className="border-2 border-white/30 hover:bg-white/15 backdrop-blur-xl text-white font-bold rounded-2xl h-11 px-4 transition-all duration-300 hover:scale-105 hover:border-white/50"
+                className="border-2 border-white/30 hover:bg-white/15 backdrop-blur-xl text-white font-bold rounded-xl sm:rounded-2xl h-9 sm:h-11 px-3 sm:px-4 transition-all duration-300 hover:scale-105 hover:border-white/50 text-xs sm:text-sm"
               >
-                <ArrowRight size={18} />
+                <ArrowRight size={16} className="sm:w-[18px] sm:h-[18px]" />
                 <span className="hidden sm:inline mr-2">رجوع</span>
               </Button>
 
               <Button
                 onClick={() => navigate(`/instructor/students/edit/${student.id}`)}
-                className="bg-white/95 backdrop-blur-xl text-[#B348FE] hover:bg-white rounded-2xl font-black px-6 shadow-[0_8px_25px_rgba(0,0,0,.15)] h-11 hover:shadow-[0_12px_35px_rgba(0,0,0,.2)] transition-all duration-300 hover:-translate-y-0.5"
+                className="bg-white/95 backdrop-blur-xl text-[#B348FE] hover:bg-white rounded-xl sm:rounded-2xl font-black px-3 sm:px-6 shadow-[0_8px_25px_rgba(0,0,0,.15)] h-9 sm:h-11 hover:shadow-[0_12px_35px_rgba(0,0,0,.2)] transition-all duration-300 hover:-translate-y-0.5 text-xs sm:text-sm whitespace-nowrap"
               >
                 تعديل البيانات
               </Button>
             </div>
 
             {/* Student Info Section */}
-            <div className="flex flex-col items-center text-center pb-10">
+            <div className="flex flex-col items-center text-center pb-6 sm:pb-10">
               {/* Avatar with Glass Effect */}
-              <div className="relative mb-6 group">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-white/10 rounded-[32px] blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
-                <div className="relative w-32 h-32 lg:w-36 lg:h-36 rounded-[32px] bg-white/20 backdrop-blur-2xl border-[3px] border-white/40 flex items-center justify-center text-5xl lg:text-6xl font-black overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,.2)] group-hover:scale-105 transition-all duration-500">
+              <div className="relative mb-3 sm:mb-6 group">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-white/10 rounded-[24px] sm:rounded-[32px] blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
+                <div className="relative w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36 rounded-[24px] sm:rounded-[32px] bg-white/20 backdrop-blur-2xl border-2 sm:border-[3px] border-white/40 flex items-center justify-center text-3xl sm:text-5xl lg:text-6xl font-black overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,.2)] group-hover:scale-105 transition-all duration-500">
                   {student.avatar_url ? (
                     <img src={student.avatar_url} alt={student.full_name} className="w-full h-full object-cover" />
                   ) : (
@@ -911,29 +911,29 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   )}
                 </div>
                 {/* Status Badge */}
-                <div className={`absolute -bottom-2 -left-2 w-9 h-9 rounded-2xl border-[3.5px] border-[#B348FE] shadow-lg ${student.is_blocked ? "bg-red-500" : "bg-emerald-400"} animate-pulse`}>
+                <div className={`absolute -bottom-1.5 -left-1.5 sm:-bottom-2 sm:-left-2 w-6 h-6 sm:w-9 sm:h-9 rounded-xl sm:rounded-2xl border-2 sm:border-[3.5px] border-[#B348FE] shadow-lg ${student.is_blocked ? "bg-red-500" : "bg-emerald-400"} animate-pulse`}>
                   <div className="absolute inset-0 bg-white/30 rounded-full blur-sm"></div>
                 </div>
               </div>
 
               {/* Name & Info */}
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl tracking-tight font-black mb-2 text-white drop-shadow-[0_4px_12px_rgba(0,0,0,.15)]">
+              <h1 className="text-lg sm:text-3xl lg:text-5xl tracking-tight font-black mb-1 sm:mb-2 text-white drop-shadow-[0_4px_12px_rgba(0,0,0,.15)] px-2 break-words leading-tight">
                 {student.full_name}
               </h1>
-              <p className="text-white/80 text-base sm:text-lg font-bold mb-6 backdrop-blur-sm">
+              <p className="text-white/80 text-xs sm:text-base lg:text-lg font-bold mb-3 sm:mb-6 backdrop-blur-sm">
                 {student.code ? `كود: ${student.code}` : student.grade}
               </p>
 
               {/* Status Badges */}
-              <div className="flex flex-wrap justify-center gap-3 text-white/95 text-sm font-bold">
-                <span className="flex items-center gap-2 bg-white/15 backdrop-blur-xl border border-white/20 px-4 py-2 rounded-2xl shadow-lg hover:bg-white/25 transition-all duration-300">
-                  <div className={`w-2 h-2 rounded-full ${student.is_blocked ? "bg-red-400" : "bg-emerald-400"} animate-pulse`}></div>
+              <div className="flex flex-wrap justify-center gap-1.5 sm:gap-3 text-white/95 text-[10px] sm:text-sm font-bold px-2">
+                <span className="flex items-center gap-1.5 sm:gap-2 bg-white/15 backdrop-blur-xl border border-white/20 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-lg hover:bg-white/25 transition-all duration-300 whitespace-nowrap">
+                  <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${student.is_blocked ? "bg-red-400" : "bg-emerald-400"} animate-pulse`}></div>
                   {student.is_blocked ? "موقوف" : "نشط"}
                 </span>
-                <span className="bg-white/15 backdrop-blur-xl border border-white/20 px-4 py-2 rounded-2xl shadow-lg hover:bg-white/25 transition-all duration-300">
+                <span className="bg-white/15 backdrop-blur-xl border border-white/20 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-lg hover:bg-white/25 transition-all duration-300 whitespace-nowrap">
                   {student.type === "online" ? "🌐 أونلاين" : student.type === "center" ? "🏫 سنتر" : "📚 طالب"}
                 </span>
-                <span className={`bg-white/15 backdrop-blur-xl border border-white/20 px-4 py-2 rounded-2xl shadow-lg hover:bg-white/25 transition-all duration-300 ${
+                <span className={`bg-white/15 backdrop-blur-xl border border-white/20 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-lg hover:bg-white/25 transition-all duration-300 whitespace-nowrap ${
                   student.subscription_status === "active" ? "text-emerald-100" : "text-rose-100"
                 }`}>
                   {student.subscription_status === "active" ? "✓ اشتراك نشط" : "⚠ اشتراك منتهي"}
@@ -943,8 +943,35 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
           </div>
 
           {/* Stats Cards with Glass Effect */}
-          <div className="relative z-10 bg-white/98 dark:bg-[#111111]/98 backdrop-blur-2xl mx-4 sm:mx-6 lg:mx-8 mb-6 rounded-[32px] border border-white/60 dark:border-white/10 shadow-[0_-12px_35px_rgba(0,0,0,.08)] overflow-hidden">
+          <div className="relative z-10 bg-white/98 dark:bg-[#111111]/98 backdrop-blur-2xl mx-3 sm:mx-6 lg:mx-8 mb-3 sm:mb-6 rounded-[20px] sm:rounded-[32px] border border-white/60 dark:border-white/10 shadow-[0_-12px_35px_rgba(0,0,0,.08)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+            <div className="relative grid grid-cols-3 divide-x divide-x-reverse divide-gray-200 dark:divide-[#2A2A2A]">
+              <div className="flex flex-col items-center py-3 sm:py-6 px-1.5 sm:px-3 group hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] transition-all duration-300">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] rounded-xl sm:rounded-2xl flex items-center justify-center mb-1.5 sm:mb-3 shadow-lg group-hover:scale-110 transition-all duration-300">
+                  <BookOpen className="text-white w-4 h-4 sm:w-6 sm:h-6" />
+                </div>
+                <span className="text-base sm:text-2xl lg:text-3xl font-black text-[#B348FE] mb-0.5 sm:mb-1">{uniqueCourses.length}</span>
+                <span className="text-[9px] sm:text-xs font-bold text-gray-600 dark:text-gray-400 text-center leading-tight">كورس مشترك</span>
+              </div>
+
+              <div className="flex flex-col items-center py-3 sm:py-6 px-1.5 sm:px-3 group hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-all duration-300">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center mb-1.5 sm:mb-3 shadow-lg group-hover:scale-110 transition-all duration-300">
+                  <CheckCircle2 className="text-white w-4 h-4 sm:w-6 sm:h-6" />
+                </div>
+                <span className="text-base sm:text-2xl lg:text-3xl font-black text-emerald-600 dark:text-emerald-400 mb-0.5 sm:mb-1">{realWatchedLessons}</span>
+                <span className="text-[9px] sm:text-xs font-bold text-gray-600 dark:text-gray-400 text-center leading-tight">محاضرة مشاهدة</span>
+              </div>
+
+              <div className="flex flex-col items-center py-3 sm:py-6 px-1.5 sm:px-3 group hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all duration-300">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl sm:rounded-2xl flex items-center justify-center mb-1.5 sm:mb-3 shadow-lg group-hover:scale-110 transition-all duration-300">
+                  <TrendingUp className="text-white w-4 h-4 sm:w-6 sm:h-6" />
+                </div>
+                <span className="text-base sm:text-2xl lg:text-3xl font-black text-amber-600 dark:text-amber-400 mb-0.5 sm:mb-1">{lessonsPercent}%</span>
+                <span className="text-[9px] sm:text-xs font-bold text-gray-600 dark:text-gray-400 text-center leading-tight">نسبة الإنجاز</span>
+              </div>
+            </div>
+          </div>
+        </div>
             <div className="relative grid grid-cols-3 divide-x divide-x-reverse divide-gray-200 dark:divide-[#2A2A2A]">
               <div className="flex flex-col items-center py-6 px-3 group hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] transition-all duration-300">
                 <div className="w-12 h-12 bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] rounded-2xl flex items-center justify-center mb-3 shadow-lg group-hover:scale-110 transition-all duration-300">
@@ -970,8 +997,6 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <span className="text-xs font-bold text-gray-600 dark:text-gray-400">نسبة الإنجاز</span>
               </div>
             </div>
-          </div>
-        </div>
 
         <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
