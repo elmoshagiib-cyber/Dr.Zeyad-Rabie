@@ -381,7 +381,7 @@ const quickActions = [
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-black">لوحة التحكم</h1>
-            <p className="text-white/60 text-xs sm:text-sm mt-0.5">{greeting}، د. {user?.name}</p>
+            <p className="text-white/60 text-xs sm:text-sm mt-0.5">{greeting}، مستر {user?.name}</p>
           </div>
         </div>
       </motion.div>

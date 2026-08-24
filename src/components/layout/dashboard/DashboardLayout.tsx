@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 import { DashboardSidebar } from "../DashboardSidebar";
-import { DashboardTopbar } from "../topbar/DashboardTopbar";
 
 type Props = {
   children: ReactNode;
@@ -90,6 +89,17 @@ className="
         </div>
       )}
 
+      {/* ───────── زرار فتح السيدبار على الموبايل/التابلت فقط ───────── */}
+      {type !== "student" && (
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="fixed top-4 right-4 z-30 xl:hidden w-11 h-11 rounded-2xl bg-white border border-slate-200 shadow-md flex items-center justify-center text-slate-700"
+          aria-label="فتح القائمة"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+        </button>
+      )}
+
       {/* ───────── Main Content ───────── */}
 <main
   className="
@@ -105,8 +115,6 @@ className="
     lg:py-6
   "
 >
-        <DashboardTopbar onMenuClick={() => setSidebarOpen(true)} />
-
         <div className="max-w-[1600px] mx-auto w-full">
           {children}
         </div>
