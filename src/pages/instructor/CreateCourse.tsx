@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import InstructorLayout from "../../layouts/InstructorLayout";
 import { supabase } from "../../lib/supabase";
 import { useNavigate } from "react-router-dom";
@@ -181,95 +182,27 @@ if (!title || !grade) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-5 sm:pt-6 lg:pt-8 pb-16">
 
 {/* ── Hero ── */}
-<div
-  className="
-    relative
-    overflow-hidden
-    rounded-[36px]
-
-    bg-gradient-to-r
-    from-[#C65CFF]
-    via-[#B348FE]
-    to-[#9E2FFF]
-
-    px-6
-    lg:px-8
-
-    py-6
-    lg:py-7
-
-    text-white
-
-    shadow-[0_18px_45px_rgba(179,72,254,.22)]
-
-    mb-6
-  "
+<motion.div
+  initial={{ opacity: 0, y: -20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.4, ease: "easeOut" }}
+  className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6"
 >
-  {/* Glow */}
-  <div
-    className="
-      absolute
-      -top-24
-      -left-20
-      w-[320px]
-      h-[320px]
-      rounded-full
-      bg-white/10
-      blur-[120px]
-      pointer-events-none
-    "
-  />
+  <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+  <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
 
-  <div
-    className="
-      absolute
-      -bottom-28
-      -right-20
-      w-[300px]
-      h-[300px]
-      rounded-full
-      bg-white/10
-      blur-[120px]
-      pointer-events-none
-    "
-  />
-
-  <div className="relative z-10 flex items-center justify-between gap-5">
-
-    {/* Icon */}
-    <div
-      className="
-        w-16
-        h-16
-
-        rounded-[24px]
-
-        flex
-        items-center
-        justify-center
-
-        bg-white/15
-        backdrop-blur-xl
-        border
-        border-white/20
-      "
-    >
-      <Sparkles size={28} />
+  <div className="relative z-10 flex items-center gap-3">
+    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
+      <Sparkles className="text-amber-400" size={20} />
     </div>
-
-    {/* Text */}
-    <div className="flex-1 text-right">
-      <h1 className="text-3xl lg:text-4xl font-black tracking-tight">
-        إنشاء كورس جديد
-      </h1>
-
-      <p className="mt-2 text-sm lg:text-base text-white/90">
+    <div>
+      <h1 className="text-xl sm:text-2xl lg:text-3xl font-black">إنشاء كورس جديد</h1>
+      <p className="text-white/60 text-xs sm:text-sm mt-0.5">
         أضف بيانات الكورس الأساسية ثم انتقل لإدارة المحتوى والمحاضرات.
       </p>
     </div>
-
   </div>
-</div>
+</motion.div>
 
         {/* ── Grid ── */}
         <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 items-start">

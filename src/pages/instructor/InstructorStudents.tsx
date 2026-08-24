@@ -11,6 +11,7 @@ import { Input } from "../../components/ui/Input";
 import { Avatar } from "../../components/ui/Avatar";
 import { supabase } from "../../lib/supabase";
 import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
+import { motion } from "framer-motion";
 
 const grades = [
   "الصف الأول الإعدادي",
@@ -95,46 +96,26 @@ export function InstructorStudents() {
   return (
     <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
       <div className="flex flex-col h-full bg-slate-50 min-h-screen">
-        {/* Header - مطابق لتصميم صفحة التسليمات */}
-        <div
-  className="
-    relative
-    overflow-hidden
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-6 mt-6"
+        >
+          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
 
-    rounded-[36px]
-
-    bg-gradient-to-r
-    from-[#C65CFF]
-    via-[#B348FE]
-    to-[#9E2FFF]
-
-    px-6
-    lg:px-8
-
-    py-6
-    lg:py-7
-
-    text-white
-
-    shadow-[0_18px_45px_rgba(179,72,254,.22)]
-
-    mx-6
-    mt-6
-  "
->
-          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/10 blur-[120px]" />
-          <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/10 blur-[120px]" />
-          
-          <div className="relative z-10 flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl lg:text-4xl tracking-tight font-black mb-2">الطلاب</h1>
-              <p className="text-white/90 text-sm lg:text-base">إدارة ومتابعة جميع الطلاب بالمنصة</p>
+          <div className="relative z-10 flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
+              <UsersRound className="text-amber-400" size={20} />
             </div>
-            <div className="h-14 w-14 lg:h-16 lg:w-16 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center">
-              <UsersRound size={28} className="text-white" />
+            <div>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black">الطلاب</h1>
+              <p className="text-white/60 text-xs sm:text-sm mt-0.5">إدارة ومتابعة جميع الطلاب بالمنصة</p>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Stats - كروت مضغوطة مثل صفحة التسليمات */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 px-6 py-6">

@@ -366,116 +366,25 @@ const quickActions = [
     <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
 
       {/* ── Hero header ── */}
-     <div
-  className="
-    relative
-    overflow-hidden
-    rounded-[36px]
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6"
+      >
+        <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+        <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
 
-    bg-gradient-to-r
-    from-[#C65CFF]
-    via-[#B348FE]
-    to-[#9E2FFF]
-
-    px-6
-    sm:px-8
-    lg:px-10
-
-    py-7
-    sm:py-8
-    lg:py-10
-
-    text-white
-
-    shadow-[0_18px_45px_rgba(179,72,254,.22)]
-
-    mb-6
-  "
->
-        {/* single glow — no duplicates */}
-{/* Top Left Glow */}
-<div
-  className="
-    absolute
-    -top-28
-    -left-20
-
-    w-[360px]
-    h-[360px]
-
-    rounded-full
-
-    bg-white/12
-
-    blur-[120px]
-
-    pointer-events-none
-  "
-/>
-
-{/* Bottom Right Glow */}
-<div
-  className="
-    absolute
-    -bottom-32
-    -right-20
-
-    w-[340px]
-    h-[340px]
-
-    rounded-full
-
-    bg-white/10
-
-    blur-[120px]
-
-    pointer-events-none
-  "
-/>
-
-
-
-
-        <div className="relative z-10 flex items-center justify-between gap-4">
-          {/* icon */}
-          <div className="
-w-14 h-14
-sm:w-16 sm:h-16
-lg:w-20 lg:h-20
-
-rounded-[26px]
-
-flex
-items-center
-justify-center
-
-bg-white/15
-
-backdrop-blur-xl
-
-border
-
-border-white/20
-
-shadow-[0_8px_30px_rgba(255,255,255,.15)]
-
-shrink-0
-">
-            <BarChart2 className="text-white" size={22} />
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
+            <BarChart2 className="text-amber-400" size={20} />
           </div>
-          {/* text — RTL so text is on the right */}
-          <div className="text-right flex-1">
-            <h1 className="text-2xl sm:text-4xl lg:text-4xl lg:text-5xl
-tracking-tight font-black text-white leading-none">
-              لوحة التحكم
-            </h1>
-            <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm lg:text-base text-white/90
-font-medium">
-              {greeting}، د. {user?.name}
-            </p>
+          <div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black">لوحة التحكم</h1>
+            <p className="text-white/60 text-xs sm:text-sm mt-0.5">{greeting}، د. {user?.name}</p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <div className="space-y-4 sm:space-y-6">
 

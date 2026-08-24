@@ -87,14 +87,6 @@ return (
           </button>
         </div>
 
-        {/* إضافة كورس عام */}
-        <Button
-          onClick={onCreateGeneralCourse}
-          className="flex items-center gap-1.5 h-9 sm:h-10 rounded-xl bg-white/10 backdrop-blur border border-white/10 px-3 sm:px-4 text-xs sm:text-sm font-bold text-white transition-colors hover:bg-white/20 whitespace-nowrap"
-        >
-          إضافة كورس عام
-        </Button>
-
         {/* إنشاء كورس جديد */}
         <Button
           onClick={onCreateCourse}
