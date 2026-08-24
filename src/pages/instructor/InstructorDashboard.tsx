@@ -380,8 +380,8 @@ const quickActions = [
             <BarChart2 className="text-amber-400" size={20} />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black">لوحة التحكم</h1>
-            <p className="text-white/60 text-xs sm:text-sm mt-0.5">{greeting}، مستر {user?.name}</p>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black"> نظره عامه </h1>
+            <p className="text-white/60 text-xs sm:text-sm mt-0.5">{greeting}، {user?.name}</p>
           </div>
         </div>
       </motion.div>

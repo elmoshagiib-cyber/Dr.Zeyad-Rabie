@@ -1,4 +1,4 @@
-import { Menu, Sparkles } from "lucide-react";
+import { Menu } from "lucide-react";
 
 type SidebarHeaderProps = {
   collapsed: boolean;
@@ -19,13 +19,12 @@ export function SidebarHeader({
             shrink-0
             w-10 h-10
             rounded-xl
-            border border-slate-200
-            bg-white
+            border border-[#EAD8FF]
+            bg-[#F6EEFF]
             flex items-center justify-center
-            text-slate-600
-            hover:bg-violet-50
-            hover:border-violet-300
-            hover:text-violet-600
+            text-[#B348FE]
+            hover:bg-[#EEDBFF]
+            hover:border-[#B348FE]
             active:scale-95
             transition-all
             duration-200
@@ -36,29 +35,9 @@ export function SidebarHeader({
         </button>
 
         {!collapsed && (
-          <>
-            <h2 className="text-[15px] font-black text-slate-900 truncate mx-2 flex-1 text-center">
-              المنصة التعليمية
-            </h2>
-
-            <div
-              className="
-                shrink-0
-                w-9 h-9
-                rounded-xl
-                bg-gradient-to-br
-                from-violet-700
-                via-purple-600
-                to-fuchsia-600
-                flex
-                items-center
-                justify-center
-                shadow-[0_8px_18px_rgba(124,58,237,.3)]
-              "
-            >
-              <Sparkles size={15} className="text-white" />
-            </div>
-          </>
+          <h2 className="text-[15px] font-black text-slate-900 truncate mr-3">
+            منصة زياد ربيع
+          </h2>
         )}
       </div>
     </div>

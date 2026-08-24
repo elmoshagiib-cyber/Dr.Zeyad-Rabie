@@ -41,7 +41,10 @@ export function SidebarItem({
 
 active
   ? `
-    bg-[#B348FE]
+    bg-gradient-to-r
+    from-[#0F172A]
+    via-[#1E1B3A]
+    to-[#2A1B4D]
     text-white
     scale-[1.02]
   `
@@ -83,7 +86,7 @@ shadow-[0_0_12px_rgba(255,255,255,.6)]" />
             `,
             active
   ? `
-    bg-white/15
+    bg-white/10
   `
   : `
     bg-[#F6EEFF]
@@ -123,7 +126,7 @@ shadow-[0_0_12px_rgba(255,255,255,.6)]" />
                 font-bold
                 `,
 active
-  ? "bg-white text-[#B348FE]"
+  ? "bg-white text-[#1E1B3A]"
   : "bg-[#B348FE] text-white"
               )}
             >
