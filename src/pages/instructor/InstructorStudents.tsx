@@ -304,13 +304,13 @@ export function InstructorStudents() {
                     <table className="w-full min-w-[900px]">
                       <thead>
                         <tr className="bg-slate-50 border-b border-slate-200">
-                          <th className="w-[20%] px-4 py-3 text-right text-xs font-black text-slate-600">الطالب</th>
-                          <th className="w-[12%] px-4 py-3 text-right text-xs font-black text-slate-600">رقم الهاتف</th>
-                          <th className="w-[18%] px-4 py-3 text-right text-xs font-black text-slate-600">الإيميل</th>
-                          <th className="w-[14%] px-4 py-3 text-right text-xs font-black text-slate-600">الصف</th>
-                          <th className="w-[8%] px-4 py-3 text-right text-xs font-black text-slate-600">النوع</th>
-                          <th className="w-[8%] px-4 py-3 text-right text-xs font-black text-slate-600">الحالة</th>
-                          <th className="w-[8%] px-4 py-3 text-right text-xs font-black text-slate-600">الكورسات</th>
+                          <th className="w-[20%] px-4 py-3 text-center text-xs font-black text-slate-600">الطالب</th>
+                          <th className="w-[12%] px-4 py-3 text-center text-xs font-black text-slate-600">رقم الهاتف</th>
+                          <th className="w-[18%] px-4 py-3 text-center text-xs font-black text-slate-600">الإيميل</th>
+                          <th className="w-[14%] px-4 py-3 text-center text-xs font-black text-slate-600">الصف</th>
+                          <th className="w-[8%] px-4 py-3 text-center text-xs font-black text-slate-600">النوع</th>
+                          <th className="w-[8%] px-4 py-3 text-center text-xs font-black text-slate-600">الحالة</th>
+                          <th className="w-[8%] px-4 py-3 text-center text-xs font-black text-slate-600">الكورسات</th>
                           <th className="w-[12%] px-4 py-3 text-center text-xs font-black text-slate-600">الإجراءات</th>
                         </tr>
                       </thead>
