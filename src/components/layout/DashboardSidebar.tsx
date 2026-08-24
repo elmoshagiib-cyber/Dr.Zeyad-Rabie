@@ -32,123 +32,94 @@ interface NavItem {
   badge?: number;
 }
 
-const studentNav: NavItem[] = [
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const studentNavGroups: NavGroup[] = [
   {
     label: "الرئيسية",
-    path: "/",
-    icon: <Home size={20} />,
+    items: [
+      { label: "الرئيسية", path: "/", icon: <Home size={20} /> },
+    ],
   },
   {
-    label: "كورساتي",
-    path: "/dashboard/courses",
-    icon: <BookOpen size={20} />,
+    label: "الأكاديمي",
+    items: [
+      { label: "كورساتي", path: "/dashboard/courses", icon: <BookOpen size={20} /> },
+      { label: "الواجبات", path: "/dashboard/homework", icon: <FileText size={20} /> },
+      { label: "الامتحانات", path: "/dashboard/exams", icon: <ClipboardList size={20} /> },
+    ],
   },
   {
-    label: "الواجبات",
-    path: "/dashboard/homework",
-    icon: <FileText size={20} />,
+    label: "المجتمع",
+    items: [
+      { label: "المنتدى", path: "/dashboard/forum", icon: <MessageCircle size={20} /> },
+      { label: "المتصدرون", path: "/dashboard/leaderboard", icon: <Trophy size={20} /> },
+    ],
   },
   {
-    label: "الامتحانات",
-    path: "/dashboard/exams",
-    icon: <ClipboardList size={20} />,
-  },
-  {
-    label: "المنتدى",
-    path: "/dashboard/forum",
-    icon: <MessageCircle size={20} />,
-  },
-  {
-    label: "المتصدرون",
-    path: "/dashboard/leaderboard",
-    icon: <Trophy size={20} />,
-  },
-  {
-    label: "الإشعارات",
-    path: "/dashboard/announcements",
-    icon: <Bell size={20} />,
-  },
-  {
-    label: "ملفي الشخصي",
-    path: "/profile",
-    icon: <User size={20} />,
+    label: "الحساب",
+    items: [
+      { label: "الإشعارات", path: "/dashboard/announcements", icon: <Bell size={20} /> },
+      { label: "ملفي الشخصي", path: "/profile", icon: <User size={20} /> },
+    ],
   },
 ];
 
-const instructorNav: NavItem[] = [
+const instructorNavGroups: NavGroup[] = [
   {
-    label: "لوحة التحكم",
-    path: "/instructor",
-    icon: <LayoutDashboard size={20} />,
+    label: "الرئيسية",
+    items: [
+      { label: "لوحة التحكم", path: "/instructor", icon: <LayoutDashboard size={20} /> },
+    ],
   },
   {
-    label: "كورساتي",
-    path: "/instructor/courses",
-    icon: <BookOpen size={20} />,
+    label: "الهيكل الأكاديمي",
+    items: [
+      { label: "كورساتي", path: "/instructor/courses", icon: <BookOpen size={20} /> },
+      { label: "إنشاء كورس", path: "/instructor/courses/create", icon: <PlusCircle size={20} /> },
+      { label: "أكواد الاشتراك", path: "/instructor/subscription-codes", icon: <QrCode size={20} /> },
+    ],
   },
   {
-    label: "إنشاء كورس",
-    path: "/instructor/courses/create",
-    icon: <PlusCircle size={20} />,
+    label: "المتابعة والتقييم",
+    items: [
+      { label: "تسليمات الطلاب", path: "/instructor/submissions", icon: <CheckCircle size={20} /> },
+      { label: "الطلاب", path: "/instructor/students", icon: <Users size={20} /> },
+    ],
   },
   {
-    label: "أكواد الاشتراك",
-    path: "/instructor/subscription-codes",
-    icon: <QrCode size={20} />,
+    label: "التواصل",
+    items: [
+      { label: "الإشعارات", path: "/instructor/notifications", icon: <Bell size={20} /> },
+    ],
   },
-  {
-    label: "تسليمات الطلاب",
-    path: "/instructor/submissions",
-    icon: <CheckCircle size={20} />,
-  },
-  {
-    label: "الإشعارات",
-    path: "/instructor/notifications",
-    icon: <Bell size={20} />,
-  },
-  {
-    label: "الطلاب",
-    path: "/instructor/students",
-    icon: <Users size={20} />,
-  },
-
-
 ];
 
-const adminNav: NavItem[] = [
+const adminNavGroups: NavGroup[] = [
   {
-    label: "لوحة التحكم",
-    path: "/admin",
-    icon: <LayoutDashboard size={20} />,
+    label: "الرئيسية",
+    items: [
+      { label: "لوحة التحكم", path: "/admin", icon: <LayoutDashboard size={20} /> },
+    ],
   },
   {
-    label: "المستخدمون",
-    path: "/admin/users",
-    icon: <Users size={20} />,
+    label: "الإدارة",
+    items: [
+      { label: "المستخدمون", path: "/admin/users", icon: <Users size={20} /> },
+      { label: "الموافقات", path: "/admin/approvals", icon: <CheckCircle size={20} />, badge: 47 },
+      { label: "الكورسات", path: "/admin/courses", icon: <Video size={20} /> },
+    ],
   },
   {
-    label: "الموافقات",
-    path: "/admin/approvals",
-    icon: <CheckCircle size={20} />,
-    badge: 47,
+    label: "التواصل والتحليلات",
+    items: [
+      { label: "الاشعارات", path: "/admin/announcements", icon: <MessageSquare size={20} /> },
+      { label: "التحليلات", path: "/admin/analytics", icon: <BarChart2 size={20} /> },
+    ],
   },
-  {
-    label: "الكورسات",
-    path: "/admin/courses",
-    icon: <Video size={20} />,
-  },
-  {
-    label: "الاشعارات",
-    path: "/admin/announcements",
-    icon: <MessageSquare size={20} />,
-  },
-  {
-    label: "التحليلات",
-    path: "/admin/analytics",
-    icon: <BarChart2 size={20} />,
-  },
-
-
 ];
 
 interface DashboardSidebarProps {
@@ -178,12 +149,12 @@ useEffect(() => {
   }
 }, [collapsed, type]);
 
-  const navItems = 
+  const navGroups = 
     type === "student" 
-      ? studentNav 
+      ? studentNavGroups 
       : type === "instructor" 
-      ? instructorNav 
-      : adminNav;
+      ? instructorNavGroups 
+      : adminNavGroups;
 
   const handleNav = (path: string) => {
     navigate(path);
@@ -225,7 +196,7 @@ useEffect(() => {
       />
 
       <SidebarNavigation
-        navItems={navItems}
+        navGroups={navGroups}
         collapsed={collapsed && !mobileOpen}
         currentPath={location.pathname}
         onNavigate={handleNav}
