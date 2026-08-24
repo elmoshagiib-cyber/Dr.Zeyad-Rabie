@@ -415,7 +415,7 @@ case "pdf":
       totalScore: hw?.total_score || 100,
       allowLateSubmission: hw?.allow_late_submission || false,
       instructionsFile: hw?.attachment_pdf || "",
-      instructionsFileName: "",
+      instructionsFileName: hw?.attachment_pdf ? "ملف التعليمات الحالي" : "",
       submissionTypes: hw?.allowed_types || ["text"],
       visibility: "public",
       published: hw?.is_published || false,
@@ -1287,7 +1287,44 @@ async function uploadPdf(
     alert("فشل رفع الملف: " + (err?.message || "خطأ غير معروف"));
   }
 }
+// ── Homework Instructions Upload ─────────────────────────
+async function uploadHomeworkInstructions(
+  sectionId: string,
+  itemId: string,
+  file: File
+) {
+  if (!course) return;
 
+  try {
+    const data = await uploadToR2(
+      file,
+      `homework-instructions/${course.id}/${sectionId}`
+    );
+
+    setCourse((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        sections: prev.sections.map((section) => ({
+          ...section,
+          items: section.items.map((item) => {
+            if (item.id !== itemId || item.type !== "homework") return item;
+
+            return {
+              ...item,
+              instructionsFile: data.url,
+              instructionsFileName: file.name,
+            };
+          }),
+        })),
+      };
+    });
+  } catch (err: any) {
+    console.error("Homework Instructions Upload Error:", err);
+    alert("فشل رفع ملف التعليمات: " + (err?.message || "خطأ غير معروف"));
+  }
+}
 
   // ── Quiz Helpers ─────────────────────────────────────────
   function addQuestion(sectionId: string, quizId: string) {
@@ -2233,7 +2270,7 @@ async function uploadPdf(
                 <span className="text-sm text-slate-500 group-hover:text-amber-600 transition-colors">رفع ملف التعليمات (PDF أو صورة)</span>
                 <input type="file" accept=".pdf,image/*" className="hidden" onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) updateItem(sectionId, item.id, { instructionsFileName: file.name, instructionsFile: file.name } as Partial<HomeworkItem>);
+                  if (file) uploadHomeworkInstructions(sectionId, item.id, file);
                 }} />
               </label>
             )}
