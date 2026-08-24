@@ -474,23 +474,23 @@ const { error: studentNotifError } = await supabase
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-6 lg:px-8 py-6 text-white shadow-lg mb-8"
+            className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6 sm:mb-8"
           >
             <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
             <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
 
             <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
-                  <Bell className="text-amber-400" size={22} />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
+                  <Bell className="text-amber-400" size={20} />
                 </div>
                 <div>
-                  <h1 className="text-2xl lg:text-3xl font-black">سجل الإشعارات</h1>
-                  <p className="text-white/60 text-sm mt-0.5">متابعة جميع الإشعارات المرسلة للطلاب عبر المنصة</p>
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-black">سجل الإشعارات</h1>
+                  <p className="text-white/60 text-xs sm:text-sm mt-0.5">متابعة جميع الإشعارات المرسلة للطلاب عبر المنصة</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap w-full lg:w-auto">
                 {notifications.length > 0 && (
                   <button
                     onClick={async () => {
@@ -504,7 +504,7 @@ const { error: studentNotifError } = await supabase
                         toast.error("حدث خطأ أثناء مسح السجل");
                       }
                     }}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-500/90 hover:bg-red-500 text-white text-sm font-bold transition-colors"
+                    className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-red-500/90 hover:bg-red-500 text-white text-xs sm:text-sm font-bold transition-colors"
                   >
                     <Trash2 size={16} />
                     مسح السجل
@@ -512,14 +512,14 @@ const { error: studentNotifError } = await supabase
                 )}
                 <button
                   onClick={() => setShowSendForm(!showSendForm)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors"
+                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold transition-colors"
                 >
                   <Send size={16} />
                   إرسال إشعار يدوي
                 </button>
                 <button
                   onClick={() => setShowSettings(!showSettings)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-slate-900 text-sm font-bold hover:bg-white/90 transition-colors"
+                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white text-slate-900 text-xs sm:text-sm font-bold hover:bg-white/90 transition-colors"
                 >
                   <Settings size={16} />
                   الإعدادات
