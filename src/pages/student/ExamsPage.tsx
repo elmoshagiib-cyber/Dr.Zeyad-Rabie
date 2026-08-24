@@ -154,7 +154,7 @@ export function ExamsPage() {
                     className={`bg-white dark:bg-[#111111] border rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-sm hover:shadow-xl transition-all duration-300 ${
                       hasResult
                         ? passed
-                          ? "border-emerald-200 dark:border-emerald-900 hover:border-emerald-400"
+                          ? "border-[#EAD8FF] dark:border-[#3D1E5C] hover:border-[#B348FE]"
                           : "border-rose-200 dark:border-rose-900 hover:border-rose-400"
                         : "border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE]"
                     }`}
@@ -170,7 +170,7 @@ export function ExamsPage() {
                             <span
                               className={`inline-flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-black shrink-0 ${
                                 passed
-                                  ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
+                                  ? "bg-[#F6EEFF] text-[#B348FE] dark:bg-[#2B103D] dark:text-[#B348FE]"
                                   : "bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400"
                               }`}
                             >
@@ -205,14 +205,14 @@ export function ExamsPage() {
                             <div
                               className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl border-4 flex flex-col items-center justify-center flex-shrink-0 ${
                                 passed
-                                  ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-950/20"
+                                  ? "border-[#B348FE] bg-[#F6EEFF] dark:bg-[#2B103D]"
                                   : "border-rose-400 bg-rose-50 dark:bg-rose-950/20"
                               }`}
                             >
                               <span
                                 className={`text-base sm:text-xl font-black ${
                                   passed
-                                    ? "text-emerald-600 dark:text-emerald-400"
+                                    ? "text-[#B348FE]"
                                     : "text-rose-600 dark:text-rose-400"
                                 }`}
                               >
@@ -298,7 +298,7 @@ export function ExamsPage() {
                                 <span
                                   className={`px-2 py-1 rounded-lg text-[10px] sm:text-xs font-black whitespace-nowrap ${
                                     a.passed
-                                      ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
+                                      ? "bg-[#F6EEFF] text-[#B348FE] dark:bg-[#2B103D] dark:text-[#B348FE]"
                                       : "bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400"
                                   }`}
                                 >
@@ -322,7 +322,7 @@ export function ExamsPage() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-3 sm:px-4 py-3.5 sm:py-4 border-t border-gray-100 dark:border-[#2A2A2A]">
-                    <span className="text-[11px] sm:text-xs font-bold text-emerald-600">
+                    <span className="text-[11px] sm:text-xs font-bold text-[#B348FE]">
                       {(attemptsPage - 1) * attemptsPerPage + 1} -{" "}
                       {Math.min(attemptsPage * attemptsPerPage, attempts.length)} من {attempts.length}
                     </span>
@@ -334,7 +334,7 @@ export function ExamsPage() {
                       >
                         ‹
                       </button>
-                      <span className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-black">
+                      <span className="w-8 h-8 rounded-lg bg-[#B348FE] text-white flex items-center justify-center text-xs font-black">
                         {attemptsPage}
                       </span>
                       <button

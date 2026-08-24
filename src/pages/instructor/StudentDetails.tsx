@@ -87,6 +87,14 @@ interface ExamResult {
   student_id: number;
   exam_id: number;
   score: number;
+  percentage?: number;
+  passed?: boolean;
+  correct_answers?: number;
+  wrong_answers?: number;
+  total_questions?: number;
+  answered_questions?: number;
+  started_at?: string | null;
+  completed_at?: string | null;
   submitted_at: string | null;
   exams: Exam | null;
 }
@@ -175,6 +183,8 @@ export function StudentDetails() {
   const [loginSessions, setLoginSessions] = useState<LoginSession[]>([]);
   const [sessionsPage, setSessionsPage] = useState(1);
   const sessionsPerPage = 5;
+  const [examsPage, setExamsPage] = useState(1);
+  const examsPerPage = 5;
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
 
@@ -1435,14 +1445,15 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
-              <CardContent className="p-6 lg:p-8">
-                <div className="mb-6">
-                  <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">الامتحانات</h2>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">نتائج وسجل الاختبارات</p>
-                </div>
+          </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
+            <CardContent className="p-0">
+              <div className="p-6 lg:p-8 pb-4">
+                <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">الامتحانات</h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">نتائج وسجل الاختبارات</p>
+
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
                     <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">عدد الاختبارات</p>
                     <p className="text-2xl font-black text-gray-900 dark:text-white">{examResults.length}</p>
@@ -1460,38 +1471,111 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     <p className="text-2xl font-black text-red-600">{examResults.length > 0 ? lowestScore : 0}%</p>
                   </div>
                 </div>
+              </div>
 
-                {examResults.length > 0 ? (
-                  <div className="space-y-3">
-                    <h4 className="font-black text-gray-900 dark:text-white text-sm mb-3">آخر الاختبارات</h4>
-                    {examResults.slice(0, 5).map((exam) => (
-                      <div key={exam.id} className="flex items-center justify-between bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-3 border border-gray-100 dark:border-[#2A2A2A]">
-                        <div className="flex-1">
-                          <p className="text-sm font-bold text-gray-900 dark:text-white">{exam.exams?.title || `اختبار #${exam.exam_id}`}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            {exam.submitted_at ? new Date(exam.submitted_at).toLocaleDateString("ar-EG") : "-"}
-                          </p>
-                        </div>
-                        <div className="text-left">
-                          <p className={`text-lg font-black ${
-                            (exam.score || 0) >= 80 ? "text-emerald-600" :
-                            (exam.score || 0) >= 50 ? "text-amber-600" : "text-red-600"
-                          }`}>
-                            {exam.score || 0}%
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+              {examResults.length === 0 ? (
+                <div className="py-16 text-center">
+                  <Award className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />
+                  <p className="text-gray-500 dark:text-gray-400 font-bold">لم يتم أداء أي اختبارات</p>
+                </div>
+              ) : (
+                <>
+                  <div className="overflow-x-auto border-t border-gray-100 dark:border-[#2A2A2A]">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400">
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">#</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">اسم الامتحان</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">عدد الأسئلة</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">المحلولة</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">الصحيحة</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">الدرجة</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">النتيجة</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">وقت البدء</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">وقت الانتهاء</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {examResults
+                          .slice((examsPage - 1) * examsPerPage, examsPage * examsPerPage)
+                          .map((exam, idx) => (
+                            <tr key={exam.id} className="border-t border-gray-100 dark:border-[#2A2A2A]">
+                              <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">
+                                {(examsPage - 1) * examsPerPage + idx + 1}
+                              </td>
+                              <td className="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">
+                                {exam.exams?.title || `اختبار #${exam.exam_id}`}
+                              </td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
+                                {exam.total_questions ?? "-"}
+                              </td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
+                                {exam.answered_questions ?? "-"}
+                              </td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
+                                {exam.correct_answers ?? "-"}
+                              </td>
+                              <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">
+                                {exam.score ?? "-"}
+                              </td>
+                              <td className="px-4 py-3">
+                                <span
+                                  className={`px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap ${
+                                    exam.passed
+                                      ? "bg-[#F6EEFF] text-[#B348FE] dark:bg-[#2B103D] dark:text-[#B348FE]"
+                                      : "bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400"
+                                  }`}
+                                >
+                                  {exam.passed ? "ناجح" : "راسب"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                {exam.started_at ? new Date(exam.started_at).toLocaleString("ar-EG") : "-"}
+                              </td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                {exam.completed_at
+                                  ? new Date(exam.completed_at).toLocaleString("ar-EG")
+                                  : exam.submitted_at
+                                  ? new Date(exam.submitted_at).toLocaleString("ar-EG")
+                                  : "-"}
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
                   </div>
-                ) : (
-                  <div className="py-8 text-center">
-                    <Award className="mx-auto text-gray-300 dark:text-gray-700 mb-3" size={40} />
-                    <p className="text-gray-500 dark:text-gray-400 font-bold text-sm">لم يتم أداء أي اختبارات</p>
+
+                  <div className="flex items-center justify-between px-4 py-4 border-t border-gray-100 dark:border-[#2A2A2A]">
+                    <span className="text-xs font-bold text-[#B348FE]">
+                      {(examsPage - 1) * examsPerPage + 1} -{" "}
+                      {Math.min(examsPage * examsPerPage, examResults.length)} من {examResults.length}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setExamsPage((p) => Math.max(1, p - 1))}
+                        disabled={examsPage === 1}
+                        className="w-8 h-8 rounded-lg border border-gray-200 dark:border-[#2A2A2A] flex items-center justify-center disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-[#1A1A1A]"
+                      >
+                        ‹
+                      </button>
+                      <span className="w-8 h-8 rounded-lg bg-[#B348FE] text-white flex items-center justify-center text-xs font-black">
+                        {examsPage}
+                      </span>
+                      <button
+                        onClick={() =>
+                          setExamsPage((p) => (p * examsPerPage < examResults.length ? p + 1 : p))
+                        }
+                        disabled={examsPage * examsPerPage >= examResults.length}
+                        className="w-8 h-8 rounded-lg border border-gray-200 dark:border-[#2A2A2A] flex items-center justify-center disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-[#1A1A1A]"
+                      >
+                        ›
+                      </button>
+                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
 
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
             <CardContent className="p-6 lg:p-8">
