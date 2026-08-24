@@ -105,10 +105,24 @@ interface HomeworkSubmission {
   homework_id: number;
   grade: number | null;
   feedback?: string | null;
+  file_url?: string | null;
+  file_name?: string | null;
+  status?: string | null;
   submitted_at: string | null;
+  graded_at?: string | null;
   homeworks?: {
+    id: number;
     title: string;
     total_score?: number;
+    due_date?: string | null;
+    course_sections?: {
+      id: string;
+      course_id: string;
+      courses?: {
+        id: string;
+        title: string;
+      } | null;
+    } | null;
   };
 }
 
@@ -185,6 +199,8 @@ export function StudentDetails() {
   const sessionsPerPage = 5;
   const [examsPage, setExamsPage] = useState(1);
   const examsPerPage = 5;
+  const [homeworksPage, setHomeworksPage] = useState(1);
+  const homeworksPerPage = 5;
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
 
@@ -448,11 +464,29 @@ const totalLessons = courseLessons.length;
   };
 
   const loadHomeworkResults = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("homework_submissions")
-      .select("*, homeworks(title, total_score)")
+      .select(`
+        *,
+        homeworks (
+          id,
+          title,
+          total_score,
+          due_date,
+          course_sections (
+            id,
+            course_id,
+            courses ( id, title )
+          )
+        )
+      `)
       .eq("student_id", Number(id))
       .order("submitted_at", { ascending: false });
+
+    if (error) {
+      console.log("Homework Results Error:", error);
+      return;
+    }
 
     if (data) {
       setHomeworkResults(data as HomeworkSubmission[]);
@@ -1372,15 +1406,13 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
-              <CardContent className="p-6 lg:p-8">
-                <div className="mb-6">
-                  <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">الواجبات</h2>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">إحصائيات وسجل الواجبات</p>
-                </div>
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
+            <CardContent className="p-0">
+              <div className="p-6 lg:p-8 pb-4">
+                <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">الواجبات</h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">إحصائيات وسجل الواجبات المسلّمة</p>
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
                     <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">إجمالي الواجبات</p>
                     <p className="text-2xl font-black text-gray-900 dark:text-white">{totalHomework}</p>
@@ -1398,54 +1430,140 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     <p className="text-2xl font-black text-[#B348FE]">{avgHomeworkScore}%</p>
                   </div>
                 </div>
+              </div>
 
-                {homeworkResults.length > 0 ? (
-                  <div className="space-y-3">
-                    <h4 className="font-black text-gray-900 dark:text-white text-sm mb-3">آخر الواجبات</h4>
-                    {homeworkResults.slice(0, 5).map((hw) => {
-                      const total = hw.homeworks?.total_score || 100;
-                      const hasGrade = hw.grade !== null && hw.grade !== undefined;
-                      const percent = hasGrade ? Math.round((hw.grade! / total) * 100) : null;
+              {homeworkResults.length === 0 ? (
+                <div className="py-16 text-center">
+                  <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />
+                  <p className="text-gray-500 dark:text-gray-400 font-bold">لا توجد واجبات محلولة</p>
+                </div>
+              ) : (
+                <>
+                  <div className="overflow-x-auto border-t border-gray-100 dark:border-[#2A2A2A]">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400">
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">#</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">اسم الواجب</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">الكورس</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">الدرجة</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">النسبة</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">الحالة</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">تاريخ التسليم</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">تاريخ التصحيح</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">الملف</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {homeworkResults
+                          .slice((homeworksPage - 1) * homeworksPerPage, homeworksPage * homeworksPerPage)
+                          .map((hw, idx) => {
+                            const total = hw.homeworks?.total_score || 100;
+                            const hasGrade = hw.grade !== null && hw.grade !== undefined;
+                            const percent = hasGrade ? Math.round((hw.grade! / total) * 100) : null;
+                            const courseTitle = hw.homeworks?.course_sections?.courses?.title || "-";
 
-                      return (
-                        <div key={hw.id} className="flex items-center justify-between bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-3 border border-gray-100 dark:border-[#2A2A2A]">
-                          <div className="flex-1">
-                            <p className="text-sm font-bold text-gray-900 dark:text-white">
-                              {hw.homeworks?.title || `واجب #${hw.homework_id}`}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                              {hw.submitted_at ? new Date(hw.submitted_at).toLocaleDateString("ar-EG") : "-"}
-                            </p>
-                          </div>
-                          <div className="text-left">
-                            {hasGrade ? (
-                              <p className={`text-lg font-black ${
-                                percent! >= 80 ? "text-emerald-600" :
-                                percent! >= 50 ? "text-amber-600" : "text-red-600"
-                              }`}>
-                                {hw.grade}
-                                <span className="text-xs text-gray-400 font-bold"> / {total}</span>
-                              </p>
-                            ) : (
-                              <span className="text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/30 px-2 py-1 rounded-lg">
-                                بانتظار التصحيح
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                            return (
+                              <tr key={hw.id} className="border-t border-gray-100 dark:border-[#2A2A2A]">
+                                <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">
+                                  {(homeworksPage - 1) * homeworksPerPage + idx + 1}
+                                </td>
+                                <td className="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">
+                                  {hw.homeworks?.title || `واجب #${hw.homework_id}`}
+                                </td>
+                                <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                  {courseTitle}
+                                </td>
+                                <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">
+                                  {hasGrade ? `${hw.grade} / ${total}` : "-"}
+                                </td>
+                                <td className="px-4 py-3">
+                                  {hasGrade ? (
+                                    <span
+                                      className={`font-black ${
+                                        percent! >= 80
+                                          ? "text-emerald-600"
+                                          : percent! >= 50
+                                          ? "text-amber-600"
+                                          : "text-red-600"
+                                      }`}
+                                    >
+                                      {percent}%
+                                    </span>
+                                  ) : (
+                                    "-"
+                                  )}
+                                </td>
+                                <td className="px-4 py-3">
+                                  <span
+                                    className={`px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap ${
+                                      hasGrade
+                                        ? "bg-[#F6EEFF] text-[#B348FE] dark:bg-[#2B103D] dark:text-[#B348FE]"
+                                        : "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400"
+                                    }`}
+                                  >
+                                    {hasGrade ? "تم التصحيح" : "بانتظار التصحيح"}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                  {hw.submitted_at ? new Date(hw.submitted_at).toLocaleString("ar-EG") : "-"}
+                                </td>
+                                <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                  {hw.graded_at ? new Date(hw.graded_at).toLocaleString("ar-EG") : "-"}
+                                </td>
+                                <td className="px-4 py-3">
+                                  {hw.file_url ? (
+                                    <a
+                                      href={hw.file_url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-[#B348FE] hover:text-[#9E2FFF] font-bold text-xs underline whitespace-nowrap"
+                                    >
+                                      عرض الملف
+                                    </a>
+                                  ) : (
+                                    <span className="text-gray-400 text-xs">-</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
                   </div>
-                ) : (
-                  <div className="py-8 text-center">
-                    <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-3" size={40} />
-                    <p className="text-gray-500 dark:text-gray-400 font-bold text-sm">لا توجد واجبات محلولة</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
 
-          </div>
+                  <div className="flex items-center justify-between px-4 py-4 border-t border-gray-100 dark:border-[#2A2A2A]">
+                    <span className="text-xs font-bold text-[#B348FE]">
+                      {(homeworksPage - 1) * homeworksPerPage + 1} -{" "}
+                      {Math.min(homeworksPage * homeworksPerPage, homeworkResults.length)} من {homeworkResults.length}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setHomeworksPage((p) => Math.max(1, p - 1))}
+                        disabled={homeworksPage === 1}
+                        className="w-8 h-8 rounded-lg border border-gray-200 dark:border-[#2A2A2A] flex items-center justify-center disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-[#1A1A1A]"
+                      >
+                        ‹
+                      </button>
+                      <span className="w-8 h-8 rounded-lg bg-[#B348FE] text-white flex items-center justify-center text-xs font-black">
+                        {homeworksPage}
+                      </span>
+                      <button
+                        onClick={() =>
+                          setHomeworksPage((p) => (p * homeworksPerPage < homeworkResults.length ? p + 1 : p))
+                        }
+                        disabled={homeworksPage * homeworksPerPage >= homeworkResults.length}
+                        className="w-8 h-8 rounded-lg border border-gray-200 dark:border-[#2A2A2A] flex items-center justify-center disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-[#1A1A1A]"
+                      >
+                        ›
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+          
 
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
             <CardContent className="p-0">
