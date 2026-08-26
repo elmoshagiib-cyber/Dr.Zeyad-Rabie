@@ -51,6 +51,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isBlocked, setIsBlocked] = useState(false);
+  const [sessionKicked, setSessionKicked] = useState(false);
 const savedUser = localStorage.getItem("user");
 
   const updateUser = (data: Partial<AppUser>) => {
@@ -95,14 +96,13 @@ if (
   student &&
   student.session_token !== savedToken
 ) {
-  alert("تم تسجيل خروجك لأنه تم تسجيل الدخول بحسابك من جهاز آخر");
-
   await supabase.auth.signOut();
 
   localStorage.removeItem("user");
   localStorage.removeItem("session_token");
 
   setUser(null);
+  setSessionKicked(true);
   setLoading(false);
 
   return;
@@ -134,13 +134,12 @@ const interval = setInterval(async () => {
   if (!student) return;
 
 if (student.session_token !== savedToken) {
-    alert("تم تسجيل خروجك لأنه تم تسجيل الدخول بحسابك من جهاز آخر");
-
     await supabase.auth.signOut();
 
     localStorage.clear();
 
-    window.location.href = "/login";
+    setUser(null);
+    setSessionKicked(true);
 
     return;
   }
@@ -188,6 +187,37 @@ const logout = async () => {
     logout,
   }}
 >
+      {sessionKicked && (
+        <div
+          dir="rtl"
+          className="fixed inset-0 z-[999999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+        >
+          <div className="w-full max-w-md rounded-[28px] bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] shadow-2xl p-8 text-center">
+            <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-950/30">
+              <span className="text-4xl">📱</span>
+            </div>
+
+            <h2 className="text-xl font-black text-gray-900 dark:text-white">
+              تم تسجيل خروجك
+            </h2>
+
+            <p className="mt-3 text-sm leading-7 text-gray-500 dark:text-gray-400">
+              تم تسجيل خروجك لأنه تم تسجيل الدخول بحسابك من جهاز آخر.
+            </p>
+
+            <button
+              onClick={() => {
+                setSessionKicked(false);
+                window.location.href = "/login";
+              }}
+              className="mt-6 w-full py-3.5 rounded-xl bg-[#B348FE] hover:bg-[#9E2FFF] text-white font-bold transition-colors"
+            >
+              حسنًا
+            </button>
+          </div>
+        </div>
+      )}
+
       {isBlocked && user?.role === "student" && (
         <div
           dir="rtl"
