@@ -381,18 +381,28 @@ export function HomeworkPage() {
                                   : "-"}
                               </td>
                               <td className="px-3 sm:px-4 py-2.5 sm:py-3">
-                                {hw.submission?.answer ? (
-                                  <a
-                                    href={hw.submission.answer}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="text-[#B348FE] hover:text-[#9E2FFF] font-bold text-xs underline whitespace-nowrap"
+                                <div className="flex flex-col items-start gap-1.5">
+                                  {hw.submission?.answer ? (
+                                    <a
+                                      href={hw.submission.answer}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-[#B348FE] hover:text-[#9E2FFF] font-bold text-xs underline whitespace-nowrap"
+                                    >
+                                      عرض الملف
+                                    </a>
+                                  ) : (
+                                    <span className="text-gray-400 text-xs">-</span>
+                                  )}
+
+                                  <Button
+                                    size="sm"
+                                    className="bg-[#B348FE] hover:bg-[#9E2FFF] font-bold text-[10px] sm:text-xs whitespace-nowrap h-7 sm:h-8 px-2.5 sm:px-3"
+                                    onClick={() => navigate(`/dashboard/homework/${hw.course_item_id}`)}
                                   >
-                                    عرض الملف
-                                  </a>
-                                ) : (
-                                  <span className="text-gray-400 text-xs">-</span>
-                                )}
+                                    فتح الواجب
+                                  </Button>
+                                </div>
                               </td>
                             </tr>
                           );
