@@ -313,38 +313,23 @@ if (student.status !== "نشط") {
   return;
 }
 
-// تحقق من عدد الأجهزة النشطة الحالية قبل ما نكمل الدخول
-const { data: sessionsData, error: sessionsError } = await supabase.rpc(
-  "get_active_sessions"
+// تحقق من حد الأجهزة وتعامل معاه في الداتابيز مباشرة (atomic - أضمن)
+const { data: limitResult, error: limitError } = await supabase.rpc(
+  "handle_login_device_limit"
 );
 
-if (sessionsError) {
-  console.error("GET ACTIVE SESSIONS ERROR:", sessionsError);
+if (limitError) {
+  console.error("DEVICE LIMIT CHECK ERROR:", limitError);
+  setErrors({ password: "حدث خطأ أثناء التحقق من الأجهزة" });
+  setLoading(false);
+  return;
 }
 
-const activeCount = sessionsData?.[0]?.active_count ?? 0;
-const deviceLimit = sessionsData?.[0]?.max_devices ?? 1;
+const action = limitResult?.[0]?.action;
+const sessions = limitResult?.[0]?.sessions ?? [];
 
-if (activeCount >= deviceLimit) {
-  // لو مسموحله بجهاز واحد بس، اطرد الجهاز القديم تلقائي من غير ما تسأله
-  if (deviceLimit === 1 && sessionsData && sessionsData.length === 1) {
-    const { error: kickError } = await supabase.rpc("kick_session", {
-      p_session_id: sessionsData[0].session_id,
-    });
-
-    if (kickError) {
-      setErrors({ password: "حدث خطأ أثناء تسجيل الخروج من الجهاز القديم" });
-      setLoading(false);
-      return;
-    }
-
-    await completeLogin(authData, student, phone);
-    setLoading(false);
-    return;
-  }
-
-  // لو مسموحله بأكتر من جهاز ووصل للحد الأقصى، نوريله قائمة أجهزته ويختار أنهي واحد يطرده
-  setActiveSessions(sessionsData || []);
+if (action === "show_modal") {
+  setActiveSessions(sessions);
   setPendingLogin({ authData, student, phone });
   setShowDeviceLimitModal(true);
   setLoading(false);
