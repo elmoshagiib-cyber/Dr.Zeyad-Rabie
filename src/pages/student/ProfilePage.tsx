@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Camera, Edit2, CheckCircle, Star, Trophy, BookOpen, Award, Shield, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Camera, Edit2, CheckCircle, Star, Trophy, BookOpen, Award, Shield, Lock, Eye, EyeOff, Loader2, ChevronDown } from "lucide-react";
 import StudentLayout from "./StudentLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
@@ -224,15 +224,11 @@ export function ProfilePage() {
   };
 
   const [avatarUrl, setAvatarUrl] = useState(displayUser.avatar_url || "");
-  const [coverUrl, setCoverUrl] = useState(displayUser.cover_url || "");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [uploadingCover, setUploadingCover] = useState(false);
 
   const [cropFile, setCropFile] = useState<File | null>(null);
-  const [cropTarget, setCropTarget] = useState<"avatar" | "cover" | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const coverFileInputRef = useRef<HTMLInputElement>(null);
 
   const validateImageFile = (file: File) => {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
@@ -249,14 +245,6 @@ export function ProfilePage() {
   const onAvatarFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !validateImageFile(file)) return;
-    setCropTarget("avatar");
-    setCropFile(file);
-  };
-
-  const onCoverFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !validateImageFile(file)) return;
-    setCropTarget("cover");
     setCropFile(file);
   };
 
@@ -300,60 +288,19 @@ export function ProfilePage() {
     }
   };
 
-  const uploadCoverBlob = async (blob: Blob) => {
-    try {
-      setUploadingCover(true);
 
-      if (!user?.id) {
-        alert("يجب تسجيل الدخول أولاً");
-        return;
-      }
-
-      const filePath = `${user.id}/cover.jpg`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, blob, { upsert: true, contentType: "image/jpeg" });
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
-      const cover = `${data.publicUrl}?t=${Date.now()}`;
-
-      const { error } = await supabase
-        .from("students")
-        .update({ cover_url: cover })
-        .eq("auth_id", user.id);
-
-      if (error) throw error;
-
-      setCoverUrl(cover);
-      updateUser({ cover_url: cover });
-
-      alert("تم تحديث صورة الغلاف بنجاح");
-    } catch (err) {
-      console.error(err);
-      alert("حدث خطأ أثناء رفع صورة الغلاف");
-    } finally {
-      setUploadingCover(false);
-      if (coverFileInputRef.current) coverFileInputRef.current.value = "";
-    }
-  };
 
   const handleCropped = (blob: Blob) => {
-    if (cropTarget === "avatar") uploadAvatarBlob(blob);
-    if (cropTarget === "cover") uploadCoverBlob(blob);
+    uploadAvatarBlob(blob);
     setCropFile(null);
-    setCropTarget(null);
   };
 
   const handleCropCancel = () => {
     setCropFile(null);
-    setCropTarget(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
-    if (coverFileInputRef.current) coverFileInputRef.current.value = "";
   };
 
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -419,13 +366,7 @@ export function ProfilePage() {
           className="hidden"
           onChange={onAvatarFileSelected}
         />
-        <input
-          ref={coverFileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          className="hidden"
-          onChange={onCoverFileSelected}
-        />
+
 
         {/* Success Message */}
         {saved && (
@@ -440,31 +381,10 @@ export function ProfilePage() {
         )}
 
         {/* Profile Header */}
-        <div className="rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 dark:border-[#2A2A2A] overflow-hidden">
-          {/* Cover Photo */}
-          <div className="relative w-full h-28 sm:h-44 lg:h-56 bg-gray-100 dark:bg-[#1A1A1A] overflow-hidden">
-            {coverUrl && (
-              <img src={coverUrl} alt="cover" className="w-full h-full object-cover" />
-            )}
-            <button
-              onClick={() => coverFileInputRef.current?.click()}
-              disabled={uploadingCover}
-              className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-white dark:bg-[#111111] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] text-[#B348FE] rounded-lg sm:rounded-2xl px-2 py-1.5 sm:px-4 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-sm font-bold shadow-lg border border-gray-200 dark:border-[#2A2A2A] transition-all disabled:opacity-60"
-            >
-              {uploadingCover ? (
-                <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Camera size={13} className="sm:w-4 sm:h-4" />
-              )}
-              <span className="hidden xs:inline sm:inline">تغيير الغلاف</span>
-            </button>
-          </div>
-
-          {/* Info panel */}
-          <div className="bg-white dark:bg-[#111111] px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 lg:pt-20 pb-5 sm:pb-6 lg:pb-8 relative">
-            {/* Avatar - centered, half over cover */}
-            <div className="absolute left-1/2 -translate-x-1/2 -top-10 sm:-top-14 lg:-top-16 z-10">
-              <div className="relative">
+        <div className="rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 dark:border-[#2A2A2A] overflow-hidden bg-white dark:bg-[#111111]">
+          <div className="px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 lg:pt-12 pb-5 sm:pb-6 lg:pb-8">
+            <div className="flex flex-col items-center text-center">
+              <div className="relative mb-4 sm:mb-5">
                 <div className="w-20 h-20 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full overflow-hidden border-4 border-white dark:border-[#111111] shadow-lg bg-white dark:bg-[#1A1A1A]">
                   {avatarUrl ? (
                     <img
@@ -517,10 +437,7 @@ export function ProfilePage() {
                   )}
                 </button>
               </div>
-            </div>
 
-            {/* Info - centered below avatar */}
-            <div className="relative flex flex-col items-center text-center">
               {editing ? (
                 <div className="mb-2 w-full flex justify-center px-2">
                   <input
@@ -544,8 +461,8 @@ export function ProfilePage() {
         {cropFile && (
           <ImageCropModal
             file={cropFile}
-            aspect={cropTarget === "cover" ? 3 : 1}
-            shape={cropTarget === "avatar" ? "circle" : "rect"}
+            aspect={1}
+            shape="circle"
             onCancel={handleCropCancel}
             onCropped={handleCropped}
           />
@@ -587,11 +504,15 @@ export function ProfilePage() {
             {/* Change Password */}
             <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm">
               <CardContent className="p-4 sm:p-6 lg:p-8">
-                <div className="flex items-center gap-2.5 sm:gap-3 mb-5 sm:mb-6">
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordForm((v) => !v)}
+                  className="w-full flex items-center gap-2.5 sm:gap-3"
+                >
                   <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center shrink-0">
                     <Lock size={18} className="text-[#B348FE] sm:w-5 sm:h-5" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1 text-right">
                     <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 dark:text-white">
                       تغيير كلمة المرور
                     </h2>
@@ -599,102 +520,112 @@ export function ProfilePage() {
                       اختر كلمة مرور جديدة لحسابك
                     </p>
                   </div>
-                </div>
+                  <ChevronDown
+                    size={20}
+                    className={`text-gray-400 shrink-0 transition-transform duration-300 ${
+                      showPasswordForm ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
 
-                {passwordSuccess && (
-                  <div className="bg-emerald-50 dark:bg-emerald-950/30 border-2 border-emerald-200 dark:border-emerald-900 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 mb-4 sm:mb-5 flex items-center gap-2.5 sm:gap-3">
-                    <CheckCircle size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0 sm:w-5 sm:h-5" />
-                    <p className="text-emerald-700 dark:text-emerald-400 font-bold text-xs sm:text-sm">
-                      تم تغيير كلمة المرور بنجاح!
-                    </p>
-                  </div>
-                )}
-
-                <div className="space-y-3.5 sm:space-y-4">
-                  {/* New Password */}
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2.5 sm:gap-3 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 focus-within:border-[#B348FE] transition-colors">
-                      <Lock size={15} className="text-[#B348FE] flex-shrink-0 sm:w-4 sm:h-4" />
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="كلمة المرور الجديدة"
-                        value={newPassword}
-                        onChange={(e) => {
-                          setNewPassword(e.target.value);
-                          setPasswordError("");
-                        }}
-                        dir="ltr"
-                        className="flex-1 min-w-0 bg-transparent border-0 outline-none text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="text-gray-400 hover:text-gray-600 flex-shrink-0"
-                      >
-                        {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                      </button>
-                    </div>
-
-                    {strength && (
-                      <div className="mt-1.5">
-                        <div className="h-1 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                          <div
-                            className="h-full rounded-full transition-all duration-300"
-                            style={{ background: strength.color, width: strength.width }}
-                          />
-                        </div>
-                        <p className="text-[10px] sm:text-[11px] text-gray-400 mt-1">
-                          قوة كلمة المرور:{" "}
-                          <span style={{ color: strength.color, fontWeight: 700 }}>
-                            {strength.label}
-                          </span>
+                {showPasswordForm && (
+                  <div className="mt-5 sm:mt-6">
+                    {passwordSuccess && (
+                      <div className="bg-emerald-50 dark:bg-emerald-950/30 border-2 border-emerald-200 dark:border-emerald-900 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 mb-4 sm:mb-5 flex items-center gap-2.5 sm:gap-3">
+                        <CheckCircle size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0 sm:w-5 sm:h-5" />
+                        <p className="text-emerald-700 dark:text-emerald-400 font-bold text-xs sm:text-sm">
+                          تم تغيير كلمة المرور بنجاح!
                         </p>
                       </div>
                     )}
+
+                    <div className="space-y-3.5 sm:space-y-4">
+                      {/* New Password */}
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2.5 sm:gap-3 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 focus-within:border-[#B348FE] transition-colors">
+                          <Lock size={15} className="text-[#B348FE] flex-shrink-0 sm:w-4 sm:h-4" />
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="كلمة المرور الجديدة"
+                            value={newPassword}
+                            onChange={(e) => {
+                              setNewPassword(e.target.value);
+                              setPasswordError("");
+                            }}
+                            dir="ltr"
+                            className="flex-1 min-w-0 bg-transparent border-0 outline-none text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                          >
+                            {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                          </button>
+                        </div>
+
+                        {strength && (
+                          <div className="mt-1.5">
+                            <div className="h-1 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+                              <div
+                                className="h-full rounded-full transition-all duration-300"
+                                style={{ background: strength.color, width: strength.width }}
+                              />
+                            </div>
+                            <p className="text-[10px] sm:text-[11px] text-gray-400 mt-1">
+                              قوة كلمة المرور:{" "}
+                              <span style={{ color: strength.color, fontWeight: 700 }}>
+                                {strength.label}
+                              </span>
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Confirm Password */}
+                      <div className="flex items-center gap-2.5 sm:gap-3 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 focus-within:border-[#B348FE] transition-colors">
+                        <Lock size={15} className="text-[#B348FE] flex-shrink-0 sm:w-4 sm:h-4" />
+                        <input
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="تأكيد كلمة المرور"
+                          value={confirmPassword}
+                          onChange={(e) => {
+                            setConfirmPassword(e.target.value);
+                            setPasswordError("");
+                          }}
+                          dir="ltr"
+                          className="flex-1 min-w-0 bg-transparent border-0 outline-none text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                        >
+                          {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                        </button>
+                      </div>
+
+                      {passwordError && (
+                        <p className="text-[11px] sm:text-xs text-red-500 font-bold break-words">{passwordError}</p>
+                      )}
+
+                      <Button
+                        onClick={handleChangePassword}
+                        disabled={passwordLoading || !newPassword || !confirmPassword}
+                        className="w-full bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl sm:rounded-2xl h-11 sm:h-12 font-black disabled:opacity-60 text-sm"
+                      >
+                        {passwordLoading ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <Loader2 size={17} className="animate-spin" />
+                            جاري الحفظ...
+                          </span>
+                        ) : (
+                          "حفظ كلمة المرور الجديدة"
+                        )}
+                      </Button>
+                    </div>
                   </div>
-
-                  {/* Confirm Password */}
-                  <div className="flex items-center gap-2.5 sm:gap-3 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 focus-within:border-[#B348FE] transition-colors">
-                    <Lock size={15} className="text-[#B348FE] flex-shrink-0 sm:w-4 sm:h-4" />
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="تأكيد كلمة المرور"
-                      value={confirmPassword}
-                      onChange={(e) => {
-                        setConfirmPassword(e.target.value);
-                        setPasswordError("");
-                      }}
-                      dir="ltr"
-                      className="flex-1 min-w-0 bg-transparent border-0 outline-none text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="text-gray-400 hover:text-gray-600 flex-shrink-0"
-                    >
-                      {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                    </button>
-                  </div>
-
-                  {passwordError && (
-                    <p className="text-[11px] sm:text-xs text-red-500 font-bold break-words">{passwordError}</p>
-                  )}
-
-                  <Button
-                    onClick={handleChangePassword}
-                    disabled={passwordLoading || !newPassword || !confirmPassword}
-                    className="w-full bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl sm:rounded-2xl h-11 sm:h-12 font-black disabled:opacity-60 text-sm"
-                  >
-                    {passwordLoading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <Loader2 size={17} className="animate-spin" />
-                        جاري الحفظ...
-                      </span>
-                    ) : (
-                      "حفظ كلمة المرور الجديدة"
-                    )}
-                  </Button>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>
