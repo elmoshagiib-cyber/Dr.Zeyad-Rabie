@@ -911,10 +911,9 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             <Button
               variant="outline"
               onClick={() => navigate(-1)}
-              className="flex items-center gap-1.5 h-9 sm:h-10 rounded-xl bg-white/10 backdrop-blur border border-white/10 px-3 sm:px-4 text-xs sm:text-sm font-bold text-white transition-colors hover:bg-white/20 flex-shrink-0"
+              className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-white/10 backdrop-blur border border-white/10 text-white transition-colors hover:bg-white/20 flex-shrink-0 p-0"
             >
-              <ArrowRight size={16} />
-              <span className="hidden sm:inline">رجوع</span>
+              <ArrowRight size={18} />
             </Button>
 
             <div className="flex items-center gap-3 min-w-0">

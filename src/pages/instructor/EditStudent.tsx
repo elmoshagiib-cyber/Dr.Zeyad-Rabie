@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
 import { Card, CardContent } from "../../components/ui/Card";
@@ -203,25 +204,34 @@ export function EditStudent() {
 
       <main className="flex-1 overflow-y-auto">
         {/* Header */}
-        <div className="bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] p-6 lg:p-8 text-white relative overflow-hidden">
-          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
-          <div className="absolute -right-24 bottom-0 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
-          
-          <div className="relative z-10 flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-black mb-2">تعديل بيانات الطالب</h1>
-              <p className="text-white/90 text-sm lg:text-base">تعديل المعلومات الشخصية والأكاديمية</p>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-4 sm:mx-6 mt-4 sm:mt-6"
+        >
+          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+
+          <div className="relative z-10 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
+                <User className="text-amber-400" size={20} />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-black">تعديل بيانات الطالب</h1>
+                <p className="text-white/60 text-xs sm:text-sm mt-0.5">تعديل المعلومات الشخصية والأكاديمية</p>
+              </div>
             </div>
+
             <Button
               onClick={() => navigate(`/instructor/students/${id}`)}
-              variant="outline"
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-xl"
+              className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-white/10 backdrop-blur border border-white/10 text-white transition-colors hover:bg-white/20 flex-shrink-0 p-0"
             >
-              <ArrowRight size={18} className="ml-2" />
-              رجوع للتفاصيل
+              <ArrowRight size={18} />
             </Button>
           </div>
-        </div>
+        </motion.div>
 
         <div className="p-4 lg:p-6 space-y-6 max-w-5xl mx-auto">
           {/* Profile Header with Avatar */}
@@ -426,72 +436,6 @@ export function EditStudent() {
 
             {/* Read-only Fields */}
             <div className="space-y-6">
-              <Card className="bg-gray-50 dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-[#1A1A1A] flex items-center justify-center">
-                      <Activity className="text-gray-500" size={20} />
-                    </div>
-                    <h3 className="text-lg font-black text-gray-900 dark:text-white">إحصائيات غير قابلة للتعديل</h3>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="bg-white dark:bg-[#111111] rounded-2xl p-4 border border-gray-200 dark:border-[#2A2A2A]">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Calendar size={16} className="text-gray-400" />
-                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400">تاريخ التسجيل</span>
-                      </div>
-                      <p className="font-bold text-gray-900 dark:text-white text-sm">
-                        {student?.created_at ? new Date(student.created_at).toLocaleString("ar-EG") : "-"}
-                      </p>
-                    </div>
-
-                    <div className="bg-white dark:bg-[#111111] rounded-2xl p-4 border border-gray-200 dark:border-[#2A2A2A]">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Activity size={16} className="text-gray-400" />
-                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400">آخر دخول</span>
-                      </div>
-                      <p className="font-bold text-gray-900 dark:text-white text-sm">
-                        {student?.last_login ? new Date(student.last_login).toLocaleString("ar-EG") : "-"}
-                      </p>
-                    </div>
-
-                    <div className="bg-white dark:bg-[#111111] rounded-2xl p-4 border border-gray-200 dark:border-[#2A2A2A]">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Percent size={16} className="text-gray-400" />
-                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400">نسبة الحضور</span>
-                      </div>
-                      <p className="font-bold text-gray-900 dark:text-white text-sm">
-                        {student?.attendance_percentage || 0}%
-                      </p>
-                    </div>
-
-                    <div className="bg-white dark:bg-[#111111] rounded-2xl p-4 border border-gray-200 dark:border-[#2A2A2A]">
-                      <div className="flex items-center gap-2 mb-1">
-                        <CheckCircle2 size={16} className="text-gray-400" />
-                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400">حالة الاشتراك</span>
-                      </div>
-                      <p className="font-bold text-gray-900 dark:text-white text-sm">
-                        {student?.subscription_status || "-"}
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-white dark:bg-[#111111] rounded-2xl p-3 border border-gray-200 dark:border-[#2A2A2A] text-center">
-                        <BookOpen size={16} className="mx-auto text-gray-400 mb-1" />
-                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 block">المحاضرات</span>
-                        <span className="font-black text-[#B348FE]">{student?.watched_lessons || 0}/{student?.total_lessons || 0}</span>
-                      </div>
-                      <div className="bg-white dark:bg-[#111111] rounded-2xl p-3 border border-gray-200 dark:border-[#2A2A2A] text-center">
-                        <FileText size={16} className="mx-auto text-gray-400 mb-1" />
-                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 block">الواجبات</span>
-                        <span className="font-black text-emerald-600">{student?.completed_homework || 0}/{student?.total_homework || 0}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Save Button */}
               <Button
                 onClick={handleSave}
