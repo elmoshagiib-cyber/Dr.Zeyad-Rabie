@@ -244,7 +244,6 @@ export function ExamsPage() {
                           <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">المحلولة</th>
                           <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">الصحيحة</th>
                           <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">الدرجة</th>
-                          <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">النتيجة</th>
                           <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">وقت البدء</th>
                           <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">وقت الانتهاء</th>
                         </tr>
@@ -271,17 +270,7 @@ export function ExamsPage() {
                                 {a.correct_answers ?? "-"}
                               </td>
                               <td className="px-3 sm:px-4 py-2.5 sm:py-3 font-bold text-gray-900 dark:text-white">{a.score ?? "-"}</td>
-                              <td className="px-3 sm:px-4 py-2.5 sm:py-3">
-                                <span
-                                  className={`px-2 py-1 rounded-lg text-[10px] sm:text-xs font-black whitespace-nowrap ${
-                                    a.passed
-                                      ? "bg-[#F6EEFF] text-[#B348FE] dark:bg-[#2B103D] dark:text-[#B348FE]"
-                                      : "bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400"
-                                  }`}
-                                >
-                                  {a.passed ? "ناجح" : "راسب"}
-                                </span>
-                              </td>
+                              
                               <td className="px-3 sm:px-4 py-2.5 sm:py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
                                 {a.started_at ? new Date(a.started_at).toLocaleString("ar-EG") : "-"}
                               </td>
