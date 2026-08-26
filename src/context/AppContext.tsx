@@ -7,6 +7,7 @@ import {
 } from "react";
 import { supabase } from "../lib/supabase";
 import { FaWhatsapp } from "react-icons/fa";
+import { LogOut } from "lucide-react";
 
 export type UserRole = "student" | "instructor" | "admin";
 
@@ -88,14 +89,15 @@ useEffect(() => {
 
 const { data: student } = await supabase
   .from("students")
-  .select("session_token, is_blocked")
+  .select("is_blocked")
   .eq("auth_id", session.user.id)
   .single();
 
-if (
-  student &&
-  student.session_token !== savedToken
-) {
+const { data: sessionValid } = await supabase.rpc("is_session_current", {
+  p_session_token: savedToken,
+});
+
+if (savedToken && sessionValid === false) {
   await supabase.auth.signOut();
 
   localStorage.removeItem("user");
@@ -127,13 +129,17 @@ const interval = setInterval(async () => {
 
   const { data: student } = await supabase
     .from("students")
-    .select("session_token, is_blocked")
+    .select("is_blocked")
     .eq("auth_id", session.user.id)
     .single();
 
   if (!student) return;
 
-if (student.session_token !== savedToken) {
+  const { data: sessionValid } = await supabase.rpc("is_session_current", {
+    p_session_token: savedToken,
+  });
+
+if (sessionValid === false) {
     await supabase.auth.signOut();
 
     localStorage.clear();
@@ -194,7 +200,7 @@ const logout = async () => {
         >
           <div className="w-full max-w-md rounded-[28px] bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] shadow-2xl p-8 text-center">
             <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-950/30">
-              <span className="text-4xl">📱</span>
+              <LogOut className="text-amber-500" size={32} />
             </div>
 
             <h2 className="text-xl font-black text-gray-900 dark:text-white">
