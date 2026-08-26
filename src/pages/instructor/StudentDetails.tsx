@@ -908,14 +908,6 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
           <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-blue-500/10 blur-[100px]" />
 
           <div className="relative z-10 flex items-center justify-between gap-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate(-1)}
-              className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-white/10 backdrop-blur border border-white/10 text-white transition-colors hover:bg-white/20 flex-shrink-0 p-0"
-            >
-              <ArrowRight size={18} />
-            </Button>
-
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center text-xl font-black overflow-hidden flex-shrink-0 relative">
                 {student.avatar_url ? (
