@@ -142,64 +142,6 @@ export function HomeworkPage() {
             </p>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-4 sm:p-6 lg:p-7">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 truncate">
-                      تم التسليم
-                    </p>
-                    <p className="text-2xl sm:text-4xl lg:text-5xl font-black text-[#B348FE]">{submitted}</p>
-                  </div>
-                  <div className="bg-[#F6EEFF] dark:bg-[#2B103D] p-2.5 sm:p-4 rounded-xl sm:rounded-2xl shrink-0">
-                    <CheckCircle className="text-[#B348FE] w-5 h-5 sm:w-8 sm:h-8" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-4 sm:p-6 lg:p-7">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 truncate">
-                      قيد الانتظار
-                    </p>
-                    <p className="text-2xl sm:text-4xl lg:text-5xl font-black text-amber-600">{pending}</p>
-                  </div>
-                  <div className="bg-amber-50 dark:bg-amber-950/30 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl shrink-0">
-                    <Clock className="text-amber-600 w-5 h-5 sm:w-8 sm:h-8" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-lg transition-all duration-300 col-span-2 lg:col-span-1">
-              <CardContent className="p-4 sm:p-6 lg:p-7">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 truncate">
-                      معدل الدرجات
-                    </p>
-                    <p className="text-2xl sm:text-4xl lg:text-5xl font-black text-[#B348FE]">
-                      {averageGrade !== null ? `${averageGrade}%` : "-"}
-                    </p>
-                    {gradedHomeworks.length > 0 && (
-                      <p className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        بناءً على {gradedHomeworks.length} واجب مُصحح
-                      </p>
-                    )}
-                  </div>
-                  <div className="bg-[#F6EEFF] dark:bg-[#2B103D] p-2.5 sm:p-4 rounded-xl sm:rounded-2xl shrink-0">
-                    <Award className="text-[#B348FE] w-5 h-5 sm:w-8 sm:h-8" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Loading */}
           {loading ? (
             <div className="flex items-center justify-center py-16 sm:py-20">
