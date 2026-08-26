@@ -280,14 +280,14 @@ export function HomeworkPage() {
           </Card>
         </div>
 
-        {/* Homework List */}
-        <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+        {/* Homework Table */}
+        <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-16 sm:py-20">
               <div className="w-9 h-9 sm:w-10 sm:h-10 border-4 border-[#B348FE]/20 border-t-[#B348FE] rounded-full animate-spin" />
             </div>
           ) : homeworks.length === 0 ? (
-            <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl p-8 sm:p-10 text-center">
+            <div className="p-8 sm:p-10 text-center">
               <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={40} />
               <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-2">
                 لا توجد واجبات
@@ -297,188 +297,105 @@ export function HomeworkPage() {
               </p>
             </div>
           ) : (
-            homeworks.map((hw) => {
-              const status = getHomeworkStatus(hw);
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs sm:text-sm">
+                <thead>
+                  <tr className="bg-gray-50 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400">
+                    <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">#</th>
+                    <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">اسم الواجب</th>
+                    <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">الدرجة</th>
+                    <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">النسبة</th>
+                    <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">الحالة</th>
+                    <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">تاريخ التسليم</th>
+                    <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">الملف</th>
+                    <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">إجراء</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {homeworks.map((hw, idx) => {
+                    const status = getHomeworkStatus(hw);
+                    const hasGrade =
+                      hw.submission?.grade !== null && hw.submission?.grade !== undefined;
+                    const total = hw.total_score || 100;
+                    const percent = hasGrade ? Math.round((hw.submission.grade / total) * 100) : null;
 
-              return (
-                <Card
-                  key={hw.id}
-                  className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-xl hover:border-[#B348FE] transition-all duration-300 overflow-hidden"
-                >
-                  <CardContent className="p-4 sm:p-6 lg:p-8">
-                    <div className="space-y-4 sm:space-y-6">
-                      {/* Header Section */}
-                      <div className="flex flex-col gap-3 sm:gap-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <h3 className="font-black text-gray-900 dark:text-white text-base sm:text-xl lg:text-2xl leading-snug flex-1">
-                            {hw.title}
-                          </h3>
-
+                    return (
+                      <tr key={hw.id} className="border-t border-gray-100 dark:border-[#2A2A2A]">
+                        <td className="px-3 sm:px-4 py-2.5 sm:py-3 font-bold text-gray-900 dark:text-white">
+                          {idx + 1}
+                        </td>
+                        <td className="px-3 sm:px-4 py-2.5 sm:py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">
+                          {hw.title}
+                        </td>
+                        <td className="px-3 sm:px-4 py-2.5 sm:py-3 font-bold text-gray-900 dark:text-white">
+                          {hasGrade ? `${hw.submission.grade} / ${total}` : "-"}
+                        </td>
+                        <td className="px-3 sm:px-4 py-2.5 sm:py-3">
+                          {hasGrade ? (
+                            <span
+                              className={`font-black ${
+                                percent! >= 80
+                                  ? "text-emerald-600"
+                                  : percent! >= 50
+                                  ? "text-amber-600"
+                                  : "text-red-600"
+                              }`}
+                            >
+                              {percent}%
+                            </span>
+                          ) : (
+                            "-"
+                          )}
+                        </td>
+                        <td className="px-3 sm:px-4 py-2.5 sm:py-3">
                           <span
-                            className={`
-                              px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-black whitespace-nowrap shrink-0 border
-                              ${
-                                status === "not_submitted"
-                                  ? "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900"
-                                  : status === "submitted"
-                                  ? "bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] border-[#EAD8FF] dark:border-[#2A2A2A]"
-                                  : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900"
-                              }
-                            `}
+                            className={`px-2 py-1 rounded-lg text-[10px] sm:text-xs font-black whitespace-nowrap border ${
+                              status === "not_submitted"
+                                ? "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900"
+                                : status === "submitted"
+                                ? "bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] border-[#EAD8FF] dark:border-[#2A2A2A]"
+                                : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900"
+                            }`}
                           >
                             {status === "not_submitted" && "لم يتم التسليم"}
                             {status === "submitted" && "تم التسليم"}
                             {status === "corrected" && "تم التصحيح"}
                           </span>
-                        </div>
-
-                        {hw.description && (
-                          <p className="text-xs sm:text-sm lg:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
-                            {hw.description}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Homework Attachments */}
-                      {(hw.attachment_pdf || hw.attachment_image) && (
-                        <div className="bg-[#F6EEFF] dark:bg-[#1A1A1A] border border-[#EAD8FF] dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                            <div className="flex items-center gap-2.5 sm:gap-3">
-                              <div className="bg-[#B348FE] bg-opacity-10 p-2 sm:p-3 rounded-lg sm:rounded-xl shrink-0">
-                                <FileText className="text-[#B348FE] w-4 h-4 sm:w-5 sm:h-5" />
-                              </div>
-                              <p className="font-black text-gray-900 dark:text-white text-sm sm:text-base">
-                                ملفات الواجب
-                              </p>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2 sm:gap-3">
-                              {hw.attachment_pdf && (
-                                <a href={hw.attachment_pdf} target="_blank" rel="noreferrer" className="flex-1 sm:flex-none">
-                                  <Button size="sm" variant="outline" className="font-bold w-full sm:w-auto text-xs sm:text-sm">
-                                    <Eye size={15} />
-                                    عرض PDF
-                                  </Button>
-                                </a>
-                              )}
-
-                              {hw.attachment_image && (
-                                <a href={hw.attachment_image} target="_blank" rel="noreferrer" className="flex-1 sm:flex-none">
-                                  <Button size="sm" className="bg-[#B348FE] hover:bg-[#9E2FFF] font-bold w-full sm:w-auto text-xs sm:text-sm">
-                                    <Eye size={15} />
-                                    عرض الصورة
-                                  </Button>
-                                </a>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Grade Display */}
-                      {status === "corrected" &&
-                        hw.submission?.grade !== null &&
-                        hw.submission?.grade !== undefined && (
-                          <div className="bg-emerald-50 dark:bg-emerald-950/20 border-2 border-emerald-200 dark:border-emerald-900 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6">
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="flex items-center gap-3 sm:gap-4">
-                                <div className="bg-emerald-100 dark:bg-emerald-900/30 p-2.5 sm:p-3 rounded-lg sm:rounded-xl shrink-0">
-                                  <CheckCircle className="text-emerald-600 dark:text-emerald-500 w-5 h-5 sm:w-6 sm:h-6" />
-                                </div>
-                                <p className="font-black text-gray-900 dark:text-white text-sm sm:text-base">
-                                  درجة الواجب
-                                </p>
-                              </div>
-                              <div className="text-left shrink-0">
-                                <p className="text-2xl sm:text-3xl lg:text-4xl font-black text-emerald-600 dark:text-emerald-500">
-                                  {hw.submission.grade}
-                                  {hw.total_score && (
-                                    <span className="text-base sm:text-xl lg:text-2xl text-gray-500 dark:text-gray-400 font-bold">
-                                      {" "}
-                                      / {hw.total_score}
-                                    </span>
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                      {/* Teacher Feedback */}
-                      {hw.submission?.feedback && (
-                        <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6">
-                          <div className="flex items-start gap-3 sm:gap-4">
-                            <div className="bg-[#F6EEFF] dark:bg-[#2B103D] p-2 sm:p-3 rounded-lg sm:rounded-xl flex-shrink-0">
-                              <FileText className="text-[#B348FE] w-4 h-4 sm:w-[22px] sm:h-[22px]" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-black text-gray-900 dark:text-white text-sm sm:text-base mb-1.5 sm:mb-2">
-                                ملاحظات المعلم
-                              </p>
-                              <p className="text-xs sm:text-sm lg:text-base text-gray-700 dark:text-gray-300 leading-relaxed break-words">
-                                {hw.submission.feedback}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Student Submission Display */}
-                      {hw.submission && (
-                        <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                              <div className="bg-gray-100 dark:bg-gray-800 p-2.5 sm:p-3 rounded-lg sm:rounded-xl shrink-0">
-                                <FileText className="text-gray-600 dark:text-gray-400 w-5 h-5 sm:w-6 sm:h-6" />
-                              </div>
-                              <div className="min-w-0">
-                                <p className="font-black text-gray-900 dark:text-white text-sm sm:text-base mb-0.5 sm:mb-1">
-                                  ملفك المرفوع
-                                </p>
-                                <p className="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 truncate">
-                                  {hw.submission.answer?.split("/").pop()}
-                                </p>
-                              </div>
-                            </div>
-                            <a href={hw.submission.answer} target="_blank" rel="noreferrer" className="shrink-0">
-                              <Button size="sm" variant="outline" className="font-bold w-full sm:w-auto text-xs sm:text-sm">
-                                <Eye size={15} />
-                                عرض الملف
-                              </Button>
+                        </td>
+                        <td className="px-3 sm:px-4 py-2.5 sm:py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                          {hw.submission?.submitted_at
+                            ? new Date(hw.submission.submitted_at).toLocaleString("ar-EG")
+                            : "-"}
+                        </td>
+                        <td className="px-3 sm:px-4 py-2.5 sm:py-3">
+                          {hw.submission?.answer ? (
+                            <a
+                              href={hw.submission.answer}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[#B348FE] hover:text-[#9E2FFF] font-bold text-xs underline whitespace-nowrap"
+                            >
+                              عرض الملف
                             </a>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Actions */}
-                      <div className="border-t border-gray-200 dark:border-[#2A2A2A] pt-4 sm:pt-6">
-                        <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
+                          ) : (
+                            <span className="text-gray-400 text-xs">-</span>
+                          )}
+                        </td>
+                        <td className="px-3 sm:px-4 py-2.5 sm:py-3">
                           <Button
                             size="sm"
-                            className="bg-[#B348FE] hover:bg-[#9E2FFF] font-bold w-full sm:w-auto text-sm"
-                            onClick={() => {
-                              navigate(`/dashboard/homework/${hw.course_item_id}`);
-                            }}
+                            className="bg-[#B348FE] hover:bg-[#9E2FFF] font-bold text-xs whitespace-nowrap"
+                            onClick={() => navigate(`/dashboard/homework/${hw.course_item_id}`)}
                           >
-                            <Eye size={16} />
                             فتح الواجب
                           </Button>
-
-                          {hw.submission?.answer && (
-                            <a href={hw.submission.answer} target="_blank" rel="noreferrer" className="w-full sm:w-auto">
-                              <Button size="sm" variant="outline" className="font-bold w-full sm:w-auto text-sm">
-                                <FileText size={16} />
-                                عرض الملف
-                              </Button>
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>
