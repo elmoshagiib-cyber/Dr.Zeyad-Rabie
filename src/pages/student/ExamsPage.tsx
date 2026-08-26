@@ -174,17 +174,6 @@ export function ExamsPage() {
                           <h2 className="text-base sm:text-xl lg:text-2xl font-black text-gray-900 dark:text-white break-words">
                             {exam.title}
                           </h2>
-                          {hasResult && (
-                            <span
-                              className={`inline-flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-black shrink-0 ${
-                                passed
-                                  ? "bg-[#F6EEFF] text-[#B348FE] dark:bg-[#2B103D] dark:text-[#B348FE]"
-                                  : "bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400"
-                              }`}
-                            >
-                              {passed ? "✓ ناجح" : "✕ راسب"}
-                            </span>
-                          )}
                         </div>
 
                         <p className="text-xs sm:text-sm lg:text-base text-gray-500 dark:text-gray-400">
@@ -205,40 +194,16 @@ export function ExamsPage() {
                         )}
                       </div>
 
-                      {/* Action / Score */}
+                      {/* Action */}
                       <div className="flex-shrink-0 flex items-center gap-3 sm:gap-4">
                         {hasResult ? (
-                          <>
-                            {/* Score Circle */}
-                            <div
-                              className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl border-4 flex flex-col items-center justify-center flex-shrink-0 ${
-                                passed
-                                  ? "border-[#B348FE] bg-[#F6EEFF] dark:bg-[#2B103D]"
-                                  : "border-rose-400 bg-rose-50 dark:bg-rose-950/20"
-                              }`}
-                            >
-                              <span
-                                className={`text-base sm:text-xl font-black ${
-                                  passed
-                                    ? "text-[#B348FE]"
-                                    : "text-rose-600 dark:text-rose-400"
-                                }`}
-                              >
-                                {exam.result.percentage}%
-                              </span>
-                              <span className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 font-bold mt-0.5">
-                                {exam.result.score} درجة
-                              </span>
-                            </div>
-
-                            <Button
-                              variant="outline"
-                              onClick={() => navigate(`/dashboard/exams/${exam.id}`)}
-                              className="flex-1 lg:flex-none lg:w-auto border-2 border-gray-200 dark:border-[#2A2A2A] text-gray-600 dark:text-gray-300 font-bold hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-all duration-300 text-xs sm:text-sm"
-                            >
-                              التفاصيل
-                            </Button>
-                          </>
+                          <Button
+                            variant="outline"
+                            onClick={() => navigate(`/dashboard/exams/${exam.id}`)}
+                            className="flex-1 lg:flex-none lg:w-auto border-2 border-gray-200 dark:border-[#2A2A2A] text-gray-600 dark:text-gray-300 font-bold hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-all duration-300 text-xs sm:text-sm"
+                          >
+                            التفاصيل
+                          </Button>
                         ) : (
                           <Button
                             onClick={() => navigate(`/dashboard/exams/${exam.id}`)}

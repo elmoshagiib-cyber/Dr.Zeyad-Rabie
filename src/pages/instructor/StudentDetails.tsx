@@ -97,6 +97,7 @@ interface ExamResult {
   completed_at?: string | null;
   submitted_at: string | null;
   exams: Exam | null;
+  courseTitle?: string;
 }
 
 interface HomeworkSubmission {
@@ -456,10 +457,42 @@ const totalLessons = courseLessons.length;
       .select(`*, exams (title)`)
       .eq("student_id", Number(id))
       .order("submitted_at", { ascending: false });
-    
-    if (data) {
-      setExamResults(data as ExamResult[]);
+
+    if (!data) return;
+
+    // هات أسماء الكورسات بتاعة كل امتحان عن طريق course_items
+    const examIds = data.map((r: any) => r.exam_id).filter(Boolean);
+
+    let courseTitleMap: Record<string, string> = {};
+
+    if (examIds.length > 0) {
+      const { data: itemsData } = await supabase
+        .from("course_items")
+        .select(`
+          exam_id,
+          section_id,
+          course_sections (
+            course_id,
+            courses ( title )
+          )
+        `)
+        .in("exam_id", examIds)
+        .eq("type", "quiz");
+
+      (itemsData || []).forEach((item: any) => {
+        const title = item.course_sections?.courses?.title;
+        if (item.exam_id && title) {
+          courseTitleMap[String(item.exam_id)] = title;
+        }
+      });
     }
+
+    const merged = data.map((r: any) => ({
+      ...r,
+      courseTitle: courseTitleMap[String(r.exam_id)] || "-",
+    }));
+
+    setExamResults(merged as ExamResult[]);
   };
 
   const loadHomeworkResults = async () => {
@@ -1567,6 +1600,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                         <tr className="bg-gray-50 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400">
                           <th className="text-right font-bold px-4 py-3 whitespace-nowrap">#</th>
                           <th className="text-right font-bold px-4 py-3 whitespace-nowrap">اسم الامتحان</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">الكورس</th>
                           <th className="text-right font-bold px-4 py-3 whitespace-nowrap">عدد الأسئلة</th>
                           <th className="text-right font-bold px-4 py-3 whitespace-nowrap">المحلولة</th>
                           <th className="text-right font-bold px-4 py-3 whitespace-nowrap">الصحيحة</th>
@@ -1586,6 +1620,9 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                               </td>
                               <td className="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                 {exam.exams?.title || `اختبار #${exam.exam_id}`}
+                              </td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                {exam.courseTitle || "-"}
                               </td>
                               <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
                                 {exam.total_questions ?? "-"}
