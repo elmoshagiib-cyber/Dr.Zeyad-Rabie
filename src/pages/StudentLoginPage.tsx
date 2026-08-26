@@ -326,7 +326,24 @@ const activeCount = sessionsData?.[0]?.active_count ?? 0;
 const deviceLimit = sessionsData?.[0]?.max_devices ?? 1;
 
 if (activeCount >= deviceLimit) {
-  // وصل للحد الأقصى — نوريله قائمة أجهزته ويختار أنهي واحد يطرده
+  // لو مسموحله بجهاز واحد بس، اطرد الجهاز القديم تلقائي من غير ما تسأله
+  if (deviceLimit === 1 && sessionsData && sessionsData.length === 1) {
+    const { error: kickError } = await supabase.rpc("kick_session", {
+      p_session_id: sessionsData[0].session_id,
+    });
+
+    if (kickError) {
+      setErrors({ password: "حدث خطأ أثناء تسجيل الخروج من الجهاز القديم" });
+      setLoading(false);
+      return;
+    }
+
+    await completeLogin(authData, student, phone);
+    setLoading(false);
+    return;
+  }
+
+  // لو مسموحله بأكتر من جهاز ووصل للحد الأقصى، نوريله قائمة أجهزته ويختار أنهي واحد يطرده
   setActiveSessions(sessionsData || []);
   setPendingLogin({ authData, student, phone });
   setShowDeviceLimitModal(true);
