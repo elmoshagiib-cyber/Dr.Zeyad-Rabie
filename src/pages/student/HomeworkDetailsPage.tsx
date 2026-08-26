@@ -35,7 +35,14 @@ export function HomeworkDetailsPage() {
 
     const { data: hw, error } = await supabase
       .from("homeworks")
-      .select("*")
+      .select(`
+        *,
+        course_sections (
+          id,
+          course_id,
+          courses ( id, title )
+        )
+      `)
       .eq("course_item_id", id)
       .single();
 
@@ -249,6 +256,12 @@ export function HomeworkDetailsPage() {
                 <h2 className="text-lg sm:text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2 sm:mb-3 leading-snug">
                   {homework.title}
                 </h2>
+
+                {homework.course_sections?.courses?.title && (
+                  <p className="text-xs sm:text-sm font-bold text-[#B348FE] mb-2">
+                    {homework.course_sections.courses.title}
+                  </p>
+                )}
 
                 {homework.description && (
                   <p className="mt-2 sm:mt-3 text-gray-600 dark:text-gray-400 leading-relaxed text-xs sm:text-sm lg:text-base">

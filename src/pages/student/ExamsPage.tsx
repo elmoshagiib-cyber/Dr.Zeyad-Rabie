@@ -47,6 +47,12 @@ export function ExamsPage() {
         .select(`
           id,
           title,
+          section_id,
+          course_sections (
+            id,
+            course_id,
+            courses ( id, title )
+          ),
           exams(
             id,
             title,
@@ -83,6 +89,7 @@ export function ExamsPage() {
           return {
             ...exam,
             lessonTitle: item.title,
+            courseTitle: item.course_sections?.courses?.title || "-",
             result,
           };
         })
@@ -95,6 +102,7 @@ export function ExamsPage() {
         return {
           ...r,
           examTitle: examMatch?.title || `امتحان #${r.exam_id}`,
+          courseTitle: examMatch?.courseTitle || "-",
           totalQ: examMatch?.exam_questions?.length ?? r.total_questions ?? 0,
         };
       });
@@ -180,7 +188,7 @@ export function ExamsPage() {
                         </div>
 
                         <p className="text-xs sm:text-sm lg:text-base text-gray-500 dark:text-gray-400">
-                          {exam.lessonTitle}
+                          {exam.courseTitle} • {exam.lessonTitle}
                         </p>
 
                         <div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400">
@@ -266,6 +274,7 @@ export function ExamsPage() {
                         <tr className="bg-gray-50 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400">
                           <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">#</th>
                           <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">اسم الامتحان</th>
+                          <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">الكورس</th>
                           <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">عدد الأسئلة</th>
                           <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">المحلولة</th>
                           <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">الصحيحة</th>
@@ -285,6 +294,9 @@ export function ExamsPage() {
                               </td>
                               <td className="px-3 sm:px-4 py-2.5 sm:py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                 {a.examTitle}
+                              </td>
+                              <td className="px-3 sm:px-4 py-2.5 sm:py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                {a.courseTitle}
                               </td>
                               <td className="px-3 sm:px-4 py-2.5 sm:py-3 text-gray-600 dark:text-gray-300">{a.totalQ}</td>
                               <td className="px-3 sm:px-4 py-2.5 sm:py-3 text-gray-600 dark:text-gray-300">
