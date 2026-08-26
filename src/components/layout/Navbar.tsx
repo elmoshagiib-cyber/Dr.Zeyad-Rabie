@@ -363,15 +363,12 @@ duration-300
 <AnimatePresence>
   {isScrolled && (
     <motion.div
-      initial={{ scaleY: 0, opacity: 0 }}
-      animate={{ scaleY: 1, opacity: 1 }}
-      exit={{ scaleY: 0, opacity: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={{
         duration: 0.25,
         ease: [0.4, 0, 0.2, 1],
-      }}
-      style={{
-        transformOrigin: "top",
       }}
       className="
         absolute
@@ -379,6 +376,7 @@ duration-300
         left-0
         w-full
         h-[3px]
+        bg-[#B348FE]/15
         pointer-events-none
       "
     >
