@@ -185,7 +185,7 @@ useEffect(() => {
       ? "rounded-none w-[280px] sm:w-[300px]"
       : "xl:rounded-2xl",
 
-    type !== "student" && collapsed && !mobileOpen
+    collapsed && !mobileOpen
       ? "xl:w-[80px]"
       : "w-[280px] sm:w-[300px]"
   )}
