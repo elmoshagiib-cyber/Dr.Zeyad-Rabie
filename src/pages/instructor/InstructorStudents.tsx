@@ -65,7 +65,13 @@ export function InstructorStudents() {
 
   const toggleStudentStatus = async (id: number, currentStatus: string) => {
     const newStatus = currentStatus === "نشط" ? "موقوف" : "نشط";
-    await supabase.from("students").update({ status: newStatus }).eq("id", id);
+    await supabase
+      .from("students")
+      .update({
+        status: newStatus,
+        is_blocked: newStatus === "موقوف",
+      })
+      .eq("id", id);
     loadStudents();
   };
 
