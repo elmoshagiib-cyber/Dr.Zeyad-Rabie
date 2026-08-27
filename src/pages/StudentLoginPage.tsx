@@ -84,10 +84,6 @@ const [errors, setErrors] = useState<{
   password?: string;
 }>({});
 
-  const [showDeviceLimitModal, setShowDeviceLimitModal] = useState(false);
-  const [activeSessions, setActiveSessions] = useState<any[]>([]);
-  const [pendingLogin, setPendingLogin] = useState<any>(null);
-  const [kickingSessionId, setKickingSessionId] = useState<string | null>(null);
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotPhone, setForgotPhone] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
@@ -150,78 +146,6 @@ const { data: email, error: phoneError } = await supabase
   };
 
 
-
-  const completeLogin = async (authData: any, student: any, phone: string) => {
-    const sessionToken = crypto.randomUUID();
-    const deviceInfo = parseDeviceInfo();
-
-    const { error: createSessionError } = await supabase.rpc(
-      "create_my_session",
-      {
-        p_session_token: sessionToken,
-        p_device_type: deviceInfo.device_type,
-        p_device_name: deviceInfo.device_name,
-        p_os: deviceInfo.os,
-        p_browser: deviceInfo.browser,
-        p_user_agent: deviceInfo.user_agent,
-      }
-    );
-
-    if (createSessionError) {
-      console.error("CREATE SESSION ERROR:", createSessionError);
-    }
-
-    localStorage.setItem("session_token", sessionToken);
-
-    await supabase.rpc("reset_login_attempts", { p_phone: phone });
-
-    try {
-      await supabase
-        .from("students")
-        .update({
-          last_login: new Date().toISOString(),
-          device_name: `${deviceInfo.device_type} - ${deviceInfo.browser}`,
-        })
-        .eq("id", student.id);
-    } catch (sessionErr) {}
-
-    login({
-      id: authData.user.id,
-      studentId: student.id,
-      name: student.full_name,
-      role: "student",
-      grade: student.grade,
-      phone: student.phone,
-      governorate: student.governorate,
-      avatar_url: student.avatar_url,
-    });
-
-    setSuccess(true);
-    setTimeout(() => navigate("/"), 1200);
-  };
-
-  const handleKickAndLogin = async (sessionId: string) => {
-    if (!pendingLogin) return;
-    setKickingSessionId(sessionId);
-
-    const { error } = await supabase.rpc("kick_session", {
-      p_session_id: sessionId,
-    });
-
-    if (error) {
-      alert("حصل خطأ أثناء تسجيل الخروج من الجهاز");
-      setKickingSessionId(null);
-      return;
-    }
-
-    setShowDeviceLimitModal(false);
-    await completeLogin(
-      pendingLogin.authData,
-      pendingLogin.student,
-      pendingLogin.phone
-    );
-    setKickingSessionId(null);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -313,30 +237,58 @@ if (student.status !== "نشط") {
   return;
 }
 
-// تحقق من حد الأجهزة وتعامل معاه في الداتابيز مباشرة (atomic - أضمن)
-const { data: limitResult, error: limitError } = await supabase.rpc(
-  "handle_login_device_limit"
-);
+// نسجل جلسة جديدة — ده هيطرد أي جهاز تاني تلقائيًا (جهاز واحد بس مسموح)
+const sessionToken = crypto.randomUUID();
 
-if (limitError) {
-  console.error("DEVICE LIMIT CHECK ERROR:", limitError);
-  setErrors({ password: "حدث خطأ أثناء التحقق من الأجهزة" });
+const { error: sessionError } = await supabase.rpc("start_single_session", {
+  p_session_token: sessionToken,
+});
+
+if (sessionError) {
+  console.error("START SESSION ERROR:", sessionError);
+  setErrors({ password: "حدث خطأ أثناء تسجيل الدخول" });
   setLoading(false);
   return;
 }
 
-const action = limitResult?.[0]?.action;
-const sessions = limitResult?.[0]?.sessions ?? [];
+localStorage.setItem("session_token", sessionToken);
 
-if (action === "show_modal") {
-  setActiveSessions(sessions);
-  setPendingLogin({ authData, student, phone });
-  setShowDeviceLimitModal(true);
-  setLoading(false);
-  return;
-}
+await supabase.rpc("reset_login_attempts", { p_phone: phone });
 
-await completeLogin(authData, student, phone);
+try {
+  const deviceInfo = parseDeviceInfo();
+  await supabase.from("student_login_sessions").insert({
+    student_id: student.id,
+    device_type: deviceInfo.device_type,
+    device_name: deviceInfo.device_name,
+    os: deviceInfo.os,
+    browser: deviceInfo.browser,
+    user_agent: deviceInfo.user_agent,
+    last_activity_at: new Date().toISOString(),
+  });
+
+  await supabase
+    .from("students")
+    .update({
+      last_login: new Date().toISOString(),
+      device_name: `${deviceInfo.device_type} - ${deviceInfo.browser}`,
+    })
+    .eq("id", student.id);
+} catch (sessionErr) {}
+
+login({
+  id: authData.user.id,
+  studentId: student.id,
+  name: student.full_name,
+  role: "student",
+  grade: student.grade,
+  phone: student.phone,
+  governorate: student.governorate,
+  avatar_url: student.avatar_url,
+});
+
+setSuccess(true);
+setTimeout(() => navigate("/"), 1200);
     } catch (err: any) {
       console.error(err);
 
@@ -653,85 +605,6 @@ hover:text-[#9E2FFF]
         
         </div>
 
-
-        {/* ═══════════════ DEVICE LIMIT MODAL ═══════════════ */}
-        <AnimatePresence>
-          {showDeviceLimitModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md p-6"
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className={`
-                  w-full max-w-md rounded-[30px] p-6 sm:p-8
-                  ${isDark ? "bg-[#111111] border border-[#2A2A2A]" : "bg-white border border-gray-200"}
-                  shadow-[0_25px_70px_rgba(15,23,42,.15)]
-                `}
-                dir="rtl"
-              >
-                <div className="text-center mb-5">
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#F6EEFF] dark:bg-[#2B103D]">
-                    <Phone size={26} className="text-[#B348FE]" />
-                  </div>
-                  <h2 className={`text-lg font-black ${isDark ? "text-white" : "text-gray-900"}`}>
-                    وصلت للحد الأقصى من الأجهزة
-                  </h2>
-                  <p className={`mt-2 text-sm leading-6 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                    اختر جهاز عشان تسجل خروجه وتقدر تدخل من هنا بدله
-                  </p>
-                </div>
-
-                <div className="space-y-2.5 max-h-[280px] overflow-y-auto">
-                  {activeSessions.map((s) => (
-                    <div
-                      key={s.session_id}
-                      className={`flex items-center justify-between rounded-2xl p-3.5 border ${
-                        isDark ? "border-gray-700 bg-[#1A1A1A]" : "border-gray-200 bg-gray-50"
-                      }`}
-                    >
-                      <div className="min-w-0">
-                        <p className={`text-sm font-bold truncate ${isDark ? "text-white" : "text-gray-800"}`}>
-                          {s.device_type || "-"} • {s.browser || "-"}
-                        </p>
-                        <p className="text-xs text-gray-400 truncate">
-                          {s.os || "-"} • آخر نشاط:{" "}
-                          {s.last_activity_at
-                            ? new Date(s.last_activity_at).toLocaleString("ar-EG")
-                            : "-"}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => handleKickAndLogin(s.session_id)}
-                        disabled={kickingSessionId === s.session_id}
-                        className="flex-shrink-0 mr-2 px-3 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold disabled:opacity-60 transition-colors"
-                      >
-                        {kickingSessionId === s.session_id ? "جاري..." : "تسجيل خروج"}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowDeviceLimitModal(false);
-                    setPendingLogin(null);
-                  }}
-                  className={`mt-5 w-full py-2 text-sm font-semibold ${
-                    isDark ? "text-gray-400 hover:text-white" : "text-gray-500 hover:text-gray-800"
-                  } transition-colors`}
-                >
-                  إلغاء
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* ═══════════════ FORGOT PASSWORD MODAL ═══════════════ */}
         <AnimatePresence>

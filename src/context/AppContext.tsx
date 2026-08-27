@@ -89,15 +89,15 @@ useEffect(() => {
 
 const { data: student } = await supabase
   .from("students")
-  .select("is_blocked")
+  .select("session_token, is_blocked")
   .eq("auth_id", session.user.id)
   .single();
 
-const { data: sessionValid } = await supabase.rpc("is_session_current", {
-  p_session_token: savedToken,
-});
-
-if (savedToken && sessionValid === false) {
+if (
+  student &&
+  savedToken &&
+  student.session_token !== savedToken
+) {
   await supabase.auth.signOut();
 
   localStorage.removeItem("user");
@@ -129,17 +129,13 @@ const interval = setInterval(async () => {
 
   const { data: student } = await supabase
     .from("students")
-    .select("is_blocked")
+    .select("session_token, is_blocked")
     .eq("auth_id", session.user.id)
     .single();
 
   if (!student) return;
 
-  const { data: sessionValid } = await supabase.rpc("is_session_current", {
-    p_session_token: savedToken,
-  });
-
-if (sessionValid === false) {
+if (student.session_token !== savedToken) {
     await supabase.auth.signOut();
 
     localStorage.clear();

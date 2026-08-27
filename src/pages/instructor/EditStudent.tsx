@@ -43,7 +43,7 @@ export function EditStudent() {
   const [type, setType] = useState("");
   const [isActivated, setIsActivated] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
-  const [maxDevices, setMaxDevices] = useState(1);
+
 
   const grades = [
     "الصف الأول الإعدادي",
@@ -113,7 +113,7 @@ export function EditStudent() {
     setType(data.type || "");
     setIsActivated(data.is_activated || false);
     setIsBlocked(data.is_blocked || false);
-    setMaxDevices(data.max_devices || 1);
+
     setLoading(false);
   };
 
@@ -148,8 +148,7 @@ export function EditStudent() {
         governorate: governorate,
         type: type,
         is_activated: isActivated,
-        is_blocked: isBlocked,
-        max_devices: maxDevices
+        is_blocked: isBlocked
       })
       .eq("id", id);
 
@@ -407,20 +406,7 @@ export function EditStudent() {
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-bold text-gray-900 dark:text-white mb-2">
-                        عدد الأجهزة المسموح بها
-                      </label>
-                      <select
-                        value={maxDevices}
-                        onChange={(e) => setMaxDevices(Number(e.target.value))}
-                        className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-gray-50 dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
-                      >
-                        <option value={1}>جهاز واحد فقط</option>
-                        <option value={2}>جهازين</option>
-                        <option value={3}>3 أجهزة</option>
-                      </select>
-                    </div>
+
 
                     <div>
                       <label className="block text-sm font-bold text-gray-900 dark:text-white mb-2">
