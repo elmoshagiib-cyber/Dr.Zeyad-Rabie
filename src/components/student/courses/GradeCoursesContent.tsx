@@ -333,30 +333,33 @@ backdrop-blur-md backdrop-blur-sm text-white
 
   return (
     <div>
-      <p
-        style={
-          !isExpanded && isLongDescription
-            ? {
-                display: "-webkit-box",
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }
-            : undefined
-        }
-        className="
-          text-sm
-          sm:text-base
-          leading-7
-          sm:leading-8
-          text-slate-500
-          dark:text-slate-300
-          whitespace-pre-line
-          break-words
-        "
-      >
-        {description}
-      </p>
+      <div className="h-[84px] sm:h-[96px] overflow-hidden">
+        <p
+          style={
+            isExpanded
+              ? undefined
+              : {
+                  display: "-webkit-box",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }
+          }
+          className={`
+            text-sm
+            sm:text-base
+            leading-7
+            sm:leading-8
+            text-slate-500
+            dark:text-slate-300
+            whitespace-pre-line
+            break-words
+            ${isExpanded ? "h-full overflow-y-auto pr-1" : ""}
+          `}
+        >
+          {description}
+        </p>
+      </div>
 
       {isLongDescription && (
         <button
@@ -387,7 +390,40 @@ backdrop-blur-md backdrop-blur-sm text-white
     gap-3
   "
 >
-  {!hasAccess && (
+  {hasAccess ? (
+    <Button
+      disabled
+      className="
+        flex-1
+        h-12
+        rounded-2xl
+        font-black
+        text-[15px]
+        text-emerald-600
+        bg-emerald-50
+        dark:bg-emerald-500/10
+        dark:text-emerald-400
+        cursor-default
+        flex
+        items-center
+        justify-center
+        gap-1.5
+      "
+    >
+      <svg
+        className="w-4 h-4 shrink-0"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M20 6L9 17l-5-5" />
+      </svg>
+      تم الاشتراك
+    </Button>
+  ) : (
     <Button
       className="
         flex-1
