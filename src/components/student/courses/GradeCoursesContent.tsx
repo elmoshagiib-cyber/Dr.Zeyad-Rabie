@@ -593,11 +593,11 @@ text-3xl">
     grid
     grid-cols-1
     md:grid-cols-2
-    xl:grid-cols-3
-gap-x-20
-    sm:gap-x-24
-    lg:gap-x-28
-    xl:gap-x-32
+    lg:grid-cols-3
+gap-x-10
+    sm:gap-x-12
+    lg:gap-x-8
+    xl:gap-x-16
     gap-y-12
   "
 >
@@ -708,11 +708,11 @@ return (
   grid
   grid-cols-1
   sm:grid-cols-2
-  xl:grid-cols-3
-  gap-x-16
-  sm:gap-x-20
-  lg:gap-x-24
-  xl:gap-x-28
+  lg:grid-cols-3
+  gap-x-8
+  sm:gap-x-10
+  lg:gap-x-6
+  xl:gap-x-12
   gap-y-8
   sm:gap-y-10
 ">
