@@ -24,6 +24,7 @@ const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 const [subscriptionCode, setSubscriptionCode] = useState("");
 const [selectedCourse, setSelectedCourse] = useState<any>(null);
 const [myCourses, setMyCourses] = useState<string[]>([]);
+const [expandedId, setExpandedId] = useState<string | null>(null);
 
 useEffect(() => {
   loadCourses();
@@ -370,20 +371,56 @@ xl:-mx-4
 
 
 {/* الوصف */}
-<p
-  className="
-   text-sm
-sm:text-base
-leading-7
-sm:leading-8
-    text-slate-500
-    dark:text-slate-300
-    whitespace-pre-line
-    break-words
-  "
->
-  {course.description}
-</p>
+{(() => {
+  const description: string = course.description || "";
+  const isLongDescription = description.length > 150;
+  const isExpanded = expandedId === course.id;
+
+  return (
+    <div>
+      <p
+        style={
+          !isExpanded && isLongDescription
+            ? {
+                display: "-webkit-box",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }
+            : undefined
+        }
+        className="
+          text-sm
+          sm:text-base
+          leading-7
+          sm:leading-8
+          text-slate-500
+          dark:text-slate-300
+          whitespace-pre-line
+          break-words
+        "
+      >
+        {description}
+      </p>
+
+      {isLongDescription && (
+        <button
+          onClick={() =>
+            setExpandedId(isExpanded ? null : course.id)
+          }
+          className="
+            mt-2 inline-flex items-center gap-1
+            text-[13px] sm:text-sm font-bold text-[#B348FE]
+            hover:text-[#9E2FFF]
+            transition-colors
+          "
+        >
+          {isExpanded ? "أقل ▲" : "عرض تفاصيل ▼"}
+        </button>
+      )}
+    </div>
+  );
+})()}
 <div className="flex flex-col gap-3 items-start"></div>
 <div className="border-t border-slate-200 pt-5">
 {/* الأزرار */}
