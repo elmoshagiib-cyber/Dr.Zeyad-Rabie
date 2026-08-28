@@ -24,7 +24,10 @@ import {
   Award,
   TrendingUp,
   PlayCircle,
-  FileText
+  FileText,
+  Receipt,
+  MessageCircle,
+  Search
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
@@ -60,8 +63,37 @@ interface Student {
   created_at: string;
 }
 
-interface Course {
+// ============================================================
+// نظام الاشتراكات والمدفوعات — إعدادات الأسعار المركزية
+// ============================================================
+const SUBSCRIPTION_PRICING: Record<"online" | "center", number> = {
+  online: 220,
+  center: 30,
+};
+
+interface SubscriptionPayment {
   id: number;
+  student_id: number;
+  course_id: string;
+  invoice_number: string;
+  student_type: "online" | "center";
+  subscription_type: string;
+  amount: number;
+  payment_method: "vodafone_cash" | "instapay";
+  payer_phone: string | null;
+  payment_status: "pending" | "verified" | "rejected" | "cancelled";
+  payment_verified_at: string | null;
+  subscription_start_date: string;
+  subscription_end_date: string;
+  subscription_code: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  courseData?: Course;
+}
+
+interface Course {
+  id: string;
   title: string;
   grade: string;
   is_published: boolean;
@@ -71,8 +103,7 @@ interface Course {
 interface StudentCourse {
   id: number;
   student_id: number;
-  course_id: number;
-  active: boolean;
+  course_id: string;  active: boolean;
   subscription_type: string;
   created_at: string;
   expires_at: string | null;
@@ -186,8 +217,10 @@ interface CourseWithProgress extends StudentCourse {
   followupNote: string | null;
 }
 
+type SubPaymentsFilterType = "all" | "online" | "center" | "active" | "expired" | "verified" | "rejected";
+
 export function StudentDetails() {
-  const { id } = useParams();
+    const { id } = useParams();
   const navigate = useNavigate();
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
@@ -217,6 +250,34 @@ export function StudentDetails() {
   const [newPassword, setNewPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [copied, setCopied] = useState(false);
+
+  // ── سجل الاشتراكات والمدفوعات ──────────────────────────
+  const [subscriptionPayments, setSubscriptionPayments] = useState<SubscriptionPayment[]>([]);
+  const [subPaymentsPage, setSubPaymentsPage] = useState(1);
+  const subPaymentsPerPage = 5;
+ const [subPaymentsFilter, setSubPaymentsFilter] = useState<SubPaymentsFilterType>("all");
+    const [subPaymentsSearch, setSubPaymentsSearch] = useState("");
+  const [showAddSubscriptionModal, setShowAddSubscriptionModal] = useState(false);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<SubscriptionPayment | null>(null);
+  const [savingSubscription, setSavingSubscription] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [subForm, setSubForm] = useState({
+    course_id: "",
+    student_type: "online" as "online" | "center",
+    payment_method: "vodafone_cash" as "vodafone_cash" | "instapay",
+    amount: SUBSCRIPTION_PRICING.online,
+    payer_phone: "",
+    subscription_code: "",
+    start_date: new Date().toISOString().slice(0, 10),
+    end_date: (() => {
+      const d = new Date();
+      d.setMonth(d.getMonth() + 1);
+      return d.toISOString().slice(0, 10);
+    })(),
+    payment_status: "verified" as "pending" | "verified" | "rejected",
+    notes: "",
+  });
 
   const gradeMap: Record<string, string> = {
     "الصف الأول الثانوي": "sec_1",
@@ -311,6 +372,31 @@ export function StudentDetails() {
     }
 
     setLoginSessions((data as LoginSession[]) || []);
+  };
+
+  const loadSubscriptionPayments = async () => {
+    const { data, error } = await supabase
+      .from("subscription_payments")
+      .select("*")
+      .eq("student_id", Number(id))
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return;
+    }
+
+    const courseIds = [...new Set((data || []).map((p: any) => p.course_id))];
+
+    const { data: coursesData } = courseIds.length
+      ? await supabase.from("courses").select("*").in("id", courseIds)
+      : { data: [] as any[] };
+
+    const merged = (data || []).map((p: any) => ({
+      ...p,
+      courseData: coursesData?.find((c: any) => c.id === p.course_id),
+    }));
+
+    setSubscriptionPayments(merged as SubscriptionPayment[]);
   };
 
   
@@ -637,6 +723,235 @@ const addCourse = async () => {
     await loadStudent();
   };
 
+  const generateInvoiceNumber = async (): Promise<string> => {
+    const { data } = await supabase
+      .from("subscription_payments")
+      .select("invoice_number")
+      .order("id", { ascending: false })
+      .limit(1);
+
+    const last = data?.[0]?.invoice_number as string | undefined;
+    const lastNum = last ? parseInt(last.replace("INV-", ""), 10) : 0;
+    const nextNum = (isNaN(lastNum) ? 0 : lastNum) + 1;
+    return `INV-${String(nextNum).padStart(5, "0")}`;
+  };
+
+  const openAddSubscriptionModal = () => {
+    const start = new Date();
+    const end = new Date(start);
+    end.setMonth(end.getMonth() + 1);
+
+    setSubForm({
+      course_id: availableCourses[0] ? String(availableCourses[0].id) : "",
+      student_type: "online",
+      payment_method: "vodafone_cash",
+      amount: SUBSCRIPTION_PRICING.online,
+      payer_phone: "",
+      subscription_code: "",
+      start_date: start.toISOString().slice(0, 10),
+      end_date: end.toISOString().slice(0, 10),
+      payment_status: "verified",
+      notes: "",
+    });
+    setShowAddSubscriptionModal(true);
+  };
+
+  const saveSubscriptionPayment = async () => {
+    if (!subForm.course_id) {
+      alert("اختر الكورس أولاً");
+      return;
+    }
+    if (!subForm.amount || Number(subForm.amount) <= 0) {
+      alert("المبلغ يجب أن يكون أكبر من صفر");
+      return;
+    }
+    if (
+      (subForm.payment_method === "vodafone_cash" || subForm.payment_method === "instapay") &&
+      !subForm.payer_phone.trim()
+    ) {
+      alert("رقم الموبايل المحول منه مطلوب");
+      return;
+    }
+    if (subForm.payment_status === "verified" && !subForm.subscription_code.trim()) {
+      alert("كود الاشتراك مطلوب عند تأكيد الدفع");
+      return;
+    }
+    if (new Date(subForm.end_date) <= new Date(subForm.start_date)) {
+      alert("تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية");
+      return;
+    }
+
+    setSavingSubscription(true);
+
+    try {
+      if (subForm.payment_status === "verified" && subForm.subscription_code.trim()) {
+        const { data: existingCode } = await supabase
+          .from("subscription_payments")
+          .select("id")
+          .eq("subscription_code", subForm.subscription_code.trim())
+          .eq("payment_status", "verified")
+          .maybeSingle();
+
+        if (existingCode) {
+          alert("هذا الكود مستخدم بالفعل في اشتراك آخر");
+          setSavingSubscription(false);
+          return;
+        }
+      }
+
+      const invoiceNumber = await generateInvoiceNumber();
+
+      const payload = {
+        student_id: Number(id),
+        course_id: subForm.course_id,
+                invoice_number: invoiceNumber,
+        student_type: subForm.student_type,
+        subscription_type: "monthly",
+        amount: Number(subForm.amount),
+        payment_method: subForm.payment_method,
+        payer_phone: subForm.payer_phone.trim() || null,
+        payment_status: subForm.payment_status,
+        payment_verified_at: subForm.payment_status === "verified" ? new Date().toISOString() : null,
+        subscription_start_date: subForm.start_date,
+        subscription_end_date: subForm.end_date,
+        subscription_code: subForm.subscription_code.trim() || null,
+        notes: subForm.notes.trim() || null,
+      };
+
+      const { error: insertError } = await supabase.from("subscription_payments").insert(payload);
+
+      if (insertError) {
+        alert("حدث خطأ أثناء حفظ الاشتراك: " + insertError.message);
+        setSavingSubscription(false);
+        return;
+      }
+
+      if (subForm.payment_status === "verified") {
+        const { data: existingCourseSub } = await supabase
+          .from("student_courses")
+          .select("id")
+          .eq("student_id", Number(id))
+          .eq("course_id", subForm.course_id)
+          .maybeSingle();
+
+        if (existingCourseSub) {
+          await supabase
+            .from("student_courses")
+            .update({
+              active: true,
+              expires_at: new Date(subForm.end_date).toISOString(),
+              subscription_type: "كود اشتراك",
+            })
+            .eq("id", existingCourseSub.id);
+        } else {
+          await supabase.from("student_courses").insert({
+            student_id: Number(id),
+            course_id: subForm.course_id,
+                active: true,
+            subscription_type: "كود اشتراك",
+            expires_at: new Date(subForm.end_date).toISOString(),
+          });
+        }
+
+        await supabase
+          .from("students")
+          .update({
+            subscription_status: "active",
+            subscription_end_date: subForm.end_date,
+          })
+          .eq("id", id);
+      }
+
+      await Promise.all([loadSubscriptionPayments(), loadCourses(), loadStudent()]);
+
+      setShowAddSubscriptionModal(false);
+      setSavingSubscription(false);
+      alert("تم حفظ الاشتراك بنجاح ✅");
+    } catch (err: any) {
+      alert(err?.message || "حدث خطأ غير متوقع أثناء حفظ الاشتراك");
+      setSavingSubscription(false);
+    }
+  };
+
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const buildWhatsappMessage = (payment: SubscriptionPayment) => {
+    const courseName = payment.courseData?.title || "الكورس";
+    const typeLabel = payment.student_type === "online" ? "Online" : "Center";
+
+    return `تم تأكيد اشتراكك في منصة مستر زياد ربيع بنجاح.
+
+اسم الكورس: ${courseName}
+نوع الاشتراك: ${typeLabel}
+مدة الاشتراك: شهر
+قيمة الاشتراك: ${payment.amount} جنيه
+
+كود الاشتراك:
+${payment.subscription_code || "-"}
+
+تاريخ بداية الاشتراك:
+${new Date(payment.subscription_start_date).toLocaleDateString("ar-EG")}
+
+تاريخ انتهاء الاشتراك:
+${new Date(payment.subscription_end_date).toLocaleDateString("ar-EG")}
+
+طريقة التفعيل:
+ادخل إلى المنصة ثم اختر "تفعيل الاشتراك"، وبعدها اختر "${courseName}" وأدخل كود الاشتراك.
+
+في حالة وجود أي مشكلة أثناء التفعيل، تواصل معنا على WhatsApp.`;
+  };
+
+  const paymentStatusBadge = (status: string) => {
+    const map: Record<string, { label: string; className: string }> = {
+      pending: {
+        label: "قيد المراجعة",
+        className: "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400",
+      },
+      verified: {
+        label: "تم التأكيد",
+        className: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400",
+      },
+      rejected: {
+        label: "مرفوض",
+        className: "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400",
+      },
+      cancelled: {
+        label: "ملغي",
+        className: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
+      },
+    };
+    const conf = map[status] || map.pending;
+    return (
+      <span className={`px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap ${conf.className}`}>
+        {conf.label}
+      </span>
+    );
+  };
+
+  const subscriptionStatusBadge = (payment: SubscriptionPayment) => {
+    if (payment.payment_status !== "verified") {
+      return (
+        <span className="px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+          -
+        </span>
+      );
+    }
+    const isActive = new Date(payment.subscription_end_date) > new Date();
+    return isActive ? (
+      <span className="px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
+        نشط
+      </span>
+    ) : (
+      <span className="px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+        منتهي
+      </span>
+    );
+  };
+
 const sendAnnouncement = async () => {
   if (!student) return;
 
@@ -804,7 +1119,8 @@ const sendAnnouncement = async () => {
         loadExamResults(),
         loadHomeworkResults(),
         loadLessonProgress(),
-        loadLoginSessions()
+        loadLoginSessions(),
+        loadSubscriptionPayments()
       ]);
       setLoading(false);
     };
@@ -865,6 +1181,39 @@ const uniqueCourses = [...new Set(courses.map((c) => c.course_id))];
           new Date(d) > new Date(latest) ? d : latest
         )
       : null;
+
+  // ── ملخص الاشتراكات والمدفوعات ──────────────────────────
+  const verifiedPayments = subscriptionPayments.filter((p) => p.payment_status === "verified");
+  const latestVerifiedPayment = verifiedPayments.length
+    ? [...verifiedPayments].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )[0]
+    : null;
+  const daysRemaining = latestVerifiedPayment
+    ? Math.ceil(
+        (new Date(latestVerifiedPayment.subscription_end_date).getTime() - Date.now()) /
+          (1000 * 60 * 60 * 24)
+      )
+    : null;
+
+  const filteredSubPayments = subscriptionPayments.filter((p) => {
+    if (
+      subPaymentsSearch.trim() &&
+      !p.invoice_number.toLowerCase().includes(subPaymentsSearch.trim().toLowerCase())
+    ) {
+      return false;
+    }
+    if (subPaymentsFilter === "all") return true;
+    if (subPaymentsFilter === "online") return p.student_type === "online";
+    if (subPaymentsFilter === "center") return p.student_type === "center";
+    if (subPaymentsFilter === "verified") return p.payment_status === "verified";
+    if (subPaymentsFilter === "rejected") return p.payment_status === "rejected";
+    if (subPaymentsFilter === "active")
+      return p.payment_status === "verified" && new Date(p.subscription_end_date) > new Date();
+    if (subPaymentsFilter === "expired")
+      return p.payment_status === "verified" && new Date(p.subscription_end_date) <= new Date();
+    return true;
+  });
 
   // نحسب دلوقتي من بيانات coursesWithProgress الحقيقية بدل الأعمدة المخزنة القديمة
   const realTotalLessons = coursesWithProgress.reduce((sum, c) => sum + c.totalLessons, 0);
@@ -988,6 +1337,77 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   <Power size={18} className="ml-2" />
                   {student.is_blocked ? "تفعيل الطالب" : "إيقاف الطالب"}
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
+            <CardContent className="p-6 lg:p-8">
+              <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+                <div>
+                  <h2 className="text-xl lg:text-2xl font-black text-gray-900 dark:text-white">ملخص الاشتراك الحالي</h2>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">آخر عملية اشتراك مؤكدة لهذا الطالب</p>
+                </div>
+                <Button
+                  onClick={openAddSubscriptionModal}
+                  className="bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-bold h-11 px-5"
+                >
+                  <Plus size={16} className="ml-1.5" />
+                  إضافة اشتراك
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">حالة الاشتراك</p>
+                  <p className={`font-black text-sm ${realSubscriptionStatus === "active" ? "text-emerald-600" : "text-red-600"}`}>
+                    {realSubscriptionStatus === "active" ? "نشط" : "منتهي"}
+                  </p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">الكورس الحالي</p>
+                  <p className="font-bold text-gray-900 dark:text-white text-sm truncate">
+                    {latestVerifiedPayment?.courseData?.title || "-"}
+                  </p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">نوع الاشتراك</p>
+                  <p className="font-bold text-gray-900 dark:text-white text-sm">
+                    {latestVerifiedPayment ? (latestVerifiedPayment.student_type === "online" ? "Online" : "Center") : "-"}
+                  </p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">قيمة آخر اشتراك</p>
+                  <p className="font-bold text-gray-900 dark:text-white text-sm">
+                    {latestVerifiedPayment ? `${latestVerifiedPayment.amount} جنيه` : "-"}
+                  </p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">تاريخ البداية</p>
+                  <p className="font-bold text-gray-900 dark:text-white text-sm">
+                    {latestVerifiedPayment ? new Date(latestVerifiedPayment.subscription_start_date).toLocaleDateString("ar-EG") : "-"}
+                  </p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">تاريخ الانتهاء</p>
+                  <p className="font-bold text-gray-900 dark:text-white text-sm">
+                    {permanentActiveExists
+                      ? "اشتراك دائم"
+                      : latestVerifiedPayment
+                      ? new Date(latestVerifiedPayment.subscription_end_date).toLocaleDateString("ar-EG")
+                      : "-"}
+                  </p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">الأيام المتبقية</p>
+                  <p className={`font-black text-sm ${daysRemaining !== null && daysRemaining > 0 ? "text-emerald-600" : "text-red-600"}`}>
+                    {permanentActiveExists
+                      ? "اشتراك دائم"
+                      : daysRemaining !== null && daysRemaining > 0
+                      ? `${daysRemaining} يوم`
+                      : "منتهي"}
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -1384,6 +1804,135 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   <BookOpen className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />
                   <p className="text-gray-500 dark:text-gray-400 font-bold">لا توجد اشتراكات حالياً</p>
                 </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
+            <CardContent className="p-0">
+              <div className="p-6 lg:p-8 pb-4">
+                <div className="flex items-center justify-between flex-wrap gap-3 mb-2">
+                  <div>
+                    <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">سجل الاشتراكات والمدفوعات</h2>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">تاريخ كل عمليات الدفع والاشتراك لهذا الطالب</p>
+                  </div>
+                  <Button
+                    onClick={openAddSubscriptionModal}
+                    className="bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-bold h-11 px-5"
+                  >
+                    <Plus size={16} className="ml-1.5" />
+                    إضافة اشتراك
+                  </Button>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 mt-4">
+                  <div className="relative flex-1 min-w-[180px]">
+                    <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      value={subPaymentsSearch}
+                      onChange={(e) => { setSubPaymentsSearch(e.target.value); setSubPaymentsPage(1); }}
+                      placeholder="بحث برقم الفاتورة..."
+                      className="w-full h-10 pr-9 pl-3 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
+                    />
+                  </div>
+                  {[
+                    { key: "all", label: "الكل" },
+                    { key: "online", label: "Online" },
+                    { key: "center", label: "Center" },
+                    { key: "active", label: "نشط" },
+                    { key: "expired", label: "منتهي" },
+                    { key: "verified", label: "تم التأكيد" },
+                    { key: "rejected", label: "مرفوض" },
+                  ].map((f) => (
+                    <button
+                      key={f.key}
+                      onClick={() => { setSubPaymentsFilter(f.key as any); setSubPaymentsPage(1); }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
+                        subPaymentsFilter === f.key
+                          ? "bg-[#B348FE] text-white"
+                          : "bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#222]"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {filteredSubPayments.length === 0 ? (
+                <div className="py-16 text-center">
+                  <Receipt className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />
+                  <p className="text-gray-500 dark:text-gray-400 font-bold">لا توجد عمليات اشتراك مسجلة بعد</p>
+                </div>
+              ) : (
+                <>
+                  <div className="overflow-x-auto border-t border-gray-100 dark:border-[#2A2A2A]">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400">
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">رقم الفاتورة</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">الكورس</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">نوع الطالب</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">المبلغ</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">طريقة الدفع</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">تاريخ الاشتراك</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">تاريخ الانتهاء</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">حالة الدفع</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">حالة الاشتراك</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredSubPayments
+                          .slice((subPaymentsPage - 1) * subPaymentsPerPage, subPaymentsPage * subPaymentsPerPage)
+                          .map((p) => (
+                            <tr
+                              key={p.id}
+                              onClick={() => { setSelectedInvoice(p); setShowInvoiceModal(true); }}
+                              className="border-t border-gray-100 dark:border-[#2A2A2A] cursor-pointer hover:bg-[#FAF7FF] dark:hover:bg-[#171717] transition-colors"
+                            >
+                              <td className="px-4 py-3 font-black text-[#B348FE] whitespace-nowrap">{p.invoice_number}</td>
+                              <td className="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">{p.courseData?.title || "-"}</td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">{p.student_type === "online" ? "Online" : "Center"}</td>
+                              <td className="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">{p.amount} جنيه</td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">{p.payment_method === "vodafone_cash" ? "Vodafone Cash" : "InstaPay"}</td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">{new Date(p.subscription_start_date).toLocaleDateString("ar-EG")}</td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">{new Date(p.subscription_end_date).toLocaleDateString("ar-EG")}</td>
+                              <td className="px-4 py-3">{paymentStatusBadge(p.payment_status)}</td>
+                              <td className="px-4 py-3">{subscriptionStatusBadge(p)}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="flex items-center justify-between px-4 py-4 border-t border-gray-100 dark:border-[#2A2A2A]">
+                    <span className="text-xs font-bold text-[#B348FE]">
+                      {(subPaymentsPage - 1) * subPaymentsPerPage + 1} -{" "}
+                      {Math.min(subPaymentsPage * subPaymentsPerPage, filteredSubPayments.length)} من {filteredSubPayments.length}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setSubPaymentsPage((p) => Math.max(1, p - 1))}
+                        disabled={subPaymentsPage === 1}
+                        className="w-8 h-8 rounded-lg border border-gray-200 dark:border-[#2A2A2A] flex items-center justify-center disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-[#1A1A1A]"
+                      >
+                        ‹
+                      </button>
+                      <span className="w-8 h-8 rounded-lg bg-[#B348FE] text-white flex items-center justify-center text-xs font-black">
+                        {subPaymentsPage}
+                      </span>
+                      <button
+                        onClick={() =>
+                          setSubPaymentsPage((p) => (p * subPaymentsPerPage < filteredSubPayments.length ? p + 1 : p))
+                        }
+                        disabled={subPaymentsPage * subPaymentsPerPage >= filteredSubPayments.length}
+                        className="w-8 h-8 rounded-lg border border-gray-200 dark:border-[#2A2A2A] flex items-center justify-center disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-[#1A1A1A]"
+                      >
+                        ›
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
@@ -1949,6 +2498,275 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   إلغاء
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAddSubscriptionModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#111111] w-full max-w-[600px] max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A]">
+            <div className="p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                  <Receipt className="text-[#B348FE]" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-gray-900 dark:text-white">إضافة اشتراك جديد</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">للطالب: {student.full_name}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="font-bold text-gray-900 dark:text-white text-sm mb-2 block">الكورس</label>
+                <select
+                  value={subForm.course_id}
+                  onChange={(e) => setSubForm((p) => ({ ...p, course_id: e.target.value }))}
+                  className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                >
+                  <option value="">اختر الكورس</option>
+                  {availableCourses.map((course) => (
+                    <option key={course.id} value={course.id}>{course.title}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="font-bold text-gray-900 dark:text-white text-sm mb-2 block">نوع الطالب</label>
+                  <select
+                    value={subForm.student_type}
+                    onChange={(e) => {
+                      const type = e.target.value as "online" | "center";
+                      setSubForm((p) => ({ ...p, student_type: type, amount: SUBSCRIPTION_PRICING[type] }));
+                    }}
+                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                  >
+                    <option value="online">Online</option>
+                    <option value="center">Center</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="font-bold text-gray-900 dark:text-white text-sm mb-2 block">طريقة الدفع</label>
+                  <select
+                    value={subForm.payment_method}
+                    onChange={(e) => setSubForm((p) => ({ ...p, payment_method: e.target.value as any }))}
+                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                  >
+                    <option value="vodafone_cash">Vodafone Cash</option>
+                    <option value="instapay">InstaPay</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="font-bold text-gray-900 dark:text-white text-sm mb-2 block">المبلغ (جنيه)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={subForm.amount}
+                    onChange={(e) => setSubForm((p) => ({ ...p, amount: Number(e.target.value) }))}
+                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-gray-900 dark:text-white text-sm mb-2 block">رقم الموبايل المحول منه</label>
+                  <input
+                    type="tel"
+                    value={subForm.payer_phone}
+                    onChange={(e) => setSubForm((p) => ({ ...p, payer_phone: e.target.value }))}
+                    placeholder="01XXXXXXXXX"
+                    dir="ltr"
+                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE] text-center"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-gray-900 dark:text-white text-sm mb-2 block">كود الاشتراك</label>
+                <input
+                  type="text"
+                  value={subForm.subscription_code}
+                  onChange={(e) => setSubForm((p) => ({ ...p, subscription_code: e.target.value.toUpperCase() }))}
+                  placeholder="XXXX-XXXX"
+                  dir="ltr"
+                  className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE] text-center tracking-widest font-bold"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="font-bold text-gray-900 dark:text-white text-sm mb-2 block">تاريخ بداية الاشتراك</label>
+                  <input
+                    type="date"
+                    value={subForm.start_date}
+                    onChange={(e) => {
+                      const start = e.target.value;
+                      const end = new Date(start);
+                      end.setMonth(end.getMonth() + 1);
+                      setSubForm((p) => ({ ...p, start_date: start, end_date: end.toISOString().slice(0, 10) }));
+                    }}
+                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-gray-900 dark:text-white text-sm mb-2 block">تاريخ انتهاء الاشتراك</label>
+                  <input
+                    type="date"
+                    value={subForm.end_date}
+                    onChange={(e) => setSubForm((p) => ({ ...p, end_date: e.target.value }))}
+                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-gray-900 dark:text-white text-sm mb-2 block">حالة الدفع</label>
+                <select
+                  value={subForm.payment_status}
+                  onChange={(e) => setSubForm((p) => ({ ...p, payment_status: e.target.value as any }))}
+                  className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                >
+                  <option value="verified">تم التأكيد</option>
+                  <option value="pending">قيد المراجعة</option>
+                  <option value="rejected">مرفوض</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="font-bold text-gray-900 dark:text-white text-sm mb-2 block">ملاحظات (اختياري)</label>
+                <textarea
+                  rows={3}
+                  value={subForm.notes}
+                  onChange={(e) => setSubForm((p) => ({ ...p, notes: e.target.value }))}
+                  className="w-full rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] p-4 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                />
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-100 dark:border-[#2A2A2A] flex gap-3">
+              <Button
+                onClick={saveSubscriptionPayment}
+                disabled={savingSubscription}
+                className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-black h-12 disabled:opacity-70"
+              >
+                {savingSubscription ? "جاري الحفظ..." : "حفظ الاشتراك"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowAddSubscriptionModal(false)}
+                className="flex-1 border-2 border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] rounded-xl font-black h-12"
+              >
+                إلغاء
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showInvoiceModal && selectedInvoice && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#111111] w-full max-w-[480px] max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A]">
+            <div className="p-6 text-center border-b border-gray-100 dark:border-[#2A2A2A]">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[#F6EEFF] dark:bg-[#2B103D]">
+                <Receipt className="text-[#B348FE]" size={26} />
+              </div>
+              <h3 className="text-lg font-black text-gray-900 dark:text-white">منصة مستر زياد ربيع</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">إيصال اشتراك</p>
+            </div>
+
+            <div className="p-6 space-y-3">
+              {[
+                { label: "اسم الطالب", value: student.full_name },
+                { label: "الكورس", value: selectedInvoice.courseData?.title || "-" },
+                { label: "نوع الاشتراك", value: selectedInvoice.student_type === "online" ? "Online" : "Center" },
+                { label: "رقم الفاتورة", value: selectedInvoice.invoice_number },
+                { label: "قيمة الاشتراك", value: `${selectedInvoice.amount} جنيه` },
+                { label: "طريقة الدفع", value: selectedInvoice.payment_method === "vodafone_cash" ? "Vodafone Cash" : "InstaPay" },
+                { label: "رقم التحويل", value: selectedInvoice.payer_phone || "-" },
+                { label: "تاريخ الاشتراك", value: new Date(selectedInvoice.subscription_start_date).toLocaleDateString("ar-EG") },
+                { label: "تاريخ انتهاء الاشتراك", value: new Date(selectedInvoice.subscription_end_date).toLocaleDateString("ar-EG") },
+              ].map((row) => (
+                <div key={row.label} className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500 dark:text-gray-400 font-bold">{row.label}</span>
+                  <span className="font-bold text-gray-900 dark:text-white">{row.value}</span>
+                </div>
+              ))}
+
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500 dark:text-gray-400 font-bold">حالة الدفع</span>
+                {paymentStatusBadge(selectedInvoice.payment_status)}
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500 dark:text-gray-400 font-bold">حالة الاشتراك</span>
+                {subscriptionStatusBadge(selectedInvoice)}
+              </div>
+
+              {selectedInvoice.subscription_code && (
+                <div className="mt-4 rounded-2xl border border-[#EAD8FF] dark:border-[#2A2A2A] bg-[#F6EEFF] dark:bg-[#1A1A1A] px-5 py-4 text-center">
+                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">كود الاشتراك</p>
+                  <p className="text-lg font-black text-[#B348FE] tracking-widest" dir="ltr">{selectedInvoice.subscription_code}</p>
+                </div>
+              )}
+
+              {selectedInvoice.notes && (
+                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  ملاحظات: {selectedInvoice.notes}
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-100 dark:border-[#2A2A2A] space-y-3">
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => copyToClipboard(selectedInvoice.invoice_number, "invoice")}
+                  className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors"
+                >
+                  <Copy size={16} className="text-[#B348FE]" />
+                  <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
+                    {copiedField === "invoice" ? "تم النسخ ✓" : "نسخ الفاتورة"}
+                  </span>
+                </button>
+                <button
+                  onClick={() => selectedInvoice.subscription_code && copyToClipboard(selectedInvoice.subscription_code, "code")}
+                  disabled={!selectedInvoice.subscription_code}
+                  className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors disabled:opacity-40"
+                >
+                  <Copy size={16} className="text-[#B348FE]" />
+                  <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
+                    {copiedField === "code" ? "تم النسخ ✓" : "نسخ الكود"}
+                  </span>
+                </button>
+                <button
+                  onClick={() => selectedInvoice.payer_phone && copyToClipboard(selectedInvoice.payer_phone, "phone")}
+                  disabled={!selectedInvoice.payer_phone}
+                  className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors disabled:opacity-40"
+                >
+                  <Copy size={16} className="text-[#B348FE]" />
+                  <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
+                    {copiedField === "phone" ? "تم النسخ ✓" : "نسخ رقم التحويل"}
+                  </span>
+                </button>
+              </div>
+
+              <Button
+                onClick={() => copyToClipboard(buildWhatsappMessage(selectedInvoice), "whatsapp")}
+                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl h-11 font-bold flex items-center justify-center gap-2"
+              >
+                <MessageCircle size={16} />
+                {copiedField === "whatsapp" ? "تم نسخ الرسالة ✓" : "نسخ رسالة الطالب"}
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => { setShowInvoiceModal(false); setSelectedInvoice(null); }}
+                className="w-full rounded-xl h-11 font-bold"
+              >
+                إغلاق
+              </Button>
             </div>
           </div>
         </div>
