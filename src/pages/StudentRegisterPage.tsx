@@ -85,9 +85,9 @@ const GOVERNORATES = [
           {showFlash && (
             <motion.div
               key={flashId}
-              className="absolute inset-0 bg-[#B348FE]/10 pointer-events-none"
+              className="absolute inset-0 bg-[#B348FE]/5 pointer-events-none"
               style={{ transformOrigin: "right" }}
-              initial={{ opacity: 0.6, scaleX: 0 }}
+              initial={{ opacity: 0.35, scaleX: 0 }}
               animate={{ opacity: 0, scaleX: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.45, ease: "easeOut" }}
@@ -143,18 +143,42 @@ const GOVERNORATES = [
   children: React.ReactNode;
   required?: boolean;
   isDark: boolean;
-}) => (
+}) => {
+    const [flashId, setFlashId] = useState(0);
+    const [showFlash, setShowFlash] = useState(false);
+
+    const handleFocus = () => {
+      setFlashId((id) => id + 1);
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 500);
+    };
+
+    return (
     <div className="flex flex-col gap-0.5 w-full">
       <div
-        className={`flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
+        className={`relative overflow-hidden flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
           ${error ? 'border-red-400' : 'border-gray-200 focus-within:border-[#B348FE]'}
           ${isDark ? 'border-gray-700 focus-within:border-[#B348FE]' : ''}
         `}
       >
-        <Icon className="w-4 h-4 text-[#B348FE] flex-shrink-0" />
+        <AnimatePresence>
+          {showFlash && (
+            <motion.div
+              key={flashId}
+              className="absolute inset-0 bg-[#B348FE]/5 pointer-events-none"
+              style={{ transformOrigin: "right" }}
+              initial={{ opacity: 0.35, scaleX: 0 }}
+              animate={{ opacity: 0, scaleX: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+            />
+          )}
+        </AnimatePresence>
+        <Icon className="w-4 h-4 text-[#B348FE] flex-shrink-0 relative z-10" />
         <select
           value={value}
           onChange={e => onChange(e.target.value)}
+          onFocus={handleFocus}
           required={required}
           style={{
             appearance: 'none',
@@ -162,6 +186,7 @@ const GOVERNORATES = [
             colorScheme: isDark ? 'dark' : 'light',
           }}
           className={`
+            relative z-10
             flex-1 min-w-0 bg-transparent border-0 outline-none
             text-sm md:text-base py-0.5 cursor-pointer
             ${isDark ? 'text-white' : value ? 'text-gray-700' : 'text-gray-400'}
@@ -169,13 +194,14 @@ const GOVERNORATES = [
         >
           {children}
         </select>
-        <ChevronLeft className="w-4 h-4 text-gray-400 rotate-[-90deg] flex-shrink-0" />
+        <ChevronLeft className="w-4 h-4 text-gray-400 rotate-[-90deg] flex-shrink-0 relative z-10" />
       </div>
       {error && (
         <p className="text-xs text-red-500 mt-0.5 text-right">{error}</p>
       )}
     </div>
-  );
+    );
+  };
 
   
 const RegisterPage = () => {
@@ -185,6 +211,11 @@ const RegisterPage = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const [passwordFlashId, setPasswordFlashId] = useState(0);
+  const [showPasswordFlash, setShowPasswordFlash] = useState(false);
+  const [confirmFlashId, setConfirmFlashId] = useState(0);
+  const [showConfirmFlash, setShowConfirmFlash] = useState(false);
   const [form, setForm] = useState({
     firstName: '',
     secondName: '',
@@ -640,7 +671,7 @@ xl:pt-24
                   {/* Password */}
                   <div className="flex flex-col gap-0.5">
                     <div
-                      className={`flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
+                      className={`relative overflow-hidden flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
                         ${errors.password
                           ? 'border-red-400'
                           : 'border-gray-200 focus-within:border-[#B348FE]'
@@ -648,15 +679,34 @@ xl:pt-24
                         ${isDark ? 'border-gray-700 focus-within:border-[#B348FE]' : ''}
                       `}
                     >
-                      <Lock className="w-4 h-4 text-[#B348FE] flex-shrink-0" />
+                      <AnimatePresence>
+                        {showPasswordFlash && (
+                          <motion.div
+                            key={passwordFlashId}
+                            className="absolute inset-0 bg-[#B348FE]/5 pointer-events-none"
+                            style={{ transformOrigin: "right" }}
+                            initial={{ opacity: 0.35, scaleX: 0 }}
+                            animate={{ opacity: 0, scaleX: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.45, ease: "easeOut" }}
+                          />
+                        )}
+                      </AnimatePresence>
+                      <Lock className="w-4 h-4 text-[#B348FE] flex-shrink-0 relative z-10" />
                       <input
                         type={showPassword ? 'text' : 'password'}
                         placeholder="كلمة السر"
                         value={form.password}
                         onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
+                        onFocus={() => {
+                          setPasswordFlashId((id) => id + 1);
+                          setShowPasswordFlash(true);
+                          setTimeout(() => setShowPasswordFlash(false), 500);
+                        }}
                         dir="ltr"
                         required
                         className={`
+                          relative z-10
                           flex-1 min-w-0 bg-transparent border-0 outline-none
                           text-sm md:text-base py-0.5 placeholder-gray-400
                           ${isDark ? 'text-white' : 'text-gray-700'}
@@ -665,7 +715,7 @@ xl:pt-24
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                        className="relative z-10 text-gray-400 hover:text-gray-600 flex-shrink-0"
                       >
                         {showPassword
                           ? <EyeOff className="w-4 h-4" />
@@ -710,7 +760,7 @@ xl:pt-24
                   {/* Confirm Password */}
                   <div className="flex flex-col gap-0.5">
                     <div
-                      className={`flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
+                      className={`relative overflow-hidden flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
                         ${errors.confirmPassword
                           ? 'border-red-400'
                           : form.confirmPassword && form.password === form.confirmPassword
@@ -720,15 +770,34 @@ xl:pt-24
                         ${isDark ? 'border-gray-700' : ''}
                       `}
                     >
-                      <Lock className="w-4 h-4 text-[#B348FE] flex-shrink-0" />
+                      <AnimatePresence>
+                        {showConfirmFlash && (
+                          <motion.div
+                            key={confirmFlashId}
+                            className="absolute inset-0 bg-[#B348FE]/5 pointer-events-none"
+                            style={{ transformOrigin: "right" }}
+                            initial={{ opacity: 0.35, scaleX: 0 }}
+                            animate={{ opacity: 0, scaleX: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.45, ease: "easeOut" }}
+                          />
+                        )}
+                      </AnimatePresence>
+                      <Lock className="w-4 h-4 text-[#B348FE] flex-shrink-0 relative z-10" />
                       <input
                         type={showConfirm ? 'text' : 'password'}
                         placeholder="تأكيد كلمة السر"
                         value={form.confirmPassword}
                         onChange={e => setForm(p => ({ ...p, confirmPassword: e.target.value }))}
+                        onFocus={() => {
+                          setConfirmFlashId((id) => id + 1);
+                          setShowConfirmFlash(true);
+                          setTimeout(() => setShowConfirmFlash(false), 500);
+                        }}
                         dir="ltr"
                         required
                         className={`
+                          relative z-10
                           flex-1 min-w-0 bg-transparent border-0 outline-none
                           text-sm md:text-base py-0.5 placeholder-gray-400
                           ${isDark ? 'text-white' : 'text-gray-700'}
@@ -737,7 +806,7 @@ xl:pt-24
                       <button
                         type="button"
                         onClick={() => setShowConfirm(!showConfirm)}
-                        className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                        className="relative z-10 text-gray-400 hover:text-gray-600 flex-shrink-0"
                       >
                         {showConfirm
                           ? <EyeOff className="w-4 h-4" />
@@ -750,7 +819,7 @@ xl:pt-24
                             initial={{ opacity: 0, scale: 0 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0 }}
-                            className="flex-shrink-0"
+                            className="relative z-10 flex-shrink-0"
                           >
                             <CheckCircle2 className="w-4 h-4 text-green-500" />
                           </motion.div>

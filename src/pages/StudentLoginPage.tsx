@@ -92,6 +92,20 @@ const [errors, setErrors] = useState<{
 const fieldIcon =
 "w-4 h-4 text-[#B348FE] flex-shrink-0";
 
+  const [phoneFlashId, setPhoneFlashId] = useState(0);
+  const [showPhoneFlash, setShowPhoneFlash] = useState(false);
+  const [passwordFlashId, setPasswordFlashId] = useState(0);
+  const [showPasswordFlash, setShowPasswordFlash] = useState(false);
+
+  const triggerFlash = (
+    setId: React.Dispatch<React.SetStateAction<number>>,
+    setShow: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    setId((id) => id + 1);
+    setShow(true);
+    setTimeout(() => setShow(false), 500);
+  };
+
   const validate = () => {
     const e: {
   phone?: string;
@@ -398,6 +412,7 @@ overflow-hidden
                 <div className="flex flex-col gap-1">
                   <div
                     className={`
+                      relative overflow-hidden
                       flex items-center gap-3
                       border-b-2 py-2.5
                       transition-colors duration-200
@@ -409,7 +424,20 @@ overflow-hidden
                       }
                     `}
                   >
-                    <Phone className={fieldIcon} />
+                    <AnimatePresence>
+                      {showPhoneFlash && (
+                        <motion.div
+                          key={phoneFlashId}
+                          className="absolute inset-0 bg-[#B348FE]/5 pointer-events-none"
+                          style={{ transformOrigin: "right" }}
+                          initial={{ opacity: 0.35, scaleX: 0 }}
+                          animate={{ opacity: 0, scaleX: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.45, ease: "easeOut" }}
+                        />
+                      )}
+                    </AnimatePresence>
+                    <Phone className={`${fieldIcon} relative z-10`} />
                     <input
                      type="tel"
                       placeholder="رقم الهاتف"
@@ -418,9 +446,11 @@ overflow-hidden
                         setLoginForm(p => ({ ...p, phone: e.target.value }));
                         setErrors(p => ({ ...p, phone: undefined }));
                       }}
+                      onFocus={() => triggerFlash(setPhoneFlashId, setShowPhoneFlash)}
                       dir="ltr"
                       required
                       className={`
+                        relative z-10
                         flex-1 min-w-0 bg-transparent border-0 outline-none
                         text-sm sm:text-base py-0.5
                         placeholder-gray-400
@@ -437,6 +467,7 @@ overflow-hidden
                 <div className="flex flex-col gap-1">
                   <div
                     className={`
+                      relative overflow-hidden
                       flex items-center gap-3
                       border-b-2 py-2.5
                       transition-colors duration-200
@@ -448,7 +479,20 @@ overflow-hidden
                       }
                     `}
                   >
-                    <Lock className={fieldIcon} />
+                    <AnimatePresence>
+                      {showPasswordFlash && (
+                        <motion.div
+                          key={passwordFlashId}
+                          className="absolute inset-0 bg-[#B348FE]/5 pointer-events-none"
+                          style={{ transformOrigin: "right" }}
+                          initial={{ opacity: 0.35, scaleX: 0 }}
+                          animate={{ opacity: 0, scaleX: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.45, ease: "easeOut" }}
+                        />
+                      )}
+                    </AnimatePresence>
+                    <Lock className={`${fieldIcon} relative z-10`} />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="كلمة السر"
@@ -457,9 +501,11 @@ overflow-hidden
                         setLoginForm(p => ({ ...p, password: e.target.value }));
                         setErrors(p => ({ ...p, password: undefined }));
                       }}
+                      onFocus={() => triggerFlash(setPasswordFlashId, setShowPasswordFlash)}
                       dir="ltr"
                       required
                       className={`
+                        relative z-10
                         flex-1 min-w-0 bg-transparent border-0 outline-none
                         text-sm sm:text-base py-0.5
                         placeholder-gray-400
@@ -469,7 +515,7 @@ overflow-hidden
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+                      className="relative z-10 flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
