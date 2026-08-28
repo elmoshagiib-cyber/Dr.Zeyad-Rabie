@@ -27,16 +27,17 @@ import {
   FileText,
   Receipt,
   MessageCircle,
-  Search
+  Search,
+  Image as ImageIcon
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "../../components/ui/Card";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { motion } from "framer-motion";
-
+import html2canvas from "html2canvas";
 interface Student {
   id: number;
   full_name: string;
@@ -260,6 +261,8 @@ export function StudentDetails() {
   const [showAddSubscriptionModal, setShowAddSubscriptionModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<SubscriptionPayment | null>(null);
+  const invoiceCardRef = useRef<HTMLDivElement>(null);
+  const [downloadingImage, setDownloadingImage] = useState(false);
   const [savingSubscription, setSavingSubscription] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [subForm, setSubForm] = useState({
@@ -873,10 +876,30 @@ const addCourse = async () => {
     }
   };
 
-  const copyToClipboard = (text: string, field: string) => {
+ const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
     setCopiedField(field);
     setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const downloadInvoiceAsImage = async () => {
+    if (!invoiceCardRef.current || !selectedInvoice) return;
+    setDownloadingImage(true);
+    try {
+      const canvas = await html2canvas(invoiceCardRef.current, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+        useCORS: true,
+      });
+      const link = document.createElement("a");
+      link.download = `فاتورة-${selectedInvoice.invoice_number}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (err) {
+      alert("حدث خطأ أثناء إنشاء الصورة");
+    } finally {
+      setDownloadingImage(false);
+    }
   };
 
   const buildWhatsappMessage = (payment: SubscriptionPayment) => {
@@ -2670,6 +2693,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
       {showInvoiceModal && selectedInvoice && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-[#111111] w-full max-w-[480px] max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A]">
+            <div ref={invoiceCardRef} className="bg-white dark:bg-[#111111]">
             <div className="p-6 text-center border-b border-gray-100 dark:border-[#2A2A2A]">
               <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[#F6EEFF] dark:bg-[#2B103D]">
                 <Receipt className="text-[#B348FE]" size={26} />
@@ -2718,6 +2742,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 </div>
               )}
             </div>
+            </div>
 
             <div className="p-6 border-t border-gray-100 dark:border-[#2A2A2A] space-y-3">
               <div className="grid grid-cols-3 gap-2">
@@ -2752,12 +2777,13 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 </button>
               </div>
 
-              <Button
-                onClick={() => copyToClipboard(buildWhatsappMessage(selectedInvoice), "whatsapp")}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl h-11 font-bold flex items-center justify-center gap-2"
+             <Button
+                onClick={downloadInvoiceAsImage}
+                disabled={downloadingImage}
+                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl h-11 font-bold flex items-center justify-center gap-2 disabled:opacity-70"
               >
-                <MessageCircle size={16} />
-                {copiedField === "whatsapp" ? "تم نسخ الرسالة ✓" : "نسخ رسالة الطالب"}
+                <ImageIcon size={16} />
+                {downloadingImage ? "جاري إنشاء الصورة..." : "تحميل الفاتورة كصورة"}
               </Button>
 
               <Button
