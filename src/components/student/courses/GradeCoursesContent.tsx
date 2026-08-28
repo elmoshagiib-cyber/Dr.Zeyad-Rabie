@@ -209,8 +209,8 @@ return (
   className="
     group
     overflow-visible
-    bg-white
-    dark:bg-black
+    bg-transparent
+    dark:bg-transparent
     border-0
     transition-all
     duration-300
