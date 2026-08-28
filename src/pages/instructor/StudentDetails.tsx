@@ -848,6 +848,24 @@ const sendAnnouncement = async () => {
 
 const uniqueCourses = [...new Set(courses.map((c) => c.course_id))];
 
+  // حساب حالة الاشتراك الحقيقية من الكورسات الفعلية (مش من عمود الطالب المخزّن)
+  const now = new Date();
+  const activeCourseSubs = coursesWithProgress.filter(
+    (c) => c.active && (!c.expires_at || new Date(c.expires_at) > now)
+  );
+  const realSubscriptionStatus: "active" | "expired" =
+    activeCourseSubs.length > 0 ? "active" : "expired";
+  const permanentActiveExists = activeCourseSubs.some((c) => !c.expires_at);
+  const activeExpiryDates = activeCourseSubs
+    .map((c) => c.expires_at)
+    .filter((d): d is string => !!d);
+  const realSubscriptionEndDate =
+    activeExpiryDates.length > 0
+      ? activeExpiryDates.reduce((latest, d) =>
+          new Date(d) > new Date(latest) ? d : latest
+        )
+      : null;
+
   // نحسب دلوقتي من بيانات coursesWithProgress الحقيقية بدل الأعمدة المخزنة القديمة
   const realTotalLessons = coursesWithProgress.reduce((sum, c) => sum + c.totalLessons, 0);
   const realWatchedLessons = coursesWithProgress.reduce((sum, c) => sum + c.completedLessons, 0);
@@ -1041,7 +1059,6 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <InfoCardItem label="اسم الطالب" value={student.full_name} icon={<User size={18} />} />
-                <InfoCardItem label="كود الطالب" value={student.code || "-"} icon={<GraduationCap size={18} />} />
                 <InfoCardItem label="الصف الدراسي" value={student.grade} icon={<GraduationCap size={18} />} />
                 <InfoCardItem label="رقم الطالب" value={student.phone} icon={<Phone size={18} />} />
                 <InfoCardItem label="رقم ولي الأمر" value={student.parent_phone || "-"} icon={<Phone size={18} />} />
@@ -1052,11 +1069,11 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">حالة الاشتراك</p>
                   </div>
                   <p className={`font-black text-sm ${
-                    student.subscription_status === "active" 
+                    realSubscriptionStatus === "active" 
                       ? "text-emerald-600" 
                       : "text-red-600"
                   }`}>
-                    {student.subscription_status === "active" ? "نشط" : student.subscription_status === "expired" ? "منتهي" : "-"}
+                    {realSubscriptionStatus === "active" ? "نشط" : "منتهي"}
                   </p>
                 </div>
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE] transition-all duration-200">
@@ -1065,7 +1082,11 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">تاريخ انتهاء الاشتراك</p>
                   </div>
                   <p className="font-bold text-gray-900 dark:text-white text-sm">
-                    {student.subscription_end_date ? new Date(student.subscription_end_date).toLocaleDateString("ar-EG") : "-"}
+                    {permanentActiveExists
+                      ? "اشتراك دائم"
+                      : realSubscriptionEndDate
+                      ? new Date(realSubscriptionEndDate).toLocaleDateString("ar-EG")
+                      : "-"}
                   </p>
                 </div>
               </div>
