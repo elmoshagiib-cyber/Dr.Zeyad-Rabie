@@ -12,6 +12,10 @@ import {
   X,
   Maximize,
   Minimize,
+  Info,
+  Clock,
+  Timer,
+  Hash,
 } from "lucide-react";
 import {
   HiOutlineCalendarDays,
@@ -71,6 +75,22 @@ export function CourseDetailPage() {
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lessonProgressRef = useRef<LessonProgress | null>(null);
   const hasIncrementedWatchedLessonsRef = useRef(false);
+
+  type VideoExtra = { watchedSeconds: number };
+  type ExamExtra = {
+    examId: number;
+    description: string;
+    duration: number;
+    questionsCount: number;
+    minScore: number;
+    avgScore: number;
+    maxScore: number;
+    attemptsCount: number;
+    completedCount: number;
+  };
+
+  const [videoExtras, setVideoExtras] = useState<Record<string, VideoExtra>>({});
+  const [examExtras, setExamExtras] = useState<Record<string, ExamExtra>>({});
 
   const loadCourse = async () => {
     const { data, error } = await supabase
@@ -167,6 +187,82 @@ export function CourseDetailPage() {
       checkEnrollment();
     }
   }, [user, course]);
+
+  const loadContentExtras = async () => {
+    const studentId = getStudentId();
+    if (!studentId || units.length === 0) return;
+
+    const videoLessonIds = units.flatMap((u) =>
+      u.lessons.filter((l: any) => l.type === "video").map((l: any) => l.id)
+    );
+    const quizLessonIds = units.flatMap((u) =>
+      u.lessons.filter((l: any) => l.type === "quiz").map((l: any) => l.id)
+    );
+
+    if (videoLessonIds.length > 0) {
+      const { data: progressData } = await supabase
+        .from("lesson_progress")
+        .select("lesson_id, watched_seconds")
+        .eq("student_id", studentId)
+        .in("lesson_id", videoLessonIds);
+
+      const map: Record<string, { watchedSeconds: number }> = {};
+      (progressData || []).forEach((p: any) => {
+        map[p.lesson_id] = { watchedSeconds: p.watched_seconds || 0 };
+      });
+      setVideoExtras(map);
+    }
+
+    if (quizLessonIds.length > 0) {
+      const { data: examsData } = await supabase
+        .from("exams")
+        .select("id, course_item_id, description, duration")
+        .in("course_item_id", quizLessonIds);
+
+      const examIds = (examsData || []).map((e: any) => e.id);
+
+      const { data: questionsData } = await supabase
+        .from("exam_questions")
+        .select("id, exam_id")
+        .in("exam_id", examIds.length ? examIds : [-1]);
+
+      const { data: resultsData } = await supabase
+        .from("exam_results")
+        .select("exam_id, percentage, started_at, completed_at")
+        .eq("student_id", studentId)
+        .in("exam_id", examIds.length ? examIds : [-1]);
+
+      const map: Record<string, any> = {};
+
+      (examsData || []).forEach((exam: any) => {
+        const results = (resultsData || []).filter((r: any) => r.exam_id === exam.id);
+        const percentages = results.map((r: any) => Number(r.percentage) || 0);
+        const questionsCount = (questionsData || []).filter((q: any) => q.exam_id === exam.id).length;
+
+        map[exam.course_item_id] = {
+          examId: exam.id,
+          description: exam.description || "",
+          duration: exam.duration || 0,
+          questionsCount,
+          minScore: percentages.length ? Math.min(...percentages) : 0,
+          avgScore: percentages.length
+            ? Math.round(percentages.reduce((a: number, b: number) => a + b, 0) / percentages.length)
+            : 0,
+          maxScore: percentages.length ? Math.max(...percentages) : 0,
+          attemptsCount: results.filter((r: any) => r.started_at).length,
+          completedCount: results.filter((r: any) => r.completed_at).length,
+        };
+      });
+
+      setExamExtras(map);
+    }
+  };
+
+  useEffect(() => {
+    if (isEnrolled && units.length > 0) {
+      loadContentExtras();
+    }
+  }, [isEnrolled, units]);
 
   const handleEnroll = async () => {
     if (!user) {
@@ -1014,15 +1110,19 @@ const saveProgress = async (currentTime: number, duration: number) => {
                         const isHomework = lesson.type === "homework";
                         const isExam = lesson.type === "quiz";
 
+                        const extras = examExtras[lesson.id];
+                        const videoExtra = videoExtras[lesson.id];
+
                         return (
                           <div
                             key={lesson.id}
-                            className={`flex flex-row-reverse items-center justify-between px-3 sm:px-6 py-3 sm:py-5 gap-2 sm:gap-4 ${
+                            className={`px-3 sm:px-6 py-3 sm:py-5 ${
                               idx !== unit.lessons.length - 1
                                 ? "border-b border-gray-100 dark:border-gray-700"
                                 : ""
-                            } hover:bg-[#FAF7FF] dark:hover:bg-[#171717] transition-all duration-300 hover:pr-8`}
+                            } hover:bg-[#FAF7FF] dark:hover:bg-[#171717] transition-all duration-300`}
                           >
+                          <div className="flex flex-row-reverse items-center justify-between gap-2 sm:gap-4 hover:pr-2 transition-all duration-300">
                             <div className="flex-shrink-0">
                               {isEnrolled ? (
                                 <>
@@ -1126,6 +1226,110 @@ const saveProgress = async (currentTime: number, duration: number) => {
                               </div>
                             </div>
                           </div>
+
+                          {isEnrolled && (isVideo || isFile || (isExam && extras)) && (
+                            <div className="mt-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-[#171717] px-4 py-3 space-y-2.5">
+                              {isVideo && (
+                                <>
+                                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                    <Info size={14} className="text-rose-400 flex-shrink-0" />
+                                    <span className="font-bold text-gray-700 dark:text-gray-200">الوصف</span>
+                                    <span className="text-gray-400">:</span>
+                                    <span className="truncate">{lesson.description || "-"}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                    <Clock size={14} className="text-amber-400 flex-shrink-0" />
+                                    <span className="font-bold text-gray-700 dark:text-gray-200">مدة الفيديو</span>
+                                    <span className="text-gray-400">:</span>
+                                    <span>{lesson.duration ? `${lesson.duration} دقيقة` : "-"}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                    <Timer size={14} className="text-emerald-400 flex-shrink-0" />
+                                    <span className="font-bold text-gray-700 dark:text-gray-200">إجمالي وقت مشاهدتك</span>
+                                    <span className="text-gray-400">:</span>
+                                    <span>{Math.floor((videoExtra?.watchedSeconds || 0) / 60)} دقيقة</span>
+                                  </div>
+                                </>
+                              )}
+
+                              {isFile && (
+                                <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                  <Info size={14} className="text-rose-400 flex-shrink-0" />
+                                  <span className="font-bold text-gray-700 dark:text-gray-200">الوصف</span>
+                                  <span className="text-gray-400">:</span>
+                                  <span className="truncate">{lesson.description || "-"}</span>
+                                </div>
+                              )}
+
+                              {isExam && extras && (
+                                <>
+                                  <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0" />
+                                      <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                        اقل نتيجة لك :{" "}
+                                        <span className="font-bold text-gray-800 dark:text-white">
+                                          {extras.minScore}%
+                                        </span>
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="w-2.5 h-2.5 rounded-full bg-red-400 flex-shrink-0" />
+                                      <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                        متوسط نتائجك :{" "}
+                                        <span className="font-bold text-gray-800 dark:text-white">
+                                          {extras.avgScore}%
+                                        </span>
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="w-2.5 h-2.5 rounded-full bg-blue-400 flex-shrink-0" />
+                                      <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                        اعلى نتيجة لك :{" "}
+                                        <span className="font-bold text-gray-800 dark:text-white">
+                                          {extras.maxScore}%
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                    عدد مرات دخولك :{" "}
+                                    <span className="font-bold text-gray-800 dark:text-white">
+                                      {extras.attemptsCount} مرة
+                                    </span>
+                                    <span className="mx-2 text-gray-300">-</span>
+                                    عدد مرات إنهائك :{" "}
+                                    <span className="font-bold text-gray-800 dark:text-white">
+                                      {extras.completedCount} مرة
+                                    </span>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                    <Info size={14} className="text-rose-400 flex-shrink-0" />
+                                    <span className="font-bold text-gray-700 dark:text-gray-200">الوصف</span>
+                                    <span className="text-gray-400">:</span>
+                                    <span className="truncate">{extras.description || "-"}</span>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                    <Hash size={14} className="text-violet-400 flex-shrink-0" />
+                                    <span className="font-bold text-gray-700 dark:text-gray-200">عدد الاسئلة</span>
+                                    <span className="text-gray-400">:</span>
+                                    <span>{extras.questionsCount} سؤال</span>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                    <Clock size={14} className="text-amber-400 flex-shrink-0" />
+                                    <span className="font-bold text-gray-700 dark:text-gray-200">مدة الامتحان</span>
+                                    <span className="text-gray-400">:</span>
+                                    <span>{extras.duration} دقيقة</span>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
                         );
                       })}
                     </div>
