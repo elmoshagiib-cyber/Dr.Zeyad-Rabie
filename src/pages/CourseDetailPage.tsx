@@ -26,6 +26,7 @@ import { Footer } from "../components/layout/Footer";
 import { useApp } from "../context/AppContext";
 import { supabase } from "../lib/supabase";
 import { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { FaWhatsapp } from "react-icons/fa";
@@ -76,7 +77,7 @@ export function CourseDetailPage() {
   const lessonProgressRef = useRef<LessonProgress | null>(null);
   const hasIncrementedWatchedLessonsRef = useRef(false);
 
-  type VideoExtra = { watchedSeconds: number };
+  type VideoExtra = { watchedSeconds: number; progressPercent: number };
   type ExamExtra = {
     examId: number;
     description: string;
@@ -91,6 +92,11 @@ export function CourseDetailPage() {
 
   const [videoExtras, setVideoExtras] = useState<Record<string, VideoExtra>>({});
   const [examExtras, setExamExtras] = useState<Record<string, ExamExtra>>({});
+  const [expandedLessonId, setExpandedLessonId] = useState<string | null>(null);
+
+  const toggleLessonExpand = (lessonId: string) => {
+    setExpandedLessonId((prev) => (prev === lessonId ? null : lessonId));
+  };
 
   const loadCourse = async () => {
     const { data, error } = await supabase
@@ -202,13 +208,16 @@ export function CourseDetailPage() {
     if (videoLessonIds.length > 0) {
       const { data: progressData } = await supabase
         .from("lesson_progress")
-        .select("lesson_id, watched_seconds")
+        .select("lesson_id, watched_seconds, progress_percent")
         .eq("student_id", studentId)
         .in("lesson_id", videoLessonIds);
 
-      const map: Record<string, { watchedSeconds: number }> = {};
+      const map: Record<string, VideoExtra> = {};
       (progressData || []).forEach((p: any) => {
-        map[p.lesson_id] = { watchedSeconds: p.watched_seconds || 0 };
+        map[p.lesson_id] = {
+          watchedSeconds: p.watched_seconds || 0,
+          progressPercent: Math.min(100, Math.max(0, p.progress_percent || 0)),
+        };
       });
       setVideoExtras(map);
     }
@@ -1116,7 +1125,8 @@ const saveProgress = async (currentTime: number, duration: number) => {
                         return (
                           <div
                             key={lesson.id}
-                            className={`px-3 sm:px-6 py-3 sm:py-5 ${
+                            onClick={() => toggleLessonExpand(lesson.id)}
+                            className={`px-3 sm:px-6 py-3 sm:py-5 cursor-pointer ${
                               idx !== unit.lessons.length - 1
                                 ? "border-b border-gray-100 dark:border-gray-700"
                                 : ""
@@ -1200,7 +1210,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                 <h4 className="text-sm sm:text-base xl:text-lg font-bold text-[#111827] dark:text-white truncate transition-colors duration-300 group-hover:text-[#B348FE]">
                                   {lesson.title}
                                 </h4>
-                                {isVideo && lesson.duration && (
+                                {isVideo && lesson.duration > 0 && (
                                   <p className="text-xs text-gray-400 mt-0.5">
                                     {lesson.duration}
                                   </p>
@@ -1227,7 +1237,16 @@ const saveProgress = async (currentTime: number, duration: number) => {
                             </div>
                           </div>
 
-                          {isEnrolled && (isVideo || isFile || (isExam && extras)) && (
+                          <AnimatePresence>
+                          {isEnrolled && expandedLessonId === lesson.id && (isVideo || isFile || (isExam && extras)) && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3, ease: "easeInOut" }}
+                              onClick={(e) => e.stopPropagation()}
+                              className="overflow-hidden"
+                            >
                             <div className="mt-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-[#171717] px-4 py-3 space-y-2.5">
                               {isVideo && (
                                 <>
@@ -1248,6 +1267,16 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                     <span className="font-bold text-gray-700 dark:text-gray-200">إجمالي وقت مشاهدتك</span>
                                     <span className="text-gray-400">:</span>
                                     <span>{Math.floor((videoExtra?.watchedSeconds || 0) / 60)} دقيقة</span>
+                                  </div>
+                                  <div className="pt-1">
+                                    <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                      <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${videoExtra?.progressPercent || 0}%` }}
+                                        transition={{ duration: 0.6, ease: "easeOut" }}
+                                        className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full"
+                                      />
+                                    </div>
                                   </div>
                                 </>
                               )}
@@ -1328,7 +1357,9 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                 </>
                               )}
                             </div>
+                            </motion.div>
                           )}
+                          </AnimatePresence>
                         </div>
                         );
                       })}
