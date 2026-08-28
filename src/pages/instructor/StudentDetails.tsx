@@ -37,7 +37,7 @@ import { Card, CardContent } from "../../components/ui/Card";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { motion } from "framer-motion";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 interface Student {
   id: number;
   full_name: string;
@@ -882,20 +882,21 @@ const addCourse = async () => {
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  const downloadInvoiceAsImage = async () => {
+ const downloadInvoiceAsImage = async () => {
     if (!invoiceCardRef.current || !selectedInvoice) return;
     setDownloadingImage(true);
     try {
-      const canvas = await html2canvas(invoiceCardRef.current, {
+      const dataUrl = await toPng(invoiceCardRef.current, {
         backgroundColor: "#ffffff",
-        scale: 2,
-        useCORS: true,
+        pixelRatio: 2,
+        cacheBust: true,
       });
       const link = document.createElement("a");
       link.download = `فاتورة-${selectedInvoice.invoice_number}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.href = dataUrl;
       link.click();
     } catch (err) {
+      console.error(err);
       alert("حدث خطأ أثناء إنشاء الصورة");
     } finally {
       setDownloadingImage(false);
