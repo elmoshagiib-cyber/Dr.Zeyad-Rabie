@@ -241,9 +241,9 @@ lg:-mr-[5%]
 xl:w-[111%]
 xl:-mr-[5.5%]
 
-    rounded-[24px]
-    sm:rounded-[28px]
-    lg:rounded-[32px]
+    rounded-t-[24px]
+    sm:rounded-t-[28px]
+    lg:rounded-t-[32px]
 
     overflow-hidden
   "
