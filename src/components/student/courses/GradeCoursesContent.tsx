@@ -206,17 +206,10 @@ const hasAccess =
 return (
 
 <Card
-  style={{ backgroundColor: "transparent" }}
+  hover
   className="
     group
-    overflow-visible
-    border-0
-    transition-all
-    duration-300
-    ease-out
-    hover:-translate-y-2
-    hover:shadow-[0_25px_60px_rgba(179,72,254,0.18)]
-    rounded-none
+    overflow-hidden
     p-0
     cursor-pointer
 "
@@ -225,25 +218,7 @@ return (
 <div
   className="
     relative
-
     aspect-[16/9]
-
-w-[106%]
--mr-[3%]
-
-sm:w-[108%]
-sm:-mr-[4%]
-
-lg:w-[110%]
-lg:-mr-[5%]
-
-xl:w-[111%]
-xl:-mr-[5.5%]
-
-    rounded-t-[24px]
-    sm:rounded-t-[28px]
-    lg:rounded-t-[32px]
-
     overflow-hidden
   "
 >
@@ -257,18 +232,10 @@ xl:-mr-[5.5%]
 className="
 w-full
 h-full
-object-cover object-center
-object-top
-translate-y-[-6px]
-
-transition-all
+object-cover
+transition-transform
 duration-300
-ease-out
-
-group-hover:translate-y-[-14px]
-group-hover:scale-[1.06]
-group-hover:brightness-110
-group-hover:saturate-110
+group-hover:scale-105
 "
         />
 
@@ -322,18 +289,6 @@ backdrop-blur-md backdrop-blur-sm text-white
   className="
     relative
     z-20
--mt-8
-    -mx-1
-sm:-mx-2
-lg:-mx-3
-xl:-mx-4
-    mb-5
-    rounded-[28px]
-    bg-white
-    dark:bg-[#111111]
-    border
-    border-gray-200
-    dark:border-[#262626]
     p-4
     sm:p-5
     lg:p-6
