@@ -245,28 +245,28 @@ const getStatusBadge = (status: string) => {
     case "active":
       return (
         <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold">
-          🟢 صالح
+           صالح
         </span>
       );
 
     case "used":
       return (
         <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold">
-          🔵 مستخدم
+           مستخدم
         </span>
       );
 
     case "expired":
       return (
         <span className="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold">
-          🟠 منتهي
+           منتهي
         </span>
       );
 
     case "cancelled":
       return (
         <span className="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold">
-          🔴 ملغي
+           ملغي
         </span>
       );
 

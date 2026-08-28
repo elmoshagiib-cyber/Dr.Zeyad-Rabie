@@ -59,45 +59,72 @@ const GOVERNORATES = [
   required?: boolean;
   suffix?: React.ReactNode;
   isDark: boolean;
-}) => (
-  <div className="flex flex-col gap-0.5 w-full">
-    <div
-      className={`flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
-        ${
-          error
-            ? "border-red-400"
-            : "border-gray-200 focus-within:border-[#B348FE]"
-        }
-        ${isDark ? "border-gray-700 focus-within:border-[#B348FE]" : ""}
-      `}
-    >
-      <Icon className="w-4 h-4 text-[#B348FE] flex-shrink-0" />
+}) => {
+  const [flashId, setFlashId] = useState(0);
+  const [showFlash, setShowFlash] = useState(false);
 
-      <input
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        dir={dir}
-        required={required}
-        className={`
-          flex-1 min-w-0 bg-transparent border-0 outline-none
-          text-sm md:text-base py-0.5
-          placeholder-gray-400
-          ${isDark ? "text-white placeholder-gray-500" : "text-gray-700"}
+  const handleFocus = () => {
+    setFlashId((id) => id + 1);
+    setShowFlash(true);
+    setTimeout(() => setShowFlash(false), 500);
+  };
+
+  return (
+    <div className="flex flex-col gap-0.5 w-full">
+      <div
+        className={`relative overflow-hidden flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
+          ${
+            error
+              ? "border-red-400"
+              : "border-gray-200 focus-within:border-[#B348FE]"
+          }
+          ${isDark ? "border-gray-700 focus-within:border-[#B348FE]" : ""}
         `}
-      />
+      >
+        <AnimatePresence>
+          {showFlash && (
+            <motion.div
+              key={flashId}
+              className="absolute inset-0 bg-[#B348FE]/10 pointer-events-none"
+              style={{ transformOrigin: "right" }}
+              initial={{ opacity: 0.6, scaleX: 0 }}
+              animate={{ opacity: 0, scaleX: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+            />
+          )}
+        </AnimatePresence>
 
-      {suffix}
+        <Icon className="w-4 h-4 text-[#B348FE] flex-shrink-0 relative z-10" />
+
+        <input
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={handleFocus}
+          dir={dir}
+          required={required}
+          className={`
+            relative z-10
+            flex-1 min-w-0 bg-transparent border-0 outline-none
+            text-sm md:text-base py-0.5
+            placeholder-gray-400
+            ${isDark ? "text-white placeholder-gray-500" : "text-gray-700"}
+          `}
+        />
+
+        {suffix}
+      </div>
+
+      {error && (
+        <p className="text-xs text-red-500 mt-0.5 text-right">
+          {error}
+        </p>
+      )}
     </div>
-
-    {error && (
-      <p className="text-xs text-red-500 mt-0.5 text-right">
-        {error}
-      </p>
-    )}
-  </div>
-);
+  );
+};
 
   /* ── Reusable underline select row ── */
   const SelectField = ({
