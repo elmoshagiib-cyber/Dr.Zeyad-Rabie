@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { Camera, Edit2, CheckCircle, Star, Trophy, BookOpen, Award, Shield, Lock, Eye, EyeOff, Loader2, ChevronDown, Receipt, Download } from "lucide-react";
-import { toPng } from "html-to-image";
-import StudentLayout from "./StudentLayout";import { Card, CardContent } from "../../components/ui/Card";
+import { Camera, Edit2, CheckCircle, Star, Trophy, BookOpen, Award, Shield, Lock, Eye, EyeOff, Loader2, ChevronDown, Receipt } from "lucide-react";
+import StudentLayout from "./StudentLayout";
+import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { ProgressBar } from "../../components/ui/ProgressBar";
@@ -318,11 +318,8 @@ export function ProfilePage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
- const [subscriptionPayments, setSubscriptionPayments] = useState<StudentSubscriptionPayment[]>([]);
+const [subscriptionPayments, setSubscriptionPayments] = useState<StudentSubscriptionPayment[]>([]);
   const [loadingPayments, setLoadingPayments] = useState(true);
-  const invoiceCardRefs = useRef<Record<number, HTMLDivElement | null>>({});
-  const [downloadingInvoiceId, setDownloadingInvoiceId] = useState<number | null>(null);
-
   useEffect(() => {
     const loadPayments = async () => {
       if (!user?.id) {
@@ -385,30 +382,9 @@ export function ProfilePage() {
     );
   };
 
-  const downloadInvoiceCardAsImage = async (payment: StudentSubscriptionPayment) => {
-    const node = invoiceCardRefs.current[payment.id];
-    if (!node) return;
-    setDownloadingInvoiceId(payment.id);
-    try {
-      const dataUrl = await toPng(node, {
-        backgroundColor: "#ffffff",
-        pixelRatio: 2,
-        cacheBust: true,
-      });
-      const link = document.createElement("a");
-      link.download = `فاتورة-${payment.invoice_number}.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (err) {
-      console.error(err);
-      alert("حدث خطأ أثناء إنشاء الصورة");
-    } finally {
-      setDownloadingInvoiceId(null);
-    }
-  };
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
+const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
@@ -642,9 +618,7 @@ export function ProfilePage() {
                         key={p.id}
                         className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:border-[#B348FE] transition-all duration-300"
                       >
-                      <div ref={(el) => { invoiceCardRefs.current[p.id] = el; }}>
-                        <div className="flex items-start justify-between gap-3 mb-3">
-                          <div className="min-w-0">
+                        <div className="flex items-start justify-between gap-3 mb-3">                          <div className="min-w-0">
                             <p className="font-black text-gray-900 dark:text-white text-sm sm:text-base truncate">
                               {p.courseData?.title || "-"}
                             </p>
@@ -693,16 +667,6 @@ export function ProfilePage() {
                             </span>
                           </div>
                         )}
-                      </div>
-
-                        <button
-                          onClick={() => downloadInvoiceCardAsImage(p)}
-                          disabled={downloadingInvoiceId === p.id}
-                          className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg border border-gray-200 dark:border-[#2A2A2A] text-[11px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-[#111111] hover:border-[#B348FE] transition-colors disabled:opacity-50"
-                        >
-                          <Download size={13} />
-                          {downloadingInvoiceId === p.id ? "جاري التحميل..." : "تحميل كصورة"}
-                        </button>
                       </div>
                     ))}
                   </div>
@@ -839,30 +803,7 @@ export function ProfilePage() {
             </Card>
           </div>
 
-          {/* Right: Achievements */}
-          <div className="space-y-5 sm:space-y-6">
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm">
-              <CardContent className="py-9 sm:py-12 lg:py-16 text-center px-4 sm:px-6">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-2xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center mx-auto mb-4 sm:mb-5">
-                  <Award size={30} className="text-amber-500 sm:w-9 sm:h-9" />
-                </div>
-
-                <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 dark:text-white mb-2.5 sm:mb-3">
-                  الإنجازات
-                </h3>
-
-                <p className="text-gray-500 dark:text-gray-400 leading-6 sm:leading-7 lg:leading-8 mb-5 sm:mb-6 text-xs sm:text-sm lg:text-base">
-                  سيتم إضافة نظام الإنجازات والشارات
-                  قريبًا بعد إطلاق نظام النقاط.
-                </p>
-
-                <Badge variant="amber" className="inline-flex">
-                  🚧 تحت التطوير
-                </Badge>
-              </CardContent>
-            </Card>
           </div>
-        </div>
       </div>
     </StudentLayout>
   );
