@@ -511,7 +511,39 @@ xl:pt-24
                 </p>
               </motion.div>
 
-             
+              {/* ── زرار: شرح كيفية إنشاء حساب (فيديو يوتيوب) ── */}
+              <motion.a
+                href="https://youtu.be/tHmKJQjkcXI"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`
+                  flex items-center justify-center gap-2
+                  w-full
+                  py-2.5 sm:py-3
+                  rounded-xl
+                  border-2 border-[#B348FE]
+                  text-[#B348FE]
+                  font-bold
+                  text-sm sm:text-base
+                  hover:bg-[#B348FE] hover:text-white
+                  transition-all duration-300
+                  mb-4 sm:mb-5
+                `}
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15, duration: 0.45 }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <svg
+                  className="w-5 h-5 flex-shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M23.498 6.186a2.994 2.994 0 0 0-2.107-2.117C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.391.569A2.994 2.994 0 0 0 .502 6.186 31.02 31.02 0 0 0 0 12a31.02 31.02 0 0 0 .502 5.814 2.994 2.994 0 0 0 2.107 2.117C4.495 20.5 12 20.5 12 20.5s7.505 0 9.391-.569a2.994 2.994 0 0 0 2.107-2.117A31.02 31.02 0 0 0 24 12a31.02 31.02 0 0 0-.502-5.814ZM9.75 15.568V8.432L15.818 12 9.75 15.568Z" />
+                </svg>
+                شاهد كيفية إنشاء حساب على المنصة
+              </motion.a>
 
               {/* ── FORM ── */}
               <motion.form
