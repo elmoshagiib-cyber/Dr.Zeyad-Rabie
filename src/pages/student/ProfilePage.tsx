@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Camera, Edit2, CheckCircle, Star, Trophy, BookOpen, Award, Shield, Lock, Eye, EyeOff, Loader2, ChevronDown } from "lucide-react";
-import StudentLayout from "./StudentLayout";
+import { Camera, Edit2, CheckCircle, Star, Trophy, BookOpen, Award, Shield, Lock, Eye, EyeOff, Loader2, ChevronDown, Receipt } from "lucide-react";import StudentLayout from "./StudentLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
@@ -10,8 +9,26 @@ import { useApp } from "../../context/AppContext";
 import { CURRENT_STUDENT, COURSES, LEADERBOARD } from "../../data/mockData";
 import { supabase } from "../../lib/supabase";
 
-function ImageCropModal({
-  file,
+interface SubCourseInfo {
+  id: string;
+  title: string;
+}
+
+interface StudentSubscriptionPayment {
+  id: number;
+  invoice_number: string;
+  student_type: "online" | "center";
+  amount: number;
+  payment_method: "vodafone_cash" | "instapay";
+  payment_status: "pending" | "verified" | "rejected" | "cancelled";
+  subscription_start_date: string;
+  subscription_end_date: string;
+  subscription_code: string | null;
+  created_at: string;
+  courseData?: SubCourseInfo;
+}
+
+function ImageCropModal({  file,
   aspect,
   shape = "rect",
   onCancel,
@@ -295,9 +312,74 @@ export function ProfilePage() {
     setCropFile(null);
   };
 
-  const handleCropCancel = () => {
+ const handleCropCancel = () => {
     setCropFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const [subscriptionPayments, setSubscriptionPayments] = useState<StudentSubscriptionPayment[]>([]);
+  const [loadingPayments, setLoadingPayments] = useState(true);
+
+  useEffect(() => {
+    const loadPayments = async () => {
+      if (!user?.id) {
+        setLoadingPayments(false);
+        return;
+      }
+      setLoadingPayments(true);
+
+      const { data: studentRow } = await supabase
+        .from("students")
+        .select("id")
+        .eq("auth_id", user.id)
+        .single();
+
+      if (!studentRow) {
+        setLoadingPayments(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("subscription_payments")
+        .select("*")
+        .eq("student_id", studentRow.id)
+        .order("created_at", { ascending: false });
+
+      if (error || !data) {
+        setLoadingPayments(false);
+        return;
+      }
+
+      const courseIds = [...new Set(data.map((p: any) => p.course_id))];
+      const { data: coursesData } = courseIds.length
+        ? await supabase.from("courses").select("id, title").in("id", courseIds)
+        : { data: [] as any[] };
+
+      const merged = data.map((p: any) => ({
+        ...p,
+        courseData: coursesData?.find((c: any) => c.id === p.course_id),
+      }));
+
+      setSubscriptionPayments(merged as StudentSubscriptionPayment[]);
+      setLoadingPayments(false);
+    };
+
+    loadPayments();
+  }, [user?.id]);
+
+  const paymentStatusBadge = (status: string) => {
+    const map: Record<string, { label: string; className: string }> = {
+      pending: { label: "قيد المراجعة", className: "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400" },
+      verified: { label: "تم التأكيد", className: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400" },
+      rejected: { label: "مرفوض", className: "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400" },
+      cancelled: { label: "ملغي", className: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400" },
+    };
+    const conf = map[status] || map.pending;
+    return (
+      <span className={`px-2.5 py-1 rounded-lg text-[11px] font-black whitespace-nowrap ${conf.className}`}>
+        {conf.label}
+      </span>
+    );
   };
 
   const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -497,7 +579,99 @@ export function ProfilePage() {
                       </p>
                     </div>
                   ))}
+               </div>
+              </CardContent>
+            </Card>
+
+            {/* Subscription Invoices */}
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm">
+              <CardContent className="p-4 sm:p-6 lg:p-8">
+                <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-6">
+                  <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center shrink-0">
+                    <Receipt size={18} className="text-[#B348FE] sm:w-5 sm:h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 dark:text-white">
+                      سجل الاشتراكات والفواتير
+                    </h2>
+                    <p className="text-[11px] sm:text-xs lg:text-sm text-gray-400 dark:text-gray-500">
+                      تاريخ اشتراكاتك ومدفوعاتك
+                    </p>
+                  </div>
                 </div>
+
+                {loadingPayments ? (
+                  <div className="py-10 text-center text-gray-400 text-xs sm:text-sm font-bold">
+                    جاري التحميل...
+                  </div>
+                ) : subscriptionPayments.length === 0 ? (
+                  <div className="py-10 text-center">
+                    <Receipt className="mx-auto text-gray-300 dark:text-gray-700 mb-3" size={40} />
+                    <p className="text-gray-500 dark:text-gray-400 font-bold text-xs sm:text-sm">
+                      لا توجد اشتراكات مسجلة بعد
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 sm:space-y-4">
+                    {subscriptionPayments.map((p) => (
+                      <div
+                        key={p.id}
+                        className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:border-[#B348FE] transition-all duration-300"
+                      >
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <div className="min-w-0">
+                            <p className="font-black text-gray-900 dark:text-white text-sm sm:text-base truncate">
+                              {p.courseData?.title || "-"}
+                            </p>
+                            <p className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                              فاتورة رقم {p.invoice_number}
+                            </p>
+                          </div>
+                          {paymentStatusBadge(p.payment_status)}
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+                          <div>
+                            <p className="text-[10px] sm:text-[11px] text-gray-400 font-bold mb-0.5">النوع</p>
+                            <p className="font-bold text-gray-800 dark:text-gray-200 text-xs sm:text-sm">
+                              {p.student_type === "online" ? "Online" : "Center"}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] sm:text-[11px] text-gray-400 font-bold mb-0.5">المبلغ</p>
+                            <p className="font-bold text-gray-800 dark:text-gray-200 text-xs sm:text-sm">
+                              {p.amount} جنيه
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] sm:text-[11px] text-gray-400 font-bold mb-0.5">البداية</p>
+                            <p className="font-bold text-gray-800 dark:text-gray-200 text-xs sm:text-sm">
+                              {new Date(p.subscription_start_date).toLocaleDateString("ar-EG")}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] sm:text-[11px] text-gray-400 font-bold mb-0.5">الانتهاء</p>
+                            <p className="font-bold text-gray-800 dark:text-gray-200 text-xs sm:text-sm">
+                              {new Date(p.subscription_end_date).toLocaleDateString("ar-EG")}
+                            </p>
+                          </div>
+                        </div>
+
+                        {p.subscription_code && p.payment_status === "verified" && (
+                          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[#2A2A2A] flex items-center justify-between">
+                            <span className="text-[11px] sm:text-xs text-gray-400 font-bold">كود الاشتراك</span>
+                            <span
+                              className="font-black text-[#B348FE] text-xs sm:text-sm tracking-widest"
+                              dir="ltr"
+                            >
+                              {p.subscription_code}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
