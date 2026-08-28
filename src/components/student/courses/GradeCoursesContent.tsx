@@ -205,12 +205,10 @@ const hasAccess =
 return (
 
 <Card
-  
+  style={{ backgroundColor: "transparent" }}
   className="
     group
     overflow-visible
-    bg-transparent
-    dark:bg-transparent
     border-0
     transition-all
     duration-300
