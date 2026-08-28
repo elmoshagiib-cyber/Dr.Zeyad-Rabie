@@ -1138,7 +1138,10 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                 <>
                                   {isVideo && (
                                     <button
-                                      onClick={() => openVideoPlayer(lesson.id, lesson.title)}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openVideoPlayer(lesson.id, lesson.title);
+                                      }}
                                       className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                     >
                                       <Play size={13} />
@@ -1148,7 +1151,10 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
                                   {isFile && (
                                     <button
-                                      onClick={() => openPdf(lesson.id)}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openPdf(lesson.id);
+                                      }}
                                       className="flex items-center gap-1.5 sm:gap-2 bg-blue-500 hover:bg-blue-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-blue-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                     >
                                       <FileText size={13} />
@@ -1158,14 +1164,15 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
                                   {isHomework && (
                                     <button
-                                      onClick={() =>
+                                      onClick={(e) => {
+                                        e.stopPropagation();
                                         navigate(`/dashboard/homework/${lesson.id}`, {
                                           state: {
                                             fromCourse: true,
                                             courseId: slug,
                                           },
-                                        })
-                                      }
+                                        });
+                                      }}
                                       className="flex items-center gap-1.5 sm:gap-2 bg-green-500 hover:bg-green-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-green-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                     >
                                       <ClipboardCheck size={13} />
@@ -1175,7 +1182,8 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
                                   {isExam && (
                                     <button
-                                      onClick={async () => {
+                                      onClick={async (e) => {
+                                        e.stopPropagation();
                                         const { data, error } = await supabase
                                           .from("exams")
                                           .select("id")
