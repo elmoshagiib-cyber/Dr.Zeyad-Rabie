@@ -1210,11 +1210,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                 <h4 className="text-sm sm:text-base xl:text-lg font-bold text-[#111827] dark:text-white truncate transition-colors duration-300 group-hover:text-[#B348FE]">
                                   {lesson.title}
                                 </h4>
-                                {isVideo && lesson.duration > 0 && (
-                                  <p className="text-xs text-gray-400 mt-0.5">
-                                    {lesson.duration}
-                                  </p>
-                                )}
+
                                 {isExam && (
                                   <p className="text-xs text-gray-400 mt-0.5">
                                     {lesson.duration || 30} دقيقة
