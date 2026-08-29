@@ -33,6 +33,7 @@ interface PdfItem {
   type: "pdf";
   id: string;
   title: string;
+  description: string;
   fileName: string;
   fileSize: number;
   allowDownload: boolean;
@@ -172,6 +173,7 @@ function createDefaultPdf(): PdfItem {
     type: "pdf",
     id: generateId(),
     title: "ملف PDF جديد",
+    description: "",
     fileName: "",
     fileSize: 0,
     allowDownload: true,
@@ -353,6 +355,7 @@ case "pdf":
     type: "pdf",
     id: item.id,
     title: item.title || "",
+    description: item.description || "",
     fileName: "",
     fileSize: item.file_size || 0,
     allowDownload: item.allow_download || false,
@@ -577,9 +580,10 @@ Object.assign(payload,{
     // ==========================
     // PDF
     // ==========================
-    if (item.type === "pdf") {
+   if (item.type === "pdf") {
 
       Object.assign(payload, {
+        description: item.description || "",
         url: item.pdfUrl || "",
         storage_path: item.storagePath || "",
         file_size: item.fileSize || 0,
@@ -1787,8 +1791,17 @@ async function uploadHomeworkInstructions(
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">رفع ملف PDF</label>
-            {item.status === "idle" || item.status === "error" ? (
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">الوصف</label>
+            <textarea
+              value={item.description}
+              onChange={(e) => updateItem(sectionId, item.id, { description: e.target.value } as Partial<PdfItem>)}
+              rows={2}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm resize-none"
+              placeholder="وصف مختصر للملف"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">رفع ملف PDF</label>            {item.status === "idle" || item.status === "error" ? (
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer bg-slate-50 hover:bg-rose-50 hover:border-rose-400 transition-all group">
                 <div className="flex flex-col items-center gap-2 text-slate-400 group-hover:text-rose-500 transition-colors">
                   <svg className="w-9 h-9" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
