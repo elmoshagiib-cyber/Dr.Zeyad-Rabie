@@ -1377,7 +1377,8 @@ const saveProgress = async (currentTime: number, duration: number) => {
           {units.length === 0 && (
             <div className="text-center py-16 sm:py-20 text-gray-400">
               <BookOpen size={48} className="mx-auto mb-4 opacity-40" />
-              <p className="text-lg sm:text-xl font-bold">لا يوجد محتوى بعد</p>
+              <p className="text-lg sm:text-xl font-bold">سيتم اضافه محتوى الكورس قريب اوي متستعجلش ⌛️⏳❤️
+</p>
             </div>
           )}
         </div>
