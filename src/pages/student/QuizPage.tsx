@@ -52,8 +52,9 @@ export function QuizPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [existingResult, setExistingResult] = useState<ExamResult | null>(null);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [studentId, setStudentId] = useState<string | null>(null);
+const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showStartConfirmModal, setShowStartConfirmModal] = useState(false);
+  const [showQuickReviewModal, setShowQuickReviewModal] = useState(false);  const [studentId, setStudentId] = useState<string | null>(null);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState(0);
   const [examStartTime, setExamStartTime] = useState<string | null>(null);
@@ -217,8 +218,23 @@ export function QuizPage() {
     return () => clearInterval(timer);
   }, [state]);
 
-  const handleSubmitClick = () => {
+ const handleSubmitClick = () => {
     setShowConfirmModal(true);
+  };
+
+  const handleConfirmEndClick = () => {
+    setShowConfirmModal(false);
+    setShowQuickReviewModal(true);
+  };
+
+  const handleBackToReview = () => {
+    setShowQuickReviewModal(false);
+    setCurrentQ(0);
+  };
+
+  const handleFinalSubmit = () => {
+    setShowQuickReviewModal(false);
+    handleSubmitConfirmed();
   };
 
   const handleSubmitConfirmed = async () => {
@@ -372,127 +388,187 @@ export function QuizPage() {
     wrong?: number;
     total: number;
     submittedAt?: string;
-  }) => (
-    <>
-      {/* Score Circle */}
-      <div className="flex justify-center -mt-12 sm:-mt-16 mb-6 sm:mb-8">
-        <div className="relative">
-          <div className="absolute inset-0 bg-[#B348FE] rounded-full blur-2xl opacity-20"></div>
-          <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full border-[6px] sm:border-8 border-[#B348FE] bg-[#F6EEFF] dark:bg-[#2B103D] flex flex-col items-center justify-center shadow-2xl">
-            <p className="text-3xl sm:text-5xl font-black text-[#B348FE]">
-              {correct ?? 0}
-              <span className="text-lg sm:text-2xl text-gray-400 dark:text-gray-500">/{total}</span>
-            </p>
-            <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">إجابة صحيحة</p>
-          </div>
-        </div>
-      </div>
+  }) => {
+    const totalPoints = questions.reduce((sum, q) => sum + (Number(q.points) || 1), 0);
+    const earnedPoints = questions.reduce((sum, q) => {
+      const selectedId = answers[String(q.id)];
+      const choices = q.question_choices || [];
+      const correctChoice = choices.find((c: any) => String(c.sort_order - 1) === String(q.correct_answer));
+      const isRight = selectedId && correctChoice && selectedId === correctChoice.id;
+      return sum + (isRight ? Number(q.points) || 1 : 0);
+    }, 0);
 
-      <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-        <div className="bg-[#F6EEFF] dark:bg-[#2B103D] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-[#EAD8FF] dark:border-[#3A1650]">
-          <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-            <CheckCircle className="text-[#B348FE]" size={16} />
-            <p className="text-[11px] sm:text-xs text-gray-600 dark:text-gray-400 font-bold">إجابات صحيحة</p>
-          </div>
-          <p className="text-xl sm:text-2xl font-black text-[#B348FE]">{correct ?? 0}</p>
-        </div>
-
-        <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-gray-200 dark:border-[#2A2A2A]">
-          <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-            <XCircle className="text-gray-400" size={16} />
-            <p className="text-[11px] sm:text-xs text-gray-600 dark:text-gray-400 font-bold">إجابات خاطئة</p>
-          </div>
-          <p className="text-xl sm:text-2xl font-black text-gray-700 dark:text-gray-300">{wrong ?? 0}</p>
-        </div>
-      </div>
-
-      {submittedAt && (
-        <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-gray-200 dark:border-[#2A2A2A] mt-2.5 sm:mt-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Clock className="text-[#B348FE]" size={16} />
-              <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-bold">تاريخ التسليم</span>
-            </div>
-            <span className="text-xs sm:text-sm font-black text-gray-900 dark:text-white text-left">{formatDate(submittedAt)}</span>
-          </div>
-        </div>
-      )}
-    </>
-  );
-
-  // ── مكوّن مراجعة الأسئلة: يوضح إجابتك مقابل الإجابة الصحيحة لكل سؤال غلط ──
-  const AnswersReview = () => (
-    <div className="bg-gray-50 dark:bg-[#0B0B0B] rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-[#2A2A2A]">
-      <h3 className="font-black text-gray-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base flex items-center gap-2">
-        <BookOpen size={18} className="text-[#B348FE]" />
-        مراجعة الإجابات
-      </h3>
-
-      <div className="space-y-2.5 sm:space-y-3 max-h-80 overflow-y-auto pr-1 custom-scrollbar">
-        {questions.map((question: any, i: number) => {
-          const selectedId = answers[String(question.id)];
-          const choices = question.question_choices || [];
-          const correctChoice = choices.find(
-            (c: any) => String(c.sort_order - 1) === String(question.correct_answer)
-          );
-          const selectedChoice = choices.find((c: any) => c.id === selectedId);
-          const isRight = selectedId && correctChoice && selectedId === correctChoice.id;
-
-          return (
-            <div
-              key={question.id}
-              className={`rounded-xl sm:rounded-2xl border-2 p-3.5 sm:p-4 ${
-                isRight
-                  ? "bg-[#F6EEFF] dark:bg-[#2B103D] border-[#EAD8FF] dark:border-[#3A1650]"
-                  : "bg-white dark:bg-[#111111] border-gray-200 dark:border-[#2A2A2A]"
-              }`}
-            >
-              <div className="flex items-start gap-2.5 sm:gap-3">
-                <div
-                  className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                    isRight ? "bg-[#B348FE]" : "bg-gray-300 dark:bg-gray-700"
-                  }`}
-                >
-                  {isRight ? (
-                    <CheckCircle size={14} className="text-white" />
-                  ) : (
-                    <XCircle size={14} className="text-white" />
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 mb-1">
-                    السؤال {i + 1}
-                  </p>
-                  <p className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-relaxed mb-2">
-                    {question.title}
-                  </p>
-
-                  {!isRight && (
-                    <div className="space-y-1.5 mt-2">
-                      <div className="flex items-start gap-1.5 text-[11px] sm:text-xs">
-                        <span className="text-gray-400 dark:text-gray-500 font-bold shrink-0">إجابتك:</span>
-                        <span className="text-gray-600 dark:text-gray-400 break-words">
-                          {selectedChoice?.text || "لم تُجب"}
-                        </span>
-                      </div>
-                      <div className="flex items-start gap-1.5 text-[11px] sm:text-xs">
-                        <span className="text-[#B348FE] font-bold shrink-0">الصحيحة:</span>
-                        <span className="text-[#B348FE] font-bold break-words">
-                          {correctChoice?.text || "-"}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+    return (
+      <>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+          {/* النتائج */}
+          <div className="bg-white dark:bg-[#111111] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border border-gray-200 dark:border-[#2A2A2A]">
+            <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold mb-2 text-center">النتائج</p>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between bg-[#F6EEFF] dark:bg-[#2B103D] rounded-lg px-2.5 py-1.5">
+                <CheckCircle className="text-[#B348FE]" size={14} />
+                <span className="text-sm font-black text-[#B348FE]">{correct ?? 0}</span>
+              </div>
+              <div className="flex items-center justify-between bg-gray-50 dark:bg-[#1A1A1A] rounded-lg px-2.5 py-1.5">
+                <XCircle className="text-gray-400" size={14} />
+                <span className="text-sm font-black text-gray-600 dark:text-gray-300">{wrong ?? 0}</span>
               </div>
             </div>
-          );
-        })}
+          </div>
+
+          {/* المحلولة */}
+          <div className="bg-white dark:bg-[#111111] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border border-gray-200 dark:border-[#2A2A2A] flex flex-col items-center justify-center">
+            <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold mb-2">المحلولة</p>
+            <p className="text-2xl sm:text-3xl font-black text-amber-600">{(correct ?? 0) + (wrong ?? 0)}</p>
+          </div>
+
+          {/* النتيجة */}
+          <div className="bg-[#F6EEFF] dark:bg-[#2B103D] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border border-[#EAD8FF] dark:border-[#3A1650] flex flex-col items-center justify-center">
+            <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold mb-2 flex items-center gap-1">
+              <Trophy size={12} className="text-[#B348FE]" />
+              النتيجة
+            </p>
+            <p className="text-2xl sm:text-3xl font-black text-[#B348FE]">{percentage}%</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 text-center">({earnedPoints} درجة من {totalPoints} درجات)</p>
+          </div>
+
+          {/* عدد الأسئلة */}
+          <div className="bg-white dark:bg-[#111111] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border border-gray-200 dark:border-[#2A2A2A] flex flex-col items-center justify-center">
+            <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold mb-2">عدد الأسئلة</p>
+            <p className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">{total}</p>
+          </div>
+        </div>
+
+        {submittedAt && (
+          <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-gray-200 dark:border-[#2A2A2A] mt-2.5 sm:mt-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Clock className="text-[#B348FE]" size={16} />
+                <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-bold">تاريخ التسليم</span>
+              </div>
+              <span className="text-xs sm:text-sm font-black text-gray-900 dark:text-white text-left">{formatDate(submittedAt)}</span>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
+
+  // ── مكوّن مراجعة الأسئلة: يوضح إجابتك مقابل الإجابة الصحيحة لكل سؤال ──
+  const AnswersReview = () => (
+    <div className="space-y-3 sm:space-y-4">
+      <div className="flex justify-center">
+        <span className="px-4 py-1.5 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] text-xs sm:text-sm font-black">
+          الإجابات
+        </span>
       </div>
+
+      {questions.map((question: any, i: number) => {
+        const selectedId = answers[String(question.id)];
+        const choices = question.question_choices || [];
+        const correctChoice = choices.find(
+          (c: any) => String(c.sort_order - 1) === String(question.correct_answer)
+        );
+        const selectedChoice = choices.find((c: any) => c.id === selectedId);
+        const isRight = selectedId && correctChoice && selectedId === correctChoice.id;
+
+        return (
+          <div
+            key={question.id}
+            className={`rounded-2xl border-2 p-4 sm:p-5 bg-white dark:bg-[#111111] ${
+              isRight
+                ? "border-emerald-200 dark:border-emerald-900"
+                : "border-gray-200 dark:border-[#2A2A2A]"
+            }`}
+          >
+            {/* Badges */}
+            <div className="flex items-center gap-2 mb-3">
+              <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300 text-[10px] sm:text-xs font-bold">
+                {question.points === 1 ? "درجة واحدة" : `${question.points} درجات`}
+              </span>
+              <span
+                className={`px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold ${
+                  isRight
+                    ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400"
+                    : "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400"
+                }`}
+              >
+                {isRight ? "إجابة صحيحة" : "إجابة خاطئة"}
+              </span>
+            </div>
+
+            {/* Question Title */}
+            <p className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-relaxed mb-4">
+              {i + 1}. {question.title}
+            </p>
+
+            {question.image_url && (
+              <div className="mb-4 flex justify-center">
+                <img
+                  src={question.image_url}
+                  alt="صورة السؤال"
+                  className="max-w-full max-h-56 rounded-xl border border-gray-200 dark:border-[#2A2A2A] object-contain"
+                />
+              </div>
+            )}
+
+            {/* Choices */}
+            <div className="space-y-2">
+              {choices.map((choice: any) => {
+                const isCorrectChoice = correctChoice && choice.id === correctChoice.id;
+                const isSelectedWrongChoice = !isRight && selectedId && choice.id === selectedId;
+
+                return (
+                  <div
+                    key={choice.id}
+                    className={`flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-bold ${
+                      isCorrectChoice
+                        ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-400"
+                        : isSelectedWrongChoice
+                        ? "bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400"
+                        : "bg-gray-50 dark:bg-[#1A1A1A] border-gray-200 dark:border-[#2A2A2A] text-gray-600 dark:text-gray-300"
+                    }`}
+                  >
+                    <span className="break-words">{choice.text}</span>
+                    {isCorrectChoice && (
+                      <CheckCircle size={16} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                    )}
+                    {isSelectedWrongChoice && (
+                      <XCircle size={16} className="text-rose-600 dark:text-rose-400 flex-shrink-0" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+           {/* Footer: correct vs your answer (only when wrong) */}
+            {!isRight && (
+              <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-[#2A2A2A]">
+                <span className="px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 text-[10px] sm:text-xs font-bold">
+                  الصحيحة: {correctChoice?.text || "-"}
+                </span>
+                <span className="px-3 py-1.5 rounded-full bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300 text-[10px] sm:text-xs font-bold">
+                  إجابتك: {selectedChoice?.text || "لم تُجب"}
+                </span>
+              </div>
+            )}
+
+            {/* Explanation / Note */}
+            {question.explanation && (
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[#2A2A2A]">
+                <p className="text-[11px] sm:text-xs font-black text-gray-500 dark:text-gray-400 mb-1.5">
+                  ملاحظة:
+                </p>
+                <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                  {question.explanation}
+                </p>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
-
   // Already Completed Screen
   if (state === "already-completed" && existingResult) {
     return (
@@ -535,9 +611,89 @@ export function QuizPage() {
     );
   }
 
-  // Confirmation Modal
-  if (showConfirmModal) {
+  // Start Confirmation Modal
+  if (showStartConfirmModal) {
     return (
+      <div className="flex h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#0B0B0B] dark:via-[#111111] dark:to-[#0B0B0B] overflow-hidden" dir="rtl">
+        <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
+        <main className="flex-1 overflow-y-auto">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6">
+            <div className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A] max-w-md w-full overflow-hidden">
+              <div className="p-6 sm:p-8 text-center">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#F6EEFF] dark:bg-[#2B103D] rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4">
+                  <AlertCircle className="text-[#B348FE]" size={28} />
+                </div>
+                <h3 className="text-lg sm:text-2xl font-black text-gray-900 dark:text-white mb-3">تأكيد بدء الاختبار !</h3>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                  بمجرد الضغط على بدء الاختبار سيتم تسجيل الوقت ولا يمكنك الرجوع للخلف والاستفادة من الوقت السابق
+                </p>
+              </div>
+              <div className="p-4 sm:p-6 pt-0 flex gap-3">
+                <Button variant="outline" onClick={() => setShowStartConfirmModal(false)} className="flex-1">
+                  الرجوع
+                </Button>
+                <Button
+                  variant="default"
+                  className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] shadow-lg"
+                  onClick={() => {
+                    setShowStartConfirmModal(false);
+                    setExamStartTime(new Date().toISOString());
+                    setState("active");
+                  }}
+                >
+                  <Play size={18} />
+                  بدء الاختبار
+                </Button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Quick Review Reminder Modal
+  if (showQuickReviewModal) {
+    return (
+      <div className="flex h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#0B0B0B] dark:via-[#111111] dark:to-[#0B0B0B] overflow-hidden" dir="rtl">
+        <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
+        <main className="flex-1 overflow-y-auto">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6">
+            <div className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A] max-w-md w-full overflow-hidden">
+              <div className="p-6 sm:p-8 text-center">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#F6EEFF] dark:bg-[#2B103D] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <AlertCircle className="text-[#B348FE]" size={28} />
+                </div>
+                <h3 className="text-lg sm:text-2xl font-black text-gray-900 dark:text-white mb-3">عارفين إنك شاطر!</h3>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                  مفيش مانع من مراجعة سريعة لإجاباتك وتشوف بسرعة كل إجاباتك. كده هتتأكد إن كل حاجة تمام قبل التسليم!
+                </p>
+              </div>
+              <div className="p-4 sm:p-6 pt-0 flex flex-col sm:flex-row gap-3">
+                <Button
+                  variant="outline"
+                  onClick={handleFinalSubmit}
+                  className="flex-1 border-rose-300 text-rose-600 hover:bg-rose-50 dark:border-rose-800 dark:text-rose-400 dark:hover:bg-rose-950/20"
+                >
+                  تسليم الاختبار علطول
+                </Button>
+                <Button
+                  variant="default"
+                  className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] shadow-lg"
+                  onClick={handleBackToReview}
+                >
+                  هراجع إجاباتي على السريع
+                </Button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Confirmation Modal
+  if (showConfirmModal) {    return (
       <div className="flex h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#0B0B0B] dark:via-[#111111] dark:to-[#0B0B0B] overflow-hidden" dir="rtl">
         <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
         <main className="flex-1 overflow-y-auto">
@@ -589,24 +745,24 @@ export function QuizPage() {
                   </div>
                 )}
 
-                <p className="text-center text-gray-700 dark:text-gray-300 font-bold text-sm sm:text-base">
-                  هل أنت متأكد من تسليم الاختبار؟
+                <p className="text-center text-gray-700 dark:text-gray-300 leading-relaxed text-sm sm:text-base">
+                  لو دوست على تسليم الاختبار .. الاختبار هيتصحح ومش مسموح لك إنك تعيده مرة تانية وهتظهر نتيجتك ودرجتك ..
                 </p>
 
                 <div className="flex gap-3">
                   <Button variant="outline" onClick={() => setShowConfirmModal(false)} className="flex-1">
-                    إلغاء
+                    الرجوع
                   </Button>
                   <Button
                     variant="default"
                     className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] shadow-lg"
-                    onClick={handleSubmitConfirmed}
+                    onClick={handleConfirmEndClick}
                   >
                     <Flag size={18} />
-                    تسليم الاختبار
+                    تأكيد إنهاء الاختبار
                   </Button>
                 </div>
-              </div>
+                              </div>
             </div>
           </div>
         </main>
@@ -692,12 +848,9 @@ export function QuizPage() {
                   </ul>
                 </div>
 
-                <Button
+                 <Button
                   size="lg"
-                  onClick={() => {
-                    setExamStartTime(new Date().toISOString());
-                    setState("active");
-                  }}
+                  onClick={() => setShowStartConfirmModal(true)}
                   className="w-full bg-[#B348FE] hover:bg-[#9E2FFF] shadow-lg hover:shadow-xl transition-all"
                 >
                   <Play className="mr-2" size={20} />
@@ -805,8 +958,18 @@ export function QuizPage() {
               </div>
             </div>
 
+            {q.image_url && (
+              <div className="mb-4 sm:mb-6 flex justify-center">
+                <img
+                  src={q.image_url}
+                  alt="صورة السؤال"
+                  className="max-w-full max-h-64 sm:max-h-80 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-[#2A2A2A] object-contain"
+                />
+              </div>
+            )}
+
             <div className="space-y-2.5 sm:space-y-3">
-              {(q.question_choices || []).map((choice: any) => {
+                            {(q.question_choices || []).map((choice: any) => {
                 const selected = answers[String(q.id)] === choice.id;
 
                 return (

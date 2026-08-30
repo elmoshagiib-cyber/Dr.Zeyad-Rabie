@@ -52,6 +52,8 @@ interface Question {
 questionType: "multiple_choice" | "true_false" | "essay";  choices: string[];
   correctAnswer: number;
   points: number;
+  imageUrl?: string;
+  explanation?: string;
 }
 
 interface QuizItem {
@@ -194,6 +196,8 @@ function createDefaultQuestion(): Question {
     choices: ["", "", "", ""],
     correctAnswer: 0,
     points: 1,
+    imageUrl: "",
+    explanation: "",
   };
 }
 
@@ -384,6 +388,8 @@ case "pdf":
             : "multiple_choice",
         correctAnswer: Number(q.correct_answer || 0),
         points: q.points || 1,
+        imageUrl: q.image_url || "",
+        explanation: q.explanation || "",
         choices: (choicesData || [])
           .filter((c) => c.question_id === q.id)
           .sort((a, b) => a.sort_order - b.sort_order)
@@ -699,6 +705,8 @@ for (let qIndex = 0; qIndex < item.questions.length; qIndex++) {
         : "multiple_choice",
       points: Number(question.points) || 1,
       sort_order: qIndex + 1,
+      image_url: question.imageUrl || null,
+      explanation: question.explanation || null,
 
       // للمقالي احفظ الإجابة النموذجية
 correct_answer: isEssay
@@ -1329,6 +1337,28 @@ async function uploadHomeworkInstructions(
     alert("فشل رفع ملف التعليمات: " + (err?.message || "خطأ غير معروف"));
   }
 }
+
+  // ── Question Image Upload ────────────────────────────────
+  async function uploadQuestionImage(
+    sectionId: string,
+    quizId: string,
+    questionId: string,
+    file: File
+  ) {
+    if (!course) return;
+
+    try {
+      const data = await uploadToR2(
+        file,
+        `question-images/${course.id}/${sectionId}`
+      );
+
+      updateQuestion(sectionId, quizId, questionId, { imageUrl: data.url });
+    } catch (err: any) {
+      console.error("Question Image Upload Error:", err);
+      alert("فشل رفع صورة السؤال: " + (err?.message || "خطأ غير معروف"));
+    }
+  }
 
   // ── Quiz Helpers ─────────────────────────────────────────
   function addQuestion(sectionId: string, quizId: string) {
@@ -1999,10 +2029,32 @@ async function uploadHomeworkInstructions(
                               placeholder="اكتب نص السؤال هنا..."
                             />
                           </div>
+                         <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-2">صورة السؤال (اختياري)</label>
+                            {q.imageUrl ? (
+                              <div className="relative inline-block">
+                                <img src={q.imageUrl} alt="صورة السؤال" className="max-h-40 rounded-xl border border-slate-200" />
+                                <button
+                                  onClick={() => updateQuestion(sectionId, item.id, q.id, { imageUrl: "" })}
+                                  className="absolute -top-2 -left-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow hover:bg-red-600 transition-colors"
+                                >
+                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                              </div>
+                            ) : (
+                              <label className="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-violet-400 hover:bg-violet-50 transition-all group w-fit">
+                                <svg className="w-5 h-5 text-slate-400 group-hover:text-violet-500 transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                <span className="text-sm text-slate-500 group-hover:text-violet-600 transition-colors">رفع صورة للسؤال</span>
+                                <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) uploadQuestionImage(sectionId, item.id, q.id, file);
+                                }} />
+                              </label>
+                            )}
+                          </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className="block text-xs font-semibold text-slate-600 mb-1">نوع السؤال</label>
-                              <select
+                              <label className="block text-xs font-semibold text-slate-600 mb-1">نوع السؤال</label>                              <select
                                 value={q.questionType}
                                 onChange={(e) => {
   const newType = e.target.value as Question["questionType"];
@@ -2108,6 +2160,19 @@ async function uploadHomeworkInstructions(
     />
   </div>
 )}
+
+<div>
+  <label className="block text-xs font-semibold text-slate-600 mb-1">
+    ملاحظة / شرح الإجابة (اختياري)
+  </label>
+  <textarea
+    value={q.explanation || ""}
+    onChange={(e) => updateQuestion(sectionId, item.id, q.id, { explanation: e.target.value })}
+    rows={3}
+    className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-800 bg-slate-50 text-sm resize-none"
+    placeholder="اكتب شرحًا يوضح سبب صحة الإجابة، يظهر للطالب بعد التسليم..."
+  />
+</div>
 
 </div>
 </div>
