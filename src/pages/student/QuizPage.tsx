@@ -412,37 +412,37 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
           <div className="bg-white dark:bg-[#111111] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border border-gray-200 dark:border-[#2A2A2A]">
             <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold mb-2 text-center">النتائج</p>
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between bg-[#F6EEFF] dark:bg-[#2B103D] rounded-lg px-2.5 py-1.5">
-                <CheckCircle className="text-[#B348FE]" size={14} />
-                <span className="text-sm font-black text-[#B348FE]">{correct ?? 0}</span>
+              <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-950/20 rounded-lg px-2.5 py-1.5">
+                <CheckCircle className="text-emerald-500" size={14} />
+                <span className="text-sm font-black text-emerald-600">{correct ?? 0}</span>
               </div>
-              <div className="flex items-center justify-between bg-gray-50 dark:bg-[#1A1A1A] rounded-lg px-2.5 py-1.5">
-                <XCircle className="text-gray-400" size={14} />
-                <span className="text-sm font-black text-gray-600 dark:text-gray-300">{wrong ?? 0}</span>
+              <div className="flex items-center justify-between bg-rose-50 dark:bg-rose-950/20 rounded-lg px-2.5 py-1.5">
+                <XCircle className="text-rose-500" size={14} />
+                <span className="text-sm font-black text-rose-600">{wrong ?? 0}</span>
               </div>
             </div>
           </div>
 
           {/* المحلولة */}
-          <div className="bg-white dark:bg-[#111111] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border border-gray-200 dark:border-[#2A2A2A] flex flex-col items-center justify-center">
-            <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold mb-2">المحلولة</p>
+          <div className="bg-amber-50 dark:bg-amber-950/20 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border border-amber-200 dark:border-amber-900 flex flex-col items-center justify-center">
+            <p className="text-[11px] sm:text-xs text-amber-700 dark:text-amber-400 font-bold mb-2">المحلولة</p>
             <p className="text-2xl sm:text-3xl font-black text-amber-600">{(correct ?? 0) + (wrong ?? 0)}</p>
           </div>
 
           {/* النتيجة */}
-          <div className="bg-[#F6EEFF] dark:bg-[#2B103D] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border border-[#EAD8FF] dark:border-[#3A1650] flex flex-col items-center justify-center">
-            <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold mb-2 flex items-center gap-1">
-              <Trophy size={12} className="text-[#B348FE]" />
+          <div className="bg-teal-50 dark:bg-teal-950/20 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border border-teal-200 dark:border-teal-900 flex flex-col items-center justify-center">
+            <p className="text-[11px] sm:text-xs text-teal-700 dark:text-teal-400 font-bold mb-2 flex items-center gap-1">
+              <Trophy size={12} className="text-teal-500" />
               النتيجة
             </p>
-            <p className="text-2xl sm:text-3xl font-black text-[#B348FE]">{percentage}%</p>
+            <p className="text-2xl sm:text-3xl font-black text-teal-600">{percentage}%</p>
             <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 text-center">({earnedPoints} درجة من {totalPoints} درجات)</p>
           </div>
 
           {/* عدد الأسئلة */}
-          <div className="bg-white dark:bg-[#111111] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border border-gray-200 dark:border-[#2A2A2A] flex flex-col items-center justify-center">
-            <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold mb-2">عدد الأسئلة</p>
-            <p className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">{total}</p>
+          <div className="bg-blue-50 dark:bg-blue-950/20 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border border-blue-200 dark:border-blue-900 flex flex-col items-center justify-center">
+            <p className="text-[11px] sm:text-xs text-blue-700 dark:text-blue-400 font-bold mb-2">عدد الأسئلة</p>
+            <p className="text-2xl sm:text-3xl font-black text-blue-600">{total}</p>
           </div>
         </div>
 
@@ -450,7 +450,7 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
           <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-gray-200 dark:border-[#2A2A2A] mt-2.5 sm:mt-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Clock className="text-[#B348FE]" size={16} />
+                <Clock className="text-teal-500" size={16} />
                 <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-bold">تاريخ التسليم</span>
               </div>
               <span className="text-xs sm:text-sm font-black text-gray-900 dark:text-white text-left">{formatDate(submittedAt)}</span>
@@ -465,7 +465,7 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
   const AnswersReview = () => (
     <div className="space-y-3 sm:space-y-4">
       <div className="flex justify-center">
-        <span className="px-4 py-1.5 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] text-xs sm:text-sm font-black">
+        <span className="px-4 py-1.5 rounded-full bg-teal-50 dark:bg-teal-950/30 text-teal-600 dark:text-teal-400 text-xs sm:text-sm font-black">
           الإجابات
         </span>
       </div>
@@ -880,17 +880,17 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
   // Result Screen
   if (state === "result") {
     return (
-      <div className="flex h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#0B0B0B] dark:via-[#111111] dark:to-[#0B0B0B] overflow-hidden" dir="rtl">
+      <div className="flex h-screen bg-[#F7F5EF] dark:bg-[#0B0B0B] overflow-hidden" dir="rtl">
         <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
-        <main className="flex-1 overflow-y-auto flex items-center justify-center p-3 sm:p-6">
+        <main className="flex-1 overflow-y-auto bg-[#F7F5EF] dark:bg-[#0B0B0B] flex items-start justify-center p-3 sm:p-6">
           <div className="max-w-2xl w-full">
-            <div className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-100 dark:border-[#2A2A2A] overflow-hidden">
-              <div className="p-6 sm:p-10 text-center bg-gradient-to-br from-[#B348FE] via-purple-600 to-[#9E2FFF]">
-                <div className="w-16 h-16 sm:w-24 sm:h-24 bg-white/20 backdrop-blur-sm rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-5 shadow-xl">
-                  <Trophy className="text-white" size={32} />
+            <div className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 dark:border-[#2A2A2A] overflow-hidden">
+              <div className="p-6 sm:p-8 text-center border-b border-gray-100 dark:border-[#2A2A2A]">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-teal-50 dark:bg-teal-950/30 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <Trophy className="text-teal-500" size={28} />
                 </div>
-                <h2 className="text-lg sm:text-3xl font-black text-white mb-2">تم تسليم الاختبار</h2>
-                <p className="text-white/90 text-xs sm:text-base">تم حفظ نتيجتك بنجاح</p>
+                <h2 className="text-lg sm:text-2xl font-black text-gray-900 dark:text-white mb-1">تم تسليم الاختبار</h2>
+                <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">تم حفظ نتيجتك بنجاح</p>
               </div>
 
               <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
@@ -905,7 +905,7 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
 
                 <Button
                   onClick={() => navigate("/dashboard")}
-                  className="w-full bg-[#B348FE] hover:bg-[#9E2FFF] shadow-lg hover:shadow-xl transition-all"
+                  className="w-full bg-teal-500 hover:bg-teal-600 shadow-lg hover:shadow-xl transition-all"
                 >
                   <Trophy size={18} />
                   العودة للداشبورد
@@ -1017,18 +1017,18 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
             {/* Next / Prev */}
             <div className="flex gap-2.5 pt-2">
               <button
-                onClick={() => setCurrentQ(Math.min(questions.length - 1, currentQ + 1))}
-                disabled={currentQ === questions.length - 1}
-                className="flex-1 bg-teal-400 hover:bg-teal-500 disabled:opacity-40 text-white font-bold text-sm py-2.5 rounded-xl transition-colors"
-              >
-                التالي
-              </button>
-              <button
                 onClick={() => setCurrentQ(Math.max(0, currentQ - 1))}
                 disabled={currentQ === 0}
                 className="flex-1 bg-teal-400 hover:bg-teal-500 disabled:opacity-40 text-white font-bold text-sm py-2.5 rounded-xl transition-colors"
               >
                 السابق
+              </button>
+              <button
+                onClick={() => setCurrentQ(Math.min(questions.length - 1, currentQ + 1))}
+                disabled={currentQ === questions.length - 1}
+                className="flex-1 bg-teal-400 hover:bg-teal-500 disabled:opacity-40 text-white font-bold text-sm py-2.5 rounded-xl transition-colors"
+              >
+                التالي
               </button>
             </div>
           </div>
@@ -1045,13 +1045,13 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
             </div>
 
             {/* Question title */}
-            <div className="flex items-start justify-between gap-3 mb-5 sm:mb-6">
+            <div className="flex items-start gap-2.5 sm:gap-3 mb-5 sm:mb-6">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-blue-300 text-blue-400 flex items-center justify-center flex-shrink-0 text-xs sm:text-sm font-bold mt-1">
+                ؟
+              </div>
               <h2 className="flex-1 text-base sm:text-2xl font-bold text-gray-900 dark:text-white leading-relaxed break-words text-right">
                 {q.title}
               </h2>
-              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-blue-300 text-blue-400 flex items-center justify-center flex-shrink-0 text-xs sm:text-sm font-bold">
-                ؟
-              </div>
             </div>
 
             <div className={q.image_url ? "grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 items-start" : ""}>
