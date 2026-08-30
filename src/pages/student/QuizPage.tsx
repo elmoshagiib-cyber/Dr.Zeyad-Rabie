@@ -920,11 +920,11 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Active Quiz
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#0B0B0B] dark:via-[#111111] dark:to-[#0B0B0B] overflow-hidden" dir="rtl">
+    <div className="flex h-screen bg-[#F7F5EF] dark:bg-[#0B0B0B] overflow-hidden" dir="rtl">
       <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto bg-[#F7F5EF] dark:bg-[#0B0B0B]">
         {/* Control Panel (scrolls normally with the page) */}
-        <div className="bg-[#F7F7F2] dark:bg-[#0B0B0B] border-b border-gray-200 dark:border-[#2A2A2A] px-3 sm:px-4 py-4">
+        <div className="px-3 sm:px-4 py-4">
           <div className="max-w-md mx-auto space-y-2.5">
 
             {/* Timer */}
@@ -1036,21 +1036,21 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
 
         <div className="max-w-4xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
           {/* Question */}
-          <div className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-[#2A2A2A] shadow-xl p-4 sm:p-8">
-            <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
-              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#B348FE] text-white font-black text-sm sm:text-lg flex items-center justify-center flex-shrink-0 shadow-lg">
-                {currentQ + 1}
-              </div>
+          <div className="p-2 sm:p-4">
+            {/* Points badge */}
+            <div className="flex justify-center mb-4 sm:mb-5">
+              <span className="px-5 sm:px-6 py-2 rounded-full bg-amber-400 text-white text-xs sm:text-sm font-black shadow-sm">
+                {(!q.points || q.points === 1) ? "درجة واحدة" : `${q.points} درجات`}
+              </span>
+            </div>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] text-[10px] sm:text-xs font-bold rounded-lg">
-                    {q.type === "mcq" ? "اختيار من متعدد" : "سؤال"}
-                  </span>
-                </div>
-                <h2 className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white leading-relaxed break-words">
-                  {q.title}
-                </h2>
+            {/* Question title */}
+            <div className="flex items-start justify-between gap-3 mb-5 sm:mb-6">
+              <h2 className="flex-1 text-base sm:text-2xl font-bold text-gray-900 dark:text-white leading-relaxed break-words text-right">
+                {q.title}
+              </h2>
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-blue-300 text-blue-400 flex items-center justify-center flex-shrink-0 text-xs sm:text-sm font-bold">
+                ؟
               </div>
             </div>
 
@@ -1063,21 +1063,20 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
                     <button
                       key={choice.id}
                       onClick={() => handleAnswer(String(q.id), choice.id)}
-                      className={`w-full text-right p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 transition-all font-medium text-xs sm:text-base group ${
+                      className={`w-full text-right px-4 sm:px-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl border transition-all font-medium text-xs sm:text-base ${
                         selected
-                          ? "border-[#B348FE] bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] shadow-md"
-                          : "border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#111111] text-gray-700 dark:text-gray-300 hover:border-[#B348FE]/50 hover:bg-[#F6EEFF]/30 dark:hover:bg-[#2B103D]/30"
+                          ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 text-gray-900 dark:text-white"
+                          : "border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#111111] text-gray-700 dark:text-gray-300 hover:border-gray-300"
                       }`}
                     >
-                      <div className="flex items-center gap-2.5 sm:gap-3">
+                      <div className="flex items-center justify-between gap-2.5 sm:gap-3">
                         <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
                           selected
-                            ? "border-[#B348FE] bg-[#B348FE]"
-                            : "border-gray-300 dark:border-gray-600 group-hover:border-[#B348FE]"
+                            ? "border-emerald-500 bg-emerald-500"
+                            : "border-gray-300 dark:border-gray-600"
                         }`}>
                           {selected && <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-white rounded-full"></div>}
                         </div>
-
                         <span className="flex-1 break-words">{choice.text}</span>
                       </div>
                     </button>
