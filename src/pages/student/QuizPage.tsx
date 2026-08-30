@@ -58,6 +58,7 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState(0);
   const [examStartTime, setExamStartTime] = useState<string | null>(null);
+  const [openedQuestions, setOpenedQuestions] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     getCurrentUser();
@@ -217,6 +218,12 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
     }, 1000);
     return () => clearInterval(timer);
   }, [state]);
+
+  useEffect(() => {
+    if (state === "active") {
+      setOpenedQuestions(prev => new Set(prev).add(currentQ));
+    }
+  }, [currentQ, state]);
 
  const handleSubmitClick = () => {
     setShowConfirmModal(true);
@@ -502,16 +509,7 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
               {i + 1}. {question.title}
             </p>
 
-            {question.image_url && (
-              <div className="mb-4 flex justify-center">
-                <img
-                  src={question.image_url}
-                  alt="صورة السؤال"
-                  className="max-w-full max-h-56 rounded-xl border border-gray-200 dark:border-[#2A2A2A] object-contain"
-                />
-              </div>
-            )}
-
+            <div className={question.image_url ? "grid grid-cols-1 md:grid-cols-2 gap-4 items-start" : ""}>
             {/* Choices */}
             <div className="space-y-2">
               {choices.map((choice: any) => {
@@ -539,6 +537,17 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
                   </div>
                 );
               })}
+            </div>
+
+              {question.image_url && (
+                <div className="flex justify-center md:justify-start">
+                  <img
+                    src={question.image_url}
+                    alt="صورة السؤال"
+                    className="max-w-full max-h-56 rounded-xl border border-gray-200 dark:border-[#2A2A2A] object-contain"
+                  />
+                </div>
+              )}
             </div>
 
            {/* Footer: correct vs your answer (only when wrong) */}
@@ -699,11 +708,11 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
         <main className="flex-1 overflow-y-auto">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6">
             <div className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A] max-w-md w-full overflow-hidden">
-              <div className="bg-[#B348FE] p-6 sm:p-8 text-center">
-                <div className="w-14 h-14 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-xl">
-                  <Flag className="text-white" size={28} />
+              <div className="p-6 sm:p-8 text-center">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-blue-50 dark:bg-blue-950/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Flag className="text-blue-500" size={28} />
                 </div>
-                <h3 className="text-lg sm:text-2xl font-black text-white">تأكيد التسليم</h3>
+                <h3 className="text-lg sm:text-2xl font-black text-gray-900 dark:text-white">تأكيد التسليم</h3>
               </div>
 
               <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
@@ -914,26 +923,113 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
     <div className="flex h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#0B0B0B] dark:via-[#111111] dark:to-[#0B0B0B] overflow-hidden" dir="rtl">
       <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
       <main className="flex-1 overflow-y-auto">
-        {/* Quiz Header */}
-        <div className="sticky top-0 z-10 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl border-b border-gray-200 dark:border-[#2A2A2A] px-3 sm:px-6 py-3 sm:py-4 shadow-sm">
-          <div className="max-w-4xl mx-auto flex items-center justify-between gap-3 sm:gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1.5 sm:mb-2 gap-2">
-                <p className="text-xs sm:text-sm font-black text-gray-900 dark:text-white truncate">{quiz.title}</p>
-                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold flex-shrink-0">
-                  {currentQ + 1} / {questions.length}
-                </p>
-              </div>
-              <ProgressBar value={currentQ + 1} max={questions.length} size="sm" />
+        {/* Sticky Control Panel */}
+        <div className="sticky top-0 z-20 bg-[#F7F7F2] dark:bg-[#0B0B0B] border-b border-gray-200 dark:border-[#2A2A2A] px-3 sm:px-4 py-4">
+          <div className="max-w-md mx-auto space-y-2.5">
+
+            {/* Timer */}
+            <div className={`rounded-xl py-2.5 text-center text-white ${timeLeft < 120 ? "bg-rose-500" : "bg-emerald-600"}`}>
+              <p className="text-[11px] font-bold mb-0.5 opacity-90">باقي من الزمن :</p>
+              <p className="text-xl font-black font-mono">{formatTime(timeLeft)}</p>
             </div>
 
-            <div className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-mono font-black text-xs sm:text-sm flex-shrink-0 border-2 transition-all ${
-              timeLeft < 120
-                ? "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-300 dark:border-rose-800 animate-pulse"
-                : "bg-gray-50 dark:bg-[#0B0B0B] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A2A]"
-            }`}>
-              <Clock size={14} />
-              {formatTime(timeLeft)}
+            {/* Action Buttons */}
+            <button
+              onClick={handleSubmitClick}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold text-sm py-2.5 rounded-xl transition-colors"
+            >
+              إنهاء الاختبار
+            </button>
+
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="w-full bg-amber-400 hover:bg-amber-500 text-white font-bold text-sm py-2.5 rounded-xl transition-colors"
+            >
+              استكمال الاختبار لاحقًا
+            </button>
+
+            <button
+              onClick={() => setShowQuickReviewModal(true)}
+              className="w-full bg-lime-600 hover:bg-lime-700 text-white font-bold text-sm py-2.5 rounded-xl transition-colors"
+            >
+              عرض الإجابات
+            </button>
+
+            {/* Stats */}
+            <div className="space-y-1.5 pt-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-bold">اجمالي درجات الامتحان :</span>
+                <span className="w-9 h-8 flex items-center justify-center bg-white dark:bg-[#111] border border-gray-200 dark:border-[#2A2A2A] rounded-lg font-black text-sm">
+                  {questions.reduce((sum, qq) => sum + (Number(qq.points) || 1), 0)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-bold">عدد الاسئلة :</span>
+                <span className="w-9 h-8 flex items-center justify-center bg-white dark:bg-[#111] border border-gray-200 dark:border-[#2A2A2A] rounded-lg font-black text-sm">
+                  {questions.length}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-bold">عدد الاسئلة الي تم فتحها :</span>
+                <span className="w-9 h-8 flex items-center justify-center bg-amber-400 text-white rounded-lg font-black text-sm">
+                  {openedQuestions.size}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-bold">عدد الاسئلة غير المحلولة :</span>
+                <span className="w-9 h-8 flex items-center justify-center bg-emerald-700 text-white rounded-lg font-black text-sm">
+                  {unansweredCount}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-bold">عدد الاسئلة المحلولة :</span>
+                <span className="w-9 h-8 flex items-center justify-center bg-blue-500 text-white rounded-lg font-black text-sm">
+                  {answeredCount}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-bold">السؤال الحالي :</span>
+                <span className="w-9 h-8 flex items-center justify-center border-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 rounded-lg font-black text-sm">
+                  {currentQ + 1}
+                </span>
+              </div>
+            </div>
+
+            {/* Question Number Grid */}
+            <div className="flex flex-wrap gap-1.5 justify-center pt-2">
+              {questions.map((_: any, i: number) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentQ(i)}
+                  className={`w-9 h-9 rounded-lg text-xs font-bold transition-all ${
+                    i === currentQ
+                      ? "bg-emerald-600 text-white"
+                      : answers[String(questions[i].id)]
+                      ? "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400"
+                      : "bg-gray-300 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-300"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+
+            {/* Next / Prev */}
+            <div className="flex gap-2.5 pt-2">
+              <button
+                onClick={() => setCurrentQ(Math.min(questions.length - 1, currentQ + 1))}
+                disabled={currentQ === questions.length - 1}
+                className="flex-1 bg-teal-400 hover:bg-teal-500 disabled:opacity-40 text-white font-bold text-sm py-2.5 rounded-xl transition-colors"
+              >
+                التالي
+              </button>
+              <button
+                onClick={() => setCurrentQ(Math.max(0, currentQ - 1))}
+                disabled={currentQ === 0}
+                className="flex-1 bg-teal-400 hover:bg-teal-500 disabled:opacity-40 text-white font-bold text-sm py-2.5 rounded-xl transition-colors"
+              >
+                السابق
+              </button>
             </div>
           </div>
         </div>
@@ -958,106 +1054,47 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
               </div>
             </div>
 
-            {q.image_url && (
-              <div className="mb-4 sm:mb-6 flex justify-center">
-                <img
-                  src={q.image_url}
-                  alt="صورة السؤال"
-                  className="max-w-full max-h-64 sm:max-h-80 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-[#2A2A2A] object-contain"
-                />
-              </div>
-            )}
+            <div className={q.image_url ? "grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 items-start" : ""}>
+              <div className="space-y-2.5 sm:space-y-3">
+                {(q.question_choices || []).map((choice: any) => {
+                  const selected = answers[String(q.id)] === choice.id;
 
-            <div className="space-y-2.5 sm:space-y-3">
-                            {(q.question_choices || []).map((choice: any) => {
-                const selected = answers[String(q.id)] === choice.id;
-
-                return (
-                  <button
-                    key={choice.id}
-                    onClick={() => handleAnswer(String(q.id), choice.id)}
-                    className={`w-full text-right p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 transition-all font-medium text-xs sm:text-base group ${
-                      selected
-                        ? "border-[#B348FE] bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] shadow-md"
-                        : "border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#111111] text-gray-700 dark:text-gray-300 hover:border-[#B348FE]/50 hover:bg-[#F6EEFF]/30 dark:hover:bg-[#2B103D]/30"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 sm:gap-3">
-                      <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+                  return (
+                    <button
+                      key={choice.id}
+                      onClick={() => handleAnswer(String(q.id), choice.id)}
+                      className={`w-full text-right p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 transition-all font-medium text-xs sm:text-base group ${
                         selected
-                          ? "border-[#B348FE] bg-[#B348FE]"
-                          : "border-gray-300 dark:border-gray-600 group-hover:border-[#B348FE]"
-                      }`}>
-                        {selected && <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-white rounded-full"></div>}
+                          ? "border-[#B348FE] bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] shadow-md"
+                          : "border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#111111] text-gray-700 dark:text-gray-300 hover:border-[#B348FE]/50 hover:bg-[#F6EEFF]/30 dark:hover:bg-[#2B103D]/30"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 sm:gap-3">
+                        <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+                          selected
+                            ? "border-[#B348FE] bg-[#B348FE]"
+                            : "border-gray-300 dark:border-gray-600 group-hover:border-[#B348FE]"
+                        }`}>
+                          {selected && <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-white rounded-full"></div>}
+                        </div>
+
+                        <span className="flex-1 break-words">{choice.text}</span>
                       </div>
-
-                      <span className="flex-1 break-words">{choice.text}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentQ(Math.max(0, currentQ - 1))}
-              disabled={currentQ === 0}
-              className="w-full sm:w-auto order-2 sm:order-1"
-            >
-              <ChevronRight size={18} />
-              السابق
-            </Button>
-
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center order-1 sm:order-2">
-              {questions.map((_: any, i: number) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentQ(i)}
-                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all ${
-                    i === currentQ
-                      ? "bg-[#B348FE] text-white shadow-lg scale-110"
-                      : answers[String(questions[i].id)]
-                      ? "bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] border border-[#EAD8FF] dark:border-[#3A1650]"
-                      : "bg-gray-100 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE]"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-
-            {currentQ < questions.length - 1 ? (
-              <Button onClick={() => setCurrentQ(currentQ + 1)} className="w-full sm:w-auto order-3 bg-[#B348FE] hover:bg-[#9E2FFF]">
-                التالي
-                <ChevronLeft size={18} />
-              </Button>
-            ) : (
-              <Button
-                variant="default"
-                className="w-full sm:w-auto order-3 bg-[#B348FE] hover:bg-[#9E2FFF] shadow-lg"
-                onClick={handleSubmitClick}
-              >
-                <Flag size={18} />
-                تسليم الاختبار
-              </Button>
-            )}
-          </div>
-
-          {/* Progress Card */}
-          <div className="bg-white dark:bg-[#111111] rounded-xl sm:rounded-2xl border border-gray-200 dark:border-[#2A2A2A] p-4 sm:p-5 shadow-sm">
-            <div className="flex items-center justify-between text-xs sm:text-sm mb-2.5 sm:mb-3">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="text-[#B348FE]" size={16} />
-                <span className="font-bold text-gray-900 dark:text-white">تقدم الإجابات</span>
+                    </button>
+                  );
+                })}
               </div>
-              <span className="font-black text-gray-900 dark:text-white">
-                {answeredCount} / {questions.length}
-              </span>
+
+              {q.image_url && (
+                <div className="flex justify-center md:justify-start">
+                  <img
+                    src={q.image_url}
+                    alt="صورة السؤال"
+                    className="max-w-full max-h-64 sm:max-h-80 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-[#2A2A2A] object-contain"
+                  />
+                </div>
+              )}
             </div>
-            <ProgressBar value={answeredCount} max={questions.length} size="sm" />
           </div>
         </div>
       </main>
