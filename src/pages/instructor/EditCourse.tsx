@@ -49,8 +49,10 @@ file?: File;
 interface Question {
   id: string;
   title: string;
-questionType: "multiple_choice" | "true_false" | "essay";  choices: string[];
+  questionType: "multiple_choice" | "true_false" | "essay";
+  choices: string[];
   correctAnswer: number;
+  correctText?: string;
   points: number;
   imageUrl?: string;
   explanation?: string;
@@ -83,6 +85,7 @@ interface HomeworkItem {
   visibility: "public" | "private";
   published: boolean;
   attachmentFile?: File;
+  questions: Question[];
 }
 
 type CourseItem = VideoItem | PdfItem | QuizItem | HomeworkItem;
@@ -230,6 +233,7 @@ function createDefaultHomework(): HomeworkItem {
     submissionTypes: ["text"],
     visibility: "public",
     published: false,
+    questions: [],
   };
 }
 
@@ -312,6 +316,18 @@ const { data: homeworksData, error: homeworksError } = await supabase
   .select("*");
 
 if (homeworksError) throw homeworksError;
+
+const { data: hwQuestionsData, error: hwQuestionsError } = await supabase
+  .from("homework_questions")
+  .select("*");
+
+if (hwQuestionsError) throw hwQuestionsError;
+
+const { data: hwChoicesData, error: hwChoicesError } = await supabase
+  .from("homework_question_choices")
+  .select("*");
+
+if (hwChoicesError) throw hwChoicesError;
 
 const loadedCourse: Course = {
   id: data.id,
@@ -415,6 +431,29 @@ case "pdf":
       (h) => h.course_item_id === item.id
     );
 
+    const hwQuestions = (hwQuestionsData || [])
+      .filter((q) => q.homework_id === hw?.id)
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((q) => ({
+        id: String(q.id),
+        title: q.title || "",
+        questionType:
+          q.type === "essay"
+            ? "essay"
+            : q.type === "true_false"
+            ? "true_false"
+            : "multiple_choice",
+        correctAnswer: Number(q.correct_answer || 0),
+        correctText: q.correct_text || "",
+        points: q.points || 1,
+        imageUrl: q.image_url || "",
+        explanation: q.explanation || "",
+        choices: (hwChoicesData || [])
+          .filter((c) => c.question_id === q.id)
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .map((c) => c.text),
+      }));
+
     return {
       type: "homework",
       id: item.id,
@@ -428,6 +467,7 @@ case "pdf":
       submissionTypes: hw?.allowed_types || ["text"],
       visibility: "public",
       published: hw?.is_published || false,
+      questions: hwQuestions,
     };
   }
 
@@ -735,7 +775,7 @@ correct_answer: isEssay
 }
     }
 
-    // ==========================
+   // ==========================
     // Homework
     // ==========================
     if (item.type === "homework") {
@@ -755,6 +795,8 @@ correct_answer: isEssay
         course_item_id: item.id,
       };
 
+      let homeworkId: number;
+
       const { data: existingHomework } = await supabase
         .from("homeworks")
         .select("id")
@@ -762,18 +804,86 @@ correct_answer: isEssay
         .maybeSingle();
 
       if (!existingHomework) {
-        const { error } = await supabase
+        const { data: newHomework, error } = await supabase
           .from("homeworks")
-          .insert(homeworkPayload);
+          .insert(homeworkPayload)
+          .select()
+          .single();
 
         if (error) throw error;
+
+        homeworkId = newHomework.id;
       } else {
+        homeworkId = existingHomework.id;
+
         const { error } = await supabase
           .from("homeworks")
           .update(homeworkPayload)
-          .eq("id", existingHomework.id);
+          .eq("id", homeworkId);
 
         if (error) throw error;
+      }
+
+      // حذف أسئلة الواجب القديمة
+      const { data: oldHwQuestions } = await supabase
+        .from("homework_questions")
+        .select("id")
+        .eq("homework_id", homeworkId);
+
+      if (oldHwQuestions?.length) {
+        await supabase
+          .from("homework_question_choices")
+          .delete()
+          .in(
+            "question_id",
+            oldHwQuestions.map((q) => q.id)
+          );
+
+        await supabase
+          .from("homework_questions")
+          .delete()
+          .eq("homework_id", homeworkId);
+      }
+
+      for (let qIndex = 0; qIndex < item.questions.length; qIndex++) {
+        const question = item.questions[qIndex];
+        const isEssay = question.questionType === "essay";
+
+        const { data: newHwQuestion, error } = await supabase
+          .from("homework_questions")
+          .insert({
+            homework_id: homeworkId,
+            title: question.title,
+            type: isEssay
+              ? "essay"
+              : question.questionType === "true_false"
+              ? "true_false"
+              : "multiple_choice",
+            points: Number(question.points) || 1,
+            sort_order: qIndex + 1,
+            image_url: question.imageUrl || null,
+            explanation: question.explanation || null,
+            correct_answer: isEssay ? null : question.correctAnswer,
+            correct_text: isEssay ? question.correctText || "" : null,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        if (isEssay) continue;
+
+        for (let cIndex = 0; cIndex < question.choices.length; cIndex++) {
+          const { error } = await supabase
+            .from("homework_question_choices")
+            .insert({
+              question_id: newHwQuestion.id,
+              text: question.choices[cIndex],
+              sort_order: cIndex + 1,
+            });
+
+          if (error) throw error;
+        }
       }
     }
   }
@@ -1481,9 +1591,134 @@ async function uploadHomeworkInstructions(
     );
   }
 
+ // ── Homework Question Helpers ───────────────────────────
+  function addHomeworkQuestion(sectionId: string, hwId: string) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId
+                ? {
+                    ...s,
+                    items: s.items.map((item) =>
+                      item.id === hwId && item.type === "homework"
+                        ? { ...item, questions: [...item.questions, createDefaultQuestion()] }
+                        : item
+                    ),
+                  }
+                : s
+            ),
+          }
+        : prev
+    );
+  }
+
+  function removeHomeworkQuestion(sectionId: string, hwId: string, questionId: string) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId
+                ? {
+                    ...s,
+                    items: s.items.map((item) =>
+                      item.id === hwId && item.type === "homework"
+                        ? { ...item, questions: item.questions.filter((q) => q.id !== questionId) }
+                        : item
+                    ),
+                  }
+                : s
+            ),
+          }
+        : prev
+    );
+  }
+
+  function updateHomeworkQuestion(
+    sectionId: string,
+    hwId: string,
+    questionId: string,
+    updates: Partial<Question>
+  ) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId
+                ? {
+                    ...s,
+                    items: s.items.map((item) =>
+                      item.id === hwId && item.type === "homework"
+                        ? {
+                            ...item,
+                            questions: item.questions.map((q) =>
+                              q.id === questionId ? { ...q, ...updates } : q
+                            ),
+                          }
+                        : item
+                    ),
+                  }
+                : s
+            ),
+          }
+        : prev
+    );
+  }
+
+  function moveHomeworkQuestion(
+    sectionId: string,
+    hwId: string,
+    qIndex: number,
+    direction: "up" | "down"
+  ) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId
+                ? {
+                    ...s,
+                    items: s.items.map((item) => {
+                      if (item.id !== hwId || item.type !== "homework") return item;
+                      const questions = [...item.questions];
+                      if (direction === "up" && qIndex > 0) {
+                        [questions[qIndex - 1], questions[qIndex]] = [questions[qIndex], questions[qIndex - 1]];
+                      } else if (direction === "down" && qIndex < questions.length - 1) {
+                        [questions[qIndex], questions[qIndex + 1]] = [questions[qIndex + 1], questions[qIndex]];
+                      }
+                      return { ...item, questions };
+                    }),
+                  }
+                : s
+            ),
+          }
+        : prev
+    );
+  }
+
+  async function uploadHomeworkQuestionImage(
+    sectionId: string,
+    hwId: string,
+    questionId: string,
+    file: File
+  ) {
+    if (!course) return;
+    try {
+      const data = await uploadToR2(file, `homework-question-images/${course.id}/${sectionId}`);
+      updateHomeworkQuestion(sectionId, hwId, questionId, { imageUrl: data.url });
+    } catch (err: any) {
+      console.error("Homework Question Image Upload Error:", err);
+      alert("فشل رفع صورة السؤال: " + (err?.message || "خطأ غير معروف"));
+    }
+  }
+
   // ── Homework helpers ────────────────────────────────────
   function toggleSubmissionType(
-    sectionId: string,
+        sectionId: string,
     hwId: string,
     type: HomeworkItem["submissionTypes"][number]
   ) {
@@ -2326,6 +2561,196 @@ async function uploadHomeworkInstructions(
                       <svg className="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                     )}
                   </button>
+                );
+              })}
+            </div>
+          </div>
+
+           {/* Questions */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-bold text-slate-800">أسئلة الواجب ({item.questions.length})</h4>
+              <button
+                onClick={() => addHomeworkQuestion(sectionId, item.id)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 transition-colors shadow-sm shadow-amber-200"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                إضافة سؤال
+              </button>
+            </div>
+
+            {item.questions.length === 0 && (
+              <div className="text-center py-6 text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200 mb-2">
+                <p className="text-sm font-medium">مفيش أسئلة لسه — دوس "إضافة سؤال" لو عايز الواجب يبقى تفاعلي بدل رفع ملف</p>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              {item.questions.map((q, qIdx) => {
+                const isExpanded = expandedQuestions[q.id] !== false;
+                const isEssay = q.questionType === "essay";
+                return (
+                  <div key={q.id} className="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50">
+                    <div
+                      className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => setExpandedQuestions((prev) => ({ ...prev, [q.id]: !isExpanded }))}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                          {qIdx + 1}
+                        </span>
+                        <span className="text-sm font-medium text-slate-700 truncate max-w-xs">
+                          {q.title || "سؤال بدون عنوان"}
+                        </span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-500">
+                          {q.questionType === "multiple_choice" ? "اختيار متعدد" : q.questionType === "true_false" ? "صح/خطأ" : "مقالي"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => moveHomeworkQuestion(sectionId, item.id, qIdx, "up")} disabled={qIdx === 0} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+                        </button>
+                        <button onClick={() => moveHomeworkQuestion(sectionId, item.id, qIdx, "down")} disabled={qIdx === item.questions.length - 1} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        <button onClick={() => removeHomeworkQuestion(sectionId, item.id, q.id)} className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                        <svg className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                      </div>
+                    </div>
+                    {isExpanded && (
+                      <div className="px-4 pb-4 space-y-4 bg-white border-t border-slate-100">
+                        <div className="pt-3 grid grid-cols-1 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-1">نص السؤال</label>
+                            <textarea
+                              value={q.title}
+                              onChange={(e) => updateHomeworkQuestion(sectionId, item.id, q.id, { title: e.target.value })}
+                              rows={2}
+                              className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 bg-slate-50 text-sm resize-none"
+                              placeholder="مثال: اقرأ الفقرة صفحة 12 من الكتاب ثم أجب..."
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-2">صورة السؤال (اختياري)</label>
+                            {q.imageUrl ? (
+                              <div className="relative inline-block">
+                                <img src={q.imageUrl} alt="صورة السؤال" className="max-h-40 rounded-xl border border-slate-200" />
+                                <button
+                                  onClick={() => updateHomeworkQuestion(sectionId, item.id, q.id, { imageUrl: "" })}
+                                  className="absolute -top-2 -left-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow hover:bg-red-600 transition-colors"
+                                >
+                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                              </div>
+                            ) : (
+                              <label className="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-amber-400 hover:bg-amber-50 transition-all group w-fit">
+                                <svg className="w-5 h-5 text-slate-400 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                <span className="text-sm text-slate-500 group-hover:text-amber-600 transition-colors">رفع صورة للسؤال</span>
+                                <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) uploadHomeworkQuestionImage(sectionId, item.id, q.id, file);
+                                }} />
+                              </label>
+                            )}
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-600 mb-1">نوع السؤال</label>
+                              <select
+                                value={q.questionType}
+                                onChange={(e) => {
+                                  const newType = e.target.value as Question["questionType"];
+                                  updateHomeworkQuestion(sectionId, item.id, q.id, {
+                                    questionType: newType,
+                                    choices:
+                                      newType === "essay"
+                                        ? []
+                                        : newType === "true_false"
+                                        ? ["صح", "خطأ"]
+                                        : ["", "", "", ""],
+                                    correctAnswer: 0,
+                                  });
+                                }}
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 bg-slate-50 text-sm"
+                              >
+                                <option value="multiple_choice">اختيار متعدد</option>
+                                <option value="true_false">صح / خطأ</option>
+                                <option value="essay">مقالي</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-600 mb-1">الدرجات</label>
+                              <input type="number" min={1} value={q.points} onChange={(e) => updateHomeworkQuestion(sectionId, item.id, q.id, { points: Number(e.target.value) })} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 bg-slate-50 text-sm" />
+                            </div>
+                          </div>
+
+                          {!isEssay && (
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-600 mb-2">الخيارات والإجابة الصحيحة</label>
+                              <div className="space-y-2">
+                                {q.choices.map((choice, cIdx) => (
+                                  <div key={cIdx} className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => updateHomeworkQuestion(sectionId, item.id, q.id, { correctAnswer: cIdx })}
+                                      className={`w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+                                        q.correctAnswer === cIdx
+                                          ? "border-emerald-500 bg-emerald-500"
+                                          : "border-slate-300 hover:border-emerald-400"
+                                      }`}
+                                    >
+                                      {q.correctAnswer === cIdx && (
+                                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                      )}
+                                    </button>
+                                    <input
+                                      type="text"
+                                      value={choice}
+                                      disabled={q.questionType === "true_false"}
+                                      onChange={(e) => {
+                                        const newChoices = [...q.choices];
+                                        newChoices[cIdx] = e.target.value;
+                                        updateHomeworkQuestion(sectionId, item.id, q.id, { choices: newChoices });
+                                      }}
+                                      className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 bg-slate-50 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                                      placeholder={`الخيار ${cIdx + 1}`}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {isEssay && (
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-600 mb-2">الإجابة النموذجية (تساعد المعلم وقت التصحيح اليدوي)</label>
+                              <textarea
+                                value={q.correctText || ""}
+                                onChange={(e) => updateHomeworkQuestion(sectionId, item.id, q.id, { correctText: e.target.value })}
+                                rows={4}
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 bg-slate-50 text-sm resize-none"
+                                placeholder="اكتب الإجابة النموذجية هنا..."
+                              />
+                            </div>
+                          )}
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-1">ملاحظة / شرح الإجابة (اختياري)</label>
+                            <textarea
+                              value={q.explanation || ""}
+                              onChange={(e) => updateHomeworkQuestion(sectionId, item.id, q.id, { explanation: e.target.value })}
+                              rows={2}
+                              className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 bg-slate-50 text-sm resize-none"
+                              placeholder="يظهر للطالب بعد التسليم..."
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
