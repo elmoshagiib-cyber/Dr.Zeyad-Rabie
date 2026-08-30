@@ -923,8 +923,8 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
     <div className="flex h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#0B0B0B] dark:via-[#111111] dark:to-[#0B0B0B] overflow-hidden" dir="rtl">
       <div className="hidden lg:block flex-shrink-0"><DashboardSidebar type="student" /></div>
       <main className="flex-1 overflow-y-auto">
-        {/* Sticky Control Panel */}
-        <div className="sticky top-0 z-20 bg-[#F7F7F2] dark:bg-[#0B0B0B] border-b border-gray-200 dark:border-[#2A2A2A] px-3 sm:px-4 py-4">
+        {/* Control Panel (scrolls normally with the page) */}
+        <div className="bg-[#F7F7F2] dark:bg-[#0B0B0B] border-b border-gray-200 dark:border-[#2A2A2A] px-3 sm:px-4 py-4">
           <div className="max-w-md mx-auto space-y-2.5">
 
             {/* Timer */}
