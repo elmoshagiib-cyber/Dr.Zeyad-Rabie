@@ -210,12 +210,11 @@ const { data: authData, error: authError } =
   });
 
 if (authError) {
-  
 
   await supabase.rpc("record_failed_login", { p_phone: phone });
 
   setErrors({
-    password: `خطأ: ${authError.message}`,
+    password: "رقم الهاتف أو كلمة المرور غير صحيحة",
   });
 
   setLoading(false);
