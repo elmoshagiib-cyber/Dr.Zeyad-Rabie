@@ -153,102 +153,7 @@ export function HomeworkPage() {
               <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-2">لا توجد واجبات</h2>
               <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">لا توجد واجبات متاحة حالياً.</p>
             </div>
-          ) : (
-            /* Homework Cards - نفس ستايل كروت الامتحانات */
-            <div className="space-y-4 sm:space-y-5 lg:space-y-6">
-              {homeworks.map((hw: any) => {
-                const status = getHomeworkStatus(hw);
-                const hasGrade = hw.submission?.grade !== null && hw.submission?.grade !== undefined;
-                const total = hw.total_score || 100;
-                const percent = hasGrade ? Math.round((hw.submission.grade / total) * 100) : null;
-
-                return (
-                  <div
-                    key={hw.id}
-                    className={`bg-white dark:bg-[#111111] border rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-sm hover:shadow-xl transition-all duration-300 ${
-                      status === "corrected"
-                        ? "border-[#EAD8FF] dark:border-[#3D1E5C] hover:border-[#B348FE]"
-                        : status === "submitted"
-                        ? "border-[#EAD8FF] dark:border-[#3D1E5C] hover:border-[#B348FE]"
-                        : "border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE]"
-                    }`}
-                  >
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
-                      {/* Homework Info */}
-                      <div className="flex-1 space-y-2.5 sm:space-y-3 min-w-0">
-                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                          <h2 className="text-base sm:text-xl lg:text-2xl font-black text-gray-900 dark:text-white break-words">
-                            {hw.title}
-                          </h2>
-                          <span
-                            className={`inline-flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-black shrink-0 ${
-                              status === "not_submitted"
-                                ? "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400"
-                                : status === "submitted"
-                                ? "bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE]"
-                                : "bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE]"
-                            }`}
-                          >
-                            {status === "not_submitted" && "لم يتم التسليم"}
-                            {status === "submitted" && "تم التسليم"}
-                            {status === "corrected" && "✓ تم التصحيح"}
-                          </span>
-                        </div>
-
-                        <p className="text-xs sm:text-sm lg:text-base text-gray-500 dark:text-gray-400">
-                          {hw.courseTitle}
-                        </p>
-
-                        {hw.description && (
-                          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                            {hw.description}
-                          </p>
-                        )}
-
-                        {hw.submission?.submitted_at && (
-                          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-1">
-                            <span className="text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400">
-                              تاريخ التسليم: {new Date(hw.submission.submitted_at).toLocaleString("ar-EG")}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Action / Score */}
-                      <div className="flex-shrink-0 flex items-center gap-3 sm:gap-4">
-                        {hasGrade ? (
-                          <>
-                            {/* Score Circle */}
-                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl border-4 border-[#B348FE] bg-[#F6EEFF] dark:bg-[#2B103D] flex flex-col items-center justify-center flex-shrink-0">
-                              <span className="text-base sm:text-xl font-black text-[#B348FE]">{percent}%</span>
-                              <span className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 font-bold mt-0.5">
-                                {hw.submission.grade} / {total}
-                              </span>
-                            </div>
-
-                            <Button
-                              variant="outline"
-                              onClick={() => navigate(`/dashboard/homework/${hw.course_item_id}`)}
-                              className="flex-1 lg:flex-none lg:w-auto border-2 border-gray-200 dark:border-[#2A2A2A] text-gray-600 dark:text-gray-300 font-bold hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-all duration-300 text-xs sm:text-sm"
-                            >
-                              التفاصيل
-                            </Button>
-                          </>
-                        ) : (
-                          <Button
-                            onClick={() => navigate(`/dashboard/homework/${hw.course_item_id}`)}
-                            className="w-full lg:w-auto bg-[#B348FE] hover:bg-[#9E2FFF] text-white shadow-md hover:shadow-[0_8px_20px_rgba(179,72,254,.35)] font-bold transition-all duration-300 text-sm"
-                          >
-                            {status === "submitted" ? "استبدال الملف" : "فتح الواجب"}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          ) : null}
 
           {/* سجل الواجبات - جدول تفصيلي زي صفحة تفاصيل الطالب */}
           {!loading && homeworks.length > 0 && (
@@ -336,14 +241,6 @@ export function HomeworkPage() {
                                   ) : (
                                     <span className="text-gray-400 text-xs">-</span>
                                   )}
-
-                                  <Button
-                                    size="sm"
-                                    className="bg-[#B348FE] hover:bg-[#9E2FFF] font-bold text-[10px] sm:text-xs whitespace-nowrap h-7 sm:h-8 px-2.5 sm:px-3"
-                                    onClick={() => navigate(`/dashboard/homework/${hw.course_item_id}`)}
-                                  >
-                                    فتح الواجب
-                                  </Button>
                                 </div>
                               </td>
                             </tr>
