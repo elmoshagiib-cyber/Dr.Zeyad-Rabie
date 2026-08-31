@@ -597,7 +597,7 @@ const { error: studentNotifError } = await supabase
                   <h2 className="text-xl font-black text-slate-900">إرسال إشعار جديد</h2>
                   <button
                     onClick={() => setShowSendForm(!showSendForm)}
-                    className="p-2 rounded-xl bg-[#B348FE] text-white hover:bg-[#9333EA] transition-colors"
+                    className="p-2 rounded-xl bg-[#B348FE] text-white hover:bg-[#9E2FFF] transition-colors"
                   >
                     {showSendForm ? <X size={20} /> : <Plus size={20} />}
                   </button>
@@ -807,7 +807,7 @@ const { error: studentNotifError } = await supabase
                           recipientCount === 0 ||
                           sending
                         }
-                        className="w-full bg-[#B348FE] text-white font-bold py-4 rounded-xl hover:bg-[#9333EA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full bg-[#B348FE] text-white font-bold py-4 rounded-xl hover:bg-[#9E2FFF] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       >
                         <Send size={20} />
                         إرسال الإشعار
@@ -961,12 +961,6 @@ const { error: studentNotifError } = await supabase
                           >
                             <td className="px-4 py-3">
                               <div className="flex items-start gap-3">
-                                <div
-                                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
-                                  style={{ backgroundColor: notification.color || "#F6EEFF" }}
-                                >
-                                  <TypeIcon size={18} style={{ color: notification.color || "#B348FE" }} />
-                                </div>
                                 <div className="min-w-0">
                                   <p className="font-black text-slate-900 text-sm flex items-center gap-2 flex-wrap">
                                     {notification.title}
@@ -1048,12 +1042,6 @@ const { error: studentNotifError } = await supabase
                         className="p-4 rounded-2xl border border-slate-200 bg-white"
                       >
                         <div className="flex items-start gap-3 mb-3">
-                          <div
-                            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
-                            style={{ backgroundColor: notification.color || "#F6EEFF" }}
-                          >
-                            <TypeIcon size={18} style={{ color: notification.color || "#B348FE" }} />
-                          </div>
                           <div className="min-w-0 flex-1">
                             <p className="font-black text-slate-900 text-sm flex items-center gap-2 flex-wrap">
                               {notification.title}
@@ -1150,7 +1138,7 @@ const { error: studentNotifError } = await supabase
                 <button
                   onClick={handleSendNotification}
                   disabled={sending}
-                  className="flex-1 px-6 py-3 rounded-xl bg-[#B348FE] text-white hover:bg-[#9333EA] transition-colors font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+                  className="flex-1 px-6 py-3 rounded-xl bg-[#B348FE] text-white hover:bg-[#9E2FFF] transition-colors font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
                 >
                   {sending ? (
                     <>
