@@ -493,7 +493,11 @@ read_at: new Date().toISOString(),
 };
 
 const formatAnnouncementDate = (date: string) => {
-  const created = new Date(date);
+  // نتأكد إن التاريخ بيتفسر كـ UTC حتى لو Supabase رجعه من غير Z
+  const normalizedDate =
+    date.includes("Z") || date.includes("+") ? date : `${date}Z`;
+
+  const created = new Date(normalizedDate);
   const now = new Date();
 
   const diff = Math.floor((now.getTime() - created.getTime()) / 1000);

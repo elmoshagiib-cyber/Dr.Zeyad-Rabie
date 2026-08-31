@@ -2731,29 +2731,6 @@ async function uploadHomeworkInstructions(
             </div>
           </div>
 
-          {/* Upload Instructions */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">رفع ملف التعليمات (اختياري)</label>
-            {item.instructionsFileName ? (
-              <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                <svg className="w-5 h-5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
-                <span className="text-sm text-amber-800 flex-1 truncate">{item.instructionsFileName}</span>
-                <button onClick={() => updateItem(sectionId, item.id, { instructionsFileName: "", instructionsFile: "" } as Partial<HomeworkItem>)} className="text-amber-500 hover:text-red-500 transition-colors">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-              </div>
-            ) : (
-              <label className="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-amber-400 hover:bg-amber-50 transition-all group">
-                <svg className="w-5 h-5 text-slate-400 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-                <span className="text-sm text-slate-500 group-hover:text-amber-600 transition-colors">رفع ملف التعليمات (PDF أو صورة)</span>
-                <input type="file" accept=".pdf,image/*" className="hidden" onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) uploadHomeworkInstructions(sectionId, item.id, file);
-                }} />
-              </label>
-            )}
-          </div>
-
           {/* Toggles */}
           <div className="flex flex-wrap gap-6">
            
