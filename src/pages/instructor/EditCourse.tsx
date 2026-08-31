@@ -108,6 +108,12 @@ interface Course {
   published: boolean;
   hidden: boolean;
   sections: Section[];
+
+  contentStatus: "draft" | "published" | "archived";
+  watermarkEnabled: boolean;
+  sequentialViewingEnabled: boolean;
+  allowAttachmentDownload: boolean;
+  minWatchPercentage: number;
 }
 
 // ============================================================
@@ -342,6 +348,12 @@ const loadedCourse: Course = {
   published: data.is_published || false,
   hidden: data.is_hidden || false,
 
+  contentStatus: data.content_status || "draft",
+  watermarkEnabled: data.watermark_enabled || false,
+  sequentialViewingEnabled: data.sequential_viewing_enabled || false,
+  allowAttachmentDownload: data.allow_attachment_download ?? true,
+  minWatchPercentage: data.min_watch_percentage || 0,
+
   sections: (sectionsData || []).map((section) => ({
     id: section.id,
     title: section.title,
@@ -518,6 +530,13 @@ await supabase
 
   is_published: course.published,
   is_hidden: course.hidden,
+
+  content_status: course.contentStatus,
+  watermark_enabled: course.watermarkEnabled,
+  sequential_viewing_enabled: course.sequentialViewingEnabled,
+  allow_attachment_download: course.allowAttachmentDownload,
+  min_watch_percentage: course.minWatchPercentage,
+
   updated_at: new Date().toISOString(),
 })
 
@@ -3055,6 +3074,88 @@ async function uploadHomeworkInstructions(
               </div>
             </div>
            
+          </div>
+        </div>
+
+        {/* Access Control Card */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-l from-slate-50 to-white">
+            <h3 className="text-base font-bold text-slate-800">التحكم في الوصول</h3>
+          </div>
+
+          <div className="p-6 space-y-5">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                حالة المحاضرة <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={course.contentStatus}
+                onChange={(e) =>
+                  updateCourseField("contentStatus", e.target.value as Course["contentStatus"])
+                }
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-800 bg-slate-50"
+              >
+                <option value="draft">مسودة (Draft)</option>
+                <option value="published">منشور (Published)</option>
+                <option value="archived">مؤرشف (Archived)</option>
+              </select>
+              <p className="text-xs text-slate-400 mt-1.5">تحل محل مفتاح تفعيل المحاضرة فورًا.</p>
+            </div>
+
+            <div className="flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 transition-colors">
+              <div>
+                <p className="text-sm font-semibold text-slate-800">تفعيل العلامة المائية (Dynamic Watermark)</p>
+                <p className="text-xs text-slate-500 mt-0.5">إظهار رقم هاتف الطالب واسمه بشكل متحرك على الفيديوهات وملفات الـ PDF لمنع السرقة.</p>
+              </div>
+              <div
+                onClick={() => updateCourseField("watermarkEnabled", !course.watermarkEnabled)}
+                className={`relative w-12 h-6 rounded-full cursor-pointer flex-shrink-0 transition-colors duration-200 ${course.watermarkEnabled ? "bg-indigo-600" : "bg-slate-300"}`}
+              >
+                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${course.watermarkEnabled ? "-translate-x-6" : "translate-x-0"}`} />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 transition-colors">
+              <div>
+                <p className="text-sm font-semibold text-slate-800">تفعيل تتبع المشاهدة والتسلسل</p>
+                <p className="text-xs text-slate-500 mt-0.5">ربط الفيديو بنظام إكمال المحاضرات ومنع الانتقال.</p>
+              </div>
+              <div
+                onClick={() => updateCourseField("sequentialViewingEnabled", !course.sequentialViewingEnabled)}
+                className={`relative w-12 h-6 rounded-full cursor-pointer flex-shrink-0 transition-colors duration-200 ${course.sequentialViewingEnabled ? "bg-indigo-600" : "bg-slate-300"}`}
+              >
+                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${course.sequentialViewingEnabled ? "-translate-x-6" : "translate-x-0"}`} />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 transition-colors">
+              <div>
+                <p className="text-sm font-semibold text-slate-800">السماح للطالب بتحميل المرفقات</p>
+                <p className="text-xs text-slate-500 mt-0.5">منح حق تنزيل ملفات الـ PDF وطباعتها.</p>
+              </div>
+              <div
+                onClick={() => updateCourseField("allowAttachmentDownload", !course.allowAttachmentDownload)}
+                className={`relative w-12 h-6 rounded-full cursor-pointer flex-shrink-0 transition-colors duration-200 ${course.allowAttachmentDownload ? "bg-indigo-600" : "bg-slate-300"}`}
+              >
+                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${course.allowAttachmentDownload ? "-translate-x-6" : "translate-x-0"}`} />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                إجبار الطالب على استكمال نسبة المشاهدة (%)
+              </label>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={course.minWatchPercentage}
+                onChange={(e) => updateCourseField("minWatchPercentage", Number(e.target.value))}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-800 bg-slate-50"
+                placeholder="0"
+              />
+              <p className="text-xs text-slate-400 mt-1.5">القيمة 0 تعني تجاوز هذه القاعدة.</p>
+            </div>
           </div>
         </div>
 
