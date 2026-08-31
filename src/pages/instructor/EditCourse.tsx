@@ -2539,32 +2539,7 @@ async function uploadHomeworkInstructions(
             </div>
           </div>
 
-          {/* Submission Types */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">أنواع التسليم المسموح بها</label>
-            <div className="flex flex-wrap gap-2">
-              {submissionOptions.map((opt) => {
-                const isSelected = item.submissionTypes.includes(opt.key);
-                return (
-                  <button
-                    key={opt.key}
-                    onClick={() => toggleSubmissionType(sectionId, item.id, opt.key)}
-                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border-2 transition-all ${
-                      isSelected
-                        ? "border-amber-400 bg-amber-50 text-amber-700"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-amber-300 hover:bg-amber-50"
-                    }`}
-                  >
-                    {opt.icon}
-                    {opt.label}
-                    {isSelected && (
-                      <svg className="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+
 
            {/* Questions */}
           <div>

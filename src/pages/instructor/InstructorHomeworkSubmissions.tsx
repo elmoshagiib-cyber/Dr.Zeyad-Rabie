@@ -100,7 +100,7 @@ export function InstructorHomeworkSubmissions() {
   const [loadingEssayQuestions, setLoadingEssayQuestions] = useState(false);
   // على الموبايل: نتحكم هل نعرض القائمة ولا التفاصيل
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
-  const [typeFilter, setTypeFilter] = useState("يحتاج مراجعة (مقالي)");
+
 
   useEffect(() => {
     loadSubmissions();
@@ -206,29 +206,21 @@ export function InstructorHomeworkSubmissions() {
       const gradeName = GRADE_LABELS[item.homeworks?.courses?.grade || ""] || "";
       const matchesGrade = gradeFilter === "الكل" || gradeName === gradeFilter;
 
-      const matchesType =
-        typeFilter === "الكل" ||
-        (typeFilter === "يحتاج مراجعة (مقالي)" && item.has_essay === true) ||
-        (typeFilter === "تفاعلي - مصحح تلقائيًا" && !!item.answers && item.has_essay !== true) ||
-        (typeFilter === "ملف / صورة / نص (قديم)" && !item.answers);
-
-      return matchesSearch && matchesStatus && matchesHomework && matchesGrade && matchesType;
+      return matchesSearch && matchesStatus && matchesHomework && matchesGrade;
     });
-  }, [submissions, search, statusFilter, homeworkFilter, gradeFilter, typeFilter]);
+  }, [submissions, search, statusFilter, homeworkFilter, gradeFilter]);
 
   const hasActiveFilters =
     search !== "" ||
     statusFilter !== "الكل" ||
     homeworkFilter !== "الكل" ||
-    gradeFilter !== "الكل" ||
-    typeFilter !== "يحتاج مراجعة (مقالي)";
+    gradeFilter !== "الكل";
 
   const clearFilters = () => {
     setSearch("");
     setStatusFilter("الكل");
     setHomeworkFilter("الكل");
     setGradeFilter("الكل");
-    setTypeFilter("يحتاج مراجعة (مقالي)");
   };
 
   // لو القائمة المفلترة اتغيرت وماعدش فيها العنصر المختار، بنختار أول عنصر تلقائيًا
@@ -466,16 +458,6 @@ export function InstructorHomeworkSubmissions() {
               <option>بانتظار التصحيح</option>
             </select>
 
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
-            >
-              <option>يحتاج مراجعة (مقالي)</option>
-              <option>تفاعلي - مصحح تلقائيًا</option>
-              <option>ملف / صورة / نص (قديم)</option>
-              <option>الكل</option>
-            </select>
           </div>
 
           {hasActiveFilters && (
