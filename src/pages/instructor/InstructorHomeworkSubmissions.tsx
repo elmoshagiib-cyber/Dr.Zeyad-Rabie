@@ -38,6 +38,13 @@ interface Submission {
   submitted_at: string;
   student_name?: string;
 
+  // تفاعلي (أسئلة اختيارات + مقالي)
+  answers?: Record<string, any>;
+  auto_score?: number;
+  correct_count?: number;
+  total_auto_questions?: number;
+  has_essay?: boolean;
+
   homeworks?: {
     title: string;
     total_score?: number;
@@ -48,6 +55,14 @@ interface Submission {
       title?: string;
     };
   };
+}
+
+interface EssayQuestion {
+  id: number;
+  title: string;
+  points: number;
+  correct_text?: string;
+  image_url?: string;
 }
 
 const GRADE_LABELS: Record<string, string> = {
@@ -80,13 +95,39 @@ export function InstructorHomeworkSubmissions() {
   const [gradeFilter, setGradeFilter] = useState("الكل");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+ const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [essayQuestions, setEssayQuestions] = useState<EssayQuestion[]>([]);
+  const [loadingEssayQuestions, setLoadingEssayQuestions] = useState(false);
   // على الموبايل: نتحكم هل نعرض القائمة ولا التفاصيل
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
+  const [typeFilter, setTypeFilter] = useState("يحتاج مراجعة (مقالي)");
 
   useEffect(() => {
     loadSubmissions();
   }, []);
+
+  // تحميل أسئلة المقالي بتاعة الواجب لما يتغيّر التسليم المختار
+  useEffect(() => {
+    if (!selectedSubmission?.answers) {
+      setEssayQuestions([]);
+      return;
+    }
+
+    const loadEssayQuestions = async () => {
+      setLoadingEssayQuestions(true);
+      const { data } = await supabase
+        .from("homework_questions")
+        .select("id, title, points, correct_text, image_url")
+        .eq("homework_id", selectedSubmission.homework_id)
+        .eq("type", "essay")
+        .order("sort_order", { ascending: true });
+
+      setEssayQuestions(data || []);
+      setLoadingEssayQuestions(false);
+    };
+
+    loadEssayQuestions();
+  }, [selectedSubmission?.id]);
 
   const loadSubmissions = async () => {
     setLoading(true);
@@ -165,18 +206,29 @@ export function InstructorHomeworkSubmissions() {
       const gradeName = GRADE_LABELS[item.homeworks?.courses?.grade || ""] || "";
       const matchesGrade = gradeFilter === "الكل" || gradeName === gradeFilter;
 
-      return matchesSearch && matchesStatus && matchesHomework && matchesGrade;
+      const matchesType =
+        typeFilter === "الكل" ||
+        (typeFilter === "يحتاج مراجعة (مقالي)" && item.has_essay === true) ||
+        (typeFilter === "تفاعلي - مصحح تلقائيًا" && !!item.answers && item.has_essay !== true) ||
+        (typeFilter === "ملف / صورة / نص (قديم)" && !item.answers);
+
+      return matchesSearch && matchesStatus && matchesHomework && matchesGrade && matchesType;
     });
-  }, [submissions, search, statusFilter, homeworkFilter, gradeFilter]);
+  }, [submissions, search, statusFilter, homeworkFilter, gradeFilter, typeFilter]);
 
   const hasActiveFilters =
-    search !== "" || statusFilter !== "الكل" || homeworkFilter !== "الكل" || gradeFilter !== "الكل";
+    search !== "" ||
+    statusFilter !== "الكل" ||
+    homeworkFilter !== "الكل" ||
+    gradeFilter !== "الكل" ||
+    typeFilter !== "يحتاج مراجعة (مقالي)";
 
   const clearFilters = () => {
     setSearch("");
     setStatusFilter("الكل");
     setHomeworkFilter("الكل");
     setGradeFilter("الكل");
+    setTypeFilter("يحتاج مراجعة (مقالي)");
   };
 
   // لو القائمة المفلترة اتغيرت وماعدش فيها العنصر المختار، بنختار أول عنصر تلقائيًا
@@ -413,6 +465,17 @@ export function InstructorHomeworkSubmissions() {
               <option>تم التصحيح</option>
               <option>بانتظار التصحيح</option>
             </select>
+
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+            >
+              <option>يحتاج مراجعة (مقالي)</option>
+              <option>تفاعلي - مصحح تلقائيًا</option>
+              <option>ملف / صورة / نص (قديم)</option>
+              <option>الكل</option>
+            </select>
           </div>
 
           {hasActiveFilters && (
@@ -496,16 +559,19 @@ export function InstructorHomeworkSubmissions() {
                             </p>
                           </div>
 
-                          <span
+                           <span
                             className={`px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap ${
                               submission.grade !== null && submission.grade !== undefined
                                 ? "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400"
                                 : "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400"
                             }`}
                           >
-                            {submission.grade !== null && submission.grade !== undefined ? "مُصحح" : "معلق"}
-                          </span>
-                        </div>
+                            {submission.grade !== null && submission.grade !== undefined
+                              ? "مُصحح"
+                              : submission.has_essay
+                              ? "بانتظار مراجعة مقالي"
+                              : "معلق"}
+                          </span>                        </div>
 
                         <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
                           <Calendar size={12} />
@@ -620,84 +686,167 @@ export function InstructorHomeworkSubmissions() {
                     </Card>
 
                     {/* Preview Section */}
-                    <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm mb-6">
-                      <CardContent className="p-6">
-                        <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                          <Eye size={20} className="text-[#B348FE]" />
-                          معاينة الإجابة
-                        </h3>
-
-                        {(() => {
-                          const fileType = getFileType(selectedSubmission);
-                          const fileUrl = selectedSubmission.file_url || selectedSubmission.answer;
-
-                          return (
-                            <div className="space-y-4">
-                              {fileType === "pdf" && fileUrl && (
-                                <div className="border-2 border-gray-200 dark:border-[#2A2A2A] rounded-2xl overflow-hidden">
-                                  <iframe src={fileUrl} className="w-full h-[500px] lg:h-[600px]" title="PDF Preview" />
-                                  <div className="p-3 bg-gray-50 dark:bg-[#1A1A1A] border-t border-gray-200 dark:border-[#2A2A2A]">
-                                    <a
-                                      href={fileUrl}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="text-sm text-[#B348FE] hover:underline font-bold flex items-center gap-2"
-                                    >
-                                      <Eye size={16} />
-                                      فتح في تبويب جديد
-                                    </a>
-                                  </div>
+                    {selectedSubmission.answers ? (
+                      <>
+                        {/* ملخص أسئلة الاختيارات (مصححة تلقائيًا) */}
+                        {(selectedSubmission.total_auto_questions ?? 0) > 0 && (
+                          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm mb-6">
+                            <CardContent className="p-6">
+                              <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <CheckCircle size={20} className="text-emerald-500" />
+                                أسئلة الاختيارات (مصححة تلقائيًا)
+                              </h3>
+                              <div className="grid grid-cols-3 gap-3">
+                                <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl p-4 border border-emerald-200 dark:border-emerald-900 text-center">
+                                  <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold mb-1">إجابات صحيحة</p>
+                                  <p className="text-2xl font-black text-emerald-600">{selectedSubmission.correct_count ?? 0}</p>
                                 </div>
-                              )}
-
-                              {fileType === "image" && fileUrl && (
-                                <div className="border-2 border-gray-200 dark:border-[#2A2A2A] rounded-2xl overflow-hidden">
-                                  <div className="p-4 bg-gray-50 dark:bg-[#1A1A1A]">
-                                    <img
-                                      src={fileUrl}
-                                      alt="Student Submission"
-                                      className="w-full h-auto rounded-xl cursor-pointer hover:scale-[1.02] transition-transform duration-300"
-                                      onClick={() => setImagePreview(fileUrl)}
-                                    />
-                                  </div>
-                                  <div className="p-3 bg-gray-50 dark:bg-[#1A1A1A] border-t border-gray-200 dark:border-[#2A2A2A]">
-                                    <button
-                                      onClick={() => setImagePreview(fileUrl)}
-                                      className="text-sm text-[#B348FE] hover:underline font-bold flex items-center gap-2"
-                                    >
-                                      <Eye size={16} />
-                                      عرض بحجم كامل
-                                    </button>
-                                  </div>
+                                <div className="bg-blue-50 dark:bg-blue-950/20 rounded-2xl p-4 border border-blue-200 dark:border-blue-900 text-center">
+                                  <p className="text-[11px] text-blue-700 dark:text-blue-400 font-bold mb-1">عدد الأسئلة</p>
+                                  <p className="text-2xl font-black text-blue-600">{selectedSubmission.total_auto_questions ?? 0}</p>
                                 </div>
-                              )}
+                                <div className="bg-teal-50 dark:bg-teal-950/20 rounded-2xl p-4 border border-teal-200 dark:border-teal-900 text-center">
+                                  <p className="text-[11px] text-teal-700 dark:text-teal-400 font-bold mb-1">درجة الاختيارات</p>
+                                  <p className="text-2xl font-black text-teal-600">{selectedSubmission.auto_score ?? 0}</p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
 
-                              {selectedSubmission.text_answer && (
-                                <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#1A1A1A] dark:to-[#151515] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6">
-                                  <div className="flex items-center gap-2 mb-3">
-                                    <FileText className="text-gray-600 dark:text-gray-400" size={18} />
-                                    <h4 className="font-bold text-gray-900 dark:text-white">الإجابة النصية</h4>
+                        {/* الأسئلة المقالية */}
+                        <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm mb-6">
+                          <CardContent className="p-6">
+                            <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                              <Eye size={20} className="text-[#B348FE]" />
+                              الأسئلة المقالية
+                            </h3>
+
+                            {loadingEssayQuestions ? (
+                              <div className="py-10 text-center text-gray-400 text-sm font-bold">جاري التحميل...</div>
+                            ) : essayQuestions.length === 0 ? (
+                              <div className="text-center py-10 bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl border-2 border-dashed border-gray-300 dark:border-[#2A2A2A]">
+                                <p className="text-gray-500 dark:text-gray-400 font-bold text-sm">لا توجد أسئلة مقالية في هذا الواجب</p>
+                              </div>
+                            ) : (
+                              <div className="space-y-4">
+                                {essayQuestions.map((q, i) => {
+                                  const studentAnswer = selectedSubmission.answers?.[String(q.id)]?.text || "";
+                                  return (
+                                    <div key={q.id} className="border-2 border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-4 sm:p-5">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300 text-[10px] font-bold">
+                                          {q.points === 1 ? "درجة واحدة" : `${q.points} درجات`}
+                                        </span>
+                                      </div>
+                                      <p className="font-bold text-gray-900 dark:text-white text-sm mb-3">
+                                        {i + 1}. {q.title}
+                                      </p>
+                                      {q.image_url && (
+                                        <img src={q.image_url} alt="صورة السؤال" className="max-h-48 rounded-xl border border-gray-200 dark:border-[#2A2A2A] mb-3" />
+                                      )}
+                                      <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-xl p-4 mb-2">
+                                        <p className="text-[11px] font-black text-gray-500 dark:text-gray-400 mb-1.5">إجابة الطالب:</p>
+                                        <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed">
+                                          {studentAnswer || "لم يجب الطالب على هذا السؤال"}
+                                        </p>
+                                      </div>
+                                      {q.correct_text && (
+                                        <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900 rounded-xl p-4">
+                                          <p className="text-[11px] font-black text-emerald-700 dark:text-emerald-400 mb-1.5">الإجابة النموذجية:</p>
+                                          <p className="text-sm text-emerald-800 dark:text-emerald-300 whitespace-pre-wrap leading-relaxed">
+                                            {q.correct_text}
+                                          </p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </>
+                    ) : (
+                      <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm mb-6">
+                        <CardContent className="p-6">
+                          <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                            <Eye size={20} className="text-[#B348FE]" />
+                            معاينة الإجابة
+                          </h3>
+
+                          {(() => {
+                            const fileType = getFileType(selectedSubmission);
+                            const fileUrl = selectedSubmission.file_url || selectedSubmission.answer;
+
+                            return (
+                              <div className="space-y-4">
+                                {fileType === "pdf" && fileUrl && (
+                                  <div className="border-2 border-gray-200 dark:border-[#2A2A2A] rounded-2xl overflow-hidden">
+                                    <iframe src={fileUrl} className="w-full h-[500px] lg:h-[600px]" title="PDF Preview" />
+                                    <div className="p-3 bg-gray-50 dark:bg-[#1A1A1A] border-t border-gray-200 dark:border-[#2A2A2A]">
+                                      <a
+                                        href={fileUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-sm text-[#B348FE] hover:underline font-bold flex items-center gap-2"
+                                      >
+                                        <Eye size={16} />
+                                        فتح في تبويب جديد
+                                      </a>
+                                    </div>
                                   </div>
-                                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                                    {selectedSubmission.text_answer}
-                                  </p>
-                                </div>
-                              )}
+                                )}
 
-                              {fileType === "none" && !selectedSubmission.text_answer && (
-                                <div className="text-center py-16 bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl border-2 border-dashed border-gray-300 dark:border-[#2A2A2A]">
-                                  <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={64} />
-                                  <p className="text-gray-500 dark:text-gray-400 font-bold">لم يتم رفع أي ملف</p>
-                                  <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
-                                    الطالب لم يقم بإرفاق إجابة
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })()}
-                      </CardContent>
-                    </Card>
+                                {fileType === "image" && fileUrl && (
+                                  <div className="border-2 border-gray-200 dark:border-[#2A2A2A] rounded-2xl overflow-hidden">
+                                    <div className="p-4 bg-gray-50 dark:bg-[#1A1A1A]">
+                                      <img
+                                        src={fileUrl}
+                                        alt="Student Submission"
+                                        className="w-full h-auto rounded-xl cursor-pointer hover:scale-[1.02] transition-transform duration-300"
+                                        onClick={() => setImagePreview(fileUrl)}
+                                      />
+                                    </div>
+                                    <div className="p-3 bg-gray-50 dark:bg-[#1A1A1A] border-t border-gray-200 dark:border-[#2A2A2A]">
+                                      <button
+                                        onClick={() => setImagePreview(fileUrl)}
+                                        className="text-sm text-[#B348FE] hover:underline font-bold flex items-center gap-2"
+                                      >
+                                        <Eye size={16} />
+                                        عرض بحجم كامل
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {selectedSubmission.text_answer && (
+                                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#1A1A1A] dark:to-[#151515] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6">
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <FileText className="text-gray-600 dark:text-gray-400" size={18} />
+                                      <h4 className="font-bold text-gray-900 dark:text-white">الإجابة النصية</h4>
+                                    </div>
+                                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                      {selectedSubmission.text_answer}
+                                    </p>
+                                  </div>
+                                )}
+
+                                {fileType === "none" && !selectedSubmission.text_answer && (
+                                  <div className="text-center py-16 bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl border-2 border-dashed border-gray-300 dark:border-[#2A2A2A]">
+                                    <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={64} />
+                                    <p className="text-gray-500 dark:text-gray-400 font-bold">لم يتم رفع أي ملف</p>
+                                    <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
+                                      الطالب لم يقم بإرفاق إجابة
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </CardContent>
+                      </Card>
+                    )}
 
                     {/* Grading Section */}
                     <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">

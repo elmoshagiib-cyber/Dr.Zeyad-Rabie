@@ -1,13 +1,35 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Upload, FileText, CheckCircle, Eye, AlertCircle, ArrowRight, Image as ImageIcon, FileType } from "lucide-react";
+import {
+  Upload,
+  FileText,
+  CheckCircle,
+  XCircle,
+  Eye,
+  AlertCircle,
+  ArrowRight,
+  Image as ImageIcon,
+  FileType,
+  ClipboardList,
+  Send,
+} from "lucide-react";
 
 import { Card, CardContent } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { useApp } from "../../context/AppContext";
 import { supabase } from "../../lib/supabase";
-import { useRef } from "react";
 import StudentLayout from "./StudentLayout";
+
+interface HwQuestion {
+  id: number;
+  title: string;
+  type: "multiple_choice" | "true_false" | "essay";
+  points: number;
+  image_url?: string;
+  explanation?: string;
+  correct_answer?: number | null;
+  choices: { id: number; text: string; sort_order: number }[];
+}
 
 export function HomeworkDetailsPage() {
   const { id } = useParams();
@@ -18,6 +40,12 @@ export function HomeworkDetailsPage() {
   const [uploading, setUploading] = useState(false);
   const [homework, setHomework] = useState<any>(null);
   const [submission, setSubmission] = useState<any>(null);
+  const [questions, setQuestions] = useState<HwQuestion[]>([]);
+  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [essayAnswers, setEssayAnswers] = useState<Record<number, string>>({});
+  const [submittingAnswers, setSubmittingAnswers] = useState(false);
+  const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
+
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -26,6 +54,7 @@ export function HomeworkDetailsPage() {
 
   useEffect(() => {
     loadHomework();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const loadHomework = async () => {
@@ -57,11 +86,138 @@ export function HomeworkDetailsPage() {
         .maybeSingle();
 
       setSubmission(sub);
+
+      const { data: qData } = await supabase
+        .from("homework_questions")
+        .select("*")
+        .eq("homework_id", hw.id)
+        .order("sort_order", { ascending: true });
+
+      if (qData && qData.length > 0) {
+        const questionIds = qData.map((q) => q.id);
+        const { data: choicesData } = await supabase
+          .from("homework_question_choices")
+          .select("*")
+          .in("question_id", questionIds)
+          .order("sort_order", { ascending: true });
+
+        const mapped: HwQuestion[] = qData.map((q) => ({
+          id: q.id,
+          title: q.title,
+          type: q.type,
+          points: q.points || 1,
+          image_url: q.image_url,
+          explanation: q.explanation,
+          correct_answer: q.correct_answer,
+          choices: (choicesData || []).filter((c) => c.question_id === q.id),
+        }));
+
+        setQuestions(mapped);
+
+        // لو في إجابات محفوظة قبل كده (استكمال لاحقًا) نرجّعها
+        if (sub?.answers) {
+          const savedMc: Record<number, number> = {};
+          const savedEssay: Record<number, string> = {};
+          Object.entries(sub.answers as Record<string, any>).forEach(([qId, val]) => {
+            if (typeof val === "object" && val !== null) {
+              if ("choiceIndex" in val) savedMc[Number(qId)] = val.choiceIndex;
+              if ("text" in val) savedEssay[Number(qId)] = val.text;
+            }
+          });
+          setAnswers(savedMc);
+          setEssayAnswers(savedEssay);
+        }
+      }
     }
 
     setLoading(false);
   };
 
+  // ── تسليم الواجب التفاعلي (أسئلة واختيارات) ──
+  const handleAnswerSelect = (questionId: number, choiceIndex: number) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: choiceIndex }));
+  };
+
+  const handleEssayChange = (questionId: number, text: string) => {
+    setEssayAnswers((prev) => ({ ...prev, [questionId]: text }));
+  };
+
+  const answeredCount =
+    questions.filter((q) => q.type !== "essay").filter((q) => answers[q.id] !== undefined).length +
+    questions.filter((q) => q.type === "essay").filter((q) => (essayAnswers[q.id] || "").trim().length > 0).length;
+
+  const submitInteractiveAnswers = async () => {
+    if (!homework || !user?.studentId) return;
+    setSubmittingAnswers(true);
+    setShowConfirmSubmit(false);
+
+    try {
+      const mcQuestions = questions.filter((q) => q.type !== "essay");
+      const essayQuestions = questions.filter((q) => q.type === "essay");
+      const hasEssay = essayQuestions.length > 0;
+
+      let correctCount = 0;
+      let autoScore = 0;
+
+      const answersPayload: Record<string, any> = {};
+
+      mcQuestions.forEach((q) => {
+        const selected = answers[q.id];
+        answersPayload[String(q.id)] = { choiceIndex: selected ?? null };
+        if (selected !== undefined && selected === q.correct_answer) {
+          correctCount++;
+          autoScore += Number(q.points) || 1;
+        }
+      });
+
+      essayQuestions.forEach((q) => {
+        answersPayload[String(q.id)] = { text: essayAnswers[q.id] || "" };
+      });
+
+      const submissionData: any = {
+        homework_id: homework.id,
+        student_id: user.studentId,
+        answers: answersPayload,
+        auto_score: autoScore,
+        correct_count: correctCount,
+        total_auto_questions: mcQuestions.length,
+        has_essay: hasEssay,
+        submitted_at: new Date().toISOString(),
+        submitted_answers_at: new Date().toISOString(),
+        // لو مفيش أسئلة مقالية، التصحيح تلقائي بالكامل والدرجة تتحط فورًا
+        grade: hasEssay ? null : autoScore,
+      };
+
+      const { data: existing } = await supabase
+        .from("homework_submissions")
+        .select("id")
+        .eq("homework_id", homework.id)
+        .eq("student_id", user.studentId)
+        .maybeSingle();
+
+      if (existing) {
+        const { error: updErr } = await supabase
+          .from("homework_submissions")
+          .update(submissionData)
+          .eq("id", existing.id);
+        if (updErr) throw updErr;
+      } else {
+        const { error: insErr } = await supabase
+          .from("homework_submissions")
+          .insert(submissionData);
+        if (insErr) throw insErr;
+      }
+
+      await loadHomework();
+    } catch (err: any) {
+      console.error(err);
+      alert("حدث خطأ أثناء تسليم الواجب: " + (err?.message || "خطأ غير معروف"));
+    } finally {
+      setSubmittingAnswers(false);
+    }
+  };
+
+  // ── الواجب القديم (رفع ملف) ──
   const uploadHomework = async (file: File) => {
     if (!user?.studentId || !homework?.id) return;
 
@@ -85,23 +241,21 @@ export function HomeworkDetailsPage() {
 
       const fileName = `${Date.now()}-${file.name}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadErr } = await supabase.storage
         .from("homework-files")
         .upload(fileName, file);
 
       clearInterval(progressInterval);
       setUploadProgress(60);
 
-      if (uploadError) {
+      if (uploadErr) {
         setUploadError("حدث خطأ أثناء رفع الملف");
-        console.error(uploadError);
+        console.error(uploadErr);
         setUploadProgress(0);
         return;
       }
 
-      const { data } = supabase.storage
-        .from("homework-files")
-        .getPublicUrl(fileName);
+      const { data } = supabase.storage.from("homework-files").getPublicUrl(fileName);
 
       setUploadProgress(75);
 
@@ -129,14 +283,12 @@ export function HomeworkDetailsPage() {
           return;
         }
       } else {
-        const { error: submitError } = await supabase
-          .from("homework_submissions")
-          .insert({
-            homework_id: homework.id,
-            student_id: user.studentId,
-            file_url: data.publicUrl,
-            file_name: file.name,
-          });
+        const { error: submitError } = await supabase.from("homework_submissions").insert({
+          homework_id: homework.id,
+          student_id: user.studentId,
+          file_url: data.publicUrl,
+          file_name: file.name,
+        });
 
         if (submitError) {
           console.error(submitError);
@@ -150,11 +302,7 @@ export function HomeworkDetailsPage() {
       await loadHomework();
       setUploadProgress(100);
 
-      if (isReplacement) {
-        setUploadSuccess("✅ تم استبدال الملف بنجاح");
-      } else {
-        setUploadSuccess("✅ تم تسليم الواجب بنجاح");
-      }
+      setUploadSuccess(isReplacement ? "✅ تم استبدال الملف بنجاح" : "✅ تم تسليم الواجب بنجاح");
 
       setTimeout(() => {
         setUploadSuccess("");
@@ -167,16 +315,6 @@ export function HomeworkDetailsPage() {
     } finally {
       setUploading(false);
     }
-  };
-
-  const getStatus = (): "not_submitted" | "submitted" | "corrected" => {
-    if (!submission) return "not_submitted";
-
-    if (submission.grade !== null && submission.grade !== undefined) {
-      return "corrected";
-    }
-
-    return "submitted";
   };
 
   const getFileType = (fileName: string): "pdf" | "image" | "unknown" => {
@@ -201,10 +339,10 @@ export function HomeworkDetailsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#09090B] px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#F7F5EF] px-4">
         <div className="text-center">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400 font-bold text-sm sm:text-base">جاري تحميل الواجب...</p>
+          <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-bold text-sm sm:text-base">جاري تحميل الواجب...</p>
         </div>
       </div>
     );
@@ -212,16 +350,350 @@ export function HomeworkDetailsPage() {
 
   if (!homework) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#09090B] px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#F7F5EF] px-4">
         <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-400 font-bold text-base sm:text-lg">لم يتم العثور على الواجب</p>
-          <Button onClick={() => navigate(-1)} className="mt-4 bg-[#B348FE] hover:bg-[#9E2FFF]">
+          <p className="text-gray-600 font-bold text-base sm:text-lg">لم يتم العثور على الواجب</p>
+          <Button onClick={() => navigate(-1)} className="mt-4 bg-teal-500 hover:bg-teal-600">
             العودة
           </Button>
         </div>
       </div>
     );
   }
+
+  const isInteractive = questions.length > 0;
+  const hasEssay = questions.some((q) => q.type === "essay");
+  const isSubmitted = !!submission?.submitted_answers_at || (!!submission && isInteractive && submission.answers);
+  const isGraded = submission?.grade !== null && submission?.grade !== undefined;
+
+  // ══════════════════════════════════════════════
+  // وضع الواجب التفاعلي (أسئلة واختيارات)
+  // ══════════════════════════════════════════════
+  if (isInteractive) {
+    // ── شاشة النتيجة / انتظار المراجعة بعد التسليم ──
+    if (isSubmitted) {
+      return (
+        <StudentLayout>
+          <main className="flex-1 overflow-y-auto bg-[#F7F5EF]">
+            <div className="max-w-3xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
+              <Button variant="outline" onClick={() => navigate(-1)} className="border-2 font-bold text-sm">
+                <ArrowRight size={16} />
+                رجوع
+              </Button>
+
+              <div className="bg-white rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="p-6 sm:p-8 text-center border-b border-gray-100">
+                  <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 ${isGraded ? "bg-teal-50" : "bg-amber-50"}`}>
+                    {isGraded ? <CheckCircle className="text-teal-500" size={28} /> : <ClipboardList className="text-amber-500" size={28} />}
+                  </div>
+                  <h2 className="text-lg sm:text-2xl font-black text-gray-900 mb-1">
+                    {isGraded ? "تم تصحيح الواجب" : "تم تسليم الواجب"}
+                  </h2>
+                  <p className="text-gray-500 text-xs sm:text-sm">
+                    {isGraded
+                      ? "شوف نتيجتك ومراجعة إجاباتك تحت"
+                      : hasEssay
+                      ? "في انتظار مراجعة المعلم للأسئلة المقالية"
+                      : "تم حفظ إجاباتك بنجاح"}
+                  </p>
+                </div>
+
+                <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
+                  {/* ملخص الدرجات */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+                    <div className="bg-emerald-50 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border border-emerald-200 flex flex-col items-center justify-center">
+                      <p className="text-[11px] sm:text-xs text-emerald-700 font-bold mb-1">إجابات صحيحة</p>
+                      <p className="text-2xl sm:text-3xl font-black text-emerald-600">{submission.correct_count ?? 0}</p>
+                    </div>
+                    <div className="bg-blue-50 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border border-blue-200 flex flex-col items-center justify-center">
+                      <p className="text-[11px] sm:text-xs text-blue-700 font-bold mb-1">أسئلة اختيارات</p>
+                      <p className="text-2xl sm:text-3xl font-black text-blue-600">{submission.total_auto_questions ?? 0}</p>
+                    </div>
+                    <div className="bg-teal-50 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border border-teal-200 flex flex-col items-center justify-center">
+                      <p className="text-[11px] sm:text-xs text-teal-700 font-bold mb-1 flex items-center gap-1">
+                        الدرجة النهائية
+                      </p>
+                      <p className="text-2xl sm:text-3xl font-black text-teal-600">
+                        {isGraded ? submission.grade : "—"}
+                        {homework.total_score && (
+                          <span className="text-sm text-gray-400 font-bold"> / {homework.total_score}</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  {!isGraded && hasEssay && (
+                    <div className="bg-amber-50 border-2 border-amber-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-4">
+                      <p className="text-amber-800 text-xs sm:text-sm font-bold flex items-start gap-2">
+                        <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                        فيه سؤال مقالي في الواجب ده، فالدرجة النهائية هتظهر بعد ما المعلم يراجعها يدويًا.
+                      </p>
+                    </div>
+                  )}
+
+                  {submission?.feedback && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-5">
+                      <p className="font-black text-gray-900 text-sm mb-1.5">ملاحظات المعلم</p>
+                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{submission.feedback}</p>
+                    </div>
+                  )}
+
+                  {/* مراجعة الأسئلة */}
+                  <div className="space-y-3 sm:space-y-4">
+                    {questions.map((q, i) => {
+                      const isEssay = q.type === "essay";
+                      const selected = answers[q.id];
+                      const isRight = !isEssay && selected === q.correct_answer;
+
+                      return (
+                        <div
+                          key={q.id}
+                          className={`rounded-2xl border-2 p-4 sm:p-5 bg-white ${
+                            isEssay ? "border-gray-200" : isRight ? "border-emerald-200" : "border-gray-200"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-[10px] sm:text-xs font-bold">
+                              {q.points === 1 ? "درجة واحدة" : `${q.points} درجات`}
+                            </span>
+                            {!isEssay && (
+                              <span
+                                className={`px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold ${
+                                  isRight ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
+                                }`}
+                              >
+                                {isRight ? "إجابة صحيحة" : "إجابة خاطئة"}
+                              </span>
+                            )}
+                            {isEssay && (
+                              <span className="px-2.5 py-1 rounded-full bg-violet-50 text-violet-600 text-[10px] sm:text-xs font-bold">
+                                سؤال مقالي
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="text-sm sm:text-base font-bold text-gray-900 leading-relaxed mb-4">
+                            {i + 1}. {q.title}
+                          </p>
+
+                          {q.image_url && (
+                            <div className="mb-4 flex justify-center">
+                              <img src={q.image_url} alt="صورة السؤال" className="max-w-full max-h-56 rounded-xl border border-gray-200 object-contain" />
+                            </div>
+                          )}
+
+                          {!isEssay && (
+                            <div className="space-y-2">
+                              {q.choices.map((choice, cIdx) => {
+                                const isCorrectChoice = cIdx === q.correct_answer;
+                                const isSelectedWrong = !isRight && cIdx === selected;
+                                return (
+                                  <div
+                                    key={choice.id}
+                                    className={`flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-bold ${
+                                      isCorrectChoice
+                                        ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                        : isSelectedWrong
+                                        ? "bg-rose-50 border-rose-200 text-rose-700"
+                                        : "bg-gray-50 border-gray-200 text-gray-600"
+                                    }`}
+                                  >
+                                    <span className="break-words">{choice.text}</span>
+                                    {isCorrectChoice && <CheckCircle size={16} className="text-emerald-600 flex-shrink-0" />}
+                                    {isSelectedWrong && <XCircle size={16} className="text-rose-600 flex-shrink-0" />}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          {isEssay && (
+                            <div className="bg-gray-50 border border-gray-200 rounded-xl p-3.5">
+                              <p className="text-[11px] font-black text-gray-500 mb-1.5">إجابتك:</p>
+                              <p className="text-xs sm:text-sm text-gray-700 whitespace-pre-line">
+                                {essayAnswers[q.id] || "لم تُجب"}
+                              </p>
+                            </div>
+                          )}
+
+                          {q.explanation && (
+                            <div className="mt-4 pt-4 border-t border-gray-100">
+                              <p className="text-[11px] sm:text-xs font-black text-gray-500 mb-1.5">ملاحظة:</p>
+                              <p className="text-xs sm:text-sm text-gray-700 leading-relaxed whitespace-pre-line">{q.explanation}</p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <Button onClick={() => navigate(-1)} className="w-full bg-teal-500 hover:bg-teal-600">
+                    العودة
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </main>
+        </StudentLayout>
+      );
+    }
+
+    // ── شاشة تأكيد التسليم ──
+    if (showConfirmSubmit) {
+      return (
+        <StudentLayout>
+          <main className="flex-1 overflow-y-auto bg-[#F7F5EF]">
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6">
+              <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-200 max-w-md w-full overflow-hidden">
+                <div className="p-6 sm:p-8 text-center">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Send className="text-blue-500" size={26} />
+                  </div>
+                  <h3 className="text-lg sm:text-2xl font-black text-gray-900">تأكيد تسليم الواجب</h3>
+                </div>
+                <div className="p-4 sm:p-6 space-y-4">
+                  <div className="bg-gray-50 rounded-xl p-4 flex items-center justify-between border border-gray-200">
+                    <span className="text-xs sm:text-sm text-gray-600 font-medium">الأسئلة المجابة</span>
+                    <span className="text-lg sm:text-2xl font-black text-blue-500">
+                      {answeredCount} / {questions.length}
+                    </span>
+                  </div>
+                  {answeredCount < questions.length && (
+                    <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-3.5">
+                      <p className="text-[11px] sm:text-xs text-amber-800 leading-relaxed font-bold">
+                        لسه فيه {questions.length - answeredCount} أسئلة لم تُجب عليها. تقدر تكمل بعد كده لو الواجب لسه مفتوح، أو تسلّم كده.
+                      </p>
+                    </div>
+                  )}
+                  <div className="flex gap-3">
+                    <Button variant="outline" onClick={() => setShowConfirmSubmit(false)} className="flex-1">
+                      الرجوع
+                    </Button>
+                    <Button onClick={submitInteractiveAnswers} disabled={submittingAnswers} className="flex-1 bg-teal-500 hover:bg-teal-600">
+                      {submittingAnswers ? "جاري التسليم..." : "تأكيد التسليم"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+        </StudentLayout>
+      );
+    }
+
+    // ── شاشة حل الواجب ──
+    return (
+      <StudentLayout>
+        <main className="flex-1 overflow-y-auto bg-[#F7F5EF]">
+          <div className="max-w-3xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
+            <Button variant="outline" onClick={() => navigate(-1)} className="border-2 font-bold text-sm">
+              <ArrowRight size={16} />
+              رجوع
+            </Button>
+
+            <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-4 sm:p-6">
+              <h1 className="text-lg sm:text-2xl font-black text-gray-900 mb-2">{homework.title}</h1>
+              {homework.course_sections?.courses?.title && (
+                <p className="text-xs sm:text-sm font-bold text-teal-600 mb-2">{homework.course_sections.courses.title}</p>
+              )}
+              {homework.description && (
+                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed whitespace-pre-line">{homework.description}</p>
+              )}
+              <div className="flex items-center gap-2 mt-3">
+                <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[11px] sm:text-xs font-bold">
+                  {questions.length} سؤال
+                </span>
+                <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-[11px] sm:text-xs font-bold">
+                  بدون وقت محدد
+                </span>
+              </div>
+            </div>
+
+            {questions.map((q, i) => {
+              const isEssay = q.type === "essay";
+              return (
+                <div key={q.id} className="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-4 sm:p-6">
+                  <div className="flex items-start gap-3 mb-4">
+                    <span className="px-3 py-1 rounded-full bg-amber-400 text-white text-[11px] sm:text-xs font-black shrink-0">
+                      {q.points === 1 ? "درجة واحدة" : `${q.points} درجات`}
+                    </span>
+                  </div>
+                  <h2 className="text-sm sm:text-lg font-bold text-gray-900 leading-relaxed mb-4">
+                    {i + 1}. {q.title}
+                  </h2>
+
+                  {q.image_url && (
+                    <div className="mb-4 flex justify-center">
+                      <img src={q.image_url} alt="صورة السؤال" className="max-w-full max-h-64 rounded-xl border border-gray-200 object-contain" />
+                    </div>
+                  )}
+
+                  {!isEssay ? (
+                    <div className="space-y-2.5">
+                      {q.choices.map((choice, cIdx) => {
+                        const selected = answers[q.id] === cIdx;
+                        return (
+                          <button
+                            key={choice.id}
+                            onClick={() => handleAnswerSelect(q.id, cIdx)}
+                            className={`w-full text-right px-4 sm:px-5 py-3.5 rounded-xl sm:rounded-2xl border transition-all font-medium text-xs sm:text-base ${
+                              selected
+                                ? "border-emerald-400 bg-emerald-50 text-gray-900"
+                                : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div
+                                className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
+                                  selected ? "border-emerald-500 bg-emerald-500" : "border-gray-300"
+                                }`}
+                              >
+                                {selected && <div className="w-2 h-2 bg-white rounded-full" />}
+                              </div>
+                              <span className="flex-1 break-words">{choice.text}</span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <textarea
+                      value={essayAnswers[q.id] || ""}
+                      onChange={(e) => handleEssayChange(q.id, e.target.value)}
+                      rows={5}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-400 text-gray-800 text-sm resize-none"
+                      placeholder="اكتب إجابتك هنا..."
+                    />
+                  )}
+                </div>
+              );
+            })}
+
+            <div className="bg-white rounded-2xl border border-gray-200 p-4 flex items-center justify-between">
+              <span className="text-xs sm:text-sm font-bold text-gray-700">تقدم الإجابات</span>
+              <span className="text-sm sm:text-base font-black text-gray-900">
+                {answeredCount} / {questions.length}
+              </span>
+            </div>
+
+            <Button onClick={() => setShowConfirmSubmit(true)} className="w-full bg-teal-500 hover:bg-teal-600 py-3 text-base font-bold">
+              <Send size={18} />
+              تسليم الواجب
+            </Button>
+          </div>
+        </main>
+      </StudentLayout>
+    );
+  }
+
+  // ══════════════════════════════════════════════
+  // الوضع القديم: رفع ملف (لو الواجب مفيهوش أسئلة)
+  // ══════════════════════════════════════════════
+  const getStatus = (): "not_submitted" | "submitted" | "corrected" => {
+    if (!submission) return "not_submitted";
+    if (submission.grade !== null && submission.grade !== undefined) return "corrected";
+    return "submitted";
+  };
 
   const status = getStatus();
   const canUpload = homework.allow_file_upload && status !== "corrected";
@@ -615,19 +1087,6 @@ export function HomeworkDetailsPage() {
                   <p className="text-emerald-700 dark:text-emerald-400 text-xs sm:text-sm font-bold flex items-start sm:items-center gap-2">
                     <CheckCircle size={17} className="shrink-0 mt-0.5 sm:mt-0" />
                     تم تصحيح الواجب، ولا يمكن استبدال الملف بعد التصحيح.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {homework.allow_text_answer && (
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm transition-all duration-300 hover:shadow-md">
-              <CardContent className="p-4 sm:p-6 lg:p-8">
-                <div>
-                  <p className="font-black text-gray-900 dark:text-white text-base sm:text-lg mb-1.5 sm:mb-2">إجابة نصية</p>
-                  <p className="text-xs sm:text-sm lg:text-base text-gray-500 dark:text-gray-400">
-                    يمكنك كتابة إجابتك هنا مباشرة
                   </p>
                 </div>
               </CardContent>
