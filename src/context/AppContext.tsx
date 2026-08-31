@@ -89,7 +89,7 @@ useEffect(() => {
 
 const { data: student } = await supabase
   .from("students")
-  .select("session_token, is_blocked")
+  .select("session_token, is_blocked, grade")
   .eq("auth_id", session.user.id)
   .single();
 
@@ -111,7 +111,15 @@ if (
 }
 
       setIsBlocked(!!student?.is_blocked);
-      setUser(JSON.parse(savedUser));
+
+      const parsedUser = JSON.parse(savedUser);
+      const freshUser =
+        student && student.grade && student.grade !== parsedUser.grade
+          ? { ...parsedUser, grade: student.grade }
+          : parsedUser;
+
+      localStorage.setItem("user", JSON.stringify(freshUser));
+      setUser(freshUser);
     }
 
     setLoading(false);
@@ -129,7 +137,7 @@ const interval = setInterval(async () => {
 
   const { data: student } = await supabase
     .from("students")
-    .select("session_token, is_blocked")
+    .select("session_token, is_blocked, grade")
     .eq("auth_id", session.user.id)
     .single();
 
@@ -147,6 +155,10 @@ if (student.session_token !== savedToken) {
   }
 
   setIsBlocked(!!student.is_blocked);
+
+  if (student.grade) {
+    updateUser({ grade: student.grade });
+  }
 }, 3000);
 
   const {
