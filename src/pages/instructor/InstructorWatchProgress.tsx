@@ -2,17 +2,16 @@ import { useState, useEffect, useMemo } from "react";
 import { supabase } from "../../lib/supabase";
 import { useApp } from "../../context/AppContext";
 import {
-  TrendingUp,
-  Users,
+  UserCheck,
   UserX,
   Eye,
   CheckCircle,
+  Users,
   Search,
   Phone,
   AlertCircle,
-  UserCheck,
-  Filter,
-  RotateCcw,
+  RefreshCw,
+  Clock,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
@@ -24,11 +23,9 @@ interface ProgressRecord {
   student_id: string;
   full_name: string;
   phone: string | null;
-  whatsapp_number: string | null;
   course_id: string;
   course_title: string;
   enrolled_at: string;
-  require_completion: boolean;
   total_lessons: number;
   completed_lessons: number;
   completion_percentage: number;
@@ -37,7 +34,7 @@ interface ProgressRecord {
   last_watched_at: string | null;
 }
 
-type FilterType = "all" | "not_started" | "partial" | "bypassed" | "completed";
+type TabType = "not_started" | "completed" | "partial" | "bypassed" | "all";
 
 interface CourseOption {
   id: string;
@@ -53,14 +50,16 @@ export function InstructorWatchProgress() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<string>("all");
-  const [filterType, setFilterType] = useState<FilterType>("all");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [activeTab, setActiveTab] = useState<TabType>("not_started");
 
-  // جلب الكورسات
   useEffect(() => {
     loadCourses();
+    fetchData();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [selectedCourse]);
 
   async function loadCourses() {
     const { data: coursesData } = await supabase
@@ -69,28 +68,13 @@ export function InstructorWatchProgress() {
     setCourses((coursesData as CourseOption[]) || []);
   }
 
-  // جلب البيانات
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   async function fetchData() {
     setLoading(true);
     try {
-      let query = supabase
-        .from("instructor_progress_view")
-        .select("*");
+      let query = supabase.from("instructor_progress_view").select("*");
 
       if (selectedCourse !== "all") {
         query = query.eq("course_id", selectedCourse);
-      }
-
-      if (dateFrom) {
-        query = query.gte("enrolled_at", dateFrom);
-      }
-
-      if (dateTo) {
-        query = query.lte("enrolled_at", dateTo + "T23:59:59");
       }
 
       const { data: viewData, error } = await query.order("enrolled_at", {
@@ -106,36 +90,6 @@ export function InstructorWatchProgress() {
     }
   }
 
-  // الفلاتر
-  const filteredData = useMemo(() => {
-    let result = data;
-
-    // بحث بالاسم أو الموبايل
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(
-        (r) =>
-          r.full_name.toLowerCase().includes(q) ||
-          r.phone?.includes(q) ||
-          r.whatsapp_number?.includes(q)
-      );
-    }
-
-    // فلتر حسب الحالة
-    if (filterType !== "all") {
-      result = result.filter((r) => {
-        const pct = r.completion_percentage || 0;
-        if (filterType === "not_started") return pct === 0;
-        if (filterType === "partial") return pct > 0 && pct < 100;
-        if (filterType === "bypassed") return r.bypassed_count > 0;
-        if (filterType === "completed") return pct === 100;
-        return true;
-      });
-    }
-
-    return result;
-  }, [data, searchQuery, filterType]);
-
   // الإحصائيات
   const stats = useMemo(() => {
     const total = data.length;
@@ -144,20 +98,120 @@ export function InstructorWatchProgress() {
       (r) => r.completion_percentage > 0 && r.completion_percentage < 100
     ).length;
     const bypassed = data.filter((r) => r.bypassed_count > 0).length;
-    const completed = data.filter((r) => r.completion_percentage === 100)
-      .length;
+    const completed = data.filter((r) => r.completion_percentage === 100).length;
 
     return { total, notStarted, partial, bypassed, completed };
   }, [data]);
 
-  const resetFilters = () => {
-    setSelectedCourse("all");
-    setDateFrom("");
-    setDateTo("");
-    setFilterType("all");
-    setSearchQuery("");
-    setTimeout(fetchData, 0);
+  const overallCompletionRate = useMemo(() => {
+    if (data.length === 0) return 0;
+    const avg =
+      data.reduce((sum, r) => sum + (r.completion_percentage || 0), 0) /
+      data.length;
+    return Math.round(avg);
+  }, [data]);
+
+  // الفلاتر (تاب + بحث)
+  const filteredData = useMemo(() => {
+    let result = data;
+
+    if (activeTab !== "all") {
+      result = result.filter((r) => {
+        const pct = r.completion_percentage || 0;
+        if (activeTab === "not_started") return pct === 0;
+        if (activeTab === "partial") return pct > 0 && pct < 100;
+        if (activeTab === "bypassed") return r.bypassed_count > 0;
+        if (activeTab === "completed") return pct === 100;
+        return true;
+      });
+    }
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (r) =>
+          r.full_name.toLowerCase().includes(q) || r.phone?.includes(q)
+      );
+    }
+
+    return result;
+  }, [data, searchQuery, activeTab]);
+
+  const tabs: { key: TabType; label: string; count: number }[] = [
+    { key: "not_started", label: "لم يفتحوا", count: stats.notStarted },
+    { key: "completed", label: "اكتملت", count: stats.completed },
+    { key: "partial", label: "مشاهدة جزئية", count: stats.partial },
+    { key: "bypassed", label: "المتجاوزون", count: stats.bypassed },
+    { key: "all", label: "السجل الكامل", count: stats.total },
+  ];
+
+  const statCards = [
+    {
+      label: "متجاوزون يدويًا",
+      value: stats.bypassed,
+      icon: UserCheck,
+      color: "blue",
+    },
+    {
+      label: "لم يفتحوا نهائيًا",
+      value: stats.notStarted,
+      icon: UserX,
+      color: "red",
+    },
+    {
+      label: "مشاهدة جزئية",
+      value: stats.partial,
+      icon: Clock,
+      color: "orange",
+    },
+    {
+      label: "أكملوا المحاضرة",
+      value: stats.completed,
+      icon: CheckCircle,
+      color: "green",
+    },
+    {
+      label: "إجمالي المستهدفين",
+      value: stats.total,
+      icon: Users,
+      color: "purple",
+    },
+  ];
+
+const colorClasses: Record<
+  string,
+  { border: string; bg: string; text: string }
+> = {
+    blue: {
+      border: "border-blue-400 dark:border-blue-500",
+      bg: "bg-blue-50 dark:bg-blue-900/20",
+      text: "text-blue-600 dark:text-blue-400",
+    },
+    red: {
+      border: "border-red-400 dark:border-red-500",
+      bg: "bg-red-50 dark:bg-red-900/20",
+      text: "text-red-600 dark:text-red-400",
+    },
+    orange: {
+      border: "border-orange-400 dark:border-orange-500",
+      bg: "bg-orange-50 dark:bg-orange-900/20",
+      text: "text-orange-600 dark:text-orange-400",
+    },
+    green: {
+      border: "border-green-400 dark:border-green-500",
+      bg: "bg-green-50 dark:bg-green-900/20",
+      text: "text-green-600 dark:text-green-400",
+    },
+    purple: {
+      border: "border-purple-400 dark:border-purple-500",
+      bg: "bg-purple-50 dark:bg-purple-900/20",
+      text: "text-purple-600 dark:text-purple-400",
+    },
   };
+
+  const circumference = 2 * Math.PI * 46;
+  const dashOffset =
+    circumference - (overallCompletionRate / 100) * circumference;
 
   return (
     <div
@@ -171,87 +225,103 @@ export function InstructorWatchProgress() {
       <main className="flex-1 overflow-y-auto">
         <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
           {/* العنوان */}
-          <div>
-            <h1 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-1">
-              مركز متابعة المشاهدة
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
-              تتبع تقدم الطلاب في الكورسات
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-1">
+                Student Progress Control Center
+              </h1>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
+                تحليل المشاهدة، متابعة الطلاب، وإدارة اجتياز المحاضرات بدقة.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={fetchData}
+              className="rounded-xl font-bold hidden sm:flex"
+            >
+              <RefreshCw size={16} className="ml-1.5" />
+              تحديث البيانات
+            </Button>
           </div>
 
           {/* الكروت الإحصائية */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {[
-              {
-                label: "متجاوزون",
-                value: stats.bypassed,
-                icon: UserCheck,
-                gradient: "from-yellow-400 to-orange-500",
-              },
-              {
-                label: "لم يفتحوا",
-                value: stats.notStarted,
-                icon: UserX,
-                gradient: "from-red-400 to-pink-500",
-              },
-              {
-                label: "مشاهدة جزئية",
-                value: stats.partial,
-                icon: Eye,
-                gradient: "from-blue-400 to-indigo-500",
-              },
-              {
-                label: "أكملوا",
-                value: stats.completed,
-                icon: CheckCircle,
-                gradient: "from-green-400 to-emerald-500",
-              },
-              {
-                label: "إجمالي",
-                value: stats.total,
-                icon: Users,
-                gradient: "from-purple-400 to-pink-500",
-              },
-            ].map((stat, i) => (
-              <Card
-                key={i}
-                className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm"
-              >
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400">
-                        {stat.label}
-                      </p>
-                      <p className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mt-1">
-                        {stat.value}
-                      </p>
-                    </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {statCards.map((stat, i) => {
+              const c = colorClasses[stat.color];
+              return (
+                <Card
+                  key={i}
+                  className={`bg-white dark:bg-[#111111] border-2 ${c.border} rounded-2xl shadow-sm`}
+                >
+                  <CardContent className="p-4">
                     <div
-                      className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg`}
+                      className={`w-9 h-9 rounded-xl ${c.bg} flex items-center justify-center mb-3`}
                     >
-                      <stat.icon className="w-6 h-6 text-white" />
+                      <stat.icon className={`w-5 h-5 ${c.text}`} />
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    <p className="text-2xl font-black text-gray-900 dark:text-white">
+                      {stat.value}
+                    </p>
+                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mt-1">
+                      {stat.label}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
-          {/* الفلاتر */}
+          {/* قسم اختيار الكورس + نسبة الإنجاز */}
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
-            <CardContent className="p-4 lg:p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end mb-4">
-                {/* الكورس */}
-                <div>
+            <CardContent className="p-5 lg:p-6">
+              <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+                {/* الدائرة */}
+                <div className="flex items-center gap-4 flex-shrink-0">
+                  <div className="relative w-28 h-28">
+                    <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="46"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="8"
+                        className="text-gray-100 dark:text-[#2A2A2A]"
+                      />
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="46"
+                        fill="none"
+                        stroke="#B348FE"
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={dashOffset}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-xl font-black text-gray-900 dark:text-white">
+                        {overallCompletionRate}%
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-bold">
+                      إجمالي نجاح الدفعة
+                    </p>
+                  </div>
+                </div>
+
+                {/* اختيار الكورس */}
+                <div className="flex-1">
                   <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 block">
                     الكورس:
                   </label>
                   <select
                     value={selectedCourse}
                     onChange={(e) => setSelectedCourse(e.target.value)}
-                    className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
+                    className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm font-bold text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
                   >
                     <option value="all">-- كل الكورسات --</option>
                     {courses.map((c) => (
@@ -261,81 +331,38 @@ export function InstructorWatchProgress() {
                     ))}
                   </select>
                 </div>
-
-                {/* الفترة من */}
-                <div>
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 block">
-                    الفترة من:
-                  </label>
-                  <input
-                    type="date"
-                    value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                    className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
-                  />
-                </div>
-
-                {/* الفترة إلى */}
-                <div>
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 block">
-                    الفترة إلى:
-                  </label>
-                  <input
-                    type="date"
-                    value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
-                    className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
-                  />
-                </div>
-
-                {/* أزرار التحكم */}
-                <div className="flex gap-2">
-                  <Button
-                    onClick={fetchData}
-                    className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-bold h-11"
-                  >
-                    <Filter size={16} className="ml-1.5" />
-                    تطبيق الفلاتر
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={resetFilters}
-                    className="rounded-xl font-bold h-11 px-3"
-                  >
-                    <RotateCcw size={16} />
-                  </Button>
-                </div>
-              </div>
-
-              {/* فلاتر إضافية */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* بحث */}
-                <div className="relative">
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    placeholder="ابحث بالاسم أو الموبايل..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pr-10 pl-4 py-3 border border-gray-200 dark:border-[#2A2A2A] rounded-xl bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
-                  />
-                </div>
-
-                {/* الحالة */}
-                <select
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value as FilterType)}
-                  className="px-4 py-3 border border-gray-200 dark:border-[#2A2A2A] rounded-xl bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
-                >
-                  <option value="all">كل الحالات</option>
-                  <option value="not_started">لم يبدأوا</option>
-                  <option value="partial">مشاهدة جزئية</option>
-                  <option value="bypassed">تم تجاوزهم</option>
-                  <option value="completed">أكملوا</option>
-                </select>
               </div>
             </CardContent>
           </Card>
+
+          {/* التابات */}
+          <div className="flex items-center gap-1 overflow-x-auto border-b border-gray-200 dark:border-[#2A2A2A]">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-4 py-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${
+                  activeTab === tab.key
+                    ? "border-[#B348FE] text-[#B348FE]"
+                    : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                }`}
+              >
+                {tab.label} ({tab.count})
+              </button>
+            ))}
+          </div>
+
+          {/* بحث */}
+          <div className="relative">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="ابحث برقم الهاتف أو الاسم..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pr-10 pl-4 py-3 border border-gray-200 dark:border-[#2A2A2A] rounded-xl bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
+            />
+          </div>
 
           {/* الجدول */}
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
@@ -347,29 +374,32 @@ export function InstructorWatchProgress() {
                     جاري التحميل...
                   </p>
                 </div>
+              ) : filteredData.length === 0 ? (
+                <div className="py-16 text-center">
+                  <div className="text-4xl mb-3">🎉</div>
+                  <p className="text-gray-500 dark:text-gray-400 font-bold">
+                    جميع الطلاب المتوقعين قاموا بفتح المحاضرة!
+                  </p>
+                </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-gradient-to-r from-[#B348FE] to-purple-600 text-white">
-                      <tr>
-                        <th className="px-4 py-3 text-right font-bold">#</th>
-                        <th className="px-4 py-3 text-right font-bold">
-                          الطالب
+                    <thead>
+                      <tr className="border-b border-gray-100 dark:border-[#2A2A2A]">
+                        <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
+                          بيانات الطالب
                         </th>
-                        <th className="px-4 py-3 text-right font-bold">
-                          الكورس
+                        <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
+                          تاريخ الاشتراك
                         </th>
-                        <th className="px-4 py-3 text-right font-bold">
-                          التقدم
+                        <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
+                          آخر دخول للمنصة
                         </th>
-                        <th className="px-4 py-3 text-right font-bold">
+                        <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
                           الحالة
                         </th>
-                        <th className="px-4 py-3 text-right font-bold">
-                          آخر مشاهدة
-                        </th>
-                        <th className="px-4 py-3 text-right font-bold">
-                          تواصل
+                        <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
+                          الإجراءات
                         </th>
                       </tr>
                     </thead>
@@ -385,12 +415,16 @@ export function InstructorWatchProgress() {
                           statusLabel = "مكتمل";
                         } else if (row.bypassed_count > 0) {
                           statusColor =
-                            "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400";
+                            "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400";
                           statusLabel = "متجاوز";
                         } else if (pct > 0) {
                           statusColor =
-                            "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400";
+                            "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400";
                           statusLabel = "جاري";
+                        } else {
+                          statusColor =
+                            "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400";
+                          statusLabel = "لم يبدأ";
                         }
 
                         return (
@@ -398,45 +432,18 @@ export function InstructorWatchProgress() {
                             key={idx}
                             className="hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors"
                           >
-                            <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
-                              {idx + 1}
-                            </td>
                             <td className="px-4 py-3">
-                              <div>
-                                <p className="font-bold text-gray-900 dark:text-white">
-                                  {row.full_name}
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                  {row.phone || "—"}
-                                </p>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
-                              {row.course_title}
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-2">
-                                <div className="flex-1 bg-gray-200 dark:bg-[#2A2A2A] rounded-full h-2">
-                                  <div
-                                    className="bg-gradient-to-r from-[#B348FE] to-purple-600 h-2 rounded-full transition-all"
-                                    style={{ width: `${pct}%` }}
-                                  />
-                                </div>
-                                <span className="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[45px]">
-                                  {pct}%
-                                </span>
-                              </div>
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {row.completed_lessons}/{row.total_lessons}{" "}
-                                محاضرة
+                              <p className="font-bold text-gray-900 dark:text-white">
+                                {row.full_name}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {row.phone || "—"}
                               </p>
                             </td>
-                            <td className="px-4 py-3">
-                              <span
-                                className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${statusColor}`}
-                              >
-                                {statusLabel}
-                              </span>
+                            <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+                              {new Date(row.enrolled_at).toLocaleDateString(
+                                "ar-EG"
+                              )}
                             </td>
                             <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
                               {row.last_watched_at
@@ -446,10 +453,20 @@ export function InstructorWatchProgress() {
                                 : "—"}
                             </td>
                             <td className="px-4 py-3">
+                              <span
+                                className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${statusColor}`}
+                              >
+                                {statusLabel}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
                               <div className="flex gap-2">
-                                {row.whatsapp_number && (
+                                {row.phone && (
                                   <a
-                                    href={`https://wa.me/${row.whatsapp_number}`}
+                                    href={`https://wa.me/${row.phone.replace(
+                                      /^0/,
+                                      "20"
+                                    )}`}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="p-2 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 rounded-lg transition-colors"
@@ -458,7 +475,7 @@ export function InstructorWatchProgress() {
                                   </a>
                                 )}
                                 {row.phone && (
-                                  <a
+                                   <a
                                     href={`tel:${row.phone}`}
                                     className="p-2 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
                                   >
@@ -472,15 +489,6 @@ export function InstructorWatchProgress() {
                       })}
                     </tbody>
                   </table>
-
-                  {filteredData.length === 0 && (
-                    <div className="py-12 text-center">
-                      <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-                      <p className="text-gray-500 dark:text-gray-400 font-bold">
-                        لا توجد بيانات
-                      </p>
-                    </div>
-                  )}
                 </div>
               )}
             </CardContent>
