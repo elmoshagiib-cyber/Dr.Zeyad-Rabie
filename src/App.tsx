@@ -41,6 +41,7 @@ import { EditStudent } from "./pages/instructor/EditStudent";
 import { EditCourse } from "./pages/instructor/EditCourse";
 import SubscriptionCodes from "./pages/instructor/SubscriptionCodes";
 import { InstructorReports } from "./pages/instructor/InstructorReports";
+import { InstructorWatchProgress } from "./pages/instructor/InstructorWatchProgress";
 import { HomeworkDetailsPage } from "./pages/student/HomeworkDetailsPage";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -338,6 +339,15 @@ function AppRoutes() {
   element={
     <ProtectedRoute roles={["instructor"]}>
       <InstructorReports />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/instructor/watch-progress"
+  element={
+    <ProtectedRoute roles={["instructor"]}>
+      <InstructorWatchProgress />
     </ProtectedRoute>
   }
 />
