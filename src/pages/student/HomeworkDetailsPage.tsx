@@ -45,6 +45,7 @@ export function HomeworkDetailsPage() {
   const [essayAnswers, setEssayAnswers] = useState<Record<number, string>>({});
   const [submittingAnswers, setSubmittingAnswers] = useState(false);
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
 
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -581,12 +582,77 @@ export function HomeworkDetailsPage() {
       );
     }
 
+    // ── شاشة تعريفية (Intro) قبل الحل ──
+    if (!hasStarted) {
+      return (
+        <StudentLayout>
+          <main className="flex-1 overflow-y-auto bg-[#F7F5EF]">
+            <div className="max-w-2xl mx-auto p-3 sm:p-6">
+              <Button variant="outline" onClick={() => navigate(-1)} className="border-2 font-bold text-sm mb-4">
+                <ArrowRight size={16} />
+                رجوع
+              </Button>
+
+              <div className="bg-white rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-br from-[#B348FE] via-purple-600 to-[#9E2FFF] p-8 sm:p-12 text-center">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-5 shadow-xl">
+                    <ClipboardList className="text-white" size={40} />
+                  </div>
+                  <h1 className="text-xl sm:text-3xl font-black text-white mb-2">{homework.title}</h1>
+                  {homework.course_sections?.courses?.title && (
+                    <p className="text-purple-100 text-sm sm:text-base">{homework.course_sections.courses.title}</p>
+                  )}
+                </div>
+
+                <div className="p-5 sm:p-8 space-y-5">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    <div className="bg-blue-50 rounded-2xl p-4 sm:p-5 border border-blue-200 text-center">
+                      <p className="text-2xl sm:text-3xl font-black text-blue-600">{questions.length}</p>
+                      <p className="text-xs text-blue-600 mt-1 font-bold">سؤال</p>
+                    </div>
+                    <div className="bg-emerald-50 rounded-2xl p-4 sm:p-5 border border-emerald-200 text-center">
+                      <p className="text-2xl sm:text-3xl font-black text-emerald-600">
+                        {homework.total_score || questions.reduce((s, q) => s + (Number(q.points) || 1), 0)}
+                      </p>
+                      <p className="text-xs text-emerald-600 mt-1 font-bold">الدرجة الكلية</p>
+                    </div>
+                  </div>
+
+                  {homework.description && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 sm:p-5">
+                      <p className="font-black text-gray-900 text-sm mb-1.5">وصف الواجب</p>
+                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                        {homework.description}
+                      </p>
+                    </div>
+                  )}
+
+                  {hasEssay && (
+                    <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4">
+                      <p className="text-amber-800 text-xs sm:text-sm font-bold flex items-start gap-2">
+                        <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                        الواجب ده فيه أسئلة مقالية، فالدرجة النهائية هتظهر بعد ما المعلم يراجعها يدويًا.
+                      </p>
+                    </div>
+                  )}
+
+                  <Button onClick={() => setHasStarted(true)} className="w-full bg-teal-500 hover:bg-teal-600 py-3 text-base font-bold">
+                    ابدأ حل الواجب
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </main>
+        </StudentLayout>
+      );
+    }
+
     // ── شاشة حل الواجب ──
     return (
       <StudentLayout>
         <main className="flex-1 overflow-y-auto bg-[#F7F5EF]">
           <div className="max-w-3xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
-            <Button variant="outline" onClick={() => navigate(-1)} className="border-2 font-bold text-sm">
+            <Button variant="outline" onClick={() => setHasStarted(false)} className="border-2 font-bold text-sm">
               <ArrowRight size={16} />
               رجوع
             </Button>
