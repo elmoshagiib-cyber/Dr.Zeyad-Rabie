@@ -18,6 +18,7 @@ import {
   AlertCircle,
   ArrowRight,
   KeyRound,
+  Unlock,
   Copy,
   Check,
   Clock,
@@ -248,6 +249,7 @@ export function StudentDetails() {
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [clearingAttempts, setClearingAttempts] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [copied, setCopied] = useState(false);
@@ -1099,6 +1101,51 @@ const sendAnnouncement = async () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const clearRegisterAttempts = async () => {
+    if (!student) return;
+
+    const confirmed = window.confirm(
+      `هل تريد إلغاء الحظر المؤقت لمحاولات التسجيل الخاصة برقم ${student.phone}؟`
+    );
+    if (!confirmed) return;
+
+    setClearingAttempts(true);
+
+    // نجرب كل الأشكال المحتملة لرقم الموبايل (بصفر - من غير صفر - بكود الدولة)
+    const rawPhone = student.phone.trim();
+    const digitsOnly = rawPhone.replace(/\D/g, "");
+    const withoutLeadingZero = digitsOnly.replace(/^0+/, "");
+    const possibleFormats = [
+      ...new Set([
+        rawPhone,
+        digitsOnly,
+        withoutLeadingZero,
+        "0" + withoutLeadingZero,
+        "20" + withoutLeadingZero,
+        "+20" + withoutLeadingZero,
+      ]),
+    ];
+
+    const { error, count } = await supabase
+      .from("register_attempts")
+      .delete({ count: "exact" })
+      .in("identifier", possibleFormats);
+
+    setClearingAttempts(false);
+
+    if (error) {
+      alert("حصل خطأ أثناء إلغاء الحظر: " + error.message);
+      return;
+    }
+
+    if (!count || count === 0) {
+      alert("لم يتم العثور على سجل حظر بهذا الرقم. جرب تتأكد من رقم الطالب أو يبقى مفيش حظر أصلاً.");
+      return;
+    }
+
+    alert("تم إلغاء الحظر بنجاح ✅ يقدر الطالب يحاول يسجل تاني دلوقتي");
+  };
+
   const toggleStudentStatus = async () => {
     if (!student) return;
 
@@ -1351,6 +1398,15 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 </Button>
                 <Button
                   variant="outline"
+                  onClick={clearRegisterAttempts}
+                  disabled={clearingAttempts}
+                  className="border-2 border-amber-200 text-amber-600 hover:bg-amber-50 dark:border-amber-900 dark:text-amber-400 dark:hover:bg-amber-950/30 rounded-xl font-bold h-12 transition-all duration-300 disabled:opacity-70"
+                >
+                  <Unlock size={18} className="ml-2" />
+                  {clearingAttempts ? "جاري الإلغاء..." : "إلغاء حظر التسجيل"}
+                </Button>
+                <Button
+                  variant="outline"
                   onClick={toggleStudentStatus}
                   className={`border-2 rounded-xl font-bold h-12 transition-all duration-300 ${
                     student.is_blocked
@@ -1361,77 +1417,6 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   <Power size={18} className="ml-2" />
                   {student.is_blocked ? "تفعيل الطالب" : "إيقاف الطالب"}
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
-            <CardContent className="p-6 lg:p-8">
-              <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-                <div>
-                  <h2 className="text-xl lg:text-2xl font-black text-gray-900 dark:text-white">ملخص الاشتراك الحالي</h2>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">آخر عملية اشتراك مؤكدة لهذا الطالب</p>
-                </div>
-                <Button
-                  onClick={openAddSubscriptionModal}
-                  className="bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-bold h-11 px-5"
-                >
-                  <Plus size={16} className="ml-1.5" />
-                  إضافة اشتراك
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">حالة الاشتراك</p>
-                  <p className={`font-black text-sm ${realSubscriptionStatus === "active" ? "text-emerald-600" : "text-red-600"}`}>
-                    {realSubscriptionStatus === "active" ? "نشط" : "منتهي"}
-                  </p>
-                </div>
-                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">الكورس الحالي</p>
-                  <p className="font-bold text-gray-900 dark:text-white text-sm truncate">
-                    {latestVerifiedPayment?.courseData?.title || "-"}
-                  </p>
-                </div>
-                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">نوع الاشتراك</p>
-                  <p className="font-bold text-gray-900 dark:text-white text-sm">
-                    {latestVerifiedPayment ? (latestVerifiedPayment.student_type === "online" ? "Online" : "Center") : "-"}
-                  </p>
-                </div>
-                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">قيمة آخر اشتراك</p>
-                  <p className="font-bold text-gray-900 dark:text-white text-sm">
-                    {latestVerifiedPayment ? `${latestVerifiedPayment.amount} جنيه` : "-"}
-                  </p>
-                </div>
-                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">تاريخ البداية</p>
-                  <p className="font-bold text-gray-900 dark:text-white text-sm">
-                    {latestVerifiedPayment ? new Date(latestVerifiedPayment.subscription_start_date).toLocaleDateString("ar-EG") : "-"}
-                  </p>
-                </div>
-                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">تاريخ الانتهاء</p>
-                  <p className="font-bold text-gray-900 dark:text-white text-sm">
-                    {permanentActiveExists
-                      ? "اشتراك دائم"
-                      : latestVerifiedPayment
-                      ? new Date(latestVerifiedPayment.subscription_end_date).toLocaleDateString("ar-EG")
-                      : "-"}
-                  </p>
-                </div>
-                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">الأيام المتبقية</p>
-                  <p className={`font-black text-sm ${daysRemaining !== null && daysRemaining > 0 ? "text-emerald-600" : "text-red-600"}`}>
-                    {permanentActiveExists
-                      ? "اشتراك دائم"
-                      : daysRemaining !== null && daysRemaining > 0
-                      ? `${daysRemaining} يوم`
-                      : "منتهي"}
-                  </p>
-                </div>
               </div>
             </CardContent>
           </Card>

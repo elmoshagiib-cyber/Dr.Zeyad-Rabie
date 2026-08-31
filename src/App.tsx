@@ -40,6 +40,7 @@ import { StudentDetails } from "./pages/instructor/StudentDetails";
 import { EditStudent } from "./pages/instructor/EditStudent";
 import { EditCourse } from "./pages/instructor/EditCourse";
 import SubscriptionCodes from "./pages/instructor/SubscriptionCodes";
+import { InstructorReports } from "./pages/instructor/InstructorReports";
 import { HomeworkDetailsPage } from "./pages/student/HomeworkDetailsPage";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -330,6 +331,15 @@ function AppRoutes() {
 <Route
     path="/instructor/subscription-codes"
     element={<SubscriptionCodes />}
+/>
+
+<Route
+  path="/instructor/reports"
+  element={
+    <ProtectedRoute roles={["instructor"]}>
+      <InstructorReports />
+    </ProtectedRoute>
+  }
 />
       {/* Admin */}
 

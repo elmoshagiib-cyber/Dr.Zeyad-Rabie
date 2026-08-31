@@ -941,12 +941,6 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
               إنهاء الاختبار
             </button>
 
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="w-full bg-amber-400 hover:bg-amber-500 text-white font-bold text-sm py-2.5 rounded-xl transition-colors"
-            >
-              استكمال الاختبار لاحقًا
-            </button>
 
             <button
               onClick={() => setShowQuickReviewModal(true)}

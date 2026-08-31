@@ -11,6 +11,7 @@ import {
   Bell,
   User,
   BarChart2,
+  BarChart3,
   Users,
   CheckCircle,
   Settings,
@@ -88,6 +89,7 @@ const instructorNavGroups: NavGroup[] = [
     items: [
       { label: "تسليمات الطلاب", path: "/instructor/submissions", icon: <CheckCircle size={20} /> },
       { label: "الطلاب", path: "/instructor/students", icon: <Users size={20} /> },
+      { label: "التقارير والإحصائيات", path: "/instructor/reports", icon: <BarChart3 size={20} /> },
     ],
   },
   {
