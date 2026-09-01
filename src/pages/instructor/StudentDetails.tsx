@@ -786,6 +786,8 @@ const addCourse = async () => {
     const confirmed = window.confirm("هل أنت متأكد من حذف عملية الاشتراك دي؟ الإجراء ده مش قابل للتراجع.");
     if (!confirmed) return;
 
+    const payment = subscriptionPayments.find((p) => p.id === paymentId);
+
     setDeletingPaymentId(paymentId);
 
     const { error } = await supabase
@@ -793,17 +795,41 @@ const addCourse = async () => {
       .delete()
       .eq("id", paymentId);
 
-    setDeletingPaymentId(null);
-
     if (error) {
+      setDeletingPaymentId(null);
       alert("حصل خطأ أثناء حذف الاشتراك: " + error.message);
       return;
     }
 
-    await loadSubscriptionPayments();
+    // لو الدفعة اللي اتمسحت كانت مؤكدة، لازم نتأكد إن مفيش دفعة تانية مؤكدة
+    // لنفس الكورس قبل ما نلغي تفعيله للطالب
+    if (payment?.payment_status === "verified" && payment.course_id) {
+      const { data: remainingVerified } = await supabase
+        .from("subscription_payments")
+        .select("id")
+        .eq("student_id", Number(id))
+        .eq("course_id", payment.course_id)
+        .eq("payment_status", "verified");
+
+      if (!remainingVerified || remainingVerified.length === 0) {
+        await supabase
+          .from("student_courses")
+          .update({ active: false })
+          .eq("student_id", Number(id))
+          .eq("course_id", payment.course_id);
+      }
+    }
+
+    setDeletingPaymentId(null);
+
+    await Promise.all([loadSubscriptionPayments(), loadCourses(), loadStudent()]);
   };
 
   const saveSubscriptionPayment = async () => {
+    const originalPayment = editingPaymentId
+      ? subscriptionPayments.find((p) => p.id === editingPaymentId)
+      : null;
+
     if (!subForm.course_id) {
       alert("اختر الكورس أولاً");
       return;
@@ -882,6 +908,30 @@ const addCourse = async () => {
           alert("حدث خطأ أثناء حفظ الاشتراك: " + insertError.message);
           setSavingSubscription(false);
           return;
+        }
+      }
+
+      // لو ده تعديل وكان فيه تغيير في الكورس أو الحالة اتحولت من "مؤكد" لحاجة تانية،
+      // نتأكد إن الكورس القديم يتلغي تفعيله لو مفيش دفعة تانية مؤكدة ليه
+      if (
+        originalPayment &&
+        originalPayment.payment_status === "verified" &&
+        (originalPayment.course_id !== subForm.course_id || subForm.payment_status !== "verified")
+      ) {
+        const { data: remainingVerified } = await supabase
+          .from("subscription_payments")
+          .select("id")
+          .eq("student_id", Number(id))
+          .eq("course_id", originalPayment.course_id)
+          .eq("payment_status", "verified")
+          .neq("id", editingPaymentId as number);
+
+        if (!remainingVerified || remainingVerified.length === 0) {
+          await supabase
+            .from("student_courses")
+            .update({ active: false })
+            .eq("student_id", Number(id))
+            .eq("course_id", originalPayment.course_id);
         }
       }
 
