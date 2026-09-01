@@ -841,7 +841,7 @@ hover:bg-[#9A2EFF]
         bg-[#F6AC08]
         hover:bg-[#E29E00]
         text-[#ffffff]
-        font-bold
+        font-black
         hover:scale-[1.03]
         transition-all
         duration-300
