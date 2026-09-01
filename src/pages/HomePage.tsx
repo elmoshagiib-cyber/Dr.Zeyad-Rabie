@@ -757,6 +757,33 @@ lg:text-center
 
   </h1>
 
+  <p
+    className="
+    mt-4
+    sm:mt-6
+    lg:mt-8
+    max-w-[320px]
+    xs:max-w-[380px]
+    sm:max-w-[500px]
+    lg:max-w-[620px]
+    mx-auto
+    lg:mx-0
+    
+    text-[15px]
+    sm:text-[17px]
+    lg:text-[20px]
+    xl:text-[22px]
+    leading-[1.7]
+    sm:leading-[1.8]
+    font-normal
+    text-slate-600
+    dark:text-slate-300
+    "
+  >
+   لا تستعجل النتيجة، فبعض التفاعلات تحتاج وقتًا،
+لكنها في النهاية تعطي أقوى النتائج
+  </p>
+
   <div
     className="
     mt-6
