@@ -29,7 +29,8 @@ import {
   Receipt,
   MessageCircle,
   Search,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Pencil
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
@@ -267,6 +268,8 @@ export function StudentDetails() {
   const [downloadingImage, setDownloadingImage] = useState(false);
   const [savingSubscription, setSavingSubscription] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [editingPaymentId, setEditingPaymentId] = useState<number | null>(null);
+  const [deletingPaymentId, setDeletingPaymentId] = useState<number | null>(null);
   const [subForm, setSubForm] = useState({
     course_id: "",
     student_type: "online" as "online" | "center",
@@ -746,6 +749,7 @@ const addCourse = async () => {
     const end = new Date(start);
     end.setMonth(end.getMonth() + 1);
 
+    setEditingPaymentId(null);
     setSubForm({
       course_id: availableCourses[0] ? String(availableCourses[0].id) : "",
       student_type: "online",
@@ -759,6 +763,44 @@ const addCourse = async () => {
       notes: "",
     });
     setShowAddSubscriptionModal(true);
+  };
+
+  const openEditSubscriptionModal = (payment: SubscriptionPayment) => {
+    setEditingPaymentId(payment.id);
+    setSubForm({
+      course_id: payment.course_id,
+      student_type: payment.student_type,
+      payment_method: payment.payment_method,
+      amount: payment.amount,
+      payer_phone: payment.payer_phone || "",
+      subscription_code: payment.subscription_code || "",
+      start_date: payment.subscription_start_date.slice(0, 10),
+      end_date: payment.subscription_end_date.slice(0, 10),
+      payment_status: payment.payment_status === "cancelled" ? "pending" : payment.payment_status,
+      notes: payment.notes || "",
+    });
+    setShowAddSubscriptionModal(true);
+  };
+
+  const deleteSubscriptionPayment = async (paymentId: number) => {
+    const confirmed = window.confirm("هل أنت متأكد من حذف عملية الاشتراك دي؟ الإجراء ده مش قابل للتراجع.");
+    if (!confirmed) return;
+
+    setDeletingPaymentId(paymentId);
+
+    const { error } = await supabase
+      .from("subscription_payments")
+      .delete()
+      .eq("id", paymentId);
+
+    setDeletingPaymentId(null);
+
+    if (error) {
+      alert("حصل خطأ أثناء حذف الاشتراك: " + error.message);
+      return;
+    }
+
+    await loadSubscriptionPayments();
   };
 
   const saveSubscriptionPayment = async () => {
@@ -804,12 +846,9 @@ const addCourse = async () => {
         }
       }
 
-      const invoiceNumber = await generateInvoiceNumber();
-
-      const payload = {
+      const payload: any = {
         student_id: Number(id),
         course_id: subForm.course_id,
-                invoice_number: invoiceNumber,
         student_type: subForm.student_type,
         subscription_type: "monthly",
         amount: Number(subForm.amount),
@@ -823,12 +862,27 @@ const addCourse = async () => {
         notes: subForm.notes.trim() || null,
       };
 
-      const { error: insertError } = await supabase.from("subscription_payments").insert(payload);
+      if (editingPaymentId) {
+        const { error: updateError } = await supabase
+          .from("subscription_payments")
+          .update(payload)
+          .eq("id", editingPaymentId);
 
-      if (insertError) {
-        alert("حدث خطأ أثناء حفظ الاشتراك: " + insertError.message);
-        setSavingSubscription(false);
-        return;
+        if (updateError) {
+          alert("حدث خطأ أثناء تعديل الاشتراك: " + updateError.message);
+          setSavingSubscription(false);
+          return;
+        }
+      } else {
+        payload.invoice_number = await generateInvoiceNumber();
+
+        const { error: insertError } = await supabase.from("subscription_payments").insert(payload);
+
+        if (insertError) {
+          alert("حدث خطأ أثناء حفظ الاشتراك: " + insertError.message);
+          setSavingSubscription(false);
+          return;
+        }
       }
 
       if (subForm.payment_status === "verified") {
@@ -871,7 +925,8 @@ const addCourse = async () => {
 
       setShowAddSubscriptionModal(false);
       setSavingSubscription(false);
-      alert("تم حفظ الاشتراك بنجاح ✅");
+      setEditingPaymentId(null);
+      alert(editingPaymentId ? "تم تعديل الاشتراك بنجاح ✅" : "تم حفظ الاشتراك بنجاح ✅");
     } catch (err: any) {
       alert(err?.message || "حدث خطأ غير متوقع أثناء حفظ الاشتراك");
       setSavingSubscription(false);
@@ -1844,27 +1899,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                       className="w-full h-10 pr-9 pl-3 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
                     />
                   </div>
-                  {[
-                    { key: "all", label: "الكل" },
-                    { key: "online", label: "Online" },
-                    { key: "center", label: "Center" },
-                    { key: "active", label: "نشط" },
-                    { key: "expired", label: "منتهي" },
-                    { key: "verified", label: "تم التأكيد" },
-                    { key: "rejected", label: "مرفوض" },
-                  ].map((f) => (
-                    <button
-                      key={f.key}
-                      onClick={() => { setSubPaymentsFilter(f.key as any); setSubPaymentsPage(1); }}
-                      className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
-                        subPaymentsFilter === f.key
-                          ? "bg-[#B348FE] text-white"
-                          : "bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#222]"
-                      }`}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
+
                 </div>
               </div>
 
@@ -1888,6 +1923,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                           <th className="text-right font-bold px-4 py-3 whitespace-nowrap">تاريخ الانتهاء</th>
                           <th className="text-right font-bold px-4 py-3 whitespace-nowrap">حالة الدفع</th>
                           <th className="text-right font-bold px-4 py-3 whitespace-nowrap">حالة الاشتراك</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">الإجراءات</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1908,6 +1944,23 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                               <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">{new Date(p.subscription_end_date).toLocaleDateString("ar-EG")}</td>
                               <td className="px-4 py-3">{paymentStatusBadge(p.payment_status)}</td>
                               <td className="px-4 py-3">{subscriptionStatusBadge(p)}</td>
+                              <td className="px-4 py-3">
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); openEditSubscriptionModal(p); }}
+                                    className="w-8 h-8 rounded-lg border border-blue-200 dark:border-blue-900 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 flex items-center justify-center transition-colors"
+                                  >
+                                    <Pencil size={14} />
+                                  </button>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); deleteSubscriptionPayment(p.id); }}
+                                    disabled={deletingPaymentId === p.id}
+                                    className="w-8 h-8 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center justify-center transition-colors disabled:opacity-40"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              </td>
                             </tr>
                           ))}
                       </tbody>
@@ -2521,7 +2574,9 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   <Receipt className="text-[#B348FE]" size={24} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-gray-900 dark:text-white">إضافة اشتراك جديد</h3>
+                  <h3 className="text-xl font-black text-gray-900 dark:text-white">
+                    {editingPaymentId ? "تعديل الاشتراك" : "إضافة اشتراك جديد"}
+                  </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">للطالب: {student.full_name}</p>
                 </div>
               </div>
@@ -2662,11 +2717,11 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 disabled={savingSubscription}
                 className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-black h-12 disabled:opacity-70"
               >
-                {savingSubscription ? "جاري الحفظ..." : "حفظ الاشتراك"}
+                {savingSubscription ? "جاري الحفظ..." : editingPaymentId ? "حفظ التعديل" : "حفظ الاشتراك"}
               </Button>
               <Button
                 variant="outline"
-                onClick={() => setShowAddSubscriptionModal(false)}
+                onClick={() => { setShowAddSubscriptionModal(false); setEditingPaymentId(null); }}
                 className="flex-1 border-2 border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] rounded-xl font-black h-12"
               >
                 إلغاء
