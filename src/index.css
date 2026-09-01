@@ -115,6 +115,13 @@ h4,
 h5,
 h6{
 font-family:"IBM Plex Sans Arabic",sans-serif;
+font-weight: 700;
+}
+
+body,
+p{
+font-family:"IBM Plex Sans Arabic",sans-serif;
+font-weight: 400;
 }
 
 .font-black {
