@@ -723,7 +723,7 @@ style={{
     sm:text-[36px]
     md:text-[44px]
     lg:text-[52px]
-    font-bold
+    font-black
     text-center
 lg:text-center
     leading-[1.25]
@@ -744,12 +744,12 @@ lg:text-center
     sm:text-[36px]
     md:text-[44px]
     lg:text-[52px]
-  font-semibold
+  font-black
   text-center
 lg:text-center
   leading-tight
   tracking-[-1px]
-  text-[#F6AC08]
+  text-[#6D28D9]
   "
 >
   مستر زياد ربيع
