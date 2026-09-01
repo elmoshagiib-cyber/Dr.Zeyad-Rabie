@@ -1,15 +1,6 @@
-/* بنستخدم Thmanyah Sans بدل Thmanyah Sans:
-   - Medium (500): للنصوص/الوصف وعناصر المنيو (حسابي، كورساتي، الإعدادات...)
-   - Bold (700): للعناوين الرئيسية (زي "مرحبا بكم في منصة")
-   - Black (900): متاح لو احتجت وزن أتقل لعنوان معين */
-
-@font-face {
-  font-family: "Thmanyah Sans";
-  src: url("/fonts/thmanyahsans-Medium.otf") format("opentype");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
+/* فونت Thmanyah Sans — وزنين بس متاحين عندك: Bold و Black.
+   - Black (900): للعناوين (h1-h6)
+   - Bold (700): لكل حاجة تانية (النصوص، الوصف، عناصر المنيو) */
 
 @font-face {
   font-family: "Thmanyah Sans";
@@ -76,9 +67,11 @@ font-family:"Thmanyah Sans",sans-serif;
 font-weight: 500;
 }
 
-/* بنستخدم بس وزنين محملين: Medium (500) و Bold (700).
-   أي كلاس تاني بيتحط على وزن مختلف هيترجم لأقرب وزن متاح. */
-.font-black,
+/* بنستخدم تلات أوزان محملة: Medium (500)، Bold (700)، Black (900). */
+.font-black {
+  font-weight: 900 !important;
+}
+
 .font-bold {
   font-weight: 700 !important;
 }
