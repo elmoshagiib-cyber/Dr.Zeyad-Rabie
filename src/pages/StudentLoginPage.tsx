@@ -582,7 +582,7 @@ rounded-xl
 bg-[#B348FE]
 hover:bg-[#9E2FFF]
 text-white
-font-bold
+font-black
 text-sm sm:text-base
 flex items-center justify-center gap-2
 disabled:opacity-70
@@ -692,7 +692,7 @@ hover:text-[#9E2FFF]
                     className="
                       mt-6 w-full py-3 rounded-xl
                       bg-emerald-500 hover:bg-emerald-600
-                      text-white font-bold
+                      text-white font-black
                       flex items-center justify-center gap-2
                       transition-colors
                     "

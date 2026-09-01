@@ -523,7 +523,7 @@ xl:pt-24
                   rounded-xl
                   border-2 border-[#B348FE]
                   text-[#B348FE]
-                  font-bold
+                  font-black
                   text-sm sm:text-base
                   hover:bg-[#B348FE] hover:text-white
                   transition-all duration-300
@@ -875,7 +875,7 @@ xl:pt-24
 bg-[#B348FE]
 hover:bg-[#9E2FFF]
     text-white
-    font-bold
+    font-black
     text-sm sm:text-base
     flex items-center justify-center gap-2
     mt-1
