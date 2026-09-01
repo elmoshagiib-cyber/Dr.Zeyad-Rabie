@@ -12,6 +12,7 @@ import {
   AlertCircle,
   RefreshCw,
   Clock,
+  Download,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
@@ -137,6 +138,33 @@ export function InstructorWatchProgress() {
     return result;
   }, [data, searchQuery, activeTab]);
 
+  function exportToCSV() {
+    const headers = ["الاسم", "الهاتف", "الكورس", "نسبة الإنجاز", "الحالة", "تاريخ الاشتراك"];
+    const rows = filteredData.map((r) => [
+      r.full_name,
+      r.phone || "",
+      r.course_title,
+      `${r.completion_percentage || 0}%`,
+      r.bypassed_count > 0
+        ? "متجاوز"
+        : r.completion_percentage === 100
+        ? "مكتمل"
+        : r.completion_percentage > 0
+        ? "جاري"
+        : "لم يبدأ",
+      new Date(r.enrolled_at).toLocaleDateString("ar-EG"),
+    ]);
+    const csvContent =
+      "\uFEFF" + [headers, ...rows].map((row) => row.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `progress_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   const tabs: { key: TabType; label: string; count: number }[] = [
     { key: "not_started", label: "لم يفتحوا", count: stats.notStarted },
     { key: "completed", label: "اكتملت", count: stats.completed },
@@ -234,14 +262,25 @@ const colorClasses: Record<
                 تحليل المشاهدة، متابعة الطلاب، وإدارة اجتياز المحاضرات بدقة.
               </p>
             </div>
-            <Button
-              variant="outline"
-              onClick={fetchData}
-              className="rounded-xl font-bold hidden sm:flex"
-            >
-              <RefreshCw size={16} className="ml-1.5" />
-              تحديث البيانات
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={exportToCSV}
+                disabled={filteredData.length === 0}
+                className="rounded-xl font-bold flex"
+              >
+                <Download size={16} className="sm:ml-1.5" />
+                <span className="hidden sm:inline">تصدير Excel</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={fetchData}
+                className="rounded-xl font-bold flex"
+              >
+                <RefreshCw size={16} className="sm:ml-1.5" />
+                <span className="hidden sm:inline">تحديث البيانات</span>
+              </Button>
+            </div>
           </div>
 
           {/* الكروت الإحصائية */}
@@ -251,7 +290,7 @@ const colorClasses: Record<
               return (
                 <Card
                   key={i}
-                  className={`bg-white dark:bg-[#111111] border-2 ${c.border} rounded-2xl shadow-sm`}
+                  className={`bg-white dark:bg-[#111111] border-2 ${c.border} rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200`}
                 >
                   <CardContent className="p-4">
                     <div
@@ -384,7 +423,7 @@ const colorClasses: Record<
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead>
+                    <thead className="bg-gray-50 dark:bg-[#161616] sticky top-0 z-10">
                       <tr className="border-b border-gray-100 dark:border-[#2A2A2A]">
                         <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
                           بيانات الطالب
@@ -433,12 +472,19 @@ const colorClasses: Record<
                             className="hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors"
                           >
                             <td className="px-4 py-3">
-                              <p className="font-bold text-gray-900 dark:text-white">
-                                {row.full_name}
-                              </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {row.phone || "—"}
-                              </p>
+                              <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-full bg-[#B348FE]/10 text-[#B348FE] flex items-center justify-center font-black text-sm flex-shrink-0">
+                                  {row.full_name?.trim()?.charAt(0) || "؟"}
+                                </div>
+                                <div>
+                                  <p className="font-bold text-gray-900 dark:text-white">
+                                    {row.full_name}
+                                  </p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {row.phone || "—"}
+                                  </p>
+                                </div>
+                              </div>
                             </td>
                             <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
                               {new Date(row.enrolled_at).toLocaleDateString(
