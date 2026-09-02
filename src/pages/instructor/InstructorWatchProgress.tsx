@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { motion } from "framer-motion";
 import { supabase } from "../../lib/supabase";
 import { useApp } from "../../context/AppContext";
 import {
@@ -253,23 +254,32 @@ const colorClasses: Record<
       </div>
 
       <main className="flex-1 overflow-y-auto">
-        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
-          {/* العنوان */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-1">
-                Student Progress Control Center
-              </h1>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">
-                تحليل المشاهدة، متابعة الطلاب، وإدارة اجتياز المحاضرات بدقة.
-              </p>
+        {/* Hero Section */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-6 mt-6"
+        >
+          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+
+          <div className="relative z-10 flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
+                <Users className="text-amber-400" size={20} />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-black">مركز متابعة تقدم الطلاب</h1>
+                <p className="text-white/60 text-xs sm:text-sm mt-0.5">تحليل المشاهدة، متابعة الطلاب، وإدارة اجتياز المحاضرات بدقة</p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 onClick={exportToCSV}
                 disabled={filteredData.length === 0}
-                className="rounded-xl font-bold flex"
+                className="rounded-xl font-bold flex bg-white/10 border-white/10 text-white hover:bg-white/20"
               >
                 <Download size={16} className="sm:ml-1.5" />
                 <span className="hidden sm:inline">تصدير Excel</span>
@@ -277,13 +287,16 @@ const colorClasses: Record<
               <Button
                 variant="outline"
                 onClick={fetchData}
-                className="rounded-xl font-bold flex"
+                className="rounded-xl font-bold flex bg-white/10 border-white/10 text-white hover:bg-white/20"
               >
                 <RefreshCw size={16} className="sm:ml-1.5" />
                 <span className="hidden sm:inline">تحديث البيانات</span>
               </Button>
             </div>
           </div>
+        </motion.div>
+
+        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
 
           {/* الكروت الإحصائية */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
