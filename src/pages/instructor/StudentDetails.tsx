@@ -790,14 +790,21 @@ const addCourse = async () => {
 
     setDeletingPaymentId(paymentId);
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("subscription_payments")
       .delete()
-      .eq("id", paymentId);
+      .eq("id", paymentId)
+      .select();
 
     if (error) {
       setDeletingPaymentId(null);
       alert("حصل خطأ أثناء حذف الاشتراك: " + error.message);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      setDeletingPaymentId(null);
+      alert("لم يتم حذف الاشتراك. غالبًا صلاحيات قاعدة البيانات (RLS) لا تسمح بحذف هذا الجدول.");
       return;
     }
 
