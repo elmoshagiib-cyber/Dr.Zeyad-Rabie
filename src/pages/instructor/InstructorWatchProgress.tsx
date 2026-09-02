@@ -4,12 +4,10 @@ import { useApp } from "../../context/AppContext";
 import {
   UserCheck,
   UserX,
-  Eye,
   CheckCircle,
   Users,
   Search,
   Phone,
-  AlertCircle,
   RefreshCw,
   Clock,
   Download,
@@ -43,8 +41,6 @@ interface CourseOption {
 }
 
 export function InstructorWatchProgress() {
-  const { user } = useApp();
-
   const [data, setData] = useState<ProgressRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [courses, setCourses] = useState<CourseOption[]>([]);
@@ -52,6 +48,7 @@ export function InstructorWatchProgress() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<TabType>("not_started");
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     loadCourses();
@@ -71,6 +68,7 @@ export function InstructorWatchProgress() {
 
   async function fetchData() {
     setLoading(true);
+    setFetchError(null);
     try {
       let query = supabase.from("instructor_progress_view").select("*");
 
@@ -84,8 +82,10 @@ export function InstructorWatchProgress() {
 
       if (error) throw error;
       setData(viewData || []);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setFetchError(err?.message || "حدث خطأ أثناء تحميل البيانات");
+      setData([]);
     } finally {
       setLoading(false);
     }
@@ -131,7 +131,9 @@ export function InstructorWatchProgress() {
       const q = searchQuery.toLowerCase();
       result = result.filter(
         (r) =>
-          r.full_name.toLowerCase().includes(q) || r.phone?.includes(q)
+          r.full_name.toLowerCase().includes(q) ||
+          r.phone?.includes(q) ||
+          r.course_title?.toLowerCase().includes(q)
       );
     }
 
@@ -396,7 +398,7 @@ const colorClasses: Record<
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="ابحث برقم الهاتف أو الاسم..."
+              placeholder="ابحث بالاسم أو رقم الهاتف أو اسم الكورس..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pr-10 pl-4 py-3 border border-gray-200 dark:border-[#2A2A2A] rounded-xl bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
@@ -412,6 +414,13 @@ const colorClasses: Record<
                   <p className="text-gray-500 dark:text-gray-400 font-bold text-sm">
                     جاري التحميل...
                   </p>
+                </div>
+              ) : fetchError ? (
+                <div className="py-16 text-center">
+                  <p className="text-red-600 dark:text-red-400 font-bold mb-3">{fetchError}</p>
+                  <Button onClick={fetchData} className="bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-bold">
+                    إعادة المحاولة
+                  </Button>
                 </div>
               ) : filteredData.length === 0 ? (
                 <div className="py-16 text-center">
@@ -429,10 +438,16 @@ const colorClasses: Record<
                           بيانات الطالب
                         </th>
                         <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
+                          الكورس
+                        </th>
+                        <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
                           تاريخ الاشتراك
                         </th>
                         <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
                           آخر دخول للمنصة
+                        </th>
+                        <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
+                          نسبة الإنجاز
                         </th>
                         <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
                           الحالة
@@ -486,6 +501,9 @@ const colorClasses: Record<
                                 </div>
                               </div>
                             </td>
+                            <td className="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                              {row.course_title || "—"}
+                            </td>
                             <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
                               {new Date(row.enrolled_at).toLocaleDateString(
                                 "ar-EG"
@@ -497,6 +515,19 @@ const colorClasses: Record<
                                     row.last_watched_at
                                   ).toLocaleDateString("ar-EG")
                                 : "—"}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2 min-w-[90px]">
+                                <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-[#B348FE] rounded-full"
+                                    style={{ width: `${pct}%` }}
+                                  />
+                                </div>
+                                <span className="text-xs font-black text-gray-700 dark:text-gray-300 w-9 text-left">
+                                  {pct}%
+                                </span>
+                              </div>
                             </td>
                             <td className="px-4 py-3">
                               <span
