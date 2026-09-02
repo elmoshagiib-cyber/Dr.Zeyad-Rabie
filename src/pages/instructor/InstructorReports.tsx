@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   Filter,
   RotateCcw,
@@ -220,16 +221,28 @@ export function InstructorReports() {
       </div>
 
       <main className="flex-1 overflow-y-auto">
-        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
-          <div>
-            <h1 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-1">
-              التقارير والإحصائيات
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
-              نظرة شاملة على أداء المنصة وتفاعل الطلاب
-            </p>
-          </div>
+        {/* Hero Section */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-6 mt-6"
+        >
+          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
 
+          <div className="relative z-10 flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
+              <ClipboardList className="text-amber-400" size={20} />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black">التقارير والإحصائيات</h1>
+              <p className="text-white/60 text-xs sm:text-sm mt-0.5">نظرة شاملة على أداء المنصة وتفاعل الطلاب</p>
+            </div>
+          </div>
+        </motion.div>
+
+        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
             <CardContent className="p-4 lg:p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
