@@ -15,8 +15,6 @@ import React, { useEffect, useState } from "react";
 import {
   Copy,
   Trash2,
-  Ban,
-  CheckCircle,
 } from "lucide-react";
 
 
@@ -314,15 +312,10 @@ await loadStats();
 };
 
 
-const toggleCodeStatus = async (
+const updateCodeStatus = async (
   id: string,
-  currentStatus: string
+  newStatus: string
 ) => {
-  const newStatus =
-    currentStatus === "active"
-      ? "cancelled"
-      : "active";
-
   const { error } = await supabase
     .from("subscription_codes")
     .update({
@@ -974,17 +967,17 @@ hover:bg-blue-700
                       <Copy size={16} />
                     </button>
 
-                    <button
-                      onClick={() => toggleCodeStatus(item.id, item.status)}
-                      title={item.status === "active" ? "تعطيل الكود" : "تفعيل الكود"}
-                      className={`p-2 rounded-lg transition ${
-                        item.status === "active"
-                          ? "text-orange-600 hover:bg-orange-50"
-                          : "text-green-600 hover:bg-green-50"
-                      }`}
+                    <select
+                      value={item.status}
+                      onChange={(e) => updateCodeStatus(item.id, e.target.value)}
+                      title="تغيير حالة الكود"
+                      className="text-xs font-bold rounded-lg border border-slate-300 px-2 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-700"
                     >
-                      {item.status === "active" ? <Ban size={16} /> : <CheckCircle size={16} />}
-                    </button>
+                      <option value="active">صالح</option>
+                      <option value="used">مستخدم</option>
+                      <option value="expired">منتهي</option>
+                      <option value="cancelled">ملغي</option>
+                    </select>
 
                     <button
                       onClick={() => deleteCode(item.id)}
