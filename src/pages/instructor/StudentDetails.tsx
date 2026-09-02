@@ -1846,7 +1846,13 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                           <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold mb-1">محاضرات مكتملة</p>
                           <p className="font-black text-sm text-gray-900 dark:text-white">{course.completedLessons} / {course.totalLessons}</p>
                         </div>
-                        <div className="bg-white dark:bg-[#111111] rounded-xl p-3 border border-gray-100 dark:border-[#2A2A2A] col-span-2">
+                        <div className="bg-white dark:bg-[#111111] rounded-xl p-3 border border-gray-100 dark:border-[#2A2A2A]">
+                          <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold mb-1">وقت المشاهدة</p>
+                          <p className="font-black text-sm text-gray-900 dark:text-white" dir="ltr">
+                            {formatWatchTime(course.lessons.reduce((sum, l) => sum + (l.watchedSeconds || 0), 0))}
+                          </p>
+                        </div>
+                        <div className="bg-white dark:bg-[#111111] rounded-xl p-3 border border-gray-100 dark:border-[#2A2A2A]">
                           <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold mb-1">آخر محاضرة</p>
                           <p className="font-bold text-xs text-gray-900 dark:text-white truncate">{course.lastLesson}</p>
                         </div>
@@ -1882,11 +1888,14 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                                   {lesson.title}
                                 </p>
                               </div>
-                              <div className="flex items-center gap-3 flex-shrink-0 min-w-[140px]">
+                              <div className="flex items-center gap-3 flex-shrink-0 min-w-[180px]">
                                 <span className="text-[10px] text-gray-400 whitespace-nowrap">
                                   {lesson.lastWatchedAt
                                     ? new Date(lesson.lastWatchedAt).toLocaleDateString("ar-EG")
                                     : "لم يشاهد"}
+                                </span>
+                                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap" dir="ltr">
+                                  {formatWatchTime(lesson.watchedSeconds)} / {formatWatchTime(lesson.videoDuration)}
                                 </span>
                                 <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden min-w-[50px]">
                                   <div
@@ -2897,6 +2906,15 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
       )}
     </div>
   );
+}
+
+function formatWatchTime(totalSeconds: number): string {
+  if (!totalSeconds || totalSeconds <= 0) return "00:00";
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return hours > 0 ? `${pad(hours)}:${pad(minutes)}:${pad(seconds)}` : `${pad(minutes)}:${pad(seconds)}`;
 }
 
 function InfoCardItem({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
