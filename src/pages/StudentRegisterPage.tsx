@@ -223,7 +223,6 @@ const RegisterPage = () => {
     lastName: '',
     phone: '',
     parentPhone: '',
-    email: '',
     grade: '',
     governorate: '',
     studentType: '',
@@ -240,11 +239,6 @@ const RegisterPage = () => {
     if (!form.lastName.trim()) e.lastName = 'الاسم الأخير مطلوب';
     if (!form.phone.match(/^(010|011|012|015)\d{8}$/)) e.phone = 'رقم الهاتف غير صحيح';
     if (form.parentPhone && !form.parentPhone.match(/^(010|011|012|015)\d{8}$/)) e.parentPhone = 'رقم هاتف ولي الأمر غير صحيح';
-    if (!form.email.trim()) {
-      e.email = "البريد الإلكتروني مطلوب";
-    } else if (!form.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      e.email = "البريد الإلكتروني غير صحيح";
-    }
     if (!form.grade) e.grade = 'يرجى اختيار الصف الدراسي';
     if (!form.governorate) e.governorate = 'يرجى اختيار المحافظة';
     if (!form.studentType) e.studentType = 'يرجى اختيار نوع الطالب';
@@ -279,9 +273,22 @@ const RegisterPage = () => {
       }
 
       // نسجل المحاولة قبل ما نكمل (بغض النظر عن النتيجة، عشان نمنع السبام حتى لو فشل كل مرة)
-      await supabase.rpc("record_register_attempt", { p_identifier: phone });
+    await supabase.rpc("record_register_attempt", { p_identifier: phone });
 
-      const finalEmail = form.email.trim().toLowerCase();
+      // تحقق مسبق إن رقم الهاتف مش مسجل قبل كده
+      const { data: existingStudent } = await supabase
+        .from("students")
+        .select("id")
+        .eq("phone", phone)
+        .maybeSingle();
+
+      if (existingStudent) {
+        alert("رقم الهاتف ده مسجل بحساب موجود بالفعل، جرب تدخل على حسابك أو استخدم رقم تاني");
+        setLoading(false);
+        return;
+      }
+
+      const finalEmail = `${phone}@students.yourdomain.com`;
 
 const { data: authData, error: authError } =
   await supabase.auth.signUp({
@@ -305,8 +312,8 @@ if (!authData.user) {
         full_name: `${form.firstName} ${form.secondName} ${form.thirdName} ${form.lastName}`,
         phone: form.phone,
         parent_phone: form.parentPhone,
-        email: form.email.trim() || null,
-        grade: form.grade,
+        email: null,
+                grade: form.grade,
         governorate: form.governorate,
         type: form.studentType,
         status: "نشط",
@@ -323,15 +330,19 @@ completed_homework: 0,
 total_homework: 0,
       }]);
 if (insertError) {
+  console.error("INSERT ERROR:", insertError);
 
-  alert(
-    JSON.stringify(insertError, null, 2)
-  );
+  if (insertError.message?.includes("students_phone_key")) {
+    alert("رقم الهاتف ده مسجل بحساب موجود بالفعل، جرب تدخل على حسابك أو استخدم رقم تاني");
+  } else {
+    alert("حدث خطأ أثناء إنشاء الحساب، حاول مرة أخرى");
+  }
 
+  // امسح جلسة الـ Auth اللي اتعملت عشان منسيبش حساب يتيم من غير صف طالب
+  await supabase.auth.signOut();
   setLoading(false);
   return;
-}
-await supabase.auth.signOut();
+}await supabase.auth.signOut();
       setSuccess(true);
 
 setTimeout(() => {
@@ -342,8 +353,8 @@ replace: true,
     } catch (err: any) {
   console.error(err);
 
-  if (err.message?.includes("already registered")) {
-    alert("هذا البريد الإلكتروني مستخدم بالفعل");
+   if (err.message?.includes("already registered")) {
+    alert("رقم الهاتف ده مسجل بحساب موجود بالفعل، جرب تدخل على حسابك أو استخدم رقم تاني");
   } else {
     alert(err.message || "حدث خطأ أثناء إنشاء الحساب");
   }
@@ -638,19 +649,6 @@ xl:pt-24
                     </p>
                   </div>
                 </div>
-
-                {/* Email */}
-                <InputField
-                  isDark={isDark}
-                  icon={Mail}
-                  placeholder="البريد الإلكتروني"
-                  value={form.email}
-                  onChange={v => setForm(p => ({ ...p, email: v }))}
-                  type="email"
-                  dir="ltr"
-                  error={errors.email}
-                  required
-                />
 
                 {/* Governorate */}
                 <SelectField
