@@ -931,7 +931,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
               </h1>
 
               <p className="mt-6 text-lg sm:text-xl font-bold text-right text-white">
-                {gradeLabels[course.grade] || course.grade}
+                {course.description || gradeLabels[course.grade] || course.grade}
               </p>
             </div>
 
