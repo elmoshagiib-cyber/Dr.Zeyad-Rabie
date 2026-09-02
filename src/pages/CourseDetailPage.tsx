@@ -60,6 +60,7 @@ export function CourseDetailPage() {
 
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [openUnit, setOpenUnit] = useState<string | null>(null);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [units, setUnits] = useState<any[]>([]);
   const [course, setCourse] = useState<any>(null);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
@@ -925,14 +926,33 @@ const saveProgress = async (currentTime: number, duration: number) => {
               ))}
             </div>
 
-            <div className="text-left mb-7">
+            <div className="text-right mb-7 w-full">
               <h1 className="text-[2rem] sm:text-[2.8rem] lg:text-[3.8rem] xl:text-[4.5rem] font-extrabold leading-[1] tracking-tight text-white drop-shadow-[0_6px_20px_rgba(0,0,0,.35)]">
                 {course.title}
               </h1>
 
-              <p className="mt-6 text-lg sm:text-xl font-bold text-right text-white">
-                {course.description || gradeLabels[course.grade] || course.grade}
-              </p>
+              {course.description ? (
+                <div className="mt-6 max-w-3xl mr-0 ml-auto">
+                  <p
+                    className={`text-lg sm:text-xl font-bold text-right text-white leading-relaxed ${
+                      isDescriptionExpanded ? "" : "line-clamp-2"
+                    }`}
+                  >
+                    {course.description}
+                  </p>
+
+                  <button
+                    onClick={() => setIsDescriptionExpanded((prev) => !prev)}
+                    className="mt-2 text-sm sm:text-base font-black text-[#FFD54A] hover:text-white transition-colors"
+                  >
+                    {isDescriptionExpanded ? "عرض أقل" : "عرض المزيد"}
+                  </button>
+                </div>
+              ) : (
+                <p className="mt-6 text-lg sm:text-xl font-bold text-right text-white">
+                  {gradeLabels[course.grade] || course.grade}
+                </p>
+              )}
             </div>
 
             <div className="flex flex-wrap justify-start gap-5">
