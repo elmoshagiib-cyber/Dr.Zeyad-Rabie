@@ -238,8 +238,13 @@ const RegisterPage = () => {
     if (!form.thirdName.trim()) e.thirdName = 'الاسم الثالث مطلوب';
     if (!form.lastName.trim()) e.lastName = 'الاسم الأخير مطلوب';
     if (!form.phone.match(/^(010|011|012|015)\d{8}$/)) e.phone = 'رقم الهاتف غير صحيح';
-    if (form.parentPhone && !form.parentPhone.match(/^(010|011|012|015)\d{8}$/)) e.parentPhone = 'رقم هاتف ولي الأمر غير صحيح';
-    if (!form.grade) e.grade = 'يرجى اختيار الصف الدراسي';
+ if (!form.parentPhone.trim()) {
+      e.parentPhone = 'رقم هاتف ولي الأمر مطلوب';
+    } else if (!form.parentPhone.match(/^(010|011|012|015)\d{8}$/)) {
+            e.parentPhone = 'رقم هاتف ولي الأمر غير صحيح';
+    } else if (form.parentPhone && form.parentPhone.trim() === form.phone.trim()) {
+      e.parentPhone = 'رقم هاتف ولي الأمر لازم يكون مختلف عن رقم هاتفك';
+    }    if (!form.grade) e.grade = 'يرجى اختيار الصف الدراسي';
     if (!form.governorate) e.governorate = 'يرجى اختيار المحافظة';
     if (!form.studentType) e.studentType = 'يرجى اختيار نوع الطالب';
     if (form.password.length < 8) e.password = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
