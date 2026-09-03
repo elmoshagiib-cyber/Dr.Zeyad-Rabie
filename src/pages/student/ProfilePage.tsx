@@ -479,108 +479,6 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
           </div>
         )}
 
-        {/* Student ID Card (Flip) */}
-        <div className="flex flex-col items-center">
-          <div
-            onClick={() => setIdFlipped((f) => !f)}
-            className="relative w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[360px] aspect-[3/4] cursor-pointer select-none"
-            style={{ perspective: "1400px" }}
-          >
-            <div
-              className="relative w-full h-full transition-transform duration-700 ease-out"
-              style={{
-                transformStyle: "preserve-3d",
-                transform: idFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
-              }}
-            >
-              {/* الوش الأمامي */}
-              <div
-                className="absolute inset-0 w-full h-full rounded-3xl bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] shadow-lg px-5 sm:px-6 py-7 sm:py-8 flex flex-col items-center text-center"
-                style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
-              >
-                <div className="relative mb-4">
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full overflow-hidden border-4 border-[#F6EEFF] dark:border-[#2B103D] shadow-md bg-gray-50 dark:bg-[#1A1A1A]">
-                    {avatarUrl ? (
-                      <img
-                        src={avatarUrl}
-                        alt={displayUser.name}
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    ) : (
-                      <Avatar
-                        name={displayUser.name}
-                        src={avatarUrl || displayUser.avatar_url}
-                        size="xl"
-                        className="w-full h-full rounded-full"
-                      />
-                    )}
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      fileInputRef.current?.click();
-                    }}
-                    disabled={uploadingAvatar}
-                    className="absolute -bottom-1 -left-1 w-8 h-8 sm:w-9 sm:h-9 bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 disabled:opacity-50"
-                  >
-                    {uploadingAvatar ? (
-                      <div className="w-4 h-4 border-2 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Camera size={15} className="text-[#B348FE]" />
-                    )}
-                  </button>
-                </div>
-
-                <h1 className="text-base sm:text-lg lg:text-xl font-black text-gray-900 dark:text-white mb-1 px-1 break-words leading-snug">
-                  {editName}
-                </h1>
-
-                <p className="text-[11px] sm:text-xs lg:text-sm text-gray-400 dark:text-gray-500 font-bold mb-3">
-                  {displayUser.gradeLabel || "الصف الثالث الثانوي"}
-                </p>
-
-                <span className="px-3 py-1.5 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] text-[11px] sm:text-xs font-black">
-                  طالب أونلاين
-                </span>
-
-                <p className="mt-auto pt-4 text-[10px] sm:text-[11px] text-gray-300 dark:text-gray-600 font-bold">
-                  اضغط للتقليب
-                </p>
-              </div>
-
-              {/* الوش الخلفي */}
-              <div
-                className="absolute inset-0 w-full h-full rounded-3xl bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] shadow-lg flex flex-col items-center justify-center gap-3"
-                style={{
-                  backfaceVisibility: "hidden",
-                  WebkitBackfaceVisibility: "hidden",
-                  transform: "rotateY(180deg)",
-                }}
-              >
-                <img
-                  src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
-                  alt="لوجو منصة مستر زياد ربيع"
-                  className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
-                />
-                <p className="text-gray-900 dark:text-white font-black text-sm sm:text-base">
-                  منصة مستر زياد ربيع
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={toggleDetails}
-            className="mt-5 sm:mt-6 flex items-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] font-black text-xs sm:text-sm hover:bg-[#EAD8FF] dark:hover:bg-[#3A1652] transition-all duration-300"
-          >
-            {showDetails ? "إخفاء باقي البيانات" : "عرض باقي البيانات"}
-            <ChevronDown
-              size={16}
-              className={`transition-transform duration-300 ${showDetails ? "rotate-180" : ""}`}
-            />
-          </button>
-        </div>
-
         {cropFile && (
           <ImageCropModal
             file={cropFile}
@@ -664,20 +562,19 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
 
                   {/* الوش الخلفي */}
                   <div
-                    className="absolute inset-0 w-full h-full rounded-3xl bg-gradient-to-br from-[#B348FE] to-[#7C1FE0] shadow-lg flex flex-col items-center justify-center gap-3"
+                    className="absolute inset-0 w-full h-full rounded-3xl bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] shadow-lg flex flex-col items-center justify-center gap-3"
                     style={{
                       backfaceVisibility: "hidden",
                       WebkitBackfaceVisibility: "hidden",
                       transform: "rotateY(180deg)",
                     }}
                   >
-                    {/* غيّر src ده للوجو الأصلي المستخدم في الـ Navbar — شوف ملاحظة اللوجو تحت */}
                     <img
-                      src="/logo.png"
+                      src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
                       alt="لوجو منصة مستر زياد ربيع"
-                      className="w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-lg"
+                      className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
                     />
-                    <p className="text-white font-black text-sm sm:text-base">
+                    <p className="text-gray-900 dark:text-white font-black text-sm sm:text-base">
                       منصة مستر زياد ربيع
                     </p>
                   </div>
