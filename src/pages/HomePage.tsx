@@ -492,6 +492,16 @@ read_at: new Date().toISOString(),
   setAnnouncement(null);
 };
 
+useEffect(() => {
+  if (!announcement?.notifications) return;
+
+  const timer = setTimeout(() => {
+    dismissAnnouncement();
+  }, 10000);
+
+  return () => clearTimeout(timer);
+}, [announcement]);
+
 const formatAnnouncementDate = (date: string) => {
   // نتأكد إن التاريخ بيتفسر كـ UTC حتى لو Supabase رجعه من غير Z
   const normalizedDate =
@@ -568,7 +578,22 @@ return (
       "
     >
 
+      <div className="h-1 w-full bg-gray-100 dark:bg-[#262626] overflow-hidden">
+        <div
+          key={announcement.id}
+          className="h-full bg-gradient-to-r from-emerald-400 via-blue-500 to-pink-500"
+          style={{
+            animation: "announcement-shrink 10s linear forwards",
+          }}
+        />
+      </div>
 
+      <style>{`
+        @keyframes announcement-shrink {
+          from { width: 100%; }
+          to { width: 0%; }
+        }
+      `}</style>
 
       <div className="flex items-center justify-between px-5 py-4">
 

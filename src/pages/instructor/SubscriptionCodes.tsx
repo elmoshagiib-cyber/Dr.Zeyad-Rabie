@@ -15,6 +15,7 @@ import React, { useEffect, useState } from "react";
 import {
   Copy,
   Trash2,
+  X,
 } from "lucide-react";
 
 
@@ -55,6 +56,18 @@ const [selectedStatus, setSelectedStatus] = useState("");
 const [filterCourse, setFilterCourse] = useState("");
 const [filterGrade, setFilterGrade] = useState("");
 const [filterDuration, setFilterDuration] = useState("");
+const [toast, setToast] = useState<{ id: number; message: string } | null>(null);
+const toastTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+const showToast = (message: string) => {
+  if (toastTimeoutRef.current) {
+    clearTimeout(toastTimeoutRef.current);
+  }
+  setToast({ id: Date.now(), message });
+  toastTimeoutRef.current = setTimeout(() => {
+    setToast(null);
+  }, 4000);
+};
 
 
 useEffect(() => {
@@ -157,12 +170,12 @@ const generateCode = () => {
 
 const generateCodes = async () => {
   if (!selectedCourse) {
-    alert("اختر الكورس أولاً");
+    showToast("اختر الكورس أولاً");
     return;
   }
 
   if (codesCount <= 0) {
-    alert("عدد الأكواد غير صحيح");
+    showToast("عدد الأكواد غير صحيح");
     return;
   }
 
@@ -185,13 +198,13 @@ const generateCodes = async () => {
 
   if (error) {
     console.error(error);
-    alert(error.message);
+    showToast(error.message);
     return;
   }
 
   await loadCodes();
 await loadStats();
-alert(`تم إنشاء ${codes.length} كود بنجاح ✅`);
+showToast(`تم إنشاء ${codes.length} كود بنجاح`);
 };
 
 const handleExport = (type: "excel" | "pdf") => {
@@ -205,7 +218,7 @@ const handleExport = (type: "excel" | "pdf") => {
   });
 
   if (filtered.length === 0) {
-    alert("لا توجد بيانات مطابقة للتصدير");
+    showToast("لا توجد بيانات مطابقة للتصدير");
     return;
   }
 
@@ -281,10 +294,10 @@ const getStatusBadge = (status: string) => {
 const copyCode = async (code: string) => {
   try {
     await navigator.clipboard.writeText(code);
-    alert("✅ تم نسخ الكود");
+    showToast("تم نسخ الكود");
   } catch (error) {
     console.error(error);
-    alert("فشل نسخ الكود");
+    showToast("فشل نسخ الكود");
   }
 };
 
@@ -302,13 +315,13 @@ const deleteCode = async (id: string) => {
 
   if (error) {
     console.error(error);
-    alert(error.message);
+    showToast(error.message);
     return;
   }
 
   await loadCodes();
 await loadStats();
-  alert("🗑️ تم حذف الكود بنجاح");
+  showToast("تم حذف الكود بنجاح");
 };
 
 
@@ -325,7 +338,7 @@ const updateCodeStatus = async (
 
   if (error) {
     console.error(error);
-    alert(error.message);
+    showToast(error.message);
     return;
   }
 
@@ -376,6 +389,42 @@ return (
 
 return (
   <div className="flex min-h-screen bg-slate-100" dir="rtl">
+
+    {toast && (
+      <div
+        key={toast.id}
+        className="fixed top-5 left-1/2 -translate-x-1/2 sm:left-auto sm:right-5 sm:translate-x-0 z-[100] w-[92%] sm:w-full max-w-sm bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden animate-in slide-in-from-top-3 fade-in duration-300"
+      >
+        <div className="flex items-start justify-between gap-3 px-4 py-3">
+          <p className="text-sm font-bold text-slate-800 text-right flex-1">
+            {toast.message}
+          </p>
+          <button
+            onClick={() => setToast(null)}
+            className="text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="h-1 w-full bg-slate-100 overflow-hidden">
+          <div
+            key={toast.id}
+            className="h-full bg-gradient-to-r from-emerald-400 via-blue-500 to-pink-500"
+            style={{
+              animation: "toast-shrink 4s linear forwards",
+            }}
+          />
+        </div>
+      </div>
+    )}
+
+    <style>{`
+      @keyframes toast-shrink {
+        from { width: 100%; }
+        to { width: 0%; }
+      }
+    `}</style>
 
     {/* Sidebar */}
     <div className="hidden lg:block">

@@ -6,7 +6,7 @@ import { Navbar } from "../components/layout/Navbar";
 import { supabase } from "../lib/supabase";
 import {
   Eye, EyeOff, Phone, Lock, User, Mail, BookOpen,
-  Layers, ChevronLeft, Loader2, CheckCircle2, MapPin, UserCheck
+  Layers, ChevronLeft, Loader2, CheckCircle2, MapPin, UserCheck, X
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import HeroSection from '../components/HeroSection';
@@ -216,6 +216,18 @@ const RegisterPage = () => {
   const [showPasswordFlash, setShowPasswordFlash] = useState(false);
   const [confirmFlashId, setConfirmFlashId] = useState(0);
   const [showConfirmFlash, setShowConfirmFlash] = useState(false);
+  const [toast, setToast] = useState<{ id: number; message: string } | null>(null);
+  const toastTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = (message: string) => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    setToast({ id: Date.now(), message });
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast(null);
+    }, 4000);
+  };
   const [form, setForm] = useState({
     firstName: '',
     secondName: '',
@@ -272,7 +284,7 @@ const RegisterPage = () => {
       }
 
       if (allowed === false) {
-        alert("تم إيقاف إنشاء الحسابات مؤقتًا من هذا الرقم بسبب محاولات كثيرة، حاول بعد 30 دقيقة");
+        showToast("تم إيقاف إنشاء الحسابات مؤقتًا من هذا الرقم بسبب محاولات كثيرة، حاول بعد 30 دقيقة");
         setLoading(false);
         return;
       }
@@ -288,7 +300,7 @@ const RegisterPage = () => {
         .maybeSingle();
 
       if (existingStudent) {
-        alert("رقم الهاتف ده مسجل بحساب موجود بالفعل، جرب تدخل على حسابك أو استخدم رقم تاني");
+        showToast("رقم الهاتف ده مسجل بحساب موجود بالفعل، جرب تدخل على حسابك أو استخدم رقم تاني");
         setLoading(false);
         return;
       }
@@ -338,9 +350,9 @@ if (insertError) {
   console.error("INSERT ERROR:", insertError);
 
   if (insertError.message?.includes("students_phone_key")) {
-    alert("رقم الهاتف ده مسجل بحساب موجود بالفعل، جرب تدخل على حسابك أو استخدم رقم تاني");
+    showToast("رقم الهاتف ده مسجل بحساب موجود بالفعل، جرب تدخل على حسابك أو استخدم رقم تاني");
   } else {
-    alert("حدث خطأ أثناء إنشاء الحساب، حاول مرة أخرى");
+    showToast("حدث خطأ أثناء إنشاء الحساب، حاول مرة أخرى");
   }
 
   // امسح جلسة الـ Auth اللي اتعملت عشان منسيبش حساب يتيم من غير صف طالب
@@ -359,9 +371,9 @@ replace: true,
   console.error(err);
 
    if (err.message?.includes("already registered")) {
-    alert("رقم الهاتف ده مسجل بحساب موجود بالفعل، جرب تدخل على حسابك أو استخدم رقم تاني");
+    showToast("رقم الهاتف ده مسجل بحساب موجود بالفعل، جرب تدخل على حسابك أو استخدم رقم تاني");
   } else {
-    alert(err.message || "حدث خطأ أثناء إنشاء الحساب");
+    showToast(err.message || "حدث خطأ أثناء إنشاء الحساب");
   }
 }
     setLoading(false);
@@ -391,6 +403,42 @@ replace: true,
     return (
       <>
         <Navbar />
+        {toast && (
+          <div
+            key={toast.id}
+            className="fixed top-5 left-1/2 -translate-x-1/2 sm:left-auto sm:right-5 sm:translate-x-0 z-[100] w-[92%] sm:w-full max-w-sm bg-white dark:bg-[#1A1A1A] rounded-xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A] overflow-hidden animate-in slide-in-from-top-3 fade-in duration-300"
+          >
+            <div className="flex items-start justify-between gap-3 px-4 py-3">
+              <p className="text-sm font-bold text-gray-800 dark:text-gray-100 text-right flex-1">
+                {toast.message}
+              </p>
+              <button
+                onClick={() => setToast(null)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors flex-shrink-0"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="h-1 w-full bg-gray-100 dark:bg-[#2A2A2A] overflow-hidden">
+              <div
+                key={toast.id}
+                className="h-full bg-gradient-to-r from-emerald-400 via-blue-500 to-pink-500"
+                style={{
+                  animation: "toast-shrink 4s linear forwards",
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        <style>{`
+          @keyframes toast-shrink {
+            from { width: 100%; }
+            to { width: 0%; }
+          }
+        `}</style>
+
         <div
           className={`min-h-screen pt-16 flex items-center justify-center px-4
             bg-white dark:bg-[#09090B]`}
@@ -434,6 +482,42 @@ replace: true,
   return (
     <>
       <Navbar />
+
+      {toast && (
+        <div
+          key={toast.id}
+          className="fixed top-5 left-1/2 -translate-x-1/2 sm:left-auto sm:right-5 sm:translate-x-0 z-[100] w-[92%] sm:w-full max-w-sm bg-white dark:bg-[#1A1A1A] rounded-xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A] overflow-hidden animate-in slide-in-from-top-3 fade-in duration-300"
+        >
+          <div className="flex items-start justify-between gap-3 px-4 py-3">
+            <p className="text-sm font-bold text-gray-800 dark:text-gray-100 text-right flex-1">
+              {toast.message}
+            </p>
+            <button
+              onClick={() => setToast(null)}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors flex-shrink-0"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="h-1 w-full bg-gray-100 dark:bg-[#2A2A2A] overflow-hidden">
+            <div
+              key={toast.id}
+              className="h-full bg-gradient-to-r from-emerald-400 via-blue-500 to-pink-500"
+              style={{
+                animation: "toast-shrink 4s linear forwards",
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes toast-shrink {
+          from { width: 100%; }
+          to { width: 0%; }
+        }
+      `}</style>
 
       <div
   className={`

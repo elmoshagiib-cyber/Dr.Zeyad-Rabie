@@ -30,7 +30,8 @@ import {
   MessageCircle,
   Search,
   Image as ImageIcon,
-  Pencil
+  Pencil,
+  X,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
@@ -267,9 +268,21 @@ export function StudentDetails() {
   const invoiceCardRef = useRef<HTMLDivElement>(null);
   const [downloadingImage, setDownloadingImage] = useState(false);
   const [savingSubscription, setSavingSubscription] = useState(false);
-  const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [editingPaymentId, setEditingPaymentId] = useState<number | null>(null);
-  const [deletingPaymentId, setDeletingPaymentId] = useState<number | null>(null);
+const [copiedField, setCopiedField] = useState<string | null>(null);
+const [editingPaymentId, setEditingPaymentId] = useState<number | null>(null);
+const [deletingPaymentId, setDeletingPaymentId] = useState<number | null>(null);
+const [toast, setToast] = useState<{ id: number; message: string } | null>(null);
+const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+const showToast = (message: string) => {
+  if (toastTimeoutRef.current) {
+    clearTimeout(toastTimeoutRef.current);
+  }
+  setToast({ id: Date.now(), message });
+  toastTimeoutRef.current = setTimeout(() => {
+    setToast(null);
+  }, 4000);
+};
   const [subForm, setSubForm] = useState({
     course_id: "",
     student_type: "online" as "online" | "center",
@@ -637,7 +650,7 @@ const totalLessons = courseLessons.length;
       .eq("id", course.id);
 
     if (error) {
-      alert("حصل خطأ أثناء تحديث حالة المتابعة");
+      showToast("حصل خطأ أثناء تحديث حالة المتابعة");
       return;
     }
 
@@ -660,12 +673,12 @@ const totalLessons = courseLessons.length;
       .select();
 
     if (error) {
-      alert("حصل خطأ أثناء تحديث حالة الكورس: " + error.message);
+      showToast("حصل خطأ أثناء تحديث حالة الكورس: " + error.message);
       return;
     }
 
     if (!data || data.length === 0) {
-      alert("لم يتم التحديث. غالبًا صلاحيات قاعدة البيانات (RLS) لا تسمح بتعديل هذا الجدول.");
+      showToast("لم يتم التحديث. غالبًا صلاحيات قاعدة البيانات (RLS) لا تسمح بتعديل هذا الجدول.");
       return;
     }
 
@@ -701,7 +714,7 @@ const addCourse = async () => {
     const alreadyExists = courses.some((c) => String(c.course_id) === String(selectedCourse));
 
     if (alreadyExists) {
-      alert("الطالب مشترك بالفعل في هذا الكورس");
+      showToast("الطالب مشترك بالفعل في هذا الكورس");
       return;
     }
 
@@ -716,7 +729,7 @@ const addCourse = async () => {
       .select();
 
     if (error) {
-      alert(error.message);
+      showToast(error.message);
       return;
     }
 
@@ -798,13 +811,13 @@ const addCourse = async () => {
 
     if (error) {
       setDeletingPaymentId(null);
-      alert("حصل خطأ أثناء حذف الاشتراك: " + error.message);
+      showToast("حصل خطأ أثناء حذف الاشتراك: " + error.message);
       return;
     }
 
     if (!data || data.length === 0) {
       setDeletingPaymentId(null);
-      alert("لم يتم حذف الاشتراك. غالبًا صلاحيات قاعدة البيانات (RLS) لا تسمح بحذف هذا الجدول.");
+      showToast("لم يتم حذف الاشتراك. غالبًا صلاحيات قاعدة البيانات (RLS) لا تسمح بحذف هذا الجدول.");
       return;
     }
 
@@ -838,26 +851,26 @@ const addCourse = async () => {
       : null;
 
     if (!subForm.course_id) {
-      alert("اختر الكورس أولاً");
+      showToast("اختر الكورس أولاً");
       return;
     }
     if (!subForm.amount || Number(subForm.amount) <= 0) {
-      alert("المبلغ يجب أن يكون أكبر من صفر");
+      showToast("المبلغ يجب أن يكون أكبر من صفر");
       return;
     }
     if (
       (subForm.payment_method === "vodafone_cash" || subForm.payment_method === "instapay") &&
       !subForm.payer_phone.trim()
     ) {
-      alert("رقم الموبايل المحول منه مطلوب");
+      showToast("رقم الموبايل المحول منه مطلوب");
       return;
     }
     if (subForm.payment_status === "verified" && !subForm.subscription_code.trim()) {
-      alert("كود الاشتراك مطلوب عند تأكيد الدفع");
+      showToast("كود الاشتراك مطلوب عند تأكيد الدفع");
       return;
     }
     if (new Date(subForm.end_date) <= new Date(subForm.start_date)) {
-      alert("تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية");
+      showToast("تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية");
       return;
     }
 
@@ -873,7 +886,7 @@ const addCourse = async () => {
           .maybeSingle();
 
         if (existingCode) {
-          alert("هذا الكود مستخدم بالفعل في اشتراك آخر");
+          showToast("هذا الكود مستخدم بالفعل في اشتراك آخر");
           setSavingSubscription(false);
           return;
         }
@@ -902,7 +915,7 @@ const addCourse = async () => {
           .eq("id", editingPaymentId);
 
         if (updateError) {
-          alert("حدث خطأ أثناء تعديل الاشتراك: " + updateError.message);
+          showToast("حدث خطأ أثناء تعديل الاشتراك: " + updateError.message);
           setSavingSubscription(false);
           return;
         }
@@ -912,7 +925,7 @@ const addCourse = async () => {
         const { error: insertError } = await supabase.from("subscription_payments").insert(payload);
 
         if (insertError) {
-          alert("حدث خطأ أثناء حفظ الاشتراك: " + insertError.message);
+          showToast("حدث خطأ أثناء حفظ الاشتراك: " + insertError.message);
           setSavingSubscription(false);
           return;
         }
@@ -983,9 +996,9 @@ const addCourse = async () => {
       setShowAddSubscriptionModal(false);
       setSavingSubscription(false);
       setEditingPaymentId(null);
-      alert(editingPaymentId ? "تم تعديل الاشتراك بنجاح ✅" : "تم حفظ الاشتراك بنجاح ✅");
+      showToast(editingPaymentId ? "تم تعديل الاشتراك بنجاح" : "تم حفظ الاشتراك بنجاح");
     } catch (err: any) {
-      alert(err?.message || "حدث خطأ غير متوقع أثناء حفظ الاشتراك");
+      showToast(err?.message || "حدث خطأ غير متوقع أثناء حفظ الاشتراك");
       setSavingSubscription(false);
     }
   };
@@ -1011,7 +1024,7 @@ const addCourse = async () => {
       link.click();
     } catch (err) {
       console.error(err);
-      alert("حدث خطأ أثناء إنشاء الصورة");
+      showToast("حدث خطأ أثناء إنشاء الصورة");
     } finally {
       setDownloadingImage(false);
     }
@@ -1094,7 +1107,7 @@ const sendAnnouncement = async () => {
   if (!student) return;
 
   if (!announcementMessage.trim()) {
-    alert("اكتب الرسالة أولاً");
+    showToast("اكتب الرسالة أولاً");
     return;
   }
 
@@ -1104,7 +1117,7 @@ const sendAnnouncement = async () => {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      alert("يجب تسجيل الدخول أولاً");
+      showToast("يجب تسجيل الدخول أولاً");
       return;
     }
 
@@ -1132,7 +1145,7 @@ const sendAnnouncement = async () => {
 
     if (notificationError) {
       
-      alert("حدث خطأ أثناء إنشاء الإشعار");
+      showToast("حدث خطأ أثناء إنشاء الإشعار");
       return;
     }
 
@@ -1153,18 +1166,18 @@ const sendAnnouncement = async () => {
         .delete()
         .eq("id", notification.id);
 
-      alert("حدث خطأ أثناء إرسال الإشعار للطالب");
+      showToast("حدث خطأ أثناء إرسال الإشعار للطالب");
       return;
     }
 
-    alert("تم إرسال الرسالة بنجاح");
+    showToast("تم إرسال الرسالة بنجاح");
 
     setAnnouncementMessage("");
     setAnnouncementPriority("important");
     setShowAnnouncementModal(false);
   } catch (error) {
     
-    alert("حدث خطأ أثناء الإرسال");
+    showToast("حدث خطأ أثناء الإرسال");
   }
 };
 
@@ -1246,16 +1259,16 @@ const sendAnnouncement = async () => {
     setClearingAttempts(false);
 
     if (error) {
-      alert("حصل خطأ أثناء إلغاء الحظر: " + error.message);
+      showToast("حصل خطأ أثناء إلغاء الحظر: " + error.message);
       return;
     }
 
     if (!count || count === 0) {
-      alert("لم يتم العثور على سجل حظر بهذا الرقم. جرب تتأكد من رقم الطالب أو يبقى مفيش حظر أصلاً.");
+      showToast("لم يتم العثور على سجل حظر بهذا الرقم. جرب تتأكد من رقم الطالب أو يبقى مفيش حظر أصلاً.");
       return;
     }
 
-    alert("تم إلغاء الحظر بنجاح ✅ يقدر الطالب يحاول يسجل تاني دلوقتي");
+    showToast("تم إلغاء الحظر بنجاح، يقدر الطالب يحاول يسجل تاني دلوقتي");
   };
 
   const toggleStudentStatus = async () => {
@@ -1276,7 +1289,7 @@ const sendAnnouncement = async () => {
       .eq("id", student.id);
 
     if (error) {
-      alert(error.message);
+      showToast(error.message);
       return;
     }
 
@@ -1442,6 +1455,42 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
 
   return (
     <div className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#09090B] dark:via-[#111111] dark:to-[#09090B]" dir="rtl">
+      {toast && (
+        <div
+          key={toast.id}
+          className="fixed top-5 left-1/2 -translate-x-1/2 sm:left-auto sm:right-5 sm:translate-x-0 z-[100] w-[92%] sm:w-full max-w-sm bg-white dark:bg-[#1A1A1A] rounded-xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A] overflow-hidden animate-in slide-in-from-top-3 fade-in duration-300"
+        >
+          <div className="flex items-start justify-between gap-3 px-4 py-3">
+            <p className="text-sm font-bold text-gray-800 dark:text-gray-100 text-right flex-1">
+              {toast.message}
+            </p>
+            <button
+              onClick={() => setToast(null)}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors flex-shrink-0"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="h-1 w-full bg-gray-100 dark:bg-[#2A2A2A] overflow-hidden">
+            <div
+              key={toast.id}
+              className="h-full bg-gradient-to-r from-emerald-400 via-blue-500 to-pink-500"
+              style={{
+                animation: "toast-shrink 4s linear forwards",
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes toast-shrink {
+          from { width: 100%; }
+          to { width: 0%; }
+        }
+      `}</style>
+
       <div className="hidden lg:block flex-shrink-0">
         <DashboardSidebar type="instructor" />
       </div>

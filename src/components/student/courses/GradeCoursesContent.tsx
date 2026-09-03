@@ -1,11 +1,11 @@
 // src/components/student/courses/GradeCoursesContent.tsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../lib/supabase";
 import { Card, CardContent } from "../../ui/Card";
 import { Button } from "../../ui/Button";
-import { BookOpen, Clock, Tag } from "lucide-react";
+import { BookOpen, Clock, Tag, X } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
@@ -25,6 +25,18 @@ const [subscriptionCode, setSubscriptionCode] = useState("");
 const [selectedCourse, setSelectedCourse] = useState<any>(null);
 const [myCourses, setMyCourses] = useState<string[]>([]);
 const [expandedId, setExpandedId] = useState<string | null>(null);
+const [toast, setToast] = useState<{ id: number; message: string } | null>(null);
+const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+const showToast = (message: string) => {
+  if (toastTimeoutRef.current) {
+    clearTimeout(toastTimeoutRef.current);
+  }
+  setToast({ id: Date.now(), message });
+  toastTimeoutRef.current = setTimeout(() => {
+    setToast(null);
+  }, 4000);
+};
 
 useEffect(() => {
   loadCourses();
@@ -105,17 +117,17 @@ const activateSubscription = async () => {
     .single();
 
   if (error || !data) {
-    alert("كود الاشتراك غير صحيح");
+    showToast("كود الاشتراك غير صحيح");
     return;
   }
 
   if (data.status !== "active") {
-    alert("هذا الكود غير صالح أو تم استخدامه");
+    showToast("هذا الكود غير صالح أو تم استخدامه");
     return;
   }
 
   if (data.course_id !== selectedCourse.id) {
-    alert("هذا الكود لا يخص هذا الكورس");
+    showToast("هذا الكود لا يخص هذا الكورس");
     return;
   }
 
@@ -133,7 +145,7 @@ const { data: existingSubscription } = await supabase
   .maybeSingle();
 
 if (existingSubscription) {
-  alert("أنت مشترك بالفعل في هذا الكورس.");
+  showToast("أنت مشترك بالفعل في هذا الكورس.");
   return;
 }
 
@@ -151,7 +163,7 @@ const { error: enrollError } = await supabase
   });
 
 if (enrollError) {
-  alert("حدث خطأ أثناء إضافة الاشتراك");
+  showToast("حدث خطأ أثناء إضافة الاشتراك");
   return;
 }
 
@@ -170,7 +182,7 @@ const { error: codeError } = await supabase
   .eq("id", data.id);
 
 if (codeError) {
-  alert("تم الاشتراك لكن حدث خطأ أثناء تحديث الكود");
+  showToast("تم الاشتراك لكن حدث خطأ أثناء تحديث الكود");
   return;
 }
 
@@ -181,7 +193,7 @@ setShowSubscriptionModal(false);
 setSubscriptionCode("");
 setSelectedCourse(null);
 
-alert("تم تفعيل الاشتراك بنجاح ✅");
+showToast("تم تفعيل الاشتراك بنجاح");
 };
 
 
@@ -620,6 +632,42 @@ gap-x-20
  
 return (
   <>
+    {toast && (
+      <div
+        key={toast.id}
+        className="fixed top-5 left-1/2 -translate-x-1/2 sm:left-auto sm:right-5 sm:translate-x-0 z-[100] w-[92%] sm:w-full max-w-sm bg-white dark:bg-[#1A1A1A] rounded-xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A] overflow-hidden animate-in slide-in-from-top-3 fade-in duration-300"
+      >
+        <div className="flex items-start justify-between gap-3 px-4 py-3">
+          <p className="text-sm font-bold text-gray-800 dark:text-gray-100 text-right flex-1">
+            {toast.message}
+          </p>
+          <button
+            onClick={() => setToast(null)}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors flex-shrink-0"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="h-1 w-full bg-gray-100 dark:bg-[#2A2A2A] overflow-hidden">
+          <div
+            key={toast.id}
+            className="h-full bg-gradient-to-r from-emerald-400 via-blue-500 to-pink-500"
+            style={{
+              animation: "toast-shrink 4s linear forwards",
+            }}
+          />
+        </div>
+      </div>
+    )}
+
+    <style>{`
+      @keyframes toast-shrink {
+        from { width: 100%; }
+        to { width: 0%; }
+      }
+    `}</style>
+
     <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-8 sm:py-12 lg:py-16">
 
       {loading && (

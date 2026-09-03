@@ -6,7 +6,7 @@ import { supabase } from "../lib/supabase";
 import { Footer } from "../components/layout/Footer";
 import {
   Eye, EyeOff, Phone, Lock,
-  Loader2, CheckCircle2, LogIn
+  Loader2, CheckCircle2, LogIn, X
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import HeroSection from '../components/HeroSection';
@@ -96,6 +96,18 @@ const fieldIcon =
   const [showPhoneFlash, setShowPhoneFlash] = useState(false);
   const [passwordFlashId, setPasswordFlashId] = useState(0);
   const [showPasswordFlash, setShowPasswordFlash] = useState(false);
+  const [toast, setToast] = useState<{ id: number; message: string } | null>(null);
+  const toastTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = (message: string) => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    setToast({ id: Date.now(), message });
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast(null);
+    }, 4000);
+  };
 
   const triggerFlash = (
     setId: React.Dispatch<React.SetStateAction<number>>,
@@ -180,9 +192,7 @@ if (allowedError) {
 }
 
 if (allowed === false) {
-  setErrors({
-    password: "تم إيقاف الدخول مؤقتًا بسبب محاولات كثيرة خاطئة، حاول بعد 15 دقيقة",
-  });
+  showToast("تم إيقاف الدخول مؤقتًا بسبب محاولات كثيرة خاطئة، حاول بعد 15 دقيقة");
   setLoading(false);
   return;
 }
@@ -242,9 +252,7 @@ if (studentError || !student) {
 if (student.status !== "نشط") {
   await supabase.auth.signOut();
 
-  setErrors({
-    phone: "الحساب لم يتم تفعيله بعد.",
-  });
+  showToast("الحساب لم يتم تفعيله بعد");
 
   setLoading(false);
   return;
@@ -259,7 +267,7 @@ const { error: sessionError } = await supabase.rpc("start_single_session", {
 
 if (sessionError) {
   console.error("START SESSION ERROR:", sessionError);
-  setErrors({ password: "حدث خطأ أثناء تسجيل الدخول" });
+  showToast("حدث خطأ أثناء تسجيل الدخول");
   setLoading(false);
   return;
 }
@@ -301,14 +309,12 @@ login({
 });
 
 setSuccess(true);
+showToast("تم تسجيل الدخول بنجاح");
 setTimeout(() => navigate("/"), 1200);
     } catch (err: any) {
       console.error(err);
 
-setErrors({
-  password:
-    err.message || "حدث خطأ أثناء تسجيل الدخول",
-});
+showToast(err.message || "حدث خطأ أثناء تسجيل الدخول");
     }
 
     setLoading(false);
@@ -317,6 +323,42 @@ setErrors({
   return (
     <>
       <Navbar />
+
+      {toast && (
+        <div
+          key={toast.id}
+          className="fixed top-5 left-1/2 -translate-x-1/2 sm:left-auto sm:right-5 sm:translate-x-0 z-[100] w-[92%] sm:w-full max-w-sm bg-white dark:bg-[#1A1A1A] rounded-xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A] overflow-hidden animate-in slide-in-from-top-3 fade-in duration-300"
+        >
+          <div className="flex items-start justify-between gap-3 px-4 py-3">
+            <p className="text-sm font-bold text-gray-800 dark:text-gray-100 text-right flex-1">
+              {toast.message}
+            </p>
+            <button
+              onClick={() => setToast(null)}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors flex-shrink-0"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="h-1 w-full bg-gray-100 dark:bg-[#2A2A2A] overflow-hidden">
+            <div
+              key={toast.id}
+              className="h-full bg-gradient-to-r from-emerald-400 via-blue-500 to-pink-500"
+              style={{
+                animation: "toast-shrink 4s linear forwards",
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes toast-shrink {
+          from { width: 100%; }
+          to { width: 0%; }
+        }
+      `}</style>
 
       <div
   className={`
