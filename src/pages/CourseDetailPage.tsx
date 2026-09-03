@@ -19,8 +19,8 @@ import {
   HelpCircle,
 } from "lucide-react";
 import {
-  HiOutlineCalendarDays,
-  HiOutlineFolder,
+  HiCalendarDays,
+  HiFolder,
 } from "react-icons/hi2";
 import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
@@ -1138,14 +1138,18 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 )}
 
                 <div className="flex items-center justify-between mt-1 pb-1">
-                  <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                     <span className="text-[13px] font-medium">{formatDate(course.created_at)}</span>
-                    <HiOutlineCalendarDays className="text-[17px]" />
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
+                      <HiCalendarDays className="text-[13px]" />
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                     <span className="text-[13px] font-medium">{formatDate(course.updated_at)}</span>
-                    <HiOutlineFolder className="text-[17px]" />
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
+                      <HiFolder className="text-[13px]" />
+                    </span>
                   </div>
                 </div>
 
