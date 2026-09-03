@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bookmark, Lightbulb, CheckSquare, ArrowRight } from "lucide-react";
+import { Bookmark, Lightbulb, CheckSquare, ArrowRight, PlayCircle, Clock3, ClipboardList, CheckCircle2 } from "lucide-react";
 import StudentLayout from "./StudentLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { useApp } from "../../context/AppContext";
@@ -16,9 +16,17 @@ export default function DashboardHomePage() {
   const [activeCoursesCount, setActiveCoursesCount] = useState(0);
   const [completedCoursesCount, setCompletedCoursesCount] = useState(0);
   const [overallProgress, setOverallProgress] = useState(0);
-  const [weeklyData, setWeeklyData] = useState <
+  const [weeklyData, setWeeklyData] = useState<
     { day: string; current: number; previous: number }[]
   >([]);
+
+  // ── إحصائيات إضافية ──────────────────────────
+  const [videoWatchCount, setVideoWatchCount] = useState(0);
+  const [totalWatchHours, setTotalWatchHours] = useState(0);
+  const [examOpenCount, setExamOpenCount] = useState(0);
+  const [examFinishCount, setExamFinishCount] = useState(0);
+  const [examsAvailableCount, setExamsAvailableCount] = useState(0);
+  const [avgExamScores, setAvgExamScores] = useState<{ day: string; score: number }[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -79,7 +87,7 @@ export default function DashboardHomePage() {
         const { data: progress } = lessonIds.length
           ? await supabase
               .from("lesson_progress")
-              .select("lesson_id, is_completed, last_watched_at")
+              .select("lesson_id, is_completed, last_watched_at, watch_count, watched_seconds")
               .eq("student_id", student.id)
               .in("lesson_id", lessonIds)
           : { data: [] as any[] };
@@ -121,7 +129,62 @@ export default function DashboardHomePage() {
             previous: dayBuckets[d].previous,
           }))
         );
+
+        // ── عدد مرات مشاهدة الفيديوهات + إجمالي مدة المشاهدة ──
+        const totalWatchCount = (progress || []).reduce(
+          (sum: number, p: any) => sum + (p.watch_count || 0),
+          0
+        );
+        const totalSeconds = (progress || []).reduce(
+          (sum: number, p: any) => sum + (p.watched_seconds || 0),
+          0
+        );
+        setVideoWatchCount(totalWatchCount);
+        setTotalWatchHours(Math.round(totalSeconds / 3600));
+
+        // ── عدد الاختبارات المتاحة في كورسات الطالب ──
+        const { data: quizItems } = sectionIds.length
+          ? await supabase
+              .from("course_items")
+              .select("id")
+              .in("section_id", sectionIds)
+              .eq("type", "quiz")
+          : { data: [] as any[] };
+        setExamsAvailableCount((quizItems || []).length);
       }
+
+      // ── عدد مرات فتح الاختبارات ──
+      const { count: opensCount } = await supabase
+        .from("exam_opens")
+        .select("id", { count: "exact", head: true })
+        .eq("student_id", student.id);
+      setExamOpenCount(opensCount || 0);
+
+      // ── عدد الاختبارات المنتهية + متوسط النتائج اليومي ──
+      const { data: examRows } = await supabase
+        .from("exam_results")
+        .select("percentage, submitted_at")
+        .eq("student_id", student.id);
+      setExamFinishCount((examRows || []).length);
+
+      const scoreBuckets: Record<string, { sum: number; count: number }> = {};
+      WEEKDAYS_AR.forEach((d) => (scoreBuckets[d] = { sum: 0, count: 0 }));
+      (examRows || []).forEach((r: any) => {
+        if (!r.submitted_at) return;
+        const date = new Date(r.submitted_at);
+        const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays >= 0 && diffDays < 7) {
+          const dayName = WEEKDAYS_AR[date.getDay()];
+          scoreBuckets[dayName].sum += Number(r.percentage) || 0;
+          scoreBuckets[dayName].count += 1;
+        }
+      });
+      setAvgExamScores(
+        WEEKDAYS_AR.map((d) => ({
+          day: d,
+          score: scoreBuckets[d].count > 0 ? Math.round(scoreBuckets[d].sum / scoreBuckets[d].count) : 0,
+        }))
+      );
 
       setCompletedCoursesCount(completedCoursesTemp);
       setOverallProgress(totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0);
@@ -150,6 +213,65 @@ export default function DashboardHomePage() {
           <div className="py-20 text-center text-gray-400 font-bold">جاري التحميل...</div>
         ) : (
           <>
+            {/* ── إحصائيات إضافية (4 كروت) ── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-sm">
+                <CardContent className="p-5 flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-black text-[#B348FE]">{videoWatchCount} مرة</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">
+                      إجمالي عدد مرات مشاهدة الفيديوهات على الموقع
+                    </p>
+                  </div>
+                  <div className="w-11 h-11 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center flex-shrink-0">
+                    <PlayCircle className="text-[#B348FE]" size={22} />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-sm">
+                <CardContent className="p-5 flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-black text-[#B348FE]">{totalWatchHours} ساعة</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">
+                      إجمالي مدة فتح المحاضرات على الموقع
+                    </p>
+                  </div>
+                  <div className="w-11 h-11 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center flex-shrink-0">
+                    <Clock3 className="text-[#B348FE]" size={22} />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-sm">
+                <CardContent className="p-5 flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-black text-[#B348FE]">{examOpenCount} مرة</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">
+                      إجمالي عدد مرات فتح الاختبار
+                    </p>
+                  </div>
+                  <div className="w-11 h-11 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center flex-shrink-0">
+                    <ClipboardList className="text-[#B348FE]" size={22} />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-sm">
+                <CardContent className="p-5 flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-black text-[#B348FE]">{examFinishCount} مرة</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">
+                      إجمالي عدد مرات إنهاء الاختبارات
+                    </p>
+                  </div>
+                  <div className="w-11 h-11 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center flex-shrink-0">
+                    <CheckCircle2 className="text-[#B348FE]" size={22} />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="bg-[#B348FE] rounded-2xl p-5 flex items-center justify-between text-white shadow-md">
                 <div>
@@ -263,9 +385,128 @@ export default function DashboardHomePage() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* ── احصائيات كورساتك ── */}
+            <div className="space-y-5">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white">احصائيات كورساتك</h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <DonutStat
+                  label="عدد الإختبارات اللي خلصها"
+                  value={examFinishCount}
+                  total={examsAvailableCount}
+                  subLabel="تقدمك في الكورسات"
+                />
+                <DonutStat
+                  label="عدد الفيديوهات اللي شافها"
+                  value={0}
+                  total={0}
+                  subLabel="تقدمك في الكورسات"
+                  fallbackPercent={overallProgress}
+                />
+              </div>
+
+              <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <p className="text-sm font-bold text-gray-500 dark:text-gray-400">متوسط النتائج اللي جيبتها</p>
+                    {!avgExamScores.some((d) => d.score > 0) && (
+                      <span className="text-lg font-black text-[#B348FE]">ممتحنتش خالص!</span>
+                    )}
+                  </div>
+
+                  <div className="flex items-end h-40 relative">
+                    <svg viewBox="0 0 700 160" className="w-full h-full overflow-visible">
+                      <polyline
+                        fill="none"
+                        stroke="#B348FE"
+                        strokeWidth="3"
+                        points={avgExamScores
+                          .map((d, i) => {
+                            const x = (i / (avgExamScores.length - 1 || 1)) * 680 + 10;
+                            const y = 150 - (d.score / 100) * 140;
+                            return `${x},${y}`;
+                          })
+                          .join(" ")}
+                      />
+                      {avgExamScores.map((d, i) => {
+                        const x = (i / (avgExamScores.length - 1 || 1)) * 680 + 10;
+                        const y = 150 - (d.score / 100) * 140;
+                        return <circle key={d.day} cx={x} cy={y} r="5" fill="#B348FE" />;
+                      })}
+                    </svg>
+                  </div>
+                  <div className="flex justify-between mt-2">
+                    {avgExamScores.map((d) => (
+                      <span key={d.day} className="flex-1 text-center text-[10px] text-gray-400 font-bold">
+                        {d.day}
+                      </span>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </>
         )}
       </div>
     </StudentLayout>
+  );
+}
+
+function DonutStat({
+  label,
+  value,
+  total,
+  subLabel,
+  fallbackPercent,
+}: {
+  label: string;
+  value: number;
+  total: number;
+  subLabel: string;
+  fallbackPercent?: number;
+}) {
+  const percent = total > 0 ? Math.round((value / total) * 100) : fallbackPercent ?? 0;
+  const hasData = total > 0 || (fallbackPercent ?? 0) > 0;
+  const radius = 45;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percent / 100) * circumference;
+
+  return (
+    <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm">
+      <CardContent className="p-6 flex items-center justify-between">
+        <div>
+          <p className="text-xs text-gray-400 dark:text-gray-500 font-bold mb-1">
+            {hasData ? "" : "بلا أبدأ"}
+          </p>
+          <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">{label}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 font-bold">{subLabel}</p>
+          <p className="text-sm font-black text-gray-900 dark:text-white">
+            {value} / {total}
+          </p>
+        </div>
+        <div className="relative w-24 h-24 flex-shrink-0">
+          <svg viewBox="0 0 100 100" className="w-24 h-24 -rotate-90">
+            <circle cx="50" cy="50" r={radius} fill="none" stroke="#F6EEFF" strokeWidth="8" />
+            {hasData && (
+              <circle
+                cx="50"
+                cy="50"
+                r={radius}
+                fill="none"
+                stroke="#B348FE"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={offset}
+              />
+            )}
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-sm font-black text-[#B348FE]">{hasData ? `${percent}%` : "—"}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

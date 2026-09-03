@@ -234,6 +234,7 @@ export function StudentDetails() {
   const [lessonProgress, setLessonProgress] = useState<LessonProgress[]>([]);
   const [coursesWithProgress, setCoursesWithProgress] = useState<CourseWithProgress[]>([]);
   const [loginSessions, setLoginSessions] = useState<LoginSession[]>([]);
+  const [examOpensCount, setExamOpensCount] = useState(0);
   const [sessionsPage, setSessionsPage] = useState(1);
   const sessionsPerPage = 5;
   const [examsPage, setExamsPage] = useState(1);
@@ -433,6 +434,19 @@ const showToast = (message: string) => {
     }
 
     setLessonProgress((data as LessonProgress[]) || []);
+  };
+
+  const loadExamOpensCount = async () => {
+    const { count, error } = await supabase
+      .from("exam_opens")
+      .select("id", { count: "exact", head: true })
+      .eq("student_id", Number(id));
+
+    if (error) {
+      return;
+    }
+
+    setExamOpensCount(count || 0);
   };
 
 const loadCoursesWithProgress = async () => {
@@ -1316,7 +1330,8 @@ const sendAnnouncement = async () => {
         loadHomeworkResults(),
         loadLessonProgress(),
         loadLoginSessions(),
-        loadSubscriptionPayments()
+        loadSubscriptionPayments(),
+        loadExamOpensCount()
       ]);
       setLoading(false);
     };
@@ -1638,6 +1653,20 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 </div>
               </CardContent>
             </Card>
+
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#B348FE] transition-all duration-300">
+              <CardContent className="p-4 lg:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">مرات فتح الاختبار</p>
+                    <h3 className="text-2xl lg:text-3xl font-black text-[#B348FE]">{examOpensCount}</h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                    <FileText className="text-[#B348FE]" size={24} />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
@@ -1703,7 +1732,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
                   <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">المحاضرات</p>
                   <p className="text-gray-900 dark:text-white font-black text-lg">

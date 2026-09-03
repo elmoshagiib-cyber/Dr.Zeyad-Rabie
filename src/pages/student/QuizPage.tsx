@@ -162,6 +162,16 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
         return;
       }
 
+      // تسجيل "فتح" الاختبار (بعد التأكد إنه لسه مش متسلّم)
+      if (studentId) {
+        supabase.from("exam_opens").insert({
+          student_id: studentId,
+          exam_id: Number(id),
+        }).then(({ error: openErr }) => {
+          if (openErr) console.error("Error logging exam open:", openErr);
+        });
+      }
+
       setQuiz(data);
       setQuestions(data.exam_questions || []);
       setTimeLeft((data.duration || 0) * 60);
