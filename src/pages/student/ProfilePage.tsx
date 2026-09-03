@@ -244,6 +244,7 @@ export function ProfilePage() {
   };
 
   const [avatarUrl, setAvatarUrl] = useState(displayUser.avatar_url || "");
+  const [studentType, setStudentType] = useState<string>("");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const [cropFile, setCropFile] = useState<File | null>(null);
@@ -347,9 +348,13 @@ const [subscriptionPayments, setSubscriptionPayments] = useState<StudentSubscrip
 
       const { data: studentRow } = await supabase
         .from("students")
-        .select("id")
+        .select("id, type")
         .eq("auth_id", user.id)
         .single();
+
+      if (studentRow?.type) {
+        setStudentType(studentRow.type);
+      }
 
       if (!studentRow) {
         setLoadingPayments(false);
@@ -552,7 +557,7 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                     </p>
 
                     <span className="px-3 py-1.5 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] text-[11px] sm:text-xs font-black">
-                      طالب أونلاين
+                      {studentType === "center" ? "طالب سنتر" : "طالب أونلاين"}
                     </span>
 
                     <p className="mt-auto pt-4 text-[10px] sm:text-[11px] text-gray-300 dark:text-gray-600 font-bold">
