@@ -44,6 +44,9 @@ export function StudentDashboardSidebar({
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
+  // على الموبايل الدرج بيفتح كامل دايمًا، مفيش وضع "مطوي" هناك
+  const isCollapsed = mobileOpen ? false : collapsed;
+
   const handleNav = (path: string) => {
     navigate(path);
     onClose?.();
@@ -72,17 +75,18 @@ export function StudentDashboardSidebar({
         "dark:border-[#2A2A2A]",
         "shadow-xl",
         "dark:shadow-[0_20px_50px_rgba(0,0,0,.45)]",
-        "transition-all duration-300 ease-out",
+        "transition-[width] duration-300 ease-out",
         "transition-colors",
-        mobileOpen ? "rounded-none w-[280px] sm:w-[300px]" : "xl:rounded-2xl",
-        "w-[280px] sm:w-[300px]"
+        mobileOpen
+          ? "rounded-none w-[280px] sm:w-[300px]"
+          : cn("xl:rounded-2xl", isCollapsed ? "w-[80px]" : "w-[280px] sm:w-[300px]")
       )}
     >
-      <SidebarHeader collapsed={false} setCollapsed={setCollapsed} />
+      <SidebarHeader collapsed={isCollapsed} setCollapsed={setCollapsed} />
 
       <StudentSidebarNavigation
         navItems={studentNavItems}
-        collapsed={false}
+        collapsed={isCollapsed}
         currentPath={location.pathname}
         onNavigate={handleNav}
         onLogout={handleLogout}
