@@ -41,12 +41,10 @@ export function SidebarItem({
 
 active
   ? `
-    bg-gradient-to-r
-    from-[#0F172A]
-    via-[#1E1B3A]
-    to-[#2A1B4D]
+    bg-[#B348FE]
     text-white
     scale-[1.02]
+    shadow-[0_8px_20px_rgba(179,72,254,.35)]
   `
           : `
 text-gray-700
@@ -58,11 +56,6 @@ active:scale-[0.98]
           `
       )}
     >
-      {/* Active Indicator */}
-      {active && (
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-l-full bg-white
-shadow-[0_0_12px_rgba(255,255,255,.6)]" />
-      )}
 
       <div
         className={cn(
@@ -86,14 +79,12 @@ shadow-[0_0_12px_rgba(255,255,255,.6)]" />
             `,
             active
   ? `
-    bg-white/10
+    bg-white/20
   `
   : `
-    bg-gradient-to-br
-    from-[#0F172A]
-    via-[#1E1B3A]
-    to-[#2A1B4D]
-    text-white
+    bg-[#F6EEFF]
+    dark:bg-[#2B103D]
+    text-[#B348FE]
     group-hover:opacity-90
     group-hover:scale-110
   `

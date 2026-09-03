@@ -12,38 +12,15 @@ interface NavItem {
   badge?: number;
 }
 
-interface NavGroup {
-  label: string;
-  items: NavItem[];
-}
-
-const studentNavGroups: NavGroup[] = [
-  {
-    label: "الرئيسية",
-    items: [{ label: "الرئيسية", path: "/dashboard/home", icon: <Home size={20} /> }],
-  },
-  {
-    label: "الأكاديمي",
-    items: [
-      { label: "كورساتي", path: "/dashboard/courses", icon: <BookOpen size={20} /> },
-      { label: "الواجبات", path: "/dashboard/homework", icon: <FileText size={20} /> },
-      { label: "الامتحانات", path: "/dashboard/exams", icon: <ClipboardList size={20} /> },
-    ],
-  },
-  {
-    label: "المجتمع",
-    items: [
-      { label: "المنتدى", path: "/dashboard/forum", icon: <MessageCircle size={20} /> },
-      { label: "المتصدرون", path: "/dashboard/leaderboard", icon: <Trophy size={20} /> },
-    ],
-  },
-  {
-    label: "الحساب",
-    items: [
-      { label: "الإشعارات", path: "/dashboard/announcements", icon: <Bell size={20} /> },
-      { label: "ملفي الشخصي", path: "/profile", icon: <User size={20} /> },
-    ],
-  },
+const studentNavItems: NavItem[] = [
+  { label: "الرئيسية", path: "/dashboard/home", icon: <Home size={20} /> },
+  { label: "كورساتي", path: "/dashboard/courses", icon: <BookOpen size={20} /> },
+  { label: "الواجبات", path: "/dashboard/homework", icon: <FileText size={20} /> },
+  { label: "الامتحانات", path: "/dashboard/exams", icon: <ClipboardList size={20} /> },
+  { label: "المنتدى", path: "/dashboard/forum", icon: <MessageCircle size={20} /> },
+  { label: "المتصدرون", path: "/dashboard/leaderboard", icon: <Trophy size={20} /> },
+  { label: "الإشعارات", path: "/dashboard/announcements", icon: <Bell size={20} /> },
+  { label: "ملفي الشخصي", path: "/profile", icon: <User size={20} /> },
 ];
 
 interface StudentDashboardSidebarProps {
@@ -85,7 +62,7 @@ export function StudentDashboardSidebar({
       <SidebarHeader collapsed={false} setCollapsed={setCollapsed} />
 
       <StudentSidebarNavigation
-        navGroups={studentNavGroups}
+        navItems={studentNavItems}
         collapsed={false}
         currentPath={location.pathname}
         onNavigate={handleNav}

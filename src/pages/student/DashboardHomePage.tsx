@@ -22,7 +22,7 @@ export default function DashboardHomePage() {
 
   // ── إحصائيات إضافية ──────────────────────────
   const [videoWatchCount, setVideoWatchCount] = useState(0);
-  const [totalWatchHours, setTotalWatchHours] = useState(0);
+  const [totalWatchSeconds, setTotalWatchSeconds] = useState(0);
   const [examOpenCount, setExamOpenCount] = useState(0);
   const [examFinishCount, setExamFinishCount] = useState(0);
   const [examsAvailableCount, setExamsAvailableCount] = useState(0);
@@ -140,7 +140,7 @@ export default function DashboardHomePage() {
           0
         );
         setVideoWatchCount(totalWatchCount);
-        setTotalWatchHours(Math.round(totalSeconds / 3600));
+        setTotalWatchSeconds(totalSeconds);
 
         // ── عدد الاختبارات المتاحة في كورسات الطالب ──
         const { data: quizItems } = sectionIds.length
@@ -196,6 +196,15 @@ export default function DashboardHomePage() {
 
   const maxValue = Math.max(1, ...weeklyData.flatMap((d) => [d.current, d.previous]));
 
+  const formatWatchTime = (totalSeconds: number): string => {
+    if (!totalSeconds || totalSeconds <= 0) return "00:00";
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return hours > 0 ? `${pad(hours)}:${pad(minutes)}:${pad(seconds)}` : `${pad(minutes)}:${pad(seconds)}`;
+  };
+
   return (
     <StudentLayout>
       <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
@@ -232,7 +241,7 @@ export default function DashboardHomePage() {
               <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-sm">
                 <CardContent className="p-5 flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-black text-[#B348FE]">{totalWatchHours} ساعة</p>
+                    <p className="text-2xl font-black text-[#B348FE]" dir="ltr">{formatWatchTime(totalWatchSeconds)}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">
                       إجمالي مدة فتح المحاضرات على الموقع
                     </p>

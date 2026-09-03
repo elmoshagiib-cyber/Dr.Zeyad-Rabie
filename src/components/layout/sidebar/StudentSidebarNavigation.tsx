@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Settings } from "lucide-react";
+import { motion } from "framer-motion";
+import { Settings } from "lucide-react";
 import { SidebarItem } from "./SidebarItem";
 
 type NavItem = {
@@ -10,33 +9,19 @@ type NavItem = {
   badge?: number;
 };
 
-type NavGroup = {
-  label: string;
-  items: NavItem[];
-};
-
 type Props = {
-  navGroups: NavGroup[];
+  navItems: NavItem[];
   collapsed: boolean;
   currentPath: string;
   onNavigate: (path: string) => void;
 };
 
 export function StudentSidebarNavigation({
-  navGroups,
+  navItems,
   collapsed,
   currentPath,
   onNavigate,
 }: Props) {
-  // كل الأقسام مفتوحة افتراضيًا
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(
-    () => Object.fromEntries(navGroups.map((g) => [g.label, true]))
-  );
-
-  const toggleGroup = (label: string) => {
-    setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }));
-  };
-
   return (
     <nav
       className="
@@ -49,109 +34,20 @@ export function StudentSidebarNavigation({
         sm:py-5
       "
     >
-      <div className="space-y-3">
-        {navGroups.map((group) => {
-          const isOpen = openGroups[group.label] ?? true;
-          const hasActiveChild = group.items.some((i) => i.path === currentPath);
+      <div className="space-y-1.5">
+        {navItems.map((item) => {
+          const active = currentPath === item.path;
 
           return (
-            <div
-              key={group.label}
-              className={`
-                relative
-                rounded-2xl
-                border
-                overflow-hidden
-                transition-colors duration-300
-                ${
-                  hasActiveChild
-                    ? "border-[#EAD8FF] dark:border-[#3A1652]"
-                    : "border-gray-100 dark:border-[#2A2A2A]"
-                }
-              `}
-            >
-              {/* خط جانبي بيبين القسم النشط */}
-              {hasActiveChild && (
-                <motion.div
-                  layoutId="active-group-bar"
-                  className="absolute right-0 top-0 bottom-0 w-[3px] bg-[#B348FE]"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-
-              {/* رأس القسم (اللي بيتفتح/يتقفل) */}
-              <button
-                type="button"
-                onClick={() => toggleGroup(group.label)}
-                className={`
-                  w-full flex items-center justify-between
-                  px-3.5 py-3
-                  transition-colors duration-200
-                  ${
-                    hasActiveChild
-                      ? "bg-[#F6EEFF] dark:bg-[#2B103D]"
-                      : "bg-white dark:bg-[#111111] hover:bg-gray-50 dark:hover:bg-[#1A1A1A]"
-                  }
-                `}
-              >
-                <motion.div
-                  animate={{ rotate: isOpen ? 0 : -90 }}
-                  transition={{ duration: 0.25, ease: "easeOut" }}
-                >
-                  {!collapsed && (
-                    <ChevronDown
-                      size={16}
-                      className={hasActiveChild ? "text-[#B348FE]" : "text-gray-400"}
-                    />
-                  )}
-                </motion.div>
-                <span
-                  className={`
-                    flex-1 text-right
-                    text-[11px] sm:text-xs font-bold tracking-wide
-                    ${
-                      hasActiveChild
-                        ? "text-[#B348FE]"
-                        : "text-gray-500 dark:text-gray-400"
-                    }
-                  `}
-                >
-                  {!collapsed ? group.label : ""}
-                </span>
-              </button>
-
-              {/* عناصر القسم — بأنيميشن سلس */}
-              <AnimatePresence initial={false}>
-                {isOpen && (
-                  <motion.div
-                    key="content"
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    className="overflow-hidden"
-                  >
-                    <div className="p-2 space-y-1.5">
-                      {group.items.map((item) => {
-                        const active = currentPath === item.path;
-
-                        return (
-                          <SidebarItem
-                            key={item.path}
-                            label={item.label}
-                            icon={item.icon}
-                            badge={item.badge}
-                            active={active}
-                            collapsed={collapsed}
-                            onClick={() => onNavigate(item.path)}
-                          />
-                        );
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <SidebarItem
+              key={item.path}
+              label={item.label}
+              icon={item.icon}
+              badge={item.badge}
+              active={active}
+              collapsed={collapsed}
+              onClick={() => onNavigate(item.path)}
+            />
           );
         })}
       </div>
