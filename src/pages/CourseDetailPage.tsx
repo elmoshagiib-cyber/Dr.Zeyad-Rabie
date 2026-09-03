@@ -16,6 +16,7 @@ import {
   Clock,
   Timer,
   Hash,
+  HelpCircle,
 } from "lucide-react";
 import {
   HiOutlineCalendarDays,
@@ -422,6 +423,27 @@ export function CourseDetailPage() {
     (t, u) => t + u.lessons.filter((l: any) => l.type === "video").length,
     0
   );
+
+  const totalVideoMinutes = units.reduce(
+    (total, unit) =>
+      total +
+      unit.lessons
+        .filter((l: any) => l.type === "video")
+        .reduce((sum: number, l: any) => sum + (Number(l.duration) || 0), 0),
+    0
+  );
+  const totalContentHours = Math.round(totalVideoMinutes / 60);
+
+  const totalQuestionsCount = units.reduce((total, unit) => {
+    const quizQuestions = unit.lessons
+      .filter((l: any) => l.type === "quiz")
+      .reduce(
+        (sum: number, l: any) => sum + (examExtras[l.id]?.questionsCount || 0),
+        0
+      );
+    return total + quizQuestions;
+  }, 0);
+
   const examsCount = units.reduce(
     (t, u) => t + u.lessons.filter((l: any) => l.type === "quiz").length,
     0
@@ -1006,18 +1028,6 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 />
               </div>
 
-              <div className="flex items-center justify-between px-6 pt-4 bg-white dark:bg-[#1A1A1A]">
-                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                  <span className="text-[13px] font-medium">{formatDate(course.created_at)}</span>
-                  <HiOutlineCalendarDays className="text-[17px]" />
-                </div>
-
-                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                  <span className="text-[13px] font-medium">{formatDate(course.updated_at)}</span>
-                  <HiOutlineFolder className="text-[17px]" />
-                </div>
-              </div>
-
               <div className="p-6 bg-white dark:bg-[#1A1A1A]">
                 {course.is_free ? (
                   <button
@@ -1079,6 +1089,36 @@ const saveProgress = async (currentTime: number, duration: number) => {
                     <span>مشاهدة المقدمة</span>
                   </button>
                 )}
+
+                <div className="flex items-center justify-between mt-1">
+                  <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                    <span className="text-[13px] font-medium">{formatDate(course.created_at)}</span>
+                    <HiOutlineCalendarDays className="text-[17px]" />
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                    <span className="text-[13px] font-medium">{formatDate(course.updated_at)}</span>
+                    <HiOutlineFolder className="text-[17px]" />
+                  </div>
+                </div>
+
+                <div className="mt-2 pt-4 border-t border-gray-200 dark:border-[#262626] space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Clock size={18} className="text-slate-400 dark:text-slate-500" />
+                    <span className="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300">
+                      المحتوى{" "}
+                      <span className="text-[#B348FE]">+{totalContentHours}</span> ساعة
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Hash size={18} className="text-slate-400 dark:text-slate-500" />
+                    <span className="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300">
+                      اجمالي الاسئلة{" "}
+                      <span className="text-[#B348FE]">+{totalQuestionsCount}</span> سؤال
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
