@@ -1174,12 +1174,32 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
       <div className="bg-white dark:bg-[#09090B] pt-10 pb-8 sm:pt-14 sm:pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-[#FCFCFD] dark:bg-[#111111] rounded-2xl sm:rounded-3xl p-5 sm:p-8 mb-4 sm:mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
-            <h2 className="text-2xl sm:text-3xl xl:text-4xl font-black text-right">
-              <span className="text-gray-900 dark:text-white">محتوى </span>
-              <span className="text-[#B348FE] dark:text-[#B348FE]">الكورس</span>
-            </h2>
-          </div>
+         <div className="group relative overflow-hidden bg-[#FCFCFD] dark:bg-[#111111] rounded-2xl sm:rounded-3xl p-5 sm:p-8 mb-4 sm:mb-6 shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-500 hover:shadow-md">
+
+  {/* Decorative lines */}
+  <div className="pointer-events-none absolute top-4 left-6 sm:left-10 flex flex-col gap-2 opacity-70">
+    <span className="block w-16 sm:w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-500 group-hover:translate-x-5 group-hover:w-20" />
+    <span className="block w-10 sm:w-14 h-1 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-500 delay-75 group-hover:-translate-x-2 group-hover:w-16" />
+  </div>
+
+  <div className="pointer-events-none absolute bottom-4 right-6 sm:right-10 flex flex-col gap-2 items-end opacity-70">
+    <span className="block w-16 sm:w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-500 group-hover:-translate-x-5 group-hover:w-20" />
+    <span className="block w-10 sm:w-14 h-1 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-500 delay-75 group-hover:translate-x-2 group-hover:w-16" />
+  </div>
+
+  {/* Title */}
+  <h2 className="relative z-10 text-2xl sm:text-3xl xl:text-4xl font-black text-right transition-all duration-500 group-hover:translate-x-1">
+
+    <span className="text-gray-900 dark:text-white transition-colors duration-500 group-hover:text-[#B348FE]">
+      محتوى
+    </span>
+
+    <span className="text-[#B348FE] transition-colors duration-500 group-hover:text-gray-900 dark:group-hover:text-white">
+      {" "}الكورس
+    </span>
+
+  </h2>
+</div>
 
           <div className="space-y-3 sm:space-y-4">
             {units.map((unit) => {
@@ -1187,36 +1207,28 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
               return (
                 <div
-                  key={unit.id}
-                  className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-300"
-                >
+  key={unit.id}
+  className="group bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+>
                   <button
                     onClick={() => setOpenUnit(isOpen ? null : unit.id)}
-                    className={`group w-full flex flex-row-reverse items-center justify-between px-4 sm:px-6 py-4 sm:py-5 transition-all duration-300 group-hover:scale-110 hover:scale-[1.01] ${
-                      isOpen
-                        ? "bg-[#F6EEFF] dark:bg-[#2B103D]"
-                        : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                    }`}
+                    className={`w-full flex flex-row-reverse items-center justify-between px-4 sm:px-6 py-4 sm:py-5 transition-all duration-300 hover:px-5 sm:hover:px-7 ${
+  isOpen
+    ? "bg-[#F6EEFF] dark:bg-[#2B103D]"
+    : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
+}`}
                   >
-                    <div
-                      className={`group relative overflow-hidden w-full flex flex-row-reverse items-center justify-between px-4 sm:px-6 py-4 sm:py-5 transition-all duration-300 ${
-                        isOpen
-                          ? "bg-[#F6EEFF] dark:bg-[#2B103D]"
-                          : "hover:bg-[#FAF7FF] dark:hover:bg-[#18181B]"
-                      }`}
-                    >
-                      <ChevronDown
-                        size={18}
-                        className={`transition-all duration-300 ${
-                          isOpen
-                            ? "rotate-180 text-[#B348FE]"
-                            : "rotate-0 text-gray-500 dark:text-gray-400"
-                        }`}
-                      />
-                    </div>
+                   <ChevronDown
+  size={18}
+  className={`flex-shrink-0 transition-all duration-300 ${
+    isOpen
+      ? "rotate-180 text-[#B348FE]"
+      : "rotate-0 text-gray-500 dark:text-gray-400"
+  }`}
+/>
 
                     <div className="flex flex-row-reverse items-center justify-start gap-3">
-                      <h3 className="text-base sm:text-xl xl:text-2xl font-black text-gray-900 dark:text-white group-hover:text-[#B348FE] transition-all duration-300 ease-out truncate">
+                      <h3 className="text-base sm:text-xl xl:text-2xl font-black text-gray-900 dark:text-white group-hover:text-[#B348FE] transition-all duration-300 ease-out group-hover:-translate-x-1 truncate">
                         {unit.title}
                       </h3>
 
