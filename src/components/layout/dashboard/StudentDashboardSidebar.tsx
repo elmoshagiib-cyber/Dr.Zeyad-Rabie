@@ -10,13 +10,20 @@ interface NavItem {
   path: string;
   icon: React.ReactNode;
   badge?: number;
+  children?: NavItem[];
 }
 
 const studentNavItems: NavItem[] = [
   { label: "الرئيسية", path: "/dashboard/home", icon: <Home size={20} /> },
-  { label: "كورساتي", path: "/dashboard/courses", icon: <BookOpen size={20} /> },
-  { label: "الواجبات", path: "/dashboard/homework", icon: <FileText size={20} /> },
-  { label: "الامتحانات", path: "/dashboard/exams", icon: <ClipboardList size={20} /> },
+  {
+    label: "كورساتي",
+    path: "/dashboard/courses",
+    icon: <BookOpen size={20} />,
+    children: [
+      { label: "نتائج الواجبات", path: "/dashboard/homework", icon: <FileText size={18} /> },
+      { label: "نتائج الامتحانات", path: "/dashboard/exams", icon: <ClipboardList size={18} /> },
+    ],
+  },
   { label: "المنتدى", path: "/dashboard/forum", icon: <MessageCircle size={20} /> },
   { label: "المتصدرون", path: "/dashboard/leaderboard", icon: <Trophy size={20} /> },
   { label: "الإشعارات", path: "/dashboard/announcements", icon: <Bell size={20} /> },
