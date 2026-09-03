@@ -61,6 +61,18 @@ export function CourseDetailPage() {
 
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [openUnit, setOpenUnit] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ id: number; message: string } | null>(null);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showToast = (message: string) => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    setToast({ id: Date.now(), message });
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast(null);
+    }, 4000);
+  };
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [units, setUnits] = useState<any[]>([]);
   const [course, setCourse] = useState<any>(null);
@@ -343,24 +355,24 @@ export function CourseDetailPage() {
       .single();
 
     if (error || !data) {
-      alert("كود الاشتراك غير صحيح");
+      showToast("كود الاشتراك غير صحيح");
       return;
     }
 
     if (data.status !== "active") {
-      alert("هذا الكود غير صالح أو تم استخدامه");
+      showToast("هذا الكود غير صالح أو تم استخدامه");
       return;
     }
 
     if (data.course_id !== course.id) {
-      alert("هذا الكود لا يخص هذا الكورس");
+      showToast("هذا الكود لا يخص هذا الكورس");
       return;
     }
 
     const studentId = getStudentId();
 
     if (!studentId) {
-      alert("يجب تسجيل الدخول أولاً");
+      showToast("يجب تسجيل الدخول أولاً");
       return;
     }
 
@@ -373,7 +385,7 @@ export function CourseDetailPage() {
       .maybeSingle();
 
     if (existingSubscription) {
-      alert("أنت مشترك بالفعل في هذا الكورس.");
+      showToast("أنت مشترك بالفعل في هذا الكورس.");
       return;
     }
 
@@ -390,7 +402,7 @@ export function CourseDetailPage() {
       });
 
     if (enrollError) {
-      alert("حدث خطأ أثناء إضافة الاشتراك");
+      showToast("حدث خطأ أثناء إضافة الاشتراك");
       return;
     }
 
@@ -408,7 +420,7 @@ export function CourseDetailPage() {
       .eq("id", data.id);
 
     if (codeError) {
-      alert("تم الاشتراك لكن حدث خطأ أثناء تحديث الكود");
+      showToast("تم الاشتراك لكن حدث خطأ أثناء تحديث الكود");
       return;
     }
 
@@ -416,7 +428,7 @@ export function CourseDetailPage() {
     setShowSubscriptionModal(false);
     setSubscriptionCode("");
 
-    alert("تم تفعيل الاشتراك بنجاح ✅");
+    showToast("تم تفعيل الاشتراك بنجاح");
   };
 
   const videosCount = units.reduce(
@@ -599,13 +611,13 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
   const openVideoPlayer = async (lessonId: string, title: string) => {
     if (!lessonId) {
-      alert("الفيديو غير متوفر");
+      showToast("الفيديو غير متوفر");
       return;
     }
 
     const studentId = getStudentId();
     if (!studentId || !slug) {
-      alert("يجب تسجيل الدخول أولاً");
+      showToast("يجب تسجيل الدخول أولاً");
       return;
     }
 
@@ -621,7 +633,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
       }
 
       if (!session?.access_token) {
-        alert("انتهت جلسة الدخول، برجاء تسجيل الدخول مرة أخرى");
+        showToast("انتهت جلسة الدخول، برجاء تسجيل الدخول مرة أخرى");
         navigate("/login");
         return;
       }
@@ -640,7 +652,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
       if (!response.ok) {
         const errData = await response.json().catch(() => null);
         console.error("Video URL error:", errData);
-        alert("تعذر فتح الفيديو، حاول مرة أخرى");
+        showToast("تعذر فتح الفيديو، حاول مرة أخرى");
         return;
       }
 
@@ -656,13 +668,13 @@ const saveProgress = async (currentTime: number, duration: number) => {
       setVideoPlayerOpen(true);
     } catch (error) {
       console.error("Error opening video:", error);
-      alert("حدث خطأ أثناء فتح الفيديو");
+      showToast("حدث خطأ أثناء فتح الفيديو");
     }
   };
 
   const openPdf = async (lessonId: string) => {
     if (!lessonId) {
-      alert("الملف غير متوفر");
+      showToast("الملف غير متوفر");
       return;
     }
 
@@ -685,7 +697,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
       if (!response.ok) {
         const error = await response.json();
         console.error("PDF ERROR:", error);
-        alert(error.error || error.message || "تعذر فتح الملف");
+        showToast(error.error || error.message || "تعذر فتح الملف");
         return;
       }
 
@@ -694,7 +706,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
       window.open(url, "_blank", "noopener,noreferrer");
     } catch (error) {
       console.error(error);
-      alert("حدث خطأ أثناء فتح الملف");
+      showToast("حدث خطأ أثناء فتح الملف");
     }
   };
 
@@ -894,6 +906,42 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#09090B]" dir="rtl">
+      {toast && (
+        <div
+          key={toast.id}
+          className="fixed top-5 left-5 z-[100] w-full max-w-sm bg-white dark:bg-[#1A1A1A] rounded-xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A] overflow-hidden animate-in slide-in-from-top-3 fade-in duration-300"
+        >
+          <div className="flex items-start justify-between gap-3 px-4 py-3">
+            <p className="text-sm font-bold text-gray-800 dark:text-gray-100 text-right flex-1">
+              {toast.message}
+            </p>
+            <button
+              onClick={() => setToast(null)}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors flex-shrink-0"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="h-1 w-full bg-gray-100 dark:bg-[#2A2A2A] overflow-hidden">
+            <div
+              key={toast.id}
+              className="h-full bg-gradient-to-r from-emerald-400 via-blue-500 to-pink-500"
+              style={{
+                animation: "toast-shrink 4s linear forwards",
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes toast-shrink {
+          from { width: 100%; }
+          to { width: 0%; }
+        }
+      `}</style>
+
       <Navbar />
 
       <div className="relative overflow-hidden pt-32 lg:pt-32 pb-56">
@@ -1031,13 +1079,10 @@ const saveProgress = async (currentTime: number, duration: number) => {
               <div className="p-6 bg-white dark:bg-[#1A1A1A]">
                 {course.is_free ? (
                   <button
-                    onClick={() => {
-                      alert("BUTTON CLICKED");
-                      handleEnroll();
-                    }}
+                    onClick={handleEnroll}
                     className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#B348FE] hover:bg-[#9E2FFF] shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)] transition-all duration-300 hover:scale-[1.015] mb-3 sm:mb-4"
                   >
-                    {isEnrolled ? "الدخول للكورس 🎉" : "اشترك مجانًا"}
+                    {isEnrolled ? "مشترك" : "اشترك مجانًا"}
                   </button>
                 ) : (
                   <>
@@ -1060,7 +1105,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                           const firstLesson = units[0]?.lessons[0];
 
                           if (!firstLesson) {
-                            alert("لا يوجد دروس متاحة");
+                            showToast("لا يوجد دروس متاحة");
                             return;
                           }
 
