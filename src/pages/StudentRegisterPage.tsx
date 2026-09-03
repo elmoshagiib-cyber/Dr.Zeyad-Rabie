@@ -440,12 +440,6 @@ if (insertError) {
   return;
 }await supabase.auth.signOut();
       setSuccess(true);
-
-setTimeout(() => {
-navigate("/login", {
-replace: true,
-});
-},1500);
     } catch (err: any) {
   console.error(err);
 
@@ -523,32 +517,62 @@ replace: true,
             bg-white dark:bg-[#09090B]`}
         >
           <motion.div
-            className="flex flex-col items-center gap-6 text-center"
-            initial={{ opacity: 0, scale: 0.75 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 180, damping: 18 }}
+            transition={{ duration: 0.3 }}
+            className={`
+              w-full max-w-md rounded-[30px] p-8 text-center
+              ${isDark ? "bg-[#111111] border border-[#2A2A2A]" : "bg-white border border-gray-200"}
+              shadow-[0_25px_70px_rgba(15,23,42,.15)]
+            `}
+            dir="rtl"
           >
-            <motion.div
-              className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center"
-              style={{
-                background: 'linear-gradient(135deg, #f97316, #fb923c)',
-                boxShadow: '0 0 0 12px rgba(249,115,22,0.15), 0 20px 50px rgba(249,115,22,0.4)',
-              }}
-              animate={{ scale: [1, 1.08, 1] }}
-              transition={{ duration: 0.55, repeat: 3 }}
-            >
-              <CheckCircle2 className="w-12 h-12 sm:w-14 sm:h-14 text-white" />
-            </motion.div>
-            <div>
-              <h2 className={`text-2xl sm:text-3xl font-black mb-2
-                ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                تم إنشاء حسابك! 🎉
-              </h2>
-              <p className={`text-sm sm:text-base
-                ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                جاري توجيهك لصفحة تسجيل الدخول...
-              </p>
+            <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center">
+              <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                <motion.circle
+                  cx="40"
+                  cy="40"
+                  r="36"
+                  stroke="#22c55e"
+                  strokeWidth="3"
+                  fill="none"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                />
+                <motion.path
+                  d="M25 41 L35 51 L56 29"
+                  stroke="#22c55e"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.4, delay: 0.5, ease: "easeOut" }}
+                />
+              </svg>
             </div>
+
+            <h2 className={`text-2xl font-black ${isDark ? "text-white" : "text-gray-900"}`}>
+              تم إنشاء حسابك بنجاح !
+            </h2>
+            <p className={`mt-2 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+              اضغط حسنًا للإستمرار
+            </p>
+
+            <button
+              type="button"
+              onClick={() => navigate("/login", { replace: true })}
+              className="
+                mt-6 w-full py-3 rounded-xl
+                bg-[#B348FE] hover:bg-[#9E2FFF]
+                text-white font-black
+                transition-colors
+              "
+            >
+              حسنًا
+            </button>
           </motion.div>
         </div>
       </>
