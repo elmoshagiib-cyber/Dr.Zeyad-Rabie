@@ -946,7 +946,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
       <Navbar />
 
-      <div className="relative overflow-hidden pt-32 lg:pt-32 pb-56">
+      <div className="relative overflow-hidden pt-24 sm:pt-28 lg:pt-32 pb-40 sm:pb-48 lg:pb-56">
         <img
           src={
             course.thumbnail ||
@@ -1062,7 +1062,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
         </div>
       </div>
 
-      <div className="relative z-20 max-w-[1400px] mx-auto px-8 lg:px-10 -mt-56">
+      <div className="relative z-20 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 -mt-40 sm:-mt-48 lg:-mt-56">
         <div className="flex justify-between items-start">
           <div className="max-w-[430px] w-full ml-0 mr-auto">
             <div className="bg-white dark:bg-[#151515] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(15,23,42,.12)] dark:shadow-[0_25px_70px_rgba(0,0,0,.75)] border border-gray-100 dark:border-[#2A2A2A]">
