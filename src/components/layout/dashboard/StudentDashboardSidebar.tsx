@@ -20,7 +20,7 @@ interface NavGroup {
 const studentNavGroups: NavGroup[] = [
   {
     label: "الرئيسية",
-    items: [{ label: "الرئيسية", path: "/", icon: <Home size={20} /> }],
+    items: [{ label: "الرئيسية", path: "/dashboard/home", icon: <Home size={20} /> }],
   },
   {
     label: "الأكاديمي",

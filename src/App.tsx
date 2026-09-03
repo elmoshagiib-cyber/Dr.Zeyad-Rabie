@@ -28,6 +28,7 @@ import { HomeworkPage } from "./pages/student/HomeworkPage";
 import { ExamsPage } from "./pages/student/ExamsPage";
 import ForumPage from "./pages/student/ForumPage";
 import GradeCoursesPage from "./pages/GradeCoursesPage";
+import DashboardHomePage from "./pages/student/DashboardHomePage";
 
 /* Instructor */
 import { InstructorDashboard } from "./pages/instructor/InstructorDashboard";
@@ -247,6 +248,14 @@ function AppRoutes() {
   element={<GradesPage />}
 />
 
+<Route
+  path="/dashboard/home"
+  element={
+    <ProtectedRoute roles={["student"]}>
+      <DashboardHomePage />
+    </ProtectedRoute>
+  }
+/>
       {/* Instructor */}
 
       <Route
