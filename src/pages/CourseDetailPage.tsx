@@ -1137,7 +1137,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   </button>
                 )}
 
-                <div className="flex items-center justify-between mt-1">
+                <div className="flex items-center justify-between mt-1 pb-1">
                   <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
                     <span className="text-[13px] font-medium">{formatDate(course.created_at)}</span>
                     <HiOutlineCalendarDays className="text-[17px]" />
@@ -1149,23 +1149,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   </div>
                 </div>
 
-                <div className="mt-2 pt-4 border-t border-gray-200 dark:border-[#262626] space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Clock size={18} className="text-slate-400 dark:text-slate-500" />
-                    <span className="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300">
-                      المحتوى{" "}
-                      <span className="text-[#B348FE]">+{totalContentHours}</span> ساعة
-                    </span>
-                  </div>
 
-                  <div className="flex items-center justify-between">
-                    <Hash size={18} className="text-slate-400 dark:text-slate-500" />
-                    <span className="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300">
-                      اجمالي الاسئلة{" "}
-                      <span className="text-[#B348FE]">+{totalQuestionsCount}</span> سؤال
-                    </span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
