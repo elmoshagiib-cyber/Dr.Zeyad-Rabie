@@ -183,17 +183,17 @@ export default function DashboardHomePage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm">
+              <Card className="relative bg-[#B348FE] text-white rounded-tr-3xl rounded-br-3xl rounded-bl-3xl rounded-tl-[70px] shadow-sm overflow-hidden">
                 <CardContent className="p-6 text-center flex flex-col items-center justify-center h-full">
-                  <p className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3">تقدمك</p>
-                  <p className="text-4xl font-black text-[#B348FE] mb-4">{overallProgress}%</p>
-                  <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-4">
+                  <p className="text-sm font-bold text-white/80 mb-3">تقدمك</p>
+                  <p className="text-4xl font-black text-white mb-4">% {overallProgress}</p>
+                  <div className="w-full h-2.5 bg-white/25 rounded-full overflow-hidden mb-4">
                     <div
-                      className="h-full bg-gradient-to-r from-[#B348FE] to-[#9E2FFF] rounded-full transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-white/70 to-white rounded-full transition-all duration-500"
                       style={{ width: `${overallProgress}%` }}
                     />
                   </div>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 leading-6">
+                  <p className="text-xs text-white/80 leading-6">
                     مقياس لكمية الدروس السابقة والمتبقية في كورساتك الحالية!
                   </p>
                 </CardContent>
@@ -207,31 +207,58 @@ export default function DashboardHomePage() {
                       <span className="text-xs font-bold text-gray-500 dark:text-gray-400">الأسبوع الحالي</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="w-3 h-3 rounded-full bg-emerald-400" />
+                      <span className="w-3 h-3 rounded-full bg-[#7C3AED]" />
                       <span className="text-xs font-bold text-gray-500 dark:text-gray-400">الأسبوع الماضي</span>
                     </div>
                   </div>
 
-                  <div className="flex items-end justify-between gap-2 h-40">
-                    {weeklyData.map((d) => (
-                      <div key={d.day} className="flex-1 flex flex-col items-center gap-2">
-                        <div className="w-full flex items-end justify-center gap-1 h-32">
-                          <div
-                            className="w-2.5 rounded-full bg-[#B348FE] transition-all duration-500"
-                            style={{ height: `${(d.current / maxValue) * 100}%`, minHeight: 4 }}
-                          />
-                          <div
-                            className="w-2.5 rounded-full bg-emerald-400 transition-all duration-500"
-                            style={{ height: `${(d.previous / maxValue) * 100}%`, minHeight: 4 }}
-                          />
-                        </div>
-                        <span className="text-[10px] text-gray-400 font-bold">{d.day}</span>
+                  {/* ─── Dot Grid Chart (0-100) ─── */}
+                  <div className="flex">
+                    {/* Y-axis labels */}
+                    <div className="flex flex-col justify-between h-48 pr-2 text-[10px] text-gray-400 font-bold">
+                      {[100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0].map((v) => (
+                        <span key={v}>{v}</span>
+                      ))}
+                    </div>
+
+                    {/* Grid + dots */}
+                    <div className="flex-1 relative h-48 border-r border-gray-100 dark:border-[#2A2A2A]">
+                      {/* horizontal grid lines */}
+                      <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                        {[100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0].map((v) => (
+                          <div key={v} className="w-full border-t border-gray-100 dark:border-[#232323]" />
+                        ))}
                       </div>
+
+                      {/* dots row */}
+                      <div className="absolute inset-0 flex items-end justify-between px-2 pb-0">
+                        {weeklyData.map((d) => (
+                          <div key={d.day} className="flex-1 h-full relative flex justify-center">
+                            <span
+                              className="absolute w-2.5 h-2.5 rounded-full bg-[#B348FE] -translate-x-1/2"
+                              style={{ bottom: `${(d.current / 100) * 100}%`, left: "50%" }}
+                            />
+                            <span
+                              className="absolute w-2.5 h-2.5 rounded-full bg-[#7C3AED] -translate-x-1/2"
+                              style={{ bottom: `${(d.previous / 100) * 100}%`, left: "50%" }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* X-axis day labels */}
+                  <div className="flex justify-between px-2 mt-2 pr-8">
+                    {weeklyData.map((d) => (
+                      <span key={d.day} className="flex-1 text-center text-[10px] text-gray-400 font-bold">
+                        {d.day}
+                      </span>
                     ))}
                   </div>
 
                   <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-5 text-center">
-                    ابدأ أول كورس علشان نعرضلك بيانات نشاطك التعليمية بشكل دقيق!
+                    *ابدأ أول كورس علشان نعرضلك بيانات نشاطك التعليمية بشكل دقيق!
                   </p>
                 </CardContent>
               </Card>
