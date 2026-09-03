@@ -610,12 +610,11 @@ text-3xl">
     grid
     grid-cols-1
     md:grid-cols-2
-    xl:grid-cols-3
-gap-x-20
-    sm:gap-x-24
-    lg:gap-x-28
-    xl:gap-x-32
-    gap-y-12
+    2xl:grid-cols-3
+    gap-x-6
+    sm:gap-x-8
+    lg:gap-x-10
+    gap-y-10
   "
 >
           {list.map(c => <CourseCard key={c.id} course={c} />)}
@@ -761,11 +760,10 @@ return (
   grid
   grid-cols-1
   sm:grid-cols-2
-  xl:grid-cols-3
-  gap-x-16
-  sm:gap-x-20
-  lg:gap-x-24
-  xl:gap-x-28
+  2xl:grid-cols-3
+  gap-x-6
+  sm:gap-x-8
+  lg:gap-x-10
   gap-y-8
   sm:gap-y-10
 ">
