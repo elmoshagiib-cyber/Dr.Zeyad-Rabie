@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Settings } from "lucide-react";
 import { SidebarItem } from "./SidebarItem";
 
@@ -56,14 +57,28 @@ export function StudentSidebarNavigation({
           return (
             <div
               key={group.label}
-              className="
+              className={`
+                relative
                 rounded-2xl
                 border
-                border-gray-100
-                dark:border-[#2A2A2A]
                 overflow-hidden
-              "
+                transition-colors duration-300
+                ${
+                  hasActiveChild
+                    ? "border-[#EAD8FF] dark:border-[#3A1652]"
+                    : "border-gray-100 dark:border-[#2A2A2A]"
+                }
+              `}
             >
+              {/* خط جانبي بيبين القسم النشط */}
+              {hasActiveChild && (
+                <motion.div
+                  layoutId="active-group-bar"
+                  className="absolute right-0 top-0 bottom-0 w-[3px] bg-[#B348FE]"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
+
               {/* رأس القسم (اللي بيتفتح/يتقفل) */}
               <button
                 type="button"
@@ -79,14 +94,17 @@ export function StudentSidebarNavigation({
                   }
                 `}
               >
-                {!collapsed && (
-                  <ChevronDown
-                    size={16}
-                    className={`text-gray-400 transition-transform duration-300 ${
-                      isOpen ? "" : "-rotate-90"
-                    }`}
-                  />
-                )}
+                <motion.div
+                  animate={{ rotate: isOpen ? 0 : -90 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                >
+                  {!collapsed && (
+                    <ChevronDown
+                      size={16}
+                      className={hasActiveChild ? "text-[#B348FE]" : "text-gray-400"}
+                    />
+                  )}
+                </motion.div>
                 <span
                   className={`
                     flex-1 text-right
@@ -102,26 +120,37 @@ export function StudentSidebarNavigation({
                 </span>
               </button>
 
-              {/* عناصر القسم */}
-              {isOpen && (
-                <div className="p-2 space-y-1.5">
-                  {group.items.map((item) => {
-                    const active = currentPath === item.path;
+              {/* عناصر القسم — بأنيميشن سلس */}
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    key="content"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="p-2 space-y-1.5">
+                      {group.items.map((item) => {
+                        const active = currentPath === item.path;
 
-                    return (
-                      <SidebarItem
-                        key={item.path}
-                        label={item.label}
-                        icon={item.icon}
-                        badge={item.badge}
-                        active={active}
-                        collapsed={collapsed}
-                        onClick={() => onNavigate(item.path)}
-                      />
-                    );
-                  })}
-                </div>
-              )}
+                        return (
+                          <SidebarItem
+                            key={item.path}
+                            label={item.label}
+                            icon={item.icon}
+                            badge={item.badge}
+                            active={active}
+                            collapsed={collapsed}
+                            onClick={() => onNavigate(item.path)}
+                          />
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         })}
@@ -146,7 +175,9 @@ export function StudentSidebarNavigation({
             النظام
           </p>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
             className="
               group
               flex
@@ -163,7 +194,6 @@ export function StudentSidebarNavigation({
               hover:bg-[#F6EEFF]
               dark:hover:bg-[#1A1A1A]
               hover:text-[#B348FE]
-              active:scale-[0.98]
             "
           >
             <div
@@ -191,7 +221,7 @@ export function StudentSidebarNavigation({
             <span className="font-semibold text-sm sm:text-[15px]">
               الإعدادات
             </span>
-          </button>
+          </motion.button>
         </>
       )}
     </nav>
