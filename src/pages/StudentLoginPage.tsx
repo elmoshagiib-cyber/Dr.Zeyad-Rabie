@@ -85,6 +85,7 @@ const [errors, setErrors] = useState<{
 }>({});
 
   const [showForgotModal, setShowForgotModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [forgotPhone, setForgotPhone] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotError, setForgotError] = useState("");
@@ -309,8 +310,7 @@ login({
 });
 
 setSuccess(true);
-showToast("تم تسجيل الدخول بنجاح");
-setTimeout(() => navigate("/"), 1200);
+setShowSuccessModal(true);
     } catch (err: any) {
       console.error(err);
 
@@ -469,12 +469,12 @@ overflow-hidden
                       {showPhoneFlash && (
                         <motion.div
                           key={phoneFlashId}
-                          className="absolute inset-0 bg-[#B348FE]/5 pointer-events-none"
+                          className="absolute inset-0 bg-[#B348FE]/20 pointer-events-none"
                           style={{ transformOrigin: "right" }}
-                          initial={{ opacity: 0.35, scaleX: 0 }}
+                          initial={{ opacity: 0.6, scaleX: 0 }}
                           animate={{ opacity: 0, scaleX: 1 }}
                           exit={{ opacity: 0 }}
-                          transition={{ duration: 0.45, ease: "easeOut" }}
+                          transition={{ duration: 0.6, ease: "easeOut" }}
                         />
                       )}
                     </AnimatePresence>
@@ -524,12 +524,12 @@ overflow-hidden
                       {showPasswordFlash && (
                         <motion.div
                           key={passwordFlashId}
-                          className="absolute inset-0 bg-[#B348FE]/5 pointer-events-none"
+                          className="absolute inset-0 bg-[#B348FE]/20 pointer-events-none"
                           style={{ transformOrigin: "right" }}
-                          initial={{ opacity: 0.35, scaleX: 0 }}
+                          initial={{ opacity: 0.6, scaleX: 0 }}
                           animate={{ opacity: 0, scaleX: 1 }}
                           exit={{ opacity: 0 }}
-                          transition={{ duration: 0.45, ease: "easeOut" }}
+                          transition={{ duration: 0.6, ease: "easeOut" }}
                         />
                       )}
                     </AnimatePresence>
@@ -751,6 +751,77 @@ hover:text-[#9E2FFF]
                     إغلاق
                   </button>
                 </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ═══════════════ SUCCESS MODAL ═══════════════ */}
+        <AnimatePresence>
+          {showSuccessModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md p-6"
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={`
+                  w-full max-w-md rounded-[30px] p-8 text-center
+                  ${isDark ? "bg-[#111111] border border-[#2A2A2A]" : "bg-white border border-gray-200"}
+                  shadow-[0_25px_70px_rgba(15,23,42,.15)]
+                `}
+                dir="rtl"
+              >
+                <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center">
+                  <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                    <motion.circle
+                      cx="40"
+                      cy="40"
+                      r="36"
+                      stroke="#22c55e"
+                      strokeWidth="3"
+                      fill="none"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 0.6, ease: "easeOut" }}
+                    />
+                    <motion.path
+                      d="M25 41 L35 51 L56 29"
+                      stroke="#22c55e"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      fill="none"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.4, delay: 0.5, ease: "easeOut" }}
+                    />
+                  </svg>
+                </div>
+
+                <h2 className={`text-2xl font-black ${isDark ? "text-white" : "text-gray-900"}`}>
+                  تم تسجيل الدخول بنجاح !
+                </h2>
+                <p className={`mt-2 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                  اضغط حسنًا للإستمرار
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/")}
+                  className="
+                    mt-6 w-full py-3 rounded-xl
+                    bg-[#B348FE] hover:bg-[#9E2FFF]
+                    text-white font-black
+                    transition-colors
+                  "
+                >
+                  حسنًا
+                </button>
               </motion.div>
             </motion.div>
           )}
