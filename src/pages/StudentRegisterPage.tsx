@@ -85,12 +85,12 @@ const GOVERNORATES = [
           {showFlash && (
             <motion.div
               key={flashId}
-              className="absolute inset-0 bg-[#B348FE]/5 pointer-events-none"
+              className="absolute inset-0 bg-[#B348FE]/20 pointer-events-none"
               style={{ transformOrigin: "right" }}
-              initial={{ opacity: 0.35, scaleX: 0 }}
+              initial={{ opacity: 0.6, scaleX: 0 }}
               animate={{ opacity: 0, scaleX: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.45, ease: "easeOut" }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
             />
           )}
         </AnimatePresence>
@@ -192,12 +192,12 @@ const GOVERNORATES = [
           {showFlash && (
             <motion.div
               key={flashId}
-              className="absolute inset-0 bg-[#B348FE]/5 pointer-events-none"
+              className="absolute inset-0 bg-[#B348FE]/20 pointer-events-none"
               style={{ transformOrigin: "right" }}
-              initial={{ opacity: 0.35, scaleX: 0 }}
+              initial={{ opacity: 0.6, scaleX: 0 }}
               animate={{ opacity: 0, scaleX: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.45, ease: "easeOut" }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
             />
           )}
         </AnimatePresence>
@@ -881,12 +881,12 @@ xl:pt-24
                         {showPasswordFlash && (
                           <motion.div
                             key={passwordFlashId}
-                            className="absolute inset-0 bg-[#B348FE]/5 pointer-events-none"
+                            className="absolute inset-0 bg-[#B348FE]/20 pointer-events-none"
                             style={{ transformOrigin: "right" }}
-                            initial={{ opacity: 0.35, scaleX: 0 }}
+                            initial={{ opacity: 0.6, scaleX: 0 }}
                             animate={{ opacity: 0, scaleX: 1 }}
                             exit={{ opacity: 0 }}
-                            transition={{ duration: 0.45, ease: "easeOut" }}
+                            transition={{ duration: 0.6, ease: "easeOut" }}
                           />
                         )}
                       </AnimatePresence>
@@ -972,12 +972,12 @@ xl:pt-24
                         {showConfirmFlash && (
                           <motion.div
                             key={confirmFlashId}
-                            className="absolute inset-0 bg-[#B348FE]/5 pointer-events-none"
+                            className="absolute inset-0 bg-[#B348FE]/20 pointer-events-none"
                             style={{ transformOrigin: "right" }}
-                            initial={{ opacity: 0.35, scaleX: 0 }}
+                            initial={{ opacity: 0.6, scaleX: 0 }}
                             animate={{ opacity: 0, scaleX: 1 }}
                             exit={{ opacity: 0 }}
-                            transition={{ duration: 0.45, ease: "easeOut" }}
+                            transition={{ duration: 0.6, ease: "easeOut" }}
                           />
                         )}
                       </AnimatePresence>
