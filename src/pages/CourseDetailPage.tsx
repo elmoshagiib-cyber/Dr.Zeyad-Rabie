@@ -911,7 +911,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
       {toast && (
         <div
           key={toast.id}
-          className="fixed top-5 left-5 z-[100] w-full max-w-sm bg-white dark:bg-[#1A1A1A] rounded-xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A] overflow-hidden animate-in slide-in-from-top-3 fade-in duration-300"
+          className="fixed top-5 left-1/2 -translate-x-1/2 sm:left-auto sm:right-5 sm:translate-x-0 z-[100] w-[92%] sm:w-full max-w-sm bg-white dark:bg-[#1A1A1A] rounded-xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A] overflow-hidden animate-in slide-in-from-top-3 fade-in duration-300"
         >
           <div className="flex items-start justify-between gap-3 px-4 py-3">
             <p className="text-sm font-bold text-gray-800 dark:text-gray-100 text-right flex-1">
