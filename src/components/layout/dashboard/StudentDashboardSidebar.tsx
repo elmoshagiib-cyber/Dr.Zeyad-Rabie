@@ -4,6 +4,7 @@ import { StudentSidebarNavigation } from "../sidebar/StudentSidebarNavigation";
 import { cn } from "../../../utils/cn";
 import { BookOpen, FileText, ClipboardList, Trophy, Bell, User, MessageCircle, Home } from "lucide-react";
 import { useState } from "react";
+import { supabase } from "../../../lib/supabase";
 
 interface NavItem {
   label: string;
@@ -48,6 +49,17 @@ export function StudentDashboardSidebar({
     onClose?.();
   };
 
+  const handleLogout = async () => {
+    const confirmed = window.confirm("هل تريد تسجيل الخروج؟");
+    if (!confirmed) return;
+
+    await supabase.auth.signOut();
+    localStorage.removeItem("user");
+    localStorage.removeItem("session_token");
+    onClose?.();
+    navigate("/login", { replace: true });
+  };
+
   return (
     <aside
       className={cn(
@@ -73,6 +85,7 @@ export function StudentDashboardSidebar({
         collapsed={false}
         currentPath={location.pathname}
         onNavigate={handleNav}
+        onLogout={handleLogout}
       />
     </aside>
   );

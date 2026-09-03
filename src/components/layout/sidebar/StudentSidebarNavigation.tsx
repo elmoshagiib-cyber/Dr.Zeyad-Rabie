@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Settings } from "lucide-react";
+import { ChevronLeft, LogOut } from "lucide-react";
 import { cn } from "../../../utils/cn";
 import { SidebarItem } from "./SidebarItem";
 
@@ -17,6 +17,7 @@ type Props = {
   collapsed: boolean;
   currentPath: string;
   onNavigate: (path: string) => void;
+  onLogout: () => void;
 };
 
 export function StudentSidebarNavigation({
@@ -24,6 +25,7 @@ export function StudentSidebarNavigation({
   collapsed,
   currentPath,
   onNavigate,
+  onLogout,
 }: Props) {
   const [openPath, setOpenPath] = useState<string | null>(
     () => navItems.find((i) => i.children?.some((c) => c.path === currentPath))?.path ?? null
@@ -82,31 +84,6 @@ export function StudentSidebarNavigation({
                       : "text-gray-700 dark:text-gray-300 hover:bg-[#F6EEFF] dark:hover:bg-[#1A1A1A] hover:text-[#B348FE]"
                   )}
                 >
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleOpen(item.path);
-                    }}
-                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg"
-                  >
-                    <motion.div
-                      animate={{ rotate: isOpen ? -90 : 0 }}
-                      transition={{ duration: 0.25, ease: "easeOut" }}
-                    >
-                      <ChevronLeft
-                        size={16}
-                        className={isActiveParent ? "text-white" : "text-gray-400"}
-                      />
-                    </motion.div>
-                  </button>
-
-                  {!collapsed && (
-                    <span className="flex-1 text-center font-semibold text-sm sm:text-[15px] truncate">
-                      {item.label}
-                    </span>
-                  )}
-
                   <div
                     className={cn(
                       `
@@ -127,6 +104,31 @@ export function StudentSidebarNavigation({
                   >
                     {item.icon}
                   </div>
+
+                  {!collapsed && (
+                    <span className="flex-1 text-center font-semibold text-sm sm:text-[15px] truncate">
+                      {item.label}
+                    </span>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleOpen(item.path);
+                    }}
+                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg"
+                  >
+                    <motion.div
+                      animate={{ rotate: isOpen ? -90 : 0 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                    >
+                      <ChevronLeft
+                        size={16}
+                        className={isActiveParent ? "text-white" : "text-gray-400"}
+                      />
+                    </motion.div>
+                  </button>
                 </div>
 
                 <AnimatePresence initial={false}>
@@ -195,6 +197,7 @@ export function StudentSidebarNavigation({
           </p>
 
           <motion.button
+            onClick={onLogout}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
             className="
@@ -206,13 +209,12 @@ export function StudentSidebarNavigation({
               rounded-2xl
               px-3
               py-3
-              text-gray-700
-              dark:text-gray-300
+              text-red-600
+              dark:text-red-400
               transition-all
               duration-300
-              hover:bg-[#F6EEFF]
-              dark:hover:bg-[#1A1A1A]
-              hover:text-[#B348FE]
+              hover:bg-red-50
+              dark:hover:bg-red-950/20
             "
           >
             <div
@@ -223,22 +225,21 @@ export function StudentSidebarNavigation({
                 items-center
                 justify-center
                 rounded-xl
-                bg-gradient-to-br
-                from-[#0F172A]
-                via-[#1E1B3A]
-                to-[#2A1B4D]
-                text-white
+                bg-red-50
+                dark:bg-red-950/30
+                text-red-600
+                dark:text-red-400
                 transition-all
                 duration-300
                 group-hover:scale-110
                 group-hover:opacity-90
               "
             >
-              <Settings size={18} />
+              <LogOut size={18} />
             </div>
 
             <span className="font-semibold text-sm sm:text-[15px]">
-              الإعدادات
+              تسجيل الخروج
             </span>
           </motion.button>
         </>
