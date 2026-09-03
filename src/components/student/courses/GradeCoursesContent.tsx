@@ -544,19 +544,19 @@ className="
 
     <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
       <span className="text-[13px] font-medium">
-        {formatDate(course.created_at)}
+        {formatDate(course.updated_at)}
       </span>
       <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
-        <HiDocumentPlus className="text-[13px]" />
+        <HiArrowPath className="text-[13px]" />
       </span>
     </div>
 
     <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
       <span className="text-[13px] font-medium">
-        {formatDate(course.updated_at)}
+        {formatDate(course.created_at)}
       </span>
       <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
-        <HiArrowPath className="text-[13px]" />
+        <HiDocumentPlus className="text-[13px]" />
       </span>
     </div>
 

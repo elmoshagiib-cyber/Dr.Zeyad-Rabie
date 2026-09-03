@@ -126,7 +126,7 @@ const GOVERNORATES = [
   );
 };
 
-  /* ── Reusable underline select row ── */
+  /* ── Reusable underline select row (custom dropdown) ── */
   const SelectField = ({
   icon: Icon,
   value,
@@ -146,6 +146,20 @@ const GOVERNORATES = [
 }) => {
     const [flashId, setFlashId] = useState(0);
     const [showFlash, setShowFlash] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+    const [search, setSearch] = useState('');
+    const containerRef = React.useRef<HTMLDivElement>(null);
+
+    const optionList = React.Children.toArray(children).map((opt: any) => ({
+      value: opt.props.value,
+      label: opt.props.children,
+    }));
+
+    const filteredOptions = optionList.filter(opt =>
+      String(opt.label).toLowerCase().includes(search.toLowerCase())
+    );
+
+    const selectedLabel = optionList.find(opt => opt.value === value)?.label || '';
 
     const handleFocus = () => {
       setFlashId((id) => id + 1);
@@ -153,12 +167,25 @@ const GOVERNORATES = [
       setTimeout(() => setShowFlash(false), 500);
     };
 
+    React.useEffect(() => {
+      const handleClickOutside = (e: MouseEvent) => {
+        if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+          setIsOpen(false);
+          setSearch('');
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     return (
-    <div className="flex flex-col gap-0.5 w-full">
+    <div className="flex flex-col gap-0.5 w-full relative" ref={containerRef}>
       <div
-        className={`relative overflow-hidden flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
+        onClick={() => { setIsOpen(o => !o); handleFocus(); }}
+        className={`relative overflow-hidden flex items-center gap-2 border-b-2 py-2 transition-colors duration-200 cursor-pointer
           ${error ? 'border-red-400' : 'border-gray-200 focus-within:border-[#B348FE]'}
           ${isDark ? 'border-gray-700 focus-within:border-[#B348FE]' : ''}
+          ${isOpen ? 'border-[#B348FE]' : ''}
         `}
       >
         <AnimatePresence>
@@ -175,27 +202,79 @@ const GOVERNORATES = [
           )}
         </AnimatePresence>
         <Icon className="w-4 h-4 text-[#B348FE] flex-shrink-0 relative z-10" />
-        <select
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          onFocus={handleFocus}
-          required={required}
-          style={{
-            appearance: 'none',
-            WebkitAppearance: 'none',
-            colorScheme: isDark ? 'dark' : 'light',
-          }}
+        <span
           className={`
             relative z-10
-            flex-1 min-w-0 bg-transparent border-0 outline-none
-            text-sm md:text-base py-0.5 cursor-pointer
-            ${isDark ? 'text-white' : value ? 'text-gray-700' : 'text-gray-400'}
+            flex-1 min-w-0 text-sm md:text-base py-0.5 text-right truncate
+            ${isDark ? (value ? 'text-white' : 'text-gray-500') : value ? 'text-gray-700' : 'text-gray-400'}
           `}
         >
-          {children}
-        </select>
-        <ChevronLeft className="w-4 h-4 text-gray-400 rotate-[-90deg] flex-shrink-0 relative z-10" />
+          {selectedLabel || 'اختر من القائمة'}
+        </span>
+        <ChevronLeft
+          className={`w-4 h-4 text-gray-400 flex-shrink-0 relative z-10 transition-transform duration-200 ${
+            isOpen ? 'rotate-90' : 'rotate-[-90deg]'
+          }`}
+        />
       </div>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className={`
+              absolute top-full right-0 left-0 mt-2 z-50
+              rounded-2xl overflow-hidden shadow-2xl border
+              ${isDark ? 'bg-[#151515] border-gray-700' : 'bg-white border-gray-200'}
+            `}
+          >
+            <div className={`px-4 py-2 border-b ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>
+              <input
+                autoFocus
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="ابحث..."
+                className={`
+                  w-full bg-transparent outline-none text-sm text-right
+                  ${isDark ? 'text-white placeholder-gray-500' : 'text-gray-700 placeholder-gray-400'}
+                `}
+              />
+            </div>
+            <div className="max-h-56 overflow-y-auto">
+              {filteredOptions.length === 0 && (
+                <div className="px-4 py-3 text-sm text-gray-400 text-center">لا توجد نتائج</div>
+              )}
+              {filteredOptions.map((opt) => (
+                <div
+                  key={opt.value}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setIsOpen(false);
+                    setSearch('');
+                  }}
+                  className={`
+                    px-4 py-3 text-sm md:text-base text-right cursor-pointer transition-colors duration-150
+                    ${
+                      opt.value === value
+                        ? 'bg-[#111827] text-white font-bold'
+                        : isDark
+                          ? 'text-gray-200 hover:bg-gray-800'
+                          : 'text-gray-700 hover:bg-gray-50'
+                    }
+                  `}
+                >
+                  {opt.label}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {error && (
         <p className="text-xs text-red-500 mt-0.5 text-right">{error}</p>
       )}
