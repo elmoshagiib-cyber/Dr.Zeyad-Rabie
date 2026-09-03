@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ChevronRight, ChevronLeft, CheckCircle, FileText, Download, List, X, Loader2 } from "lucide-react";
+import { ChevronRight, ChevronLeft, CheckCircle, FileText, Download, List, X, Loader2, Lock } from "lucide-react";
 import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
@@ -49,6 +49,9 @@ export function LessonPlayer() {
   const [completed, setCompleted] = useState(false);
   const [progressRowId, setProgressRowId] = useState<number | null>(null);
   const [hasResumed, setHasResumed] = useState(false);
+  const [sequentialViewingEnabled, setSequentialViewingEnabled] = useState(false);
+  const [minWatchPercentage, setMinWatchPercentage] = useState(0);
+  const [completedLessonsMap, setCompletedLessonsMap] = useState<Record<string, boolean>>({});
 
   // تحميل بيانات الدرس الحالي + الكورس بالكامل
   useEffect(() => {
@@ -79,6 +82,15 @@ export function LessonPlayer() {
       setSection(sectionData as CourseSection);
 
       if (sectionData) {
+        const { data: courseData } = await supabase
+          .from("courses")
+          .select("sequential_viewing_enabled, min_watch_percentage")
+          .eq("id", sectionData.course_id)
+          .single();
+
+        setSequentialViewingEnabled(courseData?.sequential_viewing_enabled || false);
+        setMinWatchPercentage(courseData?.min_watch_percentage || 0);
+
         const { data: sectionsData } = await supabase
           .from("course_sections")
           .select("*")
@@ -96,6 +108,20 @@ export function LessonPlayer() {
           .order("sort_order", { ascending: true });
 
         setAllLessons((lessonsData as CourseItem[]) || []);
+
+        if (user?.studentId && lessonsData?.length) {
+          const { data: progressRows } = await supabase
+            .from("lesson_progress")
+            .select("lesson_id, is_completed")
+            .eq("student_id", user.studentId)
+            .in("lesson_id", lessonsData.map((l: any) => l.id));
+
+          const map: Record<string, boolean> = {};
+          (progressRows || []).forEach((r: any) => {
+            map[r.lesson_id] = r.is_completed;
+          });
+          setCompletedLessonsMap(map);
+        }
       }
 
       setLoading(false);
@@ -168,7 +194,7 @@ export function LessonPlayer() {
       video_duration: duration,
       progress_percent: percent,
       last_position: currentTime,
-      is_completed: isCompleted || percent >= 90,
+      is_completed: isCompleted || (minWatchPercentage > 0 ? percent >= minWatchPercentage : percent >= 90),
       last_watched_at: new Date().toISOString(),
     };
 
@@ -184,7 +210,10 @@ export function LessonPlayer() {
 
     if (data) {
       setProgressRowId(data.id);
-      if (data.is_completed) setCompleted(true);
+      if (data.is_completed) {
+        setCompleted(true);
+        setCompletedLessonsMap((prev) => ({ ...prev, [lesson.id]: true }));
+      }
     }
   };
 
@@ -227,6 +256,7 @@ export function LessonPlayer() {
   const currentIndex = allLessons.findIndex((l) => l.id === lesson?.id);
   const prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null;
   const nextLesson = currentIndex >= 0 && currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
+  const nextLocked = !!nextLesson && sequentialViewingEnabled && !completedLessonsMap[lesson?.id || ""];
 
   if (loading) {
     return (
@@ -324,10 +354,12 @@ export function LessonPlayer() {
                     الدرس السابق
                   </button>
                   <button
-                    disabled={!nextLesson}
-                    onClick={() => nextLesson && navigate(`/dashboard/lesson/${nextLesson.id}`)}
+                    disabled={!nextLesson || nextLocked}
+                    onClick={() => nextLesson && !nextLocked && navigate(`/dashboard/lesson/${nextLesson.id}`)}
+                    title={nextLocked ? `أكمل مشاهدة ${minWatchPercentage || 90}% من الفيديو الحالي عشان تفتح الدرس ده` : undefined}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors mr-auto disabled:opacity-40 disabled:cursor-not-allowed"
                   >
+                    {nextLocked ? <Lock size={16} /> : null}
                     الدرس التالي
                     <ChevronLeft size={16} />
                   </button>
@@ -351,14 +383,25 @@ export function LessonPlayer() {
                   </div>
                   {allLessons.filter((l) => l.section_id === s.id).map((l) => {
                     const isCurrent = l.id === lesson.id;
+                    const idx = allLessons.findIndex((x) => x.id === l.id);
+                    const isLocked =
+                      idx > 0 &&
+                      sequentialViewingEnabled &&
+                      !completedLessonsMap[allLessons[idx - 1].id];
                     return (
                       <div
                         key={l.id}
-                        onClick={() => navigate(`/dashboard/lesson/${l.id}`)}
-                        className={`px-4 py-3 border-b border-slate-100 flex items-center gap-3 cursor-pointer transition-colors ${isCurrent ? "bg-blue-50 border-r-2 border-r-blue-600" : "hover:bg-slate-50"}`}
+                        onClick={() => !isLocked && navigate(`/dashboard/lesson/${l.id}`)}
+                        className={`px-4 py-3 border-b border-slate-100 flex items-center gap-3 transition-colors ${
+                          isLocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                        } ${isCurrent ? "bg-blue-50 border-r-2 border-r-blue-600" : !isLocked ? "hover:bg-slate-50" : ""}`}
                       >
                         <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <FileText size={13} className={isCurrent ? "text-blue-600" : "text-slate-400"} />
+                          {isLocked ? (
+                            <Lock size={13} className="text-slate-400" />
+                          ) : (
+                            <FileText size={13} className={isCurrent ? "text-blue-600" : "text-slate-400"} />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className={`text-xs font-medium leading-tight truncate ${isCurrent ? "text-blue-700 font-bold" : "text-slate-700"}`}>

@@ -347,6 +347,30 @@ export function CourseDetailPage() {
     0
   );
 
+  const allLessonsFlat = units.flatMap((u) => u.lessons);
+
+  const isLessonCompleted = (lesson: any): boolean => {
+    if (lesson.type === "video") {
+      const vp = videoExtras[lesson.id];
+      const required = course?.min_watch_percentage > 0 ? course.min_watch_percentage : 90;
+      return !!vp && vp.progressPercent >= required;
+    }
+    if (lesson.type === "quiz") {
+      const ex = examExtras[lesson.id];
+      return !!ex && ex.completedCount > 0;
+    }
+    // PDF والواجب مش متتبعين حاليًا، فبنعتبرهم مكتملين تلقائيًا عشان مايبقاش القفل غلط
+    return true;
+  };
+
+  const isLessonLocked = (lesson: any): boolean => {
+    if (!course?.sequential_viewing_enabled) return false;
+    const idx = allLessonsFlat.findIndex((l) => l.id === lesson.id);
+    if (idx <= 0) return false;
+    const previousLesson = allLessonsFlat[idx - 1];
+    return !isLessonCompleted(previousLesson);
+  };
+
   const activateSubscription = async () => {
     if (!course) return;
 
@@ -1255,7 +1279,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                           >
                           <div className="flex flex-row-reverse items-center justify-between gap-2 sm:gap-4 hover:pr-2 transition-all duration-300">
                             <div className="flex-shrink-0">
-                              {isEnrolled ? (
+                              {isEnrolled && !isLessonLocked(lesson) ? (
                                 <>
                                   {isVideo && (
                                     <button
@@ -1329,7 +1353,9 @@ const saveProgress = async (currentTime: number, duration: number) => {
                               ) : (
                                 <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl">
                                   <Lock size={14} />
-                                  <span className="text-xs sm:text-sm font-bold">مقفل</span>
+                                  <span className="text-xs sm:text-sm font-bold">
+                                    {isEnrolled ? "أكمل السابق أولاً" : "مقفل"}
+                                  </span>
                                 </div>
                               )}
                             </div>
