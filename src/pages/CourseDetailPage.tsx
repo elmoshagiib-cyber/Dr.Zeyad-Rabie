@@ -312,8 +312,8 @@ export function CourseDetailPage() {
         .maybeSingle();
 
       if (existing) {
-        
         setIsEnrolled(true);
+        showToast("أنت مشترك بالفعل في هذا الكورس");
         return;
       }
 
@@ -329,10 +329,12 @@ export function CourseDetailPage() {
 
       if (error && error.code !== "23505") {
         console.error("Insert failed:", error);
+        showToast("حدث خطأ أثناء الاشتراك، حاول مرة أخرى");
         return;
       }
 
       setIsEnrolled(true);
+      showToast("تم الاشتراك في الكورس بنجاح");
       return;
     }
 
