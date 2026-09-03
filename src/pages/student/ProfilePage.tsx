@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/Button";
 import { ProgressBar } from "../../components/ui/ProgressBar";
 import { Avatar } from "../../components/ui/Avatar";
 import { useApp } from "../../context/AppContext";
+import { useTheme } from "../../context/ThemeContext";
 import { CURRENT_STUDENT, COURSES, LEADERBOARD } from "../../data/mockData";
 import { supabase } from "../../lib/supabase";
 
@@ -206,6 +207,7 @@ function ImageCropModal({  file,
 
 export function ProfilePage() {
   const { user, updateUser } = useApp();
+  const { isDark } = useTheme();
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(user?.name || CURRENT_STUDENT.name);
   const [saved, setSaved] = useState(false);
@@ -548,20 +550,19 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
 
               {/* الوش الخلفي */}
               <div
-                className="absolute inset-0 w-full h-full rounded-3xl bg-gradient-to-br from-[#B348FE] to-[#7C1FE0] shadow-lg flex flex-col items-center justify-center gap-3"
+                className="absolute inset-0 w-full h-full rounded-3xl bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] shadow-lg flex flex-col items-center justify-center gap-3"
                 style={{
                   backfaceVisibility: "hidden",
                   WebkitBackfaceVisibility: "hidden",
                   transform: "rotateY(180deg)",
                 }}
               >
-                {/* غيّر src ده للوجو الأصلي المستخدم في الـ Navbar */}
                 <img
-                  src="/logo.png"
+                  src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
                   alt="لوجو منصة مستر زياد ربيع"
-                  className="w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-lg"
+                  className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
                 />
-                <p className="text-white font-black text-sm sm:text-base">
+                <p className="text-gray-900 dark:text-white font-black text-sm sm:text-base">
                   منصة مستر زياد ربيع
                 </p>
               </div>
@@ -591,41 +592,113 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
         )}
 
         <div className="grid lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
-          {/* Left: Stats + Info */}
-          <div className="lg:col-span-2 space-y-5 sm:space-y-6">
-            {/* Personal Info */}
-            {showDetails && (
-            <div ref={detailsRef}>
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
-              <CardContent className="p-4 sm:p-6 lg:p-8">
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 dark:text-white mb-4 sm:mb-6">
-                  البيانات الشخصية
-                </h2>
-                <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-5">
-                  {[
-                    { label: "الاسم بالكامل", value: editName },
-                    { label: "رقم الهاتف", value: displayUser.phone || "01012345678" },
-                    { label: "هاتف ولي الأمر", value: "01098765432" },
-                    { label: "الصف الدراسي", value: displayUser.gradeLabel || "الصف الثالث الثانوي" },
-                    { label: "المحافظة", value: displayUser.governorate || "القاهرة" },
-                  ].map((field, i) => (
-                    <div
-                      key={i}
-                      className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 lg:p-5 hover:border-[#B348FE] transition-all duration-300 min-w-0"
-                    >
-                      <p className="text-[11px] sm:text-xs lg:text-sm text-gray-400 dark:text-gray-500 mb-1 sm:mb-1.5 font-bold">
-                        {field.label}
-                      </p>
-                      <p className="font-black text-gray-900 dark:text-white text-xs sm:text-sm lg:text-base break-words">
-                        {field.value}
-                      </p>
+          {/* العمود الجانبي: كارت الـ ID */}
+          <div className="lg:col-span-1">
+            <div className="flex flex-col items-center lg:sticky lg:top-24">
+              <div
+                onClick={() => setIdFlipped((f) => !f)}
+                className="relative w-full max-w-[280px] mx-auto aspect-[3/4] cursor-pointer select-none"
+                style={{ perspective: "1400px" }}
+              >
+                <div
+                  className="relative w-full h-full transition-transform duration-700 ease-out"
+                  style={{
+                    transformStyle: "preserve-3d",
+                    transform: idFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+                  }}
+                >
+                  {/* الوش الأمامي */}
+                  <div
+                    className="absolute inset-0 w-full h-full rounded-3xl bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] shadow-lg px-5 py-7 flex flex-col items-center text-center"
+                    style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
+                  >
+                    <div className="relative mb-4">
+                      <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-[#F6EEFF] dark:border-[#2B103D] shadow-md bg-gray-50 dark:bg-[#1A1A1A]">
+                        {avatarUrl ? (
+                          <img
+                            src={avatarUrl}
+                            alt={displayUser.name}
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                        ) : (
+                          <Avatar
+                            name={displayUser.name}
+                            src={avatarUrl || displayUser.avatar_url}
+                            size="xl"
+                            className="w-full h-full rounded-full"
+                          />
+                        )}
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          fileInputRef.current?.click();
+                        }}
+                        disabled={uploadingAvatar}
+                        className="absolute -bottom-1 -left-1 w-8 h-8 sm:w-9 sm:h-9 bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 disabled:opacity-50"
+                      >
+                        {uploadingAvatar ? (
+                          <div className="w-4 h-4 border-2 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Camera size={15} className="text-[#B348FE]" />
+                        )}
+                      </button>
                     </div>
-                  ))}
-                                           </div>
-              </CardContent>
-            </Card>
+
+                    <h1 className="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-1 px-1 break-words leading-snug">
+                      {editName}
+                    </h1>
+
+                    <p className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 font-bold mb-3">
+                      {displayUser.gradeLabel || "الصف الثالث الثانوي"}
+                    </p>
+
+                    <span className="px-3 py-1.5 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] text-[11px] sm:text-xs font-black">
+                      طالب أونلاين
+                    </span>
+
+                    <p className="mt-auto pt-4 text-[10px] sm:text-[11px] text-gray-300 dark:text-gray-600 font-bold">
+                      اضغط للتقليب
+                    </p>
+                  </div>
+
+                  {/* الوش الخلفي */}
+                  <div
+                    className="absolute inset-0 w-full h-full rounded-3xl bg-gradient-to-br from-[#B348FE] to-[#7C1FE0] shadow-lg flex flex-col items-center justify-center gap-3"
+                    style={{
+                      backfaceVisibility: "hidden",
+                      WebkitBackfaceVisibility: "hidden",
+                      transform: "rotateY(180deg)",
+                    }}
+                  >
+                    {/* غيّر src ده للوجو الأصلي المستخدم في الـ Navbar — شوف ملاحظة اللوجو تحت */}
+                    <img
+                      src="/logo.png"
+                      alt="لوجو منصة مستر زياد ربيع"
+                      className="w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-lg"
+                    />
+                    <p className="text-white font-black text-sm sm:text-base">
+                      منصة مستر زياد ربيع
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={toggleDetails}
+                className="mt-5 w-full max-w-[280px] mx-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] font-black text-xs sm:text-sm hover:bg-[#EAD8FF] dark:hover:bg-[#3A1652] transition-all duration-300"
+              >
+                {showDetails ? "إخفاء باقي البيانات" : "عرض باقي البيانات"}
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform duration-300 ${showDetails ? "rotate-180" : ""}`}
+                />
+              </button>
             </div>
-            )}
+          </div>
+
+          {/* العمود الرئيسي: الاشتراكات + البيانات + كلمة المرور */}
+          <div className="lg:col-span-2 space-y-5 sm:space-y-6">
             {/* Subscription Invoices */}
             <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm">
               <CardContent className="p-4 sm:p-6 lg:p-8">
@@ -716,6 +789,40 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                 )}
               </CardContent>
             </Card>
+
+            {/* Personal Info */}
+            {showDetails && (
+            <div ref={detailsRef}>
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+              <CardContent className="p-4 sm:p-6 lg:p-8">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 dark:text-white mb-4 sm:mb-6">
+                  البيانات الشخصية
+                </h2>
+                <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-5">
+                  {[
+                    { label: "الاسم بالكامل", value: editName },
+                    { label: "رقم الهاتف", value: displayUser.phone || "01012345678" },
+                    { label: "هاتف ولي الأمر", value: "01098765432" },
+                    { label: "الصف الدراسي", value: displayUser.gradeLabel || "الصف الثالث الثانوي" },
+                    { label: "المحافظة", value: displayUser.governorate || "القاهرة" },
+                  ].map((field, i) => (
+                    <div
+                      key={i}
+                      className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 lg:p-5 hover:border-[#B348FE] transition-all duration-300 min-w-0"
+                    >
+                      <p className="text-[11px] sm:text-xs lg:text-sm text-gray-400 dark:text-gray-500 mb-1 sm:mb-1.5 font-bold">
+                        {field.label}
+                      </p>
+                      <p className="font-black text-gray-900 dark:text-white text-xs sm:text-sm lg:text-base break-words">
+                        {field.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            </div>
+            )}
 
             {/* Change Password */}
             <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm">
