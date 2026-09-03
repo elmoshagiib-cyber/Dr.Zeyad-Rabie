@@ -408,7 +408,7 @@ if (!authData.user) {
         full_name: `${form.firstName} ${form.secondName} ${form.thirdName} ${form.lastName}`,
         phone: form.phone,
         parent_phone: form.parentPhone,
-        email: null,
+        email: finalEmail,
                 grade: form.grade,
         governorate: form.governorate,
         type: form.studentType,
