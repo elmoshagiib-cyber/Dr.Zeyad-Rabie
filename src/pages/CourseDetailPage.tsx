@@ -994,15 +994,29 @@ const saveProgress = async (currentTime: number, duration: number) => {
         <div className="flex justify-between items-start">
           <div className="max-w-[430px] w-full ml-0 mr-auto">
             <div className="bg-white dark:bg-[#151515] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(15,23,42,.12)] dark:shadow-[0_25px_70px_rgba(0,0,0,.75)] border border-gray-100 dark:border-[#2A2A2A]">
-              <img
-                src={
-                  course.thumbnail ||
-                  course.cover_image ||
-                  "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800"
-                }
-                alt={course.title}
-                className="w-full h-[240px] sm:h-[270px] object-cover"
-              />
+              <div className="relative w-full aspect-[16/9] overflow-hidden">
+                <img
+                  src={
+                    course.thumbnail ||
+                    course.cover_image ||
+                    "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800"
+                  }
+                  alt={course.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <div className="flex items-center justify-between px-6 pt-4 bg-white dark:bg-[#1A1A1A]">
+                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                  <span className="text-[13px] font-medium">{formatDate(course.created_at)}</span>
+                  <HiOutlineCalendarDays className="text-[17px]" />
+                </div>
+
+                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                  <span className="text-[13px] font-medium">{formatDate(course.updated_at)}</span>
+                  <HiOutlineFolder className="text-[17px]" />
+                </div>
+              </div>
 
               <div className="p-6 bg-white dark:bg-[#1A1A1A]">
                 {course.is_free ? (
