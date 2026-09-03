@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import { StudentDashboardSidebar } from "../../components/layout/StudentDashboardSidebar";
 import { Menu } from "lucide-react";
 import { Navbar } from "../../components/layout/Navbar";
 
@@ -34,8 +34,7 @@ export default function StudentLayout({ children }: Props) {
           />
 
           <div className="absolute right-0 top-0 bottom-0 w-[320px] animate-slide-in-right">
-            <DashboardSidebar
-              type="student"
+            <StudentDashboardSidebar
               mobileOpen
               onClose={() => setSidebarOpen(false)}
             />
@@ -45,7 +44,7 @@ export default function StudentLayout({ children }: Props) {
 
       {/* Desktop Sidebar */}
       <div className="hidden xl:block p-4 pt-[104px]">
-        <DashboardSidebar type="student" />
+        <StudentDashboardSidebar />
       </div>
 
       <main className="flex-1 overflow-y-auto pt-24">
