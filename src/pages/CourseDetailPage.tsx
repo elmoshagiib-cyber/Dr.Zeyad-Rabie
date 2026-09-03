@@ -1172,32 +1172,23 @@ const saveProgress = async (currentTime: number, duration: number) => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#09090B] pt-10 pb-8 sm:pt-14 sm:pb-10">
+      <div className="bg-white dark:bg-[#09090B] pt-6 pb-8 sm:pt-10 sm:pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-         <div className="group relative overflow-hidden bg-[#FCFCFD] dark:bg-[#111111] rounded-2xl sm:rounded-3xl p-5 sm:p-8 mb-4 sm:mb-6 shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-500 hover:shadow-md">
 
-  {/* Decorative lines */}
-  <div className="pointer-events-none absolute top-4 left-6 sm:left-10 flex flex-col gap-2 opacity-70">
-    <span className="block w-16 sm:w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-500 group-hover:translate-x-5 group-hover:w-20" />
-    <span className="block w-10 sm:w-14 h-1 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-500 delay-75 group-hover:-translate-x-2 group-hover:w-16" />
+<div className="flex items-center justify-between mb-6 sm:mb-8">
+  <div className="hidden sm:flex flex-col gap-2">
+    <span className="block w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
+    <span className="block w-14 h-1 rounded-full bg-gray-300 dark:bg-gray-700 mr-5" />
   </div>
 
-  <div className="pointer-events-none absolute bottom-4 right-6 sm:right-10 flex flex-col gap-2 items-end opacity-70">
-    <span className="block w-16 sm:w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-500 group-hover:-translate-x-5 group-hover:w-20" />
-    <span className="block w-10 sm:w-14 h-1 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-500 delay-75 group-hover:translate-x-2 group-hover:w-16" />
-  </div>
-
-  {/* Title */}
-  <h2 className="relative z-10 text-2xl sm:text-3xl xl:text-4xl font-black text-right transition-all duration-500 group-hover:translate-x-1">
-
-    <span className="text-gray-900 dark:text-white transition-colors duration-500 group-hover:text-[#B348FE]">
-      محتوى
+  <h2 className="text-2xl sm:text-3xl xl:text-4xl font-black text-right">
+    <span className="text-gray-900 dark:text-white">
+      محتوى{" "}
     </span>
 
-    <span className="text-[#B348FE] transition-colors duration-500 group-hover:text-gray-900 dark:group-hover:text-white">
-      {" "}الكورس
+    <span className="text-[#B348FE]">
+      الكورس
     </span>
-
   </h2>
 </div>
 
