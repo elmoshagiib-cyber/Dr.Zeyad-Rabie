@@ -34,7 +34,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "../../components/ui/Card";
 import { useParams, useNavigate } from "react-router-dom";

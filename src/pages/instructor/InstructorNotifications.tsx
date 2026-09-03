@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
 import {
   Bell,
   FileText,

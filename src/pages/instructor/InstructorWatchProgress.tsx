@@ -14,7 +14,7 @@ import {
   Download,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 

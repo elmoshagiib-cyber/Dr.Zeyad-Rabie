@@ -9,7 +9,7 @@ import {
   Ticket,
   KeyRound,
 } from "lucide-react";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import {

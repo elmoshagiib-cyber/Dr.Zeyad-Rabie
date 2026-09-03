@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, BookOpen, DollarSign, CheckCircle, XCircle, Clock, Bell, Search, BarChart2, Shield } from "lucide-react";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";

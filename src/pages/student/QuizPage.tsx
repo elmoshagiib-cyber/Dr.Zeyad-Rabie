@@ -16,7 +16,7 @@ import {
   Target,
   Play
 } from "lucide-react";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
 import { Button } from "../../components/ui/Button";
 import { ProgressBar } from "../../components/ui/ProgressBar";
 import { useParams } from "react-router-dom";

@@ -12,7 +12,7 @@ import {
   Layers,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
 import { Card, CardContent } from "../../components/ui/Card";
 import { supabase } from "../../lib/supabase";
 

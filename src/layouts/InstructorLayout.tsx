@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { DashboardSidebar } from "../components/layout/DashboardSidebar";
+import { DashboardSidebar } from "../components/layout/dashboard/DashboardSidebar";
 
 type Props = {
   children: ReactNode;

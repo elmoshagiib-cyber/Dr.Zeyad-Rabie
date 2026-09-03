@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { SidebarHeader } from "./sidebar/SidebarHeader";
-import { StudentSidebarNavigation } from "./sidebar/StudentSidebarNavigation";
-import { cn } from "../../utils/cn";
+import { SidebarHeader } from "../sidebar/SidebarHeader";
+import { StudentSidebarNavigation } from "../sidebar/StudentSidebarNavigation";
+import { cn } from "../../../utils/cn";
 import { BookOpen, FileText, ClipboardList, Trophy, Bell, User, MessageCircle, Home } from "lucide-react";
 import { useState } from "react";
 

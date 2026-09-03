@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { DashboardSidebar } from "../../components/layout/DashboardSidebar";
+import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
 import { supabase } from "../../lib/supabase";
 import { useEffect, useState } from "react";
 import { CourseHero } from "../../components/instructor-courses/CourseHero";

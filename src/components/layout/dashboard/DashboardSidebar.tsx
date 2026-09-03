@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { SidebarHeader } from "./sidebar/SidebarHeader";
-import { SidebarNavigation } from "./sidebar/SidebarNavigation";
-import { cn } from "../../utils/cn";
+import { SidebarHeader } from "../sidebar/SidebarHeader";
+import { SidebarNavigation } from "../sidebar/SidebarNavigation";
+import { cn } from "../../../utils/cn";
 import {
   LayoutDashboard,
   BookOpen,
@@ -24,7 +24,7 @@ import {
   MessageCircle,
   TrendingUp,  // ← أضفها هنا
 } from "lucide-react";
-import { useApp } from "../../context/AppContext";
+import { useApp } from "../../../context/AppContext";
 import { useState, useEffect } from "react";
 
 interface NavItem {
