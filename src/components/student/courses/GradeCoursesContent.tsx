@@ -9,8 +9,8 @@ import { BookOpen, Clock, Tag, X } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
-import { HiOutlineCalendarDays } from "react-icons/hi2";
-import { HiOutlineFolder } from "react-icons/hi2";
+import { HiArrowPath } from "react-icons/hi2";
+import { HiDocumentPlus } from "react-icons/hi2";
 interface GradeCoursesContentProps {
   grade: string;
 }
@@ -258,15 +258,16 @@ group-hover:scale-105
     top-4
     right-4
     rounded-full
-    bg-gradient-to-r
-from-[#B348FE]
-to-[#8D2BFF]
+    bg-white/20
+    backdrop-blur-md
+    border
+    border-white/40
     text-white
     text-xs
     font-black
     px-4
     py-2
-    shadow-[0_10px_25px_rgba(16,185,129,.35)]
+    shadow-[0_8px_20px_rgba(0,0,0,.15)]
   "
 >
   مجاني
@@ -541,18 +542,22 @@ className="
 
   <div className="flex flex-col gap-2">
 
-    <div className="flex items-center text-slate-500 dark:text-slate-400">
+    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
       <span className="text-[13px] font-medium">
         {formatDate(course.created_at)}
       </span>
-      <HiOutlineCalendarDays className="mr-2 text-[17px]" />
+      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
+        <HiDocumentPlus className="text-[13px]" />
+      </span>
     </div>
 
-    <div className="flex items-center text-slate-500 dark:text-slate-400">
+    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
       <span className="text-[13px] font-medium">
         {formatDate(course.updated_at)}
       </span>
-      <HiOutlineFolder className="mr-2 text-[17px]" />
+      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
+        <HiArrowPath className="text-[13px]" />
+      </span>
     </div>
 
   </div>
