@@ -610,11 +610,10 @@ text-3xl">
     grid
     grid-cols-1
     md:grid-cols-2
-    2xl:grid-cols-3
-    gap-x-6
-    sm:gap-x-8
-    lg:gap-x-10
-    gap-y-10
+    lg:grid-cols-3
+    gap-x-5
+    lg:gap-x-6
+    gap-y-8
   "
 >
           {list.map(c => <CourseCard key={c.id} course={c} />)}
@@ -760,12 +759,10 @@ return (
   grid
   grid-cols-1
   sm:grid-cols-2
-  2xl:grid-cols-3
-  gap-x-6
-  sm:gap-x-8
-  lg:gap-x-10
+  lg:grid-cols-3
+  gap-x-5
+  lg:gap-x-6
   gap-y-8
-  sm:gap-y-10
 ">
   {courses.map(c => <CourseCard key={c.id} course={c} />)}
 </div>
