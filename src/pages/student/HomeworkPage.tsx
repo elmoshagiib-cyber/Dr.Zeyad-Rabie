@@ -89,16 +89,24 @@ export function HomeworkPage() {
     let validItemIds = new Set<string>();
 
     if (itemIds.length > 0) {
-      const { data: validItems } = await supabase
+      const { data: validItems, error: validItemsError } = await supabase
         .from("course_items")
         .select("id")
         .in("id", itemIds)
         .eq("type", "homework");
 
+      if (validItemsError) {
+        console.error("Error loading valid course items:", validItemsError);
+      }
+
       validItemIds = new Set((validItems || []).map((i: any) => i.id));
     }
 
-    const validHomeworks = homeworksData.filter((hw: any) => validItemIds.has(hw.course_item_id));
+    // لو الواجب مالوش course_item_id أصلاً، أو حصل خطأ في التحقق، سيبه يظهر
+    // بدل ما يتفلتر برا بصمت — الأساس إن الطالب مشترك في كورس الواجب ده
+    const validHomeworks = homeworksData.filter(
+      (hw: any) => !hw.course_item_id || validItemIds.has(hw.course_item_id)
+    );
 
     const { data: submissions } = await supabase
       .from("homework_submissions")
