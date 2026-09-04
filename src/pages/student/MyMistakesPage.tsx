@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertCircle, BookOpen, Sparkles } from "lucide-react";
+import { BookOpen, Sparkles } from "lucide-react";
 import StudentLayout from "./StudentLayout";
 import { Button } from "../../components/ui/Button";
 import { supabase } from "../../lib/supabase";
@@ -14,7 +14,6 @@ export function MyMistakesPage() {
 
   const [loading, setLoading] = useState(true);
   const [wrongQuestionIds, setWrongQuestionIds] = useState<WrongQuestion[]>([]);
-  const [questionCount, setQuestionCount] = useState(10);
 
   useEffect(() => {
     if (user?.studentId) loadMistakes();
@@ -53,7 +52,6 @@ export function MyMistakesPage() {
 
     if (hwError) console.error(hwError);
 
-    // آخر اختيار للطالب لكل سؤال واجب (أحدث تسليم أولاً)
     const latestHwChoiceByQuestion = new Map<number, number>();
     (hwSubmissions || []).forEach((row: any) => {
       const ans = row.answers || {};
@@ -87,13 +85,12 @@ export function MyMistakesPage() {
 
     const allWrong = [...wrongExam, ...wrongHomework];
     setWrongQuestionIds(allWrong);
-    setQuestionCount(Math.min(10, allWrong.length || 1));
     setLoading(false);
   };
 
   const startReview = () => {
     navigate("/dashboard/mistakes-review", {
-      state: { questionIds: wrongQuestionIds, count: questionCount },
+      state: { questionIds: wrongQuestionIds, count: wrongQuestionIds.length },
     });
   };
 
@@ -132,34 +129,18 @@ export function MyMistakesPage() {
                   عندك <span className="font-black text-[#B348FE]">{wrongQuestionIds.length} أسئلة</span> محتاج تراجعهم. يلا نبدأ مراجعة عشان اجمد واحد وسط العيلة
                 </p>
 
-                <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-5 mb-6">
-                  <p className="font-black text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                    <AlertCircle size={18} className="text-[#B348FE]" />
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-5 mb-6 text-center">
+                  <p className="font-black text-gray-900 dark:text-white mb-2">
                     ازاي بتشتغل؟
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    هنجيبلك الأسئلة اللي غلطت فيها في امتحاناتك وواجباتك السابقة، وانت تختار عدد الأسئلة اللي عايز تراجعها. هنديك امتحان خاص بيك من غير وقت، عشان تستفيد من اخطائك وتتأكد إنك فهمت صح ومش هترجع تغلط تاني.
+                    هنجيبلك الأسئلة اللي غلطت فيها في امتحاناتك السابقة، وانت تختار عدد الأسئلة اللي عايز تراجعها. هنديك امتحان خاص بيك من غير وقت، عشان تستفيد من اخطائك وتتأكد إنك فهمت صح ومش هترجع تغلط تاني — كده هتبقى اجمد واحد وسط العيلة.
                   </p>
-                </div>
-
-                <div className="mb-6">
-                  <label className="font-bold text-sm text-gray-700 dark:text-gray-300 mb-2 block">
-                    عدد الأسئلة اللي عايز تراجعها
-                  </label>
-                  <input
-                    type="range"
-                    min={1}
-                    max={wrongQuestionIds.length}
-                    value={questionCount}
-                    onChange={(e) => setQuestionCount(Number(e.target.value))}
-                    className="w-full accent-[#B348FE]"
-                  />
-                  <p className="text-center font-black text-[#B348FE] mt-1">{questionCount} سؤال</p>
                 </div>
 
                 <Button
                   onClick={startReview}
-                  className="w-full bg-lime-500 hover:bg-lime-600 text-gray-900 font-black py-3 text-base"
+                  className="w-full bg-[#B348FE] hover:bg-[#9E2FFF] text-white font-black py-3 text-base"
                 >
                   <Sparkles size={18} />
                   امتحان خاص بيك
