@@ -55,6 +55,7 @@ export function QuizPage() {
 const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showStartConfirmModal, setShowStartConfirmModal] = useState(false);
   const [showQuickReviewModal, setShowQuickReviewModal] = useState(false);  const [studentId, setStudentId] = useState<string | null>(null);
+  const [attemptsUsed, setAttemptsUsed] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState(0);
   const [examStartTime, setExamStartTime] = useState<string | null>(null);
@@ -69,7 +70,11 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) return;
+    if (!user) {
+      setError("يجب تسجيل الدخول لعرض الاختبار");
+      setLoading(false);
+      return;
+    }
 
     const { data: student, error } = await supabase
       .from("students")
@@ -79,6 +84,8 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     if (error) {
       console.error(error);
+      setError("تعذر تحميل بيانات الطالب، حاول مرة أخرى");
+      setLoading(false);
       return;
     }
 
@@ -115,26 +122,6 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
       setLoading(true);
       setError(null);
 
-      if (studentId) {
-        const { data: existingAttempt, error: resultError } = await supabase
-          .from("exam_results")
-          .select("*")
-          .eq("exam_id", examId)
-          .eq("student_id", studentId)
-          .maybeSingle();
-
-        if (resultError && resultError.code !== 'PGRST116') {
-          console.error("Error checking existing attempt:", resultError);
-        }
-
-        if (existingAttempt) {
-          setExistingResult(existingAttempt);
-          setState("already-completed");
-          setLoading(false);
-          return;
-        }
-      }
-
       const { data, error } = await supabase
         .from("exams")
         .select(`
@@ -162,7 +149,32 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
         return;
       }
 
-      // تسجيل "فتح" الاختبار (بعد التأكد إنه لسه مش متسلّم)
+      const maxAttempts = data.max_attempts && data.max_attempts > 0 ? data.max_attempts : 1;
+
+      if (studentId) {
+        const { data: previousAttempts, error: resultError } = await supabase
+          .from("exam_results")
+          .select("*")
+          .eq("exam_id", examId)
+          .eq("student_id", studentId)
+          .order("submitted_at", { ascending: false });
+
+        if (resultError) {
+          console.error("Error checking existing attempts:", resultError);
+        }
+
+        const usedAttempts = previousAttempts?.length || 0;
+        setAttemptsUsed(usedAttempts);
+
+        if (usedAttempts >= maxAttempts) {
+          setExistingResult(previousAttempts![0]);
+          setState("already-completed");
+          setLoading(false);
+          return;
+        }
+      }
+
+      // تسجيل "فتح" الاختبار (بعد التأكد إن لسه فيه محاولات متاحة)
       if (studentId) {
         supabase.from("exam_opens").insert({
           student_id: studentId,
@@ -176,6 +188,7 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
       setQuestions(data.exam_questions || []);
       setTimeLeft((data.duration || 0) * 60);
       setLoading(false);
+      setShowStartConfirmModal(true);
     } catch (err) {
       console.error("Error loading exam:", err);
       setError("حدث خطأ أثناء تحميل الاختبار.");
@@ -646,6 +659,11 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
                 <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                   بمجرد الضغط على بدء الاختبار سيتم تسجيل الوقت ولا يمكنك الرجوع للخلف والاستفادة من الوقت السابق
                 </p>
+                {quiz?.max_attempts > 1 && (
+                  <p className="text-xs sm:text-sm text-[#B348FE] font-bold mt-2">
+                    هذه المحاولة رقم {attemptsUsed + 1} من {quiz.max_attempts}
+                  </p>
+                )}
               </div>
               <div className="p-4 sm:p-6 pt-0 flex gap-3">
                 <Button variant="outline" onClick={() => setShowStartConfirmModal(false)} className="flex-1">
