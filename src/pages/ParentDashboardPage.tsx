@@ -11,6 +11,9 @@ import {
   Calendar,
   ChevronDown,
   Receipt,
+  User,
+  Phone,
+  MapPin,
 } from "lucide-react";
 import { Card, CardContent } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
@@ -106,6 +109,39 @@ export default function ParentDashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Student info */}
+        <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl mb-6">
+          <CardContent className="p-6">
+            <h2 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <User className="text-[#B348FE]" size={20} />
+              بيانات الطالب
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <GraduationCap size={16} className="text-gray-400" />
+                  <p className="text-[11px] font-bold text-gray-400">الصف الدراسي</p>
+                </div>
+                <p className="font-bold text-gray-900 dark:text-white text-sm">{student.grade || "-"}</p>
+              </div>
+              <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Phone size={16} className="text-gray-400" />
+                  <p className="text-[11px] font-bold text-gray-400">رقم الطالب</p>
+                </div>
+                <p className="font-bold text-gray-900 dark:text-white text-sm" dir="ltr">{student.phone || "-"}</p>
+              </div>
+              <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <MapPin size={16} className="text-gray-400" />
+                  <p className="text-[11px] font-bold text-gray-400">المحافظة</p>
+                </div>
+                <p className="font-bold text-gray-900 dark:text-white text-sm">{student.governorate || "-"}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Stat cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
