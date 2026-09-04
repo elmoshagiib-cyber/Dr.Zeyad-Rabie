@@ -123,7 +123,7 @@ export function MyMistakesPage() {
               <div className="text-center py-8">
                 <BookOpen className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />
                 <p className="text-gray-600 dark:text-gray-400 font-bold">
-                  مفيش عندك أي أسئلة غلط دلوقتي، أنت شاطر! 🎉
+                  مفيش عندك أي أسئلة غلط دلوقتي، أنت شاطر!
                 </p>
               </div>
             ) : (
