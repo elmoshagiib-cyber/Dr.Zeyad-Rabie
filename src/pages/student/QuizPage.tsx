@@ -288,6 +288,7 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
           .select("*")
           .eq("exam_id", quiz.id)
           .eq("student_id", studentId)
+          .eq("attempt_number", attemptsUsed + 1)
           .maybeSingle();
 
         if (alreadyExists) {
