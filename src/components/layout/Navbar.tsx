@@ -98,7 +98,7 @@ const handleScroll = () => {
   className="
   md:hidden
   absolute
-  left-1/2
+  left-[54%]
   -translate-x-1/2
   "
 >
@@ -144,37 +144,6 @@ const handleScroll = () => {
     isDark={isDark}
     toggleTheme={toggleTheme}
   />
-
-  <button
-    onClick={() => navigate("/search")}
-    className="
-      flex
-      items-center
-      justify-center
-
-      w-9
-      h-9
-      sm:w-10
-      sm:h-10
-
-      rounded-full
-
-      border
-      border-gray-200
-      dark:border-[#2A2A2A]
-
-      bg-white
-      dark:bg-[#111111]
-
-      hover:border-[#B348FE]
-      hover:text-[#B348FE]
-
-      transition-all
-      duration-300
-    "
-  >
-    <Search className="w-4 h-4" />
-  </button>
 </div>
 
   
@@ -276,13 +245,12 @@ const handleScroll = () => {
       gap-1
       h-9
       px-2.5
-      rounded-full
+      rounded-lg
       bg-[#B348FE]
       text-white
       text-[10px]
       font-bold
       whitespace-nowrap
-      shadow-[0_4px_12px_rgba(179,72,254,.35)]
       hover:bg-[#9A2EFF]
       transition-all
       duration-300
