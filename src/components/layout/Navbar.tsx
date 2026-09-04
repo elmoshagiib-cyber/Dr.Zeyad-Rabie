@@ -144,6 +144,37 @@ const handleScroll = () => {
     isDark={isDark}
     toggleTheme={toggleTheme}
   />
+
+  <button
+    onClick={() => navigate("/search")}
+    className="
+      flex
+      items-center
+      justify-center
+
+      w-9
+      h-9
+      sm:w-10
+      sm:h-10
+
+      rounded-full
+
+      border
+      border-gray-200
+      dark:border-[#2A2A2A]
+
+      bg-white
+      dark:bg-[#111111]
+
+      hover:border-[#B348FE]
+      hover:text-[#B348FE]
+
+      transition-all
+      duration-300
+    "
+  >
+    <Search className="w-4 h-4" />
+  </button>
 </div>
 
   
