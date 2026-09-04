@@ -2880,112 +2880,173 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
       )}
 
       {showInvoiceModal && selectedInvoice && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#111111] w-full max-w-[480px] max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A]">
-            <div ref={invoiceCardRef} className="bg-white dark:bg-[#111111]">
-            <div className="p-6 text-center border-b border-gray-100 dark:border-[#2A2A2A]">
-              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[#F6EEFF] dark:bg-[#2B103D]">
-                <Receipt className="text-[#B348FE]" size={26} />
-              </div>
-              <h3 className="text-lg font-black text-gray-900 dark:text-white">منصة مستر زياد ربيع</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">إيصال اشتراك</p>
+  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="w-full max-w-[420px] max-h-[90vh] overflow-y-auto">
+      {/* ===== الجزء اللي بيتحول لصورة (الإيصال) ===== */}
+      <div ref={invoiceCardRef} className="relative bg-white rounded-t-[28px] overflow-hidden">
+        {/* شعار المنصة */}
+        <div className="pt-6 pb-3 px-6 text-center">
+          <p className="text-gray-900 font-black text-base">منصة مستر زياد ربيع</p>
+        </div>
+
+        {/* أيقونة النجاح */}
+        <div className="px-6 pb-4 text-center">
+          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
+            <CheckCircle2 className="text-emerald-500" size={34} />
+          </div>
+          <p className="text-emerald-600 font-black text-[15px]">تمت عملية الدفع بنجاح</p>
+          <p className="text-gray-400 text-[11px] font-bold mt-1" dir="ltr">
+            {new Date(selectedInvoice.created_at).toLocaleString("ar-EG")}
+          </p>
+        </div>
+
+        {/* خط متقطع أفقي */}
+        <div className="mx-6 border-t-2 border-dashed border-gray-200" />
+
+        {/* المبلغ بخط كبير */}
+        <div className="px-6 py-5 text-center">
+          <p className="text-gray-400 text-[11px] font-bold mb-1">قيمة الاشتراك</p>
+          <p className="text-4xl font-black text-gray-900" dir="ltr">
+            {selectedInvoice.amount}
+            <span className="text-base font-bold text-gray-400 mr-1">جنيه</span>
+          </p>
+        </div>
+
+        <div className="mx-6 border-t-2 border-dashed border-gray-200" />
+
+        {/* تفاصيل الفاتورة - سطور بخط منقط زي الإيصال */}
+        <div className="px-6 py-5 space-y-3">
+          {[
+            { label: "اسم الطالب", value: student.full_name },
+            { label: "الكورس", value: selectedInvoice.courseData?.title || "-" },
+            { label: "نوع الاشتراك", value: selectedInvoice.student_type === "online" ? "Online" : "Center" },
+            { label: "طريقة الدفع", value: selectedInvoice.payment_method === "vodafone_cash" ? "Vodafone Cash" : "InstaPay" },
+            { label: "رقم التحويل", value: selectedInvoice.payer_phone || "-" },
+            { label: "تاريخ الاشتراك", value: new Date(selectedInvoice.subscription_start_date).toLocaleDateString("ar-EG") },
+            { label: "تاريخ الانتهاء", value: new Date(selectedInvoice.subscription_end_date).toLocaleDateString("ar-EG") },
+          ].map((row) => (
+            <div key={row.label} className="flex items-end justify-between gap-2 text-[13px]">
+              <span className="text-gray-400 font-bold whitespace-nowrap bg-white pl-1 relative z-10">
+                {row.label}
+              </span>
+              <span className="flex-1 border-b-2 border-dotted border-gray-300 mb-[3px]" />
+              <span className="font-black text-gray-800 whitespace-nowrap bg-white pr-1 relative z-10">
+                {row.value}
+              </span>
             </div>
+          ))}
 
-            <div className="p-6 space-y-3">
-              {[
-                { label: "اسم الطالب", value: student.full_name },
-                { label: "الكورس", value: selectedInvoice.courseData?.title || "-" },
-                { label: "نوع الاشتراك", value: selectedInvoice.student_type === "online" ? "Online" : "Center" },
-                { label: "رقم الفاتورة", value: selectedInvoice.invoice_number },
-                { label: "قيمة الاشتراك", value: `${selectedInvoice.amount} جنيه` },
-                { label: "طريقة الدفع", value: selectedInvoice.payment_method === "vodafone_cash" ? "Vodafone Cash" : "InstaPay" },
-                { label: "رقم التحويل", value: selectedInvoice.payer_phone || "-" },
-                { label: "تاريخ الاشتراك", value: new Date(selectedInvoice.subscription_start_date).toLocaleDateString("ar-EG") },
-                { label: "تاريخ انتهاء الاشتراك", value: new Date(selectedInvoice.subscription_end_date).toLocaleDateString("ar-EG") },
-              ].map((row) => (
-                <div key={row.label} className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500 dark:text-gray-400 font-bold">{row.label}</span>
-                  <span className="font-bold text-gray-900 dark:text-white">{row.value}</span>
-                </div>
-              ))}
+          <div className="flex items-end justify-between gap-2 text-[13px]">
+            <span className="text-gray-400 font-bold whitespace-nowrap bg-white pl-1 relative z-10">
+              حالة الدفع
+            </span>
+            <span className="flex-1 border-b-2 border-dotted border-gray-300 mb-[3px]" />
+            <span className="bg-white pr-1 relative z-10">{paymentStatusBadge(selectedInvoice.payment_status)}</span>
+          </div>
 
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400 font-bold">حالة الدفع</span>
-                {paymentStatusBadge(selectedInvoice.payment_status)}
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400 font-bold">حالة الاشتراك</span>
-                {subscriptionStatusBadge(selectedInvoice)}
-              </div>
-
-              {selectedInvoice.subscription_code && (
-                <div className="mt-4 rounded-2xl border border-[#EAD8FF] dark:border-[#2A2A2A] bg-[#F6EEFF] dark:bg-[#1A1A1A] px-5 py-4 text-center">
-                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">كود الاشتراك</p>
-                  <p className="text-lg font-black text-[#B348FE] tracking-widest" dir="ltr">{selectedInvoice.subscription_code}</p>
-                </div>
-              )}
-
-              {selectedInvoice.notes && (
-                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  ملاحظات: {selectedInvoice.notes}
-                </div>
-              )}
-            </div>
-            </div>
-
-            <div className="p-6 border-t border-gray-100 dark:border-[#2A2A2A] space-y-3">
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  onClick={() => copyToClipboard(selectedInvoice.invoice_number, "invoice")}
-                  className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors"
-                >
-                  <Copy size={16} className="text-[#B348FE]" />
-                  <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
-                    {copiedField === "invoice" ? "تم النسخ ✓" : "نسخ الفاتورة"}
-                  </span>
-                </button>
-                <button
-                  onClick={() => selectedInvoice.subscription_code && copyToClipboard(selectedInvoice.subscription_code, "code")}
-                  disabled={!selectedInvoice.subscription_code}
-                  className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors disabled:opacity-40"
-                >
-                  <Copy size={16} className="text-[#B348FE]" />
-                  <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
-                    {copiedField === "code" ? "تم النسخ ✓" : "نسخ الكود"}
-                  </span>
-                </button>
-                <button
-                  onClick={() => selectedInvoice.payer_phone && copyToClipboard(selectedInvoice.payer_phone, "phone")}
-                  disabled={!selectedInvoice.payer_phone}
-                  className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors disabled:opacity-40"
-                >
-                  <Copy size={16} className="text-[#B348FE]" />
-                  <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
-                    {copiedField === "phone" ? "تم النسخ ✓" : "نسخ رقم التحويل"}
-                  </span>
-                </button>
-              </div>
-
-             <Button
-                onClick={downloadInvoiceAsImage}
-                disabled={downloadingImage}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl h-11 font-bold flex items-center justify-center gap-2 disabled:opacity-70"
-              >
-                <ImageIcon size={16} />
-                {downloadingImage ? "جاري إنشاء الصورة..." : "تحميل الفاتورة كصورة"}
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={() => { setShowInvoiceModal(false); setSelectedInvoice(null); }}
-                className="w-full rounded-xl h-11 font-bold"
-              >
-                إغلاق
-              </Button>
-            </div>
+          <div className="flex items-end justify-between gap-2 text-[13px]">
+            <span className="text-gray-400 font-bold whitespace-nowrap bg-white pl-1 relative z-10">
+              حالة الاشتراك
+            </span>
+            <span className="flex-1 border-b-2 border-dotted border-gray-300 mb-[3px]" />
+            <span className="bg-white pr-1 relative z-10">{subscriptionStatusBadge(selectedInvoice)}</span>
           </div>
         </div>
-      )}
+
+        <div className="mx-6 border-t-2 border-dashed border-gray-200" />
+
+        {/* رقم الفاتورة */}
+        <div className="px-6 py-4 flex items-center justify-between">
+          <span className="text-[11px] text-gray-400 font-bold">رقم الفاتورة</span>
+          <span className="font-black text-gray-800 text-sm tracking-widest" dir="ltr">
+            {selectedInvoice.invoice_number}
+          </span>
+        </div>
+
+        {/* كود الاشتراك */}
+        {selectedInvoice.subscription_code && (
+          <div className="px-6 pb-5">
+            <div className="rounded-2xl border-2 border-dashed border-[#B348FE]/40 bg-[#FAF5FF] px-5 py-4 text-center">
+              <p className="text-[11px] font-bold text-gray-400 mb-1.5">كود الاشتراك</p>
+              <p className="text-2xl font-black text-[#B348FE] tracking-[4px]" dir="ltr">
+                {selectedInvoice.subscription_code}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {selectedInvoice.notes && (
+          <div className="px-6 pb-4 text-[11px] text-gray-400 text-center">{selectedInvoice.notes}</div>
+        )}
+
+        {/* شريط باركود شكلي زي الإيصالات */}
+        <div className="px-6 pb-6 flex items-center justify-center gap-[2px] h-8">
+          {Array.from({ length: 40 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-gray-800"
+              style={{ width: i % 3 === 0 ? "2px" : "1px", height: i % 5 === 0 ? "100%" : "70%" }}
+            />
+          ))}
+        </div>
+
+        <p className="pb-6 text-center text-[10px] text-gray-300 font-bold">شكراً لثقتكم بمنصة مستر زياد ربيع</p>
+      </div>
+
+      {/* ===== الأزرار (مش بتتحول لصورة) ===== */}
+      <div className="bg-white dark:bg-[#111111] rounded-b-[28px] border-t border-gray-100 dark:border-[#2A2A2A] p-5 space-y-3 shadow-2xl">
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            onClick={() => copyToClipboard(selectedInvoice.invoice_number, "invoice")}
+            className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors"
+          >
+            <Copy size={16} className="text-[#B348FE]" />
+            <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
+              {copiedField === "invoice" ? "تم النسخ ✓" : "نسخ الفاتورة"}
+            </span>
+          </button>
+          <button
+            onClick={() => selectedInvoice.subscription_code && copyToClipboard(selectedInvoice.subscription_code, "code")}
+            disabled={!selectedInvoice.subscription_code}
+            className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors disabled:opacity-40"
+          >
+            <Copy size={16} className="text-[#B348FE]" />
+            <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
+              {copiedField === "code" ? "تم النسخ ✓" : "نسخ الكود"}
+            </span>
+          </button>
+          <button
+            onClick={() => selectedInvoice.payer_phone && copyToClipboard(selectedInvoice.payer_phone, "phone")}
+            disabled={!selectedInvoice.payer_phone}
+            className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors disabled:opacity-40"
+          >
+            <Copy size={16} className="text-[#B348FE]" />
+            <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
+              {copiedField === "phone" ? "تم النسخ ✓" : "نسخ رقم التحويل"}
+            </span>
+          </button>
+        </div>
+
+        <Button
+          onClick={downloadInvoiceAsImage}
+          disabled={downloadingImage}
+          className="w-full bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl h-11 font-bold flex items-center justify-center gap-2 disabled:opacity-70"
+        >
+          <ImageIcon size={16} />
+          {downloadingImage ? "جاري إنشاء الصورة..." : "تحميل الفاتورة كصورة"}
+        </Button>
+
+        <Button
+          variant="outline"
+          onClick={() => { setShowInvoiceModal(false); setSelectedInvoice(null); }}
+          className="w-full rounded-xl h-11 font-bold"
+        >
+          إغلاق
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
