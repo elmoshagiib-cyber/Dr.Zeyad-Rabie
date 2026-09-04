@@ -8,7 +8,9 @@ import {
   CheckCircle2,
   Clock,
   ArrowRight,
-  Phone,
+  Activity,
+  Calendar,
+  ChevronDown,
 } from "lucide-react";
 import { Card, CardContent } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
@@ -17,6 +19,7 @@ export default function ParentDashboardPage() {
   const navigate = useNavigate();
   const [students, setStudents] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [expandedCourseId, setExpandedCourseId] = useState<string | null>(null);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("parent_students");
@@ -39,11 +42,17 @@ export default function ParentDashboardPage() {
     );
   }
 
-  const totalLessons = student.lessonProgress?.length || 0;
-  const completedLessons = (student.lessonProgress || []).filter((l: any) => l.is_completed).length;
+  const courses = student.courses || [];
+  const totalLessons = courses.reduce((sum: number, c: any) => sum + (c.total_lessons || 0), 0);
+  const completedLessons = courses.reduce((sum: number, c: any) => sum + (c.completed_lessons || 0), 0);
   const totalWatchMinutes = Math.round(
     (student.lessonProgress || []).reduce((sum: number, p: any) => sum + (p.watched_seconds || 0), 0) / 60
   );
+
+  const subscriptionLabel =
+    student.subscription_status === "active" ? "نشط" : student.subscription_status === "expired" ? "منتهي" : "-";
+  const subscriptionColor =
+    student.subscription_status === "active" ? "text-emerald-600" : "text-red-600";
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#09090B] pt-28 pb-16" dir="rtl">
@@ -66,6 +75,7 @@ export default function ParentDashboardPage() {
           </div>
         )}
 
+        {/* Header */}
         <div className="bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] rounded-3xl p-6 sm:p-8 text-white mb-6">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center text-2xl font-black overflow-hidden">
@@ -82,13 +92,136 @@ export default function ParentDashboardPage() {
           </div>
         </div>
 
+        {/* Stat cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatCard icon={<BookOpen size={22} />} label="محاضرات مكتملة" value={`${completedLessons} / ${totalLessons}`} />
           <StatCard icon={<CheckCircle2 size={22} />} label="واجبات مسلّمة" value={String(student.homeworkResults?.length || 0)} />
-          <StatCard icon={<GraduationCap size={22} />} label="كورسات مشترك بها" value={String(student.courses?.length || 0)} />
+          <StatCard icon={<GraduationCap size={22} />} label="كورسات مشترك بها" value={String(courses.length)} />
           <StatCard icon={<Clock size={22} />} label="وقت المشاهدة" value={`${Math.floor(totalWatchMinutes / 60)}س ${totalWatchMinutes % 60}د`} />
         </div>
 
+        {/* Attendance + subscription */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <Activity size={18} className="text-[#B348FE]" />
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400">نسبة الحضور</p>
+              </div>
+              <p
+                className={`text-2xl font-black ${
+                  (student.attendance_percentage || 0) >= 80
+                    ? "text-emerald-600"
+                    : (student.attendance_percentage || 0) >= 50
+                    ? "text-amber-600"
+                    : "text-red-600"
+                }`}
+              >
+                {student.attendance_percentage || 0}%
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle2 size={18} className="text-[#B348FE]" />
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400">حالة الاشتراك</p>
+              </div>
+              <p className={`text-2xl font-black ${subscriptionColor}`}>{subscriptionLabel}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar size={18} className="text-[#B348FE]" />
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400">تاريخ انتهاء الاشتراك</p>
+              </div>
+              <p className="text-sm font-black text-gray-900 dark:text-white">
+                {student.subscription_end_date
+                  ? new Date(student.subscription_end_date).toLocaleDateString("ar-EG")
+                  : "-"}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Courses with progress */}
+        <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl mb-6">
+          <CardContent className="p-6">
+            <h2 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <BookOpen className="text-[#B348FE]" size={20} />
+              الكورسات ونسبة التقدم
+            </h2>
+            {courses.length === 0 ? (
+              <p className="text-center text-gray-400 py-6 font-bold">غير مشترك في أي كورس حالياً</p>
+            ) : (
+              <div className="space-y-3">
+                {courses.map((course: any) => {
+                  const total = course.total_lessons || 0;
+                  const completed = course.completed_lessons || 0;
+                  const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+                  const isExpanded = expandedCourseId === course.course_id;
+
+                  return (
+                    <div
+                      key={course.course_id}
+                      className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4"
+                    >
+                      <button
+                        onClick={() => setExpandedCourseId(isExpanded ? null : course.course_id)}
+                        className="w-full flex items-center justify-between gap-3"
+                      >
+                        <div className="text-right min-w-0">
+                          <p className="font-black text-gray-900 dark:text-white text-sm truncate">
+                            {course.course_title || "كورس"}
+                          </p>
+                          <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
+                            {course.expires_at
+                              ? new Date(course.expires_at) < new Date()
+                                ? "انتهى الاشتراك"
+                                : `ينتهي في ${new Date(course.expires_at).toLocaleDateString("ar-EG")}`
+                              : "اشتراك دائم"}
+                          </p>
+                        </div>
+                        <ChevronDown
+                          size={18}
+                          className={`text-gray-400 flex-shrink-0 transition-transform duration-300 ${
+                            isExpanded ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+
+                      <div className="mt-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400">نسبة الإنجاز</span>
+                          <span className="text-xs font-black text-[#B348FE]">{percent}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-[#B348FE] to-[#9E2FFF] rounded-full transition-all duration-500"
+                            style={{ width: `${percent}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {isExpanded && (
+                        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[#2A2A2A]">
+                          <p className="text-xs font-bold text-gray-600 dark:text-gray-300">
+                            محاضرات مكتملة: {completed} / {total}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Exams */}
         <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl mb-6">
           <CardContent className="p-6">
             <h2 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
@@ -101,8 +234,20 @@ export default function ParentDashboardPage() {
               <div className="space-y-2">
                 {student.examResults.map((exam: any) => (
                   <div key={exam.id} className="flex items-center justify-between bg-gray-50 dark:bg-[#1A1A1A] rounded-xl px-4 py-3">
-                    <span className="font-bold text-gray-800 dark:text-gray-200 text-sm">{exam.exams?.title || "امتحان"}</span>
-                    <span className="font-black text-[#B348FE]">{exam.score ?? "-"}</span>
+                    <div>
+                      <span className="font-bold text-gray-800 dark:text-gray-200 text-sm block">
+                        {exam.exam_title || "امتحان"}
+                      </span>
+                      {exam.submitted_at && (
+                        <span className="text-[11px] text-gray-400">
+                          {new Date(exam.submitted_at).toLocaleDateString("ar-EG")}
+                        </span>
+                      )}
+                    </div>
+                    <span className="font-black text-[#B348FE]">
+                      {exam.score ?? "-"}
+                      {exam.percentage != null ? ` (${exam.percentage}%)` : ""}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -110,6 +255,7 @@ export default function ParentDashboardPage() {
           </CardContent>
         </Card>
 
+        {/* Homework */}
         <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl">
           <CardContent className="p-6">
             <h2 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
@@ -122,9 +268,18 @@ export default function ParentDashboardPage() {
               <div className="space-y-2">
                 {student.homeworkResults.map((hw: any) => (
                   <div key={hw.id} className="flex items-center justify-between bg-gray-50 dark:bg-[#1A1A1A] rounded-xl px-4 py-3">
-                    <span className="font-bold text-gray-800 dark:text-gray-200 text-sm">{hw.homeworks?.title || "واجب"}</span>
+                    <div>
+                      <span className="font-bold text-gray-800 dark:text-gray-200 text-sm block">
+                        {hw.homework_title || "واجب"}
+                      </span>
+                      {hw.submitted_at && (
+                        <span className="text-[11px] text-gray-400">
+                          {new Date(hw.submitted_at).toLocaleDateString("ar-EG")}
+                        </span>
+                      )}
+                    </div>
                     <span className="font-black text-[#B348FE]">
-                      {hw.grade !== null ? `${hw.grade} / ${hw.homeworks?.total_score || 100}` : "بانتظار التصحيح"}
+                      {hw.grade !== null ? `${hw.grade} / ${hw.total_score || 100}` : "بانتظار التصحيح"}
                     </span>
                   </div>
                 ))}
