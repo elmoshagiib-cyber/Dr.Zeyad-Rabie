@@ -859,12 +859,12 @@ hover:bg-[#9A2EFF]
       size="lg"
       onClick={() => setShowParentModal(true)}
       className="
-        h-9
-        sm:h-10
-        lg:h-11
-        px-5
-        sm:px-6
-        lg:px-7
+        h-11
+        sm:h-12
+        lg:h-14
+        px-6
+        sm:px-7
+        lg:px-9
         rounded-xl
         bg-white
         dark:bg-[#111111]
@@ -873,16 +873,16 @@ hover:bg-[#9A2EFF]
         hover:bg-[#B348FE]
         text-[#B348FE]
         hover:text-white
-        text-[13px]
-        sm:text-[14px]
-        lg:text-[15px]
+        text-[14px]
+        sm:text-[16px]
+        lg:text-[18px]
         font-semibold
         hover:scale-[1.03]
         transition-all
         duration-300
       "
     >
-      <Users className="w-4 h-4 ml-2" />
+      <Users className="w-5 h-5 ml-2" />
       لوحة ولي الأمر
     </Button>
   )}
