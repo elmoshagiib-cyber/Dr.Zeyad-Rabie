@@ -1263,6 +1263,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                         const isFile = lesson.type === "pdf";
                         const isHomework = lesson.type === "homework";
                         const isExam = lesson.type === "quiz";
+                        const isLink = lesson.type === "link";
 
                         const extras = examExtras[lesson.id];
                         const videoExtra = videoExtras[lesson.id];
@@ -1349,6 +1350,23 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                       <span>ابدأ الكويز</span>
                                     </button>
                                   )}
+
+                                  {isLink && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (!lesson.url) {
+                                          showToast("الرابط غير متوفر");
+                                          return;
+                                        }
+                                        window.open(lesson.url, "_blank", "noopener,noreferrer");
+                                      }}
+                                      className="flex items-center gap-1.5 sm:gap-2 bg-cyan-500 hover:bg-cyan-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-cyan-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                    >
+                                      <svg className="w-[13px] h-[13px]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l3-3a4 4 0 015.656 5.656l-1.5 1.5" /></svg>
+                                      <span>فتح الرابط</span>
+                                    </button>
+                                  )}
                                 </>
                               ) : (
                                 <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl">
@@ -1378,18 +1396,23 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                   isVideo ? "bg-yellow-100 text-yellow-500" : ""
                                 } ${isFile ? "bg-blue-100   text-blue-500" : ""} ${
                                   isHomework ? "bg-green-100  text-green-500" : ""
-                                } ${isExam ? "bg-red-100    text-red-500" : ""}`}
+                                } ${isExam ? "bg-red-100    text-red-500" : ""} ${
+                                  isLink ? "bg-cyan-100   text-cyan-500" : ""
+                                }`}
                               >
                                 {isVideo && <Play size={15} />}
                                 {isFile && <FileText size={15} />}
                                 {isHomework && <ClipboardCheck size={15} />}
                                 {isExam && <ClipboardList size={15} />}
+                                {isLink && (
+                                  <svg className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l3-3a4 4 0 015.656 5.656l-1.5 1.5" /></svg>
+                                )}
                               </div>
                             </div>
                           </div>
 
                           <AnimatePresence>
-                          {isEnrolled && expandedLessonId === lesson.id && (isVideo || isFile || (isExam && extras)) && (
+                          {isEnrolled && expandedLessonId === lesson.id && (isVideo || isFile || isLink || (isExam && extras)) && (
                             <motion.div
                               initial={{ height: 0, opacity: 0 }}
                               animate={{ height: "auto", opacity: 1 }}
@@ -1433,6 +1456,15 @@ const saveProgress = async (currentTime: number, duration: number) => {
                               )}
 
                               {isFile && (
+                                <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                  <Info size={14} className="text-rose-400 flex-shrink-0" />
+                                  <span className="font-bold text-gray-700 dark:text-gray-200">الوصف</span>
+                                  <span className="text-gray-400">:</span>
+                                  <span className="truncate">{lesson.description || "-"}</span>
+                                </div>
+                              )}
+
+                              {isLink && (
                                 <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                                   <Info size={14} className="text-rose-400 flex-shrink-0" />
                                   <span className="font-bold text-gray-700 dark:text-gray-200">الوصف</span>
