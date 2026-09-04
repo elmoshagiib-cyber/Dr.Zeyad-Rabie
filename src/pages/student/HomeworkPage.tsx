@@ -226,22 +226,6 @@ export function HomeworkPage() {
                                   ? new Date(hw.submission.submitted_at).toLocaleString("ar-EG")
                                   : "-"}
                               </td>
-                              <td className="px-3 sm:px-4 py-2.5 sm:py-3">
-                                <div className="flex flex-col items-start gap-1.5">
-                                  {hw.submission?.answer ? (
-                                    <a
-                                      href={hw.submission.answer}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="text-[#B348FE] hover:text-[#9E2FFF] font-bold text-xs underline whitespace-nowrap"
-                                    >
-                                      عرض الملف
-                                    </a>
-                                  ) : (
-                                    <span className="text-gray-400 text-xs">-</span>
-                                  )}
-                                </div>
-                              </td>
                             </tr>
                           );
                         })}

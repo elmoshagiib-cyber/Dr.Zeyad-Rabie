@@ -181,7 +181,7 @@ const handleScroll = () => {
 
 </div>
           {/* Right Side */}
-         <div className="flex items-center gap-2 sm:gap-3">
+         <div className="flex items-center gap-1.5 sm:gap-3">
 
   {user ? (
     <>
@@ -272,22 +272,23 @@ const handleScroll = () => {
       md:hidden
       flex
       items-center
-      gap-1.5
-      h-11
-      px-3.5
+      shrink-0
+      gap-1
+      h-9
+      px-2.5
       rounded-full
       bg-[#B348FE]
       text-white
-      text-xs
+      text-[10px]
       font-bold
       whitespace-nowrap
-      shadow-[0_6px_16px_rgba(179,72,254,.35)]
+      shadow-[0_4px_12px_rgba(179,72,254,.35)]
       hover:bg-[#9A2EFF]
       transition-all
       duration-300
     "
   >
-    <Users className="w-4 h-4" />
+    <Users className="w-3.5 h-3.5 shrink-0" />
     لوحة ولي الأمر
   </button>
 )}
