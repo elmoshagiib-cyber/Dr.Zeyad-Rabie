@@ -59,6 +59,13 @@ const savedUser = localStorage.getItem("user");
   setUser((prev) => {
     if (!prev) return prev;
 
+    // لو مفيش تغيير فعلي في القيم، سيب الـ user reference زي ما هي
+    // عشان مانعملش re-render لكل حاجة بتعتمد على user من غير داعي
+    const hasRealChange = (Object.keys(data) as (keyof AppUser)[]).some(
+      (key) => prev[key] !== data[key]
+    );
+    if (!hasRealChange) return prev;
+
     const updated = {
       ...prev,
       ...data,
