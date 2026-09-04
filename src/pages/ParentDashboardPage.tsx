@@ -8,9 +8,9 @@ import {
   CheckCircle2,
   Clock,
   ArrowRight,
-  Activity,
   Calendar,
   ChevronDown,
+  Receipt,
 } from "lucide-react";
 import { Card, CardContent } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
@@ -53,6 +53,21 @@ export default function ParentDashboardPage() {
     student.subscription_status === "active" ? "نشط" : student.subscription_status === "expired" ? "منتهي" : "-";
   const subscriptionColor =
     student.subscription_status === "active" ? "text-emerald-600" : "text-red-600";
+
+  const paymentStatusBadge = (status: string) => {
+    const map: Record<string, { label: string; className: string }> = {
+      pending: { label: "قيد المراجعة", className: "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400" },
+      verified: { label: "تم التأكيد", className: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400" },
+      rejected: { label: "مرفوض", className: "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400" },
+      cancelled: { label: "ملغي", className: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400" },
+    };
+    const conf = map[status] || map.pending;
+    return (
+      <span className={`px-2.5 py-1 rounded-lg text-[11px] font-black whitespace-nowrap ${conf.className}`}>
+        {conf.label}
+      </span>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#09090B] pt-28 pb-16" dir="rtl">
@@ -100,28 +115,8 @@ export default function ParentDashboardPage() {
           <StatCard icon={<Clock size={22} />} label="وقت المشاهدة" value={`${Math.floor(totalWatchMinutes / 60)}س ${totalWatchMinutes % 60}د`} />
         </div>
 
-        {/* Attendance + subscription */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl">
-            <CardContent className="p-5">
-              <div className="flex items-center gap-2 mb-2">
-                <Activity size={18} className="text-[#B348FE]" />
-                <p className="text-xs font-bold text-gray-500 dark:text-gray-400">نسبة الحضور</p>
-              </div>
-              <p
-                className={`text-2xl font-black ${
-                  (student.attendance_percentage || 0) >= 80
-                    ? "text-emerald-600"
-                    : (student.attendance_percentage || 0) >= 50
-                    ? "text-amber-600"
-                    : "text-red-600"
-                }`}
-              >
-                {student.attendance_percentage || 0}%
-              </p>
-            </CardContent>
-          </Card>
-
+        {/* Subscription status */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl">
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-2">
@@ -161,7 +156,7 @@ export default function ParentDashboardPage() {
                 {courses.map((course: any) => {
                   const total = course.total_lessons || 0;
                   const completed = course.completed_lessons || 0;
-                  const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+                  const percent = course.progress_percent ?? 0;
                   const isExpanded = expandedCourseId === course.course_id;
 
                   return (
@@ -178,6 +173,9 @@ export default function ParentDashboardPage() {
                             {course.course_title || "كورس"}
                           </p>
                           <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
+                            {course.subscribed_at &&
+                              `اشترك في ${new Date(course.subscribed_at).toLocaleDateString("ar-EG")}`}
+                            {" • "}
                             {course.expires_at
                               ? new Date(course.expires_at) < new Date()
                                 ? "انتهى الاشتراك"
@@ -216,6 +214,74 @@ export default function ParentDashboardPage() {
                     </div>
                   );
                 })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Subscription invoices */}
+        <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl mb-6">
+          <CardContent className="p-6">
+            <h2 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <Receipt className="text-[#B348FE]" size={20} />
+              سجل الاشتراكات والفواتير
+            </h2>
+            {(!student.subscriptionPayments || student.subscriptionPayments.length === 0) ? (
+              <p className="text-center text-gray-400 py-6 font-bold">لا توجد اشتراكات مسجلة بعد</p>
+            ) : (
+              <div className="space-y-3">
+                {student.subscriptionPayments.map((p: any) => (
+                  <div
+                    key={p.id}
+                    className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="min-w-0">
+                        <p className="font-black text-gray-900 dark:text-white text-sm truncate">
+                          {p.course_title || "-"}
+                        </p>
+                        <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
+                          فاتورة رقم {p.invoice_number}
+                        </p>
+                      </div>
+                      {paymentStatusBadge(p.payment_status)}
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      <div>
+                        <p className="text-[10px] text-gray-400 font-bold mb-0.5">النوع</p>
+                        <p className="font-bold text-gray-800 dark:text-gray-200 text-xs">
+                          {p.student_type === "online" ? "Online" : "Center"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-400 font-bold mb-0.5">المبلغ</p>
+                        <p className="font-bold text-gray-800 dark:text-gray-200 text-xs">{p.amount} جنيه</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-400 font-bold mb-0.5">البداية</p>
+                        <p className="font-bold text-gray-800 dark:text-gray-200 text-xs">
+                          {new Date(p.subscription_start_date).toLocaleDateString("ar-EG")}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-400 font-bold mb-0.5">الانتهاء</p>
+                        <p className="font-bold text-gray-800 dark:text-gray-200 text-xs">
+                          {new Date(p.subscription_end_date).toLocaleDateString("ar-EG")}
+                        </p>
+                      </div>
+                    </div>
+
+                    {p.subscription_code && (
+                      <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[#2A2A2A] flex items-center justify-between">
+                        <span className="text-[11px] text-gray-400 font-bold">كود الاشتراك</span>
+                        <span className="font-black text-[#B348FE] text-xs tracking-widest" dir="ltr">
+                          {p.subscription_code}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
