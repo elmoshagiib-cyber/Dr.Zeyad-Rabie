@@ -31,6 +31,7 @@ import GradeCoursesPage from "./pages/GradeCoursesPage";
 import DashboardHomePage from "./pages/student/DashboardHomePage";
 import { MyMistakesPage } from "./pages/student/MyMistakesPage";
 import { MistakesReviewQuizPage } from "./pages/student/MistakesReviewQuizPage";
+import ParentDashboardPage from "./pages/ParentDashboardPage";
 
 /* Instructor */
 import { InstructorDashboard } from "./pages/instructor/InstructorDashboard";
@@ -125,6 +126,7 @@ function AppRoutes() {
 <Route path="/courses/:slug" element={<CourseDetailPage />} />
 
 <Route path="/staff-login" element={<StaffLoginPage />} />
+<Route path="/parent-dashboard" element={<ParentDashboardPage />} />
      <Route
   path="/login"
   element={<StudentLoginPage />}

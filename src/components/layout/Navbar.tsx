@@ -7,15 +7,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { UserMenu } from "./navbar/UserMenu";
 
 import { FaReact } from "react-icons/fa6";
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, Users } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { useTheme } from "../../context/ThemeContext";
 import { supabase } from "../../lib/supabase";
+import { ParentAccessModal } from "./navbar/ParentAccessModal";
 export function Navbar() {
 const [scrollProgress, setScrollProgress] = useState(0);
 
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showParentModal, setShowParentModal] = useState(false);
   const navigate = useNavigate();
   const { user } = useApp();
   const { isDark, toggleTheme } = useTheme();
@@ -66,6 +68,7 @@ const handleScroll = () => {
 
 
   return (
+    <>
 <nav
   className={`
     fixed
@@ -235,7 +238,37 @@ const handleScroll = () => {
       <UserMenu />
     </>
   ) : (
-    <GuestActions navigate={navigate} />
+    <>
+      <button
+        onClick={() => setShowParentModal(true)}
+        className="
+          hidden
+          sm:flex
+          items-center
+          gap-2
+          h-11
+          sm:h-12
+          px-4
+          rounded-full
+          border
+          border-[#B348FE]/30
+          bg-[#F6EEFF]
+          dark:bg-[#2B103D]
+          text-[#B348FE]
+          text-sm
+          font-bold
+          hover:bg-[#B348FE]
+          hover:text-white
+          transition-all
+          duration-300
+        "
+      >
+        <Users className="w-4 h-4" />
+        لوحة ولي الأمر
+      </button>
+
+      <GuestActions navigate={navigate} />
+    </>
   )}
        
             {/* Mobile Menu Toggle */}
@@ -303,6 +336,30 @@ p-0
             {!user && mobileOpen && (
         <div className="md:hidden bg-white dark:bg-[#1E244F] border-t border-slate-100 p-4">
           <div className="space-y-1">
+            <button
+onClick={() => { setMobileOpen(false); setShowParentModal(true); }}
+className="
+w-full
+h-[52px]
+rounded-xl
+border
+border-[#B348FE]
+text-[#B348FE]
+hover:bg-[#B348FE]
+hover:text-white
+transition-all
+duration-300
+mb-3
+flex
+items-center
+justify-center
+gap-2
+"
+>
+<Users size={18} />
+لوحة ولي الأمر
+</button>
+
             <button
 onClick={() => navigate("/login")}
 className="
@@ -394,5 +451,8 @@ duration-300
 </AnimatePresence>
 
     </nav>
+
+    <ParentAccessModal open={showParentModal} onClose={() => setShowParentModal(false)} />
+    </>
   );
 }
