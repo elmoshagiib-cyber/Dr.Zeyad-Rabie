@@ -239,33 +239,26 @@ const handleScroll = () => {
     </>
   ) : (
     <>
-      <button
-        onClick={() => setShowParentModal(true)}
-        className="
-          hidden
-          sm:flex
-          items-center
-          gap-2
-          h-11
-          sm:h-12
-          px-4
-          rounded-full
-          border
-          border-[#B348FE]/30
-          bg-[#F6EEFF]
-          dark:bg-[#2B103D]
-          text-[#B348FE]
-          text-sm
-          font-bold
-          hover:bg-[#B348FE]
-          hover:text-white
-          transition-all
-          duration-300
-        "
+      <motion.div
+        whileHover={{ scale: 1.04 }}
+        whileTap={{ scale: 0.97 }}
+        transition={{ type: "spring", stiffness: 400, damping: 22 }}
+        className="hidden sm:block"
       >
-        <Users className="w-4 h-4" />
-        لوحة ولي الأمر
-      </button>
+        <button
+          onClick={() => setShowParentModal(true)}
+          aria-label="لوحة ولي الأمر"
+          className="group inline-flex items-center gap-2 px-4 h-10 rounded-xl bg-white dark:bg-[#111111] border border-[#B348FE] text-[#B348FE] text-[14px] font-medium hover:bg-[#B348FE] hover:text-white hover:shadow-[0_10px_25px_rgba(179,72,254,.25)] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B348FE] focus-visible:ring-offset-2"
+        >
+          <span>لوحة ولي الأمر</span>
+          <Users
+            size={16}
+            strokeWidth={2}
+            className="text-[#B348FE] group-hover:text-white transition-colors duration-200"
+            aria-hidden="true"
+          />
+        </button>
+      </motion.div>
 
       <GuestActions navigate={navigate} />
     </>
