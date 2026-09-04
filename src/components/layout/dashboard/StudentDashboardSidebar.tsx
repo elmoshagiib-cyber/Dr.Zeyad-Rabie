@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { SidebarHeader } from "../sidebar/SidebarHeader";
 import { StudentSidebarNavigation } from "../sidebar/StudentSidebarNavigation";
 import { cn } from "../../../utils/cn";
-import { BookOpen, FileText, ClipboardList, Trophy, Bell, User, MessageCircle, Home } from "lucide-react";
+import { BookOpen, FileText, ClipboardList, Trophy, Bell, User, MessageCircle, Home, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "../../../lib/supabase";
 
@@ -19,6 +19,7 @@ const studentNavItems: NavItem[] = [
   { label: "كورساتي", path: "/dashboard/courses", icon: <BookOpen size={20} /> },
   { label: "نتائج الواجبات", path: "/dashboard/homework", icon: <FileText size={20} /> },
   { label: "نتائج الامتحانات", path: "/dashboard/exams", icon: <ClipboardList size={20} /> },
+  { label: "أخطائي", path: "/dashboard/mistakes", icon: <AlertCircle size={20} /> },
   { label: "المنتدى", path: "/dashboard/forum", icon: <MessageCircle size={20} /> },
   { label: "المتصدرون", path: "/dashboard/leaderboard", icon: <Trophy size={20} /> },
   { label: "الإشعارات", path: "/dashboard/announcements", icon: <Bell size={20} /> },

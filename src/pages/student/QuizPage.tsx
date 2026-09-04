@@ -315,9 +315,11 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
           attempt_number: attemptsUsed + 1,
         };
 
-        const { error: insertError } = await supabase
+        const { data: insertedResult, error: insertError } = await supabase
           .from("exam_results")
-          .insert([resultData]);
+          .insert([resultData])
+          .select()
+          .single();
 
         if (insertError) {
           console.error("Error saving exam result:", insertError);
@@ -326,6 +328,33 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
           }
         } else {
           localStorage.removeItem(`exam_${id}_answers`);
+
+          // تسجيل إجابة الطالب على كل سؤال لوحده (لميزة مراجعة الأخطاء)
+          const answersRows = questions.map((q) => {
+            const selectedId = answers[String(q.id)] || null;
+            const correctChoice = (q.question_choices || []).find(
+              (c: any) => String(c.sort_order - 1) === String(q.correct_answer)
+            );
+            const isCorrect = !!(selectedId && correctChoice && selectedId === correctChoice.id);
+
+            return {
+              exam_result_id: insertedResult?.id,
+              exam_id: quiz.id,
+              student_id: studentId,
+              question_id: q.id,
+              selected_choice_id: selectedId,
+              is_correct: isCorrect,
+            };
+          });
+
+          if (answersRows.length > 0) {
+            const { error: answersError } = await supabase
+              .from("exam_answers")
+              .insert(answersRows);
+            if (answersError) {
+              console.error("Error saving individual answers:", answersError);
+            }
+          }
         }
       } catch (err) {
         console.error("Error submitting exam:", err);

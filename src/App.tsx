@@ -29,6 +29,8 @@ import { ExamsPage } from "./pages/student/ExamsPage";
 import ForumPage from "./pages/student/ForumPage";
 import GradeCoursesPage from "./pages/GradeCoursesPage";
 import DashboardHomePage from "./pages/student/DashboardHomePage";
+import { MyMistakesPage } from "./pages/student/MyMistakesPage";
+import { MistakesReviewQuizPage } from "./pages/student/MistakesReviewQuizPage";
 
 /* Instructor */
 import { InstructorDashboard } from "./pages/instructor/InstructorDashboard";
@@ -226,6 +228,24 @@ function AppRoutes() {
   element={
     <ProtectedRoute roles={["student"]}>
       <LeaderboardPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/dashboard/mistakes"
+  element={
+    <ProtectedRoute roles={["student"]}>
+      <MyMistakesPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/dashboard/mistakes-review"
+  element={
+    <ProtectedRoute roles={["student"]}>
+      <MistakesReviewQuizPage />
     </ProtectedRoute>
   }
 />
