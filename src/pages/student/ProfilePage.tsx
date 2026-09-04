@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Camera, Edit2, CheckCircle, Star, Trophy, BookOpen, Award, Shield, Lock, Eye, EyeOff, Loader2, ChevronDown, Receipt } from "lucide-react";
+import { Camera, Edit2, CheckCircle, Star, Trophy, BookOpen, Award, Shield, Lock, Eye, EyeOff, Loader2, ChevronDown, Receipt, Copy, Image as ImageIcon } from "lucide-react";
 import StudentLayout from "./StudentLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
@@ -10,7 +10,7 @@ import { useApp } from "../../context/AppContext";
 import { useTheme } from "../../context/ThemeContext";
 import { CURRENT_STUDENT, COURSES, LEADERBOARD } from "../../data/mockData";
 import { supabase } from "../../lib/supabase";
-
+import { toPng } from "html-to-image";
 interface SubCourseInfo {
   id: string;
   title: string;
@@ -338,6 +338,11 @@ const toggleDetails = () => {
 
 const [subscriptionPayments, setSubscriptionPayments] = useState<StudentSubscriptionPayment[]>([]);
   const [loadingPayments, setLoadingPayments] = useState(true);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<StudentSubscriptionPayment | null>(null);
+  const invoiceCardRef = useRef<HTMLDivElement>(null);
+  const [downloadingImage, setDownloadingImage] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
   useEffect(() => {
     const loadPayments = async () => {
       if (!user?.id) {
@@ -389,7 +394,7 @@ const [subscriptionPayments, setSubscriptionPayments] = useState<StudentSubscrip
     loadPayments();
   }, [user?.id]);
 
-  const paymentStatusBadge = (status: string) => {
+    const paymentStatusBadge = (status: string) => {
     const map: Record<string, { label: string; className: string }> = {
       pending: { label: "قيد المراجعة", className: "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400" },
       verified: { label: "تم التأكيد", className: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400" },
@@ -402,6 +407,53 @@ const [subscriptionPayments, setSubscriptionPayments] = useState<StudentSubscrip
         {conf.label}
       </span>
     );
+  };
+
+  const subscriptionStatusBadge = (payment: StudentSubscriptionPayment) => {
+    if (payment.payment_status !== "verified") {
+      return (
+        <span className="px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+          -
+        </span>
+      );
+    }
+    const isActive = new Date(payment.subscription_end_date) > new Date();
+    return isActive ? (
+      <span className="px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
+        نشط
+      </span>
+    ) : (
+      <span className="px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+        منتهي
+      </span>
+    );
+  };
+
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const downloadInvoiceAsImage = async () => {
+    if (!invoiceCardRef.current || !selectedInvoice) return;
+    setDownloadingImage(true);
+    try {
+      const dataUrl = await toPng(invoiceCardRef.current, {
+        backgroundColor: "#ffffff",
+        pixelRatio: 2,
+        cacheBust: true,
+      });
+      const link = document.createElement("a");
+      link.download = `فاتورة-${selectedInvoice.invoice_number}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ أثناء إنشاء الصورة");
+    } finally {
+      setDownloadingImage(false);
+    }
   };
 
 const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -634,7 +686,8 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
 {subscriptionPayments.map((p) => (
                       <div
                         key={p.id}
-                        className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:border-[#B348FE] transition-all duration-300"
+                        onClick={() => { setSelectedInvoice(p); setShowInvoiceModal(true); }}
+                        className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:border-[#B348FE] transition-all duration-300 cursor-pointer"
                       >
                         <div className="flex items-start justify-between gap-3 mb-3">                          <div className="min-w-0">
                             <p className="font-black text-gray-900 dark:text-white text-sm sm:text-base truncate">
@@ -856,6 +909,149 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
           </div>
 
           </div>
+
+        {showInvoiceModal && selectedInvoice && (
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="w-full max-w-[420px] max-h-[90vh] overflow-y-auto">
+              <div ref={invoiceCardRef} className="relative bg-white rounded-t-[28px] overflow-hidden">
+                <div className="pt-6 pb-3 px-6 text-center">
+                  <p className="text-gray-900 font-black text-base">منصة مستر زياد ربيع</p>
+                </div>
+
+                <div className="px-6 pb-4 text-center">
+                  <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
+                    <CheckCircle className="text-emerald-500" size={34} />
+                  </div>
+                  <p className="text-emerald-600 font-black text-[15px]">تمت عملية الدفع بنجاح</p>
+                  <p className="text-gray-400 text-[11px] font-bold mt-1" dir="ltr">
+                    {new Date(selectedInvoice.created_at).toLocaleString("ar-EG")}
+                  </p>
+                </div>
+
+                <div className="mx-6 border-t-2 border-dashed border-gray-200" />
+
+                <div className="px-6 py-5 text-center">
+                  <p className="text-gray-400 text-[11px] font-bold mb-1">قيمة الاشتراك</p>
+                  <p className="text-4xl font-black text-gray-900" dir="ltr">
+                    {selectedInvoice.amount}
+                    <span className="text-base font-bold text-gray-400 mr-1">جنيه</span>
+                  </p>
+                </div>
+
+                <div className="mx-6 border-t-2 border-dashed border-gray-200" />
+
+                <div className="px-6 py-5 space-y-3">
+                  {[
+                    { label: "الكورس", value: selectedInvoice.courseData?.title || "-" },
+                    { label: "نوع الاشتراك", value: selectedInvoice.student_type === "online" ? "Online" : "Center" },
+                    { label: "طريقة الدفع", value: selectedInvoice.payment_method === "vodafone_cash" ? "Vodafone Cash" : "InstaPay" },
+                    { label: "تاريخ الاشتراك", value: new Date(selectedInvoice.subscription_start_date).toLocaleDateString("ar-EG") },
+                    { label: "تاريخ الانتهاء", value: new Date(selectedInvoice.subscription_end_date).toLocaleDateString("ar-EG") },
+                  ].map((row) => (
+                    <div key={row.label} className="flex items-end justify-between gap-2 text-[13px]">
+                      <span className="text-gray-400 font-bold whitespace-nowrap bg-white pl-1 relative z-10">
+                        {row.label}
+                      </span>
+                      <span className="flex-1 border-b-2 border-dotted border-gray-300 mb-[3px]" />
+                      <span className="font-black text-gray-800 whitespace-nowrap bg-white pr-1 relative z-10">
+                        {row.value}
+                      </span>
+                    </div>
+                  ))}
+
+                  <div className="flex items-end justify-between gap-2 text-[13px]">
+                    <span className="text-gray-400 font-bold whitespace-nowrap bg-white pl-1 relative z-10">
+                      حالة الدفع
+                    </span>
+                    <span className="flex-1 border-b-2 border-dotted border-gray-300 mb-[3px]" />
+                    <span className="bg-white pr-1 relative z-10">{paymentStatusBadge(selectedInvoice.payment_status)}</span>
+                  </div>
+
+                  <div className="flex items-end justify-between gap-2 text-[13px]">
+                    <span className="text-gray-400 font-bold whitespace-nowrap bg-white pl-1 relative z-10">
+                      حالة الاشتراك
+                    </span>
+                    <span className="flex-1 border-b-2 border-dotted border-gray-300 mb-[3px]" />
+                    <span className="bg-white pr-1 relative z-10">{subscriptionStatusBadge(selectedInvoice)}</span>
+                  </div>
+                </div>
+
+                <div className="mx-6 border-t-2 border-dashed border-gray-200" />
+
+                <div className="px-6 py-4 flex items-center justify-between">
+                  <span className="text-[11px] text-gray-400 font-bold">رقم الفاتورة</span>
+                  <span className="font-black text-gray-800 text-sm tracking-widest" dir="ltr">
+                    {selectedInvoice.invoice_number}
+                  </span>
+                </div>
+
+                {selectedInvoice.subscription_code && selectedInvoice.payment_status === "verified" && (
+                  <div className="px-6 pb-5">
+                    <div className="rounded-2xl border-2 border-dashed border-[#B348FE]/40 bg-[#FAF5FF] px-5 py-4 text-center">
+                      <p className="text-[11px] font-bold text-gray-400 mb-1.5">كود الاشتراك</p>
+                      <p className="text-2xl font-black text-[#B348FE] tracking-[4px]" dir="ltr">
+                        {selectedInvoice.subscription_code}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="px-6 pb-6 flex items-center justify-center gap-[2px] h-8">
+                  {Array.from({ length: 40 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="bg-gray-800"
+                      style={{ width: i % 3 === 0 ? "2px" : "1px", height: i % 5 === 0 ? "100%" : "70%" }}
+                    />
+                  ))}
+                </div>
+
+                <p className="pb-6 text-center text-[10px] text-gray-300 font-bold">شكراً لثقتكم بمنصة مستر زياد ربيع</p>
+              </div>
+
+              <div className="bg-white dark:bg-[#111111] rounded-b-[28px] border-t border-gray-100 dark:border-[#2A2A2A] p-5 space-y-3 shadow-2xl">
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => copyToClipboard(selectedInvoice.invoice_number, "invoice")}
+                    className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors"
+                  >
+                    <Copy size={16} className="text-[#B348FE]" />
+                    <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
+                      {copiedField === "invoice" ? "تم النسخ ✓" : "نسخ الفاتورة"}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => selectedInvoice.subscription_code && copyToClipboard(selectedInvoice.subscription_code, "code")}
+                    disabled={!selectedInvoice.subscription_code}
+                    className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors disabled:opacity-40"
+                  >
+                    <Copy size={16} className="text-[#B348FE]" />
+                    <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
+                      {copiedField === "code" ? "تم النسخ ✓" : "نسخ الكود"}
+                    </span>
+                  </button>
+                </div>
+
+                <Button
+                  onClick={downloadInvoiceAsImage}
+                  disabled={downloadingImage}
+                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl h-11 font-bold flex items-center justify-center gap-2 disabled:opacity-70"
+                >
+                  <ImageIcon size={16} />
+                  {downloadingImage ? "جاري إنشاء الصورة..." : "تحميل الفاتورة كصورة"}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={() => { setShowInvoiceModal(false); setSelectedInvoice(null); }}
+                  className="w-full rounded-xl h-11 font-bold"
+                >
+                  إغلاق
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </StudentLayout>
   );
