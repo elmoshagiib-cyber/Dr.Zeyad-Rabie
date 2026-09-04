@@ -39,6 +39,7 @@ import {
 } from "../data/mockData";
 
 import InstallToast from "../components/ui/InstallToast";
+import { ParentAccessModal } from "../components/layout/navbar/ParentAccessModal";
 import { NotebookPen, X as CloseIcon, Loader2, Save, Plus, Trash2, ListChecks, StickyNote } from "lucide-react";
 
 const gradeColors: Record<string, string> = {
@@ -59,6 +60,7 @@ const { user } = useApp();
     const [courses, setCourses] = useState<any[]>([]);
     const [announcement, setAnnouncement] = useState<any>(null);
 const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+const [showParentModal, setShowParentModal] = useState(false);
 
 const [showNotesModal, setShowNotesModal] = useState(false);
 const [noteContent, setNoteContent] = useState("");
@@ -875,6 +877,39 @@ hover:bg-[#9A2EFF]
       <Download className="w-5 h-5 ml-2" />
 
       تثبيت التطبيق
+    </Button>
+  )}
+
+  {!user && (
+    <Button
+      size="lg"
+      onClick={() => setShowParentModal(true)}
+      className="
+        h-11
+        sm:h-12
+        lg:h-14
+        px-6
+        sm:px-7
+        lg:px-9
+        rounded-xl
+        bg-white
+        dark:bg-[#111111]
+        border-2
+        border-[#B348FE]
+        hover:bg-[#B348FE]
+        text-[#B348FE]
+        hover:text-white
+        text-[14px]
+        sm:text-[16px]
+        lg:text-[18px]
+        font-semibold
+        hover:scale-[1.03]
+        transition-all
+        duration-300
+      "
+    >
+      <Users className="w-5 h-5 ml-2" />
+      لوحة ولي الأمر
     </Button>
   )}
 </div>
@@ -2241,6 +2276,8 @@ className="
   </div>
 )}
 <Footer />
+
+<ParentAccessModal open={showParentModal} onClose={() => setShowParentModal(false)} />
 </motion.div>
 );
 }

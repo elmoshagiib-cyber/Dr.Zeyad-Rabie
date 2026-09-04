@@ -98,7 +98,7 @@ const handleScroll = () => {
   className="
   md:hidden
   absolute
-  left-[54%]
+  left-1/2
   -translate-x-1/2
   "
 >
@@ -239,59 +239,10 @@ const handleScroll = () => {
     </>
   ) : (
     <>
-      <motion.div
-        whileHover={{ scale: 1.04 }}
-        whileTap={{ scale: 0.97 }}
-        transition={{ type: "spring", stiffness: 400, damping: 22 }}
-        className="hidden sm:block"
-      >
-        <button
-          onClick={() => setShowParentModal(true)}
-          aria-label="لوحة ولي الأمر"
-          className="group inline-flex items-center gap-2 px-4 h-10 rounded-xl bg-white dark:bg-[#111111] border border-[#B348FE] text-[#B348FE] text-[14px] font-medium hover:bg-[#B348FE] hover:text-white hover:shadow-[0_10px_25px_rgba(179,72,254,.25)] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B348FE] focus-visible:ring-offset-2"
-        >
-          <span>لوحة ولي الأمر</span>
-          <Users
-            size={16}
-            strokeWidth={2}
-            className="text-[#B348FE] group-hover:text-white transition-colors duration-200"
-            aria-hidden="true"
-          />
-        </button>
-      </motion.div>
-
       <GuestActions navigate={navigate} />
     </>
   )}
        
-            {/* Parent Access - Mobile */}
-           {!user && (
-  <button
-    onClick={() => setShowParentModal(true)}
-    className="
-      md:hidden
-      flex
-      items-center
-      shrink-0
-      gap-1
-      h-9
-      px-2.5
-      rounded-lg
-      bg-[#B348FE]
-      text-white
-      text-[10px]
-      font-bold
-      whitespace-nowrap
-      hover:bg-[#9A2EFF]
-      transition-all
-      duration-300
-    "
-  >
-    <Users className="w-3.5 h-3.5 shrink-0" />
-    لوحة ولي الأمر
-  </button>
-)}
-
             {/* Mobile Menu Toggle */}
            {!user && (
   <button
@@ -357,30 +308,6 @@ p-0
             {!user && mobileOpen && (
         <div className="md:hidden bg-white dark:bg-[#1E244F] border-t border-slate-100 p-4">
           <div className="space-y-1">
-            <button
-onClick={() => { setMobileOpen(false); setShowParentModal(true); }}
-className="
-w-full
-h-[52px]
-rounded-xl
-border
-border-[#B348FE]
-text-[#B348FE]
-hover:bg-[#B348FE]
-hover:text-white
-transition-all
-duration-300
-mb-3
-flex
-items-center
-justify-center
-gap-2
-"
->
-<Users size={18} />
-لوحة ولي الأمر
-</button>
-
             <button
 onClick={() => navigate("/login")}
 className="
