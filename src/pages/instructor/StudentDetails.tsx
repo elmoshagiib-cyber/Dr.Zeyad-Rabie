@@ -2307,6 +2307,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                         <tr className="bg-gray-50 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400">
                           <th className="text-right font-bold px-4 py-3 whitespace-nowrap">#</th>
                           <th className="text-right font-bold px-4 py-3 whitespace-nowrap">اسم الامتحان</th>
+                          <th className="text-right font-bold px-4 py-3 whitespace-nowrap">المحاولة</th>
                           <th className="text-right font-bold px-4 py-3 whitespace-nowrap">الكورس</th>
                           <th className="text-right font-bold px-4 py-3 whitespace-nowrap">عدد الأسئلة</th>
                           <th className="text-right font-bold px-4 py-3 whitespace-nowrap">المحلولة</th>
@@ -2326,6 +2327,9 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                               </td>
                               <td className="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                 {exam.exams?.title || `اختبار #${exam.exam_id}`}
+                              </td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
+                                {(exam as any).attempt_number ?? "-"}
                               </td>
                               <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
                                 {exam.courseTitle || "-"}

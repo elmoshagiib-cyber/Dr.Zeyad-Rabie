@@ -311,6 +311,7 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
           started_at: examStartTime || nowIso,
           completed_at: nowIso,
           submitted_at: nowIso,
+          attempt_number: attemptsUsed + 1,
         };
 
         const { error: insertError } = await supabase
@@ -985,14 +986,6 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
               className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold text-sm py-2.5 rounded-xl transition-colors"
             >
               إنهاء الاختبار
-            </button>
-
-
-            <button
-              onClick={() => setShowQuickReviewModal(true)}
-              className="w-full bg-lime-600 hover:bg-lime-700 text-white font-bold text-sm py-2.5 rounded-xl transition-colors"
-            >
-              عرض الإجابات
             </button>
 
             {/* Stats */}
