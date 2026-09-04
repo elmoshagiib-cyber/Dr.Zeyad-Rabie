@@ -821,9 +821,10 @@ lg:text-center
     lg:justify-start
     "
   >
-   <div className="mt-6 sm:mt-8 lg:mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+   <div className="mt-6 sm:mt-8 lg:mt-10 flex flex-col sm:flex-row items-center sm:items-start justify-center lg:justify-start gap-4">
 
- {!user && (
+ <div className="contents sm:flex sm:flex-col sm:gap-3">
+  {!user && (
   <Button
     size="lg"
     onClick={() => navigate("/register")}
@@ -853,6 +854,40 @@ hover:bg-[#9A2EFF]
   </Button>
 )}
 
+  {!user && (
+    <Button
+      size="lg"
+      onClick={() => setShowParentModal(true)}
+      className="
+        h-9
+        sm:h-10
+        lg:h-11
+        px-5
+        sm:px-6
+        lg:px-7
+        rounded-xl
+        bg-white
+        dark:bg-[#111111]
+        border-2
+        border-[#B348FE]
+        hover:bg-[#B348FE]
+        text-[#B348FE]
+        hover:text-white
+        text-[13px]
+        sm:text-[14px]
+        lg:text-[15px]
+        font-semibold
+        hover:scale-[1.03]
+        transition-all
+        duration-300
+      "
+    >
+      <Users className="w-4 h-4 ml-2" />
+      لوحة ولي الأمر
+    </Button>
+  )}
+</div>
+
   {true && (
     <Button
       size="lg"
@@ -877,39 +912,6 @@ hover:bg-[#9A2EFF]
       <Download className="w-5 h-5 ml-2" />
 
       تثبيت التطبيق
-    </Button>
-  )}
-
-  {!user && (
-    <Button
-      size="lg"
-      onClick={() => setShowParentModal(true)}
-      className="
-        h-11
-        sm:h-12
-        lg:h-14
-        px-6
-        sm:px-7
-        lg:px-9
-        rounded-xl
-        bg-white
-        dark:bg-[#111111]
-        border-2
-        border-[#B348FE]
-        hover:bg-[#B348FE]
-        text-[#B348FE]
-        hover:text-white
-        text-[14px]
-        sm:text-[16px]
-        lg:text-[18px]
-        font-semibold
-        hover:scale-[1.03]
-        transition-all
-        duration-300
-      "
-    >
-      <Users className="w-5 h-5 ml-2" />
-      لوحة ولي الأمر
     </Button>
   )}
 </div>
