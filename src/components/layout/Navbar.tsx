@@ -264,29 +264,31 @@ const handleScroll = () => {
     </>
   )}
        
-            {/* Parent Access - Mobile Icon */}
+            {/* Parent Access - Mobile */}
            {!user && (
   <button
     onClick={() => setShowParentModal(true)}
-    aria-label="لوحة ولي الأمر"
     className="
       md:hidden
       flex
       items-center
-      justify-center
-      w-11
+      gap-1.5
       h-11
+      px-3.5
       rounded-full
-      border
-      border-[#B348FE]
-      text-[#B348FE]
-      hover:bg-[#B348FE]
-      hover:text-white
+      bg-[#B348FE]
+      text-white
+      text-xs
+      font-bold
+      whitespace-nowrap
+      shadow-[0_6px_16px_rgba(179,72,254,.35)]
+      hover:bg-[#9A2EFF]
       transition-all
       duration-300
     "
   >
-    <Users className="w-5 h-5" />
+    <Users className="w-4 h-4" />
+    لوحة ولي الأمر
   </button>
 )}
 
