@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Clock,
@@ -56,6 +56,7 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showStartConfirmModal, setShowStartConfirmModal] = useState(false);
   const [showQuickReviewModal, setShowQuickReviewModal] = useState(false);  const [studentId, setStudentId] = useState<string | null>(null);
   const [attemptsUsed, setAttemptsUsed] = useState(0);
+  const submittingRef = useRef(false);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState(0);
   const [examStartTime, setExamStartTime] = useState<string | null>(null);
@@ -268,6 +269,8 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
   };
 
   const handleSubmitConfirmed = async () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setShowConfirmModal(false);
 
     const result = calcScore();
@@ -280,6 +283,19 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     if (studentId && id) {
       try {
+        const { data: alreadyExists } = await supabase
+          .from("exam_results")
+          .select("*")
+          .eq("exam_id", quiz.id)
+          .eq("student_id", studentId)
+          .maybeSingle();
+
+        if (alreadyExists) {
+          localStorage.removeItem(`exam_${id}_answers`);
+          setState("result");
+          return;
+        }
+
         const nowIso = new Date().toISOString();
 
         const resultData = {
@@ -303,7 +319,9 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
 
         if (insertError) {
           console.error("Error saving exam result:", insertError);
-          alert("حدث خطأ أثناء حفظ نتيجة الامتحان: " + insertError.message);
+          if (insertError.code !== "23505") {
+            alert("حدث خطأ أثناء حفظ نتيجة الامتحان: " + insertError.message);
+          }
         } else {
           localStorage.removeItem(`exam_${id}_answers`);
         }
