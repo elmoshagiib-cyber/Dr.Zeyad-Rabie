@@ -9,7 +9,7 @@ import {
   Loader2, CheckCircle2, LogIn, X
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import HeroSection from '../../components/HeroSection';
+import HeroSection from '../../components/shared/HeroSection';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 

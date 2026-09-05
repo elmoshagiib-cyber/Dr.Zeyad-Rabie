@@ -17,8 +17,8 @@ import {
   Copy,
   Image as ImageIcon,
 } from "lucide-react";
-import { Card, CardContent } from "../components/ui/Card";
-import { Button } from "../components/ui/Button";
+import { Card, CardContent } from "../../components/ui/Card";
+import { Button } from "../../components/ui/Button";
 import { toPng } from "html-to-image";
 
 export default function ParentDashboardPage() {

@@ -329,7 +329,7 @@ export function LessonPlayer() {
                     </p>
                   </div>
                   <Button
-                    variant={completed ? "success" : "primary"}
+                    variant={completed ? "success" : "default"}
                     size="sm"
                     onClick={toggleCompleted}
                   >

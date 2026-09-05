@@ -9,7 +9,7 @@ import {
   Layers, ChevronLeft, Loader2, CheckCircle2, MapPin, UserCheck, X
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import HeroSection from '../../components/HeroSection';
+import HeroSection from '../../components/shared/HeroSection';
 
 const GRADES = [
   'الصف الأول الثانوي',

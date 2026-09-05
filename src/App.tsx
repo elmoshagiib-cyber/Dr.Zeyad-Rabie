@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider, useApp } from "./context/AppContext";
 import { HomePage } from "./pages/home/HomePage";
-import { MaintenanceMode } from "./components/MaintenanceMode";
+import { MaintenanceMode } from "./components/shared/MaintenanceMode";
 
 // غيّر true/false هنا عشان تشغّل أو توقف وضع الصيانة
 const MAINTENANCE_MODE = false;
@@ -31,7 +31,7 @@ import GradeCoursesPage from "./pages/home/GradeCoursesPage";
 import DashboardHomePage from "./pages/student/DashboardHomePage";
 import { MyMistakesPage } from "./pages/student/MyMistakesPage";
 import { MistakesReviewQuizPage } from "./pages/student/MistakesReviewQuizPage";
-import ParentDashboardPage from "./pages/ParentDashboardPage";
+import ParentDashboardPage from "./pages/parent/ParentDashboardPage";
 
 /* Instructor */
 import { InstructorDashboard } from "./pages/instructor/InstructorDashboard";

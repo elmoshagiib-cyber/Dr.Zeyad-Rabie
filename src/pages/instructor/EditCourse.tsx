@@ -378,7 +378,7 @@ const loadedCourse: Course = {
     collapsed: false,
     items: (itemsData || [])
       .filter((item) => item.section_id === section.id)
-      .map((item) => {
+      .map((item): CourseItem | null => {
         switch (item.type) {
 case "video":
   return {
@@ -398,7 +398,7 @@ case "video":
     videoUrl: item.url || "",
     thumbnailUrl: item.thumbnail || "",
     storagePath: item.storage_path || "",
-  };
+  } as VideoItem;
 
 case "pdf":
   return {
@@ -415,7 +415,7 @@ case "pdf":
     status: "done",
     pdfUrl: item.url || "",
     storagePath: item.storage_path || "",
-  };
+  } as PdfItem;
 
 case "link":
   return {
@@ -424,7 +424,7 @@ case "link":
     title: item.title || "",
     description: item.description || "",
     url: item.url || "",
-  };
+  } as LinkItem;
 
   case "quiz": {
     const exam = (examsData || []).find(
@@ -462,7 +462,7 @@ case "link":
       visibility: exam?.is_visible ? "public" : "private",
       published: exam?.is_published || false,
       questions,
-    };
+    } as QuizItem;
   }
 
   case "homework": {
@@ -507,7 +507,7 @@ case "link":
       visibility: "public",
       published: hw?.is_published || false,
       questions: hwQuestions,
-    };
+    } as HomeworkItem;
   }
 
   default:
@@ -516,7 +516,7 @@ case "link":
   
 
     })
-    .filter(Boolean),
+    .filter((item): item is CourseItem => item !== null),
 })),
       };
                   
