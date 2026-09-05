@@ -206,7 +206,7 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
 
       if (selected) {
         const correctChoice = (q.question_choices || []).find(
-          (c: any) => String(c.sort_order - 1) === String(q.correct_answer)
+          (c: any) => c.is_correct
         );
 
         if (correctChoice && selected === correctChoice.id) {
@@ -472,7 +472,7 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
     const earnedPoints = questions.reduce((sum, q) => {
       const selectedId = answers[String(q.id)];
       const choices = q.question_choices || [];
-      const correctChoice = choices.find((c: any) => String(c.sort_order - 1) === String(q.correct_answer));
+      const correctChoice = choices.find((c: any) => c.is_correct);
       const isRight = selectedId && correctChoice && selectedId === correctChoice.id;
       return sum + (isRight ? Number(q.points) || 1 : 0);
     }, 0);
@@ -545,9 +545,7 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
       {questions.map((question: any, i: number) => {
         const selectedId = answers[String(question.id)];
         const choices = question.question_choices || [];
-        const correctChoice = choices.find(
-          (c: any) => String(c.sort_order - 1) === String(question.correct_answer)
-        );
+        const correctChoice = choices.find((c: any) => c.is_correct);
         const selectedChoice = choices.find((c: any) => c.id === selectedId);
         const isRight = selectedId && correctChoice && selectedId === correctChoice.id;
 

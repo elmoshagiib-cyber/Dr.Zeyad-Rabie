@@ -824,6 +824,7 @@ correct_answer: isEssay
         question_id: newQuestion.id,
         text: question.choices[cIndex],
         sort_order: cIndex + 1,
+        is_correct: !isEssay && cIndex === question.correctAnswer,
       });
 
     if (error) throw error;
