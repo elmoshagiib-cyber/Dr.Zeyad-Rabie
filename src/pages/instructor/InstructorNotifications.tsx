@@ -21,6 +21,7 @@ import {
   Clock,
   Pin,
   Settings,
+  Timer,
 } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import toast from "react-hot-toast";
@@ -41,6 +42,8 @@ interface Notification {
   icon: string | null;
   color: string | null;
   created_at: string;
+  is_banner: boolean;
+  banner_end_at: string | null;
 }
 
 interface Student {
@@ -152,6 +155,8 @@ export default function InstructorNotifications() {
     isPinned: false,
     targetType: "all",
     targetValue: "",
+    isBanner: false,
+    bannerEndAt: "",
   });
   const [historySearch, setHistorySearch] = useState("");
 
@@ -292,6 +297,16 @@ const getStageFromGrade = (grade: string): string => {
         return;
       }
 
+      if (formData.isBanner && !formData.bannerEndAt) {
+        toast.error("يجب تحديد تاريخ ووقت نهاية العد التنازلي");
+        return;
+      }
+
+      if (formData.isBanner && new Date(formData.bannerEndAt).getTime() <= Date.now()) {
+        toast.error("يجب أن يكون وقت انتهاء العداد في المستقبل");
+        return;
+      }
+
       if (recipientCount === 0) {
         toast.error("لا يوجد مستلمين لهذا الإشعار");
         return;
@@ -322,6 +337,8 @@ const getStageFromGrade = (grade: string): string => {
           sent_at: new Date().toISOString(),
           is_pinned: formData.isPinned,
           is_active: true,
+          is_banner: formData.isBanner,
+          banner_end_at: formData.isBanner ? new Date(formData.bannerEndAt).toISOString() : null,
           icon:
   formData.type === "lecture"
     ? "book"
@@ -360,6 +377,8 @@ const studentNotifications = recipientIds.map((studentId) => ({
         isPinned: false,
         targetType: "all",
         targetValue: "",
+        isBanner: false,
+        bannerEndAt: "",
       });
 
       setShowSendForm(false);
@@ -381,6 +400,10 @@ const studentNotifications = recipientIds.map((studentId) => ({
       isPinned: notification.is_pinned,
       targetType: notification.target_type,
       targetValue: notification.target_value || "",
+      isBanner: notification.is_banner,
+      bannerEndAt: notification.banner_end_at
+        ? new Date(notification.banner_end_at).toISOString().slice(0, 16)
+        : "",
     });
     setShowSendForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -409,6 +432,26 @@ const { error: studentNotifError } = await supabase
       await loadData();
     } catch (error: any) {
       toast.error("حدث خطأ أثناء حذف الإشعار");
+      console.error(error);
+    }
+  };
+
+  const toggleBannerActive = async (id: number, currentActive: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .update({ is_active: !currentActive })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_active: !currentActive } : n))
+      );
+
+      toast.success(!currentActive ? "تم تفعيل الشريط" : "تم إيقاف الشريط");
+    } catch (error: any) {
+      toast.error("حدث خطأ أثناء تحديث حالة الشريط");
       console.error(error);
     }
   };
@@ -653,6 +696,43 @@ const { error: studentNotifError } = await supabase
                           <Pin size={18} className="text-slate-600" />
                           <span className="text-sm font-bold text-slate-700">تثبيت الإشعار</span>
                         </label>
+                      </div>
+
+                      <div className="border border-dashed border-[#B348FE]/40 rounded-xl p-4 bg-[#B348FE]/5">
+                        <label className="flex items-center gap-2 cursor-pointer mb-3">
+                          <input
+                            type="checkbox"
+                            checked={formData.isBanner}
+                            onChange={(e) =>
+                              setFormData({ ...formData, isBanner: e.target.checked })
+                            }
+                            className="w-5 h-5 rounded border-slate-300 text-[#B348FE] focus:ring-[#B348FE]"
+                          />
+                          <Timer size={18} className="text-[#B348FE]" />
+                          <span className="text-sm font-bold text-slate-700">
+                            عرضه كشريط عد تنازلي أعلى الموقع (فوق الـ Navbar)
+                          </span>
+                        </label>
+
+                        {formData.isBanner && (
+                          <div>
+                            <label className="block text-xs font-bold text-slate-600 mb-2">
+                              ينتهي العد التنازلي في
+                            </label>
+                            <input
+                              type="datetime-local"
+                              value={formData.bannerEndAt}
+                              min={new Date().toISOString().slice(0, 16)}
+                              onChange={(e) =>
+                                setFormData({ ...formData, bannerEndAt: e.target.value })
+                              }
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
+                            />
+                            <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                              نص العنوان اللي كتبته فوق هيظهر كرسالة قبل العداد، والعداد هيحسب تلقائيًا (أيام : ساعات : دقايق : ثواني) لحد التاريخ والوقت ده. الشريط هيفضل ظاهر لحد ما الوقت ينتهي أو المستخدم يقفله بزرار X.
+                            </p>
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -959,13 +1039,38 @@ const { error: studentNotifError } = await supabase
                                         مثبت
                                       </span>
                                     )}
+                                    {notification.is_banner && (
+                                      <span
+                                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold ${
+                                          notification.is_active
+                                            ? "bg-[#B348FE]/10 text-[#B348FE]"
+                                            : "bg-slate-100 text-slate-500"
+                                        }`}
+                                      >
+                                        <Timer size={10} />
+                                        {notification.is_active ? "شريط نشط" : "شريط متوقف"}
+                                      </span>
+                                    )}
                                   </p>
                                   <p className="text-xs text-slate-500 mt-0.5 line-clamp-1 max-w-md">
                                     {notification.content}
                                   </p>
-                                  <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${typeInfo.color}`}>
-                                    {typeInfo.label}
-                                  </span>
+                                  <div className="flex items-center gap-2 flex-wrap mt-1.5">
+                                    <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${typeInfo.color}`}>
+                                      {typeInfo.label}
+                                    </span>
+                                    {notification.is_banner && notification.banner_end_at && (
+                                      <span className="text-[10px] text-slate-400">
+                                        ينتهي: {new Date(notification.banner_end_at).toLocaleString("ar-EG", {
+                                          year: "numeric",
+                                          month: "short",
+                                          day: "numeric",
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                        })}
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </td>
@@ -996,6 +1101,19 @@ const { error: studentNotifError } = await supabase
                             </td>
                             <td className="px-4 py-3">
                               <div className="flex justify-center gap-1">
+                                {notification.is_banner && (
+                                  <button
+                                    onClick={() => toggleBannerActive(notification.id, notification.is_active)}
+                                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                                      notification.is_active
+                                        ? "bg-[#B348FE]/10 text-[#B348FE] hover:bg-[#B348FE]/20"
+                                        : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                    }`}
+                                    title={notification.is_active ? "إيقاف الشريط" : "تفعيل الشريط"}
+                                  >
+                                    <Timer size={14} />
+                                  </button>
+                                )}
                                 <button
                                   onClick={() => handleDuplicate(notification)}
                                   className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center transition-all duration-200"
@@ -1039,6 +1157,18 @@ const { error: studentNotifError } = await supabase
                                   مثبت
                                 </span>
                               )}
+                              {notification.is_banner && (
+                                <span
+                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold ${
+                                    notification.is_active
+                                      ? "bg-[#B348FE]/10 text-[#B348FE]"
+                                      : "bg-slate-100 text-slate-500"
+                                  }`}
+                                >
+                                  <Timer size={10} />
+                                  {notification.is_active ? "شريط نشط" : "شريط متوقف"}
+                                </span>
+                              )}
                             </p>
                             <p className="text-xs text-slate-500 mt-0.5">{notification.content}</p>
                           </div>
@@ -1061,6 +1191,19 @@ const { error: studentNotifError } = await supabase
                         </div>
 
                         <div className="flex gap-2 pt-2 border-t border-slate-100">
+                          {notification.is_banner && (
+                            <button
+                              onClick={() => toggleBannerActive(notification.id, notification.is_active)}
+                              className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold ${
+                                notification.is_active
+                                  ? "bg-[#B348FE]/10 text-[#B348FE]"
+                                  : "bg-slate-100 text-slate-500"
+                              }`}
+                            >
+                              <Timer size={14} />
+                              {notification.is_active ? "إيقاف" : "تفعيل"}
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDuplicate(notification)}
                             className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold"

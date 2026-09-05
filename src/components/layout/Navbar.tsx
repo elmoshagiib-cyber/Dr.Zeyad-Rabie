@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { UserMenu } from "./navbar/UserMenu";
 
 import { FaReact } from "react-icons/fa6";
-import { Bell, Search, Users } from "lucide-react";
+import { Bell, Search, Users, Timer, X } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { useTheme } from "../../context/ThemeContext";
 import { supabase } from "../../lib/supabase";
@@ -23,6 +23,67 @@ const [scrollProgress, setScrollProgress] = useState(0);
   const { isDark, toggleTheme } = useTheme();
 const [isScrolled, setIsScrolled] = useState(false);
 const [unreadCount, setUnreadCount] = useState(0);
+
+const [bannerNotif, setBannerNotif] = useState<{ id: number; title: string; banner_end_at: string } | null>(null);
+const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
+const [bannerVisible, setBannerVisible] = useState(false);
+
+useEffect(() => {
+  const loadBanner = async () => {
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("id, title, banner_end_at")
+      .eq("is_banner", true)
+      .eq("is_active", true)
+      .gt("banner_end_at", new Date().toISOString())
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!error && data) {
+      const dismissedId = localStorage.getItem("dismissed_banner_id");
+      if (dismissedId !== String(data.id)) {
+        setBannerNotif(data);
+        setBannerVisible(true);
+      }
+    }
+  };
+
+  loadBanner();
+}, []);
+
+useEffect(() => {
+  if (!bannerNotif?.banner_end_at) return;
+
+  const updateCountdown = () => {
+    const diff = new Date(bannerNotif.banner_end_at).getTime() - Date.now();
+
+    if (diff <= 0) {
+      setBannerVisible(false);
+      setTimeLeft(null);
+      return;
+    }
+
+    setTimeLeft({
+      days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((diff / (1000 * 60)) % 60),
+      seconds: Math.floor((diff / 1000) % 60),
+    });
+  };
+
+  updateCountdown();
+  const interval = setInterval(updateCountdown, 1000);
+
+  return () => clearInterval(interval);
+}, [bannerNotif]);
+
+const dismissBanner = () => {
+  if (bannerNotif) {
+    localStorage.setItem("dismissed_banner_id", String(bannerNotif.id));
+  }
+  setBannerVisible(false);
+};
 
 useEffect(() => {
   const loadUnreadCount = async () => {
@@ -69,13 +130,61 @@ const handleScroll = () => {
 
   return (
     <>
+    <div className="fixed top-0 left-0 right-0 z-50 w-full flex flex-col">
+
+      <AnimatePresence>
+        {bannerVisible && bannerNotif && timeLeft && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="w-full overflow-hidden bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] text-white"
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-11 sm:h-12 flex items-center justify-between gap-2 sm:gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <Timer size={16} className="text-[#B348FE] flex-shrink-0 hidden sm:block" />
+                <span className="w-2 h-2 rounded-full bg-[#B348FE] flex-shrink-0 animate-pulse sm:hidden" />
+                <span className="truncate text-[11px] sm:text-[13px] font-bold">
+                  {bannerNotif.title}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+                {[
+                  { value: timeLeft.days, label: "يوم" },
+                  { value: timeLeft.hours, label: "س" },
+                  { value: timeLeft.minutes, label: "د" },
+                  { value: timeLeft.seconds, label: "ث" },
+                ].map((unit, i) => (
+                  <div key={i} className="flex items-center gap-1 sm:gap-1.5">
+                    <div className="flex flex-col items-center bg-white/10 rounded-lg px-1.5 py-1 sm:px-2.5 sm:py-1.5 min-w-[30px] sm:min-w-[38px]">
+                      <span className="text-[12px] sm:text-[14px] font-black leading-none tabular-nums">
+                        {String(unit.value).padStart(2, "0")}
+                      </span>
+                      <span className="text-[7px] sm:text-[8px] text-white/60 leading-none mt-0.5">
+                        {unit.label}
+                      </span>
+                    </div>
+                    {i < 3 && <span className="text-white/30 font-bold text-xs">:</span>}
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={dismissBanner}
+                className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
 <nav
   className={`
-    fixed
-    top-0
-    left-0
-    right-0
-    z-50
+    relative
     w-full
     bg-white
     dark:bg-[#09090B]
@@ -399,6 +508,7 @@ duration-300
 </AnimatePresence>
 
     </nav>
+    </div>
 
     <ParentAccessModal open={showParentModal} onClose={() => setShowParentModal(false)} />
     </>
