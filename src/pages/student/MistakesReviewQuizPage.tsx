@@ -17,6 +17,7 @@ export function MistakesReviewQuizPage() {
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [finished, setFinished] = useState(false);
+  const [studentId, setStudentId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!questionIds.length) {
@@ -24,8 +25,28 @@ export function MistakesReviewQuizPage() {
       return;
     }
     loadQuestions();
+    getCurrentStudent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const getCurrentStudent = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: student, error } = await supabase
+      .from("students")
+      .select("id")
+      .eq("auth_id", user.id)
+      .single();
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+    setStudentId(student.id);
+  };
 
   const loadQuestions = async () => {
     setLoading(true);
@@ -80,6 +101,15 @@ export function MistakesReviewQuizPage() {
     setAnswers((prev) => ({ ...prev, [questionKey]: choiceId }));
   };
 
+  // الامتحانات بتحدد الإجابة الصح عن طريق is_correct، والواجبات عن طريق correct_answer (index)
+  const getCorrectChoice = (question: any) => {
+    const choices = question.question_choices || [];
+    if (question.__key.startsWith("exam-")) {
+      return choices.find((c: any) => c.is_correct);
+    }
+    return choices.find((c: any) => String(c.sort_order - 1) === String(question.correct_answer));
+  };
+
   const q = questions[currentQ];
   const answeredCount = Object.keys(answers).length;
 
@@ -87,12 +117,37 @@ export function MistakesReviewQuizPage() {
     let correct = 0;
     questions.forEach((question) => {
       const selected = answers[question.__key];
-      const correctChoice = (question.question_choices || []).find(
-        (c: any) => String(c.sort_order - 1) === String(question.correct_answer)
-      );
+      const correctChoice = getCorrectChoice(question);
       if (selected && correctChoice && selected === correctChoice.id) correct++;
     });
     return { correct, total: questions.length };
+  };
+
+  const handleFinishReview = async () => {
+    if (studentId) {
+      const rows = questions
+        .map((question) => {
+          const selected = answers[question.__key];
+          const correctChoice = getCorrectChoice(question);
+          const isRight = !!(selected && correctChoice && selected === correctChoice.id);
+          if (!isRight) return null;
+          return {
+            student_id: studentId,
+            question_id: String(question.id),
+            question_type: question.__key.startsWith("exam-") ? "exam" : "homework",
+            resolved_at: new Date().toISOString(),
+          };
+        })
+        .filter(Boolean) as any[];
+
+      if (rows.length > 0) {
+        const { error } = await supabase
+          .from("resolved_mistakes")
+          .upsert(rows, { onConflict: "student_id,question_id,question_type" });
+        if (error) console.error("Error saving resolved mistakes:", error);
+      }
+    }
+    setFinished(true);
   };
 
   if (loading) {
@@ -124,9 +179,7 @@ export function MistakesReviewQuizPage() {
 
             {questions.map((question, i) => {
               const selectedId = answers[question.__key];
-              const correctChoice = (question.question_choices || []).find(
-                (c: any) => String(c.sort_order - 1) === String(question.correct_answer)
-              );
+              const correctChoice = getCorrectChoice(question);
               const isRight = selectedId && correctChoice && selectedId === correctChoice.id;
 
               return (
@@ -208,7 +261,7 @@ export function MistakesReviewQuizPage() {
             </button>
             {currentQ === questions.length - 1 ? (
               <button
-                onClick={() => setFinished(true)}
+                onClick={handleFinishReview}
                 className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white font-bold py-3 rounded-xl"
               >
                 إنهاء المراجعة

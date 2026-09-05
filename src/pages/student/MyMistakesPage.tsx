@@ -14,6 +14,7 @@ export function MyMistakesPage() {
 
   const [loading, setLoading] = useState(true);
   const [wrongQuestionIds, setWrongQuestionIds] = useState<WrongQuestion[]>([]);
+  const [selectedCount, setSelectedCount] = useState<number>(0);
 
   useEffect(() => {
     if (user?.studentId) loadMistakes();
@@ -22,6 +23,26 @@ export function MyMistakesPage() {
   const loadMistakes = async () => {
     if (!user?.studentId) return;
     setLoading(true);
+
+    // الأسئلة اللي اتحلت صح في مراجعة سابقة، عشان نستبعدها من قايمة الأخطاء
+    const { data: resolvedData, error: resolvedError } = await supabase
+      .from("resolved_mistakes")
+      .select("question_id, question_type, resolved_at")
+      .eq("student_id", user.studentId);
+
+    if (resolvedError) console.error(resolvedError);
+
+    const resolvedMap = new Map<string, string>();
+    (resolvedData || []).forEach((row: any) => {
+      resolvedMap.set(`${row.question_type}-${row.question_id}`, row.resolved_at);
+    });
+
+    // لو اتحل صح بعد آخر مرة غلط فيها، يتستبعد. لو غلط فيه تاني بعد الحل، يرجع يظهر.
+    const isStillResolved = (type: "exam" | "homework", qId: number | string, wrongAt: string) => {
+      const resolvedAt = resolvedMap.get(`${type}-${qId}`);
+      if (!resolvedAt) return false;
+      return new Date(resolvedAt) > new Date(wrongAt);
+    };
 
     // 1) أسئلة الامتحانات اللي غلط فيها
     const { data: examData, error: examError } = await supabase
@@ -32,15 +53,15 @@ export function MyMistakesPage() {
 
     if (examError) console.error(examError);
 
-    const latestExamStatus = new Map<number, boolean>();
+    const latestExamStatus = new Map<number, { isCorrect: boolean; createdAt: string }>();
     (examData || []).forEach((row: any) => {
       if (!latestExamStatus.has(row.question_id)) {
-        latestExamStatus.set(row.question_id, row.is_correct);
+        latestExamStatus.set(row.question_id, { isCorrect: row.is_correct, createdAt: row.created_at });
       }
     });
 
     const wrongExam: WrongQuestion[] = Array.from(latestExamStatus.entries())
-      .filter(([, isCorrect]) => !isCorrect)
+      .filter(([qId, v]) => !v.isCorrect && !isStillResolved("exam", qId, v.createdAt))
       .map(([qId]) => ({ id: qId, type: "exam" }));
 
     // 2) أسئلة الواجبات اللي غلط فيها
@@ -52,7 +73,7 @@ export function MyMistakesPage() {
 
     if (hwError) console.error(hwError);
 
-    const latestHwChoiceByQuestion = new Map<number, number>();
+    const latestHwChoiceByQuestion = new Map<number, { choiceIndex: number; createdAt: string }>();
     (hwSubmissions || []).forEach((row: any) => {
       const ans = row.answers || {};
       Object.keys(ans).forEach((qIdStr) => {
@@ -60,7 +81,7 @@ export function MyMistakesPage() {
         if (latestHwChoiceByQuestion.has(qId)) return;
         const choiceIndex = ans[qIdStr]?.choiceIndex;
         if (choiceIndex !== undefined && choiceIndex !== null) {
-          latestHwChoiceByQuestion.set(qId, choiceIndex);
+          latestHwChoiceByQuestion.set(qId, { choiceIndex, createdAt: row.created_at });
         }
       });
     });
@@ -78,19 +99,27 @@ export function MyMistakesPage() {
         console.error(hwQError);
       } else {
         wrongHomework = (hwQuestions || [])
-          .filter((q: any) => latestHwChoiceByQuestion.get(q.id) !== q.correct_answer)
+          .filter((q: any) => {
+            const entry = latestHwChoiceByQuestion.get(q.id);
+            if (!entry) return false;
+            const isWrong = entry.choiceIndex !== q.correct_answer;
+            return isWrong && !isStillResolved("homework", q.id, entry.createdAt);
+          })
           .map((q: any) => ({ id: q.id, type: "homework" }));
       }
     }
 
     const allWrong = [...wrongExam, ...wrongHomework];
     setWrongQuestionIds(allWrong);
+    setSelectedCount(allWrong.length);
     setLoading(false);
   };
 
   const startReview = () => {
+    const shuffled = [...wrongQuestionIds].sort(() => Math.random() - 0.5);
+    const questionsToReview = shuffled.slice(0, selectedCount);
     navigate("/dashboard/mistakes-review", {
-      state: { questionIds: wrongQuestionIds, count: wrongQuestionIds.length },
+      state: { questionIds: questionsToReview, count: questionsToReview.length },
     });
   };
 
@@ -138,12 +167,37 @@ export function MyMistakesPage() {
                   </p>
                 </div>
 
+                <div className="mb-6">
+                  <p className="text-center font-black text-gray-900 dark:text-white mb-3">
+                    اختار عدد الأسئلة اللي عايز تراجعها
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {[5, 10, 15, 20, wrongQuestionIds.length]
+                      .filter((n, i, arr) => n > 0 && n <= wrongQuestionIds.length && arr.indexOf(n) === i)
+                      .sort((a, b) => a - b)
+                      .map((n) => (
+                        <button
+                          key={n}
+                          onClick={() => setSelectedCount(n)}
+                          className={`px-4 py-2 rounded-xl font-black text-sm transition-all ${
+                            selectedCount === n
+                              ? "bg-[#B348FE] text-white"
+                              : "bg-white dark:bg-[#111111] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-[#2A2A2A]"
+                          }`}
+                        >
+                          {n === wrongQuestionIds.length ? `الكل (${n})` : n}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+
                 <Button
                   onClick={startReview}
-                  className="w-full bg-[#B348FE] hover:bg-[#9E2FFF] text-white font-black py-3 text-base"
+                  disabled={selectedCount === 0}
+                  className="w-full bg-[#B348FE] hover:bg-[#9E2FFF] text-white font-black py-3 text-base disabled:opacity-50"
                 >
                   <Sparkles size={18} />
-                  امتحان خاص بيك
+                  امتحان خاص بيك ({selectedCount} سؤال)
                 </Button>
               </>
             )}
