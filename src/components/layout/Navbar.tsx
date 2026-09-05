@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { GuestActions } from "./navbar/GuestActions";
 import { ThemeToggle } from "./navbar/ThemeToggle";
@@ -28,29 +28,45 @@ const [bannerNotif, setBannerNotif] = useState<{ id: number; title: string; bann
 const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
 const [bannerVisible, setBannerVisible] = useState(false);
 
-useEffect(() => {
-  const loadBanner = async () => {
-    const { data, error } = await supabase
-      .from("notifications")
-      .select("id, title, banner_end_at")
-      .eq("is_banner", true)
-      .eq("is_active", true)
-      .gt("banner_end_at", new Date().toISOString())
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+const loadBanner = useCallback(async () => {
+  const { data, error } = await supabase
+    .from("notifications")
+    .select("id, title, banner_end_at")
+    .eq("is_banner", true)
+    .eq("is_active", true)
+    .gt("banner_end_at", new Date().toISOString())
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-    if (!error && data) {
-      const dismissedId = localStorage.getItem("dismissed_banner_id");
-      if (dismissedId !== String(data.id)) {
-        setBannerNotif(data);
-        setBannerVisible(true);
-      }
-    }
-  };
+  if (error) return;
 
-  loadBanner();
+  if (!data) {
+    setBannerNotif(null);
+    setBannerVisible(false);
+    return;
+  }
+
+  const dismissedId = localStorage.getItem("dismissed_banner_id");
+  setBannerNotif(data);
+  setBannerVisible(dismissedId !== String(data.id));
 }, []);
+
+useEffect(() => {
+  loadBanner();
+
+  const interval = setInterval(loadBanner, 20000);
+
+  const handleVisibility = () => {
+    if (document.visibilityState === "visible") loadBanner();
+  };
+  document.addEventListener("visibilitychange", handleVisibility);
+
+  return () => {
+    clearInterval(interval);
+    document.removeEventListener("visibilitychange", handleVisibility);
+  };
+}, [loadBanner]);
 
 useEffect(() => {
   if (!bannerNotif?.banner_end_at) return;
@@ -139,30 +155,33 @@ const handleScroll = () => {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="w-full overflow-hidden bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] text-white"
+            className="w-full overflow-hidden bg-[#0B0E17] text-white"
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-3 sm:gap-4">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <Timer size={18} className="text-[#B348FE] flex-shrink-0 hidden sm:block" />
-                <span className="w-2 h-2 rounded-full bg-[#B348FE] flex-shrink-0 animate-pulse sm:hidden" />
-                <span className="truncate text-[13px] sm:text-[15px] font-bold">
-                  {bannerNotif.title}
-                </span>
-              </div>
+              <button
+                onClick={dismissBanner}
+                className="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/15 hover:bg-white/10 flex items-center justify-center transition-colors"
+              >
+                <X size={16} />
+              </button>
 
               <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                 {[
-                  { value: timeLeft.days, label: "يوم" },
+                  { value: timeLeft.days, label: "يوم", highlight: true },
                   { value: timeLeft.hours, label: "س" },
                   { value: timeLeft.minutes, label: "د" },
                   { value: timeLeft.seconds, label: "ث" },
                 ].map((unit, i) => (
                   <div key={i} className="flex items-center gap-1.5 sm:gap-2">
-                    <div className="flex flex-col items-center bg-white/10 rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 min-w-[38px] sm:min-w-[50px]">
-                      <span className="text-[14px] sm:text-[18px] font-black leading-none tabular-nums">
+                    <div
+                      className={`flex flex-col items-center rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 min-w-[38px] sm:min-w-[50px] ${
+                        unit.highlight ? "bg-red-500" : "bg-white/10"
+                      }`}
+                    >
+                      <span className="text-[14px] sm:text-[18px] font-black leading-none tabular-nums text-white">
                         {String(unit.value).padStart(2, "0")}
                       </span>
-                      <span className="text-[8px] sm:text-[9px] text-white/60 leading-none mt-0.5">
+                      <span className={`text-[8px] sm:text-[9px] leading-none mt-0.5 ${unit.highlight ? "text-white/85" : "text-white/60"}`}>
                         {unit.label}
                       </span>
                     </div>
@@ -171,12 +190,12 @@ const handleScroll = () => {
                 ))}
               </div>
 
-              <button
-                onClick={dismissBanner}
-                className="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-              >
-                <X size={16} />
-              </button>
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="truncate text-[13px] sm:text-[16px] font-extrabold">
+                  {bannerNotif.title}
+                </span>
+                <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+              </div>
             </div>
           </motion.div>
         )}
