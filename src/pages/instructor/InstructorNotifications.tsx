@@ -522,7 +522,7 @@ const { error: studentNotifError } = await supabase
         <DashboardSidebar type="instructor" />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="w-16 h-16 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="w-16 h-16 border-4 border-[#1E1B3A] border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="mt-4 text-slate-600 font-bold">جاري التحميل...</p>
           </div>
         </main>
@@ -541,8 +541,8 @@ const { error: studentNotifError } = await supabase
             animate={{ opacity: 1, y: 0 }}
             className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6 sm:mb-8"
           >
-            <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
-            <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+            <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#1E1B3A]/20 blur-[100px]" />
+            <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#1E1B3A]/20 blur-[100px]" />
 
             <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -667,7 +667,7 @@ const { error: studentNotifError } = await supabase
                       if (showSendForm) resetForm();
                       setShowSendForm(!showSendForm);
                     }}
-                    className="p-2 rounded-xl bg-[#B348FE] text-white hover:bg-[#9E2FFF] transition-colors"
+                    className="p-2 rounded-xl bg-[#1E1B3A] text-white hover:bg-[#0F172A] transition-colors"
                   >
                     {showSendForm ? <X size={20} /> : <Plus size={20} />}
                   </button>
@@ -976,7 +976,7 @@ const { error: studentNotifError } = await supabase
                               className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
                             >
                               <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                                <Icon size={18} className="text-[#B348FE]" />
+                                <Icon size={18} className="text-[#1E1B3A]" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <h3 className="font-bold text-slate-900 text-sm mb-1">
@@ -987,7 +987,7 @@ const { error: studentNotifError } = await supabase
                               <button
                                 onClick={() => toggleSetting(setting.id, setting.enabled)}
                                 className={`flex-shrink-0 w-11 h-6 rounded-full transition-colors relative ${
-                                  setting.enabled ? "bg-[#B348FE]" : "bg-slate-300"
+                                  setting.enabled ? "bg-[#1E1B3A]" : "bg-slate-300"
                                 }`}
                               >
                                 <div
@@ -1021,7 +1021,7 @@ const { error: studentNotifError } = await supabase
                   value={historySearch}
                   onChange={(e) => setHistorySearch(e.target.value)}
                   placeholder="عنوان الإشعار، محتوى، أو اسم الطالب..."
-                  className="w-full pr-9 pl-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
+                  className="w-full pr-9 pl-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all"
                 />
               </div>
             </div>
@@ -1033,7 +1033,7 @@ const { error: studentNotifError } = await supabase
                   onClick={() => setActiveFilter(option.key)}
                   className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${
                     activeFilter === option.key
-                      ? "bg-[#B348FE] text-white shadow-md"
+                      ? "bg-[#1E1B3A] text-white shadow-md"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   }`}
                 >
@@ -1089,7 +1089,7 @@ const { error: studentNotifError } = await supabase
                                       <span
                                         className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold ${
                                           notification.is_active
-                                            ? "bg-[#B348FE]/10 text-[#B348FE]"
+                                            ? "bg-[#1E1B3A]/10 text-[#1E1B3A]"
                                             : "bg-slate-100 text-slate-500"
                                         }`}
                                       >
@@ -1151,7 +1151,7 @@ const { error: studentNotifError } = await supabase
                                   onClick={() => toggleBannerActive(notification.id, notification.is_active)}
                                   className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
                                     notification.is_active
-                                      ? "bg-[#B348FE]/10 text-[#B348FE] hover:bg-[#B348FE]/20"
+                                      ? "bg-[#1E1B3A]/10 text-[#1E1B3A] hover:bg-[#1E1B3A]/20"
                                       : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                                   }`}
                                   title={notification.is_active ? "إخفاء من الشريط العلوي" : "إظهار في الشريط العلوي"}
@@ -1212,7 +1212,7 @@ const { error: studentNotifError } = await supabase
                                 <span
                                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold ${
                                     notification.is_active
-                                      ? "bg-[#B348FE]/10 text-[#B348FE]"
+                                      ? "bg-[#1E1B3A]/10 text-[#1E1B3A]"
                                       : "bg-slate-100 text-slate-500"
                                   }`}
                                 >
@@ -1246,7 +1246,7 @@ const { error: studentNotifError } = await supabase
                             onClick={() => toggleBannerActive(notification.id, notification.is_active)}
                             className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold ${
                               notification.is_active
-                                ? "bg-[#B348FE]/10 text-[#B348FE]"
+                                ? "bg-[#1E1B3A]/10 text-[#1E1B3A]"
                                 : "bg-slate-100 text-slate-500"
                             }`}
                           >
@@ -1317,7 +1317,7 @@ const { error: studentNotifError } = await supabase
                 ) : (
                   <>
                     هل أنت متأكد من إرسال هذا الإشعار إلى{" "}
-                    <span className="font-black text-[#B348FE]">{recipientCount}</span> طالب؟
+                    <span className="font-black text-[#1E1B3A]">{recipientCount}</span> طالب؟
                   </>
                 )}
               </p>
@@ -1333,7 +1333,7 @@ const { error: studentNotifError } = await supabase
                 <button
                   onClick={handleSendNotification}
                   disabled={sending}
-                  className="flex-1 px-6 py-3 rounded-xl bg-[#B348FE] text-white hover:bg-[#9E2FFF] transition-colors font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+                  className="flex-1 px-6 py-3 rounded-xl bg-[#1E1B3A] text-white hover:bg-[#0F172A] transition-colors font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
                 >
                   {sending ? (
                     <>
