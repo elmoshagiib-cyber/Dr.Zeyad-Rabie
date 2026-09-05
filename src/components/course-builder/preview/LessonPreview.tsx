@@ -278,7 +278,7 @@ export function LessonPreview({
     تعديل
   </Button>
 
-  <Button variant="danger">
+  <Button variant="destructive">
     حذف
   </Button>
 

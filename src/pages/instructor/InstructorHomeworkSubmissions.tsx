@@ -84,6 +84,25 @@ const GRADE_OPTIONS = [
   "ثالثة ثانوي",
 ];
 
+// شارة صغيرة بتوضح نوع ملف الإجابة (PDF / صورة / نص) - بتتحط جنب اسم الطالب في القائمة
+function FileTypeBadge({ type }: { type: "pdf" | "image" | "text" | "none" }) {
+  if (type === "none") return null;
+
+  const config = {
+    pdf: { icon: FileType, className: "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400" },
+    image: { icon: ImageIcon, className: "bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400" },
+    text: { icon: FileText, className: "bg-gray-100 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400" },
+  }[type];
+
+  const Icon = config.icon;
+
+  return (
+    <span className={`inline-flex items-center justify-center w-6 h-6 rounded-lg flex-shrink-0 ${config.className}`}>
+      <Icon size={13} />
+    </span>
+  );
+}
+
 export function InstructorHomeworkSubmissions() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
@@ -95,12 +114,11 @@ export function InstructorHomeworkSubmissions() {
   const [gradeFilter, setGradeFilter] = useState("الكل");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
- const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [essayQuestions, setEssayQuestions] = useState<EssayQuestion[]>([]);
   const [loadingEssayQuestions, setLoadingEssayQuestions] = useState(false);
   // على الموبايل: نتحكم هل نعرض القائمة ولا التفاصيل
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
-
 
   useEffect(() => {
     loadSubmissions();
@@ -127,6 +145,18 @@ export function InstructorHomeworkSubmissions() {
     };
 
     loadEssayQuestions();
+  }, [selectedSubmission?.id]);
+
+  // لو الواجب فيه اختيارات مصححة تلقائيًا ولسه معندوش درجة نهائية،
+  // بنحط درجة الاختيارات كنقطة بداية في خانة الدرجة عشان المستر يضيف عليها درجة المقالي بس
+  useEffect(() => {
+    if (!selectedSubmission) return;
+    if (selectedSubmission.grade !== null && selectedSubmission.grade !== undefined) return;
+    if (grades[selectedSubmission.id] !== undefined) return;
+    if (selectedSubmission.auto_score === null || selectedSubmission.auto_score === undefined) return;
+
+    setGrades((prev) => ({ ...prev, [selectedSubmission.id]: selectedSubmission.auto_score! }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSubmission?.id]);
 
   const loadSubmissions = async () => {
@@ -173,13 +203,13 @@ export function InstructorHomeworkSubmissions() {
     setLoading(false);
   };
 
-  const gradedCount = submissions.filter((s) => s.grade !== null && s.grade !== undefined).length;
+  const isGraded = (submission: Submission) => submission.grade !== null && submission.grade !== undefined;
+
+  const gradedCount = submissions.filter(isGraded).length;
   const pendingCount = submissions.length - gradedCount;
 
   const averageGrade = useMemo(() => {
-    const graded = submissions.filter(
-      (s) => s.grade !== null && s.grade !== undefined && s.homeworks?.total_score
-    );
+    const graded = submissions.filter((s) => isGraded(s) && s.homeworks?.total_score);
     if (graded.length === 0) return null;
     const sum = graded.reduce((acc, s) => acc + (s.grade! / (s.homeworks!.total_score || 100)) * 100, 0);
     return Math.round(sum / graded.length);
@@ -198,8 +228,8 @@ export function InstructorHomeworkSubmissions() {
 
       const matchesStatus =
         statusFilter === "الكل" ||
-        (statusFilter === "تم التصحيح" && item.grade !== null && item.grade !== undefined) ||
-        (statusFilter === "بانتظار التصحيح" && (item.grade === null || item.grade === undefined));
+        (statusFilter === "تم التصحيح" && isGraded(item)) ||
+        (statusFilter === "بانتظار التصحيح" && !isGraded(item));
 
       const matchesHomework = homeworkFilter === "الكل" || item.homeworks?.title === homeworkFilter;
 
@@ -211,10 +241,7 @@ export function InstructorHomeworkSubmissions() {
   }, [submissions, search, statusFilter, homeworkFilter, gradeFilter]);
 
   const hasActiveFilters =
-    search !== "" ||
-    statusFilter !== "الكل" ||
-    homeworkFilter !== "الكل" ||
-    gradeFilter !== "الكل";
+    search !== "" || statusFilter !== "الكل" || homeworkFilter !== "الكل" || gradeFilter !== "الكل";
 
   const clearFilters = () => {
     setSearch("");
@@ -337,6 +364,12 @@ export function InstructorHomeworkSubmissions() {
     ? filteredSubmissions.findIndex((s) => s.id === selectedSubmission.id) + 1
     : 0;
 
+  // مجموع درجات الأسئلة المقالية في الواجب الحالي - مرجع سريع للمستر وهو بيحدد باقي الدرجة
+  const essayTotalPoints = useMemo(
+    () => essayQuestions.reduce((sum, q) => sum + (q.points || 0), 0),
+    [essayQuestions]
+  );
+
   const statCards = [
     {
       label: "إجمالي التسليمات",
@@ -457,7 +490,6 @@ export function InstructorHomeworkSubmissions() {
               <option>تم التصحيح</option>
               <option>بانتظار التصحيح</option>
             </select>
-
           </div>
 
           {hasActiveFilters && (
@@ -518,49 +550,59 @@ export function InstructorHomeworkSubmissions() {
                   </div>
 
                   <div className="space-y-2">
-                    {filteredSubmissions.map((submission) => (
-                      <button
-                        key={submission.id}
-                        onClick={() => selectSubmission(submission)}
-                        className={`w-full text-right p-4 rounded-2xl transition-all duration-200 ${
-                          selectedSubmission?.id === submission.id
-                            ? "bg-white dark:bg-[#111111] shadow-md border-2 border-[#B348FE]"
-                            : "bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE] hover:shadow-sm"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-black text-gray-900 dark:text-white text-sm truncate">
-                              {submission.student_name}
-                            </h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                              {submission.homeworks?.title}
-                            </p>
-                            <p className="text-[11px] font-bold text-[#B348FE] mt-1">
-                              {GRADE_LABELS[submission.homeworks?.courses?.grade || ""] || ""}
-                            </p>
+                    {filteredSubmissions.map((submission) => {
+                      const graded = isGraded(submission);
+                      const fileType = getFileType(submission);
+                      const statusLabel = graded
+                        ? "مُصحح"
+                        : submission.has_essay
+                        ? "بانتظار مراجعة مقالي"
+                        : "معلق";
+
+                      return (
+                        <button
+                          key={submission.id}
+                          onClick={() => selectSubmission(submission)}
+                          className={`w-full text-right p-4 rounded-2xl transition-all duration-200 ${
+                            selectedSubmission?.id === submission.id
+                              ? "bg-white dark:bg-[#111111] shadow-md border-2 border-[#B348FE]"
+                              : "bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE] hover:shadow-sm"
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3 mb-2">
+                            <div className="flex items-start gap-2 flex-1 min-w-0">
+                              {!submission.answers && <FileTypeBadge type={fileType} />}
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-black text-gray-900 dark:text-white text-sm truncate">
+                                  {submission.student_name}
+                                </h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                                  {submission.homeworks?.title}
+                                </p>
+                                <p className="text-[11px] font-bold text-[#B348FE] mt-1">
+                                  {GRADE_LABELS[submission.homeworks?.courses?.grade || ""] || ""}
+                                </p>
+                              </div>
+                            </div>
+
+                            <span
+                              className={`px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap flex-shrink-0 ${
+                                graded
+                                  ? "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400"
+                                  : "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400"
+                              }`}
+                            >
+                              {statusLabel}
+                            </span>
                           </div>
 
-                           <span
-                            className={`px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap ${
-                              submission.grade !== null && submission.grade !== undefined
-                                ? "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400"
-                                : "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400"
-                            }`}
-                          >
-                            {submission.grade !== null && submission.grade !== undefined
-                              ? "مُصحح"
-                              : submission.has_essay
-                              ? "بانتظار مراجعة مقالي"
-                              : "معلق"}
-                          </span>                        </div>
-
-                        <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
-                          <Calendar size={12} />
-                          <span>{new Date(submission.submitted_at).toLocaleDateString("ar-EG")}</span>
-                        </div>
-                      </button>
-                    ))}
+                          <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+                            <Calendar size={12} />
+                            <span>{new Date(submission.submitted_at).toLocaleDateString("ar-EG")}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -604,10 +646,10 @@ export function InstructorHomeworkSubmissions() {
                       </div>
                     </div>
 
-                    {/* Student Info */}
+                    {/* Student + Homework Info */}
                     <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm mb-6">
                       <CardContent className="p-6">
-                        <div className="flex items-start gap-4 flex-wrap">
+                        <div className="flex items-start gap-4 flex-wrap mb-5">
                           <div className="bg-[#F6EEFF] dark:bg-[#2B103D] p-3 rounded-2xl">
                             <User className="text-[#B348FE]" size={24} />
                           </div>
@@ -622,23 +664,16 @@ export function InstructorHomeworkSubmissions() {
 
                           <span
                             className={`px-4 py-2 rounded-full text-sm font-black border ${
-                              selectedSubmission.grade !== null && selectedSubmission.grade !== undefined
+                              isGraded(selectedSubmission)
                                 ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900"
                                 : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900"
                             }`}
                           >
-                            {selectedSubmission.grade !== null && selectedSubmission.grade !== undefined
-                              ? "تم التصحيح"
-                              : "بانتظار التصحيح"}
+                            {isGraded(selectedSubmission) ? "تم التصحيح" : "بانتظار التصحيح"}
                           </span>
                         </div>
-                      </CardContent>
-                    </Card>
 
-                    {/* Homework Info */}
-                    <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm mb-6">
-                      <CardContent className="p-6">
-                        <div className="flex items-start gap-4">
+                        <div className="flex items-start gap-4 pt-5 border-t border-gray-100 dark:border-[#2A2A2A]">
                           <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-2xl">
                             <BookOpen className="text-blue-600 dark:text-blue-400" size={24} />
                           </div>
@@ -680,16 +715,28 @@ export function InstructorHomeworkSubmissions() {
                               </h3>
                               <div className="grid grid-cols-3 gap-3">
                                 <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl p-4 border border-emerald-200 dark:border-emerald-900 text-center">
-                                  <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold mb-1">إجابات صحيحة</p>
-                                  <p className="text-2xl font-black text-emerald-600">{selectedSubmission.correct_count ?? 0}</p>
+                                  <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold mb-1">
+                                    إجابات صحيحة
+                                  </p>
+                                  <p className="text-2xl font-black text-emerald-600">
+                                    {selectedSubmission.correct_count ?? 0}
+                                  </p>
                                 </div>
                                 <div className="bg-blue-50 dark:bg-blue-950/20 rounded-2xl p-4 border border-blue-200 dark:border-blue-900 text-center">
-                                  <p className="text-[11px] text-blue-700 dark:text-blue-400 font-bold mb-1">عدد الأسئلة</p>
-                                  <p className="text-2xl font-black text-blue-600">{selectedSubmission.total_auto_questions ?? 0}</p>
+                                  <p className="text-[11px] text-blue-700 dark:text-blue-400 font-bold mb-1">
+                                    عدد الأسئلة
+                                  </p>
+                                  <p className="text-2xl font-black text-blue-600">
+                                    {selectedSubmission.total_auto_questions ?? 0}
+                                  </p>
                                 </div>
                                 <div className="bg-teal-50 dark:bg-teal-950/20 rounded-2xl p-4 border border-teal-200 dark:border-teal-900 text-center">
-                                  <p className="text-[11px] text-teal-700 dark:text-teal-400 font-bold mb-1">درجة الاختيارات</p>
-                                  <p className="text-2xl font-black text-teal-600">{selectedSubmission.auto_score ?? 0}</p>
+                                  <p className="text-[11px] text-teal-700 dark:text-teal-400 font-bold mb-1">
+                                    درجة الاختيارات
+                                  </p>
+                                  <p className="text-2xl font-black text-teal-600">
+                                    {selectedSubmission.auto_score ?? 0}
+                                  </p>
                                 </div>
                               </div>
                             </CardContent>
@@ -699,43 +746,63 @@ export function InstructorHomeworkSubmissions() {
                         {/* الأسئلة المقالية */}
                         <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm mb-6">
                           <CardContent className="p-6">
-                            <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                              <Eye size={20} className="text-[#B348FE]" />
-                              الأسئلة المقالية
-                            </h3>
+                            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                              <h3 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
+                                <Eye size={20} className="text-[#B348FE]" />
+                                الأسئلة المقالية
+                              </h3>
+                              {essayQuestions.length > 0 && (
+                                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-[#1A1A1A] px-3 py-1 rounded-full">
+                                  {essayQuestions.length} سؤال · {essayTotalPoints} درجة
+                                </span>
+                              )}
+                            </div>
 
                             {loadingEssayQuestions ? (
                               <div className="py-10 text-center text-gray-400 text-sm font-bold">جاري التحميل...</div>
                             ) : essayQuestions.length === 0 ? (
                               <div className="text-center py-10 bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl border-2 border-dashed border-gray-300 dark:border-[#2A2A2A]">
-                                <p className="text-gray-500 dark:text-gray-400 font-bold text-sm">لا توجد أسئلة مقالية في هذا الواجب</p>
+                                <p className="text-gray-500 dark:text-gray-400 font-bold text-sm">
+                                  لا توجد أسئلة مقالية في هذا الواجب
+                                </p>
                               </div>
                             ) : (
                               <div className="space-y-4">
                                 {essayQuestions.map((q, i) => {
                                   const studentAnswer = selectedSubmission.answers?.[String(q.id)]?.text || "";
                                   return (
-                                    <div key={q.id} className="border-2 border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-4 sm:p-5">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300 text-[10px] font-bold">
+                                    <div
+                                      key={q.id}
+                                      className="border-2 border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-4 sm:p-5"
+                                    >
+                                      <div className="flex items-center justify-between gap-2 mb-2">
+                                        <p className="font-bold text-gray-900 dark:text-white text-sm">
+                                          {i + 1}. {q.title}
+                                        </p>
+                                        <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300 text-[10px] font-bold whitespace-nowrap">
                                           {q.points === 1 ? "درجة واحدة" : `${q.points} درجات`}
                                         </span>
                                       </div>
-                                      <p className="font-bold text-gray-900 dark:text-white text-sm mb-3">
-                                        {i + 1}. {q.title}
-                                      </p>
                                       {q.image_url && (
-                                        <img src={q.image_url} alt="صورة السؤال" className="max-h-48 rounded-xl border border-gray-200 dark:border-[#2A2A2A] mb-3" />
+                                        <img
+                                          src={q.image_url}
+                                          alt="صورة السؤال"
+                                          className="max-h-48 rounded-xl border border-gray-200 dark:border-[#2A2A2A] mb-3"
+                                        />
                                       )}
                                       <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-xl p-4 mb-2">
-                                        <p className="text-[11px] font-black text-gray-500 dark:text-gray-400 mb-1.5">إجابة الطالب:</p>
+                                        <p className="text-[11px] font-black text-gray-500 dark:text-gray-400 mb-1.5">
+                                          إجابة الطالب:
+                                        </p>
                                         <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed">
                                           {studentAnswer || "لم يجب الطالب على هذا السؤال"}
                                         </p>
                                       </div>
                                       {q.correct_text && (
                                         <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900 rounded-xl p-4">
-                                          <p className="text-[11px] font-black text-emerald-700 dark:text-emerald-400 mb-1.5">الإجابة النموذجية:</p>
+                                          <p className="text-[11px] font-black text-emerald-700 dark:text-emerald-400 mb-1.5">
+                                            الإجابة النموذجية:
+                                          </p>
                                           <p className="text-sm text-emerald-800 dark:text-emerald-300 whitespace-pre-wrap leading-relaxed">
                                             {q.correct_text}
                                           </p>
@@ -860,6 +927,15 @@ export function InstructorHomeworkSubmissions() {
                               }
                               className="w-full border-2 border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#B348FE] focus:border-[#B348FE] transition-all duration-200"
                             />
+                            {!isGraded(selectedSubmission) &&
+                              selectedSubmission.auto_score !== null &&
+                              selectedSubmission.auto_score !== undefined &&
+                              essayQuestions.length > 0 && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 font-bold mt-2">
+                                  الخانة معبّأة بدرجة الاختيارات ({selectedSubmission.auto_score}) — ضيف عليها درجة
+                                  الأسئلة المقالية ({essayTotalPoints} درجة كحد أقصى)
+                                </p>
+                              )}
                           </div>
 
                           <div>
@@ -913,7 +989,7 @@ export function InstructorHomeworkSubmissions() {
                             )}
                           </div>
 
-                          {selectedSubmission.grade !== null && selectedSubmission.grade !== undefined && (
+                          {isGraded(selectedSubmission) && (
                             <div className="mt-4 p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900 rounded-2xl">
                               <div className="flex items-center justify-between">
                                 <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">

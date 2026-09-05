@@ -70,7 +70,7 @@ export function LessonCard({
 </div>
 
     <Button
-  variant="danger"
+  variant="destructive"
   size="icon"
   className="rounded-xl"
   onClick={(e) => {

@@ -137,7 +137,7 @@ const examsCount = section.lessons.reduce(
   </Button>
 
   <Button
-    variant="danger"
+    variant="destructive"
     size="sm"
     onClick={(e) => {
       e.stopPropagation();
