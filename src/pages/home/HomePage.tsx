@@ -26,7 +26,7 @@ import {
   ArrowLeft,
   GraduationCap,
 } from "lucide-react";
-import { Bell, X, Clock3 } from "lucide-react";
+
 import {
   TEACHER,
   STATS,
@@ -57,7 +57,6 @@ const { user } = useApp();
     useState<"secondary" | "prep">("secondary");
 
     const [courses, setCourses] = useState<any[]>([]);
-    const [announcement, setAnnouncement] = useState<any>(null);
 const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 const [showParentModal, setShowParentModal] = useState(false);
 
@@ -84,7 +83,6 @@ useEffect(() => {
 
 useEffect(() => {
   loadCourses();
-  loadAnnouncement();
   if (user) loadTasks();
 }, [user]);
 
@@ -209,38 +207,7 @@ const FEATURES = [
   },
 ];
 
-const loadAnnouncement = async () => {
-  if (!user) return;
 
-const { data } = await supabase
-.from("notification_reads")
-.select(`
-id,
-student_id,
-read_at,
-notifications (
-id,
-title,
-content,
-type,
-icon,
-color,
-is_pinned,
-created_at
-)
-`)
-.eq("student_id", user.studentId)
-.is("read_at", null)
-.order("created_at", {
-  ascending: false,
-  foreignTable: "notifications",
-})
-.limit(1);
-
-  if (data) {
-    setAnnouncement(data?.[0] ?? null);
-  }
-};
 
 const openNotesModal = async () => {
   if (!user) {
@@ -475,57 +442,7 @@ const saveNote = async () => {
   setNoteSaving(false);
 };
 
-const dismissAnnouncement = async () => {
-  if (!announcement) return;
 
-  const { error } = await supabase
-    .from("notification_reads")
-.update({
-read_at: new Date().toISOString(),
-})
-    .eq("id", announcement.id);
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  setAnnouncement(null);
-};
-
-useEffect(() => {
-  if (!announcement?.notifications) return;
-
-  const timer = setTimeout(() => {
-    dismissAnnouncement();
-  }, 10000);
-
-  return () => clearTimeout(timer);
-}, [announcement]);
-
-const formatAnnouncementDate = (date: string) => {
-  // نتأكد إن التاريخ بيتفسر كـ UTC حتى لو Supabase رجعه من غير Z
-  const normalizedDate =
-    date.includes("Z") || date.includes("+") ? date : `${date}Z`;
-
-  const created = new Date(normalizedDate);
-  const now = new Date();
-
-  const diff = Math.floor((now.getTime() - created.getTime()) / 1000);
-
-  if (diff < 60) return "الآن";
-
-  if (diff < 3600)
-    return `منذ ${Math.floor(diff / 60)} دقيقة`;
-
-  if (diff < 86400)
-    return `منذ ${Math.floor(diff / 3600)} ساعة`;
-
-  return created.toLocaleDateString("ar-EG", {
-    month: "short",
-    day: "numeric",
-  });
-};
 
 const [scrollY, setScrollY] = useState(0);
 
@@ -549,139 +466,6 @@ return (
   dir="rtl"
 >
      <Navbar />
-
-{user && announcement?.notifications && (
-  <div
-    className="
-      fixed
-      top-[78px]
-      left-0
-      right-0
-      z-[9999]
-      px-4
-      animate-in
-      slide-in-from-top-3
-      duration-500
-    "
-  >
-    <div
-      className="
-        max-w-[1350px]
-        mx-auto
-        overflow-hidden
-        rounded-2xl
-        border
-        border-[#E8D6FF]
-        bg-white/90
-        dark:bg-[#141414]/95
-        backdrop-blur-xl
-        shadow-[0_15px_45px_rgba(179,72,254,.15)]
-      "
-    >
-
-      <div className="h-1 w-full bg-gray-100 dark:bg-[#262626] overflow-hidden">
-        <div
-          key={announcement.id}
-          className="h-full bg-gradient-to-r from-emerald-400 via-blue-500 to-pink-500"
-          style={{
-            animation: "announcement-shrink 10s linear forwards",
-          }}
-        />
-      </div>
-
-      <style>{`
-        @keyframes announcement-shrink {
-          from { width: 100%; }
-          to { width: 0%; }
-        }
-      `}</style>
-
-      <div className="flex items-center justify-between px-5 py-4">
-
-        <div className="flex items-center gap-4">
-
-          <div
-            className="
-              w-11
-              h-11
-              rounded-xl
-              bg-[#B348FE]
-              flex
-              items-center
-              justify-center
-              text-white
-              shadow-md
-            "
-          >
-            <Bell size={20} />
-          </div>
-
-          <div>
-
-            <div className="flex items-center gap-2 flex-wrap">
-
-              <span className="font-extrabold text-[14px] text-[#2B1042] dark:text-white">
-                رسالة من مستر زياد ربيع
-              </span>
-
-              {announcement.notifications?.type === "important" && (
-                <span className="px-2 py-1 rounded-full bg-[#B348FE] text-white text-[10px] font-bold">
-                  مهم
-                </span>
-              )}
-
-              {announcement.notifications?.type === "urgent" && (
-                <span className="px-2 py-1 rounded-full bg-red-500 text-white text-[10px] font-bold">
-                  عاجل
-                </span>
-              )}
-
-            </div>
-
-            <p className="mt-2 text-[14px] text-gray-700 dark:text-gray-300 leading-7 whitespace-pre-line">
-              {announcement.notifications?.content}
-            </p>
-
-            <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
-
-              <Clock3 size={14} />
-
-              <span>
-                {formatAnnouncementDate(announcement.notifications?.created_at)}
-              </span>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <button
-          onClick={dismissAnnouncement}
-          className="
-            w-10
-            h-10
-            rounded-full
-            flex
-            items-center
-            justify-center
-            text-gray-500
-            hover:bg-[#F3F3F3]
-            dark:hover:bg-[#232323]
-            hover:text-red-500
-            transition-all
-          "
-        >
-          <X size={18} />
-        </button>
-
-      </div>
-
-    </div>
-  </div>
-)}
-
-      
 
       <section
 className="

@@ -141,41 +141,41 @@ const handleScroll = () => {
             transition={{ duration: 0.3 }}
             className="w-full overflow-hidden bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] text-white"
           >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-11 sm:h-12 flex items-center justify-between gap-2 sm:gap-3">
-              <div className="flex items-center gap-2 min-w-0">
-                <Timer size={16} className="text-[#B348FE] flex-shrink-0 hidden sm:block" />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-3 sm:gap-4">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Timer size={18} className="text-[#B348FE] flex-shrink-0 hidden sm:block" />
                 <span className="w-2 h-2 rounded-full bg-[#B348FE] flex-shrink-0 animate-pulse sm:hidden" />
-                <span className="truncate text-[11px] sm:text-[13px] font-bold">
+                <span className="truncate text-[13px] sm:text-[15px] font-bold">
                   {bannerNotif.title}
                 </span>
               </div>
 
-              <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                 {[
                   { value: timeLeft.days, label: "يوم" },
                   { value: timeLeft.hours, label: "س" },
                   { value: timeLeft.minutes, label: "د" },
                   { value: timeLeft.seconds, label: "ث" },
                 ].map((unit, i) => (
-                  <div key={i} className="flex items-center gap-1 sm:gap-1.5">
-                    <div className="flex flex-col items-center bg-white/10 rounded-lg px-1.5 py-1 sm:px-2.5 sm:py-1.5 min-w-[30px] sm:min-w-[38px]">
-                      <span className="text-[12px] sm:text-[14px] font-black leading-none tabular-nums">
+                  <div key={i} className="flex items-center gap-1.5 sm:gap-2">
+                    <div className="flex flex-col items-center bg-white/10 rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 min-w-[38px] sm:min-w-[50px]">
+                      <span className="text-[14px] sm:text-[18px] font-black leading-none tabular-nums">
                         {String(unit.value).padStart(2, "0")}
                       </span>
-                      <span className="text-[7px] sm:text-[8px] text-white/60 leading-none mt-0.5">
+                      <span className="text-[8px] sm:text-[9px] text-white/60 leading-none mt-0.5">
                         {unit.label}
                       </span>
                     </div>
-                    {i < 3 && <span className="text-white/30 font-bold text-xs">:</span>}
+                    {i < 3 && <span className="text-white/30 font-bold text-sm">:</span>}
                   </div>
                 ))}
               </div>
 
               <button
                 onClick={dismissBanner}
-                className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                className="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
               >
-                <X size={14} />
+                <X size={16} />
               </button>
             </div>
           </motion.div>
