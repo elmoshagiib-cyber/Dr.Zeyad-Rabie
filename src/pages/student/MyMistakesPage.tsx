@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Sparkles } from "lucide-react";
+import { BookOpen, Sparkles, Target, RefreshCw, Trophy } from "lucide-react";
 import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 import { Button } from "../../components/ui/Button";
 import { supabase } from "../../lib/supabase";
@@ -104,49 +104,121 @@ export function MyMistakesPage() {
     );
   }
 
+  const steps = [
+    {
+      icon: Target,
+      title: "بنجمّعلك أسئلتك الغلط",
+      desc: "من كل امتحاناتك وواجباتك السابقة، من غير ما تدور عليها بنفسك.",
+    },
+    {
+      icon: RefreshCw,
+      title: "تختار وتراجع براحتك",
+      desc: "امتحان خاص بيك من غير وقت، تراجع فيه لحد ما تتأكد إنك فاهم صح.",
+    },
+    {
+      icon: Trophy,
+      title: "متكررش نفس الغلطة",
+      desc: "كل مرة تراجع، هتبقى أقرب إنك تبقى أجمد واحد وسط العيلة.",
+    },
+  ];
+
   return (
     <StudentLayout>
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto p-4 sm:p-6">
-          <div className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 dark:border-[#2A2A2A] p-6 sm:p-10">
-            <div className="text-center mb-6">
-              <h1 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white mb-2">
-                خليك أقوى واحد وسط عيلتنا
-              </h1>
-              <div className="w-16 h-1 bg-gradient-to-r from-emerald-400 to-pink-400 rounded-full mx-auto" />
-            </div>
+      <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#0B0B0B] dark:via-[#111111] dark:to-[#0B0B0B] min-h-screen">
+        <div className="max-w-2xl mx-auto p-4 sm:p-6 lg:p-10">
+          <div
+            className="
+              relative overflow-hidden
+              bg-white dark:bg-[#111111]
+              rounded-[28px] sm:rounded-[32px]
+              border border-[#EAD8FF] dark:border-[#2A2A2A]
+              shadow-[0_10px_40px_rgba(179,72,254,.10)]
+              p-6 sm:p-10
+            "
+          >
+            {/* توهج خلفية خفيف */}
+            <div className="absolute -top-24 -left-24 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[90px] pointer-events-none" />
+            <div className="absolute -bottom-24 -right-24 w-64 h-64 rounded-full bg-pink-400/10 blur-[90px] pointer-events-none" />
 
-            {wrongQuestionIds.length === 0 ? (
-              <div className="text-center py-8">
-                <BookOpen className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />
-                <p className="text-gray-600 dark:text-gray-400 font-bold">
-                  مفيش عندك أي أسئلة غلط دلوقتي، أنت شاطر!
+            <div className="relative z-10">
+              {/* Header */}
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#B348FE] to-[#9E2FFF] flex items-center justify-center mx-auto mb-5 shadow-lg shadow-[#B348FE]/30">
+                  <Sparkles className="text-white" size={28} />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2">
+                  خليك أقوى واحد وسط عيلتنا
+                </h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  راجع أخطائك السابقة وحوّلها لنقاط قوة
                 </p>
               </div>
-            ) : (
-              <>
-                <p className="text-center text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
-                  عندك <span className="font-black text-[#B348FE]">{wrongQuestionIds.length} أسئلة</span> محتاج تراجعهم. يلا نبدأ مراجعة عشان اجمد واحد وسط العيلة
-                </p>
 
-                <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-5 mb-6 text-center">
-                  <p className="font-black text-gray-900 dark:text-white mb-2">
-                    ازاي بتشتغل؟
+              {wrongQuestionIds.length === 0 ? (
+                <div className="text-center py-10">
+                  <div className="w-20 h-20 rounded-full bg-emerald-50 dark:bg-emerald-950/20 flex items-center justify-center mx-auto mb-5">
+                    <BookOpen className="text-emerald-500" size={32} />
+                  </div>
+                  <p className="text-gray-800 dark:text-gray-200 font-black text-lg mb-1">
+                    مفيش عندك أي أسئلة غلط دلوقتي
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    هنجيبلك الأسئلة اللي غلطت فيها في امتحاناتك السابقة، وانت تختار عدد الأسئلة اللي عايز تراجعها. هنديك امتحان خاص بيك من غير وقت، عشان تستفيد من اخطائك وتتأكد إنك فهمت صح ومش هترجع تغلط تاني — كده هتبقى اجمد واحد وسط العيلة.
-                  </p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">أنت شاطر، كمّل كده!</p>
                 </div>
+              ) : (
+                <>
+                  {/* عداد الأسئلة */}
+                  <div className="flex items-center justify-center gap-3 mb-8">
+                    <div className="bg-[#F6EEFF] dark:bg-[#2B103D] border border-[#EAD8FF] dark:border-[#3A1854] rounded-2xl px-6 py-4 text-center">
+                      <p className="text-3xl font-black text-[#B348FE] leading-none mb-1">
+                        {wrongQuestionIds.length}
+                      </p>
+                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400">سؤال محتاج مراجعة</p>
+                    </div>
+                  </div>
 
-                <Button
-                  onClick={startReview}
-                  className="w-full bg-[#B348FE] hover:bg-[#9E2FFF] text-white font-black py-3 text-base"
-                >
-                  <Sparkles size={18} />
-                  امتحان خاص بيك
-                </Button>
-              </>
-            )}
+                  {/* خطوات الشرح */}
+                  <div className="space-y-3 mb-8">
+                    {steps.map((step) => {
+                      const Icon = step.icon;
+                      return (
+                        <div
+                          key={step.title}
+                          className="flex items-start gap-4 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-4"
+                        >
+                          <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] flex items-center justify-center flex-shrink-0">
+                            <Icon className="text-[#B348FE]" size={18} />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-black text-gray-900 dark:text-white text-sm mb-1">
+                              {step.title}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                              {step.desc}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <Button
+                    onClick={startReview}
+                    className="
+                      w-full
+                      bg-gradient-to-r from-[#B348FE] to-[#9E2FFF]
+                      hover:from-[#9E2FFF] hover:to-[#8B1FEF]
+                      text-white font-black py-3.5 text-base
+                      shadow-lg shadow-[#B348FE]/30
+                      hover:shadow-xl hover:shadow-[#B348FE]/40
+                      transition-all duration-300
+                    "
+                  >
+                    <Sparkles size={18} />
+                    امتحان خاص بيك
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </main>
