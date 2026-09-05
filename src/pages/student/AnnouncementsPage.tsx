@@ -134,7 +134,7 @@ export function AnnouncementsPage() {
                       )}
                     </div>
 
-                    {notif.content && (
+                    {notif.content && notif.content !== notif.title && (
                       <p className="text-gray-500 dark:text-gray-400 mt-2 text-xs sm:text-sm leading-6 sm:leading-7 whitespace-pre-line break-words">
                         {notif.content}
                       </p>

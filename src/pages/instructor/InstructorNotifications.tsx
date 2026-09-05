@@ -1221,7 +1221,9 @@ const { error: studentNotifError } = await supabase
                                 </span>
                               )}
                             </p>
-                            <p className="text-xs text-slate-500 mt-0.5">{notification.content}</p>
+                            {notification.content && notification.content !== notification.title && (
+                              <p className="text-xs text-slate-500 mt-0.5">{notification.content}</p>
+                            )}
                           </div>
                         </div>
 
