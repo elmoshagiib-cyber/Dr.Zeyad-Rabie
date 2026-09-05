@@ -330,10 +330,12 @@ const [showConfirmModal, setShowConfirmModal] = useState(false);
           localStorage.removeItem(`exam_${id}_answers`);
 
           // تسجيل إجابة الطالب على كل سؤال لوحده (لميزة مراجعة الأخطاء)
+          // ملاحظة: بنستخدم نفس طريقة تحديد "الإجابة الصحيحة" المُستخدمة في calcScore
+          // (الاعتماد على c.is_correct) عشان النتيجة المسجلة هنا تتطابق مع درجتك الفعلية.
           const answersRows = questions.map((q) => {
             const selectedId = answers[String(q.id)] || null;
             const correctChoice = (q.question_choices || []).find(
-              (c: any) => String(c.sort_order - 1) === String(q.correct_answer)
+              (c: any) => c.is_correct
             );
             const isCorrect = !!(selectedId && correctChoice && selectedId === correctChoice.id);
 
