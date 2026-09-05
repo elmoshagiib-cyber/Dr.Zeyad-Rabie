@@ -21,7 +21,6 @@ import {
   Clock,
   Pin,
   Settings,
-  Filter,
 } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import toast from "react-hot-toast";
@@ -175,18 +174,6 @@ export default function InstructorNotifications() {
         supabase.from("notification_settings").select("*"),
       ]);
 
-      if (notificationsRes.error) {
-  console.error(notificationsRes.error);
-}
-
-if (studentsRes.error) {
-  console.error(studentsRes.error);
-}
-
-if (settingsRes.error) {
-  console.error(settingsRes.error);
-}
-
       if (notificationsRes.error) throw notificationsRes.error;
       if (studentsRes.error) throw studentsRes.error;
       if (settingsRes.error) throw settingsRes.error;
@@ -226,11 +213,6 @@ if (settingsRes.error) {
   useEffect(() => {
     loadData();
   }, [loadData]);
-
-  const grades = useMemo(() => {
-    const uniqueGrades = Array.from(new Set(students.map((s) => s.grade))).filter(Boolean);
-    return uniqueGrades;
-  }, [students]);
 
   const filteredStudents = useMemo(() => {
     if (!studentSearch.trim()) return students;
@@ -619,9 +601,11 @@ const { error: studentNotifError } = await supabase
                           type="text"
                           value={formData.title}
                           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                          maxLength={100}
                           className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
                           placeholder="عنوان الإشعار"
                         />
+                        <p className="text-xs text-slate-400 mt-1 text-left">{formData.title.length}/100</p>
                       </div>
 
                       <div>
@@ -632,9 +616,11 @@ const { error: studentNotifError } = await supabase
                           value={formData.content}
                           onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                           rows={4}
+                          maxLength={500}
                           className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all resize-none"
                           placeholder="محتوى الإشعار"
                         />
+                        <p className="text-xs text-slate-400 mt-1 text-left">{formData.content.length}/500</p>
                       </div>
 
                       <div>
@@ -753,6 +739,7 @@ const { error: studentNotifError } = await supabase
                                 setShowStudentDropdown(true);
                               }}
                               onFocus={() => setShowStudentDropdown(true)}
+                              onBlur={() => setTimeout(() => setShowStudentDropdown(false), 150)}
                               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
                               placeholder="ابحث عن طالب..."
                             />
@@ -763,13 +750,16 @@ const { error: studentNotifError } = await supabase
                           </div>
 
                           <AnimatePresence>
-                            {showStudentDropdown && filteredStudents.length > 0 && (
+                            {showStudentDropdown && (
                               <motion.div
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
                                 className="absolute z-10 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto"
                               >
+                                {filteredStudents.length === 0 && (
+                                  <p className="px-4 py-3 text-sm text-slate-500 text-center">لا يوجد طلاب مطابقين</p>
+                                )}
                                 {filteredStudents.slice(0, 50).map((student) => (
                                   <button
                                     key={student.id}
@@ -952,7 +942,6 @@ const { error: studentNotifError } = await supabase
                     <tbody>
                       {filteredNotifications.map((notification) => {
                         const typeInfo = notificationTypeMap[notification.type] || notificationTypeMap.general;
-                        const TypeIcon = typeInfo.icon;
 
                         return (
                           <tr
@@ -1034,7 +1023,6 @@ const { error: studentNotifError } = await supabase
                 <div className="md:hidden space-y-3">
                   {filteredNotifications.map((notification) => {
                     const typeInfo = notificationTypeMap[notification.type] || notificationTypeMap.general;
-                    const TypeIcon = typeInfo.icon;
 
                     return (
                       <div
