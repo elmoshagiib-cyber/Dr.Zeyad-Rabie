@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { Footer } from "../components/layout/Footer";
+import { Footer } from "../../components/layout/Footer";
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from "react-router-dom";
-import { Navbar } from "../components/layout/Navbar";
-import { supabase } from "../lib/supabase";
+import { Navbar } from "../../components/layout/Navbar";
+import { supabase } from "../../lib/supabase";
 import {
   Eye, EyeOff, Phone, Lock, User, Mail, BookOpen,
   Layers, ChevronLeft, Loader2, CheckCircle2, MapPin, UserCheck, X
 } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
-import HeroSection from '../components/HeroSection';
+import { useTheme } from '../../context/ThemeContext';
+import HeroSection from '../../components/HeroSection';
 
 const GRADES = [
   'الصف الأول الثانوي',

@@ -1,7 +1,7 @@
 import { ReactNode, useState } from "react";
-import { StudentDashboardSidebar } from "../../components/layout/sidebar/StudentDashboardSidebar";
+import { StudentDashboardSidebar } from "./StudentDashboardSidebar";
 import { Menu } from "lucide-react";
-import { Navbar } from "../../components/layout/Navbar";
+import { Navbar } from "../Navbar";
 
 type Props = {
   children: ReactNode;

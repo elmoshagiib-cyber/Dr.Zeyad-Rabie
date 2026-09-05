@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BookOpen, Sparkles } from "lucide-react";
-import StudentLayout from "./StudentLayout";
+import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 import { Button } from "../../components/ui/Button";
 import { supabase } from "../../lib/supabase";
 import { useApp } from "../../context/AppContext";

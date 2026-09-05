@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Trophy, Star, TrendingUp } from "lucide-react";
-import StudentLayout from "./StudentLayout";
+import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Avatar } from "../../components/ui/Avatar";
 import { Badge } from "../../components/ui/Badge";

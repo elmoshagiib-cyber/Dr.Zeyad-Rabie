@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { BookOpen, Clock, ChevronDown, ChevronUp, Play } from "lucide-react";
-import StudentLayout from "./StudentLayout";
+import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useApp } from "../../context/AppContext";

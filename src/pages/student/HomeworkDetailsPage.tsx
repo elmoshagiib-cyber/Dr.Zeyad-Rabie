@@ -18,7 +18,7 @@ import { Card, CardContent } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { useApp } from "../../context/AppContext";
 import { supabase } from "../../lib/supabase";
-import StudentLayout from "./StudentLayout";
+import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 
 interface HwQuestion {
   id: number;

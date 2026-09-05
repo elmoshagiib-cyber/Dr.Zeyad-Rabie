@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 import { Badge } from "../../components/ui/Badge";
-import StudentLayout from "./StudentLayout";
+import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 import { useApp } from "../../context/AppContext";
 import { supabase } from "../../lib/supabase";
 

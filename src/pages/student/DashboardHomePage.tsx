@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bookmark, Lightbulb, CheckSquare, ArrowRight, PlayCircle, Clock3, ClipboardList, CheckCircle2 } from "lucide-react";
-import StudentLayout from "./StudentLayout";
+import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { useApp } from "../../context/AppContext";
 import { supabase } from "../../lib/supabase";

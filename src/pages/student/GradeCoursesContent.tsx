@@ -1,10 +1,10 @@
-// src/components/student/courses/GradeCoursesContent.tsx
+// src/pages/student/GradeCoursesContent.tsx
 
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../../../lib/supabase";
-import { Card, CardContent } from "../../ui/Card";
-import { Button } from "../../ui/Button";
+import { supabase } from "../../lib/supabase";
+import { Card, CardContent } from "../../components/ui/Card";
+import { Button } from "../../components/ui/Button";
 import { BookOpen, Clock, Tag, X } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { ShieldCheck } from "lucide-react";

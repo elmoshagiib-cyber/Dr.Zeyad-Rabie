@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Navbar } from "../components/layout/Navbar";
-import { useApp } from "../context/AppContext";
-import { supabase } from "../lib/supabase";
-import { Footer } from "../components/layout/Footer";
+import { Navbar } from "../../components/layout/Navbar";
+import { useApp } from "../../context/AppContext";
+import { supabase } from "../../lib/supabase";
+import { Footer } from "../../components/layout/Footer";
 import {
   Eye, EyeOff, Phone, Lock,
   Loader2, CheckCircle2, LogIn, X
 } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
-import HeroSection from '../components/HeroSection';
+import { useTheme } from '../../context/ThemeContext';
+import HeroSection from '../../components/HeroSection';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 

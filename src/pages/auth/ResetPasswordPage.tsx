@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Navbar } from "../components/layout/Navbar";
-import { Footer } from "../components/layout/Footer";
-import { supabase } from "../lib/supabase";
-import { useTheme } from "../context/ThemeContext";
+import { Navbar } from "../../components/layout/Navbar";
+import { Footer } from "../../components/layout/Footer";
+import { supabase } from "../../lib/supabase";
+import { useTheme } from "../../context/ThemeContext";
 import {
   Eye,
   EyeOff,

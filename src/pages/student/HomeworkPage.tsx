@@ -1,5 +1,5 @@
 import { FileText, CheckCircle, Clock, Award } from "lucide-react";
-import StudentLayout from "./StudentLayout";
+import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { useEffect, useState } from "react";

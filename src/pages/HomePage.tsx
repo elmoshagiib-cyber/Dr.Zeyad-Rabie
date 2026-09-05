@@ -14,7 +14,7 @@ import { Badge } from "../components/ui/Badge";
 import { Avatar } from "../components/ui/Avatar";
 import { Download } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
-import GradeCoursesContent from "../components/student/courses/GradeCoursesContent";
+import GradeCoursesContent from "./student/GradeCoursesContent";
 import toast from "react-hot-toast";
 import {
   ChevronRight,

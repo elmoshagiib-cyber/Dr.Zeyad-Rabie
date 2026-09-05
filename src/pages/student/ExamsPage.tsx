@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
-import StudentLayout from "./StudentLayout";
+import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 
 export function ExamsPage() {
   const navigate = useNavigate();
