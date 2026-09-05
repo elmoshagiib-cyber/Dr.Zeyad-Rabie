@@ -2,19 +2,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useApp } from "../context/AppContext";
-import { supabase } from "../lib/supabase";
-import { ScrollReveal } from "../components/layout/ScrollReveal";
-import { Navbar } from "../components/layout/Navbar";
-import { Footer } from "../components/layout/Footer";
-import StudentGradeCard from "../components/home/StudentGradeCard";
-import { Button } from "../components/ui/Button";
-import { Card, CardContent } from "../components/ui/Card";
-import { Badge } from "../components/ui/Badge";
-import { Avatar } from "../components/ui/Avatar";
+import { useApp } from "../../context/AppContext";
+import { supabase } from "../../lib/supabase";
+import { ScrollReveal } from "../../components/layout/ScrollReveal";
+import { Navbar } from "../../components/layout/Navbar";
+import { Footer } from "../../components/layout/Footer";
+import { Button } from "../../components/ui/Button";
+import { Card, CardContent } from "../../components/ui/Card";
+import { Badge } from "../../components/ui/Badge";
+import { Avatar } from "../../components/ui/Avatar";
 import { Download } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
-import GradeCoursesContent from "./student/GradeCoursesContent";
+import GradeCoursesContent from "./GradeCoursesContent";
 import toast from "react-hot-toast";
 import {
   ChevronRight,
@@ -36,10 +35,10 @@ import {
   FAQS,
   ANNOUNCEMENTS,
   GRADES,
-} from "../data/mockData";
+} from "../../data/mockData";
 
-import InstallToast from "../components/ui/InstallToast";
-import { ParentAccessModal } from "../components/layout/navbar/ParentAccessModal";
+import InstallToast from "../../components/ui/InstallToast";
+import { ParentAccessModal } from "../../components/layout/navbar/ParentAccessModal";
 import { NotebookPen, X as CloseIcon, Loader2, Save, Plus, Trash2, ListChecks, StickyNote } from "lucide-react";
 
 const gradeColors: Record<string, string> = {

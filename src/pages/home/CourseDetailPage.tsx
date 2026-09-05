@@ -22,14 +22,14 @@ import {
   HiArrowPath,
   HiDocumentPlus,
 } from "react-icons/hi2";
-import { Navbar } from "../components/layout/Navbar";
-import { Footer } from "../components/layout/Footer";
-import { useApp } from "../context/AppContext";
-import { supabase } from "../lib/supabase";
+import { Navbar } from "../../components/layout/Navbar";
+import { Footer } from "../../components/layout/Footer";
+import { useApp } from "../../context/AppContext";
+import { supabase } from "../../lib/supabase";
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck } from "lucide-react";
-import { Button } from "../components/ui/Button";
+import { Button } from "../../components/ui/Button";
 import { FaWhatsapp } from "react-icons/fa";
 
 interface LessonProgress {

@@ -1,18 +1,18 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider, useApp } from "./context/AppContext";
-import { HomePage } from "./pages/HomePage";
+import { HomePage } from "./pages/home/HomePage";
 import { MaintenanceMode } from "./components/MaintenanceMode";
 
 // غيّر true/false هنا عشان تشغّل أو توقف وضع الصيانة
 const MAINTENANCE_MODE = false;
 
-import { CourseDetailPage } from "./pages/CourseDetailPage";
+import { CourseDetailPage } from "./pages/home/CourseDetailPage";
 import { ThemeProvider } from "./context/ThemeContext";
 import { InstructorHomeworkSubmissions } from "./pages/instructor/InstructorHomeworkSubmissions";
 import StudentLoginPage from "./pages/auth/StudentLoginPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import StudentRegisterPage from "./pages/auth/StudentRegisterPage";
-import GradesPage from "./pages/student/GradesPage";
+import GradesPage from "./pages/home/GradesPage";
 import { StaffLoginPage } from "./pages/auth/StaffLoginPage";
 import { useState } from "react";
 import { Toaster } from "react-hot-toast";
@@ -27,7 +27,7 @@ import { MyCoursesPage } from "./pages/student/MyCourses";
 import { HomeworkPage } from "./pages/student/HomeworkPage";
 import { ExamsPage } from "./pages/student/ExamsPage";
 import ForumPage from "./pages/student/ForumPage";
-import GradeCoursesPage from "./pages/GradeCoursesPage";
+import GradeCoursesPage from "./pages/home/GradeCoursesPage";
 import DashboardHomePage from "./pages/student/DashboardHomePage";
 import { MyMistakesPage } from "./pages/student/MyMistakesPage";
 import { MistakesReviewQuizPage } from "./pages/student/MistakesReviewQuizPage";
@@ -51,7 +51,7 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useVisitTracker } from "./hooks/useVisitTracker";
 /* Admin */
-import { AdminDashboard } from "./pages/admin/AdminDashboard";
+
 
 function ProtectedRoute({
   children,
@@ -382,27 +382,7 @@ function AppRoutes() {
     </ProtectedRoute>
   }
 />
-      {/* Admin */}
-
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute roles={["admin"]}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/*"
-        element={
-          <ProtectedRoute roles={["admin"]}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
-
-
+  
       {/* Fallback */}
 
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
-import { Navbar } from "../components/layout/Navbar";
-import { Footer } from "../components/layout/Footer";
-import GradeCoursesContent from "./student/GradeCoursesContent";
+import { Navbar } from "../../components/layout/Navbar";
+import { Footer } from "../../components/layout/Footer";
+import GradeCoursesContent from "./GradeCoursesContent";
 
 export default function GradeCoursesPage() {
   const { grade } = useParams();
