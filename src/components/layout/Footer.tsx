@@ -164,7 +164,7 @@ export function Footer() {
             <div className="hidden sm:block w-px h-4 sm:h-5 lg:h-6 bg-white/20" />
 
             <a
-              href="https://wa.me/201109414585"
+              href="https://wa.me/201064858547"
               target="_blank"
               rel="noopener noreferrer"
               className="

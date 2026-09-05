@@ -152,7 +152,6 @@ export default function InstructorNotifications() {
 
   const [formData, setFormData] = useState({
     title: "",
-    content: "",
     type: "general",
     isPinned: false,
     targetType: "all",
@@ -295,7 +294,6 @@ const getStageFromGrade = (grade: string): string => {
   const resetForm = () => {
     setFormData({
       title: "",
-      content: "",
       type: "general",
       isPinned: false,
       targetType: "all",
@@ -308,8 +306,8 @@ const getStageFromGrade = (grade: string): string => {
 
   const handleSendNotification = async () => {
     try {
-      if (!formData.title.trim() || (!formData.isBanner && !formData.content.trim())) {
-        toast.error("يجب ملء الحقول المطلوبة");
+      if (!formData.title.trim()) {
+        toast.error("يجب كتابة نص الإشعار");
         return;
       }
 
@@ -338,11 +336,11 @@ const getStageFromGrade = (grade: string): string => {
 
       const sharedFields = {
         title: formData.title,
-        content: formData.isBanner ? formData.title : formData.content,
+        content: formData.title,
         type: formData.type,
         target_type: formData.isBanner ? "all" : formData.targetType,
         target_value: formData.isBanner ? null : formData.targetValue || null,
-        is_pinned: formData.isBanner ? false : formData.isPinned,
+        is_pinned: formData.isPinned,
         is_banner: formData.isBanner,
         banner_end_at: formData.isBanner ? new Date(formData.bannerEndAt).toISOString() : null,
         icon:
@@ -419,8 +417,7 @@ const getStageFromGrade = (grade: string): string => {
   const handleDuplicate = (notification: Notification) => {
     setEditingId(null);
     setFormData({
-      title: notification.title,
-      content: notification.content,
+      title: notification.content || notification.title,
       type: notification.type,
       isPinned: notification.is_pinned,
       targetType: notification.target_type,
@@ -438,8 +435,7 @@ const getStageFromGrade = (grade: string): string => {
   const handleEdit = (notification: Notification) => {
     setEditingId(notification.id);
     setFormData({
-      title: notification.title,
-      content: notification.content,
+      title: notification.content || notification.title,
       type: notification.type,
       isPinned: notification.is_pinned,
       targetType: notification.target_type,
@@ -685,7 +681,28 @@ const { error: studentNotifError } = await supabase
                       exit={{ opacity: 0, height: 0 }}
                       className="space-y-4"
                     >
-                      <div className="border border-dashed border-[#B348FE]/40 rounded-xl p-4 bg-[#B348FE]/5">
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                          نص الإشعار
+                        </label>
+                        <textarea
+                          value={formData.title}
+                          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                          rows={formData.isBanner ? 2 : 4}
+                          maxLength={formData.isBanner ? 120 : 500}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all resize-none"
+                          placeholder={
+                            formData.isBanner
+                              ? "مثال: فاضل على نهاية رحلة الثانوية العامة"
+                              : "اكتب نص الإشعار هنا"
+                          }
+                        />
+                        <p className="text-xs text-slate-400 mt-1 text-left">
+                          {formData.title.length}/{formData.isBanner ? 120 : 500}
+                        </p>
+                      </div>
+
+                      <div className="border border-dashed border-[#1E1B3A]/40 rounded-xl p-4 bg-[#1E1B3A]/5">
                         <label className="flex items-center gap-2 cursor-pointer mb-3">
                           <input
                             type="checkbox"
@@ -693,40 +710,17 @@ const { error: studentNotifError } = await supabase
                             onChange={(e) =>
                               setFormData({ ...formData, isBanner: e.target.checked, targetType: "all", targetValue: "" })
                             }
-                            className="w-5 h-5 rounded border-slate-300 text-[#B348FE] focus:ring-[#B348FE]"
+                            className="w-5 h-5 rounded border-slate-300 text-[#1E1B3A] focus:ring-[#1E1B3A]"
                           />
-                          <Timer size={18} className="text-[#B348FE]" />
+                          <Timer size={18} className="text-[#1E1B3A]" />
                           <span className="text-sm font-bold text-slate-700">
                             عرضه كشريط عد تنازلي أعلى الموقع (فوق الـ Navbar)
                           </span>
                         </label>
 
-                        {formData.isBanner && (
-                          <p className="text-xs text-slate-500 leading-relaxed">
-                            الشريط بيتعرض لكل زوار الموقع (مسجلين أو لأ)، فمفيش داعي تحدد مستلمين له، واكتب نص قصير وواضح لأنه هيظهر في مساحة صغيرة أعلى الموقع.
-                          </p>
-                        )}
-                      </div>
-
-                      {formData.isBanner ? (
-                        <>
+                        {formData.isBanner ? (
                           <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                              نص الشريط
-                            </label>
-                            <textarea
-                              value={formData.title}
-                              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                              rows={2}
-                              maxLength={120}
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all resize-none"
-                              placeholder="مثال: فاضل على نهاية رحلة الثانوية العامة"
-                            />
-                            <p className="text-xs text-slate-400 mt-1 text-left">{formData.title.length}/120</p>
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
+                            <label className="block text-xs font-bold text-slate-600 mb-2">
                               ينتهي العد التنازلي في
                             </label>
                             <input
@@ -736,45 +730,39 @@ const { error: studentNotifError } = await supabase
                               onChange={(e) =>
                                 setFormData({ ...formData, bannerEndAt: e.target.value })
                               }
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all"
                             />
                             <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                              العداد هيحسب تلقائيًا (أيام : ساعات : دقايق : ثواني) لحد التاريخ والوقت ده. الشريط هيفضل ظاهر لحد ما الوقت ينتهي أو المستخدم يقفله بزرار X.
+                              العداد هيحسب تلقائيًا (أيام : ساعات : دقايق : ثواني) لحد التاريخ والوقت ده.
                             </p>
                           </div>
-                        </>
-                      ) : (
+                        ) : (
+                          <p className="text-xs text-slate-500 leading-relaxed">
+                            من غير تيك هنا، الإشعار هيظهر في نفس الشريط أعلى الموقع كرسالة بس من غير عداد.
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="border border-slate-200 rounded-xl p-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.isPinned}
+                            onChange={(e) =>
+                              setFormData({ ...formData, isPinned: e.target.checked })
+                            }
+                            className="w-5 h-5 rounded border-slate-300 text-[#1E1B3A] focus:ring-[#1E1B3A]"
+                          />
+                          <Pin size={18} className="text-slate-600" />
+                          <span className="text-sm font-bold text-slate-700">تثبيت الإشعار</span>
+                        </label>
+                        <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                          لو مثبت: هيفضل يظهر للزائر تاني كل ما يفتح المنصة من جديد حتى لو كان قفله بزرار X قبل كده. لو مش مثبت: أول ما الزائر يقفله بـ X مش هيرجع يظهر له تاني.
+                        </p>
+                      </div>
+
+                      {!formData.isBanner && (
                         <>
-                          <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                              العنوان
-                            </label>
-                            <input
-                              type="text"
-                              value={formData.title}
-                              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                              maxLength={100}
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
-                              placeholder="عنوان الإشعار"
-                            />
-                            <p className="text-xs text-slate-400 mt-1 text-left">{formData.title.length}/100</p>
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                              المحتوى
-                            </label>
-                            <textarea
-                              value={formData.content}
-                              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                              rows={4}
-                              maxLength={500}
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all resize-none"
-                              placeholder="محتوى الإشعار"
-                            />
-                            <p className="text-xs text-slate-400 mt-1 text-left">{formData.content.length}/500</p>
-                          </div>
-
                           <div>
                             <label className="block text-sm font-bold text-slate-700 mb-2">
                               نوع الإشعار
@@ -782,7 +770,7 @@ const { error: studentNotifError } = await supabase
                             <select
                               value={formData.type}
                               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all"
                             >
                               {Object.entries(notificationTypeMap).map(([key, value]) => (
                                 <option key={key} value={key}>
@@ -790,21 +778,6 @@ const { error: studentNotifError } = await supabase
                                 </option>
                               ))}
                             </select>
-                          </div>
-
-                          <div>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={formData.isPinned}
-                                onChange={(e) =>
-                                  setFormData({ ...formData, isPinned: e.target.checked })
-                                }
-                                className="w-5 h-5 rounded border-slate-300 text-[#B348FE] focus:ring-[#B348FE]"
-                              />
-                              <Pin size={18} className="text-slate-600" />
-                              <span className="text-sm font-bold text-slate-700">تثبيت الإشعار</span>
-                            </label>
                           </div>
 
                           <div>
@@ -816,7 +789,7 @@ const { error: studentNotifError } = await supabase
                               onChange={(e) =>
                                 setFormData({ ...formData, targetType: e.target.value, targetValue: "" })
                               }
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all"
                             >
                               {Object.entries(targetTypeMap).map(([key, value]) => (
                                 <option key={key} value={key}>
@@ -836,7 +809,7 @@ const { error: studentNotifError } = await supabase
                                 onChange={(e) =>
                                   setFormData({ ...formData, targetValue: e.target.value })
                                 }
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all"
                               >
                                 <option value="">اختر المرحلة</option>
                                 <option value="الثانوية">الثانوية</option>
@@ -855,7 +828,7 @@ const { error: studentNotifError } = await supabase
                                 onChange={(e) =>
                                   setFormData({ ...formData, targetValue: e.target.value })
                                 }
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all"
                               >
                                 <option value="">اختر الصف</option>
                                 <optgroup label="المرحلة الإعدادية">
@@ -892,7 +865,7 @@ const { error: studentNotifError } = await supabase
                                   }}
                                   onFocus={() => setShowStudentDropdown(true)}
                                   onBlur={() => setTimeout(() => setShowStudentDropdown(false), 150)}
-                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#B348FE] focus:ring-2 focus:ring-[#B348FE]/20 outline-none transition-all"
+                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all"
                                   placeholder="ابحث عن طالب..."
                                 />
                                 <Search
@@ -935,7 +908,7 @@ const { error: studentNotifError } = await supabase
                           <div className="bg-slate-50 rounded-xl p-4">
                             <div className="flex items-center justify-between">
                               <span className="text-sm font-bold text-slate-700">عدد المستلمين:</span>
-                              <span className="text-lg font-black text-[#B348FE]">
+                              <span className="text-lg font-black text-[#1E1B3A]">
                                 {recipientCount} طالب
                               </span>
                             </div>
@@ -947,10 +920,10 @@ const { error: studentNotifError } = await supabase
                         onClick={() => setShowConfirm(true)}
                         disabled={
                           !formData.title.trim() ||
-                          (formData.isBanner ? !formData.bannerEndAt : !formData.content.trim() || recipientCount === 0) ||
+                          (formData.isBanner ? !formData.bannerEndAt : recipientCount === 0) ||
                           sending
                         }
-                        className="w-full bg-[#B348FE] text-white font-bold py-4 rounded-xl hover:bg-[#9E2FFF] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full bg-[#1E1B3A] text-white font-bold py-4 rounded-xl hover:bg-[#0F172A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       >
                         <Send size={20} />
                         {editingId ? "تحديث الإشعار" : "إرسال الإشعار"}
@@ -1174,19 +1147,17 @@ const { error: studentNotifError } = await supabase
                             </td>
                             <td className="px-4 py-3">
                               <div className="flex justify-center gap-1">
-                                {notification.is_banner && (
-                                  <button
-                                    onClick={() => toggleBannerActive(notification.id, notification.is_active)}
-                                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
-                                      notification.is_active
-                                        ? "bg-[#B348FE]/10 text-[#B348FE] hover:bg-[#B348FE]/20"
-                                        : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                                    }`}
-                                    title={notification.is_active ? "إيقاف الشريط" : "تفعيل الشريط"}
-                                  >
-                                    <Timer size={14} />
-                                  </button>
-                                )}
+                                <button
+                                  onClick={() => toggleBannerActive(notification.id, notification.is_active)}
+                                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                                    notification.is_active
+                                      ? "bg-[#B348FE]/10 text-[#B348FE] hover:bg-[#B348FE]/20"
+                                      : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                  }`}
+                                  title={notification.is_active ? "إخفاء من الشريط العلوي" : "إظهار في الشريط العلوي"}
+                                >
+                                  <Timer size={14} />
+                                </button>
                                 <button
                                   onClick={() => handleEdit(notification)}
                                   className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center transition-all duration-200"
@@ -1271,19 +1242,17 @@ const { error: studentNotifError } = await supabase
                         </div>
 
                         <div className="flex gap-2 pt-2 border-t border-slate-100">
-                          {notification.is_banner && (
-                            <button
-                              onClick={() => toggleBannerActive(notification.id, notification.is_active)}
-                              className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold ${
-                                notification.is_active
-                                  ? "bg-[#B348FE]/10 text-[#B348FE]"
-                                  : "bg-slate-100 text-slate-500"
-                              }`}
-                            >
-                              <Timer size={14} />
-                              {notification.is_active ? "إيقاف" : "تفعيل"}
-                            </button>
-                          )}
+                          <button
+                            onClick={() => toggleBannerActive(notification.id, notification.is_active)}
+                            className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold ${
+                              notification.is_active
+                                ? "bg-[#B348FE]/10 text-[#B348FE]"
+                                : "bg-slate-100 text-slate-500"
+                            }`}
+                          >
+                            <Timer size={14} />
+                            {notification.is_active ? "إيقاف" : "تفعيل"}
+                          </button>
                           <button
                             onClick={() => handleEdit(notification)}
                             className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl bg-blue-50 text-blue-600 text-xs font-bold"

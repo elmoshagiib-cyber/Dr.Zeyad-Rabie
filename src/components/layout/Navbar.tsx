@@ -24,17 +24,15 @@ const [scrollProgress, setScrollProgress] = useState(0);
 const [isScrolled, setIsScrolled] = useState(false);
 const [unreadCount, setUnreadCount] = useState(0);
 
-const [bannerNotif, setBannerNotif] = useState<{ id: number; title: string; banner_end_at: string } | null>(null);
+const [bannerNotif, setBannerNotif] = useState<{ id: number; title: string; is_pinned: boolean; banner_end_at: string | null } | null>(null);
 const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
 const [bannerVisible, setBannerVisible] = useState(false);
 
 const loadBanner = useCallback(async () => {
   const { data, error } = await supabase
     .from("notifications")
-    .select("id, title, banner_end_at")
-    .eq("is_banner", true)
+    .select("id, title, is_pinned, is_banner, banner_end_at")
     .eq("is_active", true)
-    .gt("banner_end_at", new Date().toISOString())
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -47,9 +45,18 @@ const loadBanner = useCallback(async () => {
     return;
   }
 
+  // لو ده إشعار "شريط عداد" وانتهى وقته، اعتبره غير موجود
+  if (data.is_banner && data.banner_end_at && new Date(data.banner_end_at).getTime() <= Date.now()) {
+    setBannerNotif(null);
+    setBannerVisible(false);
+    return;
+  }
+
   const dismissedId = localStorage.getItem("dismissed_banner_id");
+  const wasDismissed = dismissedId === String(data.id);
+
   setBannerNotif(data);
-  setBannerVisible(dismissedId !== String(data.id));
+  setBannerVisible(data.is_pinned || !wasDismissed);
 }, []);
 
 useEffect(() => {
@@ -69,10 +76,13 @@ useEffect(() => {
 }, [loadBanner]);
 
 useEffect(() => {
-  if (!bannerNotif?.banner_end_at) return;
+  if (!bannerNotif?.banner_end_at) {
+    setTimeLeft(null);
+    return;
+  }
 
   const updateCountdown = () => {
-    const diff = new Date(bannerNotif.banner_end_at).getTime() - Date.now();
+    const diff = new Date(bannerNotif.banner_end_at as string).getTime() - Date.now();
 
     if (diff <= 0) {
       setBannerVisible(false);
@@ -149,7 +159,7 @@ const handleScroll = () => {
     <div className="fixed top-0 left-0 right-0 z-50 w-full flex flex-col">
 
       <AnimatePresence>
-        {bannerVisible && bannerNotif && timeLeft && (
+        {bannerVisible && bannerNotif && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -165,30 +175,32 @@ const handleScroll = () => {
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                {[
-                  { value: timeLeft.seconds, label: "ث" },
-                  { value: timeLeft.minutes, label: "د" },
-                  { value: timeLeft.hours, label: "س" },
-                  { value: timeLeft.days, label: "يوم", highlight: true },
-                ].map((unit, i) => (
-                  <div key={i} className="flex items-center gap-1.5 sm:gap-2">
-                    {i > 0 && <span className="text-white/30 font-bold text-sm">:</span>}
-                    <div
-                      className={`flex flex-col items-center rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 min-w-[38px] sm:min-w-[50px] ${
-                        unit.highlight ? "bg-red-500" : "bg-white/10"
-                      }`}
-                    >
-                      <span className="text-[14px] sm:text-[18px] font-black leading-none tabular-nums text-white">
-                        {String(unit.value).padStart(2, "0")}
-                      </span>
-                      <span className={`text-[8px] sm:text-[9px] leading-none mt-0.5 ${unit.highlight ? "text-white/85" : "text-white/60"}`}>
-                        {unit.label}
-                      </span>
+              {timeLeft && (
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                  {[
+                    { value: timeLeft.seconds, label: "ث" },
+                    { value: timeLeft.minutes, label: "د" },
+                    { value: timeLeft.hours, label: "س" },
+                    { value: timeLeft.days, label: "يوم", highlight: true },
+                  ].map((unit, i) => (
+                    <div key={i} className="flex items-center gap-1.5 sm:gap-2">
+                      {i > 0 && <span className="text-white/30 font-bold text-sm">:</span>}
+                      <div
+                        className={`flex flex-col items-center rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 min-w-[38px] sm:min-w-[50px] ${
+                          unit.highlight ? "bg-red-500" : "bg-white/10"
+                        }`}
+                      >
+                        <span className="text-[14px] sm:text-[18px] font-black leading-none tabular-nums text-white">
+                          {String(unit.value).padStart(2, "0")}
+                        </span>
+                        <span className={`text-[8px] sm:text-[9px] leading-none mt-0.5 ${unit.highlight ? "text-white/85" : "text-white/60"}`}>
+                          {unit.label}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               <button
                 onClick={dismissBanner}
