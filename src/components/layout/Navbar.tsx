@@ -158,21 +158,22 @@ const handleScroll = () => {
             className="w-full overflow-hidden bg-[#0B0E17] text-white"
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-3 sm:gap-4">
-              <button
-                onClick={dismissBanner}
-                className="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/15 hover:bg-white/10 flex items-center justify-center transition-colors"
-              >
-                <X size={16} />
-              </button>
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+                <span className="truncate text-[13px] sm:text-[16px] font-extrabold">
+                  {bannerNotif.title}
+                </span>
+              </div>
 
               <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                 {[
-                  { value: timeLeft.days, label: "يوم", highlight: true },
-                  { value: timeLeft.hours, label: "س" },
-                  { value: timeLeft.minutes, label: "د" },
                   { value: timeLeft.seconds, label: "ث" },
+                  { value: timeLeft.minutes, label: "د" },
+                  { value: timeLeft.hours, label: "س" },
+                  { value: timeLeft.days, label: "يوم", highlight: true },
                 ].map((unit, i) => (
                   <div key={i} className="flex items-center gap-1.5 sm:gap-2">
+                    {i > 0 && <span className="text-white/30 font-bold text-sm">:</span>}
                     <div
                       className={`flex flex-col items-center rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 min-w-[38px] sm:min-w-[50px] ${
                         unit.highlight ? "bg-red-500" : "bg-white/10"
@@ -185,17 +186,16 @@ const handleScroll = () => {
                         {unit.label}
                       </span>
                     </div>
-                    {i < 3 && <span className="text-white/30 font-bold text-sm">:</span>}
                   </div>
                 ))}
               </div>
 
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="truncate text-[13px] sm:text-[16px] font-extrabold">
-                  {bannerNotif.title}
-                </span>
-                <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
-              </div>
+              <button
+                onClick={dismissBanner}
+                className="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/15 hover:bg-white/10 flex items-center justify-center transition-colors"
+              >
+                <X size={16} />
+              </button>
             </div>
           </motion.div>
         )}
