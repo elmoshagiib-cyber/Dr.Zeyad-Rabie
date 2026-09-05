@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { SidebarHeader } from "../sidebar/SidebarHeader";
+import { StudentSidebarHeader } from "../sidebar/StudentSidebarHeader";
 import { StudentSidebarNavigation } from "../sidebar/StudentSidebarNavigation";
 import { cn } from "../../../utils/cn";
 import { BookOpen, FileText, ClipboardList, Trophy, Bell, User, MessageCircle, Home, AlertCircle } from "lucide-react";
@@ -77,7 +77,7 @@ export function StudentDashboardSidebar({
           : cn("xl:rounded-2xl", isCollapsed ? "w-[80px]" : "w-[280px] sm:w-[300px]")
       )}
     >
-      <SidebarHeader collapsed={isCollapsed} setCollapsed={setCollapsed} />
+      <StudentSidebarHeader collapsed={isCollapsed} setCollapsed={setCollapsed} />
 
       <StudentSidebarNavigation
         navItems={studentNavItems}

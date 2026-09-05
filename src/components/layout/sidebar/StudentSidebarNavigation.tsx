@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, LogOut } from "lucide-react";
 import { cn } from "../../../utils/cn";
-import { SidebarItem } from "./SidebarItem";
+import { StudentSidebarItem } from "./StudentSidebarItem";
 
 type NavItem = {
   label: string;
@@ -142,7 +142,7 @@ export function StudentSidebarNavigation({
                     >
                       <div className="pt-2 space-y-1.5">
                         {item.children.map((child) => (
-                          <SidebarItem
+                          <StudentSidebarItem
                             key={child.path}
                             label={child.label}
                             icon={child.icon}
@@ -163,7 +163,7 @@ export function StudentSidebarNavigation({
           const active = currentPath === item.path;
 
           return (
-            <SidebarItem
+           <StudentSidebarItem
               key={item.path}
               label={item.label}
               icon={item.icon}
