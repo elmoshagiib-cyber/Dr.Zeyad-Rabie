@@ -114,9 +114,9 @@ text-gray-700
 dark:text-gray-300
 transition-all
 duration-300
-hover:bg-[#F6EEFF]
+hover:bg-[#ECECF2]
 dark:hover:bg-[#1A1A1A]
-hover:text-[#B348FE]
+hover:text-[#1E1B3A]
 active:scale-[0.98]
 "
           >

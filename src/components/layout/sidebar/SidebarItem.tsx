@@ -41,17 +41,20 @@ export function SidebarItem({
 
 active
   ? `
-    bg-[#B348FE]
+    bg-gradient-to-br
+    from-[#0F172A]
+    via-[#1E1B3A]
+    to-[#2A1B4D]
     text-white
-    shadow-[0_8px_20px_rgba(179,72,254,.35)]
+    shadow-[0_8px_20px_rgba(15,23,42,.35)]
     scale-[1.02]
   `
           : `
 text-gray-700
 dark:text-gray-300
-hover:bg-[#F6EEFF]
+hover:bg-[#ECECF2]
 dark:hover:bg-[#1A1A1A]
-hover:text-[#B348FE]
+hover:text-[#1E1B3A]
 active:scale-[0.98]
           `
       )}
@@ -86,9 +89,9 @@ active:scale-[0.98]
     bg-white/20
   `
   : `
-    bg-[#F6EEFF]
-    text-[#B348FE]
-    dark:bg-[#2B103D]
+    bg-[#ECECF2]
+    text-[#1E1B3A]
+    dark:bg-[#1E1B3A]
     group-hover:opacity-90
     group-hover:scale-110
   `
@@ -122,8 +125,8 @@ active:scale-[0.98]
                 font-bold
                 `,
 active
-  ? "bg-white text-[#B348FE]"
-  : "bg-[#B348FE] text-white"
+  ? "bg-white text-[#1E1B3A]"
+  : "bg-[#1E1B3A] text-white"
               )}
             >
               {badge > 99 ? "99+" : badge}
