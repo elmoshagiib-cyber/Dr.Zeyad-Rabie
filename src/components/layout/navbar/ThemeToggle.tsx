@@ -101,17 +101,6 @@ className="
   dark:focus-visible:ring-offset-neutral-950
 "
     >
-      {/* Subtle inner glow */}
-      <span
-        aria-hidden
-        className="
-          pointer-events-none
-          absolute inset-0
-          rounded-full
-          bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.35),transparent_55%)]
-        "
-      />
-
       {/* Track icons (behind the knob) */}
 <span
   aria-hidden
