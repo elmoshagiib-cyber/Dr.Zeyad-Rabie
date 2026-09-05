@@ -26,18 +26,15 @@ export function StudentSidebarHeader({
             w-10 h-10
             rounded-xl
             border border-transparent
-            bg-gradient-to-br
-            from-[#0F172A]
-            via-[#1E1B3A]
-            to-[#2A1B4D]
+            bg-[#B348FE]
             flex items-center justify-center
             text-white
+            shadow-[0_8px_20px_rgba(179,72,254,.35)]
             hover:opacity-90
             hover:scale-105
             active:scale-95
             transition-all
             duration-200
-            shadow-sm
           "
         >
           <Menu size={18} strokeWidth={2.3} />
