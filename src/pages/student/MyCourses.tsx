@@ -69,7 +69,7 @@ export function MyCoursesPage() {
 
           {/* Header */}
           <div className="text-right">
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white dark:text-white">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
               كورساتي
             </h1>
             <p className="text-slate-500 dark:text-gray-400 text-sm mt-1">
@@ -118,17 +118,17 @@ export function MyCoursesPage() {
                 return (
                   <div
                     key={course.id}
-                   className="
-  bg-white dark:bg-[#111111]
-  border
-  border-[#EAD8FF] dark:border-[#2A2A2A]
-  rounded-[26px]
-  overflow-hidden
-  shadow-[0_4px_20px_rgba(15,23,42,.06)]
-  hover:shadow-[0_18px_40px_rgba(179,72,254,.15)]
-  transition-all
-  duration-300
-"
+                    className="
+                      bg-white dark:bg-[#111111]
+                      border
+                      border-[#EAD8FF] dark:border-[#2A2A2A]
+                      rounded-[26px]
+                      overflow-hidden
+                      shadow-[0_4px_20px_rgba(15,23,42,.06)]
+                      hover:shadow-[0_18px_40px_rgba(179,72,254,.15)]
+                      transition-all
+                      duration-300
+                    "
                   >
                     {/* Thumbnail */}
                     <div
@@ -177,7 +177,7 @@ export function MyCoursesPage() {
                     <div className="p-4 sm:p-5">
                       <h3
                         className="
-                          font-black text-slate-900
+                          font-black text-slate-900 dark:text-white
                           text-[16px] sm:text-[18px] leading-snug
                           cursor-pointer hover:text-[#B348FE] transition-colors
                           mb-2
@@ -193,7 +193,7 @@ export function MyCoursesPage() {
                           <p
                             className={`
                               text-[13px] sm:text-sm leading-6
-                              text-slate-500
+                              text-slate-500 dark:text-gray-400
                               whitespace-pre-line
                               ${!isExpanded && isLongDescription ? "line-clamp-3" : ""}
                             `}
