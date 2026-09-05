@@ -1,5 +1,5 @@
 import { Settings } from "lucide-react";
-import { SidebarItem } from "./SidebarItem";
+import { DashboardSidebarItem } from "./DashboardSidebarItem";
 
 type NavItem = {
   label: string;
@@ -20,7 +20,7 @@ type Props = {
   onNavigate: (path: string) => void;
 };
 
-export function SidebarNavigation({
+export function DashboardSidebarNavigation({
   navGroups,
   collapsed,
   currentPath,
@@ -64,7 +64,7 @@ sm:py-5
                 const active = currentPath === item.path;
 
                 return (
-                  <SidebarItem
+                  <DashboardSidebarItem
                     key={item.path}
                     label={item.label}
                     icon={item.icon}

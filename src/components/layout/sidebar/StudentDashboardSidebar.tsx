@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { StudentSidebarHeader } from "../sidebar/StudentSidebarHeader";
-import { StudentSidebarNavigation } from "../sidebar/StudentSidebarNavigation";
+import { StudentSidebarHeader } from "./StudentSidebarHeader";
+import { StudentSidebarNavigation } from "./StudentSidebarNavigation";
 import { cn } from "../../../utils/cn";
 import { BookOpen, FileText, ClipboardList, Trophy, Bell, User, MessageCircle, Home, AlertCircle } from "lucide-react";
 import { useState } from "react";
@@ -39,7 +39,6 @@ export function StudentDashboardSidebar({
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
-  // على الموبايل الدرج بيفتح كامل دايمًا، مفيش وضع "مطوي" هناك
   const isCollapsed = mobileOpen ? false : collapsed;
 
   const handleNav = (path: string) => {

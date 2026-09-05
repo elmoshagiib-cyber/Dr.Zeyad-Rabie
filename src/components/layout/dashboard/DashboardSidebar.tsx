@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { SidebarHeader } from "../sidebar/SidebarHeader";
-import { SidebarNavigation } from "../sidebar/SidebarNavigation";
+import { DashboardSidebarHeader } from "./DashboardSidebarHeader";
+import { DashboardSidebarNavigation } from "./DashboardSidebarNavigation";
 import { cn } from "../../../utils/cn";
 import {
   LayoutDashboard,
@@ -194,12 +194,12 @@ useEffect(() => {
       : "w-[280px] sm:w-[300px]"
   )}
 >
-      <SidebarHeader
+      <DashboardSidebarHeader
         collapsed={collapsed && !mobileOpen}
         setCollapsed={setCollapsed}
       />
 
-      <SidebarNavigation
+      <DashboardSidebarNavigation
         navGroups={navGroups}
         collapsed={collapsed && !mobileOpen}
         currentPath={location.pathname}

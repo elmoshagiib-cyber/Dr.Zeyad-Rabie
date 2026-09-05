@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { StudentDashboardSidebar } from "../../components/layout/dashboard/StudentDashboardSidebar";
+import { StudentDashboardSidebar } from "../../components/layout/sidebar/StudentDashboardSidebar";
 import { Menu } from "lucide-react";
 import { Navbar } from "../../components/layout/Navbar";
 

@@ -10,7 +10,7 @@ type Props = {
   onClick: () => void;
 };
 
-export function SidebarItem({
+export function DashboardSidebarItem({
   label,
   icon,
   active,
@@ -59,7 +59,6 @@ active:scale-[0.98]
           `
       )}
     >
-      {/* Active Indicator */}
       {active && (
         <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-l-full bg-white/70" />
       )}
@@ -70,7 +69,6 @@ active:scale-[0.98]
           collapsed ? "justify-center" : "gap-3"
         )}
       >
-        {/* Icon */}
         <div
           className={cn(
             `

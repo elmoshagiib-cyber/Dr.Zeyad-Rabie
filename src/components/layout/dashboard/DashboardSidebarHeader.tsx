@@ -1,14 +1,14 @@
 import { Menu } from "lucide-react";
 
-type SidebarHeaderProps = {
+type DashboardSidebarHeaderProps = {
   collapsed: boolean;
   setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export function SidebarHeader({
+export function DashboardSidebarHeader({
   collapsed,
   setCollapsed,
-}: SidebarHeaderProps) {
+}: DashboardSidebarHeaderProps) {
   return (
     <div className="border-b border-slate-200 bg-white px-4 py-4">
       <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
