@@ -1,229 +1,116 @@
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Trophy } from "lucide-react";
+import { motion } from "framer-motion";
 import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
-import { Button } from "../../components/ui/Button";
-import { supabase } from "../../lib/supabase";
+import { Card, CardContent } from "../../components/ui/Card";
+import { Badge } from "../../components/ui/Badge";
 
-type WrongQuestion = { id: number; type: "exam" | "homework" };
-
-export function MistakesReviewQuizPage() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { questionIds = [], count = 10 } = (location.state as any) || {};
-
-  const [loading, setLoading] = useState(true);
-  const [questions, setQuestions] = useState<any[]>([]);
-  const [currentQ, setCurrentQ] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [finished, setFinished] = useState(false);
-
-  useEffect(() => {
-    if (!questionIds.length) {
-      navigate("/dashboard/mistakes");
-      return;
-    }
-    loadQuestions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const loadQuestions = async () => {
-    setLoading(true);
-
-    const shuffled = [...(questionIds as WrongQuestion[])].sort(() => Math.random() - 0.5);
-    const selected = shuffled.slice(0, count);
-
-    const examIds = selected.filter((q) => q.type === "exam").map((q) => q.id);
-    const hwIds = selected.filter((q) => q.type === "homework").map((q) => q.id);
-
-    const combined: any[] = [];
-
-    if (examIds.length > 0) {
-      const { data, error } = await supabase
-        .from("exam_questions")
-        .select(`*, question_choices!question_choices_question_id_fkey (*)`)
-        .in("id", examIds);
-
-      if (error) console.error(error);
-      else
-        combined.push(
-          ...(data || []).map((q: any) => ({
-            ...q,
-            __key: `exam-${q.id}`,
-            question_choices: q.question_choices,
-          }))
-        );
-    }
-
-    if (hwIds.length > 0) {
-      const { data, error } = await supabase
-        .from("homework_questions")
-        .select(`*, homework_question_choices (*)`)
-        .in("id", hwIds);
-
-      if (error) console.error(error);
-      else
-        combined.push(
-          ...(data || []).map((q: any) => ({
-            ...q,
-            __key: `homework-${q.id}`,
-            question_choices: q.homework_question_choices,
-          }))
-        );
-    }
-
-    setQuestions(combined);
-    setLoading(false);
-  };
-
-  const handleAnswer = (questionKey: string, choiceId: string) => {
-    setAnswers((prev) => ({ ...prev, [questionKey]: choiceId }));
-  };
-
-  const q = questions[currentQ];
-  const answeredCount = Object.keys(answers).length;
-
-  const calcResults = () => {
-    let correct = 0;
-    questions.forEach((question) => {
-      const selected = answers[question.__key];
-      const correctChoice = (question.question_choices || []).find(
-        (c: any) => String(c.sort_order - 1) === String(question.correct_answer)
-      );
-      if (selected && correctChoice && selected === correctChoice.id) correct++;
-    });
-    return { correct, total: questions.length };
-  };
-
-  if (loading) {
-    return (
-      <StudentLayout>
-        <main className="flex-1 flex items-center justify-center min-h-[60vh]">
-          <div className="w-10 h-10 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
-        </main>
-      </StudentLayout>
-    );
-  }
-
-  if (finished) {
-    const { correct, total } = calcResults();
-    return (
-      <StudentLayout>
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-4">
-            <div className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 dark:border-[#2A2A2A] p-6 sm:p-8 text-center">
-              <Trophy className="mx-auto text-teal-500 mb-3" size={40} />
-              <h2 className="text-xl font-black text-gray-900 dark:text-white mb-1">خلصت المراجعة!</h2>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
-                جاوبت صح في {correct} من {total} سؤال
-              </p>
-              <Button onClick={() => navigate("/dashboard/mistakes")} className="w-full bg-[#B348FE] hover:bg-[#9E2FFF]">
-                العودة لمراجعة أخطائي
-              </Button>
-            </div>
-
-            {questions.map((question, i) => {
-              const selectedId = answers[question.__key];
-              const correctChoice = (question.question_choices || []).find(
-                (c: any) => String(c.sort_order - 1) === String(question.correct_answer)
-              );
-              const isRight = selectedId && correctChoice && selectedId === correctChoice.id;
-
-              return (
-                <div key={question.__key} className="bg-white dark:bg-[#111111] rounded-2xl border-2 p-5 border-gray-200 dark:border-[#2A2A2A]">
-                  <p className="font-bold text-gray-900 dark:text-white mb-3">{i + 1}. {question.title}</p>
-                  <div className="space-y-2">
-                    {(question.question_choices || []).map((choice: any) => {
-                      const isCorrectChoice = correctChoice && choice.id === correctChoice.id;
-                      const isSelectedWrong = !isRight && choice.id === selectedId;
-                      return (
-                        <div
-                          key={choice.id}
-                          className={`flex items-center justify-between px-4 py-2.5 rounded-xl border text-sm font-bold ${
-                            isCorrectChoice
-                              ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                              : isSelectedWrong
-                              ? "bg-rose-50 border-rose-200 text-rose-700"
-                              : "bg-gray-50 border-gray-200 text-gray-600"
-                          }`}
-                        >
-                          <span>{choice.text}</span>
-                          {isCorrectChoice && <CheckCircle size={16} />}
-                          {isSelectedWrong && <XCircle size={16} />}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </main>
-      </StudentLayout>
-    );
-  }
+function ConstructionScene() {
+  const blocks = [0, 1, 2, 3, 4];
 
   return (
+    <div className="relative w-48 h-40 sm:w-64 sm:h-48 lg:w-72 lg:h-56 mx-auto mb-6 sm:mb-8 select-none">
+      {/* الأرضية */}
+      <div className="absolute bottom-0 left-0 right-0 h-1.5 sm:h-2 bg-gray-200 dark:bg-[#2A2A2A] rounded-full" />
+
+      {/* البلوكات بترتفع فوق بعض زي عمارة بتتبني */}
+      <div className="absolute bottom-1.5 sm:bottom-2 right-3 sm:right-6 flex flex-col-reverse gap-1">
+        {blocks.map((i) => (
+          <motion.div
+            key={i}
+            className="w-14 sm:w-20 lg:w-24 h-4 sm:h-5 lg:h-6 rounded-md sm:rounded-lg bg-gradient-to-r from-[#B348FE] to-[#8B2FD8] shadow-md"
+            initial={{ opacity: 0, y: 12, scaleX: 0.7 }}
+            animate={{ opacity: 1, y: 0, scaleX: 1 }}
+            transition={{
+              duration: 0.5,
+              delay: i * 0.35,
+              repeat: Infinity,
+              repeatDelay: blocks.length * 0.35 + 0.6,
+              repeatType: "loop",
+              ease: "easeOut",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* غبار/ورش خفيفة فوق البلوكات */}
+      <motion.div
+        className="absolute bottom-16 sm:bottom-20 right-4 sm:right-8 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-amber-300/60 blur-[2px]"
+        animate={{ opacity: [0, 0.8, 0], y: [0, -14, -20], scale: [0.6, 1.1, 0.8] }}
+        transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+      />
+      <motion.div
+        className="absolute bottom-16 sm:bottom-20 right-10 sm:right-16 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-amber-300/50 blur-[2px]"
+        animate={{ opacity: [0, 0.7, 0], y: [0, -10, -16], scale: [0.5, 1, 0.7] }}
+        transition={{ duration: 1.4, repeat: Infinity, delay: 0.5, ease: "easeOut" }}
+      />
+
+      {/* الشخصية */}
+      <div className="absolute bottom-1.5 sm:bottom-2 left-2 sm:left-6">
+        <motion.div
+          className="relative"
+          animate={{ y: [0, -3, 0] }}
+          transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+        >
+          {/* الجسم */}
+          <div className="w-9 h-11 sm:w-11 sm:h-14 lg:w-12 lg:h-16 rounded-t-2xl rounded-b-md bg-[#2B2B2B] dark:bg-[#3A3A3A] mx-auto relative z-10" />
+
+          {/* الراس + الخوذة */}
+          <div className="absolute -top-4 sm:-top-5 left-1/2 -translate-x-1/2 z-20">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 rounded-full bg-[#F2C6A0]" />
+            <div className="absolute -top-1.5 sm:-top-2 left-1/2 -translate-x-1/2 w-7 sm:w-8 lg:w-9 h-3 sm:h-3.5 rounded-t-full bg-amber-400 shadow-sm" />
+          </div>
+
+          {/* الدراع والشاكوش - بتضرب */}
+          <motion.div
+            className="absolute top-1 sm:top-1.5 -right-3 sm:-right-4 z-0 origin-top-left"
+            style={{ transformOrigin: "0% 0%" }}
+            animate={{ rotate: [0, 55, 0] }}
+            transition={{ duration: 0.7, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
+          >
+            <div className="w-1.5 h-6 sm:h-7 lg:h-8 bg-[#F2C6A0] rounded-full" />
+            <div className="absolute -bottom-1 -right-1.5 w-4 h-2.5 sm:w-5 sm:h-3 rounded-sm bg-gray-500 dark:bg-gray-400 rotate-45" />
+          </motion.div>
+
+          {/* الرجلين */}
+          <div className="flex justify-center gap-1 -mt-0.5">
+            <div className="w-2 h-2.5 sm:w-2.5 sm:h-3 bg-[#1D1D1D] rounded-sm" />
+            <div className="w-2 h-2.5 sm:w-2.5 sm:h-3 bg-[#1D1D1D] rounded-sm" />
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+export function LeaderboardPage() {
+  return (
     <StudentLayout>
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-4">
-          <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-200 dark:border-[#2A2A2A] p-4 flex items-center justify-between">
-            <span className="font-bold text-sm text-gray-700 dark:text-gray-300">
-              سؤال {currentQ + 1} من {questions.length}
-            </span>
-            <span className="font-black text-[#B348FE]">{answeredCount} / {questions.length} تم الإجابة</span>
-          </div>
+      <div className="flex items-center justify-center p-4 sm:p-6 lg:p-8 min-h-full">
+        <Card className="max-w-3xl w-full bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden">
+          {/* زخرفة خلفية خفيفة */}
+          <div className="absolute -top-16 -left-16 w-48 h-48 sm:w-64 sm:h-64 rounded-full bg-amber-100/40 dark:bg-amber-900/10 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-16 -right-16 w-48 h-48 sm:w-64 sm:h-64 rounded-full bg-[#F6EEFF]/60 dark:bg-[#2B103D]/20 blur-3xl pointer-events-none" />
 
-          {q && (
-            <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-200 dark:border-[#2A2A2A] p-5 sm:p-6">
-              <h2 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white mb-5">{q.title}</h2>
-              <div className="space-y-2.5">
-                {(q.question_choices || []).map((choice: any) => {
-                  const selected = answers[q.__key] === choice.id;
-                  return (
-                    <button
-                      key={choice.id}
-                      onClick={() => handleAnswer(q.__key, choice.id)}
-                      className={`w-full text-right px-4 py-3.5 rounded-xl border font-medium ${
-                        selected
-                          ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-950/20"
-                          : "border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#111111]"
-                      }`}
-                    >
-                      {choice.text}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          <CardContent className="relative py-10 sm:py-14 lg:py-16 px-5 sm:px-6 lg:px-12 text-center">
+            <ConstructionScene />
 
-          <div className="flex gap-3">
-            <button
-              onClick={() => setCurrentQ((c) => Math.max(0, c - 1))}
-              disabled={currentQ === 0}
-              className="flex-1 bg-teal-400 hover:bg-teal-500 disabled:opacity-40 text-white font-bold py-3 rounded-xl"
+            <h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-gray-900 dark:text-white mb-3 sm:mb-5">
+              لوحة المتصدرين
+            </h1>
+
+            <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base lg:text-lg leading-6 sm:leading-8 lg:leading-9 mb-6 sm:mb-8 max-w-xl mx-auto">
+              إحنا شغالين عليها دلوقتي 👷‍♂️ هتكون متاحة قريبًا بعد إطلاق
+              نظام النقاط والإنجازات داخل المنصة.
+            </p>
+
+            <Badge
+              variant="amber"
+              className="text-xs sm:text-sm lg:text-base px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 font-black inline-flex"
             >
-              السابق
-            </button>
-            {currentQ === questions.length - 1 ? (
-              <button
-                onClick={() => setFinished(true)}
-                className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white font-bold py-3 rounded-xl"
-              >
-                إنهاء المراجعة
-              </button>
-            ) : (
-              <button
-                onClick={() => setCurrentQ((c) => Math.min(questions.length - 1, c + 1))}
-                className="flex-1 bg-teal-400 hover:bg-teal-500 text-white font-bold py-3 rounded-xl"
-              >
-                التالي
-              </button>
-            )}
-          </div>
-        </div>
-      </main>
+              🚧 تحت التطوير
+            </Badge>
+          </CardContent>
+        </Card>
+      </div>
     </StudentLayout>
   );
 }
