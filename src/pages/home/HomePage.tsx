@@ -568,33 +568,6 @@ lg:text-center
 
   </h1>
 
-  <p
-    className="
-    mt-4
-    sm:mt-5
-    lg:mt-6
-    max-w-[300px]
-    xs:max-w-[360px]
-    sm:max-w-[440px]
-    lg:max-w-[500px]
-    mx-auto
-    lg:mx-0
-    
-    text-[14px]
-    sm:text-[15px]
-    lg:text-[17px]
-    xl:text-[18px]
-    leading-[1.65]
-    sm:leading-[1.75]
-    font-normal
-    text-slate-500
-    dark:text-slate-400
-    "
-  >
-   لا تستعجل النتيجة، فبعض التفاعلات تحتاج وقتًا،
-لكنها في النهاية تعطي أقوى النتائج
-  </p>
-
   <div
     className="
     mt-6
@@ -755,13 +728,6 @@ object-contain
 "
 />
 
-<motion.div
-  animate={{ y: [0, -8, 0] }}
-  transition={{ repeat: Infinity, duration: 9 }}
-  className="absolute bottom-8 sm:bottom-12 lg:bottom-16 -right-4 sm:-right-6 lg:-right-8 bg-white dark:bg-white rounded-3xl p-3 sm:p-4 lg:p-5 shadow-2xl"
->
-  
-</motion.div>
         </div>
 
       </motion.div>
