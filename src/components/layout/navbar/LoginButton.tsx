@@ -11,14 +11,14 @@ export function LoginButton() {
       <Link
         to="/login"
         aria-label="تسجيل الدخول"
-        className="group inline-flex items-center gap-2 px-4 h-10 rounded-xl bg-white border border-[#B348FE] text-[#B348FE] text-[14px] font-medium hover:bg-[#B348FE] hover:text-white hover:shadow-[0_10px_25px_rgba(179,72,254,.25)] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B348FE] focus-visible:ring-offset-2"
+        className="group inline-flex items-center gap-2 px-2 h-10 text-[#B348FE] text-[14px] font-medium hover:text-[#9A2EFF] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B348FE] focus-visible:ring-offset-2 rounded-lg"
         dir="rtl"
       >
         <span>تسجيل الدخول</span>
         <LogIn
           size={16}
           strokeWidth={2}
-          className="text-[#B348FE] group-hover:text-white transition-colors duration-200"
+          className="text-[#B348FE] group-hover:text-[#9A2EFF] transition-colors duration-200"
           aria-hidden="true"
         />
       </Link>

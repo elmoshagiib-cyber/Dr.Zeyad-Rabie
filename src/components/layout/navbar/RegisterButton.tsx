@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { UserPlus } from "lucide-react";
+import { Home } from "lucide-react";
 
 export function RegisterButton() {
   return (
@@ -13,45 +13,36 @@ export function RegisterButton() {
         to="/register"
         aria-label="أنشئ حسابك"
         className="
+group
 inline-flex
 items-center
 gap-2
-pl-4
-pr-2
+px-4
 h-10
-rounded-xl
-bg-[#3B1248]
-hover:bg-[#4A175B]
-text-white
+rounded-full
+border-2
+border-[#B348FE]
+bg-transparent
+text-[#B348FE]
 text-[14px]
 font-semibold
+hover:bg-[#B348FE]
+hover:text-white
 transition-all
 duration-200
 focus-visible:outline-none
 focus-visible:ring-2
-focus-visible:ring-[#F6AC08]
+focus-visible:ring-[#B348FE]
 focus-visible:ring-offset-2
 "
         dir="rtl"
       >
-        {/* Icon box — right side in RTL */}
-        <span className="
-flex
-items-center
-justify-center
-w-6
-h-6
-rounded-md
-bg-[#F6AC08]
-shrink-0
-">
-          <UserPlus
-            size={13}
-            strokeWidth={2.2}
-            className="text-white"
-            aria-hidden="true"
-          />
-        </span>
+        <Home
+          size={16}
+          strokeWidth={2.2}
+          className="text-[#B348FE] group-hover:text-white transition-colors duration-200"
+          aria-hidden="true"
+        />
         <span>! أنشئ حسابك</span>
       </Link>
     </motion.div>
