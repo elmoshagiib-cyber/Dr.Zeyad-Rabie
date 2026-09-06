@@ -520,7 +520,7 @@ duration-300
         bottom-0
         left-0
         w-full
-        h-[6px]
+        h-[4px]
         bg-[#B348FE]/15
         pointer-events-none
       "

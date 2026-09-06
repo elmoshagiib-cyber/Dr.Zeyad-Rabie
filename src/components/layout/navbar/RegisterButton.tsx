@@ -25,8 +25,6 @@ hover:bg-[#4A175B]
 text-white
 text-[14px]
 font-semibold
-shadow-md
-hover:shadow-[0_10px_25px_rgba(59,18,72,.35)]
 transition-all
 duration-200
 focus-visible:outline-none
