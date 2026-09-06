@@ -103,35 +103,14 @@ manifest: {
   build: {
     rollupOptions: {
       output: {
-        // بيمنع Vite من تقسيم مكتبات زي lucide-react
+        // بيمنع Vite من تقسيم مكتبات الأيقونات (lucide-react / react-icons)
         // لملف منفصل لكل أيقونة (كان بيعمل عشرات الـ requests الصغيرة).
-        // بدل كده بنجمعهم في "vendor chunks" كبيرة ومحدودة العدد.
+        // باقي المكتبات (react, framer-motion, supabase...) بنسيبها لـ Vite
+        // يتصرف فيها تلقائيًا عشان نتجنب مشاكل ترتيب التحميل (load order).
         manualChunks(id) {
-          if (!id.includes("node_modules")) return;
-
-          if (id.includes("lucide-react") || id.includes("react-icons")) {
+          if (id.includes("node_modules") && (id.includes("lucide-react") || id.includes("react-icons"))) {
             return "vendor-icons";
           }
-
-          if (
-            id.includes("react-router-dom") ||
-            id.includes("/react/") ||
-            id.includes("/react-dom/") ||
-            id.includes("scheduler")
-          ) {
-            return "vendor-react";
-          }
-
-          if (id.includes("framer-motion")) {
-            return "vendor-motion";
-          }
-
-          if (id.includes("@supabase")) {
-            return "vendor-supabase";
-          }
-
-          // أي مكتبة تانية من node_modules تتجمع هنا
-          return "vendor";
         },
       },
     },
