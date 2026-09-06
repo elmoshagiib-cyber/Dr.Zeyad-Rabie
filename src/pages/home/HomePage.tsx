@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -528,16 +527,17 @@ style={{
 >
   <h1
     className="
-    text-[26px]
-    xs:text-[28px]
-    sm:text-[36px]
-    md:text-[44px]
-    lg:text-[52px]
+    text-[30px]
+    xs:text-[34px]
+    sm:text-[44px]
+    md:text-[54px]
+    lg:text-[60px]
+    xl:text-[68px]
     font-black
     text-center
 lg:text-center
-    leading-[1.25]
-    tracking-[-0.5px]
+    leading-[1.15]
+    tracking-[-1px]
     text-slate-900
     dark:text-white
     "
@@ -547,18 +547,19 @@ lg:text-center
 <span
   className="
   block
-  mt-1.5
-  sm:mt-2
-    text-[26px]
-    xs:text-[28px]
-    sm:text-[36px]
-    md:text-[44px]
-    lg:text-[52px]
+  mt-2
+  sm:mt-2.5
+    text-[30px]
+    xs:text-[34px]
+    sm:text-[44px]
+    md:text-[54px]
+    lg:text-[60px]
+    xl:text-[68px]
   font-black
   text-center
 lg:text-center
-  leading-tight
-  tracking-[-1px]
+  leading-[1.1]
+  tracking-[-1.5px]
   text-[#B348FE]
   "
 >
@@ -570,24 +571,24 @@ lg:text-center
   <p
     className="
     mt-4
-    sm:mt-6
-    lg:mt-8
-    max-w-[320px]
-    xs:max-w-[380px]
-    sm:max-w-[500px]
-    lg:max-w-[620px]
+    sm:mt-5
+    lg:mt-6
+    max-w-[300px]
+    xs:max-w-[360px]
+    sm:max-w-[440px]
+    lg:max-w-[500px]
     mx-auto
     lg:mx-0
     
-    text-[15px]
-    sm:text-[17px]
-    lg:text-[20px]
-    xl:text-[22px]
-    leading-[1.7]
-    sm:leading-[1.8]
+    text-[14px]
+    sm:text-[15px]
+    lg:text-[17px]
+    xl:text-[18px]
+    leading-[1.65]
+    sm:leading-[1.75]
     font-normal
-    text-slate-600
-    dark:text-slate-300
+    text-slate-500
+    dark:text-slate-400
     "
   >
    لا تستعجل النتيجة، فبعض التفاعلات تحتاج وقتًا،
