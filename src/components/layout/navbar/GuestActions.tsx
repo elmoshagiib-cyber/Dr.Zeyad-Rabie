@@ -38,9 +38,6 @@ hover:bg-[#9A2EFF]
     text-white
     text-[14px]
     font-bold
-   shadow-[0_12px_30px_rgba(179,72,254,.30)]
-hover:shadow-[0_16px_36px_rgba(179,72,254,.40)]
-    hover:shadow-[0_16px_36px_rgba(66,46,145,.40)]
     active:scale-[0.98]
     transition-all
     duration-300
