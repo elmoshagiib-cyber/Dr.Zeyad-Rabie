@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   motion,
   AnimatePresence,
@@ -34,8 +34,23 @@ const SPRING: Transition = {
   mass: 0.7,
 };
 
+// مدة الستارة اللي بتتحرك من اليمين للشمال عند تبديل المود
+const WIPE_DURATION = 0.5; // بالثواني
+
 export function ThemeToggle({ isDark, toggleTheme }: ThemeToggleProps) {
   const prefersReducedMotion = useReducedMotion();
+  const [isWiping, setIsWiping] = useState(false);
+
+  const handleToggle = () => {
+    if (isWiping) return; // يمنع الضغط المتكرر أثناء الأنيميشن
+
+    if (prefersReducedMotion) {
+      toggleTheme(); // بدّل على طول من غير ستارة لو المستخدم مفعّل تقليل الحركة
+      return;
+    }
+
+    setIsWiping(true);
+  };
 
   // Respect user motion preferences
   const knobTransition = useMemo<Transition>(
@@ -55,6 +70,7 @@ export function ThemeToggle({ isDark, toggleTheme }: ThemeToggleProps) {
   );
 
   return (
+    <>
     <motion.button
       type="button"
       role="switch"
@@ -65,7 +81,7 @@ export function ThemeToggle({ isDark, toggleTheme }: ThemeToggleProps) {
           : "التبديل إلى الوضع الداكن"
       }
       title={isDark ? "Light mode" : "Dark mode"}
-      onClick={toggleTheme}
+      onClick={handleToggle}
       whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
       whileTap={prefersReducedMotion ? undefined : { scale: 0.94 }}
       transition={SPRING}
@@ -78,6 +94,7 @@ className="
   group
   relative
   isolate
+  z-[100]
   flex
   items-center
   shrink-0
@@ -197,5 +214,23 @@ animate={{
         </AnimatePresence>
       </motion.span>
     </motion.button>
+
+    {/* الستارة اللي بتتحرك من اليمين للشمال زي الفيديو بالظبط */}
+    {isWiping && (
+      <motion.div
+        initial={{ width: 0 }}
+        animate={{ width: "100vw" }}
+        transition={{ duration: WIPE_DURATION, ease: [0.65, 0, 0.35, 1] }}
+        onAnimationComplete={() => {
+          // لما الستارة تغطي الشاشة بالكامل، بدّل المود الحقيقي تحتها
+          toggleTheme();
+          setIsWiping(false);
+        }}
+        className={`fixed inset-y-0 right-0 z-[90] pointer-events-none ${
+          isDark ? "bg-white" : "bg-neutral-950"
+        }`}
+      />
+    )}
+    </>
   );
 }
