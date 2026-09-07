@@ -218,15 +218,15 @@ animate={{
     {/* الستارة اللي بتتحرك من اليمين للشمال زي الفيديو بالظبط */}
     {isWiping && (
       <motion.div
-        initial={{ width: 0 }}
-        animate={{ width: "100vw" }}
+        initial={{ clipPath: "inset(0 0 0 100%)" }}
+        animate={{ clipPath: "inset(0 0 0 0%)" }}
         transition={{ duration: WIPE_DURATION, ease: [0.65, 0, 0.35, 1] }}
         onAnimationComplete={() => {
           // لما الستارة تغطي الشاشة بالكامل، بدّل المود الحقيقي تحتها
           toggleTheme();
           setIsWiping(false);
         }}
-        className={`fixed inset-y-0 right-0 z-[90] pointer-events-none ${
+        className={`fixed inset-0 z-[90] pointer-events-none ${
           isDark ? "bg-white" : "bg-neutral-950"
         }`}
       />
