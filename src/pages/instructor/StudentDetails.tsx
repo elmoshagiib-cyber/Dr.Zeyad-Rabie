@@ -1265,19 +1265,30 @@ const sendAnnouncement = async () => {
       ]),
     ];
 
-    const { error, count } = await supabase
-      .from("register_attempts")
-      .delete({ count: "exact" })
-      .in("identifier", possibleFormats);
+    let totalAffected = 0;
+    let lastError: string | null = null;
+
+    for (const format of possibleFormats) {
+      const { data, error } = await supabase.rpc("clear_register_attempts", {
+        p_identifier: format,
+      });
+
+      if (error) {
+        lastError = error.message;
+        continue;
+      }
+
+      totalAffected += Number(data) || 0;
+    }
 
     setClearingAttempts(false);
 
-    if (error) {
-      showToast("حصل خطأ أثناء إلغاء الحظر: " + error.message);
+    if (lastError && totalAffected === 0) {
+      showToast("حصل خطأ أثناء إلغاء الحظر: " + lastError);
       return;
     }
 
-    if (!count || count === 0) {
+    if (totalAffected === 0) {
       showToast("لم يتم العثور على سجل حظر بهذا الرقم. جرب تتأكد من رقم الطالب أو يبقى مفيش حظر أصلاً.");
       return;
     }
