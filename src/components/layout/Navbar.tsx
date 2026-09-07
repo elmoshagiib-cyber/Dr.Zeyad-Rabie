@@ -219,7 +219,7 @@ const handleScroll = () => {
     w-full
     bg-white
     dark:bg-[#09090B]
-    transition-all
+    transition-[border-color]
     duration-300
     ${
       isScrolled
