@@ -39,17 +39,9 @@ const WIPE_DURATION = 0.5; // بالثواني
 
 export function ThemeToggle({ isDark, toggleTheme }: ThemeToggleProps) {
   const prefersReducedMotion = useReducedMotion();
-  const [isWiping, setIsWiping] = useState(false);
 
   const handleToggle = () => {
-    if (isWiping) return; // يمنع الضغط المتكرر أثناء الأنيميشن
-
-    if (prefersReducedMotion) {
-      toggleTheme(); // بدّل على طول من غير ستارة لو المستخدم مفعّل تقليل الحركة
-      return;
-    }
-
-    setIsWiping(true);
+    toggleTheme(); // بيبدأ الستارة من الـ ThemeContext تلقائيًا
   };
 
   // Respect user motion preferences
@@ -70,7 +62,6 @@ export function ThemeToggle({ isDark, toggleTheme }: ThemeToggleProps) {
   );
 
   return (
-    <>
     <motion.button
       type="button"
       role="switch"
@@ -214,23 +205,5 @@ animate={{
         </AnimatePresence>
       </motion.span>
     </motion.button>
-
-    {/* الستارة اللي بتتحرك من اليمين للشمال زي الفيديو بالظبط */}
-    {isWiping && (
-      <motion.div
-        initial={{ clipPath: "inset(0 0 0 100%)" }}
-        animate={{ clipPath: "inset(0 0 0 0%)" }}
-        transition={{ duration: WIPE_DURATION, ease: [0.65, 0, 0.35, 1] }}
-        onAnimationComplete={() => {
-          // لما الستارة تغطي الشاشة بالكامل، بدّل المود الحقيقي تحتها
-          toggleTheme();
-          setIsWiping(false);
-        }}
-        className={`fixed inset-0 z-[90] pointer-events-none ${
-          isDark ? "bg-white" : "bg-neutral-950"
-        }`}
-      />
-    )}
-    </>
   );
 }
