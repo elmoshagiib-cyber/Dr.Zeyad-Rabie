@@ -1413,7 +1413,7 @@ duration-300
     bottom-[104px]
     sm:bottom-[112px]
     left-6
-    z-50
+    z-[95]
     w-14
     h-14
     sm:w-16
@@ -1445,7 +1445,7 @@ duration-300
     fixed
     bottom-6
     left-6
-    z-50
+    z-[95]
     flex
     items-center
     gap-2

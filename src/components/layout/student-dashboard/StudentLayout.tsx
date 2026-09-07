@@ -27,7 +27,7 @@ export default function StudentLayout({ children }: Props) {
       <Navbar />
 
       {sidebarOpen && (
-        <div className="fixed inset-0 z-50">
+        <div className="fixed inset-0 z-[110]">
           <div
             className="absolute inset-0 bg-black/60"
             onClick={() => setSidebarOpen(false)}
@@ -43,7 +43,7 @@ export default function StudentLayout({ children }: Props) {
       )}
 
       {/* Desktop Sidebar */}
-      <div className="hidden xl:block p-4 pt-[104px]">
+      <div className="hidden xl:block relative z-[60] p-4 pt-[104px]">
         <StudentDashboardSidebar />
       </div>
 
