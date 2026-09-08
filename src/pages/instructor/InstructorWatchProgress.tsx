@@ -16,6 +16,7 @@ import {
   Copy,
   Check,
   ArrowUpDown,
+  TrendingUp,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
@@ -38,7 +39,7 @@ interface ProgressRecord {
   last_watched_at: string | null;
 }
 
-type TabType = "not_started" | "completed" | "partial" | "bypassed" | "stalled" | "all";
+type TabType = "not_started" | "completed" | "partial" | "bypassed" | "stalled" | "near_completion" | "all";
 type SortType = "recent" | "lowest_completion" | "most_stalled";
 
 interface CourseOption {
@@ -60,6 +61,11 @@ function daysSince(dateStr: string | null): number | null {
   if (!dateStr) return null;
   const diff = Date.now() - new Date(dateStr).getTime();
   return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+function isNearCompletion(r: ProgressRecord): boolean {
+  const pct = r.completion_percentage || 0;
+  return pct >= 70 && pct < 100;
 }
 
 export function InstructorWatchProgress() {
@@ -149,7 +155,9 @@ export function InstructorWatchProgress() {
       ? Math.round(stalledDaysList.reduce((s, d) => s + d, 0) / stalledDaysList.length)
       : 0;
 
-    return { total, notStarted, partial, bypassed, completed, stalled, avgStalledDays };
+    const nearCompletion = data.filter((r) => isNearCompletion(r)).length;
+
+    return { total, notStarted, partial, bypassed, completed, stalled, avgStalledDays, nearCompletion };
   }, [data]);
 
   const overallCompletionRate = useMemo(() => {
@@ -180,6 +188,7 @@ export function InstructorWatchProgress() {
         if (activeTab === "bypassed") return r.bypassed_count > 0;
         if (activeTab === "completed") return pct === 100;
         if (activeTab === "stalled") return isStalled(r);
+        if (activeTab === "near_completion") return isNearCompletion(r);
         return true;
       });
     }
@@ -251,6 +260,7 @@ export function InstructorWatchProgress() {
   const tabs: { key: TabType; label: string; count: number }[] = [
     { key: "not_started", label: "لم يفتحوا", count: stats.notStarted },
     { key: "completed", label: "اكتملت", count: stats.completed },
+    { key: "near_completion", label: "قربوا الإكمال", count: stats.nearCompletion },
     { key: "partial", label: "مشاهدة جزئية", count: stats.partial },
     { key: "bypassed", label: "المتجاوزون", count: stats.bypassed },
     { key: "stalled", label: "متعثرون", count: stats.stalled },
@@ -283,6 +293,12 @@ export function InstructorWatchProgress() {
       color: "amber",
     },
     {
+      label: "قربوا الإكمال (+70%)",
+      value: stats.nearCompletion,
+      icon: TrendingUp,
+      color: "teal",
+    },
+    {
       label: "أكملوا المحاضرة",
       value: stats.completed,
       icon: CheckCircle,
@@ -300,6 +316,12 @@ const colorClasses: Record<
   string,
   { border: string; bg: string; text: string; gradient: string }
 > = {
+    teal: {
+      border: "border-teal-200 dark:border-teal-900",
+      bg: "bg-teal-50 dark:bg-teal-900/20",
+      text: "text-teal-600 dark:text-teal-400",
+      gradient: "from-teal-500/5 to-transparent",
+    },
     blue: {
       border: "border-blue-200 dark:border-blue-900",
       bg: "bg-blue-50 dark:bg-blue-900/20",
