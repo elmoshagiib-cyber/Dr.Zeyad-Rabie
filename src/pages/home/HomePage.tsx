@@ -521,18 +521,21 @@ style={{
   max-w-[700px]
   mx-auto
   lg:mx-0
-  px-2
-  sm:px-0
+  px-4
+  sm:px-6
+  md:px-10
+  lg:pr-8
+  lg:pl-0
   "
 >
   <h1
     className="
-    text-[30px]
-    xs:text-[34px]
-    sm:text-[44px]
-    md:text-[54px]
-    lg:text-[60px]
-    xl:text-[68px]
+    text-[24px]
+    xs:text-[28px]
+    sm:text-[36px]
+    md:text-[44px]
+    lg:text-[50px]
+    xl:text-[56px]
     font-black
     text-center
 lg:text-center
@@ -549,12 +552,12 @@ lg:text-center
   block
   mt-2
   sm:mt-2.5
-    text-[30px]
-    xs:text-[34px]
-    sm:text-[44px]
-    md:text-[54px]
-    lg:text-[60px]
-    xl:text-[68px]
+    text-[24px]
+    xs:text-[28px]
+    sm:text-[36px]
+    md:text-[44px]
+    lg:text-[50px]
+    xl:text-[56px]
   font-black
   text-center
 lg:text-center
@@ -565,6 +568,28 @@ lg:text-center
 >
   مستر زياد ربيع
 </span>
+
+  {/* الوصف الجديد */}
+  <p
+    className="
+    mt-4
+    sm:mt-5
+    text-[13px]
+    xs:text-[14px]
+    sm:text-[16px]
+    lg:text-[18px]
+    leading-7
+    sm:leading-8
+    font-medium
+    text-slate-500
+    dark:text-slate-400
+    max-w-[560px]
+    mx-auto
+    lg:mx-0
+    "
+  >
+    اكتب هنا نص الوصف اللي عايز يظهر تحت العنوان
+  </p>
 
   </h1>
 
