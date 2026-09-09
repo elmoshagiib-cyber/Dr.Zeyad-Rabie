@@ -235,10 +235,9 @@ const handleScroll = () => {
         <div className="relative h-24 flex items-center justify-between">
 <div className="flex items-center gap-3 pr-1 sm:pr-3">
 
-  {/* Mobile Center Logo */}
+  {/* Centered Logo (mobile + desktop) */}
 <div
   className="
-  md:hidden
   absolute
   left-1/2
   -translate-x-1/2
@@ -246,40 +245,27 @@ const handleScroll = () => {
 >
   <button
     onClick={() => navigate("/")}
-    className="flex items-center justify-center"
+    className="
+    flex
+    items-center
+    justify-center
+    transition-all
+    duration-200
+    hover:scale-105
+    "
   >
     <img
       src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
       alt="د. زياد ربيع"
-      className="h-14 object-contain"
-    />
-  </button>
-</div>
-
-  {/* Logo */}
-  <button
-  className="
-  hidden
-  md:flex
-  items-center
-  justify-center
-  transition-all
-  duration-200
-  hover:scale-105
-  "
-  onClick={() => navigate("/")}
->
-    <img
-      src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
-      alt="د. زياد ربيع"
       className="
-      h-10
-      sm:h-12
+      h-12
+      sm:h-14
       lg:h-16
       object-contain
       "
     />
   </button>
+</div>
 
 <div className="flex items-center gap-2">
   <ThemeToggle
@@ -394,23 +380,24 @@ const handleScroll = () => {
                   flex
                   items-center
                   justify-center
-                  gap-1.5
+                  gap-2
                   h-10
-                  px-3
-                  rounded-full
-                  border
+                  px-4
+                  rounded-xl
+                  border-2
                   border-[#B348FE]
+                  bg-transparent
                   text-[#B348FE]
-                  text-[12px]
-                  font-bold
+                  text-[14px]
+                  font-medium
                   whitespace-nowrap
                   hover:bg-[#B348FE]
                   hover:text-white
                   transition-all
-                  duration-300
+                  duration-200
                 "
               >
-                <Users className="w-4 h-4" />
+                <Users size={16} strokeWidth={2} />
                 ولي الأمر
               </button>
             )}
