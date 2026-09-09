@@ -488,7 +488,8 @@ return (
 className="
 relative
 overflow-hidden
-py-12 sm:py-16 lg:py-28
+pt-24 sm:pt-28 lg:pt-32
+pb-12 sm:pb-16 lg:pb-28
 bg-white
 dark:bg-[#09090B]
 "
