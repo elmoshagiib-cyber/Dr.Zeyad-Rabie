@@ -616,8 +616,10 @@ lg:text-center
     sm:mt-5
     lg:mt-6
     flex
-    justify-center
-    lg:justify-start
+    flex-col
+    items-center
+    lg:items-start
+    gap-3
     "
   >
    <div className="flex flex-row items-center justify-center lg:justify-start gap-3">
@@ -679,6 +681,36 @@ hover:bg-[#9A2EFF]
     </Button>
   )}
 </div>
+
+{!user && (
+  <button
+    onClick={() => setShowParentModal(true)}
+    className="
+      md:hidden
+      flex
+      items-center
+      justify-center
+      gap-1.5
+      h-9
+      px-3.5
+      rounded-xl
+      border-2
+      border-[#B348FE]
+      bg-transparent
+      text-[#B348FE]
+      text-[13px]
+      font-medium
+      whitespace-nowrap
+      hover:bg-[#B348FE]
+      hover:text-white
+      transition-all
+      duration-200
+    "
+  >
+    <Users size={14} strokeWidth={2} />
+    ولي الأمر
+  </button>
+)}
 </div>
 </motion.div>
 

@@ -31,7 +31,7 @@ export function RegisterButton() {
           className="text-white group-hover:text-[#B348FE] transition-colors duration-200"
           aria-hidden="true"
         />
-        <span>!حساب جديد</span>
+        <span>حساب جديد</span>
       </Link>
     </motion.div>
   );

@@ -11,7 +11,6 @@ import { Bell, Search, Users, Timer, X } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { useTheme } from "../../context/ThemeContext";
 import { supabase } from "../../lib/supabase";
-import { ParentAccessModal } from "./navbar/ParentAccessModal";
 import { LoginButton } from "./navbar/LoginButton";
 import { RegisterButton } from "./navbar/RegisterButton";
 export function Navbar() {
@@ -19,7 +18,7 @@ const [scrollProgress, setScrollProgress] = useState(0);
 
 
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [showParentModal, setShowParentModal] = useState(false);
+
   const navigate = useNavigate();
   const { user } = useApp();
   const { isDark, toggleTheme } = useTheme();
@@ -269,9 +268,9 @@ const handleScroll = () => {
       src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
       alt="د. زياد ربيع"
       className="
-      h-16
-      sm:h-20
-      lg:h-24
+      h-11
+      sm:h-14
+      lg:h-16
       object-contain
       "
     />
@@ -283,28 +282,6 @@ const handleScroll = () => {
     isDark={isDark}
     toggleTheme={toggleTheme}
   />
-
-  <button
-    onClick={() => navigate("/search")}
-    className={`
-      flex
-      items-center
-      justify-center
-      rounded-full
-      border
-      border-gray-200
-      dark:border-[#2A2A2A]
-      bg-white
-      dark:bg-[#111111]
-      hover:border-[#B348FE]
-      hover:text-[#B348FE]
-      transition-all
-      duration-300
-      ${isScrolled ? "w-8 h-8" : "w-9 h-9 sm:w-10 sm:h-10"}
-    `}
-  >
-    <Search className="w-4 h-4" />
-  </button>
 </div>
 
   
@@ -363,37 +340,6 @@ const handleScroll = () => {
       <GuestActions navigate={navigate} />
     </>
   )}
-       
-            {/* Parent Access Button */}
-            {!user && (
-              <button
-                onClick={() => setShowParentModal(true)}
-                className="
-                  md:hidden
-                  flex
-                  items-center
-                  justify-center
-                  gap-1.5
-                  h-9
-                  px-3.5
-                  rounded-xl
-                  border-2
-                  border-[#B348FE]
-                  bg-transparent
-                  text-[#B348FE]
-                  text-[13px]
-                  font-medium
-                  whitespace-nowrap
-                  hover:bg-[#B348FE]
-                  hover:text-white
-                  transition-all
-                  duration-200
-                "
-              >
-                <Users size={14} strokeWidth={2} />
-                ولي الأمر
-              </button>
-            )}
 
             {/* Mobile Menu Toggle */}
            {!user && (
@@ -554,7 +500,6 @@ duration-300
     </nav>
     </div>
 
-    <ParentAccessModal open={showParentModal} onClose={() => setShowParentModal(false)} />
     </>
   );
 }
