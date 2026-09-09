@@ -40,9 +40,11 @@ workbox: {
     },
 
     {
-      urlPattern: ({ request, url }) =>
-        request.destination === "image" &&
-        !url.pathname.includes("/images/logo"),
+  urlPattern: ({ request, url }) =>
+    request.destination === "image" &&
+    !url.pathname.includes("/images/logo") &&
+    !url.pathname.includes("/images/footer") &&
+    !url.pathname.includes("/images/teacher"),
 
       handler: "CacheFirst",
 
@@ -85,7 +87,7 @@ manifest: {
   scope: "/",
 
   display: "standalone",
-  orientation: "landscape",
+  orientation: "any",
 
   theme_color: "#421651",
   background_color: "#ffffff",
