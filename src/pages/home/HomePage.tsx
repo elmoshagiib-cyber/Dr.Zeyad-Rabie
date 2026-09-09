@@ -857,9 +857,9 @@ object-contain
 }}
                 src="/images/secondary-stage.jpg"
                 alt="المرحلة الثانوية"
+                style={{ aspectRatio: "4 / 3" }}
                 className="
                   w-full
-                  h-[180px] sm:h-[240px] lg:h-[300px]
                   object-cover
                   saturate-110
                   group-hover:saturate-150
@@ -947,9 +947,9 @@ duration-300
 }}
                 src="/images/prep-stage.jpg"
                 alt="المرحلة الإعدادية"
+                style={{ aspectRatio: "4 / 3" }}
                 className="
                   w-full
-                  h-[180px] sm:h-[240px] lg:h-[300px]
                   object-cover
                   saturate-110
                   group-hover:saturate-150
