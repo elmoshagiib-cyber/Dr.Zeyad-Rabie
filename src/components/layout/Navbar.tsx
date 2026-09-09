@@ -385,6 +385,36 @@ const handleScroll = () => {
     </>
   )}
        
+            {/* Parent Access Button */}
+            {!user && (
+              <button
+                onClick={() => setShowParentModal(true)}
+                className="
+                  md:hidden
+                  flex
+                  items-center
+                  justify-center
+                  gap-1.5
+                  h-10
+                  px-3
+                  rounded-full
+                  border
+                  border-[#B348FE]
+                  text-[#B348FE]
+                  text-[12px]
+                  font-bold
+                  whitespace-nowrap
+                  hover:bg-[#B348FE]
+                  hover:text-white
+                  transition-all
+                  duration-300
+                "
+              >
+                <Users className="w-4 h-4" />
+                ولي الأمر
+              </button>
+            )}
+
             {/* Mobile Menu Toggle */}
            {!user && (
   <button

@@ -619,9 +619,8 @@ lg:text-center
     lg:justify-start
     "
   >
-   <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center lg:justify-start gap-3">
+   <div className="flex flex-row items-center justify-center lg:justify-start gap-3">
 
- <div className="contents sm:flex sm:flex-col sm:gap-3">
   {!user && (
   <Button
     size="lg"
@@ -630,7 +629,7 @@ lg:text-center
       h-11
       sm:h-12
       lg:h-14
-      px-6
+      px-4
       sm:px-7
       lg:px-9
       rounded-xl
@@ -639,7 +638,7 @@ bg-[#B348FE]
 hover:bg-[#9A2EFF]
       border-0
       text-white
-      text-[14px]
+      text-[13px]
       sm:text-[16px]
       lg:text-[18px]
       font-semibold
@@ -652,40 +651,6 @@ hover:bg-[#9A2EFF]
   </Button>
 )}
 
-  {!user && (
-    <Button
-      size="lg"
-      onClick={() => setShowParentModal(true)}
-      className="
-        h-11
-        sm:h-12
-        lg:h-14
-        px-6
-        sm:px-7
-        lg:px-9
-        rounded-xl
-        bg-white
-        dark:bg-[#111111]
-        border-2
-        border-[#B348FE]
-        hover:bg-[#B348FE]
-        text-[#B348FE]
-        hover:text-white
-        text-[14px]
-        sm:text-[16px]
-        lg:text-[18px]
-        font-semibold
-        hover:scale-[1.03]
-        transition-all
-        duration-300
-      "
-    >
-      <Users className="w-5 h-5 ml-2" />
-      لوحة ولي الأمر
-    </Button>
-  )}
-</div>
-
   {true && (
     <Button
       size="lg"
@@ -694,7 +659,7 @@ hover:bg-[#9A2EFF]
         h-11
         sm:h-12
         lg:h-14
-        px-6
+        px-4
         sm:px-7
         lg:px-9
         rounded-xl
