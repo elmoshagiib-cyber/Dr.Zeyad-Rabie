@@ -12,6 +12,8 @@ import { useApp } from "../../context/AppContext";
 import { useTheme } from "../../context/ThemeContext";
 import { supabase } from "../../lib/supabase";
 import { ParentAccessModal } from "./navbar/ParentAccessModal";
+import { LoginButton } from "./navbar/LoginButton";
+import { RegisterButton } from "./navbar/RegisterButton";
 export function Navbar() {
 const [scrollProgress, setScrollProgress] = useState(0);
 

@@ -58,6 +58,7 @@ const { user } = useApp();
     const [courses, setCourses] = useState<any[]>([]);
 const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 const [showParentModal, setShowParentModal] = useState(false);
+const [showIOSInstallModal, setShowIOSInstallModal] = useState(false);
 
 const [showNotesModal, setShowNotesModal] = useState(false);
 const [noteContent, setNoteContent] = useState("");
@@ -117,9 +118,26 @@ const loadCourses = async () => {
 
 
 
+const isIOS = () => {
+  const ua = window.navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+};
+
+const isInStandaloneMode = () =>
+  "standalone" in window.navigator && (window.navigator as any).standalone;
+
 const installApp = async () => {
-  if (!deferredPrompt) {
-    toast("التطبيق مثبت بالفعل أو غير متاح للتثبيت.");
+  if (!deferredPrompt && !isIOS()) {
+    toast("جاري تجهيز خاصية التثبيت، حاول تاني بعد لحظة.");
+    return;
+  }
+
+  if (isIOS()) {
+    if (isInStandaloneMode()) {
+      toast("التطبيق مثبت بالفعل على جهازك.");
+      return;
+    }
+    setShowIOSInstallModal(true);
     return;
   }
 
@@ -2051,6 +2069,113 @@ className="
 <Footer />
 
 <ParentAccessModal open={showParentModal} onClose={() => setShowParentModal(false)} />
+
+{showIOSInstallModal && (
+  <div
+    className="
+      fixed inset-0 z-[10000]
+      flex items-center justify-center
+      bg-black/60 backdrop-blur-sm
+      p-4
+    "
+    onClick={() => setShowIOSInstallModal(false)}
+  >
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.25 }}
+      onClick={(e) => e.stopPropagation()}
+      dir="rtl"
+      className="
+        w-full
+        max-w-[92%]
+        sm:max-w-md
+        rounded-[24px]
+        bg-white
+        dark:bg-[#111111]
+        border
+        border-gray-200
+        dark:border-[#262626]
+        shadow-[0_25px_70px_rgba(15,23,42,.25)]
+        p-6
+      "
+    >
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="font-black text-[18px] text-slate-900 dark:text-white">
+          تثبيت التطبيق على آيفون
+        </h3>
+        <button
+          onClick={() => setShowIOSInstallModal(false)}
+          className="w-9 h-9 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-[#232323] hover:text-red-500 transition-all"
+        >
+          <CloseIcon size={18} />
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-4">
+
+        <div className="flex items-start gap-3">
+          <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#B348FE] text-white text-sm font-bold flex items-center justify-center">
+            1
+          </span>
+          <p className="text-sm sm:text-[15px] leading-7 text-slate-600 dark:text-slate-300">
+            افتح المنصة من متصفح <span className="font-bold text-slate-900 dark:text-white">Safari</span> (لازم يكون Safari مش أي متصفح تاني).
+          </p>
+        </div>
+
+        <div className="flex items-start gap-3">
+          <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#B348FE] text-white text-sm font-bold flex items-center justify-center">
+            2
+          </span>
+          <p className="text-sm sm:text-[15px] leading-7 text-slate-600 dark:text-slate-300">
+            دوس على زرار <span className="font-bold text-slate-900 dark:text-white">المشاركة</span> (المربع وعليه سهم لفوق) في شريط الأدوات.
+          </p>
+        </div>
+
+        <div className="flex items-start gap-3">
+          <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#B348FE] text-white text-sm font-bold flex items-center justify-center">
+            3
+          </span>
+          <p className="text-sm sm:text-[15px] leading-7 text-slate-600 dark:text-slate-300">
+            انزل في القائمة ودوس على <span className="font-bold text-slate-900 dark:text-white">"إضافة إلى الشاشة الرئيسية"</span> (Add to Home Screen).
+          </p>
+        </div>
+
+        <div className="flex items-start gap-3">
+          <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#B348FE] text-white text-sm font-bold flex items-center justify-center">
+            4
+          </span>
+          <p className="text-sm sm:text-[15px] leading-7 text-slate-600 dark:text-slate-300">
+            دوس <span className="font-bold text-slate-900 dark:text-white">"إضافة"</span> وهتلاقي أيقونة المنصة على شاشتك الرئيسية زي أي تطبيق عادي.
+          </p>
+        </div>
+
+      </div>
+
+      <button
+        onClick={() => setShowIOSInstallModal(false)}
+        className="
+          w-full
+          mt-6
+          py-3
+          rounded-xl
+          bg-[#B348FE]
+          hover:bg-[#9E2FFF]
+          text-white
+          font-bold
+          text-sm
+          sm:text-base
+          transition-all
+          duration-300
+        "
+      >
+        تمام، فهمت
+      </button>
+
+    </motion.div>
+  </div>
+)}
 </motion.div>
 );
 }
