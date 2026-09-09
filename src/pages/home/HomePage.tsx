@@ -784,8 +784,6 @@ object-contain
       alt="ليه تختار مستر زياد ربيع؟"
       className="
         w-full
-        aspect-[16/9]
-        sm:aspect-[21/9]
         object-cover
         object-center
       "
