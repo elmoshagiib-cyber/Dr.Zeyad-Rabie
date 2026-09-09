@@ -784,12 +784,10 @@ object-contain
       alt="ليه تختار مستر زياد ربيع؟"
       className="
         w-full
-        h-[280px]
-        sm:h-[360px]
-        md:h-[440px]
-        lg:h-[520px]
-        xl:h-[600px]
+        aspect-[16/9]
+        sm:aspect-[21/9]
         object-cover
+        object-center
       "
     />
   </section>
