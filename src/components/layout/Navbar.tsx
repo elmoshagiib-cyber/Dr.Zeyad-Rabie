@@ -146,7 +146,7 @@ const handleScroll = () => {
 
   setScrollProgress(progress);
 
-  setIsScrolled(scrollY > 0);
+  setIsScrolled(scrollY > 20);
 };
 
   window.addEventListener("scroll", handleScroll);
@@ -218,21 +218,32 @@ const handleScroll = () => {
 <nav
   className={`
     relative
-    w-full
     bg-white
     dark:bg-[#09090B]
-    transition-[border-color]
+    transition-all
     duration-300
+    ease-out
     ${
       isScrolled
-        ? "border-b border-[#ECECEC] dark:border-[#2A2A2A]"
-        : "border-b border-transparent"
+        ? "w-[calc(100%-24px)] sm:w-[calc(100%-32px)] max-w-3xl mx-auto mt-3 rounded-full border border-[#ECECEC] dark:border-[#2A2A2A] shadow-[0_8px_30px_rgba(0,0,0,.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,.45)]"
+        : "w-full mt-0 rounded-none border-b border-transparent shadow-none"
     }
   `}
 >
 
-      <div className="w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-        <div className="relative h-24 flex items-center justify-between">
+      <div
+        className={`
+          w-full max-w-7xl mx-auto transition-[padding] duration-300
+          ${isScrolled ? "px-4 sm:px-5" : "px-5 sm:px-6 lg:px-8"}
+        `}
+      >
+        <div
+          className={`
+            relative flex items-center justify-between
+            transition-[height] duration-300
+            ${isScrolled ? "h-14 sm:h-16" : "h-24"}
+          `}
+        >
 <div className="flex items-center gap-3 pr-1 sm:pr-3">
 
   {/* Centered Logo (mobile + desktop) */}
@@ -267,7 +278,7 @@ const handleScroll = () => {
   </button>
 </div>
 
-<div className="flex items-center gap-2">
+<div className={`flex items-center transition-[gap] duration-300 ${isScrolled ? "gap-1" : "gap-2"}`}>
   <ThemeToggle
     isDark={isDark}
     toggleTheme={toggleTheme}
@@ -275,31 +286,22 @@ const handleScroll = () => {
 
   <button
     onClick={() => navigate("/search")}
-    className="
+    className={`
       flex
       items-center
       justify-center
-
-      w-9
-      h-9
-      sm:w-10
-      sm:h-10
-
       rounded-full
-
       border
       border-gray-200
       dark:border-[#2A2A2A]
-
       bg-white
       dark:bg-[#111111]
-
       hover:border-[#B348FE]
       hover:text-[#B348FE]
-
       transition-all
       duration-300
-    "
+      ${isScrolled ? "w-8 h-8" : "w-9 h-9 sm:w-10 sm:h-10"}
+    `}
   >
     <Search className="w-4 h-4" />
   </button>
@@ -309,39 +311,30 @@ const handleScroll = () => {
 
 </div>
           {/* Right Side */}
-         <div className="flex items-center gap-1.5 sm:gap-3">
+         <div className={`flex items-center transition-[gap] duration-300 ${isScrolled ? "gap-1" : "gap-1.5 sm:gap-3"}`}>
 
   {user ? (
     <>
 {/* Notification */}
       <button
         onClick={() => navigate("/dashboard/announcements")}
-        className="
+        className={`
           relative
           flex
           items-center
           justify-center
-
-          w-11
-          h-11
-          sm:w-12
-          sm:h-12
-
           rounded-full
-
           border
           border-gray-200
           dark:border-[#2A2A2A]
-
           bg-white
           dark:bg-[#111111]
-
           hover:border-[#B348FE]
           hover:text-[#B348FE]
-
           transition-all
           duration-300
-        "
+          ${isScrolled ? "w-9 h-9" : "w-11 h-11 sm:w-12 sm:h-12"}
+        `}
       >
         <Bell className="w-5 h-5" />
 
@@ -406,16 +399,17 @@ const handleScroll = () => {
            {!user && (
   <button
     onClick={() => setMobileOpen(!mobileOpen)}
-    className="
+    className={`
 md:hidden
 flex
 items-center
 justify-center
-w-11
-h-11
 bg-transparent
 p-0
-"
+transition-[width,height]
+duration-300
+${isScrolled ? "w-9 h-9" : "w-11 h-11"}
+`}
   >
    <AnimatePresence mode="wait">
   {!mobileOpen ? (
@@ -525,7 +519,7 @@ duration-300
 
 
 <AnimatePresence>
-  {isScrolled && (
+  {!isScrolled && (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}

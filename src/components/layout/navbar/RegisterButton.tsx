@@ -11,7 +11,7 @@ export function RegisterButton() {
     >
       <Link
         to="/register"
-        aria-label="أنشئ حسابك"
+        aria-label="حساب جديد"
         className="
           group inline-flex items-center gap-2
           px-4 h-10
@@ -31,7 +31,7 @@ export function RegisterButton() {
           className="text-white group-hover:text-[#B348FE] transition-colors duration-200"
           aria-hidden="true"
         />
-        <span>! أنشئ حسابك</span>
+        <span>!حساب جديد</span>
       </Link>
     </motion.div>
   );
