@@ -483,9 +483,10 @@ dark:bg-[#09090B]
    <div
   className="
 grid
-lg:grid-cols-2
+lg:grid-cols-[1.15fr_1fr]
 items-center
-gap-24
+gap-6
+lg:gap-10
 py-12
 lg:py-20
 "
@@ -522,8 +523,6 @@ style={{
   mx-auto
   lg:mx-0
   px-4
-  lg:pr-6
-  xl:pr-12
   "
 >
   <h1
