@@ -590,6 +590,8 @@ lg:text-center
     className="
     mt-3
     sm:mt-4
+    text-center
+    lg:text-center
     text-[14px]
     xs:text-[15px]
     sm:text-[17px]
