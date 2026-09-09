@@ -485,8 +485,7 @@ dark:bg-[#09090B]
 grid
 lg:grid-cols-2
 items-center
-gap-10
-lg:gap-14
+gap-24
 py-12
 lg:py-20
 "
