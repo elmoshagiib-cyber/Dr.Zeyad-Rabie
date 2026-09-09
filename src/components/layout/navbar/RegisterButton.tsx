@@ -13,34 +13,22 @@ export function RegisterButton() {
         to="/register"
         aria-label="أنشئ حسابك"
         className="
-group
-inline-flex
-items-center
-gap-2
-px-4
-h-10
-rounded-full
-border-2
-border-[#B348FE]
-bg-transparent
-text-[#B348FE]
-text-[14px]
-font-semibold
-hover:bg-[#B348FE]
-hover:text-white
-transition-all
-duration-200
-focus-visible:outline-none
-focus-visible:ring-2
-focus-visible:ring-[#B348FE]
-focus-visible:ring-offset-2
-"
+          group inline-flex items-center gap-2
+          px-4 h-10
+          rounded-xl
+          border-2 border-[#B348FE]
+          bg-[#B348FE]
+          text-white text-[14px] font-semibold
+          hover:bg-transparent hover:text-[#B348FE]
+          transition-all duration-200
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B348FE] focus-visible:ring-offset-2
+        "
         dir="rtl"
       >
         <Home
           size={16}
           strokeWidth={2.2}
-          className="text-[#B348FE] group-hover:text-white transition-colors duration-200"
+          className="text-white group-hover:text-[#B348FE] transition-colors duration-200"
           aria-hidden="true"
         />
         <span>! أنشئ حسابك</span>

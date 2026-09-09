@@ -15,7 +15,7 @@ export function LoginButton() {
         className="
           group inline-flex items-center gap-2
           px-4 h-10
-          rounded-full
+          rounded-xl
           border-2 border-[#B348FE]
           bg-transparent
           text-[#B348FE] text-[14px] font-medium
