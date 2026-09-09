@@ -249,12 +249,13 @@ const handleScroll = () => {
         >
 <div className="flex items-center gap-3 pr-1 sm:pr-3">
 
-  {/* Centered Logo (mobile + desktop) */}
+  {/* Centered Logo (mobile only) */}
 <div
   className="
   absolute
   left-1/2
   -translate-x-1/2
+  md:hidden
   "
 >
   <button
@@ -282,6 +283,29 @@ const handleScroll = () => {
 </div>
 
 <div className={`flex items-center transition-[gap] duration-300 ${isScrolled ? "gap-1" : "gap-2"}`}>
+  <button
+    onClick={() => navigate("/")}
+    className="
+    hidden
+    md:flex
+    items-center
+    justify-center
+    transition-all
+    duration-200
+    hover:scale-105
+    "
+  >
+    <img
+      src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
+      alt="د. زياد ربيع"
+      className="
+      h-8
+      lg:h-10
+      object-contain
+      "
+    />
+  </button>
+
   <ThemeToggle
     isDark={isDark}
     toggleTheme={toggleTheme}
