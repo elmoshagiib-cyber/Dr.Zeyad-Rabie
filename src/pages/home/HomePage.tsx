@@ -522,8 +522,8 @@ style={{
   mx-auto
   lg:mx-0
   px-4
-  lg:pr-2
-  xl:pr-4
+  lg:pr-6
+  xl:pr-12
   "
 >
   <h1
