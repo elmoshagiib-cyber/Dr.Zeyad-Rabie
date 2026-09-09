@@ -488,7 +488,7 @@ return (
 className="
 relative
 overflow-hidden
-py-28
+py-12 sm:py-16 lg:py-28
 bg-white
 dark:bg-[#09090B]
 "
@@ -505,7 +505,7 @@ lg:grid-cols-[1.15fr_1fr]
 items-center
 gap-6
 lg:gap-10
-py-12
+py-6
 lg:py-20
 "
 >
