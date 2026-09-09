@@ -14,6 +14,7 @@ import { Download } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import GradeCoursesContent from "./GradeCoursesContent";
 import toast from "react-hot-toast";
+import { WhyUsScrollSection } from "../home/WhyUsScrollSection";
 import {
   ChevronRight,
   Play,
@@ -776,7 +777,7 @@ object-contain
   </div>
 
 </section>
-
+<WhyUsScrollSection />
 
 <ScrollReveal>
   <section className="relative w-full">
