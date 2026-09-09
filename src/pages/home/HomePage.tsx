@@ -569,41 +569,40 @@ lg:text-center
   مستر زياد ربيع
 </span>
 
-  {/* الوصف الجديد */}
+  </h1>
+
   <p
     className="
-    mt-4
-    sm:mt-5
+    mt-3
+    sm:mt-4
     text-[13px]
     xs:text-[14px]
-    sm:text-[16px]
-    lg:text-[18px]
-    leading-7
-    sm:leading-8
-    font-medium
-    text-slate-500
-    dark:text-slate-400
-    max-w-[560px]
+    sm:text-[15px]
+    lg:text-[16px]
+    leading-6
+    sm:leading-7
+    font-normal
+    text-slate-400
+    dark:text-slate-500
+    max-w-[480px]
     mx-auto
     lg:mx-0
     "
   >
-    لا تستعجل النتيجة، فبعض التفاعلات تحتاج وقتًا،
-لكنها في النهاية تعطي أقوى النتائج  </p>
-
-  </h1>
+    لا تستعجل النتيجة، فبعض التفاعلات تحتاج وقتًا، لكنها في النهاية تعطي أقوى النتائج
+  </p>
 
   <div
     className="
-    mt-6
-    sm:mt-8
-    lg:mt-10
+    mt-4
+    sm:mt-5
+    lg:mt-6
     flex
     justify-center
     lg:justify-start
     "
   >
-   <div className="mt-6 sm:mt-8 lg:mt-10 flex flex-col sm:flex-row items-center sm:items-start justify-center lg:justify-start gap-4">
+   <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center lg:justify-start gap-3">
 
  <div className="contents sm:flex sm:flex-col sm:gap-3">
   {!user && (
