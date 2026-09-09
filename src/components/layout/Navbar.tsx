@@ -249,7 +249,7 @@ const handleScroll = () => {
     <img
       src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
       alt="د. زياد ربيع"
-      className="h-15 object-contain"
+      className="h-14 object-contain"
     />
   </button>
 </div>
