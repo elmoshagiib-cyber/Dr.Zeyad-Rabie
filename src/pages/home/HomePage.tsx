@@ -522,6 +522,8 @@ style={{
   mx-auto
   lg:mx-0
   px-4
+  lg:pr-10
+  xl:pr-16
   "
 >
   <h1
@@ -571,16 +573,16 @@ lg:text-center
     className="
     mt-3
     sm:mt-4
-    text-[13px]
-    xs:text-[14px]
-    sm:text-[15px]
-    lg:text-[16px]
-    leading-6
-    sm:leading-7
+    text-[14px]
+    xs:text-[15px]
+    sm:text-[17px]
+    lg:text-[18px]
+    leading-7
+    sm:leading-8
     font-normal
     text-slate-400
     dark:text-slate-500
-    max-w-[480px]
+    max-w-[520px]
     mx-auto
     lg:mx-0
     "
