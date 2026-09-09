@@ -778,161 +778,32 @@ object-contain
 </section>
 
 
-{!user && (
-  <>
-    {/* FEATURES */}
-    <ScrollReveal>
-      <section
+<ScrollReveal>
+  <section
+    className="
+      relative
+      py-12
+      sm:py-16
+      lg:py-24
+      bg-white
+      dark:bg-[#09090B]
+    "
+  >
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <img
+        src="/images/why-us.jpg"
+        alt="ليه تختار مستر زياد ربيع؟"
         className="
-          relative
-          py-12
-          sm:py-16
-          lg:py-24
-          bg-white
-          dark:bg-[#09090B]
-        "
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <img
-              src="/typography/features-title.png"
-              alt="ليه تختار مستر زياد ربيع؟"
-              draggable={false}
-              className="
-                mx-auto
-                w-[280px]
-                sm:w-[420px]
-                md:w-[560px]
-                lg:w-[700px]
-                xl:w-[820px]
-                h-auto
-                select-none
-                pointer-events-none
-              "
-            />
-          </div>
-
-        <div
-  className="
-  grid
-  grid-cols-1
-  sm:grid-cols-2
-  xl:grid-cols-4
-  gap-6
-  mt-10
-"
->
-  {FEATURES.map((feature, index) => {
-    const Icon = feature.icon;
-
-
-    
-    return (
-      <motion.div
-        key={feature.title}
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{
-          duration: .5,
-          delay: index * .12,
-        }}
-        whileHover={{
-          y: -8,
-        }}
-className="
-group
-relative
-overflow-hidden
-rounded-3xl
-border
-border-gray-200
-dark:border-[#262626]
-bg-white
-dark:bg-[#111111]
-p-7
-shadow-[0_8px_30px_rgba(0,0,0,.08)]
-dark:shadow-[0_10px_35px_rgba(0,0,0,.35)]
-hover:-translate-y-2
-hover:shadow-[0_18px_45px_rgba(0,0,0,.12)]
-dark:hover:shadow-[0_18px_45px_rgba(0,0,0,.55)]
-transition-all
-duration-300
-        "
-      >
-
-        <div
-          className="
-          absolute
-          top-0
-          left-0
           w-full
-          h-1
-          bg-[#422E91]
-          scale-x-0
-          group-hover:scale-x-100
-          transition-transform
-          duration-300
-          origin-left
-          "
-        />
-
-        <div
-          className="
-w-16
-h-16
-rounded-2xl
-bg-[#B348FE]/10
-dark:bg-[#B348FE]/15
-flex
-items-center
-justify-center
-mb-6
-group-hover:scale-110
-transition-all
-duration-300
-"
-        >
-         <Icon
-  className="text-[#B348FE]"
-  size={30}
-/>
-        </div>
-
-        <h3
-          className="
-          text-xl
-          font-bold
-          text-slate-900
-          dark:text-white
-          mb-3
-          "
-        >
-          {feature.title}
-        </h3>
-
-        <p
-          className="
-          text-[15px]
-          leading-8
-          text-slate-500
-          dark:text-slate-300
-          "
-        >
-          {feature.description}
-        </p>
-
-      </motion.div>
-    );
-  })}
-</div>
-
-        </div>
-      </section>
-    </ScrollReveal>
-  </>
-)}
+          h-auto
+          rounded-[24px]
+          sm:rounded-[32px]
+          object-cover
+        "
+      />
+    </div>
+  </section>
+</ScrollReveal>
 
 {/* ================= GRADES SECTION ================= */}
 <ScrollReveal>
