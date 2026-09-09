@@ -258,9 +258,9 @@ const handleScroll = () => {
       src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
       alt="د. زياد ربيع"
       className="
-      h-12
-      sm:h-14
-      lg:h-16
+      h-16
+      sm:h-20
+      lg:h-24
       object-contain
       "
     />
@@ -380,15 +380,15 @@ const handleScroll = () => {
                   flex
                   items-center
                   justify-center
-                  gap-2
-                  h-10
-                  px-4
+                  gap-1.5
+                  h-9
+                  px-3.5
                   rounded-xl
                   border-2
                   border-[#B348FE]
                   bg-transparent
                   text-[#B348FE]
-                  text-[14px]
+                  text-[13px]
                   font-medium
                   whitespace-nowrap
                   hover:bg-[#B348FE]
@@ -397,7 +397,7 @@ const handleScroll = () => {
                   duration-200
                 "
               >
-                <Users size={16} strokeWidth={2} />
+                <Users size={14} strokeWidth={2} />
                 ولي الأمر
               </button>
             )}
