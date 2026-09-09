@@ -145,13 +145,17 @@ const handleScroll = () => {
 
   setScrollProgress(progress);
 
-  setIsScrolled(scrollY > 20);
+  const isMobileView = window.innerWidth < 768;
+  setIsScrolled(isMobileView && scrollY > 20);
 };
 
   window.addEventListener("scroll", handleScroll);
+  window.addEventListener("resize", handleScroll);
 
-  return () =>
+  return () => {
     window.removeEventListener("scroll", handleScroll);
+    window.removeEventListener("resize", handleScroll);
+  };
 }, []);
 
 
@@ -268,9 +272,9 @@ const handleScroll = () => {
       src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
       alt="د. زياد ربيع"
       className="
-      h-11
-      sm:h-14
-      lg:h-16
+      h-14
+      sm:h-16
+      lg:h-20
       object-contain
       "
     />
