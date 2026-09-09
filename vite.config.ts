@@ -26,8 +26,23 @@ workbox: {
 
   runtimeCaching: [
     {
-      urlPattern: ({ request }) =>
-        request.destination === "image",
+      urlPattern: ({ url }) =>
+        url.pathname.includes("/images/logo") ||
+        url.pathname.includes("/images/footer") ||
+        url.pathname.includes("/images/notebook-teacher") ||
+        url.pathname.includes("/images/teacher"),
+
+      handler: "StaleWhileRevalidate",
+
+      options: {
+        cacheName: "brand-images",
+      },
+    },
+
+    {
+      urlPattern: ({ request, url }) =>
+        request.destination === "image" &&
+        !url.pathname.includes("/images/logo"),
 
       handler: "CacheFirst",
 
