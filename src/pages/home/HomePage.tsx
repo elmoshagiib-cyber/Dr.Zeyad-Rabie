@@ -485,7 +485,8 @@ dark:bg-[#09090B]
 grid
 lg:grid-cols-2
 items-center
-gap-24
+gap-10
+lg:gap-14
 py-12
 lg:py-20
 "
@@ -522,8 +523,8 @@ style={{
   mx-auto
   lg:mx-0
   px-4
-  lg:pr-10
-  xl:pr-16
+  lg:pr-2
+  xl:pr-4
   "
 >
   <h1
