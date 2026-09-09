@@ -779,29 +779,20 @@ object-contain
 
 
 <ScrollReveal>
-  <section
-    className="
-      relative
-      py-12
-      sm:py-16
-      lg:py-24
-      bg-white
-      dark:bg-[#09090B]
-    "
-  >
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <img
-        src="/images/why-us.jpg"
-        alt="ليه تختار مستر زياد ربيع؟"
-        className="
-          w-full
-          h-auto
-          rounded-[24px]
-          sm:rounded-[32px]
-          object-cover
-        "
-      />
-    </div>
+  <section className="relative w-full">
+    <img
+      src="/images/why-us.jpg"
+      alt="ليه تختار مستر زياد ربيع؟"
+      className="
+        w-full
+        h-[280px]
+        sm:h-[360px]
+        md:h-[440px]
+        lg:h-[520px]
+        xl:h-[600px]
+        object-cover
+      "
+    />
   </section>
 </ScrollReveal>
 
