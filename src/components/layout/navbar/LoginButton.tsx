@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LogIn } from "lucide-react";
+
 export function LoginButton() {
   return (
     <motion.div
@@ -11,14 +12,24 @@ export function LoginButton() {
       <Link
         to="/login"
         aria-label="تسجيل الدخول"
-        className="group inline-flex items-center gap-2 px-2 h-10 text-[#B348FE] text-[14px] font-medium hover:text-[#9A2EFF] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B348FE] focus-visible:ring-offset-2 rounded-lg"
+        className="
+          group inline-flex items-center gap-2
+          px-4 h-10
+          rounded-full
+          border-2 border-[#B348FE]
+          bg-transparent
+          text-[#B348FE] text-[14px] font-medium
+          hover:bg-[#B348FE] hover:text-white
+          transition-all duration-200
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B348FE] focus-visible:ring-offset-2
+        "
         dir="rtl"
       >
         <span>تسجيل الدخول</span>
         <LogIn
           size={16}
           strokeWidth={2}
-          className="text-[#B348FE] group-hover:text-[#9A2EFF] transition-colors duration-200"
+          className="text-[#B348FE] group-hover:text-white transition-colors duration-200"
           aria-hidden="true"
         />
       </Link>
