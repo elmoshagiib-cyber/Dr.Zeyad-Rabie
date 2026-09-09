@@ -299,8 +299,8 @@ const handleScroll = () => {
       src={isDark ? "/images/logo-dark.png" : "/images/logo-light.png"}
       alt="د. زياد ربيع"
       className="
-      h-8
-      lg:h-10
+      h-11
+      lg:h-14
       object-contain
       "
     />
@@ -395,9 +395,9 @@ ${isScrolled ? "w-9 h-9" : "w-11 h-11"}
       transition={{ duration: 0.2 }}
       className="flex flex-col justify-center gap-[5px]"
     >
-      <span className="block w-7 h-[3px] rounded-full bg-[#B348FE]" />
-      <span className="block w-7 h-[3px] rounded-full bg-[#B348FE]" />
-      <span className="block w-7 h-[3px] rounded-full bg-[#B348FE]" />
+      <span className="block w-7 h-[3px] rounded-full bg-[#5800a9]" />
+      <span className="block w-7 h-[3px] rounded-full bg-[#5800a9]" />
+      <span className="block w-7 h-[3px] rounded-full bg-[#5800a9]" />
     </motion.div>
   ) : (
     <motion.div

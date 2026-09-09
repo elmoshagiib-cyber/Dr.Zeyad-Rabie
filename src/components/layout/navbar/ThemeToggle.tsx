@@ -93,17 +93,17 @@ className="
   cursor-pointer
   overflow-hidden
 
-  bg-[#B348FE]
+  bg-[#5800a9]
 
   shadow-lg
-  hover:bg-[#B348FE]
+  hover:bg-[#5800a9]
 
   transition-all
   duration-300
 
   focus-visible:outline-none
   focus-visible:ring-2
-  focus-visible:ring-[#B348FE]
+  focus-visible:ring-[#5800a9]
   focus-visible:ring-offset-2
   focus-visible:ring-offset-white
   dark:focus-visible:ring-offset-neutral-950
@@ -179,7 +179,7 @@ animate={{
     animate={{ opacity: 1, rotate: 0, scale: 1 }}
     exit={{ opacity: 0, rotate: 180, scale: 0.6 }}
     transition={iconTransition}
-    className="text-[#B348FE]"
+    className="text-[#5800a9]"
   >
     <Moon
       size={14}
@@ -194,7 +194,7 @@ animate={{
     animate={{ opacity: 1, rotate: 0, scale: 1 }}
     exit={{ opacity: 0, rotate: -180, scale: 0.6 }}
     transition={iconTransition}
-    className="text-[#B348FE]"
+    className="text-[#5800a9]"
   >
     <Sun
       size={14}

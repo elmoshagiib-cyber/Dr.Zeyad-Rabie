@@ -16,12 +16,12 @@ export function LoginButton() {
           group inline-flex items-center gap-2
           px-4 h-10
           rounded-xl
-          border-2 border-[#B348FE]
+          border-2 border-[#5800a9]
           bg-transparent
-          text-[#B348FE] text-[14px] font-medium
-          hover:bg-[#B348FE] hover:text-white
+          text-[#5800a9] text-[14px] font-medium
+          hover:bg-[#5800a9] hover:text-white
           transition-all duration-200
-          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B348FE] focus-visible:ring-offset-2
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5800a9] focus-visible:ring-offset-2
         "
         dir="rtl"
       >
@@ -29,7 +29,7 @@ export function LoginButton() {
         <LogIn
           size={16}
           strokeWidth={2}
-          className="text-[#B348FE] group-hover:text-white transition-colors duration-200"
+          className="text-[#5800a9] group-hover:text-white transition-colors duration-200"
           aria-hidden="true"
         />
       </Link>
