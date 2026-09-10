@@ -554,7 +554,7 @@ style={{
     xl:text-[56px]
     font-black
     text-center
-lg:text-center
+lg:text-right
     leading-[1.15]
     tracking-[-1px]
     text-[#5800a9]
@@ -576,7 +576,7 @@ lg:text-center
     xl:text-[56px]
   font-black
   text-center
-lg:text-center
+lg:text-right
   leading-[1.1]
   tracking-[-1.5px]
   text-[#b600d7]
@@ -589,9 +589,9 @@ lg:text-center
 
   <div
     className="
-    mt-3
-    sm:mt-4
-    lg:mt-5
+    mt-6
+    sm:mt-7
+    lg:mt-8
     flex
     justify-center
     lg:justify-start
@@ -776,15 +776,12 @@ duration-700
 </section>
 
 <ScrollReveal>
-  <section className="relative w-full min-h-screen overflow-hidden">
+  <section className="relative w-full">
     <img
       src="/images/why-us.jpg"
       alt="ليه تختار مستر زياد ربيع؟"
       className="
-        absolute
-        inset-0
         w-full
-        h-full
         object-cover
         object-center
       "
