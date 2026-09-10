@@ -818,7 +818,7 @@ duration-700
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 lg:gap-7">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 lg:gap-7 items-start">
         {FEATURES.map((feature, index) => {
           const Icon = feature.icon;
           const isColored = index % 2 === 1;
@@ -835,27 +835,29 @@ duration-700
                 ease: [0.22, 1, 0.36, 1],
               }}
               className={`
-                rounded-[24px]
-                sm:rounded-[28px]
-                p-6
-                sm:p-7
-                lg:p-8
+                rounded-[36px]
+                sm:rounded-[40px]
+                px-6
+                sm:px-7
+                pt-8
+                sm:pt-9
+                ${isColored ? "pb-14 sm:pb-16" : "pb-8 sm:pb-9"}
                 flex
                 flex-col
-                gap-4
-                sm:gap-5
+                gap-5
+                sm:gap-6
                 ${
                   isColored
                     ? "bg-[#5800a9] dark:bg-[#b600d7]"
-                    : "bg-white dark:bg-[#111111] border-2 border-[#5800a9] dark:border-[#b600d7]"
+                    : "bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#262626]"
                 }
               `}
             >
               <div
                 className={`
-                  w-14 h-14
-                  sm:w-16 sm:h-16
-                  rounded-2xl
+                  w-16 h-16
+                  sm:w-[72px] sm:h-[72px]
+                  rounded-full
                   flex items-center justify-center
                   ${
                     isColored
@@ -866,7 +868,7 @@ duration-700
               >
                 <Icon
                   className={`
-                    w-7 h-7 sm:w-8 sm:h-8
+                    w-8 h-8 sm:w-9 sm:h-9
                     ${
                       isColored
                         ? "text-white"
@@ -877,23 +879,25 @@ duration-700
                 />
               </div>
 
-              <h3
-                className={`
-                  text-lg sm:text-xl font-black
-                  ${isColored ? "text-white" : "text-slate-900 dark:text-white"}
-                `}
-              >
-                {feature.title}
-              </h3>
+              <div>
+                <h3
+                  className={`
+                    text-lg sm:text-xl font-black mb-2
+                    ${isColored ? "text-white" : "text-slate-900 dark:text-white"}
+                  `}
+                >
+                  {feature.title}
+                </h3>
 
-              <p
-                className={`
-                  text-sm sm:text-[15px] leading-7
-                  ${isColored ? "text-white/85" : "text-slate-500 dark:text-slate-400"}
-                `}
-              >
-                {feature.description}
-              </p>
+                <p
+                  className={`
+                    text-sm sm:text-[15px] leading-7
+                    ${isColored ? "text-white/85" : "text-slate-500 dark:text-slate-400"}
+                  `}
+                >
+                  {feature.description}
+                </p>
+              </div>
             </motion.div>
           );
         })}
