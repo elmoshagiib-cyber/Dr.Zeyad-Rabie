@@ -911,22 +911,22 @@ transition-all
 duration-300
 "
 >
-              <img
-                src="/typography/secondary-stage-title.png"
-                alt="المراحل الثانوية"
-                className="
-                  mx-auto
-                  w-[150px]
-                  xs:w-[170px]
-                  sm:w-[200px]
-                  lg:w-[230px]
-                  h-auto
-                  select-none
-                  pointer-events-none
-                  mb-3
-                  sm:mb-4
-                "
-              />
+              <div className="h-[50px] sm:h-[58px] lg:h-[66px] flex items-center justify-center mb-3 sm:mb-4">
+                <img
+                  src="/typography/secondary-stage-title.png"
+                  alt="المراحل الثانوية"
+                  className="
+                    h-full
+                    w-auto
+                    max-w-[220px]
+                    sm:max-w-[260px]
+                    lg:max-w-[300px]
+                    object-contain
+                    select-none
+                    pointer-events-none
+                  "
+                />
+              </div>
               <div className="h-[3px] bg-[#422E91] dark:bg-[#F6AC08] rounded-full mb-3 sm:mb-4" />
               <p className="text-slate-500 dark:text-slate-300 text-[13px] sm:text-[15px]">
                 الصف الأول والثاني والثالث الثانوي
@@ -1013,22 +1013,22 @@ transition-all
 duration-300
 "
 >
-              <img
-                src="/typography/prep-stage-title.png"
-                alt="المراحل الإعدادية"
-                className="
-                  mx-auto
-                  w-[150px]
-                  xs:w-[170px]
-                  sm:w-[200px]
-                  lg:w-[230px]
-                  h-auto
-                  select-none
-                  pointer-events-none
-                  mb-3
-                  sm:mb-4
-                "
-              />
+              <div className="h-[50px] sm:h-[58px] lg:h-[66px] flex items-center justify-center mb-3 sm:mb-4">
+                <img
+                  src="/typography/prep-stage-title.png"
+                  alt="المراحل الإعدادية"
+                  className="
+                    h-full
+                    w-auto
+                    max-w-[220px]
+                    sm:max-w-[260px]
+                    lg:max-w-[300px]
+                    object-contain
+                    select-none
+                    pointer-events-none
+                  "
+                />
+              </div>
               <div className="h-[3px] bg-[#422E91] dark:bg-[#F6AC08] rounded-full mb-3 sm:mb-4" />
               <p className="text-slate-500 dark:text-slate-300 text-[13px] sm:text-[15px]">
                 الصف الأول والثاني والثالث الإعدادي
