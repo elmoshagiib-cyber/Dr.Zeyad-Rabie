@@ -587,29 +587,6 @@ lg:text-center
 
   </h1>
 
-  <p
-    className="
-    mt-3
-    sm:mt-4
-    text-center
-    lg:text-center
-    text-[14px]
-    xs:text-[15px]
-    sm:text-[17px]
-    lg:text-[18px]
-    leading-7
-    sm:leading-8
-    font-normal
-    text-slate-400
-    dark:text-slate-500
-    max-w-[520px]
-    mx-auto
-    lg:mx-0
-    "
-  >
-    لا تستعجل النتيجة، فبعض التفاعلات تحتاج وقتًا، لكنها في النهاية تعطي أقوى النتائج
-  </p>
-
   <div
     className="
     mt-4
@@ -891,10 +868,13 @@ duration-700
               {/* Overlay badge */}
               <div className="
                 absolute top-3 right-3 sm:top-4 sm:right-4
-                bg-[#422E91] dark:bg-[#F6AC08]
-                text-white dark:text-slate-900
+                bg-white/15
+                backdrop-blur-md
+                border border-white/25
+                text-white
                 text-[11px] sm:text-[12px] font-bold
                 px-3 py-1 rounded-full
+                shadow-sm
               ">
                 ثانوي
               </div>
@@ -981,10 +961,13 @@ duration-300
               {/* Overlay badge */}
               <div className="
                 absolute top-3 right-3 sm:top-4 sm:right-4
-                bg-[#422E91] dark:bg-[#F6AC08]
-                text-white dark:text-slate-900
+                bg-white/15
+                backdrop-blur-md
+                border border-white/25
+                text-white
                 text-[11px] sm:text-[12px] font-bold
                 px-3 py-1 rounded-full
+                shadow-sm
               ">
                 إعدادي
               </div>
