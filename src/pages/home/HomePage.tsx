@@ -579,7 +579,7 @@ lg:text-center
 lg:text-center
   leading-[1.1]
   tracking-[-1.5px]
-  text-[#B348FE]
+  text-[#b600d7]
   "
 >
  الكيميائي مستر زياد ربيع 

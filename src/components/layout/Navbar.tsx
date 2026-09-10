@@ -232,7 +232,7 @@ const handleScroll = () => {
     ease-out
     ${
       isScrolled
-        ? "w-[calc(100%-24px)] sm:w-[calc(100%-32px)] max-w-3xl mx-auto mt-3 rounded-full border border-[#ECECEC] dark:border-[#2A2A2A] shadow-[0_8px_30px_rgba(0,0,0,.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,.45)]"
+        ? "w-[calc(100%-56px)] sm:w-[calc(100%-72px)] max-w-3xl mx-auto mt-3 rounded-full border border-[#ECECEC] dark:border-[#2A2A2A] shadow-[0_8px_30px_rgba(0,0,0,.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,.45)]"
         : "w-full mt-0 rounded-none border-b border-transparent shadow-none"
     }
   `}
@@ -496,38 +496,35 @@ duration-300
       )}
 
 
-<AnimatePresence>
-  {!isScrolled && (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{
-        duration: 0.25,
-        ease: [0.4, 0, 0.2, 1],
-      }}
-      className="
-        absolute
-        bottom-0
-        left-0
-        w-full
-        h-[5px]
-        bg-[#B348FE]/15
-        pointer-events-none
-      "
-    >
-      <motion.div
-        className="h-full bg-[#B348FE]"
-        initial={{ width: "0%" }}
-        animate={{ width: `${scrollProgress}%` }}
-        transition={{
-          duration: 0.1,
-          ease: "linear",
-        }}
-      />
-    </motion.div>
-  )}
-</AnimatePresence>
+<motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: scrollProgress > 0 ? 1 : 0 }}
+  transition={{
+    duration: 0.25,
+    ease: [0.4, 0, 0.2, 1],
+  }}
+  className="
+    absolute
+    bottom-0
+    left-0
+    w-full
+    h-[5px]
+    rounded-b-full
+    overflow-hidden
+    bg-[#B348FE]/15
+    pointer-events-none
+  "
+>
+  <motion.div
+    className="h-full bg-[#B348FE]"
+    initial={{ width: "0%" }}
+    animate={{ width: `${scrollProgress}%` }}
+    transition={{
+      duration: 0.1,
+      ease: "linear",
+    }}
+  />
+</motion.div>
 
     </nav>
     </div>
