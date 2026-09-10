@@ -94,9 +94,11 @@ className="
   overflow-hidden
 
   bg-[#5800a9]
+  dark:bg-[#b600d7]
 
   shadow-lg
   hover:bg-[#5800a9]
+  dark:hover:bg-[#b600d7]
 
   transition-all
   duration-300
@@ -179,7 +181,7 @@ animate={{
     animate={{ opacity: 1, rotate: 0, scale: 1 }}
     exit={{ opacity: 0, rotate: 180, scale: 0.6 }}
     transition={iconTransition}
-    className="text-[#5800a9]"
+    className="text-[#b600d7]"
   >
     <Moon
       size={14}

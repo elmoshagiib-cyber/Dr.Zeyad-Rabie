@@ -542,6 +542,9 @@ style={{
   mx-auto
   lg:mx-0
   px-4
+  lg:pr-8
+  xl:pr-12
+  2xl:pr-16
   "
 >
   <h1
