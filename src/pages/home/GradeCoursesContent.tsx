@@ -261,29 +261,6 @@ group-hover:scale-105
 "
         />
 
-        {course.is_free && (
-       <span
-  className="
-    absolute
-    top-4
-    right-4
-    rounded-full
-    bg-white/20
-    backdrop-blur-md
-    border
-    border-white/40
-    text-white
-    text-xs
-    font-black
-    px-4
-    py-2
-    shadow-[0_8px_20px_rgba(0,0,0,.15)]
-  "
->
-  مجاني
-</span>
-        )}
-
         {course.category && (
           <span className="
             absolute top-3 left-3
@@ -332,7 +309,7 @@ backdrop-blur-md backdrop-blur-sm text-white
     dark:text-white
     line-clamp-2
     group-hover:text-[#5800a9]
-    dark:group-hover:text-[#c9a6ff]
+    dark:group-hover:text-[#b600d7]
     transition-colors
     duration-300
   "
@@ -390,6 +367,7 @@ backdrop-blur-md backdrop-blur-sm text-white
             text-[13px] sm:text-sm font-bold text-[#5800a9]
             dark:text-[#c9a6ff]
             hover:text-[#b600d7]
+            dark:hover:text-[#b600d7]
             transition-colors
           "
         >
@@ -418,7 +396,10 @@ backdrop-blur-md backdrop-blur-sm text-white
       text-[15px]
       text-white
       bg-[#b600d7]
-      hover:bg-[#9a00b5]
+      border-2
+      border-[#b600d7]
+      hover:bg-transparent
+      hover:text-[#b600d7]
       !shadow-none
       cursor-pointer
       transition-all
@@ -439,7 +420,10 @@ backdrop-blur-md backdrop-blur-sm text-white
         text-[15px]
         text-white
         bg-[#5800a9]
-        hover:bg-[#420080]
+        border-2
+        border-[#5800a9]
+        hover:bg-transparent
+        hover:text-[#5800a9]
         !shadow-none
         cursor-pointer
         transition-all
@@ -486,10 +470,10 @@ backdrop-blur-md backdrop-blur-sm text-white
         flex
         items-center
         gap-1.5
-        bg-lime-100
-        dark:bg-lime-500/10
-        text-lime-700
-        dark:text-lime-400
+        bg-emerald-100
+        dark:bg-emerald-900/40
+        text-emerald-700
+        dark:text-emerald-400
         rounded-full
         px-4
         py-2

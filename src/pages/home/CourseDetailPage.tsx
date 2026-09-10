@@ -1015,7 +1015,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 >
                   <span className="text-sm font-bold">{item.label}</span>
                   <span className="text-[#FFD54A]">{item.icon}</span>
-                  <span className="rounded-full bg-[#B348FE] text-white px-2.5 py-1 text-[11px] font-black">
+                  <span className="rounded-full bg-[#5800a9] text-white px-2.5 py-1 text-[11px] font-black">
                     +{item.value}
                   </span>
                 </div>
@@ -1054,7 +1054,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
             <div className="flex flex-wrap justify-start gap-5">
               <div className="flex items-center gap-3">
                 <span className="text-white font-bold">تاريخ الإنشاء</span>
-                <span className="rounded-full bg-[#B348FE] text-white px-4 py-1.5 text-sm font-black">
+                <span className="rounded-full bg-[#5800a9] text-white px-4 py-1.5 text-sm font-black">
                   {new Date(course.created_at || Date.now()).toLocaleDateString(
                     "ar-EG",
                     {
@@ -1106,7 +1106,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 {course.is_free ? (
                   <button
                     onClick={handleEnroll}
-                    className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#B348FE] hover:bg-[#9E2FFF] shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)] transition-all duration-300 hover:scale-[1.015] mb-3 sm:mb-4"
+                    className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#5800a9] hover:bg-[#9E2FFF] shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)] transition-all duration-300 hover:scale-[1.015] mb-3 sm:mb-4"
                   >
                     {isEnrolled ? "مشترك" : "اشترك مجانًا"}
                   </button>
@@ -1144,7 +1144,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
                         handleEnroll();
                       }}
-                      className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#B348FE] hover:bg-[#9E2FFF] shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)] transition-all duration-300 hover:scale-[1.015] mb-3"
+                      className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#5800a9] hover:bg-[#9E2FFF] shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)] transition-all duration-300 hover:scale-[1.015] mb-3"
                     >
                       {isEnrolled ? "مشترك" : "اشترك الآن"}
                     </button>
@@ -1156,7 +1156,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                     onClick={() => window.open(course.intro_video)}
                     className="w-full py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-gray-700 dark:text-gray-200 font-bold text-sm sm:text-base border-2 border-gray-200 dark:border-gray-600 hover:border-rose-300 flex items-center justify-center gap-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all duration-300 mb-3 sm:mb-4"
                   >
-                    <Play size={16} className="text-[#B348FE]" />
+                    <Play size={16} className="text-[#5800a9]" />
                     <span>مشاهدة المقدمة</span>
                   </button>
                 )}
@@ -1202,11 +1202,11 @@ const saveProgress = async (currentTime: number, duration: number) => {
   {/* Title */}
   <h2 className="relative z-10 text-2xl sm:text-3xl xl:text-4xl font-black text-right transition-all duration-500 group-hover:translate-x-1">
 
-    <span className="text-gray-900 dark:text-white transition-colors duration-500 group-hover:text-[#B348FE]">
+    <span className="text-gray-900 dark:text-white transition-colors duration-500 group-hover:text-[#5800a9]">
       محتوى
     </span>
 
-    <span className="text-[#B348FE] transition-colors duration-500 group-hover:text-gray-900 dark:group-hover:text-white">
+    <span className="text-[#5800a9] transition-colors duration-500 group-hover:text-gray-900 dark:group-hover:text-white">
       {" "}الكورس
     </span>
 
@@ -1234,24 +1234,24 @@ const saveProgress = async (currentTime: number, duration: number) => {
   size={18}
   className={`flex-shrink-0 transition-all duration-300 ${
     isOpen
-      ? "rotate-180 text-[#B348FE]"
+      ? "rotate-180 text-[#5800a9]"
       : "rotate-0 text-gray-500 dark:text-gray-400"
   }`}
 />
 
                     <div className="flex flex-row-reverse items-center justify-start gap-3">
-                      <h3 className="text-base sm:text-xl xl:text-2xl font-black text-gray-900 dark:text-white group-hover:text-[#B348FE] transition-all duration-300 ease-out group-hover:-translate-x-1 truncate">
+                      <h3 className="text-base sm:text-xl xl:text-2xl font-black text-gray-900 dark:text-white group-hover:text-[#5800a9] transition-all duration-300 ease-out group-hover:-translate-x-1 truncate">
                         {unit.title}
                       </h3>
 
                       <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
                         <LayoutGrid
                           size={16}
-                          className="sm:hidden text-[#B348FE]"
+                          className="sm:hidden text-[#5800a9]"
                         />
                         <LayoutGrid
                           size={20}
-                          className="hidden sm:block text-[#B348FE]"
+                          className="hidden sm:block text-[#5800a9]"
                         />
                       </div>
                     </div>
@@ -1380,7 +1380,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
                             <div className="flex flex-row-reverse items-center gap-3 text-right flex-1 min-w-0">
                               <div className="flex-1 min-w-0">
-                                <h4 className="text-sm sm:text-base xl:text-lg font-bold text-[#111827] dark:text-white truncate transition-colors duration-300 group-hover:text-[#B348FE]">
+                                <h4 className="text-sm sm:text-base xl:text-lg font-bold text-[#111827] dark:text-white truncate transition-colors duration-300 group-hover:text-[#5800a9]">
                                   {lesson.title}
                                 </h4>
 
@@ -1568,7 +1568,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
           <div className="w-full max-w-md rounded-[30px] bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] shadow-[0_25px_70px_rgba(15,23,42,.12)] dark:shadow-[0_30px_70px_rgba(0,0,0,.65)] p-8">
             <div className="text-center">
               <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#F6EEFF] dark:bg-[#2B103D]">
-                <ShieldCheck size={36} className="text-[#B348FE]" />
+                <ShieldCheck size={36} className="text-[#5800a9]" />
               </div>
 
               <h2 className="text-3xl font-black text-gray-900 dark:text-white">
@@ -1580,7 +1580,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
               </p>
 
               <div className="mt-5 rounded-2xl border border-[#EAD8FF] dark:border-[#2A2A2A] bg-[#F6EEFF] dark:bg-[#1A1A1A] px-5 py-4">
-                <h3 className="text-lg font-black text-[#B348FE] text-center">
+                <h3 className="text-lg font-black text-[#5800a9] text-center">
                   {course?.title}
                 </h3>
               </div>
@@ -1591,7 +1591,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
               value={subscriptionCode}
               onChange={(e) => setSubscriptionCode(e.target.value.toUpperCase())}
               placeholder="XXXX-XXXX"
-              className="mt-7 w-full rounded-2xl border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#181818] px-5 py-4 text-center text-lg tracking-[6px] font-black text-[#B348FE] outline-none transition-all duration-300 focus:border-[#B348FE] focus:ring-4 focus:ring-[#B348FE]/20"
+              className="mt-7 w-full rounded-2xl border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#181818] px-5 py-4 text-center text-lg tracking-[6px] font-black text-[#5800a9] outline-none transition-all duration-300 focus:border-[#5800a9] focus:ring-4 focus:ring-[#5800a9]/20"
             />
 
             <Button className="w-full mt-5" onClick={activateSubscription}>
@@ -1616,7 +1616,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
             <Button
               variant="ghost"
-              className="w-full mt-3 text-gray-500 dark:text-gray-400 hover:text-[#B348FE]"
+              className="w-full mt-3 text-gray-500 dark:text-gray-400 hover:text-[#5800a9]"
               onClick={() => {
                 setShowSubscriptionModal(false);
                 setSubscriptionCode("");
