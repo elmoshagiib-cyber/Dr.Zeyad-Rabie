@@ -757,10 +757,15 @@ justify-center
 "
 >
 
-        <div className="relative">
+        <div className="relative group">
 
           
-         <img
+         <motion.img
+  whileHover={{ scale: 1.07 }}
+  transition={{
+    duration: 0.25,
+    ease: [0.22, 1, 0.36, 1],
+  }}
   src={TEACHER.image}
   alt={TEACHER.name}
   className="
@@ -775,6 +780,11 @@ xl:w-[620px]
 2xl:w-[680px]
 mx-auto
 object-contain
+saturate-110
+group-hover:saturate-150
+group-hover:brightness-110
+transition-all
+duration-700
 "
 />
 
