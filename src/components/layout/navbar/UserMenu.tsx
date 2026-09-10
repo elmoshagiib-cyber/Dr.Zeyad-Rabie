@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, BookOpen, Settings, LogOut } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
 import { supabase } from '../../../lib/supabase';
@@ -109,20 +109,6 @@ const avatar = user.avatar_url || "/images/default-avatar.png";
      icon: User,
       label: 'حسابي',
       action: () => handleNavigate('/dashboard'),
-      color: 'text-gray-700 dark:text-gray-300',
-      hoverColor: 'hover:bg-gray-50 dark:hover:bg-gray-800'
-    },
-    {
-      icon: BookOpen,
-      label: 'كورساتي',
-      action: () => handleNavigate('/dashboard/courses'),
-      color: 'text-gray-700 dark:text-gray-300',
-      hoverColor: 'hover:bg-gray-50 dark:hover:bg-gray-800'
-    },
-    {
-      icon: Settings,
-      label: 'الإعدادات',
-      action: () => handleNavigate('/profile'),
       color: 'text-gray-700 dark:text-gray-300',
       hoverColor: 'hover:bg-gray-50 dark:hover:bg-gray-800'
     }
