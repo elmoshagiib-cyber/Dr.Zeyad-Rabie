@@ -637,7 +637,7 @@ lg:text-center
       lg:px-9
       rounded-xl
       bg-[#422E91]
-bg-[#B348FE]
+bg-[#5800a9]
 hover:bg-[#9A2EFF]
       border-0
       text-white
@@ -650,7 +650,7 @@ hover:bg-[#9A2EFF]
       duration-300
     "
   >
-    سجل الآن مجانًا
+    سجل الآن
   </Button>
 )}
 

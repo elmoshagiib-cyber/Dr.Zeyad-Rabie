@@ -225,6 +225,7 @@ const handleScroll = () => {
 <nav
   className={`
     relative
+    overflow-hidden
     bg-white
     dark:bg-[#09090B]
     transition-all
@@ -248,7 +249,7 @@ const handleScroll = () => {
           className={`
             relative flex items-center justify-between
             transition-[height] duration-300
-            ${isScrolled ? "h-14 sm:h-16" : "h-24"}
+            ${isScrolled ? "h-[72px] sm:h-20" : "h-24"}
           `}
         >
 <div className="flex items-center gap-3 pr-1 sm:pr-3">
