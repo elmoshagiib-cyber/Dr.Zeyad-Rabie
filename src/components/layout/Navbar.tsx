@@ -145,9 +145,13 @@ const handleScroll = () => {
 
   setScrollProgress(progress);
 
+  // على الموبايل: شكل الكبسولة يفضل ثابت طول الوقت (مش مرتبط بالسكرول)
+  // على التابلت والدسكتوب: يفضل زي ما هو من غير أي تغيير
   const isMobileView = window.innerWidth < 768;
-  setIsScrolled(isMobileView && scrollY > 20);
+  setIsScrolled(isMobileView);
 };
+
+  handleScroll();
 
   window.addEventListener("scroll", handleScroll);
   window.addEventListener("resize", handleScroll);
