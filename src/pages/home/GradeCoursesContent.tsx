@@ -223,11 +223,13 @@ return (
     group
     overflow-hidden
     p-0
-    bg-[#F7F7F8]
+    bg-white
     dark:bg-[#151515]
     border
     border-gray-200
     dark:border-[#262626]
+    shadow-[0_4px_20px_rgba(0,0,0,.06)]
+    hover:shadow-[0_10px_35px_rgba(0,0,0,.1)]
     rounded-[26px]
     cursor-pointer
 "
@@ -415,9 +417,10 @@ backdrop-blur-md backdrop-blur-sm text-white
       font-black
       text-[15px]
       text-white
-      bg-emerald-600
-      hover:bg-emerald-700
-      shadow-none
+      bg-[#b600d7]
+      hover:bg-[#9a00b5]
+      !shadow-none
+      cursor-pointer
       transition-all
       duration-300
     "
@@ -435,9 +438,10 @@ backdrop-blur-md backdrop-blur-sm text-white
         font-black
         text-[15px]
         text-white
-        bg-[#F6AC08]
-        hover:bg-[#E29E00]
-        shadow-none
+        bg-[#5800a9]
+        hover:bg-[#420080]
+        !shadow-none
+        cursor-pointer
         transition-all
         duration-300
       "
