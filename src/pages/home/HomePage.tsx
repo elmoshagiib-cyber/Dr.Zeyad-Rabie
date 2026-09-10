@@ -776,12 +776,15 @@ duration-700
 </section>
 
 <ScrollReveal>
-  <section className="relative w-full">
+  <section className="relative w-full min-h-screen overflow-hidden">
     <img
       src="/images/why-us.jpg"
       alt="ليه تختار مستر زياد ربيع؟"
       className="
+        absolute
+        inset-0
         w-full
+        h-full
         object-cover
         object-center
       "
@@ -911,22 +914,13 @@ transition-all
 duration-300
 "
 >
-              <div className="h-[50px] sm:h-[58px] lg:h-[66px] flex items-center justify-center mb-3 sm:mb-4">
-                <img
-                  src="/typography/secondary-stage-title.png"
-                  alt="المراحل الثانوية"
-                  className="
-                    h-full
-                    w-auto
-                    max-w-[220px]
-                    sm:max-w-[260px]
-                    lg:max-w-[300px]
-                    object-contain
-                    select-none
-                    pointer-events-none
-                  "
-                />
-              </div>
+              <h3 className="
+                text-[18px] sm:text-[22px] lg:text-[26px]
+                font-black mb-3 sm:mb-4
+                text-slate-900 dark:text-white
+              ">
+                المراحل الثانوية
+              </h3>
               <div className="h-[3px] bg-[#422E91] dark:bg-[#F6AC08] rounded-full mb-3 sm:mb-4" />
               <p className="text-slate-500 dark:text-slate-300 text-[13px] sm:text-[15px]">
                 الصف الأول والثاني والثالث الثانوي
@@ -1013,22 +1007,13 @@ transition-all
 duration-300
 "
 >
-              <div className="h-[50px] sm:h-[58px] lg:h-[66px] flex items-center justify-center mb-3 sm:mb-4">
-                <img
-                  src="/typography/prep-stage-title.png"
-                  alt="المراحل الإعدادية"
-                  className="
-                    h-full
-                    w-auto
-                    max-w-[220px]
-                    sm:max-w-[260px]
-                    lg:max-w-[300px]
-                    object-contain
-                    select-none
-                    pointer-events-none
-                  "
-                />
-              </div>
+              <h3 className="
+                text-[18px] sm:text-[22px] lg:text-[26px]
+                font-black mb-3 sm:mb-4
+                text-slate-900 dark:text-white
+              ">
+                المراحل الإعدادية
+              </h3>
               <div className="h-[3px] bg-[#422E91] dark:bg-[#F6AC08] rounded-full mb-3 sm:mb-4" />
               <p className="text-slate-500 dark:text-slate-300 text-[13px] sm:text-[15px]">
                 الصف الأول والثاني والثالث الإعدادي
