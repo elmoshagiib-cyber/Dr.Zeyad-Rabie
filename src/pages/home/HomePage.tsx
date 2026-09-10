@@ -558,7 +558,7 @@ lg:text-right
     leading-[1.15]
     tracking-[-1px]
     text-[#5800a9]
-    dark:text-[#c9a6ff]
+    dark:text-white
     "
   >
     مرحبا بكم في منصة
@@ -677,8 +677,10 @@ lg:text-right
           rounded-xl
           border-2
           border-[#5800a9]
+          dark:border-white
           bg-transparent
           text-[#5800a9]
+          dark:text-white
           text-[13px]
           sm:text-[16px]
           lg:text-[18px]
@@ -686,6 +688,8 @@ lg:text-right
           whitespace-nowrap
           hover:bg-[#5800a9]
           hover:text-white
+          dark:hover:bg-white
+          dark:hover:text-[#5800a9]
           transition-all
           duration-300
         "

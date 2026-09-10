@@ -16,10 +16,11 @@ export function LoginButton() {
           group inline-flex items-center gap-2
           px-4 h-10
           rounded-xl
-          border-2 border-[#5800a9]
+          border-2 border-[#5800a9] dark:border-white
           bg-transparent
-          text-[#5800a9] text-[14px] font-medium
+          text-[#5800a9] dark:text-white text-[14px] font-medium
           hover:bg-[#5800a9] hover:text-white
+          dark:hover:bg-white dark:hover:text-[#5800a9]
           transition-all duration-200
           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5800a9] focus-visible:ring-offset-2
         "
@@ -29,7 +30,7 @@ export function LoginButton() {
         <LogIn
           size={16}
           strokeWidth={2}
-          className="text-[#5800a9] group-hover:text-white transition-colors duration-200"
+          className="text-[#5800a9] dark:text-white group-hover:text-white dark:group-hover:text-[#5800a9] transition-colors duration-200"
           aria-hidden="true"
         />
       </Link>

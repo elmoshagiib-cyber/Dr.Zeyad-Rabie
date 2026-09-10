@@ -1106,7 +1106,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 {course.is_free ? (
                   <button
                     onClick={handleEnroll}
-                    className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#5800a9] hover:bg-[#9E2FFF] shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)] transition-all duration-300 hover:scale-[1.015] mb-3 sm:mb-4"
+                    className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#5800a9] border-2 border-[#5800a9] hover:bg-transparent hover:text-[#5800a9] shadow-none cursor-pointer transition-all duration-300 mb-3 sm:mb-4"
                   >
                     {isEnrolled ? "مشترك" : "اشترك مجانًا"}
                   </button>
@@ -1144,7 +1144,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
                         handleEnroll();
                       }}
-                      className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#5800a9] hover:bg-[#9E2FFF] shadow-lg hover:shadow-[0_12px_35px_rgba(179,72,254,.35)] transition-all duration-300 hover:scale-[1.015] mb-3"
+                      className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#5800a9] border-2 border-[#5800a9] hover:bg-transparent hover:text-[#5800a9] shadow-none cursor-pointer transition-all duration-300 mb-3"
                     >
                       {isEnrolled ? "مشترك" : "اشترك الآن"}
                     </button>
@@ -1154,7 +1154,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 {course.intro_video && (
                   <button
                     onClick={() => window.open(course.intro_video)}
-                    className="w-full py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-gray-700 dark:text-gray-200 font-bold text-sm sm:text-base border-2 border-gray-200 dark:border-gray-600 hover:border-rose-300 flex items-center justify-center gap-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all duration-300 mb-3 sm:mb-4"
+                    className="w-full py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-gray-700 dark:text-gray-200 font-bold text-sm sm:text-base border-2 border-gray-200 dark:border-gray-600 hover:border-[#5800a9] flex items-center justify-center gap-2 hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] transition-all duration-300 mb-3 sm:mb-4 cursor-pointer"
                   >
                     <Play size={16} className="text-[#5800a9]" />
                     <span>مشاهدة المقدمة</span>

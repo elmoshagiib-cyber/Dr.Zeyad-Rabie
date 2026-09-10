@@ -452,7 +452,7 @@ ${isScrolled ? "w-9 h-9" : "w-11 h-11"}
     "
   >
     <motion.div
-      className="h-full bg-[#5800a9]"
+      className="h-full bg-[#5800a9] dark:bg-[#b600d7]"
       initial={{ width: "0%" }}
       animate={{ width: `${scrollProgress}%` }}
       transition={{
