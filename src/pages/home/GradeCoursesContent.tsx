@@ -223,15 +223,23 @@ return (
     group
     overflow-hidden
     p-0
+    bg-[#F7F7F8]
+    dark:bg-[#151515]
+    border
+    border-gray-200
+    dark:border-[#262626]
+    rounded-[26px]
     cursor-pointer
 "
 >
 
+<div className="p-3 sm:p-3.5 pb-0">
 <div
   className="
     relative
-    aspect-[16/9]
+    aspect-[2/1]
     overflow-hidden
+    rounded-2xl
   "
 >
 
@@ -297,6 +305,7 @@ backdrop-blur-md backdrop-blur-sm text-white
           transition-transform duration-500
         " />
       </div>
+</div>
 
 <CardContent
   className="
@@ -396,62 +405,48 @@ backdrop-blur-md backdrop-blur-sm text-white
   className="
     flex
     flex-col
-    sm:flex-row
-    gap-3
+    gap-2.5
   "
 >
-  {!hasAccess && (
-    <Button
-      className="
-        flex-1
-        h-12
-        rounded-2xl
-        font-black
-        text-[15px]
-        text-white
-        bg-[#B348FE]
-        hover:bg-[#9E2FFF]
-        shadow-lg
-        shadow-[#B348FE]/25
-        transition-all
-        duration-300
-        hover:-translate-y-0.5
-      "
-      onClick={() => handleCourseAction(course)}
-    >
-      اشترك الآن
-    </Button>
-  )}
-
   <Button
-    variant="outline"
     className="
-      flex-1
+      w-full
       h-12
-      rounded-2xl
+      rounded-xl
       font-black
       text-[15px]
-
-      border-2
-      border-[#B348FE]
-
-      bg-transparent
-      text-[#B348FE]
-
-      hover:bg-transparent
-      hover:text-[#B348FE]
-      hover:border-[#B348FE]
-
-      active:bg-transparent
-
+      text-white
+      bg-emerald-600
+      hover:bg-emerald-700
       shadow-none
       transition-all
       duration-300
     "
     onClick={() => navigate(`/courses/${course.id}`)}
   >
-    عرض المحتوى
+    الدخول للكورس
   </Button>
+
+  {!hasAccess && (
+    <Button
+      className="
+        w-full
+        h-12
+        rounded-xl
+        font-black
+        text-[15px]
+        text-white
+        bg-[#F6AC08]
+        hover:bg-[#E29E00]
+        shadow-none
+        transition-all
+        duration-300
+      "
+      onClick={() => handleCourseAction(course)}
+    >
+      الاشتراك في الكورس!
+    </Button>
+  )}
 </div>
 
 
