@@ -635,10 +635,13 @@ lg:text-center
       px-4
       sm:px-7
       lg:px-9
+      min-w-[150px]
+      sm:min-w-[170px]
+      lg:min-w-[200px]
+      justify-center
       rounded-xl
-      bg-[#422E91]
-bg-[#5800a9]
-hover:bg-[#9A2EFF]
+      bg-[#5800a9]
+      hover:bg-[#420080]
       border-0
       text-white
       text-[13px]
@@ -665,6 +668,10 @@ hover:bg-[#9A2EFF]
         px-4
         sm:px-7
         lg:px-9
+        min-w-[150px]
+        sm:min-w-[170px]
+        lg:min-w-[200px]
+        justify-center
         rounded-xl
         bg-[#F6AC08]
         hover:bg-[#E29E00]
@@ -686,7 +693,6 @@ hover:bg-[#9A2EFF]
   <button
     onClick={() => setShowParentModal(true)}
     className="
-      md:hidden
       flex
       items-center
       justify-center
@@ -695,13 +701,13 @@ hover:bg-[#9A2EFF]
       px-3.5
       rounded-xl
       border-2
-      border-[#B348FE]
+      border-[#5800a9]
       bg-transparent
-      text-[#B348FE]
+      text-[#5800a9]
       text-[13px]
       font-medium
       whitespace-nowrap
-      hover:bg-[#B348FE]
+      hover:bg-[#5800a9]
       hover:text-white
       transition-all
       duration-200
@@ -732,10 +738,6 @@ transition={{
   duration: 0.9,
   delay: 0.2,
   ease: [0.16, 1, 0.3, 1],
-}}
-style={{
-  y: scrollY * -0.06,
-  scale: Math.max(1 - scrollY / 3500, 0.94),
 }}
   className="
 mt-10
