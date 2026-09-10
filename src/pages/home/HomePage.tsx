@@ -557,8 +557,8 @@ style={{
 lg:text-center
     leading-[1.15]
     tracking-[-1px]
-    text-slate-900
-    dark:text-white
+    text-[#5800a9]
+    dark:text-[#c9a6ff]
     "
   >
     مرحبا بكم في منصة
@@ -589,9 +589,9 @@ lg:text-center
 
   <div
     className="
-    mt-4
-    sm:mt-5
-    lg:mt-6
+    mt-3
+    sm:mt-4
+    lg:mt-5
     flex
     justify-center
     lg:justify-start
