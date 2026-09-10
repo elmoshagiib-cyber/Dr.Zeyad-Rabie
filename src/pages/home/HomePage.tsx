@@ -642,6 +642,8 @@ lg:text-right
           rounded-xl
           bg-[#5800a9]
           hover:bg-[#420080]
+          dark:bg-[#b600d7]
+          dark:hover:bg-[#9a00b5]
           border-0
           text-white
           text-[13px]
@@ -946,7 +948,7 @@ duration-300
               ">
                 المراحل الثانوية
               </h3>
-              <div className="h-[3px] bg-[#422E91] dark:bg-[#F6AC08] rounded-full mb-3 sm:mb-4" />
+              <div className="h-[3px] bg-[#b600d7] rounded-full mb-3 sm:mb-4" />
               <p className="text-slate-500 dark:text-slate-300 text-[13px] sm:text-[15px]">
                 الصف الأول والثاني والثالث الثانوي
               </p>
@@ -1039,7 +1041,7 @@ duration-300
               ">
                 المراحل الإعدادية
               </h3>
-              <div className="h-[3px] bg-[#422E91] dark:bg-[#F6AC08] rounded-full mb-3 sm:mb-4" />
+              <div className="h-[3px] bg-[#b600d7] rounded-full mb-3 sm:mb-4" />
               <p className="text-slate-500 dark:text-slate-300 text-[13px] sm:text-[15px]">
                 الصف الأول والثاني والثالث الإعدادي
               </p>
@@ -1347,13 +1349,16 @@ duration-300
     sm:w-16
     sm:h-16
     rounded-full
-    bg-[#B348FE]
+    bg-[#5800a9]
+    dark:bg-[#b600d7]
     flex
     items-center
     justify-center
-    shadow-[0_12px_30px_rgba(179,72,254,.35)]
+    shadow-[0_12px_30px_rgba(88,0,169,.35)]
+    dark:shadow-[0_12px_30px_rgba(182,0,215,.35)]
     hover:scale-110
-    hover:shadow-[0_18px_40px_rgba(179,72,254,.45)]
+    hover:shadow-[0_18px_40px_rgba(88,0,169,.45)]
+    dark:hover:shadow-[0_18px_40px_rgba(182,0,215,.45)]
     transition-all
     duration-300
   "

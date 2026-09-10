@@ -188,14 +188,8 @@ dark:border-[#262626]
 
                  <button
   className="
-bg-gradient-to-r
-from-[#C65CFF]
-via-[#B348FE]
-to-[#9E2FFF]
-
-hover:from-[#B348FE]
-hover:via-[#A238F5]
-hover:to-[#8D28E8]
+    bg-[#b600d7]
+    hover:bg-[#9a00b5]
     text-white
     h-10
     sm:h-11
@@ -212,15 +206,14 @@ hover:to-[#8D28E8]
     sm:gap-2
     text-sm
     sm:text-base
-shadow-[0_8px_22px_rgba(179,72,254,.28)]
-hover:shadow-[0_12px_30px_rgba(179,72,254,.4)]
+    shadow-none
     transition-all
     duration-300
     group-hover:scale-105
     shrink-0
   "
 >
-  ابدأ الآن
+ الدخول 
   <ArrowLeft size={16} className="sm:w-[18px] sm:h-[18px]" />
 </button>
                 </div>
