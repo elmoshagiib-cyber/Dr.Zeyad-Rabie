@@ -378,6 +378,7 @@ const handleScroll = () => {
            {!user && (
   <button
     onClick={() => setMobileOpen(!mobileOpen)}
+    aria-label={mobileOpen ? "إغلاق القائمة" : "فتح القائمة"}
     className={`
 md:hidden
 flex
@@ -390,46 +391,32 @@ duration-300
 ${isScrolled ? "w-9 h-9" : "w-11 h-11"}
 `}
   >
-   <AnimatePresence mode="wait">
-  {!mobileOpen ? (
-    <motion.div
-      key="menu"
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
-      transition={{ duration: 0.2 }}
-      className="flex flex-col justify-center gap-[5px]"
-    >
-      <span className="block w-7 h-[3px] rounded-full bg-[#5800a9]" />
-      <span className="block w-7 h-[3px] rounded-full bg-[#5800a9]" />
-      <span className="block w-7 h-[3px] rounded-full bg-[#5800a9]" />
-    </motion.div>
-  ) : (
-    <motion.div
-      key="atom"
-      initial={{ opacity: 0, scale: 0.5 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.5 }}
-      transition={{ duration: 0.2 }}
-    >
-   <motion.div
-  animate={{ rotate: 360 }}
-  transition={{
-    repeat: Infinity,
-    duration: 4,
-    ease: "linear",
-  }}
->
-  <FaReact
-    size={28}
-    className="text-[#B348FE]"
-  />
-</motion.div>
-
-    </motion.div>
-  )}
-</AnimatePresence>
-
+    <div className="relative w-7 h-[18px] flex items-center justify-center">
+      <motion.span
+        animate={{
+          rotate: mobileOpen ? 45 : 0,
+          y: mobileOpen ? 0 : -7,
+        }}
+        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+        className="absolute w-7 h-[3px] rounded-full bg-[#5800a9]"
+      />
+      <motion.span
+        animate={{
+          opacity: mobileOpen ? 0 : 1,
+          scale: mobileOpen ? 0 : 1,
+        }}
+        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+        className="absolute w-7 h-[3px] rounded-full bg-[#5800a9]"
+      />
+      <motion.span
+        animate={{
+          rotate: mobileOpen ? -45 : 0,
+          y: mobileOpen ? 0 : 7,
+        }}
+        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+        className="absolute w-7 h-[3px] rounded-full bg-[#5800a9]"
+      />
+    </div>
   </button>
 )}
           </div>
@@ -517,7 +504,7 @@ duration-300
   "
 >
   <motion.div
-    className="h-full bg-[#B348FE]"
+    className="h-full bg-[#5800a9]"
     initial={{ width: "0%" }}
     animate={{ width: `${scrollProgress}%` }}
     transition={{
