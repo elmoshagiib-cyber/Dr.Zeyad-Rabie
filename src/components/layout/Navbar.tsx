@@ -423,65 +423,6 @@ ${isScrolled ? "w-9 h-9" : "w-11 h-11"}
         </div>
       </div>
 
-      {/* Mobile Menu */}
-            {!user && mobileOpen && (
-        <div className="md:hidden bg-white dark:bg-[#1E244F] border-t border-slate-100 p-4">
-          <div className="space-y-1">
-            <button
-onClick={() => navigate("/login")}
-className="
-w-full
-h-[52px]
-rounded-xl
-border
-border-[#B348FE]
-text-[#B348FE]
-hover:bg-[#B348FE]
-hover:text-white
-transition-all
-duration-300
-mb-3
-"
->
-تسجيل الدخول
-</button>
-
-<button
-  onClick={() => navigate("/register")}
-  className="
-group
-relative
-overflow-hidden
-w-full
-h-[52px]
-rounded-xl
-bg-[#B348FE]
-hover:bg-[#9A2EFF]
-text-white
-font-semibold
-transition-all
-duration-300
-"
->
-  <div
-    className="
-absolute
-inset-0
-bg-white/10
-opacity-0
-group-hover:opacity-100
-transition-opacity
-duration-300
-"
-  />
-
-  <span className="relative z-10">
-    إنشاء حساب
-  </span>
-</button>
-          </div>
-        </div>
-      )}
 
 
 <motion.div
@@ -515,6 +456,71 @@ duration-300
 </motion.div>
 
     </nav>
+
+    <AnimatePresence>
+      {!user && mobileOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -12, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -12, scale: 0.97 }}
+          transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+          className="
+            md:hidden
+            w-[calc(100%-56px)]
+            max-w-3xl
+            mx-auto
+            mt-2
+            rounded-[28px]
+            bg-white
+            dark:bg-[#111111]
+            border
+            border-[#ECECEC]
+            dark:border-[#2A2A2A]
+            shadow-[0_8px_30px_rgba(0,0,0,.12)]
+            dark:shadow-[0_8px_30px_rgba(0,0,0,.45)]
+            p-4
+          "
+        >
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => navigate("/register")}
+              className="
+                w-full
+                h-[52px]
+                rounded-full
+                bg-[#5800a9]
+                hover:bg-[#420080]
+                text-white
+                font-semibold
+                transition-all
+                duration-300
+              "
+            >
+              إنشاء حساب
+            </button>
+
+            <button
+              onClick={() => navigate("/login")}
+              className="
+                w-full
+                h-[52px]
+                rounded-full
+                border-2
+                border-[#5800a9]
+                text-[#5800a9]
+                font-semibold
+                hover:bg-[#5800a9]
+                hover:text-white
+                transition-all
+                duration-300
+              "
+            >
+              تسجيل الدخول
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
     </div>
 
     </>
