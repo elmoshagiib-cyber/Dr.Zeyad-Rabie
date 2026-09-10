@@ -587,6 +587,30 @@ lg:text-right
 
   </h1>
 
+  <p
+    className="
+    mt-4
+    sm:mt-5
+    lg:mt-6
+    text-[13px]
+    xs:text-[14px]
+    sm:text-[16px]
+    lg:text-[18px]
+    text-slate-600
+    dark:text-slate-300
+    text-center
+    lg:text-right
+    leading-[1.8]
+    max-w-[600px]
+    mx-auto
+    lg:mx-0
+    "
+  >
+    لا تستعجل النتيجة، فبعض التفاعلات تحتاج وقتًا،
+    <br className="hidden sm:block" />
+    لكنها في النهاية تعطي أقوى النتائج.
+  </p>
+
   <div
     className="
     mt-6
