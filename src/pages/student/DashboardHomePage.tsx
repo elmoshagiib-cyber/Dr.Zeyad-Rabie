@@ -211,7 +211,7 @@ export default function DashboardHomePage() {
         <div className="flex justify-end">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[#B348FE] bg-[#F6EEFF] dark:bg-[#2B103D] hover:bg-[#EAD8FF] dark:hover:bg-[#3A1652] transition-all duration-300 font-bold text-xs sm:text-sm"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[#5800a9] bg-[#F6EEFF] dark:bg-[#2B103D] hover:bg-[#EAD8FF] dark:hover:bg-[#3A1652] transition-all duration-300 font-bold text-xs sm:text-sm"
           >
             <ArrowRight size={16} />
             الرجوع للموقع الرئيسي
@@ -227,13 +227,13 @@ export default function DashboardHomePage() {
               <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-sm">
                 <CardContent className="p-5 flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-black text-[#B348FE]">{videoWatchCount} مرة</p>
+                    <p className="text-2xl font-black text-[#5800a9]">{videoWatchCount} مرة</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">
                       إجمالي عدد مرات مشاهدة الفيديوهات على الموقع
                     </p>
                   </div>
                   <div className="w-11 h-11 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center flex-shrink-0">
-                    <PlayCircle className="text-[#B348FE]" size={22} />
+                    <PlayCircle className="text-[#5800a9]" size={22} />
                   </div>
                 </CardContent>
               </Card>
@@ -241,13 +241,13 @@ export default function DashboardHomePage() {
               <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-sm">
                 <CardContent className="p-5 flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-black text-[#B348FE]" dir="ltr">{formatWatchTime(totalWatchSeconds)}</p>
+                    <p className="text-2xl font-black text-[#5800a9]" dir="ltr">{formatWatchTime(totalWatchSeconds)}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">
                       إجمالي مدة فتح المحاضرات على الموقع
                     </p>
                   </div>
                   <div className="w-11 h-11 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center flex-shrink-0">
-                    <Clock3 className="text-[#B348FE]" size={22} />
+                    <Clock3 className="text-[#5800a9]" size={22} />
                   </div>
                 </CardContent>
               </Card>
@@ -255,13 +255,13 @@ export default function DashboardHomePage() {
               <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-sm">
                 <CardContent className="p-5 flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-black text-[#B348FE]">{examOpenCount} مرة</p>
+                    <p className="text-2xl font-black text-[#5800a9]">{examOpenCount} مرة</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">
                       إجمالي عدد مرات فتح الاختبار
                     </p>
                   </div>
                   <div className="w-11 h-11 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center flex-shrink-0">
-                    <ClipboardList className="text-[#B348FE]" size={22} />
+                    <ClipboardList className="text-[#5800a9]" size={22} />
                   </div>
                 </CardContent>
               </Card>
@@ -269,20 +269,20 @@ export default function DashboardHomePage() {
               <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-sm">
                 <CardContent className="p-5 flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-black text-[#B348FE]">{examFinishCount} مرة</p>
+                    <p className="text-2xl font-black text-[#5800a9]">{examFinishCount} مرة</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">
                       إجمالي عدد مرات إنهاء الاختبارات
                     </p>
                   </div>
                   <div className="w-11 h-11 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="text-[#B348FE]" size={22} />
+                    <CheckCircle2 className="text-[#5800a9]" size={22} />
                   </div>
                 </CardContent>
               </Card>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-[#B348FE] rounded-2xl p-5 flex items-center justify-between text-white shadow-md">
+              <div className="bg-[#5800a9] rounded-2xl p-5 flex items-center justify-between text-white shadow-md">
                 <div>
                   <p className="text-3xl font-black">0</p>
                   <p className="text-xs sm:text-sm font-bold mt-1">الفيديوهات المحفوظة</p>
@@ -292,7 +292,7 @@ export default function DashboardHomePage() {
                 </div>
               </div>
 
-              <div className="bg-[#B348FE] rounded-2xl p-5 flex items-center justify-between text-white shadow-md">
+              <div className="bg-[#5800a9] rounded-2xl p-5 flex items-center justify-between text-white shadow-md">
                 <div>
                   <p className="text-3xl font-black">{activeCoursesCount}</p>
                   <p className="text-xs sm:text-sm font-bold mt-1">كورساتك الحالية</p>
@@ -302,7 +302,7 @@ export default function DashboardHomePage() {
                 </div>
               </div>
 
-              <div className="bg-[#B348FE] rounded-2xl p-5 flex items-center justify-between text-white shadow-md">
+              <div className="bg-[#5800a9] rounded-2xl p-5 flex items-center justify-between text-white shadow-md">
                 <div>
                   <p className="text-3xl font-black">{completedCoursesCount}</p>
                   <p className="text-xs sm:text-sm font-bold mt-1">كورسات مكتملة</p>
@@ -314,7 +314,7 @@ export default function DashboardHomePage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              <Card className="relative bg-[#B348FE] text-white rounded-tr-3xl rounded-br-3xl rounded-bl-3xl rounded-tl-[70px] shadow-sm overflow-hidden">
+              <Card className="relative bg-[#5800a9] text-white rounded-tr-3xl rounded-br-3xl rounded-bl-3xl rounded-tl-[70px] shadow-sm overflow-hidden">
                 <CardContent className="p-6 text-center flex flex-col items-center justify-center h-full">
                   <p className="text-sm font-bold text-white/80 mb-3">تقدمك</p>
                   <p className="text-4xl font-black text-white mb-4">% {overallProgress}</p>
@@ -334,7 +334,7 @@ export default function DashboardHomePage() {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4 mb-6">
                     <div className="flex items-center gap-1.5">
-                      <span className="w-3 h-3 rounded-full bg-[#B348FE]" />
+                      <span className="w-3 h-3 rounded-full bg-[#5800a9]" />
                       <span className="text-xs font-bold text-gray-500 dark:text-gray-400">الأسبوع الحالي</span>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -366,7 +366,7 @@ export default function DashboardHomePage() {
                         {weeklyData.map((d) => (
                           <div key={d.day} className="flex-1 h-full relative flex justify-center">
                             <span
-                              className="absolute w-2.5 h-2.5 rounded-full bg-[#B348FE] -translate-x-1/2"
+                              className="absolute w-2.5 h-2.5 rounded-full bg-[#5800a9] -translate-x-1/2"
                               style={{ bottom: `${(d.current / 100) * 100}%`, left: "50%" }}
                             />
                             <span
@@ -420,7 +420,7 @@ export default function DashboardHomePage() {
                   <div className="flex items-center justify-between mb-6">
                     <p className="text-sm font-bold text-gray-500 dark:text-gray-400">متوسط النتائج اللي جيبتها</p>
                     {!avgExamScores.some((d) => d.score > 0) && (
-                      <span className="text-lg font-black text-[#B348FE]">ممتحنتش خالص!</span>
+                      <span className="text-lg font-black text-[#5800a9]">ممتحنتش خالص!</span>
                     )}
                   </div>
 
@@ -428,7 +428,7 @@ export default function DashboardHomePage() {
                     <svg viewBox="0 0 700 160" className="w-full h-full overflow-visible">
                       <polyline
                         fill="none"
-                        stroke="#B348FE"
+                        stroke="#5800a9"
                         strokeWidth="3"
                         points={avgExamScores
                           .map((d, i) => {
@@ -441,7 +441,7 @@ export default function DashboardHomePage() {
                       {avgExamScores.map((d, i) => {
                         const x = (i / (avgExamScores.length - 1 || 1)) * 680 + 10;
                         const y = 150 - (d.score / 100) * 140;
-                        return <circle key={d.day} cx={x} cy={y} r="5" fill="#B348FE" />;
+                        return <circle key={d.day} cx={x} cy={y} r="5" fill="#5800a9" />;
                       })}
                     </svg>
                   </div>
@@ -503,7 +503,7 @@ function DonutStat({
                 cy="50"
                 r={radius}
                 fill="none"
-                stroke="#B348FE"
+                stroke="#5800a9"
                 strokeWidth="8"
                 strokeLinecap="round"
                 strokeDasharray={circumference}
@@ -512,7 +512,7 @@ function DonutStat({
             )}
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-sm font-black text-[#B348FE]">{hasData ? `${percent}%` : "—"}</span>
+            <span className="text-sm font-black text-[#5800a9]">{hasData ? `${percent}%` : "—"}</span>
           </div>
         </div>
       </CardContent>

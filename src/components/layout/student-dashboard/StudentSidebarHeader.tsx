@@ -14,7 +14,7 @@ export function StudentSidebarHeader({
       <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
         {!collapsed && (
           <h2 className="text-[15px] font-black text-slate-900 truncate">
-            منصه زياد ربيع
+            لوحة التحكم 
           </h2>
         )}
 
@@ -29,7 +29,6 @@ export function StudentSidebarHeader({
             bg-[#5800a9]
             flex items-center justify-center
             text-white
-            shadow-[0_8px_20px_rgba(179,72,254,.35)]
             hover:opacity-90
             hover:scale-105
             active:scale-95
