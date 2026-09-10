@@ -237,7 +237,7 @@ return (
 <div
   className="
     relative
-    aspect-[2/1]
+    aspect-[1000/563]
     overflow-hidden
     rounded-2xl
   "
@@ -329,8 +329,8 @@ backdrop-blur-md backdrop-blur-sm text-white
     text-slate-900
     dark:text-white
     line-clamp-2
-    group-hover:text-[#9F3FFF]
-    dark:group-hover:text-[#C36CFF]
+    group-hover:text-[#5800a9]
+    dark:group-hover:text-[#c9a6ff]
     transition-colors
     duration-300
   "
@@ -385,8 +385,9 @@ backdrop-blur-md backdrop-blur-sm text-white
           }
           className="
             mt-2 inline-flex items-center gap-1
-            text-[13px] sm:text-sm font-bold text-[#B348FE]
-            hover:text-[#9E2FFF]
+            text-[13px] sm:text-sm font-bold text-[#5800a9]
+            dark:text-[#c9a6ff]
+            hover:text-[#b600d7]
             transition-colors
           "
         >
@@ -471,7 +472,7 @@ backdrop-blur-md backdrop-blur-sm text-white
     rounded-xl
     p-1
     shrink-0
-    ${hasAccess || course.is_free ? "" : "bg-[#B348FE]"}
+    ${hasAccess || course.is_free ? "" : "bg-gradient-to-r from-[#5800a9] to-[#b600d7]"}
   `}
 >
   
@@ -843,7 +844,7 @@ className="
 >
   <ShieldCheck
     size={36}
-    className="text-[#B348FE]"
+    className="text-[#5800a9] dark:text-[#c9a6ff]"
   />
 </div>
 
@@ -875,7 +876,8 @@ leading-7 leading-7">
     className="
       text-lg
       font-black
-      text-[#B348FE]
+      text-[#5800a9]
+      dark:text-[#c9a6ff]
       text-center
     "
   >
@@ -906,13 +908,13 @@ className="
   text-lg
   tracking-[6px]
   font-black
-  text-[#B348FE]
+  text-[#5800a9]
   outline-none
   transition-all
   duration-300
-  focus:border-[#B348FE]
+  focus:border-[#5800a9]
   focus:ring-4
-  focus:ring-[#B348FE]/20
+  focus:ring-[#5800a9]/20
 "
       />
 
@@ -960,7 +962,7 @@ w-full
 mt-3
 text-gray-500
 dark:text-gray-400
-hover:text-[#B348FE]
+hover:text-[#5800a9]
 "
         onClick={() => {
           setShowSubscriptionModal(false);
