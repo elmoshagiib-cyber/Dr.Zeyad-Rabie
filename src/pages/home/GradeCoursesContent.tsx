@@ -338,8 +338,6 @@ backdrop-blur-md backdrop-blur-sm text-white
   {course.title}
 </h3>
 
-<div className="h-[2px] w-full rounded-full bg-[#B348FE]" />
-
 
 <div className="mt-4">
 
@@ -473,11 +471,33 @@ backdrop-blur-md backdrop-blur-sm text-white
     rounded-xl
     p-1
     shrink-0
-    ${hasAccess ? "" : "bg-[#B348FE]"}
+    ${hasAccess || course.is_free ? "" : "bg-[#B348FE]"}
   `}
 >
   
-{hasAccess ? (
+{course.is_free ? (
+    <span
+      className="
+        flex
+        items-center
+        gap-1.5
+        bg-lime-100
+        dark:bg-lime-500/10
+        text-lime-700
+        dark:text-lime-400
+        rounded-full
+        px-4
+        py-2
+        text-[13px]
+        font-black
+        whitespace-nowrap
+        cursor-default
+        select-none
+      "
+    >
+      🌱 كورس مجاني
+    </span>
+  ) : hasAccess ? (
     <span
 className="
         flex
