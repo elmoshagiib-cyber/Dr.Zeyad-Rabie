@@ -809,16 +809,68 @@ duration-700
 </section>
 
 <ScrollReveal>
-  <section className="relative w-full">
-    <img
-      src="/images/why-us.jpg"
-      alt="ليه تختار مستر زياد ربيع؟"
-      className="
-        w-full
-        object-cover
-        object-center
-      "
-    />
+  <section className="relative py-14 sm:py-20 lg:py-24 bg-white dark:bg-[#09090B]">
+    <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
+
+      <div className="text-center mb-10 sm:mb-14 lg:mb-16">
+        <h2 className="text-[24px] sm:text-[34px] lg:text-[42px] font-black text-slate-900 dark:text-white">
+          ليه تختار مستر زياد ربيع؟
+        </h2>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 lg:gap-7">
+        {FEATURES.map((feature, index) => {
+          const Icon = feature.icon;
+          return (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{
+                duration: 0.5,
+                delay: index * 0.1,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="
+                bg-[#5800a9]
+                dark:bg-[#b600d7]
+                rounded-[24px]
+                sm:rounded-[28px]
+                p-6
+                sm:p-7
+                lg:p-8
+                flex
+                flex-col
+                gap-4
+                sm:gap-5
+              "
+            >
+              <div
+                className="
+                  w-14 h-14
+                  sm:w-16 sm:h-16
+                  rounded-2xl
+                  bg-white/15
+                  flex items-center justify-center
+                "
+              >
+                <Icon className="text-white w-7 h-7 sm:w-8 sm:h-8" strokeWidth={2} />
+              </div>
+
+              <h3 className="text-lg sm:text-xl font-black text-white">
+                {feature.title}
+              </h3>
+
+              <p className="text-sm sm:text-[15px] leading-7 text-white/85">
+                {feature.description}
+              </p>
+            </motion.div>
+          );
+        })}
+      </div>
+
+    </div>
   </section>
 </ScrollReveal>
 
