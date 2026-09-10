@@ -59,7 +59,7 @@ export default function StudentLayout({ children }: Props) {
               px-4
               py-2.5
               rounded-xl
-              text-[#B348FE]
+              text-[#5800a9]
               bg-[#F6EEFF]
               dark:bg-[#111111]
               border

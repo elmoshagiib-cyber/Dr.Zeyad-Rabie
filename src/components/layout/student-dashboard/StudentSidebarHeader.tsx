@@ -26,7 +26,7 @@ export function StudentSidebarHeader({
             w-10 h-10
             rounded-xl
             border border-transparent
-            bg-[#B348FE]
+            bg-[#5800a9]
             flex items-center justify-center
             text-white
             shadow-[0_8px_20px_rgba(179,72,254,.35)]
