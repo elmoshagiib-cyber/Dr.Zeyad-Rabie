@@ -496,7 +496,7 @@ backdrop-blur-md backdrop-blur-sm text-white
         select-none
       "
     >
-      🌱 كورس مجاني
+      كورس مجاني
     </span>
   ) : hasAccess ? (
     <span
