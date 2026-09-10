@@ -402,7 +402,7 @@ ${isScrolled ? "w-9 h-9" : "w-11 h-11"}
           y: mobileOpen ? 0 : -7,
         }}
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-        className="absolute w-7 h-[3px] rounded-full bg-[#5800a9]"
+        className="absolute w-7 h-[3px] rounded-full bg-[#5800a9] dark:bg-[#b600d7]"
       />
       <motion.span
         animate={{
@@ -410,7 +410,7 @@ ${isScrolled ? "w-9 h-9" : "w-11 h-11"}
           scale: mobileOpen ? 0 : 1,
         }}
         transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-        className="absolute w-7 h-[3px] rounded-full bg-[#5800a9]"
+        className="absolute w-7 h-[3px] rounded-full bg-[#5800a9] dark:bg-[#b600d7]"
       />
       <motion.span
         animate={{
@@ -418,7 +418,7 @@ ${isScrolled ? "w-9 h-9" : "w-11 h-11"}
           y: mobileOpen ? 0 : 7,
         }}
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-        className="absolute w-7 h-[3px] rounded-full bg-[#5800a9]"
+        className="absolute w-7 h-[3px] rounded-full bg-[#5800a9] dark:bg-[#b600d7]"
       />
     </div>
   </button>
@@ -498,6 +498,8 @@ ${isScrolled ? "w-9 h-9" : "w-11 h-11"}
                 rounded-full
                 bg-[#5800a9]
                 hover:bg-[#420080]
+                dark:bg-[#b600d7]
+                dark:hover:bg-[#9a00b5]
                 text-white
                 font-semibold
                 transition-all
@@ -515,10 +517,14 @@ ${isScrolled ? "w-9 h-9" : "w-11 h-11"}
                 rounded-full
                 border-2
                 border-[#5800a9]
+                dark:border-[#b600d7]
                 text-[#5800a9]
+                dark:text-[#b600d7]
                 font-semibold
                 hover:bg-[#5800a9]
                 hover:text-white
+                dark:hover:bg-[#b600d7]
+                dark:hover:text-white
                 transition-all
                 duration-300
               "
