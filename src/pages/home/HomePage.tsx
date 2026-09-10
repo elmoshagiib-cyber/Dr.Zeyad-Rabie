@@ -616,107 +616,116 @@ lg:text-center
     sm:mt-5
     lg:mt-6
     flex
-    flex-col
-    items-center
-    lg:items-start
-    gap-3
+    justify-center
+    lg:justify-start
     "
   >
-   <div className="flex flex-row items-center justify-center lg:justify-start gap-3">
+   <div className="flex flex-row items-start gap-3">
 
-  {!user && (
-  <Button
-    size="lg"
-    onClick={() => navigate("/register")}
-    className="
-      h-11
-      sm:h-12
-      lg:h-14
-      px-4
-      sm:px-7
-      lg:px-9
-      min-w-[150px]
-      sm:min-w-[170px]
-      lg:min-w-[200px]
-      justify-center
-      rounded-xl
-      bg-[#5800a9]
-      hover:bg-[#420080]
-      border-0
-      text-white
-      text-[13px]
-      sm:text-[16px]
-      lg:text-[18px]
-      font-semibold
-      hover:scale-[1.03]
-      transition-all
-      duration-300
-    "
-  >
-    سجل الآن
-  </Button>
-)}
+    <div className="flex flex-col gap-3">
+      {!user && (
+      <Button
+        size="lg"
+        onClick={() => navigate("/register")}
+        className="
+          h-11
+          sm:h-12
+          lg:h-14
+          px-4
+          sm:px-7
+          lg:px-9
+          min-w-[150px]
+          sm:min-w-[170px]
+          lg:min-w-[200px]
+          justify-center
+          rounded-xl
+          bg-[#5800a9]
+          hover:bg-[#420080]
+          border-0
+          text-white
+          text-[13px]
+          sm:text-[16px]
+          lg:text-[18px]
+          font-semibold
+          hover:scale-[1.03]
+          transition-all
+          duration-300
+        "
+      >
+        سجل الآن
+      </Button>
+    )}
 
-  {true && (
-    <Button
-      size="lg"
-      onClick={installApp}
-      className="
-        h-11
-        sm:h-12
-        lg:h-14
-        px-4
-        sm:px-7
-        lg:px-9
-        min-w-[150px]
-        sm:min-w-[170px]
-        lg:min-w-[200px]
-        justify-center
-        rounded-xl
-        bg-[#F6AC08]
-        hover:bg-[#E29E00]
-        text-[#ffffff]
-        font-black
-        hover:scale-[1.03]
-        transition-all
-        duration-300
-      "
-    >
-      <Download className="w-5 h-5 ml-2" />
+      {!user && (
+      <button
+        onClick={() => setShowParentModal(true)}
+        className="
+          h-11
+          sm:h-12
+          lg:h-14
+          px-4
+          sm:px-7
+          lg:px-9
+          min-w-[150px]
+          sm:min-w-[170px]
+          lg:min-w-[200px]
+          flex
+          items-center
+          justify-center
+          gap-1.5
+          rounded-xl
+          border-2
+          border-[#5800a9]
+          bg-transparent
+          text-[#5800a9]
+          text-[13px]
+          sm:text-[16px]
+          lg:text-[18px]
+          font-semibold
+          whitespace-nowrap
+          hover:bg-[#5800a9]
+          hover:text-white
+          transition-all
+          duration-300
+        "
+      >
+        <Users size={16} strokeWidth={2} />
+        ولي الأمر
+      </button>
+    )}
+    </div>
 
-      تثبيت التطبيق
-    </Button>
-  )}
-</div>
+    {true && (
+      <Button
+        size="lg"
+        onClick={installApp}
+        className="
+          h-11
+          sm:h-12
+          lg:h-14
+          px-4
+          sm:px-7
+          lg:px-9
+          min-w-[150px]
+          sm:min-w-[170px]
+          lg:min-w-[200px]
+          justify-center
+          rounded-xl
+          bg-[#F6AC08]
+          hover:bg-[#E29E00]
+          text-[#ffffff]
+          font-black
+          hover:scale-[1.03]
+          transition-all
+          duration-300
+        "
+      >
+        <Download className="w-5 h-5 ml-2" />
 
-{!user && (
-  <button
-    onClick={() => setShowParentModal(true)}
-    className="
-      flex
-      items-center
-      justify-center
-      gap-1.5
-      h-9
-      px-3.5
-      rounded-xl
-      border-2
-      border-[#5800a9]
-      bg-transparent
-      text-[#5800a9]
-      text-[13px]
-      font-medium
-      whitespace-nowrap
-      hover:bg-[#5800a9]
-      hover:text-white
-      transition-all
-      duration-200
-    "
-  >
-    <Users size={14} strokeWidth={2} />
-    ولي الأمر
-  </button>
-)}
+        تثبيت التطبيق
+      </Button>
+    )}
+  </div>
 </div>
 </motion.div>
 
