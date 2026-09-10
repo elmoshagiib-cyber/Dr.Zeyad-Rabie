@@ -225,7 +225,6 @@ const handleScroll = () => {
 <nav
   className={`
     relative
-    overflow-hidden
     bg-white
     dark:bg-[#09090B]
     transition-all
