@@ -260,14 +260,17 @@ const handleScroll = () => {
   left-1/2
   -translate-x-1/2
   md:hidden
+  z-10
   "
 >
   <button
+    type="button"
     onClick={() => navigate("/")}
     className="
     flex
     items-center
     justify-center
+    cursor-pointer
     transition-all
     duration-200
     hover:scale-105
@@ -288,12 +291,14 @@ const handleScroll = () => {
 
 <div className={`flex items-center transition-[gap] duration-300 ${isScrolled ? "gap-1" : "gap-2"}`}>
   <button
+    type="button"
     onClick={() => navigate("/")}
     className="
     hidden
     md:flex
     items-center
     justify-center
+    cursor-pointer
     transition-all
     duration-200
     hover:scale-105
@@ -424,35 +429,39 @@ ${isScrolled ? "w-9 h-9" : "w-11 h-11"}
 
 
 
-<motion.div
-  initial={{ opacity: 0 }}
-  animate={{ opacity: scrollProgress > 0 ? 1 : 0 }}
-  transition={{
-    duration: 0.25,
-    ease: [0.4, 0, 0.2, 1],
-  }}
-  className="
-    absolute
-    bottom-0
-    left-0
-    w-full
-    h-[5px]
-    rounded-b-full
-    overflow-hidden
-    bg-[#B348FE]/15
-    pointer-events-none
-  "
+<div
+  className={`
+    absolute inset-0 pointer-events-none overflow-hidden
+    ${isScrolled ? "rounded-full" : "rounded-none"}
+  `}
 >
   <motion.div
-    className="h-full bg-[#5800a9]"
-    initial={{ width: "0%" }}
-    animate={{ width: `${scrollProgress}%` }}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: scrollProgress > 0 ? 1 : 0 }}
     transition={{
-      duration: 0.1,
-      ease: "linear",
+      duration: 0.25,
+      ease: [0.4, 0, 0.2, 1],
     }}
-  />
-</motion.div>
+    className="
+      absolute
+      bottom-0
+      left-0
+      w-full
+      h-[5px]
+      bg-[#B348FE]/15
+    "
+  >
+    <motion.div
+      className="h-full bg-[#5800a9]"
+      initial={{ width: "0%" }}
+      animate={{ width: `${scrollProgress}%` }}
+      transition={{
+        duration: 0.1,
+        ease: "linear",
+      }}
+    />
+  </motion.div>
+</div>
 
     </nav>
 
