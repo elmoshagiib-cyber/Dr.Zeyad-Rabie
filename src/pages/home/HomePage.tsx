@@ -812,8 +812,8 @@ duration-700
   <section className="relative py-14 sm:py-20 lg:py-24 bg-white dark:bg-[#09090B]">
     <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
 
-      <div className="text-center mb-10 sm:mb-14 lg:mb-16">
-        <h2 className="text-[24px] sm:text-[34px] lg:text-[42px] font-black text-slate-900 dark:text-white">
+      <div className="mb-10 sm:mb-14 lg:mb-16">
+        <h2 className="text-[24px] sm:text-[34px] lg:text-[42px] font-black text-slate-900 dark:text-white text-right">
           ليه تختار مستر زياد ربيع؟
         </h2>
       </div>
@@ -821,6 +821,8 @@ duration-700
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 lg:gap-7">
         {FEATURES.map((feature, index) => {
           const Icon = feature.icon;
+          const isColored = index % 2 === 1;
+
           return (
             <motion.div
               key={feature.title}
@@ -832,9 +834,7 @@ duration-700
                 delay: index * 0.1,
                 ease: [0.22, 1, 0.36, 1],
               }}
-              className="
-                bg-[#5800a9]
-                dark:bg-[#b600d7]
+              className={`
                 rounded-[24px]
                 sm:rounded-[28px]
                 p-6
@@ -844,25 +844,54 @@ duration-700
                 flex-col
                 gap-4
                 sm:gap-5
-              "
+                ${
+                  isColored
+                    ? "bg-[#5800a9] dark:bg-[#b600d7]"
+                    : "bg-white dark:bg-[#111111] border-2 border-[#5800a9] dark:border-[#b600d7]"
+                }
+              `}
             >
               <div
-                className="
+                className={`
                   w-14 h-14
                   sm:w-16 sm:h-16
                   rounded-2xl
-                  bg-white/15
                   flex items-center justify-center
-                "
+                  ${
+                    isColored
+                      ? "bg-white/15"
+                      : "bg-[#5800a9]/10 dark:bg-[#b600d7]/10"
+                  }
+                `}
               >
-                <Icon className="text-white w-7 h-7 sm:w-8 sm:h-8" strokeWidth={2} />
+                <Icon
+                  className={`
+                    w-7 h-7 sm:w-8 sm:h-8
+                    ${
+                      isColored
+                        ? "text-white"
+                        : "text-[#5800a9] dark:text-[#b600d7]"
+                    }
+                  `}
+                  strokeWidth={2}
+                />
               </div>
 
-              <h3 className="text-lg sm:text-xl font-black text-white">
+              <h3
+                className={`
+                  text-lg sm:text-xl font-black
+                  ${isColored ? "text-white" : "text-slate-900 dark:text-white"}
+                `}
+              >
                 {feature.title}
               </h3>
 
-              <p className="text-sm sm:text-[15px] leading-7 text-white/85">
+              <p
+                className={`
+                  text-sm sm:text-[15px] leading-7
+                  ${isColored ? "text-white/85" : "text-slate-500 dark:text-slate-400"}
+                `}
+              >
                 {feature.description}
               </p>
             </motion.div>
