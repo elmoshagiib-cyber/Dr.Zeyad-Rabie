@@ -818,7 +818,7 @@ duration-700
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 lg:gap-7 items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 lg:gap-3">
         {FEATURES.map((feature, index) => {
           const Icon = feature.icon;
           const isColored = index % 2 === 1;
@@ -841,11 +841,13 @@ duration-700
                 sm:px-7
                 pt-8
                 sm:pt-9
-                ${isColored ? "pb-14 sm:pb-16" : "pb-8 sm:pb-9"}
+                pb-8
+                sm:pb-9
                 flex
                 flex-col
                 gap-5
                 sm:gap-6
+                h-full
                 ${
                   isColored
                     ? "bg-[#5800a9] dark:bg-[#b600d7]"
