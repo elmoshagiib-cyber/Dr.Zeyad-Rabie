@@ -126,41 +126,41 @@ export function CourseCard({ course, onDelete, onFeature, view }: Props) {
     <div
       className="
         group
-        overflow-hidden
-        rounded-[22px]
-        border
-        border-slate-200
         bg-white
-        shadow-sm
+        border
+        border-gray-200
+        shadow-[0_4px_20px_rgba(0,0,0,.06)]
+        hover:shadow-[0_10px_35px_rgba(0,0,0,.1)]
+        rounded-[26px]
+        overflow-hidden
         transition-all
         duration-300
-        hover:-translate-y-1
-        hover:shadow-2xl
         flex
         flex-col
       "
     >
       {/* ── الصورة ── */}
-      <div className="relative">
-        <img
-          src={
-            course.thumbnail ||
-            course.cover_image ||
-            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3"
-          }
-          className="w-full aspect-[16/9] object-cover"
-        />
+      <div className="p-3 sm:p-3.5 pb-0">
+        <div className="relative aspect-[16/9] overflow-hidden rounded-2xl">
+          <img
+            src={
+              course.thumbnail ||
+              course.cover_image ||
+              "https://images.unsplash.com/photo-1516321318423-f06f85e504b3"
+            }
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
 
-
-        {/* حالة النشر */}
-        <span
-          className={`
-            absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold text-white
-            ${course.is_published ? "bg-green-500" : "bg-amber-500"}
-          `}
-        >
-          {course.is_published ? "منشور" : "مسودة"}
-        </span>
+          {/* حالة النشر */}
+          <span
+            className={`
+              absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold text-white
+              ${course.is_published ? "bg-green-500" : "bg-amber-500"}
+            `}
+          >
+            {course.is_published ? "منشور" : "مسودة"}
+          </span>
+        </div>
       </div>
 
       {/* ── المحتوى ── */}
@@ -214,13 +214,7 @@ export function CourseCard({ course, onDelete, onFeature, view }: Props) {
             <button
               onClick={() => onDelete(course.id)}
               title="حذف الكورس"
-              className="
-                w-9 h-9 rounded-xl
-                bg-red-50 text-red-500
-                hover:bg-red-100
-                transition
-                flex items-center justify-center
-              "
+              className="h-9 w-9 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition flex items-center justify-center"
             >
               <Trash2 size={16} />
             </button>
@@ -231,13 +225,7 @@ export function CourseCard({ course, onDelete, onFeature, view }: Props) {
                 navigate(`/instructor/courses/edit/${course.id}`)
               }
               title="تعديل الكورس"
-              className="
-                w-9 h-9 rounded-xl
-                bg-amber-50 text-amber-500
-                hover:bg-amber-100
-                transition
-                flex items-center justify-center
-              "
+              className="h-9 w-9 rounded-xl bg-amber-50 text-amber-500 hover:bg-amber-100 transition flex items-center justify-center"
             >
               <Edit size={16} />
             </button>
@@ -247,7 +235,7 @@ export function CourseCard({ course, onDelete, onFeature, view }: Props) {
               onClick={() => onFeature?.(course.id)}
               title="إضافة للكورسات المقترحة"
               className={`
-                w-9 h-9 rounded-xl
+                h-9 w-9 rounded-xl
                 transition
                 flex items-center justify-center
                 ${
@@ -264,12 +252,12 @@ export function CourseCard({ course, onDelete, onFeature, view }: Props) {
 
           {/* السعر */}
           <span
-  className={`text-xl sm:text-2xl font-black whitespace-nowrap ${
-    course.is_free ? "text-emerald-600" : "text-violet-700"
-  }`}
->
-  {course.is_free ? "مجاني" : `${course.price} ج.م`}
-</span>
+            className={`text-xl sm:text-2xl font-black whitespace-nowrap ${
+              course.is_free ? "text-emerald-600" : "text-violet-700"
+            }`}
+          >
+            {course.is_free ? "مجاني" : `${course.price} ج.م`}
+          </span>
 
         </div>
       </div>
