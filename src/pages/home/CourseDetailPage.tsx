@@ -1241,6 +1241,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
       <div className="bg-white dark:bg-[#09090B] pt-10 pb-8 sm:pt-14 sm:pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
          <div className="group relative overflow-visible py-6 px-5 sm:py-8 sm:px-7 mb-4 sm:mb-6 transition-all duration-500">
 
   {/* Decorative lines */}
@@ -1627,6 +1628,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 </p>
             </div>
           )}
+          </div>
         </div>
       </div>
 
