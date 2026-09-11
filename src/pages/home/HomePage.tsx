@@ -1375,7 +1375,7 @@ duration-300
 
         {/* Single rotating suggested course card - positioned on the left */}
         <div dir="ltr" className="flex justify-start">
-          <div dir="rtl" className="relative w-full max-w-[340px] sm:max-w-[360px] p-4 sm:p-5">
+          <div dir="rtl" className="relative w-full max-w-[420px] sm:max-w-[460px] p-8 sm:p-10 md:p-12">
 
             {/* Background image behind the slider */}
             <img
@@ -1386,7 +1386,7 @@ duration-300
                 absolute inset-0
                 w-full h-full
                 object-cover
-                rounded-[30px]
+                rounded-[40px]
                 -z-10
               "
             />
