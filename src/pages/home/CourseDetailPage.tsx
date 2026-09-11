@@ -1738,9 +1738,8 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   <X size={22} />
                 </button>
 
-                {/* غيّر src ده لمسار اللوجو الحقيقي بتاع المنصة */}
                 <img
-                  src="/logo.png"
+                  src="/images/logo-light.png"
                   alt="logo"
                   className="absolute top-4 right-4 z-20 h-8 sm:h-10 w-auto object-contain"
                 />
