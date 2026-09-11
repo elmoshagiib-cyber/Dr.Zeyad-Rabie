@@ -1242,18 +1242,10 @@ const saveProgress = async (currentTime: number, duration: number) => {
       <div className="bg-white dark:bg-[#09090B] pt-10 pb-8 sm:pt-14 sm:pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
-         <div className="group relative overflow-visible py-6 px-5 sm:py-8 sm:px-7 mb-4 sm:mb-6 transition-all duration-500">
+         <div className="group relative py-6 px-5 sm:py-8 sm:px-7 mb-4 sm:mb-6 transition-all duration-500">
 
-  {/* Decorative lines */}
-  <div className="pointer-events-none absolute top-0 right-10 sm:right-16 flex flex-col gap-2 opacity-70">
-    <span className="block w-16 sm:w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-500 group-hover:-translate-x-24 sm:group-hover:-translate-x-40 group-hover:w-20" />
-    <span className="block w-10 sm:w-14 h-1 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-500 delay-75 group-hover:-translate-x-16 sm:group-hover:-translate-x-28 group-hover:w-16" />
-  </div>
-
-  <div className="pointer-events-none absolute bottom-0 right-4 sm:right-6 flex flex-col gap-2 items-end opacity-70">
-    <span className="block w-16 sm:w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-500 group-hover:-translate-x-20 sm:group-hover:-translate-x-36 group-hover:w-20" />
-    <span className="block w-10 sm:w-14 h-1 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-500 delay-75 group-hover:-translate-x-12 sm:group-hover:-translate-x-24 group-hover:w-16" />
-  </div>
+  {/* Decorative line - top */}
+  <span className="block w-16 sm:w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700 ml-auto mb-3 sm:mb-4" />
 
   {/* Title */}
   <h2 className="relative z-10 text-2xl sm:text-3xl xl:text-4xl font-black text-right transition-all duration-500 group-hover:translate-x-1">
@@ -1267,6 +1259,9 @@ const saveProgress = async (currentTime: number, duration: number) => {
     </span>
 
   </h2>
+
+  {/* Decorative line - bottom */}
+  <span className="block w-16 sm:w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700 ml-auto mt-3 sm:mt-4" />
 </div>
 
           <div className="space-y-3 sm:space-y-4">
@@ -1332,14 +1327,14 @@ const saveProgress = async (currentTime: number, duration: number) => {
                         return (
                           <div
                             key={lesson.id}
-                            className="rounded-xl sm:rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-[#1A1A1A] shadow-sm hover:shadow-md transition-all duration-300"
+                            className="rounded-xl sm:rounded-2xl overflow-hidden bg-white dark:bg-[#1A1A1A] shadow-[0_8px_24px_rgba(15,23,42,0.08)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-all duration-300"
                           >
                             <div
                               onClick={() => toggleLessonExpand(lesson.id)}
                               className={`px-3 sm:px-6 py-3 sm:py-5 cursor-pointer transition-colors duration-300 ${
                                 isExpanded
                                   ? "bg-slate-100 dark:bg-slate-800/60"
-                                  : "hover:bg-rose-50/60 dark:hover:bg-[#171717]"
+                                  : "hover:bg-gray-50 dark:hover:bg-[#171717]"
                               }`}
                             >
                               <div className="flex flex-row-reverse items-center justify-between gap-2 sm:gap-4 transition-all duration-300">
