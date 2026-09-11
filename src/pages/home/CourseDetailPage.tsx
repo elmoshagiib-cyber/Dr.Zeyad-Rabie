@@ -1276,7 +1276,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.35, ease: "easeInOut" }}
-                      className="overflow-hidden border-t border-slate-200 dark:border-[#262626] p-3 sm:p-4 space-y-3"
+                      className="overflow-hidden border-t border-slate-200 dark:border-[#262626] bg-gray-50 dark:bg-[#0c0c0c] p-3 sm:p-4 space-y-3"
                     >
                       {unit.lessons.map((lesson: any) => {
                         const isVideo = lesson.type === "video";
@@ -1292,7 +1292,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                         return (
                           <div
                             key={lesson.id}
-                            className="rounded-xl sm:rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden bg-white dark:bg-[#1A1A1A] transition-all duration-300"
+                            className="rounded-xl sm:rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-[#1A1A1A] shadow-sm hover:shadow-md transition-all duration-300"
                           >
                             <div
                               onClick={() => toggleLessonExpand(lesson.id)}
