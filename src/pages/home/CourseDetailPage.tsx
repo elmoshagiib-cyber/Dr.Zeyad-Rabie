@@ -1276,9 +1276,9 @@ const saveProgress = async (currentTime: number, duration: number) => {
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.35, ease: "easeInOut" }}
-                      className="overflow-hidden border-t border-slate-200 dark:border-[#262626]"
+                      className="overflow-hidden border-t border-slate-200 dark:border-[#262626] p-3 sm:p-4 space-y-3"
                     >
-                      {unit.lessons.map((lesson: any, idx: number) => {
+                      {unit.lessons.map((lesson: any) => {
                         const isVideo = lesson.type === "video";
                         const isFile = lesson.type === "pdf";
                         const isHomework = lesson.type === "homework";
@@ -1287,289 +1287,298 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
                         const extras = examExtras[lesson.id];
                         const videoExtra = videoExtras[lesson.id];
+                        const isExpanded = expandedLessonId === lesson.id;
 
                         return (
                           <div
                             key={lesson.id}
-                            onClick={() => toggleLessonExpand(lesson.id)}
-                            className={`px-3 sm:px-6 py-3 sm:py-5 cursor-pointer ${
-                              idx !== unit.lessons.length - 1
-                                ? "border-b border-gray-100 dark:border-gray-700"
-                                : ""
-                            } hover:bg-rose-50/60 dark:hover:bg-[#171717] transition-all duration-300`}
+                            className="rounded-xl sm:rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden bg-white dark:bg-[#1A1A1A] transition-all duration-300"
                           >
-                          <div className="flex flex-row-reverse items-center justify-between gap-2 sm:gap-4 hover:pr-2 transition-all duration-300">
-                            <div className="flex-shrink-0 flex items-center gap-2 sm:gap-3">
-                              <ChevronDown
-                                size={14}
-                                className={`text-gray-400 dark:text-gray-500 transition-transform duration-300 flex-shrink-0 ${
-                                  expandedLessonId === lesson.id ? "rotate-0" : "rotate-180"
-                                }`}
-                              />
-                              {isEnrolled && !isLessonLocked(lesson) ? (
-                                <>
-                                  {isVideo && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        openVideoPlayer(lesson.id, lesson.title);
-                                      }}
-                                      className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-                                    >
-                                      <Play size={13} />
-                                      <span>مشاهدة الفيديو</span>
-                                    </button>
-                                  )}
-
-                                  {isFile && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        openPdf(lesson.id);
-                                      }}
-                                      className="flex items-center gap-1.5 sm:gap-2 bg-blue-500 hover:bg-blue-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-blue-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-                                    >
-                                      <FileText size={13} />
-                                      <span>تحميل الملف</span>
-                                    </button>
-                                  )}
-
-                                  {isHomework && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        navigate(`/dashboard/homework/${lesson.id}`, {
-                                          state: {
-                                            fromCourse: true,
-                                            courseId: slug,
-                                          },
-                                        });
-                                      }}
-                                      className="flex items-center gap-1.5 sm:gap-2 bg-green-500 hover:bg-green-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-green-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-                                    >
-                                      <ClipboardCheck size={13} />
-                                      <span>حل الواجب</span>
-                                    </button>
-                                  )}
-
-                                  {isExam && (
-                                    <button
-                                      onClick={async (e) => {
-                                        e.stopPropagation();
-                                        const { data, error } = await supabase
-                                          .from("exams")
-                                          .select("id")
-                                          .eq("course_item_id", lesson.id)
-                                          .single();
-
-                                        if (error || !data) {
-                                          console.error(error);
-                                          alert("الامتحان غير موجود");
-                                          return;
-                                        }
-
-                                        navigate(`/dashboard/exams/${data.id}`);
-                                      }}
-                                      className="flex items-center gap-1.5 sm:gap-2 bg-red-500 hover:bg-red-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-red-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-                                    >
-                                      <ClipboardList size={13} />
-                                      <span>ابدأ الكويز</span>
-                                    </button>
-                                  )}
-
-                                  {isLink && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (!lesson.url) {
-                                          showToast("الرابط غير متوفر");
-                                          return;
-                                        }
-                                        window.open(lesson.url, "_blank", "noopener,noreferrer");
-                                      }}
-                                      className="flex items-center gap-1.5 sm:gap-2 bg-cyan-500 hover:bg-cyan-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-cyan-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-                                    >
-                                      <svg className="w-[13px] h-[13px]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l3-3a4 4 0 015.656 5.656l-1.5 1.5" /></svg>
-                                      <span>فتح الرابط</span>
-                                    </button>
-                                  )}
-                                </>
-                              ) : isEnrolled && isLessonLocked(lesson) ? (
-                                <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl">
-                                  <Lock size={14} />
-                                  <span className="text-xs sm:text-sm font-bold">
-                                    أكمل السابق أولاً
-                                  </span>
-                                </div>
-                              ) : null}
-                            </div>
-
-                            <div className="flex flex-row-reverse items-center gap-3 text-right flex-1 min-w-0">
-                              <div className="flex-1 min-w-0">
-                                <h4 className="text-sm sm:text-base xl:text-lg font-bold text-[#111827] dark:text-white truncate transition-colors duration-300 group-hover:text-[#5800a9]">
-                                  {lesson.title}
-                                </h4>
-
-                                {isExam && (
-                                  <p className="text-xs text-gray-400 mt-0.5">
-                                    {lesson.duration || 30} دقيقة
-                                  </p>
-                                )}
-                              </div>
-
-                              <div
-                                className={`flex-shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${
-                                  isVideo ? "text-yellow-500" : ""
-                                } ${isFile ? "text-blue-500" : ""} ${
-                                  isHomework ? "text-green-500" : ""
-                                } ${isExam ? "text-red-500" : ""} ${
-                                  isLink ? "text-cyan-500" : ""
-                                }`}
-                              >
-                                {isVideo && <Play size={20} />}
-                                {isFile && <FileText size={20} />}
-                                {isHomework && <ClipboardCheck size={20} />}
-                                {isExam && <ClipboardList size={20} />}
-                                {isLink && (
-                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l3-3a4 4 0 015.656 5.656l-1.5 1.5" /></svg>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          <AnimatePresence>
-                          {expandedLessonId === lesson.id && (isVideo || isFile || isLink || (isExam && extras)) && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.3, ease: "easeInOut" }}
-                              onClick={(e) => e.stopPropagation()}
-                              className="overflow-hidden"
+                            <div
+                              onClick={() => toggleLessonExpand(lesson.id)}
+                              className={`px-3 sm:px-6 py-3 sm:py-5 cursor-pointer transition-colors duration-300 ${
+                                isExpanded
+                                  ? "bg-slate-100 dark:bg-slate-800/60"
+                                  : "hover:bg-rose-50/60 dark:hover:bg-[#171717]"
+                              }`}
                             >
-                            <div className="mt-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-[#171717] px-4 py-3 space-y-2.5">
-                              {isVideo && (
-                                <>
+                              <div className="flex flex-row-reverse items-center justify-between gap-2 sm:gap-4 transition-all duration-300">
+                                <div className="flex-shrink-0 flex items-center gap-2 sm:gap-3">
+                                  <ChevronDown
+                                    size={14}
+                                    className={`text-gray-400 dark:text-gray-500 transition-transform duration-300 flex-shrink-0 ${
+                                      isExpanded ? "rotate-0" : "rotate-180"
+                                    }`}
+                                  />
+                                  {isEnrolled && !isLessonLocked(lesson) ? (
+                                    <>
+                                      {isVideo && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            openVideoPlayer(lesson.id, lesson.title);
+                                          }}
+                                          className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                        >
+                                          <Play size={13} />
+                                          <span>مشاهدة الفيديو</span>
+                                        </button>
+                                      )}
+
+                                      {isFile && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            openPdf(lesson.id);
+                                          }}
+                                          className="flex items-center gap-1.5 sm:gap-2 bg-blue-500 hover:bg-blue-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-blue-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                        >
+                                          <FileText size={13} />
+                                          <span>تحميل الملف</span>
+                                        </button>
+                                      )}
+
+                                      {isHomework && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/dashboard/homework/${lesson.id}`, {
+                                              state: {
+                                                fromCourse: true,
+                                                courseId: slug,
+                                              },
+                                            });
+                                          }}
+                                          className="flex items-center gap-1.5 sm:gap-2 bg-green-500 hover:bg-green-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-green-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                        >
+                                          <ClipboardCheck size={13} />
+                                          <span>حل الواجب</span>
+                                        </button>
+                                      )}
+
+                                      {isExam && (
+                                        <button
+                                          onClick={async (e) => {
+                                            e.stopPropagation();
+                                            const { data, error } = await supabase
+                                              .from("exams")
+                                              .select("id")
+                                              .eq("course_item_id", lesson.id)
+                                              .single();
+
+                                            if (error || !data) {
+                                              console.error(error);
+                                              alert("الامتحان غير موجود");
+                                              return;
+                                            }
+
+                                            navigate(`/dashboard/exams/${data.id}`);
+                                          }}
+                                          className="flex items-center gap-1.5 sm:gap-2 bg-red-500 hover:bg-red-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-red-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                        >
+                                          <ClipboardList size={13} />
+                                          <span>ابدأ الكويز</span>
+                                        </button>
+                                      )}
+
+                                      {isLink && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (!lesson.url) {
+                                              showToast("الرابط غير متوفر");
+                                              return;
+                                            }
+                                            window.open(lesson.url, "_blank", "noopener,noreferrer");
+                                          }}
+                                          className="flex items-center gap-1.5 sm:gap-2 bg-cyan-500 hover:bg-cyan-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-cyan-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                        >
+                                          <svg className="w-[13px] h-[13px]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l3-3a4 4 0 015.656 5.656l-1.5 1.5" /></svg>
+                                          <span>فتح الرابط</span>
+                                        </button>
+                                      )}
+                                    </>
+                                  ) : isEnrolled && isLessonLocked(lesson) ? (
+                                    <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl">
+                                      <Lock size={14} />
+                                      <span className="text-xs sm:text-sm font-bold">
+                                        أكمل السابق أولاً
+                                      </span>
+                                    </div>
+                                  ) : null}
+                                </div>
+
+                                <div className="flex flex-row-reverse items-center gap-3 text-right flex-1 min-w-0">
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="text-sm sm:text-base xl:text-lg font-bold text-[#111827] dark:text-white truncate">
+                                      {lesson.title}
+                                    </h4>
+
+                                    {isExam && (
+                                      <p className="text-xs text-gray-400 mt-0.5">
+                                        {lesson.duration || 30} دقيقة
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <div
+                                    className={`flex-shrink-0 flex items-center justify-center transition-transform duration-300 ${
+                                      isVideo ? "text-yellow-500" : ""
+                                    } ${isFile ? "text-blue-500" : ""} ${
+                                      isHomework ? "text-green-500" : ""
+                                    } ${isExam ? "text-red-500" : ""} ${
+                                      isLink ? "text-cyan-500" : ""
+                                    }`}
+                                  >
+                                    {isVideo && <Play size={20} />}
+                                    {isFile && <FileText size={20} />}
+                                    {isHomework && <ClipboardCheck size={20} />}
+                                    {isExam && <ClipboardList size={20} />}
+                                    {isLink && (
+                                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l3-3a4 4 0 015.656 5.656l-1.5 1.5" /></svg>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {isExpanded && (
+                              <div className="h-[3px] w-full bg-gradient-to-r from-slate-300 via-slate-200 to-slate-300 dark:from-slate-600 dark:via-slate-700 dark:to-slate-600" />
+                            )}
+
+                            <AnimatePresence>
+                            {isExpanded && (isVideo || isFile || isLink || (isExam && extras)) && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="overflow-hidden"
+                              >
+                              <div className="px-4 py-3 space-y-2.5 bg-slate-50 dark:bg-[#171717]">
+                                {isVideo && (
+                                  <>
+                                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                      <Info size={14} className="text-rose-400 flex-shrink-0" />
+                                      <span className="font-bold text-gray-700 dark:text-gray-200">الوصف</span>
+                                      <span className="text-gray-400">:</span>
+                                      <span className="truncate">{lesson.description || "-"}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                      <Clock size={14} className="text-amber-400 flex-shrink-0" />
+                                      <span className="font-bold text-gray-700 dark:text-gray-200">مدة الفيديو</span>
+                                      <span className="text-gray-400">:</span>
+                                      <span>{lesson.duration ? `${lesson.duration} دقيقة` : "-"}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                      <Timer size={14} className="text-emerald-400 flex-shrink-0" />
+                                      <span className="font-bold text-gray-700 dark:text-gray-200">إجمالي وقت مشاهدتك</span>
+                                      <span className="text-gray-400">:</span>
+                                      <span>{Math.floor((videoExtra?.watchedSeconds || 0) / 60)} دقيقة</span>
+                                    </div>
+                                    <div className="pt-1">
+                                      <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                        <motion.div
+                                          initial={{ width: 0 }}
+                                          animate={{ width: `${videoExtra?.progressPercent || 0}%` }}
+                                          transition={{ duration: 0.6, ease: "easeOut" }}
+                                          className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full"
+                                        />
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
+
+                                {isFile && (
                                   <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                                     <Info size={14} className="text-rose-400 flex-shrink-0" />
                                     <span className="font-bold text-gray-700 dark:text-gray-200">الوصف</span>
                                     <span className="text-gray-400">:</span>
                                     <span className="truncate">{lesson.description || "-"}</span>
                                   </div>
-                                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                                    <Clock size={14} className="text-amber-400 flex-shrink-0" />
-                                    <span className="font-bold text-gray-700 dark:text-gray-200">مدة الفيديو</span>
-                                    <span className="text-gray-400">:</span>
-                                    <span>{lesson.duration ? `${lesson.duration} دقيقة` : "-"}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                                    <Timer size={14} className="text-emerald-400 flex-shrink-0" />
-                                    <span className="font-bold text-gray-700 dark:text-gray-200">إجمالي وقت مشاهدتك</span>
-                                    <span className="text-gray-400">:</span>
-                                    <span>{Math.floor((videoExtra?.watchedSeconds || 0) / 60)} دقيقة</span>
-                                  </div>
-                                  <div className="pt-1">
-                                    <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                      <motion.div
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${videoExtra?.progressPercent || 0}%` }}
-                                        transition={{ duration: 0.6, ease: "easeOut" }}
-                                        className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full"
-                                      />
-                                    </div>
-                                  </div>
-                                </>
-                              )}
+                                )}
 
-                              {isFile && (
-                                <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                                  <Info size={14} className="text-rose-400 flex-shrink-0" />
-                                  <span className="font-bold text-gray-700 dark:text-gray-200">الوصف</span>
-                                  <span className="text-gray-400">:</span>
-                                  <span className="truncate">{lesson.description || "-"}</span>
-                                </div>
-                              )}
-
-                              {isLink && (
-                                <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                                  <Info size={14} className="text-rose-400 flex-shrink-0" />
-                                  <span className="font-bold text-gray-700 dark:text-gray-200">الوصف</span>
-                                  <span className="text-gray-400">:</span>
-                                  <span className="truncate">{lesson.description || "-"}</span>
-                                </div>
-                              )}
-
-                              {isExam && extras && (
-                                <>
-                                  <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-                                    <div className="flex items-center gap-1.5">
-                                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0" />
-                                      <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                                        اقل نتيجة لك :{" "}
-                                        <span className="font-bold text-gray-800 dark:text-white">
-                                          {extras.minScore}%
-                                        </span>
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                      <span className="w-2.5 h-2.5 rounded-full bg-red-400 flex-shrink-0" />
-                                      <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                                        متوسط نتائجك :{" "}
-                                        <span className="font-bold text-gray-800 dark:text-white">
-                                          {extras.avgScore}%
-                                        </span>
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                      <span className="w-2.5 h-2.5 rounded-full bg-blue-400 flex-shrink-0" />
-                                      <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                                        اعلى نتيجة لك :{" "}
-                                        <span className="font-bold text-gray-800 dark:text-white">
-                                          {extras.maxScore}%
-                                        </span>
-                                      </span>
-                                    </div>
-                                  </div>
-
-                                  <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                                    عدد مرات دخولك :{" "}
-                                    <span className="font-bold text-gray-800 dark:text-white">
-                                      {extras.attemptsCount} مرة
-                                    </span>
-                                    <span className="mx-2 text-gray-300">-</span>
-                                    عدد مرات إنهائك :{" "}
-                                    <span className="font-bold text-gray-800 dark:text-white">
-                                      {extras.completedCount} مرة
-                                    </span>
-                                  </div>
-
+                                {isLink && (
                                   <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                                     <Info size={14} className="text-rose-400 flex-shrink-0" />
                                     <span className="font-bold text-gray-700 dark:text-gray-200">الوصف</span>
                                     <span className="text-gray-400">:</span>
-                                    <span className="truncate">{extras.description || "-"}</span>
+                                    <span className="truncate">{lesson.description || "-"}</span>
                                   </div>
+                                )}
 
-                                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                                    <Hash size={14} className="text-violet-400 flex-shrink-0" />
-                                    <span className="font-bold text-gray-700 dark:text-gray-200">عدد الاسئلة</span>
-                                    <span className="text-gray-400">:</span>
-                                    <span>{extras.questionsCount} سؤال</span>
-                                  </div>
+                                {isExam && extras && (
+                                  <>
+                                    <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0" />
+                                        <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                          اقل نتيجة لك :{" "}
+                                          <span className="font-bold text-gray-800 dark:text-white">
+                                            {extras.minScore}%
+                                          </span>
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-red-400 flex-shrink-0" />
+                                        <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                          متوسط نتائجك :{" "}
+                                          <span className="font-bold text-gray-800 dark:text-white">
+                                            {extras.avgScore}%
+                                          </span>
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-blue-400 flex-shrink-0" />
+                                        <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                          اعلى نتيجة لك :{" "}
+                                          <span className="font-bold text-gray-800 dark:text-white">
+                                            {extras.maxScore}%
+                                          </span>
+                                        </span>
+                                      </div>
+                                    </div>
 
-                                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                                    <Clock size={14} className="text-amber-400 flex-shrink-0" />
-                                    <span className="font-bold text-gray-700 dark:text-gray-200">مدة الامتحان</span>
-                                    <span className="text-gray-400">:</span>
-                                    <span>{extras.duration} دقيقة</span>
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                            </motion.div>
-                          )}
-                          </AnimatePresence>
-                        </div>
+                                    <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                      عدد مرات دخولك :{" "}
+                                      <span className="font-bold text-gray-800 dark:text-white">
+                                        {extras.attemptsCount} مرة
+                                      </span>
+                                      <span className="mx-2 text-gray-300">-</span>
+                                      عدد مرات إنهائك :{" "}
+                                      <span className="font-bold text-gray-800 dark:text-white">
+                                        {extras.completedCount} مرة
+                                      </span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                      <Info size={14} className="text-rose-400 flex-shrink-0" />
+                                      <span className="font-bold text-gray-700 dark:text-gray-200">الوصف</span>
+                                      <span className="text-gray-400">:</span>
+                                      <span className="truncate">{extras.description || "-"}</span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                      <Hash size={14} className="text-violet-400 flex-shrink-0" />
+                                      <span className="font-bold text-gray-700 dark:text-gray-200">عدد الاسئلة</span>
+                                      <span className="text-gray-400">:</span>
+                                      <span>{extras.questionsCount} سؤال</span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                      <Clock size={14} className="text-amber-400 flex-shrink-0" />
+                                      <span className="font-bold text-gray-700 dark:text-gray-200">مدة الامتحان</span>
+                                      <span className="text-gray-400">:</span>
+                                      <span>{extras.duration} دقيقة</span>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                              </motion.div>
+                            )}
+                            </AnimatePresence>
+                          </div>
                         );
                       })}
                     </motion.div>
