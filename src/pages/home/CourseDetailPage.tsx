@@ -124,7 +124,9 @@ export function CourseDetailPage() {
   const [videoPlayerOpen, setVideoPlayerOpen] = useState(false);
   const [videoPlayerUrl, setVideoPlayerUrl] = useState("");
   const [videoPlayerTitle, setVideoPlayerTitle] = useState("");
+  const [videoPlayerDescription, setVideoPlayerDescription] = useState("");
   const [currentLessonId, setCurrentLessonId] = useState<string>("");
+  const [playerStage, setPlayerStage] = useState<"info" | "playing">("info");
   const [watermarkPosition, setWatermarkPosition] = useState({ top: "10%", left: "10%" });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
@@ -677,7 +679,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
     }
   };
 
-  const openVideoPlayer = async (lessonId: string, title: string) => {
+  const openVideoPlayer = async (lessonId: string, title: string, description?: string | null) => {
     if (!lessonId) {
       showToast("الفيديو غير متوفر");
       return;
@@ -733,6 +735,8 @@ const saveProgress = async (currentTime: number, duration: number) => {
       setCurrentLessonId(lessonId);
       setVideoPlayerUrl(url);
       setVideoPlayerTitle(title);
+      setVideoPlayerDescription(description || "");
+      setPlayerStage("info");
       setVideoPlayerOpen(true);
     } catch (error) {
       console.error("Error opening video:", error);
@@ -791,7 +795,9 @@ const saveProgress = async (currentTime: number, duration: number) => {
     setVideoPlayerOpen(false);
     setVideoPlayerUrl("");
     setVideoPlayerTitle("");
+    setVideoPlayerDescription("");
     setCurrentLessonId("");
+    setPlayerStage("info");
     lessonProgressRef.current = null;
     hasIncrementedWatchedLessonsRef.current = false;
   };
@@ -861,7 +867,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !videoPlayerOpen) return;
+    if (!video || !videoPlayerOpen || playerStage !== "playing") return;
 
     const handleLoadedMetadata = async () => {
       const duration = video.duration;
@@ -932,7 +938,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
         updateIntervalRef.current = null;
       }
     };
-  }, [videoPlayerOpen, currentLessonId]);
+  }, [videoPlayerOpen, currentLessonId, playerStage]);
 
   useEffect(() => {
     const handleBeforeUnload = async () => {
@@ -1191,7 +1197,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                           }
 
                           if (firstLesson.type === "video") {
-                            await openVideoPlayer(firstLesson.id, firstLesson.title);
+                            await openVideoPlayer(firstLesson.id, firstLesson.title, firstLesson.description);
                           }
 
                           return;
@@ -1360,7 +1366,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                         <button
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            openVideoPlayer(lesson.id, lesson.title);
+                                            openVideoPlayer(lesson.id, lesson.title, lesson.description);
                                           }}
                                           className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                         >
@@ -1712,66 +1718,117 @@ const saveProgress = async (currentTime: number, duration: number) => {
             className="relative w-full max-w-5xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between bg-gray-800 px-6 py-4 border-b border-gray-700">
-              <button
-                onClick={closeVideoPlayer}
-                className="text-white hover:text-gray-300 transition-colors"
-              >
-                <X size={24} />
-              </button>
+            {playerStage === "info" ? (
+              <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
+                <img
+                  src={
+                    course.thumbnail ||
+                    course.cover_image ||
+                    "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1600"
+                  }
+                  alt={videoPlayerTitle}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
 
-              <h3 className="text-white font-bold text-lg text-right flex-1 mr-4 truncate">
-                {videoPlayerTitle}
-              </h3>
-            </div>
-
-            <div
-              ref={videoWrapperRef}
-              className="relative bg-black"
-              style={{ paddingBottom: isFullscreen ? "0" : "56.25%" }}
-              onContextMenu={(e) => e.preventDefault()}
-            >
-              <video
-                ref={videoRef}
-                key={videoPlayerUrl}
-                src={videoPlayerUrl}
-                controls
-                controlsList="nodownload noremoteplayback"
-                disablePictureInPicture
-                preload="metadata"
-                playsInline
-                onContextMenu={(e) => e.preventDefault()}
-                className={isFullscreen ? "w-full h-full" : "absolute inset-0 w-full h-full"}
-                autoPlay
-              />
-
-              <button
-                onClick={toggleFullscreen}
-                className="absolute bottom-4 left-4 z-20 bg-black/50 hover:bg-black/70 text-white p-2.5 rounded-xl transition-all backdrop-blur-sm"
-                title={isFullscreen ? "الخروج من ملء الشاشة" : "ملء الشاشة"}
-              >
-                {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
-              </button>
-
-              <div
-                className="absolute pointer-events-none select-none transition-all duration-1000 ease-in-out z-10"
-                style={{
-                  top: watermarkPosition.top,
-                  left: watermarkPosition.left,
-                }}
-              >
-                <div
-                  className="px-3 py-1.5 rounded-lg text-white text-xs sm:text-sm font-bold whitespace-nowrap"
-                  style={{
-                    background: "rgba(0,0,0,0.35)",
-                    textShadow: "0 1px 3px rgba(0,0,0,0.8)",
-                    opacity: 0.55,
-                  }}
+                <button
+                  onClick={closeVideoPlayer}
+                  className="absolute top-4 left-4 z-20 text-white hover:text-gray-300 transition-colors bg-black/40 hover:bg-black/60 rounded-full p-2"
                 >
-                  {getWatermarkText()}
+                  <X size={22} />
+                </button>
+
+                {/* غيّر src ده لمسار اللوجو الحقيقي بتاع المنصة */}
+                <img
+                  src="/logo.png"
+                  alt="logo"
+                  className="absolute top-4 right-4 z-20 h-8 sm:h-10 w-auto object-contain"
+                />
+
+                <div className="absolute bottom-0 right-0 left-0 p-5 sm:p-8 z-10">
+                  <h3 className="text-white font-black text-xl sm:text-3xl text-right mb-2 sm:mb-3">
+                    {videoPlayerTitle}
+                  </h3>
+
+                  {videoPlayerDescription && (
+                    <p className="text-gray-200 text-sm sm:text-base text-right leading-relaxed mb-4 sm:mb-6 max-w-2xl mr-0 ml-auto line-clamp-3">
+                      {videoPlayerDescription}
+                    </p>
+                  )}
+
+                  <button
+                    onClick={() => setPlayerStage("playing")}
+                    className="flex items-center gap-2 bg-white hover:bg-gray-200 text-black font-black text-sm sm:text-base px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl transition-all duration-200 hover:scale-105"
+                  >
+                    <Play size={18} className="fill-black" />
+                    <span>عرض</span>
+                  </button>
                 </div>
               </div>
-            </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between bg-gray-800 px-6 py-4 border-b border-gray-700">
+                  <button
+                    onClick={closeVideoPlayer}
+                    className="text-white hover:text-gray-300 transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+
+                  <h3 className="text-white font-bold text-lg text-right flex-1 mr-4 truncate">
+                    {videoPlayerTitle}
+                  </h3>
+                </div>
+
+                <div
+                  ref={videoWrapperRef}
+                  className="relative bg-black"
+                  style={{ paddingBottom: isFullscreen ? "0" : "56.25%" }}
+                  onContextMenu={(e) => e.preventDefault()}
+                >
+                  <video
+                    ref={videoRef}
+                    key={videoPlayerUrl}
+                    src={videoPlayerUrl}
+                    controls
+                    controlsList="nodownload noremoteplayback"
+                    disablePictureInPicture
+                    preload="metadata"
+                    playsInline
+                    onContextMenu={(e) => e.preventDefault()}
+                    className={isFullscreen ? "w-full h-full" : "absolute inset-0 w-full h-full"}
+                    autoPlay
+                  />
+
+                  <button
+                    onClick={toggleFullscreen}
+                    className="absolute bottom-4 left-4 z-20 bg-black/50 hover:bg-black/70 text-white p-2.5 rounded-xl transition-all backdrop-blur-sm"
+                    title={isFullscreen ? "الخروج من ملء الشاشة" : "ملء الشاشة"}
+                  >
+                    {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+                  </button>
+
+                  <div
+                    className="absolute pointer-events-none select-none transition-all duration-1000 ease-in-out z-10"
+                    style={{
+                      top: watermarkPosition.top,
+                      left: watermarkPosition.left,
+                    }}
+                  >
+                    <div
+                      className="px-3 py-1.5 rounded-lg text-white text-xs sm:text-sm font-bold whitespace-nowrap"
+                      style={{
+                        background: "rgba(0,0,0,0.35)",
+                        textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+                        opacity: 0.55,
+                      }}
+                    >
+                      {getWatermarkText()}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
