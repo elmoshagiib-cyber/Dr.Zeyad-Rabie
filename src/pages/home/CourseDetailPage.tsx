@@ -1245,7 +1245,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
          <div className="group relative py-6 px-5 sm:py-8 sm:px-7 mb-4 sm:mb-6 transition-all duration-500">
 
   {/* Decorative line - top */}
-  <span className="block w-16 sm:w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700 ml-auto mb-3 sm:mb-4" />
+  <span className="block w-16 sm:w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700 ml-auto mb-3 sm:mb-4 transition-all duration-500 group-hover:-translate-x-24 sm:group-hover:-translate-x-40 group-hover:w-20" />
 
   {/* Title */}
   <h2 className="relative z-10 text-2xl sm:text-3xl xl:text-4xl font-black text-right transition-all duration-500 group-hover:translate-x-1">
@@ -1261,7 +1261,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
   </h2>
 
   {/* Decorative line - bottom */}
-  <span className="block w-16 sm:w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700 ml-auto mt-3 sm:mt-4" />
+  <span className="block w-16 sm:w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700 ml-auto mt-3 sm:mt-4 transition-all duration-500 group-hover:-translate-x-20 sm:group-hover:-translate-x-36 group-hover:w-20" />
 </div>
 
           <div className="space-y-3 sm:space-y-4">
