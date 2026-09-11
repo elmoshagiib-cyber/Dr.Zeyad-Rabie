@@ -1646,6 +1646,19 @@ duration-300
               </div>
             )}
 
+            {/* Banner image below the slider - same width as the card */}
+            <img
+              src="/images/suggested-courses-banner.jpg"
+              alt="بانر الكورسات المقترحة"
+              className="
+                w-full
+                mt-5
+                rounded-[20px]
+                object-cover
+                shadow-[0_4px_20px_rgba(0,0,0,.06)]
+              "
+            />
+
           </div>
         </div>
 
