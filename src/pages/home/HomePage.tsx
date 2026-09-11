@@ -1340,34 +1340,22 @@ duration-300
         {/* Title */}
         <div className="text-center lg:text-right lg:flex-1">
 
-          <div className="flex items-center justify-center lg:justify-start gap-3 mb-3">
-            <div
-              className="
-                w-11 h-11
-                rounded-2xl
-                bg-[#F6AC08]/10
-                flex items-center justify-center
-              "
-            >
-              <Star
-                className="text-[#F6AC08]"
-                size={24}
-                fill="currentColor"
-              />
-            </div>
-          </div>
-
 <h2
   className="
+    flex
+    items-center
+    gap-3
+    justify-center
+    lg:justify-start
     text-[26px]
     sm:text-[32px]
     lg:text-[40px]
     font-black
-    text-slate-900
-    dark:text-white
   "
 >
-  الكورسات المقترحة
+  <span className="w-[3px] h-8 sm:h-9 lg:h-10 bg-[#5800a9] dark:bg-[#b600d7] rounded-full" />
+  <span className="text-slate-900 dark:text-white">الكورسات</span>{" "}
+  <span className="text-[#5800a9] dark:text-[#b600d7]">المُقترحة</span>
 </h2>
 
           <p
