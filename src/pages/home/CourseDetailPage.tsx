@@ -3,6 +3,7 @@ import {
   BookOpen,
   ChevronDown,
   ChevronUp,
+  ChevronRight,
   Play,
   FileText,
   Lock,
@@ -1027,6 +1028,14 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
         <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-start">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 rounded-full bg-[#5800a9] hover:bg-[#4a0089] text-white font-bold text-sm sm:text-base px-5 py-2.5 shadow-lg transition-all duration-300 mb-6 sm:mb-8"
+            >
+              <span>العودة</span>
+              <ChevronRight size={18} />
+            </button>
+
             <div className="flex flex-wrap justify-start gap-3 mb-8">
               {[
                 {
