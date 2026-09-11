@@ -1709,13 +1709,19 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
       {videoPlayerOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
+          className={`fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center ${
+            playerStage === "info" ? "p-4" : "p-0"
+          }`}
           onClick={closeVideoPlayer}
           onContextMenu={(e) => e.preventDefault()}
           style={{ userSelect: "none" }}
         >
           <div
-            className="relative w-full max-w-5xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
+            className={
+              playerStage === "info"
+                ? "relative w-full max-w-5xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
+                : "relative w-full h-full bg-black"
+            }
             onClick={(e) => e.stopPropagation()}
           >
             {playerStage === "info" ? (
@@ -1765,68 +1771,63 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 </div>
               </div>
             ) : (
-              <>
-                <div className="flex items-center justify-between bg-gray-800 px-6 py-4 border-b border-gray-700">
-                  <button
-                    onClick={closeVideoPlayer}
-                    className="text-white hover:text-gray-300 transition-colors"
-                  >
-                    <X size={24} />
-                  </button>
+              <div
+                ref={videoWrapperRef}
+                className="relative w-full h-full bg-black"
+                onContextMenu={(e) => e.preventDefault()}
+              >
+                <button
+                  onClick={closeVideoPlayer}
+                  className="absolute top-4 left-4 z-20 text-white hover:text-gray-300 transition-colors bg-black/50 hover:bg-black/70 rounded-full p-2.5"
+                >
+                  <X size={22} />
+                </button>
 
-                  <h3 className="text-white font-bold text-lg text-right flex-1 mr-4 truncate">
-                    {videoPlayerTitle}
-                  </h3>
-                </div>
+                <h3 className="absolute top-4 right-4 z-20 text-white font-bold text-sm sm:text-base bg-black/50 px-3 py-1.5 rounded-lg max-w-[55%] truncate">
+                  {videoPlayerTitle}
+                </h3>
+
+                <video
+                  ref={videoRef}
+                  key={videoPlayerUrl}
+                  src={videoPlayerUrl}
+                  controls
+                  controlsList="nodownload noremoteplayback"
+                  disablePictureInPicture
+                  preload="metadata"
+                  playsInline
+                  onContextMenu={(e) => e.preventDefault()}
+                  className="w-full h-full object-contain"
+                  autoPlay
+                />
+
+                <button
+                  onClick={toggleFullscreen}
+                  className="absolute bottom-4 left-4 z-20 bg-black/50 hover:bg-black/70 text-white p-2.5 rounded-xl transition-all backdrop-blur-sm"
+                  title={isFullscreen ? "الخروج من ملء الشاشة" : "ملء الشاشة"}
+                >
+                  {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+                </button>
 
                 <div
-                  ref={videoWrapperRef}
-                  className="relative bg-black"
-                  style={{ paddingBottom: isFullscreen ? "0" : "56.25%" }}
-                  onContextMenu={(e) => e.preventDefault()}
+                  className="absolute pointer-events-none select-none transition-all duration-1000 ease-in-out z-10"
+                  style={{
+                    top: watermarkPosition.top,
+                    left: watermarkPosition.left,
+                  }}
                 >
-                  <video
-                    ref={videoRef}
-                    key={videoPlayerUrl}
-                    src={videoPlayerUrl}
-                    controls
-                    controlsList="nodownload noremoteplayback"
-                    disablePictureInPicture
-                    preload="metadata"
-                    playsInline
-                    onContextMenu={(e) => e.preventDefault()}
-                    className={isFullscreen ? "w-full h-full" : "absolute inset-0 w-full h-full"}
-                    autoPlay
-                  />
-
-                  <button
-                    onClick={toggleFullscreen}
-                    className="absolute bottom-4 left-4 z-20 bg-black/50 hover:bg-black/70 text-white p-2.5 rounded-xl transition-all backdrop-blur-sm"
-                    title={isFullscreen ? "الخروج من ملء الشاشة" : "ملء الشاشة"}
-                  >
-                    {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
-                  </button>
-
                   <div
-                    className="absolute pointer-events-none select-none transition-all duration-1000 ease-in-out z-10"
+                    className="px-3 py-1.5 rounded-lg text-white text-xs sm:text-sm font-bold whitespace-nowrap"
                     style={{
-                      top: watermarkPosition.top,
-                      left: watermarkPosition.left,
+                      background: "rgba(0,0,0,0.35)",
+                      textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+                      opacity: 0.55,
                     }}
                   >
-                    <div
-                      className="px-3 py-1.5 rounded-lg text-white text-xs sm:text-sm font-bold whitespace-nowrap"
-                      style={{
-                        background: "rgba(0,0,0,0.35)",
-                        textShadow: "0 1px 3px rgba(0,0,0,0.8)",
-                        opacity: 0.55,
-                      }}
-                    >
-                      {getWatermarkText()}
-                    </div>
+                    {getWatermarkText()}
                   </div>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
