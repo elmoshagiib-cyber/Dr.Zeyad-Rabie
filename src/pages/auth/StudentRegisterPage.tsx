@@ -103,7 +103,14 @@ const GOVERNORATES = [
           )}
         </AnimatePresence>
 
-        <Icon className="w-4 h-4 text-[#5800a9] dark:text-[#b600d7] flex-shrink-0 relative z-10" />
+        <motion.div
+          initial={false}
+          animate={{ y: floating ? -20 : 0 }}
+          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+          className="relative z-10 flex-shrink-0"
+        >
+          <Icon className="w-4 h-4 text-[#5800a9] dark:text-[#b600d7]" />
+        </motion.div>
 
         <div className="relative z-10 flex-1 min-w-0">
           <motion.label
@@ -174,8 +181,6 @@ const GOVERNORATES = [
   required?: boolean;
   isDark: boolean;
 }) => {
-    const [flashId, setFlashId] = useState(0);
-    const [showFlash, setShowFlash] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
     const containerRef = React.useRef<HTMLDivElement>(null);
@@ -191,12 +196,6 @@ const GOVERNORATES = [
 
     const selectedLabel = optionList.find(opt => opt.value === value)?.label || '';
 
-    const handleFocus = () => {
-      setFlashId((id) => id + 1);
-      setShowFlash(true);
-      setTimeout(() => setShowFlash(false), 500);
-    };
-
     React.useEffect(() => {
       const handleClickOutside = (e: MouseEvent) => {
         if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -211,26 +210,13 @@ const GOVERNORATES = [
     return (
     <div className="flex flex-col gap-0.5 w-full relative" ref={containerRef}>
       <div
-        onClick={() => { setIsOpen(o => !o); handleFocus(); }}
-        className={`relative overflow-hidden flex items-center gap-2 border-b-2 py-2 transition-colors duration-200 cursor-pointer
+        onClick={() => setIsOpen(o => !o)}
+        className={`relative flex items-center gap-2 border-b-2 py-2 transition-colors duration-200 cursor-pointer
           ${error ? 'border-red-400' : 'border-gray-200 focus-within:border-[#5800a9] dark:focus-within:border-[#b600d7]'}
           ${isDark ? 'border-gray-700' : ''}
           ${isOpen ? (isDark ? 'border-[#b600d7]' : 'border-[#5800a9]') : ''}
         `}
       >
-        <AnimatePresence>
-          {showFlash && (
-            <motion.div
-              key={flashId}
-              className="absolute inset-0 bg-[#5800a9] dark:bg-[#b600d7] pointer-events-none"
-              style={{ transformOrigin: "right" }}
-              initial={{ opacity: 1, scaleX: 0 }}
-              animate={{ opacity: 0, scaleX: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-            />
-          )}
-        </AnimatePresence>
         <Icon className="w-4 h-4 text-[#5800a9] dark:text-[#b600d7] flex-shrink-0 relative z-10" />
         <span
           className={`
