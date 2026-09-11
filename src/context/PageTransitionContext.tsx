@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 
 type TransitionState = {
   path: string;
-  phase: "covering" | "holding";
+  phase: "covering" | "holding" | "leaving";
 } | null;
 
 type TransitionFn = (path: string) => void;
@@ -73,8 +73,15 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
       );
     }
 
-    // خلصنا فترة "الإمساك" -> نشيل الأوفرلاي ونكشف الصفحة الجديدة
+    // خلصنا فترة "الإمساك" -> نخلي الفقاعة تكمل طلوعها لفوق وتخرج برّه الشاشة
     if (event.animationName === "page-bubble-hold") {
+      setTransition((current) =>
+        current ? { ...current, phase: "leaving" } : current
+      );
+    }
+
+    // الفقاعة خرجت خالص برّه الشاشة -> نشيل الأوفرلاي (مش هيبان لأنه أصلاً مختفي)
+    if (event.animationName === "page-bubble-leave") {
       setTransition(null);
     }
   };

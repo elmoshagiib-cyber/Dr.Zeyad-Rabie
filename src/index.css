@@ -583,8 +583,8 @@ transform:translateX(350%) rotate(12deg);
   height: 200vmax;
   border-radius: 200vmax;
   background: var(--page-bubble-color);
-  animation-duration: 900ms;
-  animation-timing-function: cubic-bezier(0.34, 1.1, 0.4, 1);
+  animation-duration: 1400ms;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .page-bubbles.covering .page-bubbles__first {
@@ -603,15 +603,20 @@ transform:translateX(350%) rotate(12deg);
   animation-timing-function: ease-in-out;
 }
 
+/* المرحلة الجديدة: خروج ناعم لفوق بدل الاختفاء المفاجئ */
+.page-bubbles.leaving .page-bubbles__first,
+.page-bubbles.leaving .page-bubbles__second {
+  animation-name: page-bubble-leave;
+  animation-duration: 700ms;
+  animation-timing-function: cubic-bezier(0.34, 1.1, 0.4, 1);
+  animation-fill-mode: forwards;
+}
+
 @keyframes page-bubble-move {
-  0% {
-    translate: -50% 100%;
+  20% {
     border-radius: 200vmax;
   }
-  70% {
-    translate: -50% 15%;
-    border-radius: 200vmax;
-  }
+  50%,
   100% {
     translate: -50% 0;
     border-radius: 0;
@@ -636,5 +641,19 @@ transform:translateX(350%) rotate(12deg);
   to {
     translate: -50% 0;
     border-radius: 0;
+  }
+}
+
+@keyframes page-bubble-leave {
+  0% {
+    translate: -50% 0;
+    border-radius: 0;
+  }
+  35% {
+    border-radius: 200vmax;
+  }
+  100% {
+    translate: -50% -100%;
+    border-radius: 200vmax;
   }
 }
