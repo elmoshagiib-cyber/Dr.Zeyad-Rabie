@@ -1324,7 +1324,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
           <div className="flex flex-col items-start">
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 rounded-full bg-[#5800a9] hover:bg-[#4a0089] text-white font-bold text-sm sm:text-base px-5 py-2.5 shadow-lg transition-all duration-300 mb-6 sm:mb-8"
+              className="flex items-center gap-2 rounded-full bg-[#5800a9] hover:bg-[#4a0089] dark:bg-[#b600d7] dark:hover:bg-[#9a00b5] text-white font-bold text-sm sm:text-base px-5 py-2.5 shadow-lg transition-all duration-300 mb-6 sm:mb-8"
             >
               <span>العودة</span>
               <ChevronRight size={18} />
@@ -1359,7 +1359,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 >
                   <span className="text-sm font-bold">{item.label}</span>
                   <span className="text-[#FFD54A]">{item.icon}</span>
-                  <span className="rounded-full bg-[#5800a9] text-white px-2.5 py-1 text-[11px] font-black">
+                  <span className="rounded-full bg-[#5800a9] dark:bg-[#b600d7] text-white px-2.5 py-1 text-[11px] font-black">
                     +{item.value}
                   </span>
                 </div>
@@ -1398,7 +1398,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
             <div className="flex flex-wrap justify-start gap-5">
               <div className="flex items-center gap-3">
                 <span className="text-white font-bold">تاريخ الإنشاء</span>
-                <span className="rounded-full bg-[#5800a9] text-white px-4 py-1.5 text-sm font-black">
+                <span className="rounded-full bg-[#5800a9] dark:bg-[#b600d7] text-white px-4 py-1.5 text-sm font-black">
                   {new Date(course.created_at || Date.now()).toLocaleDateString(
                     "ar-EG",
                     {
@@ -1450,7 +1450,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 {course.is_free ? (
                   <button
                     onClick={handleEnroll}
-                    className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#5800a9] border-2 border-[#5800a9] hover:bg-transparent hover:text-[#5800a9] shadow-none cursor-pointer transition-all duration-300 mb-3 sm:mb-4"
+                    className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#5800a9] dark:bg-[#b600d7] border-2 border-[#5800a9] dark:border-[#b600d7] hover:bg-transparent hover:text-[#5800a9] dark:hover:text-[#b600d7] shadow-none cursor-pointer transition-all duration-300 mb-3 sm:mb-4"
                   >
                     {isEnrolled ? "مشترك" : "اشترك مجانًا"}
                   </button>
@@ -1493,7 +1493,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
                         handleEnroll();
                       }}
-                      className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#5800a9] border-2 border-[#5800a9] hover:bg-transparent hover:text-[#5800a9] shadow-none cursor-pointer transition-all duration-300 mb-3"
+                      className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-white text-lg sm:text-xl font-black bg-[#5800a9] dark:bg-[#b600d7] border-2 border-[#5800a9] dark:border-[#b600d7] hover:bg-transparent hover:text-[#5800a9] dark:hover:text-[#b600d7] shadow-none cursor-pointer transition-all duration-300 mb-3"
                     >
                       {isEnrolled ? "مشترك" : "اشترك الآن"}
                     </button>
@@ -1503,7 +1503,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200 font-bold text-sm sm:text-base">
-                      <Clock size={16} className="text-[#5800a9]" />
+                      <Clock size={16} className="text-[#5800a9] dark:text-[#b600d7]" />
                       <span>المحتوى</span>
                     </div>
                     <div className="flex items-center gap-1 text-sm sm:text-base text-gray-400 dark:text-gray-500 font-bold">
@@ -1516,7 +1516,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200 font-bold text-sm sm:text-base">
-                      <HelpCircle size={16} className="text-[#5800a9]" />
+                      <HelpCircle size={16} className="text-[#5800a9] dark:text-[#b600d7]" />
                       <span>اجمالي الاسئلة</span>
                     </div>
                     <div className="flex items-center gap-1 text-sm sm:text-base text-gray-400 dark:text-gray-500 font-bold">
@@ -1529,9 +1529,9 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 {course.intro_video && (
                   <button
                     onClick={() => window.open(course.intro_video)}
-                    className="w-full py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-gray-700 dark:text-gray-200 font-bold text-sm sm:text-base border-2 border-gray-200 dark:border-gray-600 hover:border-[#5800a9] flex items-center justify-center gap-2 hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] transition-all duration-300 mb-3 sm:mb-4 cursor-pointer"
+                    className="w-full py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-gray-700 dark:text-gray-200 font-bold text-sm sm:text-base border-2 border-gray-200 dark:border-gray-600 hover:border-[#5800a9] dark:hover:border-[#b600d7] flex items-center justify-center gap-2 hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] transition-all duration-300 mb-3 sm:mb-4 cursor-pointer"
                   >
-                    <Play size={16} className="text-[#5800a9]" />
+                    <Play size={16} className="text-[#5800a9] dark:text-[#b600d7]" />
                     <span>مشاهدة المقدمة</span>
                   </button>
                 )}
@@ -1550,11 +1550,11 @@ const saveProgress = async (currentTime: number, duration: number) => {
   {/* Title */}
   <h2 className="relative z-10 text-2xl sm:text-3xl xl:text-4xl font-black text-right transition-all duration-500 group-hover:translate-x-1">
 
-    <span className="text-gray-900 dark:text-white transition-colors duration-500 group-hover:text-rose-600">
+    <span className="text-gray-900 dark:text-white transition-colors duration-500 group-hover:text-[#5800a9] dark:group-hover:text-[#b600d7]">
       محتوى
     </span>
 
-    <span className="text-rose-600 transition-colors duration-500 group-hover:text-gray-900 dark:group-hover:text-white">
+    <span className="text-[#5800a9] dark:text-[#b600d7] transition-colors duration-500 group-hover:text-gray-900 dark:group-hover:text-white">
       {" "}الكورس
     </span>
 
@@ -1573,12 +1573,12 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   <button
                     onClick={() => setOpenUnit(isOpen ? null : unit.id)}
                     className={`w-full flex flex-row-reverse items-center justify-between px-4 sm:px-6 py-4 sm:py-5 transition-colors duration-300 ${
-  isOpen ? "bg-rose-50 dark:bg-rose-950/30" : "bg-white dark:bg-[#111111]"
+  isOpen ? "bg-[#F6EEFF] dark:bg-[#2B103D]" : "bg-white dark:bg-[#111111]"
 }`}
                   >
                    <ChevronDown
   size={18}
-  className={`flex-shrink-0 transition-transform duration-300 text-rose-500 ${
+  className={`flex-shrink-0 transition-transform duration-300 text-[#5800a9] dark:text-[#b600d7] ${
     isOpen ? "rotate-0" : "rotate-180"
   }`}
 />
@@ -1597,7 +1597,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
                       <LayoutGrid
                         size={20}
-                        className="flex-shrink-0 text-rose-500"
+                        className="flex-shrink-0 text-[#5800a9] dark:text-[#b600d7]"
                       />
                     </div>
                   </button>
@@ -1784,7 +1784,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                 {isVideo && (
                                   <>
                                     <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                                      <Info size={14} className="text-rose-400 flex-shrink-0" />
+                                      <Info size={14} className="text-[#5800a9] dark:text-[#b600d7] flex-shrink-0" />
                                       <span className="font-bold text-gray-700 dark:text-gray-200">الوصف</span>
                                       <span className="text-gray-400">:</span>
                                       <span className="truncate">{lesson.description || "-"}</span>
@@ -1929,7 +1929,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
           <div className="w-full max-w-md rounded-[30px] bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] shadow-[0_25px_70px_rgba(15,23,42,.12)] dark:shadow-[0_30px_70px_rgba(0,0,0,.65)] p-8">
             <div className="text-center">
               <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#F6EEFF] dark:bg-[#2B103D]">
-                <ShieldCheck size={36} className="text-[#5800a9]" />
+                <ShieldCheck size={36} className="text-[#5800a9] dark:text-[#b600d7]" />
               </div>
 
               <h2 className="text-3xl font-black text-gray-900 dark:text-white">
@@ -1941,7 +1941,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
               </p>
 
               <div className="mt-5 rounded-2xl border border-[#EAD8FF] dark:border-[#2A2A2A] bg-[#F6EEFF] dark:bg-[#1A1A1A] px-5 py-4">
-                <h3 className="text-lg font-black text-[#5800a9] text-center">
+                <h3 className="text-lg font-black text-[#5800a9] dark:text-[#b600d7] text-center">
                   {course?.title}
                 </h3>
               </div>
@@ -1952,7 +1952,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
               value={subscriptionCode}
               onChange={(e) => setSubscriptionCode(e.target.value.toUpperCase())}
               placeholder="XXXX-XXXX"
-              className="mt-7 w-full rounded-2xl border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#181818] px-5 py-4 text-center text-lg tracking-[6px] font-black text-[#5800a9] outline-none transition-all duration-300 focus:border-[#5800a9] focus:ring-4 focus:ring-[#5800a9]/20"
+              className="mt-7 w-full rounded-2xl border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#181818] px-5 py-4 text-center text-lg tracking-[6px] font-black text-[#5800a9] dark:text-[#b600d7] outline-none transition-all duration-300 focus:border-[#5800a9] dark:focus:border-[#b600d7] focus:ring-4 focus:ring-[#5800a9]/20 dark:focus:ring-[#b600d7]/20"
             />
 
             <Button className="w-full mt-5" onClick={activateSubscription}>
@@ -1977,7 +1977,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
             <Button
               variant="ghost"
-              className="w-full mt-3 text-gray-500 dark:text-gray-400 hover:text-[#5800a9]"
+              className="w-full mt-3 text-gray-500 dark:text-gray-400 hover:text-[#5800a9] dark:hover:text-[#b600d7]"
               onClick={() => {
                 setShowSubscriptionModal(false);
                 setSubscriptionCode("");
@@ -2113,7 +2113,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                       className="absolute top-6 sm:top-10 right-6 sm:right-10 z-20 pointer-events-none select-none"
                     >
                       <div className="flex items-center gap-3 sm:gap-4">
-                        <span className="w-[3px] sm:w-1 h-10 sm:h-14 bg-red-600 rounded-full flex-shrink-0" />
+                        <span className="w-[3px] sm:w-1 h-10 sm:h-14 bg-[#5800a9] dark:bg-[#b600d7] rounded-full flex-shrink-0" />
                         <div className="text-right">
                           <h3 className="text-white font-black text-lg sm:text-2xl leading-tight">
                             منصة الكيميائي
@@ -2159,7 +2159,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                     className="relative w-full h-1.5 bg-white/25 rounded-full cursor-pointer mb-3 sm:mb-4"
                   >
                     <div
-                      className="absolute top-0 left-0 h-full bg-red-600 rounded-full"
+                      className="absolute top-0 left-0 h-full bg-[#5800a9] dark:bg-[#b600d7] rounded-full"
                       style={{ width: `${videoDuration ? (currentTime / videoDuration) * 100 : 0}%` }}
                     />
                     <div
@@ -2255,7 +2255,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                 key={rate}
                                 onClick={() => changeSpeed(rate)}
                                 className={`w-full text-center px-4 py-2 text-sm transition-colors ${
-                                  playbackRate === rate ? "text-red-500 font-bold" : "text-white hover:bg-white/10"
+                                  playbackRate === rate ? "text-[#5800a9] dark:text-[#b600d7] font-bold" : "text-white hover:bg-white/10"
                                 }`}
                               >
                                 {rate}x
@@ -2268,7 +2268,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                       {videoChapters.length > 0 && (
                         <button
                           onClick={() => setShowChapters((prev) => !prev)}
-                          className={`transition-colors ${showChapters ? "text-red-500" : "text-white hover:text-gray-300"}`}
+                          className={`transition-colors ${showChapters ? "text-[#5800a9] dark:text-[#b600d7]" : "text-white hover:text-gray-300"}`}
                           title="الفصول"
                         >
                           <ListVideo size={20} className="sm:w-6 sm:h-6" />
@@ -2323,16 +2323,16 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                 }
                               }}
                               className={`w-full flex items-center justify-between gap-3 px-3 sm:px-4 py-3 rounded-xl transition-colors text-right ${
-                                isActive ? "bg-red-600/15" : "hover:bg-white/5"
+                                isActive ? "bg-[#5800a9]/15 dark:bg-[#b600d7]/15" : "hover:bg-white/5"
                               }`}
                             >
                               <span className="flex items-center gap-2 flex-1 min-w-0 justify-start">
                                 {isActive && (
-                                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
                                 )}
                                 <span
                                   className={`text-sm sm:text-base font-bold truncate ${
-                                    isActive ? "text-red-500" : "text-white"
+                                    isActive ? "text-[#5800a9] dark:text-[#b600d7]" : "text-white"
                                   }`}
                                 >
                                   {chapter.title}
