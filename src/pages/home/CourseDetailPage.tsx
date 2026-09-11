@@ -132,6 +132,7 @@ export function CourseDetailPage() {
   const [videoPlayerUrl, setVideoPlayerUrl] = useState("");
   const [videoPlayerTitle, setVideoPlayerTitle] = useState("");
   const [videoPlayerDescription, setVideoPlayerDescription] = useState("");
+  const [videoPlayerThumbnail, setVideoPlayerThumbnail] = useState("");
   const [currentLessonId, setCurrentLessonId] = useState<string>("");
   const [playerStage, setPlayerStage] = useState<"info" | "playing">("info");
   const [watermarkPosition, setWatermarkPosition] = useState({ top: "10%", left: "10%" });
@@ -703,7 +704,8 @@ const saveProgress = async (currentTime: number, duration: number) => {
     lessonId: string,
     title: string,
     description?: string | null,
-    chapters?: { title: string; time: number }[] | null
+    chapters?: { title: string; time: number }[] | null,
+    thumbnail?: string | null
   ) => {
     if (!lessonId) {
       showToast("الفيديو غير متوفر");
@@ -762,8 +764,9 @@ const saveProgress = async (currentTime: number, duration: number) => {
       setVideoPlayerTitle(title);
       setVideoPlayerDescription(description || "");
       setVideoChapters(chapters || []);
+      setVideoPlayerThumbnail(thumbnail || "");
       setShowChapters(false);
-      setPlayerStage("info");
+      setPlayerStage(thumbnail ? "info" : "playing");
       setVideoPlayerOpen(true);
     } catch (error) {
       console.error("Error opening video:", error);
@@ -823,6 +826,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
     setVideoPlayerUrl("");
     setVideoPlayerTitle("");
     setVideoPlayerDescription("");
+    setVideoPlayerThumbnail("");
     setCurrentLessonId("");
     setPlayerStage("info");
     setVideoChapters([]);
@@ -998,6 +1002,14 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
     return () => clearTimeout(timer);
   }, [videoPlayerOpen, playerStage]);
+
+  useEffect(() => {
+    if (!videoPlayerOpen || playerStage !== "info" || !videoPlayerThumbnail) return;
+
+    const timer = setTimeout(() => setPlayerStage("playing"), 4000);
+
+    return () => clearTimeout(timer);
+  }, [videoPlayerOpen, playerStage, videoPlayerThumbnail]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -1347,7 +1359,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                           }
 
                           if (firstLesson.type === "video") {
-                            await openVideoPlayer(firstLesson.id, firstLesson.title, firstLesson.description, firstLesson.chapters);
+                            await openVideoPlayer(firstLesson.id, firstLesson.title, firstLesson.description, firstLesson.chapters, firstLesson.thumbnail);
                           }
 
                           return;
@@ -1516,7 +1528,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                         <button
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            openVideoPlayer(lesson.id, lesson.title, lesson.description, lesson.chapters);
+                                            openVideoPlayer(lesson.id, lesson.title, lesson.description, lesson.chapters, lesson.thumbnail);
                                           }}
                                           className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                         >
@@ -1869,7 +1881,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
           <div
             className={
               playerStage === "info"
-                ? "relative w-full max-w-5xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
+                ? "relative w-full max-w-6xl xl:max-w-7xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
                 : "relative w-full h-full bg-black"
             }
             onClick={(e) => e.stopPropagation()}
@@ -1877,11 +1889,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
             {playerStage === "info" ? (
               <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
                 <img
-                  src={
-                    course.thumbnail ||
-                    course.cover_image ||
-                    "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1600"
-                  }
+                  src={videoPlayerThumbnail || course.thumbnail || course.cover_image}
                   alt={videoPlayerTitle}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -2010,9 +2018,20 @@ const saveProgress = async (currentTime: number, duration: number) => {
                       style={{ width: `${videoDuration ? (currentTime / videoDuration) * 100 : 0}%` }}
                     />
                     <div
-                      className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow"
+                      className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow z-10"
                       style={{ left: `calc(${videoDuration ? (currentTime / videoDuration) * 100 : 0}% - 6px)` }}
                     />
+
+                    {videoDuration > 0 &&
+                      videoChapters
+                        .filter((chapter) => chapter.time > 0 && chapter.time < videoDuration)
+                        .map((chapter, index) => (
+                          <div
+                            key={index}
+                            className="absolute top-0 h-full w-[2px] bg-black/70"
+                            style={{ left: `${(chapter.time / videoDuration) * 100}%` }}
+                          />
+                        ))}
                   </div>
 
                   <div className="relative flex items-center justify-between gap-3 sm:gap-4">
@@ -2125,22 +2144,22 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 <AnimatePresence>
                   {showChapters && (
                     <motion.div
-                      initial={{ opacity: 0, x: -20 }}
+                      initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
+                      exit={{ opacity: 0, x: 20 }}
                       transition={{ duration: 0.25 }}
                       onClick={(e) => e.stopPropagation()}
-                      className="absolute bottom-0 top-0 left-0 z-30 w-[280px] sm:w-[340px] bg-black/90 backdrop-blur-md overflow-y-auto"
+                      className="absolute bottom-0 top-0 right-0 z-30 w-[280px] sm:w-[340px] bg-black/90 backdrop-blur-md overflow-y-auto"
                       dir="rtl"
                     >
                       <div className="p-4 sm:p-5 border-b border-white/15 flex items-center justify-between">
+                        <h3 className="text-white font-black text-lg sm:text-xl">الفصول</h3>
                         <button
                           onClick={() => setShowChapters(false)}
                           className="text-gray-400 hover:text-white transition-colors"
                         >
                           <X size={18} />
                         </button>
-                        <h3 className="text-white font-black text-lg sm:text-xl">الفصول</h3>
                       </div>
 
                       <div className="p-2 sm:p-3">
@@ -2162,11 +2181,10 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                 isActive ? "bg-red-600/15" : "hover:bg-white/5"
                               }`}
                             >
-                              <span className="text-gray-300 text-sm sm:text-base font-bold tabular-nums flex-shrink-0">
-                                {formatTime(chapter.time)}
-                              </span>
-
-                              <span className="flex items-center gap-2 flex-1 min-w-0 justify-end">
+                              <span className="flex items-center gap-2 flex-1 min-w-0 justify-start">
+                                {isActive && (
+                                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                                )}
                                 <span
                                   className={`text-sm sm:text-base font-bold truncate ${
                                     isActive ? "text-red-500" : "text-white"
@@ -2174,9 +2192,10 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                 >
                                   {chapter.title}
                                 </span>
-                                {isActive && (
-                                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
-                                )}
+                              </span>
+
+                              <span className="text-gray-300 text-sm sm:text-base font-bold tabular-nums flex-shrink-0">
+                                {formatTime(chapter.time)}
                               </span>
                             </button>
                           );
