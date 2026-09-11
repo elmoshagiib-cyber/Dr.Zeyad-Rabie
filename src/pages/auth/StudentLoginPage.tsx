@@ -95,8 +95,10 @@ const fieldIcon =
 
   const [phoneFlashId, setPhoneFlashId] = useState(0);
   const [showPhoneFlash, setShowPhoneFlash] = useState(false);
+  const [isPhoneFocused, setIsPhoneFocused] = useState(false);
   const [passwordFlashId, setPasswordFlashId] = useState(0);
   const [showPasswordFlash, setShowPasswordFlash] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [toast, setToast] = useState<{ id: number; message: string } | null>(null);
   const toastTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -459,7 +461,7 @@ overflow-hidden
                     className={`
                       relative overflow-hidden
                       flex items-center gap-3
-                      border-b-2 py-2.5
+                      border-b-2 pt-4 pb-2
                       transition-colors duration-200
                       ${errors.phone
                         ? 'border-red-400'
@@ -482,26 +484,60 @@ overflow-hidden
                         />
                       )}
                     </AnimatePresence>
-                    <Phone className={`${fieldIcon} relative z-10`} />
-                    <input
-                     type="tel"
-                      placeholder="رقم الهاتف"
-                      value={loginForm.phone}
-                      onChange={e => {
-                        setLoginForm(p => ({ ...p, phone: e.target.value }));
-                        setErrors(p => ({ ...p, phone: undefined }));
-                      }}
-                      onFocus={() => triggerFlash(setPhoneFlashId, setShowPhoneFlash)}
-                      dir="ltr"
-                      required
-                      className={`
-                        relative z-10
-                        flex-1 min-w-0 bg-transparent border-0 outline-none
-                        text-sm sm:text-base py-0.5
-                        placeholder-gray-400
-                        ${isDark ? 'text-white placeholder-gray-500' : 'text-gray-700'}
-                      `}
-                    />
+
+                    <motion.div
+                      initial={false}
+                      animate={{ y: (isPhoneFocused || loginForm.phone.length > 0) ? -20 : 0 }}
+                      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                      className="relative z-10 flex-shrink-0"
+                    >
+                      <Phone className={fieldIcon} />
+                    </motion.div>
+
+                    <div className="relative z-10 flex-1 min-w-0">
+                      <motion.label
+                        initial={false}
+                        animate={{
+                          y: (isPhoneFocused || loginForm.phone.length > 0) ? -20 : 0,
+                          scale: (isPhoneFocused || loginForm.phone.length > 0) ? 0.8 : 1,
+                        }}
+                        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                        style={{ originX: 1, originY: 0 }}
+                        className={`
+                          absolute right-0 top-1/2 -translate-y-1/2
+                          pointer-events-none select-none
+                          text-sm sm:text-base font-medium whitespace-nowrap
+                          transition-colors duration-200
+                          ${(isPhoneFocused || loginForm.phone.length > 0)
+                            ? (isDark ? "text-[#b600d7]" : "text-[#5800a9]")
+                            : (isDark ? "text-gray-500" : "text-gray-400")
+                          }
+                        `}
+                      >
+                        رقم الهاتف
+                      </motion.label>
+
+                      <input
+                        type="tel"
+                        value={loginForm.phone}
+                        onChange={e => {
+                          setLoginForm(p => ({ ...p, phone: e.target.value }));
+                          setErrors(p => ({ ...p, phone: undefined }));
+                        }}
+                        onFocus={() => {
+                          triggerFlash(setPhoneFlashId, setShowPhoneFlash);
+                          setIsPhoneFocused(true);
+                        }}
+                        onBlur={() => setIsPhoneFocused(false)}
+                        dir="ltr"
+                        required
+                        className={`
+                          w-full bg-transparent border-0 outline-none
+                          text-sm sm:text-base py-0.5
+                          ${isDark ? 'text-white' : 'text-gray-700'}
+                        `}
+                      />
+                    </div>
                   </div>
                   {errors.phone && (
                     <p className="text-xs text-red-500 text-right">{errors.phone}</p>
@@ -514,7 +550,7 @@ overflow-hidden
                     className={`
                       relative overflow-hidden
                       flex items-center gap-3
-                      border-b-2 py-2.5
+                      border-b-2 pt-4 pb-2
                       transition-colors duration-200
                       ${errors.password
                         ? 'border-red-400'
@@ -537,26 +573,61 @@ overflow-hidden
                         />
                       )}
                     </AnimatePresence>
-                    <Lock className={`${fieldIcon} relative z-10`} />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="كلمة السر"
-                      value={loginForm.password}
-                      onChange={e => {
-                        setLoginForm(p => ({ ...p, password: e.target.value }));
-                        setErrors(p => ({ ...p, password: undefined }));
-                      }}
-                      onFocus={() => triggerFlash(setPasswordFlashId, setShowPasswordFlash)}
-                      dir="ltr"
-                      required
-                      className={`
-                        relative z-10
-                        flex-1 min-w-0 bg-transparent border-0 outline-none
-                        text-sm sm:text-base py-0.5
-                        placeholder-gray-400
-                        ${isDark ? 'text-white placeholder-gray-500' : 'text-gray-700'}
-                      `}
-                    />
+
+                    <motion.div
+                      initial={false}
+                      animate={{ y: (isPasswordFocused || loginForm.password.length > 0) ? -20 : 0 }}
+                      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                      className="relative z-10 flex-shrink-0"
+                    >
+                      <Lock className={fieldIcon} />
+                    </motion.div>
+
+                    <div className="relative z-10 flex-1 min-w-0">
+                      <motion.label
+                        initial={false}
+                        animate={{
+                          y: (isPasswordFocused || loginForm.password.length > 0) ? -20 : 0,
+                          scale: (isPasswordFocused || loginForm.password.length > 0) ? 0.8 : 1,
+                        }}
+                        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                        style={{ originX: 1, originY: 0 }}
+                        className={`
+                          absolute right-0 top-1/2 -translate-y-1/2
+                          pointer-events-none select-none
+                          text-sm sm:text-base font-medium whitespace-nowrap
+                          transition-colors duration-200
+                          ${(isPasswordFocused || loginForm.password.length > 0)
+                            ? (isDark ? "text-[#b600d7]" : "text-[#5800a9]")
+                            : (isDark ? "text-gray-500" : "text-gray-400")
+                          }
+                        `}
+                      >
+                        كلمة السر
+                      </motion.label>
+
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={loginForm.password}
+                        onChange={e => {
+                          setLoginForm(p => ({ ...p, password: e.target.value }));
+                          setErrors(p => ({ ...p, password: undefined }));
+                        }}
+                        onFocus={() => {
+                          triggerFlash(setPasswordFlashId, setShowPasswordFlash);
+                          setIsPasswordFocused(true);
+                        }}
+                        onBlur={() => setIsPasswordFocused(false)}
+                        dir="ltr"
+                        required
+                        className={`
+                          w-full bg-transparent border-0 outline-none
+                          text-sm sm:text-base py-0.5
+                          ${isDark ? 'text-white' : 'text-gray-700'}
+                        `}
+                      />
+                    </div>
+
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
