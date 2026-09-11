@@ -1275,14 +1275,12 @@ const saveProgress = async (currentTime: number, duration: number) => {
               return (
                 <div
   key={unit.id}
-  className="group bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+  className="group bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700"
 >
                   <button
                     onClick={() => setOpenUnit(isOpen ? null : unit.id)}
-                    className={`w-full flex flex-row-reverse items-center justify-between px-4 sm:px-6 py-4 sm:py-5 transition-all duration-300 hover:px-5 sm:hover:px-7 ${
-  isOpen
-    ? "bg-rose-50 dark:bg-rose-950/30"
-    : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    className={`w-full flex flex-row-reverse items-center justify-between px-4 sm:px-6 py-4 sm:py-5 transition-colors duration-300 ${
+  isOpen ? "bg-rose-50 dark:bg-rose-950/30" : "bg-white dark:bg-[#111111]"
 }`}
                   >
                    <ChevronDown
@@ -1294,7 +1292,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
                     <div className="flex flex-row-reverse items-center justify-start gap-3">
                       <div className="text-right">
-                        <h3 className="text-base sm:text-xl xl:text-2xl font-black text-gray-900 dark:text-white group-hover:text-rose-600 transition-all duration-300 ease-out group-hover:-translate-x-1 truncate">
+                        <h3 className="text-base sm:text-xl xl:text-2xl font-black text-gray-900 dark:text-white truncate">
                           {unit.title}
                         </h3>
                         {unit.description && (
