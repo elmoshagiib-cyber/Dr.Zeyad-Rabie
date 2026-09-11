@@ -583,8 +583,8 @@ transform:translateX(350%) rotate(12deg);
   height: 200vmax;
   border-radius: 200vmax;
   background: var(--page-bubble-color);
-  animation-duration: 750ms;
-  animation-timing-function: ease-in-out;
+  animation-duration: 1400ms;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .page-bubbles.covering .page-bubbles__first {
@@ -599,7 +599,8 @@ transform:translateX(350%) rotate(12deg);
 
 .page-bubbles.holding .page-bubbles__second {
   animation-name: page-bubble-hold;
-  animation-duration: 220ms;
+  animation-duration: 380ms;
+  animation-timing-function: ease-in-out;
 }
 
 @keyframes page-bubble-move {
@@ -614,10 +615,10 @@ transform:translateX(350%) rotate(12deg);
 }
 
 @keyframes page-bubble-second-move {
-  30% {
+  35% {
     translate: -50% 100%;
   }
-  50% {
+  65% {
     border-radius: 200vmax;
   }
   100% {
