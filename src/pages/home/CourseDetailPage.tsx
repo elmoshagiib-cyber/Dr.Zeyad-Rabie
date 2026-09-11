@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   BookOpen,
   ChevronDown,
@@ -101,6 +101,7 @@ export function CourseDetailPage() {
   
   const navigate = useNavigate();
   const { user } = useApp();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const gradeLabels: Record<string, string> = {
     sec_3: "الصف الثالث الثانوي",
@@ -354,6 +355,28 @@ export function CourseDetailPage() {
       loadContentExtras();
     }
   }, [isEnrolled, units]);
+
+  useEffect(() => {
+    const lessonIdFromUrl = searchParams.get("lesson");
+    if (!lessonIdFromUrl || videoPlayerOpen || units.length === 0) return;
+
+    const lesson = units.flatMap((u) => u.lessons).find((l: any) => l.id === lessonIdFromUrl);
+
+    if (!lesson || lesson.type !== "video") return;
+
+    // امنع الفتح التلقائي لو الطالب مش مشترك أو الدرس مقفول بسبب التسلسل
+    if (!isEnrolled || isLessonLocked(lesson)) {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("lesson");
+        return next;
+      }, { replace: true });
+      return;
+    }
+
+    openVideoPlayer(lesson.id, lesson.title, lesson.description, lesson.chapters, lesson.thumbnail);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [units, isEnrolled]);
 
   const handleEnroll = async () => {
     if (!user) {
@@ -772,6 +795,12 @@ const saveProgress = async (currentTime: number, duration: number) => {
       setPreviewPhase("image");
       setPlayerStage("info");
       setVideoPlayerOpen(true);
+
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.set("lesson", lessonId);
+        return next;
+      }, { replace: true });
     } catch (error) {
       console.error("Error opening video:", error);
       showToast("حدث خطأ أثناء فتح الفيديو");
@@ -837,6 +866,12 @@ const saveProgress = async (currentTime: number, duration: number) => {
     setShowChapters(false);
     lessonProgressRef.current = null;
     hasIncrementedWatchedLessonsRef.current = false;
+
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("lesson");
+      return next;
+    }, { replace: true });
   };
 
   const toggleFullscreen = () => {
