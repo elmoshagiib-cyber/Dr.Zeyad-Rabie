@@ -1216,11 +1216,11 @@ const saveProgress = async (currentTime: number, duration: number) => {
   {/* Title */}
   <h2 className="relative z-10 text-2xl sm:text-3xl xl:text-4xl font-black text-right transition-all duration-500 group-hover:translate-x-1">
 
-    <span className="text-gray-900 dark:text-white transition-colors duration-500 group-hover:text-[#5800a9]">
+    <span className="text-gray-900 dark:text-white transition-colors duration-500 group-hover:text-rose-600">
       محتوى
     </span>
 
-    <span className="text-[#5800a9] transition-colors duration-500 group-hover:text-gray-900 dark:group-hover:text-white">
+    <span className="text-rose-600 transition-colors duration-500 group-hover:text-gray-900 dark:group-hover:text-white">
       {" "}الكورس
     </span>
 
@@ -1240,38 +1240,44 @@ const saveProgress = async (currentTime: number, duration: number) => {
                     onClick={() => setOpenUnit(isOpen ? null : unit.id)}
                     className={`w-full flex flex-row-reverse items-center justify-between px-4 sm:px-6 py-4 sm:py-5 transition-all duration-300 hover:px-5 sm:hover:px-7 ${
   isOpen
-    ? "bg-[#F6EEFF] dark:bg-[#2B103D]"
+    ? "bg-rose-50 dark:bg-rose-950/30"
     : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
 }`}
                   >
                    <ChevronDown
   size={18}
-  className={`flex-shrink-0 transition-all duration-300 ${
-    isOpen
-      ? "rotate-180 text-[#5800a9]"
-      : "rotate-0 text-gray-500 dark:text-gray-400"
+  className={`flex-shrink-0 transition-transform duration-300 text-rose-500 ${
+    isOpen ? "rotate-0" : "rotate-180"
   }`}
 />
 
                     <div className="flex flex-row-reverse items-center justify-start gap-3">
-                      <h3 className="text-base sm:text-xl xl:text-2xl font-black text-gray-900 dark:text-white group-hover:text-[#5800a9] transition-all duration-300 ease-out group-hover:-translate-x-1 truncate">
-                        {unit.title}
-                      </h3>
-
-                      <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
-                        <LayoutGrid
-                          size={16}
-                          className="sm:hidden text-[#5800a9]"
-                        />
-                        <LayoutGrid
-                          size={20}
-                          className="hidden sm:block text-[#5800a9]"
-                        />
+                      <div className="text-right">
+                        <h3 className="text-base sm:text-xl xl:text-2xl font-black text-gray-900 dark:text-white group-hover:text-rose-600 transition-all duration-300 ease-out group-hover:-translate-x-1 truncate">
+                          {unit.title}
+                        </h3>
+                        {unit.description && (
+                          <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500 font-medium mt-0.5 truncate">
+                            {unit.description}
+                          </p>
+                        )}
                       </div>
+
+                      <LayoutGrid
+                        size={20}
+                        className="flex-shrink-0 text-rose-500"
+                      />
                     </div>
                   </button>
+                  <AnimatePresence initial={false}>
                   {isOpen && (
-                    <div className="border-t border-slate-200 dark:border-[#262626]">
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.35, ease: "easeInOut" }}
+                      className="overflow-hidden border-t border-slate-200 dark:border-[#262626]"
+                    >
                       {unit.lessons.map((lesson: any, idx: number) => {
                         const isVideo = lesson.type === "video";
                         const isFile = lesson.type === "pdf";
@@ -1290,10 +1296,16 @@ const saveProgress = async (currentTime: number, duration: number) => {
                               idx !== unit.lessons.length - 1
                                 ? "border-b border-gray-100 dark:border-gray-700"
                                 : ""
-                            } hover:bg-[#FAF7FF] dark:hover:bg-[#171717] transition-all duration-300`}
+                            } hover:bg-rose-50/60 dark:hover:bg-[#171717] transition-all duration-300`}
                           >
                           <div className="flex flex-row-reverse items-center justify-between gap-2 sm:gap-4 hover:pr-2 transition-all duration-300">
-                            <div className="flex-shrink-0">
+                            <div className="flex-shrink-0 flex items-center gap-2 sm:gap-3">
+                              <ChevronDown
+                                size={14}
+                                className={`text-gray-400 dark:text-gray-500 transition-transform duration-300 flex-shrink-0 ${
+                                  expandedLessonId === lesson.id ? "rotate-0" : "rotate-180"
+                                }`}
+                              />
                               {isEnrolled && !isLessonLocked(lesson) ? (
                                 <>
                                   {isVideo && (
@@ -1406,20 +1418,20 @@ const saveProgress = async (currentTime: number, duration: number) => {
                               </div>
 
                               <div
-                                className={`flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${
-                                  isVideo ? "bg-yellow-100 text-yellow-500" : ""
-                                } ${isFile ? "bg-blue-100   text-blue-500" : ""} ${
-                                  isHomework ? "bg-green-100  text-green-500" : ""
-                                } ${isExam ? "bg-red-100    text-red-500" : ""} ${
-                                  isLink ? "bg-cyan-100   text-cyan-500" : ""
+                                className={`flex-shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${
+                                  isVideo ? "text-yellow-500" : ""
+                                } ${isFile ? "text-blue-500" : ""} ${
+                                  isHomework ? "text-green-500" : ""
+                                } ${isExam ? "text-red-500" : ""} ${
+                                  isLink ? "text-cyan-500" : ""
                                 }`}
                               >
-                                {isVideo && <Play size={15} />}
-                                {isFile && <FileText size={15} />}
-                                {isHomework && <ClipboardCheck size={15} />}
-                                {isExam && <ClipboardList size={15} />}
+                                {isVideo && <Play size={20} />}
+                                {isFile && <FileText size={20} />}
+                                {isHomework && <ClipboardCheck size={20} />}
+                                {isExam && <ClipboardList size={20} />}
                                 {isLink && (
-                                  <svg className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l3-3a4 4 0 015.656 5.656l-1.5 1.5" /></svg>
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l3-3a4 4 0 015.656 5.656l-1.5 1.5" /></svg>
                                 )}
                               </div>
                             </div>
@@ -1560,8 +1572,9 @@ const saveProgress = async (currentTime: number, duration: number) => {
                         </div>
                         );
                       })}
-                    </div>
+                    </motion.div>
                   )}
+                  </AnimatePresence>
                 </div>
               );
             })}
