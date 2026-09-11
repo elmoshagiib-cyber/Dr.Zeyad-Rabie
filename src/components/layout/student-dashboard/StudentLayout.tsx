@@ -26,15 +26,14 @@ export default function StudentLayout({ children }: Props) {
       {/* Navbar الموحّد لكل الموقع */}
       <Navbar />
 
-      {/* Mobile Overlay Sidebar — أصغر من md بس */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-[110] md:hidden">
+        <div className="fixed inset-0 z-[110]">
           <div
             className="absolute inset-0 bg-black/60"
             onClick={() => setSidebarOpen(false)}
           />
 
-          <div className="absolute right-0 top-0 bottom-0 w-[280px] animate-slide-in-right">
+          <div className="absolute right-0 top-0 bottom-0 w-[320px] animate-slide-in-right">
             <StudentDashboardSidebar
               mobileOpen
               onClose={() => setSidebarOpen(false)}
@@ -43,14 +42,14 @@ export default function StudentLayout({ children }: Props) {
         </div>
       )}
 
-      {/* Sidebar الدائمة - تابلت وديسكتوب */}
-      <div className="hidden md:block relative z-[60] p-4 pt-[104px]">
+      {/* Desktop Sidebar */}
+      <div className="hidden xl:block relative z-[60] p-4 pt-[104px]">
         <StudentDashboardSidebar />
       </div>
 
       <main className="flex-1 overflow-y-auto pt-24">
-        {/* زرار فتح السايدبار — موبايل بس */}
-        <div className="md:hidden px-4 pt-4">
+        {/* زرار فتح السايدبار — موبايل/تابلت بس */}
+        <div className="xl:hidden px-4 sm:px-6 pt-4">
           <button
             onClick={() => setSidebarOpen(true)}
             className="
