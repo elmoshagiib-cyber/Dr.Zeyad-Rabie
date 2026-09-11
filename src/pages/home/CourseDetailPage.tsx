@@ -1115,13 +1115,15 @@ const saveProgress = async (currentTime: number, duration: number) => {
                     {isEnrolled ? (
                       <div className="text-center mb-4"></div>
                     ) : (
-                      <div className="text-center mb-3 sm:mb-4">
-                        <span className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white">
-                          {course.price}
-                        </span>
-                        <span className="text-base sm:text-lg text-slate-500 dark:text-slate-400 mr-1">
-                          جنيه
-                        </span>
+                      <div className="flex justify-center mb-3 sm:mb-4">
+                        <div className="inline-flex rounded-full overflow-hidden shadow-sm">
+                          <span className="flex items-center gap-1 px-4 sm:px-5 py-2 sm:py-2.5 text-white font-black text-base sm:text-lg bg-[#5800a9]">
+                            {course.price}
+                          </span>
+                          <span className="flex items-center px-4 sm:px-5 py-2 sm:py-2.5 text-white font-bold text-sm sm:text-base bg-[#b600d7]">
+                            جنيهًا
+                          </span>
+                        </div>
                       </div>
                     )}
 
@@ -1157,11 +1159,9 @@ const saveProgress = async (currentTime: number, duration: number) => {
                       <Clock size={16} className="text-[#5800a9]" />
                       <span>المحتوى</span>
                     </div>
-                    <div className="flex items-center gap-1 text-sm sm:text-base">
-                      <span className="font-black text-gray-900 dark:text-white">
-                        {totalContentHours}+
-                      </span>
-                      <span className="text-gray-400 font-medium">ساعات</span>
+                    <div className="flex items-center gap-1 text-sm sm:text-base text-gray-400 dark:text-gray-500 font-bold">
+                      <span>+{totalContentHours}</span>
+                      <span>ساعات</span>
                     </div>
                   </div>
 
@@ -1172,11 +1172,9 @@ const saveProgress = async (currentTime: number, duration: number) => {
                       <HelpCircle size={16} className="text-[#5800a9]" />
                       <span>اجمالي الاسئلة</span>
                     </div>
-                    <div className="flex items-center gap-1 text-sm sm:text-base">
-                      <span className="font-black text-gray-900 dark:text-white">
-                        {totalQuestionsCount}+
-                      </span>
-                      <span className="text-gray-400 font-medium">سؤال</span>
+                    <div className="flex items-center gap-1 text-sm sm:text-base text-gray-400 dark:text-gray-500 font-bold">
+                      <span>+{totalQuestionsCount}</span>
+                      <span>سؤال</span>
                     </div>
                   </div>
                 </div>
