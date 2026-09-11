@@ -152,6 +152,7 @@ export function CourseDetailPage() {
   const [showChapters, setShowChapters] = useState(false);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const previewVideoRef = useRef<HTMLVideoElement>(null);
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lessonProgressRef = useRef<LessonProgress | null>(null);
   const hasIncrementedWatchedLessonsRef = useRef(false);
@@ -766,7 +767,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
       setVideoChapters(chapters || []);
       setVideoPlayerThumbnail(thumbnail || "");
       setShowChapters(false);
-      setPlayerStage(thumbnail ? "info" : "playing");
+      setPlayerStage("info");
       setVideoPlayerOpen(true);
     } catch (error) {
       console.error("Error opening video:", error);
@@ -992,6 +993,16 @@ const saveProgress = async (currentTime: number, duration: number) => {
   }, [videoPlayerOpen]);
 
   useEffect(() => {
+    if (playerStage !== "info" || videoPlayerThumbnail || !videoPlayerUrl) return;
+
+    const timer = setTimeout(() => {
+      previewVideoRef.current?.pause();
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [playerStage, videoPlayerThumbnail, videoPlayerUrl]);
+
+  useEffect(() => {
     if (!videoPlayerOpen || playerStage !== "playing") {
       setShowIntroCard(false);
       return;
@@ -1003,13 +1014,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
     return () => clearTimeout(timer);
   }, [videoPlayerOpen, playerStage]);
 
-  useEffect(() => {
-    if (!videoPlayerOpen || playerStage !== "info" || !videoPlayerThumbnail) return;
 
-    const timer = setTimeout(() => setPlayerStage("playing"), 4000);
-
-    return () => clearTimeout(timer);
-  }, [videoPlayerOpen, playerStage, videoPlayerThumbnail]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -1888,11 +1893,24 @@ const saveProgress = async (currentTime: number, duration: number) => {
           >
             {playerStage === "info" ? (
               <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
-                <img
-                  src={videoPlayerThumbnail || course.thumbnail || course.cover_image}
-                  alt={videoPlayerTitle}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+                {videoPlayerThumbnail ? (
+                  <img
+                    src={videoPlayerThumbnail}
+                    alt={videoPlayerTitle}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                ) : (
+                  <video
+                    ref={previewVideoRef}
+                    key={videoPlayerUrl}
+                    src={videoPlayerUrl}
+                    muted
+                    autoPlay
+                    playsInline
+                    preload="auto"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
 
                 <button
