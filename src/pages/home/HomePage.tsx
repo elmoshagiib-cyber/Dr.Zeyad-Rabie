@@ -1488,11 +1488,10 @@ duration-300
                             {course.grade && (
                               <span
                                 className="
-                                  absolute top-0 right-0
+                                  absolute top-3 right-3
                                   bg-black/70 backdrop-blur-sm
                                   text-white text-xs font-semibold
-                                  px-3.5 py-1.5
-                                  rounded-bl-2xl
+                                  px-2.5 py-1 rounded-full
                                 "
                               >
                                 {gradeSlugToName[course.grade] || course.grade}
