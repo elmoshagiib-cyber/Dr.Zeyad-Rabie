@@ -1381,13 +1381,14 @@ duration-300
             <button
               onClick={goToPrevSuggested}
               className="
-                absolute -left-4 top-1/2 -translate-y-1/2 z-20
-                w-10 h-10 rounded-full
-                bg-white dark:bg-[#1A1A1A]
-                border border-gray-200 dark:border-[#262626]
-                shadow-lg flex items-center justify-center
-                text-slate-600 dark:text-slate-300
-                hover:bg-[#5800a9] hover:text-white hover:border-[#5800a9]
+                absolute -left-5 top-1/2 -translate-y-1/2 z-20
+                w-9 h-9 sm:w-10 sm:h-10 rounded-full
+                bg-[#5800a9] dark:bg-[#b600d7]
+                flex items-center justify-center
+                text-white
+                shadow-[0_6px_18px_rgba(88,0,169,.35)]
+                hover:bg-[#420080] dark:hover:bg-[#9a00b5]
+                hover:scale-110
                 transition-all duration-300
               "
               aria-label="السابق"
@@ -1399,13 +1400,14 @@ duration-300
             <button
               onClick={goToNextSuggested}
               className="
-                absolute -right-4 top-1/2 -translate-y-1/2 z-20
-                w-10 h-10 rounded-full
-                bg-white dark:bg-[#1A1A1A]
-                border border-gray-200 dark:border-[#262626]
-                shadow-lg flex items-center justify-center
-                text-slate-600 dark:text-slate-300
-                hover:bg-[#5800a9] hover:text-white hover:border-[#5800a9]
+                absolute -right-5 top-1/2 -translate-y-1/2 z-20
+                w-9 h-9 sm:w-10 sm:h-10 rounded-full
+                bg-[#5800a9] dark:bg-[#b600d7]
+                flex items-center justify-center
+                text-white
+                shadow-[0_6px_18px_rgba(88,0,169,.35)]
+                hover:bg-[#420080] dark:hover:bg-[#9a00b5]
+                hover:scale-110
                 transition-all duration-300
               "
               aria-label="التالي"
@@ -1626,7 +1628,7 @@ duration-300
 
             {/* Dots indicator */}
             {courses.length > 1 && (
-              <div className="flex items-center justify-center gap-1.5 mt-4">
+              <div className="flex items-center justify-center gap-2 mt-5">
                 {courses.map((_, i) => (
                   <button
                     key={i}
@@ -1635,8 +1637,8 @@ duration-300
                       setSuggestedIndex(i);
                     }}
                     className={`
-                      h-2 rounded-full transition-all duration-300
-                      ${i === suggestedIndex ? "w-6 bg-[#5800a9] dark:bg-[#b600d7]" : "w-2 bg-gray-300 dark:bg-gray-700"}
+                      h-2.5 rounded-full transition-all duration-300
+                      ${i === suggestedIndex ? "w-7 bg-[#5800a9] dark:bg-[#b600d7]" : "w-2.5 bg-[#5800a9]/20 dark:bg-[#b600d7]/20"}
                     `}
                     aria-label={`اذهب للكورس ${i + 1}`}
                   />
