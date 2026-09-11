@@ -1093,30 +1093,41 @@ const saveProgress = async (currentTime: number, duration: number) => {
     const video = videoRef.current;
     if (!video || !videoPlayerOpen || playerStage !== "playing") return;
 
+    const persistDuration = async (duration: number) => {
+      const studentId = getStudentId();
+      if (!studentId || !currentLessonId || !(duration > 0)) return;
+      try {
+        await supabase
+          .from("lesson_progress")
+          .update({ video_duration: Math.floor(duration) })
+          .eq("student_id", studentId)
+          .eq("lesson_id", currentLessonId);
+      } catch (error) {
+        console.error("Error saving video duration:", error);
+      }
+    };
+
     const handleLoadedMetadata = async () => {
       const duration = video.duration;
-      const studentId = getStudentId();
 
-      setVideoDuration(duration || 0);
+      if (isFinite(duration) && duration > 0) {
+        setVideoDuration(duration);
+        persistDuration(duration);
+      }
+
       setIsMuted(video.muted);
       setPlaybackRate(video.playbackRate);
 
-      if (studentId && currentLessonId && duration > 0) {
-        try {
-          await supabase
-            .from("lesson_progress")
-            .update({
-              video_duration: Math.floor(duration),
-            })
-            .eq("student_id", studentId)
-            .eq("lesson_id", currentLessonId);
-        } catch (error) {
-          console.error("Error saving video duration:", error);
-        }
-      }
-
       if (lessonProgressRef.current && lessonProgressRef.current.last_position > 0) {
         video.currentTime = lessonProgressRef.current.last_position;
+      }
+    };
+
+    const handleDurationChange = () => {
+      const duration = video.duration;
+      if (isFinite(duration) && duration > 0) {
+        setVideoDuration(duration);
+        persistDuration(duration);
       }
     };
 
@@ -1161,6 +1172,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
     };
 
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener("durationchange", handleDurationChange);
     video.addEventListener("play", handlePlay);
     video.addEventListener("pause", handlePause);
     video.addEventListener("ended", handleEnded);
@@ -1168,6 +1180,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
     return () => {
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener("durationchange", handleDurationChange);
       video.removeEventListener("play", handlePlay);
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("ended", handleEnded);
@@ -2048,6 +2061,17 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   <X size={22} />
                 </button>
 
+                {videoPlayerThumbnail && (
+                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <img
+                      src={videoPlayerThumbnail}
+                      alt=""
+                      className="w-full h-full object-cover blur-2xl scale-110 opacity-50"
+                    />
+                    <div className="absolute inset-0 bg-black/40" />
+                  </div>
+                )}
+
                 <video
                   ref={videoRef}
                   key={videoPlayerUrl}
@@ -2057,7 +2081,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   preload="metadata"
                   playsInline
                   onContextMenu={(e) => e.preventDefault()}
-                  className="w-full h-full object-contain"
+                  className="relative z-[1] w-full h-full object-contain"
                   autoPlay
                 />
 
