@@ -1087,11 +1087,11 @@ const saveProgress = async (currentTime: number, duration: number) => {
   useEffect(() => {
     if (playerStage !== "info" || !videoPlayerUrl) return;
 
-    // لو مفيش صورة غلاف: شغّل معاينة الفيديو 5 ثواني ثم قف عليها
+    // لو مفيش صورة غلاف: شغّل معاينة الفيديو 20 ثانية ثم قف عليها
     if (!videoPlayerThumbnail) {
       const timer = setTimeout(() => {
         previewVideoRef.current?.pause();
-      }, 5000);
+      }, 20000);
       return () => clearTimeout(timer);
     }
 
