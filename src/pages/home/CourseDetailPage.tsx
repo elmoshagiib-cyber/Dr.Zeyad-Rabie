@@ -5,6 +5,12 @@ import {
   ChevronUp,
   ChevronRight,
   Play,
+  Pause,
+  RotateCcw,
+  RotateCw,
+  Volume2,
+  VolumeX,
+  Gauge,
   FileText,
   Lock,
   ClipboardList,
@@ -129,6 +135,12 @@ export function CourseDetailPage() {
   const [playerStage, setPlayerStage] = useState<"info" | "playing">("info");
   const [watermarkPosition, setWatermarkPosition] = useState({ top: "10%", left: "10%" });
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -814,6 +826,55 @@ const saveProgress = async (currentTime: number, duration: number) => {
     }
   };
 
+  const formatTime = (seconds: number): string => {
+    if (!isFinite(seconds) || seconds < 0) return "00:00";
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    if (h > 0) {
+      return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
+
+  const togglePlayPause = () => {
+    if (!videoRef.current) return;
+    if (videoRef.current.paused) {
+      videoRef.current.play();
+    } else {
+      videoRef.current.pause();
+    }
+  };
+
+  const skipTime = (seconds: number) => {
+    if (!videoRef.current) return;
+    const newTime = Math.min(
+      Math.max(videoRef.current.currentTime + seconds, 0),
+      videoRef.current.duration || 0
+    );
+    videoRef.current.currentTime = newTime;
+  };
+
+  const toggleMute = () => {
+    if (!videoRef.current) return;
+    videoRef.current.muted = !videoRef.current.muted;
+    setIsMuted(videoRef.current.muted);
+  };
+
+  const changeSpeed = (rate: number) => {
+    if (!videoRef.current) return;
+    videoRef.current.playbackRate = rate;
+    setPlaybackRate(rate);
+    setShowSpeedMenu(false);
+  };
+
+  const handleSeekClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!videoRef.current || !videoDuration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    videoRef.current.currentTime = Math.min(Math.max(ratio, 0), 1) * videoDuration;
+  };
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && videoPlayerOpen && !document.fullscreenElement) {
@@ -873,6 +934,10 @@ const saveProgress = async (currentTime: number, duration: number) => {
       const duration = video.duration;
       const studentId = getStudentId();
 
+      setVideoDuration(duration || 0);
+      setIsMuted(video.muted);
+      setPlaybackRate(video.playbackRate);
+
       if (studentId && currentLessonId && duration > 0) {
         try {
           await supabase
@@ -893,6 +958,8 @@ const saveProgress = async (currentTime: number, duration: number) => {
     };
 
     const handlePlay = () => {
+      setIsPlaying(true);
+
       if (updateIntervalRef.current) {
         clearInterval(updateIntervalRef.current);
       }
@@ -905,6 +972,8 @@ const saveProgress = async (currentTime: number, duration: number) => {
     };
 
     const handlePause = async () => {
+      setIsPlaying(false);
+
       if (updateIntervalRef.current) {
         clearInterval(updateIntervalRef.current);
         updateIntervalRef.current = null;
@@ -914,6 +983,8 @@ const saveProgress = async (currentTime: number, duration: number) => {
     };
 
     const handleEnded = async () => {
+      setIsPlaying(false);
+
       if (updateIntervalRef.current) {
         clearInterval(updateIntervalRef.current);
         updateIntervalRef.current = null;
@@ -922,16 +993,22 @@ const saveProgress = async (currentTime: number, duration: number) => {
       await markAsCompleted();
     };
 
+    const handleTimeUpdate = () => {
+      setCurrentTime(video.currentTime);
+    };
+
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
     video.addEventListener("play", handlePlay);
     video.addEventListener("pause", handlePause);
     video.addEventListener("ended", handleEnded);
+    video.addEventListener("timeupdate", handleTimeUpdate);
 
     return () => {
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       video.removeEventListener("play", handlePlay);
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("ended", handleEnded);
+      video.removeEventListener("timeupdate", handleTimeUpdate);
 
       if (updateIntervalRef.current) {
         clearInterval(updateIntervalRef.current);
@@ -1775,23 +1852,22 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 ref={videoWrapperRef}
                 className="relative w-full h-full bg-black"
                 onContextMenu={(e) => e.preventDefault()}
+                onClick={togglePlayPause}
               >
                 <button
-                  onClick={closeVideoPlayer}
-                  className="absolute top-4 left-4 z-20 text-white hover:text-gray-300 transition-colors bg-black/50 hover:bg-black/70 rounded-full p-2.5"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    closeVideoPlayer();
+                  }}
+                  className="absolute top-4 left-4 z-30 text-white hover:text-gray-300 transition-colors bg-black/50 hover:bg-black/70 rounded-full p-2.5"
                 >
                   <X size={22} />
                 </button>
-
-                <h3 className="absolute top-4 right-4 z-20 text-white font-bold text-sm sm:text-base bg-black/50 px-3 py-1.5 rounded-lg max-w-[55%] truncate">
-                  {videoPlayerTitle}
-                </h3>
 
                 <video
                   ref={videoRef}
                   key={videoPlayerUrl}
                   src={videoPlayerUrl}
-                  controls
                   controlsList="nodownload noremoteplayback"
                   disablePictureInPicture
                   preload="metadata"
@@ -1800,14 +1876,6 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   className="w-full h-full object-contain"
                   autoPlay
                 />
-
-                <button
-                  onClick={toggleFullscreen}
-                  className="absolute bottom-4 left-4 z-20 bg-black/50 hover:bg-black/70 text-white p-2.5 rounded-xl transition-all backdrop-blur-sm"
-                  title={isFullscreen ? "الخروج من ملء الشاشة" : "ملء الشاشة"}
-                >
-                  {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
-                </button>
 
                 <div
                   className="absolute pointer-events-none select-none transition-all duration-1000 ease-in-out z-10"
@@ -1825,6 +1893,100 @@ const saveProgress = async (currentTime: number, duration: number) => {
                     }}
                   >
                     {getWatermarkText()}
+                  </div>
+                </div>
+
+                {/* شريط التحكم المخصص */}
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute bottom-0 left-0 right-0 z-20 px-4 sm:px-8 pb-3 sm:pb-5 pt-10 bg-gradient-to-t from-black/85 via-black/40 to-transparent"
+                >
+                  <div
+                    onClick={handleSeekClick}
+                    className="relative w-full h-1.5 bg-white/25 rounded-full cursor-pointer mb-3 sm:mb-4"
+                  >
+                    <div
+                      className="absolute top-0 right-0 h-full bg-[#5800a9] rounded-full"
+                      style={{ width: `${videoDuration ? (currentTime / videoDuration) * 100 : 0}%` }}
+                    />
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow"
+                      style={{ right: `calc(${videoDuration ? (currentTime / videoDuration) * 100 : 0}% - 6px)` }}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 sm:gap-4">
+                    <div className="flex items-center gap-3 sm:gap-5">
+                      <button onClick={togglePlayPause} className="text-white hover:text-gray-300 transition-colors">
+                        {isPlaying ? (
+                          <Pause size={22} className="sm:w-7 sm:h-7 fill-white" />
+                        ) : (
+                          <Play size={22} className="sm:w-7 sm:h-7 fill-white" />
+                        )}
+                      </button>
+
+                      <button onClick={() => skipTime(-10)} className="relative text-white hover:text-gray-300 transition-colors">
+                        <RotateCcw size={20} className="sm:w-6 sm:h-6" />
+                        <span className="absolute inset-0 flex items-center justify-center text-[9px] sm:text-[10px] font-bold pt-0.5">
+                          10
+                        </span>
+                      </button>
+
+                      <button onClick={() => skipTime(10)} className="relative text-white hover:text-gray-300 transition-colors">
+                        <RotateCw size={20} className="sm:w-6 sm:h-6" />
+                        <span className="absolute inset-0 flex items-center justify-center text-[9px] sm:text-[10px] font-bold pt-0.5">
+                          10
+                        </span>
+                      </button>
+
+                      <button onClick={toggleMute} className="text-white hover:text-gray-300 transition-colors">
+                        {isMuted ? <VolumeX size={20} className="sm:w-6 sm:h-6" /> : <Volume2 size={20} className="sm:w-6 sm:h-6" />}
+                      </button>
+
+                      <span className="text-white text-xs sm:text-sm font-bold hidden sm:block truncate max-w-[220px]">
+                        {videoPlayerTitle}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 sm:gap-5">
+                      <span className="text-white text-xs sm:text-sm font-bold tabular-nums">
+                        {formatTime(currentTime)} / {formatTime(videoDuration)}
+                      </span>
+
+                      <div className="relative">
+                        <button
+                          onClick={() => setShowSpeedMenu((prev) => !prev)}
+                          className="flex items-center gap-1 text-white hover:text-gray-300 transition-colors"
+                        >
+                          <Gauge size={20} className="sm:w-6 sm:h-6" />
+                          <span className="text-xs sm:text-sm font-bold">{playbackRate}x</span>
+                        </button>
+
+                        {showSpeedMenu && (
+                          <div className="absolute bottom-full mb-2 right-0 bg-black/90 rounded-lg overflow-hidden shadow-xl min-w-[80px]">
+                            {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
+                              <button
+                                key={rate}
+                                onClick={() => changeSpeed(rate)}
+                                className={`w-full text-center px-4 py-2 text-sm transition-colors ${
+                                  playbackRate === rate ? "text-[#b600d7] font-bold" : "text-white hover:bg-white/10"
+                                }`}
+                              >
+                                {rate}x
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={toggleFullscreen}
+                        className="text-white hover:text-gray-300 transition-colors"
+                        title={isFullscreen ? "الخروج من ملء الشاشة" : "ملء الشاشة"}
+                      >
+                        {isFullscreen ? <Minimize size={20} className="sm:w-6 sm:h-6" /> : <Maximize size={20} className="sm:w-6 sm:h-6" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
