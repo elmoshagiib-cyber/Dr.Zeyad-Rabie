@@ -52,6 +52,7 @@ dark:text-gray-300
 hover:bg-[#F6EEFF]
 dark:hover:bg-[#1A1A1A]
 hover:text-[#5800a9]
+dark:hover:text-[#b600d7]
 active:scale-[0.98]
           `
       )}
