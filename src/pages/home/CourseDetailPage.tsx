@@ -1362,7 +1362,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                           className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                         >
                                           <Play size={13} />
-                                          <span>مشاهدة الفيديو</span>
+                                          <span>مشاهدة</span>
                                         </button>
                                       )}
 
