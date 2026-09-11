@@ -62,23 +62,31 @@ const GOVERNORATES = [
 }) => {
   const [flashId, setFlashId] = useState(0);
   const [showFlash, setShowFlash] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleFocus = () => {
     setFlashId((id) => id + 1);
     setShowFlash(true);
+    setIsFocused(true);
     setTimeout(() => setShowFlash(false), 500);
   };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+  };
+
+  const floating = isFocused || value.length > 0;
 
   return (
     <div className="flex flex-col gap-0.5 w-full">
       <div
-        className={`relative overflow-hidden flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
+        className={`relative overflow-hidden flex items-center gap-2 border-b-2 pt-4 pb-2 transition-colors duration-200
           ${
             error
               ? "border-red-400"
-              : "border-gray-200 focus-within:border-[#5800a9]"
+              : "border-gray-200 focus-within:border-[#5800a9] dark:focus-within:border-[#b600d7]"
           }
-          ${isDark ? "border-gray-700 focus-within:border-[#b600d7]" : ""}
+          ${isDark ? "border-gray-700" : ""}
         `}
       >
         <AnimatePresence>
@@ -97,22 +105,44 @@ const GOVERNORATES = [
 
         <Icon className="w-4 h-4 text-[#5800a9] dark:text-[#b600d7] flex-shrink-0 relative z-10" />
 
-        <input
-          type={type}
-          placeholder={placeholder}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={handleFocus}
-          dir={dir}
-          required={required}
-          className={`
-            relative z-10
-            flex-1 min-w-0 bg-transparent border-0 outline-none
-            text-sm md:text-base py-0.5
-            placeholder-gray-400
-            ${isDark ? "text-white placeholder-gray-500" : "text-gray-700"}
-          `}
-        />
+        <div className="relative z-10 flex-1 min-w-0">
+          <motion.label
+            initial={false}
+            animate={{
+              y: floating ? -20 : 0,
+              scale: floating ? 0.8 : 1,
+            }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            style={{ originX: 1, originY: 0 }}
+            className={`
+              absolute right-0 top-1/2 -translate-y-1/2
+              pointer-events-none select-none
+              text-sm md:text-base font-medium whitespace-nowrap
+              transition-colors duration-200
+              ${floating
+                ? (isDark ? "text-[#b600d7]" : "text-[#5800a9]")
+                : (isDark ? "text-gray-500" : "text-gray-400")
+              }
+            `}
+          >
+            {placeholder}
+          </motion.label>
+
+          <input
+            type={type}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            dir={dir}
+            required={required}
+            className={`
+              w-full bg-transparent border-0 outline-none
+              text-sm md:text-base py-0.5
+              ${isDark ? "text-white" : "text-gray-700"}
+            `}
+          />
+        </div>
 
         {suffix}
       </div>
