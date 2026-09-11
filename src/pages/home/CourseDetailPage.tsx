@@ -530,7 +530,7 @@ export function CourseDetailPage() {
     0
   );
 
-  const totalVideoMinutes = units.reduce(
+  const totalVideoSeconds = units.reduce(
     (total, unit) =>
       total +
       unit.lessons
@@ -538,7 +538,7 @@ export function CourseDetailPage() {
         .reduce((sum: number, l: any) => sum + (Number(l.duration) || 0), 0),
     0
   );
-  const totalContentHours = Math.round(totalVideoMinutes / 60);
+  const totalContentHours = Math.round(totalVideoSeconds / 3600);
 
   const totalQuestionsCount = units.reduce((total, unit) => {
     const quizQuestions = unit.lessons
@@ -1764,7 +1764,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                       <Clock size={14} className="text-amber-400 flex-shrink-0" />
                                       <span className="font-bold text-gray-700 dark:text-gray-200">مدة الفيديو</span>
                                       <span className="text-gray-400">:</span>
-                                      <span>{lesson.duration ? `${lesson.duration} دقيقة` : "-"}</span>
+                                      <span>{lesson.duration ? formatTime(Number(lesson.duration)) : "-"}</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                                       <Timer size={14} className="text-emerald-400 flex-shrink-0" />
