@@ -1347,28 +1347,63 @@ duration-300
     gap-3
     justify-center
     lg:justify-start
-    text-[26px]
-    sm:text-[32px]
-    lg:text-[40px]
+    text-[30px]
+    xs:text-[34px]
+    sm:text-[40px]
+    md:text-[46px]
+    lg:text-[52px]
     font-black
   "
 >
-  <span className="w-[3px] h-8 sm:h-9 lg:h-10 bg-[#5800a9] dark:bg-[#b600d7] rounded-full" />
+  <span className="w-[4px] h-9 xs:h-10 sm:h-11 md:h-12 lg:h-14 bg-[#5800a9] dark:bg-[#b600d7] rounded-full" />
   <span className="text-slate-900 dark:text-white">الكورسات</span>{" "}
   <span className="text-[#5800a9] dark:text-[#b600d7]">المُقترحة</span>
 </h2>
 
-          <p
-            className="
-              mt-3
-              text-sm
-              sm:text-base
-              text-slate-500
-              dark:text-slate-400
-            "
-          >
-            كورسات مختارة ومقترحة لك
-          </p>
+          <div className="relative inline-block lg:block mt-4">
+            <p
+              className="
+                text-base
+                xs:text-lg
+                sm:text-xl
+                md:text-[22px]
+                text-slate-500
+                dark:text-slate-400
+                leading-8
+              "
+            >
+              كورسات مختارة ومقترحة لك
+            </p>
+
+            <svg
+              className="
+                hidden
+                lg:block
+                absolute
+                -top-3
+                -left-12
+                w-9 h-9
+                text-red-500
+                rotate-[15deg]
+              "
+              viewBox="0 0 42 42"
+              fill="none"
+            >
+              <path
+                d="M5 34C12 18 22 10 35 9"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+              <path
+                d="M28 5L35 9L31 16"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
 
         </div>
 
