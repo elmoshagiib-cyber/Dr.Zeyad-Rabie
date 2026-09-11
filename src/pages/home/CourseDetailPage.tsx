@@ -1899,6 +1899,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 {/* شريط التحكم المخصص */}
                 <div
                   onClick={(e) => e.stopPropagation()}
+                  dir="ltr"
                   className="absolute bottom-0 left-0 right-0 z-20 px-4 sm:px-8 pb-3 sm:pb-5 pt-10 bg-gradient-to-t from-black/85 via-black/40 to-transparent"
                 >
                   <div
@@ -1906,12 +1907,12 @@ const saveProgress = async (currentTime: number, duration: number) => {
                     className="relative w-full h-1.5 bg-white/25 rounded-full cursor-pointer mb-3 sm:mb-4"
                   >
                     <div
-                      className="absolute top-0 right-0 h-full bg-[#5800a9] rounded-full"
+                      className="absolute top-0 left-0 h-full bg-[#5800a9] rounded-full"
                       style={{ width: `${videoDuration ? (currentTime / videoDuration) * 100 : 0}%` }}
                     />
                     <div
                       className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow"
-                      style={{ right: `calc(${videoDuration ? (currentTime / videoDuration) * 100 : 0}% - 6px)` }}
+                      style={{ left: `calc(${videoDuration ? (currentTime / videoDuration) * 100 : 0}% - 6px)` }}
                     />
                   </div>
 
