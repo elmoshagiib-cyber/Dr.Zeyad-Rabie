@@ -1116,9 +1116,12 @@ const saveProgress = async (currentTime: number, duration: number) => {
                       <div className="text-center mb-4"></div>
                     ) : (
                       <div className="flex justify-center mb-3 sm:mb-4">
-                        <div className="inline-flex rounded-full overflow-hidden shadow-sm">
-                          <span className="flex items-center gap-1 px-4 sm:px-5 py-2 sm:py-2.5 text-white font-black text-base sm:text-lg bg-[#5800a9]">
-                            {course.price}
+                        <div className="inline-flex items-center rounded-full overflow-hidden shadow-sm">
+                          <span className="flex items-center gap-2 pl-4 pr-3 sm:pl-5 sm:pr-4 py-2 sm:py-2.5 text-white font-black text-base sm:text-lg bg-[#5800a9]">
+                            <span className="flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white text-[#5800a9] text-[10px] sm:text-xs font-black flex-shrink-0">
+                              ج
+                            </span>
+                            <span>{Number(course.price).toFixed(2)}</span>
                           </span>
                           <span className="flex items-center px-4 sm:px-5 py-2 sm:py-2.5 text-white font-bold text-sm sm:text-base bg-[#b600d7]">
                             جنيهًا
