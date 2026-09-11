@@ -136,7 +136,6 @@ export function CourseDetailPage() {
   const [currentLessonId, setCurrentLessonId] = useState<string>("");
   const [playerStage, setPlayerStage] = useState<"info" | "playing">("info");
   const [watermarkPosition, setWatermarkPosition] = useState({ top: "10%", left: "10%" });
-  const [videoContentRect, setVideoContentRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -973,81 +972,27 @@ const saveProgress = async (currentTime: number, duration: number) => {
   }, []);
 
   useEffect(() => {
-    if (!videoPlayerOpen || playerStage !== "playing") return;
-
-    const calculateContentRect = () => {
-      const video = videoRef.current;
-      const wrapper = videoWrapperRef.current;
-      if (!video || !wrapper || !video.videoWidth || !video.videoHeight) return;
-
-      const wrapperWidth = wrapper.clientWidth;
-      const wrapperHeight = wrapper.clientHeight;
-      const videoRatio = video.videoWidth / video.videoHeight;
-      const wrapperRatio = wrapperWidth / wrapperHeight;
-
-      let contentWidth: number;
-      let contentHeight: number;
-
-      if (videoRatio > wrapperRatio) {
-        // الفيديو أعرض من الحاوية → فراغ فوق وتحت
-        contentWidth = wrapperWidth;
-        contentHeight = wrapperWidth / videoRatio;
-      } else {
-        // الفيديو أطول من الحاوية → فراغ يمين وشمال
-        contentHeight = wrapperHeight;
-        contentWidth = wrapperHeight * videoRatio;
-      }
-
-      setVideoContentRect({
-        top: (wrapperHeight - contentHeight) / 2,
-        left: (wrapperWidth - contentWidth) / 2,
-        width: contentWidth,
-        height: contentHeight,
-      });
-    };
-
-    calculateContentRect();
-
-    const video = videoRef.current;
-    video?.addEventListener("loadedmetadata", calculateContentRect);
-    window.addEventListener("resize", calculateContentRect);
-
-    return () => {
-      video?.removeEventListener("loadedmetadata", calculateContentRect);
-      window.removeEventListener("resize", calculateContentRect);
-    };
-  }, [videoPlayerOpen, playerStage]);
-
-  useEffect(() => {
-    if (!videoPlayerOpen || playerStage !== "playing" || !videoContentRect) return;
-
-    const marginX = videoContentRect.width * 0.08;
-    const marginY = videoContentRect.height * 0.1;
+    if (!videoPlayerOpen) return;
 
     const positions = [
-      { top: videoContentRect.top + marginY, left: videoContentRect.left + marginX },
-      { top: videoContentRect.top + marginY, left: videoContentRect.left + videoContentRect.width - marginX - 140 },
-      { top: videoContentRect.top + videoContentRect.height - marginY - 30, left: videoContentRect.left + marginX },
-      { top: videoContentRect.top + videoContentRect.height - marginY - 30, left: videoContentRect.left + videoContentRect.width - marginX - 140 },
-      { top: videoContentRect.top + videoContentRect.height * 0.45, left: videoContentRect.left + videoContentRect.width * 0.35 },
-      { top: videoContentRect.top + videoContentRect.height * 0.15, left: videoContentRect.left + videoContentRect.width * 0.4 },
-      { top: videoContentRect.top + videoContentRect.height * 0.7, left: videoContentRect.left + videoContentRect.width * 0.15 },
+      { top: "8%", left: "8%" },
+      { top: "8%", left: "70%" },
+      { top: "80%", left: "8%" },
+      { top: "80%", left: "70%" },
+      { top: "45%", left: "40%" },
+      { top: "15%", left: "45%" },
+      { top: "70%", left: "20%" },
     ];
 
     let index = 0;
 
     const interval = setInterval(() => {
       index = (index + 1) % positions.length;
-      setWatermarkPosition({
-        top: `${positions[index].top}px`,
-        left: `${positions[index].left}px`,
-      });
+      setWatermarkPosition(positions[index]);
     }, 4000);
 
-    setWatermarkPosition({ top: `${positions[0].top}px`, left: `${positions[0].left}px` });
-
     return () => clearInterval(interval);
-  }, [videoPlayerOpen, playerStage, videoContentRect]);
+  }, [videoPlayerOpen]);
 
   useEffect(() => {
     if (playerStage !== "info" || !videoPlayerUrl) return;
@@ -1069,7 +1014,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
       const timer = setTimeout(() => {
         previewVideoRef.current?.pause();
         setPreviewPhase("image-final");
-      }, 20000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
     // لو "image-final": متسيبهاش تعمل حاجة، تفضل ثابتة
@@ -1093,41 +1038,30 @@ const saveProgress = async (currentTime: number, duration: number) => {
     const video = videoRef.current;
     if (!video || !videoPlayerOpen || playerStage !== "playing") return;
 
-    const persistDuration = async (duration: number) => {
-      const studentId = getStudentId();
-      if (!studentId || !currentLessonId || !(duration > 0)) return;
-      try {
-        await supabase
-          .from("lesson_progress")
-          .update({ video_duration: Math.floor(duration) })
-          .eq("student_id", studentId)
-          .eq("lesson_id", currentLessonId);
-      } catch (error) {
-        console.error("Error saving video duration:", error);
-      }
-    };
-
     const handleLoadedMetadata = async () => {
       const duration = video.duration;
+      const studentId = getStudentId();
 
-      if (isFinite(duration) && duration > 0) {
-        setVideoDuration(duration);
-        persistDuration(duration);
-      }
-
+      setVideoDuration(duration || 0);
       setIsMuted(video.muted);
       setPlaybackRate(video.playbackRate);
 
+      if (studentId && currentLessonId && duration > 0) {
+        try {
+          await supabase
+            .from("lesson_progress")
+            .update({
+              video_duration: Math.floor(duration),
+            })
+            .eq("student_id", studentId)
+            .eq("lesson_id", currentLessonId);
+        } catch (error) {
+          console.error("Error saving video duration:", error);
+        }
+      }
+
       if (lessonProgressRef.current && lessonProgressRef.current.last_position > 0) {
         video.currentTime = lessonProgressRef.current.last_position;
-      }
-    };
-
-    const handleDurationChange = () => {
-      const duration = video.duration;
-      if (isFinite(duration) && duration > 0) {
-        setVideoDuration(duration);
-        persistDuration(duration);
       }
     };
 
@@ -1172,7 +1106,6 @@ const saveProgress = async (currentTime: number, duration: number) => {
     };
 
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
-    video.addEventListener("durationchange", handleDurationChange);
     video.addEventListener("play", handlePlay);
     video.addEventListener("pause", handlePause);
     video.addEventListener("ended", handleEnded);
@@ -1180,7 +1113,6 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
     return () => {
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-      video.removeEventListener("durationchange", handleDurationChange);
       video.removeEventListener("play", handlePlay);
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("ended", handleEnded);
@@ -2061,17 +1993,6 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   <X size={22} />
                 </button>
 
-                {videoPlayerThumbnail && (
-                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <img
-                      src={videoPlayerThumbnail}
-                      alt=""
-                      className="w-full h-full object-cover blur-2xl scale-110 opacity-50"
-                    />
-                    <div className="absolute inset-0 bg-black/40" />
-                  </div>
-                )}
-
                 <video
                   ref={videoRef}
                   key={videoPlayerUrl}
@@ -2081,7 +2002,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   preload="metadata"
                   playsInline
                   onContextMenu={(e) => e.preventDefault()}
-                  className="relative z-[1] w-full h-full object-contain"
+                  className="w-full h-full object-contain"
                   autoPlay
                 />
 
