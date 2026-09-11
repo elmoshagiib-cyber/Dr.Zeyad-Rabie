@@ -1367,7 +1367,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
             </div>
 
             <div className="text-right mb-7 w-full">
-              <h1 className="text-[2rem] sm:text-[2.8rem] lg:text-[3.8rem] xl:text-[4.5rem] font-extrabold leading-[1] tracking-tight text-white drop-shadow-[0_6px_20px_rgba(0,0,0,.35)]">
+              <h1 className="text-[2rem] sm:text-[2.8rem] lg:text-[3.8rem] xl:text-[4.5rem] font-black leading-[1] tracking-tight text-white drop-shadow-[0_6px_20px_rgba(0,0,0,.35)]">
                 {course.title}
               </h1>
 
@@ -1430,7 +1430,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
         </div>
       </div>
 
-      <div className="relative z-20 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 -mt-40 sm:-mt-48 lg:-mt-56">
+      <div className="relative z-20 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 -mt-6 sm:-mt-32 lg:-mt-56">
         <div className="flex justify-between items-start">
           <div className="max-w-[430px] w-full ml-0 mr-auto">
             <div className="bg-white dark:bg-[#151515] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(15,23,42,.12)] dark:shadow-[0_25px_70px_rgba(0,0,0,.75)] border border-gray-100 dark:border-[#2A2A2A]">
