@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "../../context/AppContext";
 import { supabase } from "../../lib/supabase";
 import { ScrollReveal } from "../../components/layout/ScrollReveal";
@@ -65,8 +65,8 @@ const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 const [subscriptionCode, setSubscriptionCode] = useState("");
 const [selectedCourse, setSelectedCourse] = useState<any>(null);
 const [suggestedToast, setSuggestedToast] = useState<string | null>(null);
-const carouselRef = useRef<HTMLDivElement | null>(null);
-const autoScrollRef = useRef<NodeJS.Timeout | null>(null);
+const [suggestedIndex, setSuggestedIndex] = useState(0);
+const [suggestedDirection, setSuggestedDirection] = useState(1);
 const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 const [showParentModal, setShowParentModal] = useState(false);
 const [showIOSInstallModal, setShowIOSInstallModal] = useState(false);
@@ -255,38 +255,30 @@ const formatSuggestedDate = (date: string) => {
   });
 };
 
-const scrollSuggestedCourses = (direction: "left" | "right") => {
-  const el = carouselRef.current;
-  if (!el) return;
-  const cardWidth = el.firstElementChild
-    ? (el.firstElementChild as HTMLElement).offsetWidth + 24
-    : 320;
-  el.scrollBy({
-    left: direction === "left" ? -cardWidth : cardWidth,
-    behavior: "smooth",
-  });
+const goToNextSuggested = () => {
+  setSuggestedDirection(1);
+  setSuggestedIndex((prev) => (prev + 1) % courses.length);
+};
+
+const goToPrevSuggested = () => {
+  setSuggestedDirection(-1);
+  setSuggestedIndex((prev) => (prev - 1 + courses.length) % courses.length);
 };
 
 useEffect(() => {
   if (courses.length <= 1) return;
 
-  autoScrollRef.current = setInterval(() => {
-    const el = carouselRef.current;
-    if (!el) return;
-
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    const atEnd = Math.abs(el.scrollLeft) >= maxScroll - 10;
-
-    if (atEnd) {
-      el.scrollTo({ left: 0, behavior: "smooth" });
-    } else {
-      scrollSuggestedCourses("right");
-    }
+  const interval = setInterval(() => {
+    goToNextSuggested();
   }, 4000);
 
-  return () => {
-    if (autoScrollRef.current) clearInterval(autoScrollRef.current);
-  };
+  return () => clearInterval(interval);
+}, [courses.length, suggestedIndex]);
+
+useEffect(() => {
+  if (suggestedIndex >= courses.length) {
+    setSuggestedIndex(0);
+  }
 }, [courses]);
 
 
@@ -1381,260 +1373,276 @@ duration-300
 
         </div>
 
-        {/* Courses Carousel */}
-        <div className="relative">
+        {/* Single rotating suggested course card - positioned on the left */}
+        <div dir="ltr" className="flex justify-start">
+          <div dir="rtl" className="relative w-full max-w-[340px] sm:max-w-[360px]">
 
-          {/* Left Arrow */}
-          <button
-            onClick={() => scrollSuggestedCourses("left")}
-            className="
-              hidden sm:flex
-              absolute -left-4 top-1/2 -translate-y-1/2 z-20
-              w-11 h-11 rounded-full
-              bg-white dark:bg-[#1A1A1A]
-              border border-gray-200 dark:border-[#262626]
-              shadow-lg items-center justify-center
-              text-slate-600 dark:text-slate-300
-              hover:bg-[#5800a9] hover:text-white hover:border-[#5800a9]
-              transition-all duration-300
-            "
-            aria-label="السابق"
-          >
-            <ChevronLeft size={20} />
-          </button>
+            {/* Left Arrow (previous) */}
+            <button
+              onClick={goToPrevSuggested}
+              className="
+                absolute -left-4 top-1/2 -translate-y-1/2 z-20
+                w-10 h-10 rounded-full
+                bg-white dark:bg-[#1A1A1A]
+                border border-gray-200 dark:border-[#262626]
+                shadow-lg flex items-center justify-center
+                text-slate-600 dark:text-slate-300
+                hover:bg-[#5800a9] hover:text-white hover:border-[#5800a9]
+                transition-all duration-300
+              "
+              aria-label="السابق"
+            >
+              <ChevronLeft size={18} />
+            </button>
 
-          {/* Right Arrow */}
-          <button
-            onClick={() => scrollSuggestedCourses("right")}
-            className="
-              hidden sm:flex
-              absolute -right-4 top-1/2 -translate-y-1/2 z-20
-              w-11 h-11 rounded-full
-              bg-white dark:bg-[#1A1A1A]
-              border border-gray-200 dark:border-[#262626]
-              shadow-lg items-center justify-center
-              text-slate-600 dark:text-slate-300
-              hover:bg-[#5800a9] hover:text-white hover:border-[#5800a9]
-              transition-all duration-300
-            "
-            aria-label="التالي"
-          >
-            <ChevronRight size={20} />
-          </button>
+            {/* Right Arrow (next) */}
+            <button
+              onClick={goToNextSuggested}
+              className="
+                absolute -right-4 top-1/2 -translate-y-1/2 z-20
+                w-10 h-10 rounded-full
+                bg-white dark:bg-[#1A1A1A]
+                border border-gray-200 dark:border-[#262626]
+                shadow-lg flex items-center justify-center
+                text-slate-600 dark:text-slate-300
+                hover:bg-[#5800a9] hover:text-white hover:border-[#5800a9]
+                transition-all duration-300
+              "
+              aria-label="التالي"
+            >
+              <ChevronRight size={18} />
+            </button>
 
-          <div
-            ref={carouselRef}
-            className="
-              flex gap-5 sm:gap-6
-              overflow-x-auto scroll-smooth snap-x snap-mandatory
-              pb-2
-              [-ms-overflow-style:none]
-              [scrollbar-width:none]
-              [&::-webkit-scrollbar]:hidden
-            "
-          >
+            <div className="overflow-hidden">
+              <AnimatePresence mode="wait" custom={suggestedDirection}>
+                {courses[suggestedIndex] && (() => {
+                  const course = courses[suggestedIndex];
+                  const hasAccess =
+                    course.is_free ||
+                    myCourses.map(String).includes(String(course.id));
 
-            {courses.map((course) => {
-              const hasAccess =
-                course.is_free ||
-                myCourses.map(String).includes(String(course.id));
+                  const description: string = course.description || "";
+                  const isLongDescription = description.length > 110;
+                  const isExpanded = expandedCourseId === course.id;
 
-              const description: string = course.description || "";
-              const isLongDescription = description.length > 110;
-              const isExpanded = expandedCourseId === course.id;
-
-              return (
-                <div
-                  key={course.id}
-                  className="snap-start shrink-0 w-[280px] xs:w-[300px] sm:w-[340px] lg:w-[360px]"
-                >
-                  <Card
-                    hover
-                    className="
-                      group overflow-hidden p-0 h-full flex flex-col
-                      bg-white dark:bg-[#151515]
-                      border border-gray-200 dark:border-[#262626]
-                      shadow-[0_4px_20px_rgba(0,0,0,.06)]
-                      hover:shadow-[0_10px_35px_rgba(0,0,0,.1)]
-                      rounded-[26px]
-                      cursor-pointer
-                      transition-all duration-300
-                    "
-                  >
-
-                    <div className="p-3 sm:p-3.5 pb-0">
-                      <div className="relative aspect-[1000/563] overflow-hidden rounded-2xl">
-                        <img
-                          src={
-                            course.thumbnail ||
-                            course.cover_image ||
-                            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3"
-                          }
-                          alt={course.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-
-                        <div
-                          className="
-                            absolute top-3 right-3 flex items-center gap-1.5
-                            bg-[#F6AC08] text-white text-xs font-bold
-                            px-3 py-1.5 rounded-full shadow-lg
-                          "
-                        >
-                          <Star size={13} fill="currentColor" />
-                          مقترح
-                        </div>
-
-                        {course.grade && (
-                          <span
-                            className="
-                              absolute top-3 left-3
-                              bg-black/70 backdrop-blur-sm
-                              text-white text-xs font-semibold
-                              px-2.5 py-1 rounded-full
-                            "
-                          >
-                            {course.grade}
-                          </span>
-                        )}
-
-                        <div className="
-                          absolute inset-0 opacity-0 group-hover:opacity-100
-                          transition-opacity duration-700
-                          bg-gradient-to-r from-transparent via-white/15 to-transparent
-                          -translate-x-full group-hover:translate-x-full
-                          transition-transform duration-500
-                        " />
-                      </div>
-                    </div>
-
-                    <CardContent className="relative z-20 p-4 sm:p-5 flex flex-col flex-1 gap-3">
-                      <h3
+                  return (
+                    <motion.div
+                      key={course.id}
+                      custom={suggestedDirection}
+                      initial={{ opacity: 0, x: suggestedDirection > 0 ? 60 : -60 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: suggestedDirection > 0 ? -60 : 60 }}
+                      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      <Card
+                        hover
                         className="
-                          text-[17px] sm:text-[19px] leading-tight font-black
-                          text-slate-900 dark:text-white
-                          line-clamp-2
-                          group-hover:text-[#5800a9] dark:group-hover:text-[#b600d7]
-                          transition-colors duration-300
+                          group overflow-hidden p-0 flex flex-col
+                          bg-white dark:bg-[#151515]
+                          border border-gray-200 dark:border-[#262626]
+                          shadow-[0_4px_20px_rgba(0,0,0,.06)]
+                          hover:shadow-[0_10px_35px_rgba(0,0,0,.1)]
+                          rounded-[26px]
+                          cursor-pointer
+                          transition-all duration-300
                         "
                       >
-                        {course.title}
-                      </h3>
 
-                      {description && (
-                        <div>
-                          <p
-                            style={
-                              !isExpanded && isLongDescription
-                                ? {
-                                    display: "-webkit-box",
-                                    WebkitLineClamp: 2,
-                                    WebkitBoxOrient: "vertical",
-                                    overflow: "hidden",
-                                  }
-                                : undefined
-                            }
-                            className="text-sm leading-6 text-slate-500 dark:text-slate-300 whitespace-pre-line break-words"
-                          >
-                            {description}
-                          </p>
-
-                          {isLongDescription && (
-                            <button
-                              onClick={() =>
-                                setExpandedCourseId(isExpanded ? null : course.id)
+                        <div className="p-3 sm:p-3.5 pb-0">
+                          <div className="relative aspect-[1000/563] overflow-hidden rounded-2xl">
+                            <img
+                              src={
+                                course.thumbnail ||
+                                course.cover_image ||
+                                "https://images.unsplash.com/photo-1516321318423-f06f85e504b3"
                               }
+                              alt={course.title}
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+
+                            <div
                               className="
-                                mt-1 inline-flex items-center gap-1
-                                text-[12px] font-bold text-[#5800a9]
-                                dark:text-[#c9a6ff]
-                                hover:text-[#b600d7] dark:hover:text-[#b600d7]
-                                transition-colors
+                                absolute top-3 right-3 flex items-center gap-1.5
+                                bg-[#F6AC08] text-white text-xs font-bold
+                                px-3 py-1.5 rounded-full shadow-lg
                               "
                             >
-                              {isExpanded ? "أقل ▲" : "عرض تفاصيل ▼"}
-                            </button>
-                          )}
-                        </div>
-                      )}
+                              <Star size={13} fill="currentColor" />
+                              مقترح
+                            </div>
 
-                      <div className="mt-auto pt-4 border-t border-slate-200 dark:border-[#262626]">
-                        <div className="flex flex-col gap-2.5">
-                          <Button
-                            className="
-                              w-full h-11 rounded-xl font-black text-[14px]
-                              text-white bg-[#b600d7] border-2 border-[#b600d7]
-                              hover:bg-transparent hover:text-[#b600d7]
-                              !shadow-none cursor-pointer
-                              transition-all duration-300
-                            "
-                            onClick={() => navigate(`/courses/${course.id}`)}
-                          >
-                            الدخول للكورس
-                          </Button>
-
-                          {!hasAccess && (
-                            <Button
-                              className="
-                                w-full h-11 rounded-xl font-black text-[14px]
-                                text-white bg-[#5800a9] border-2 border-[#5800a9]
-                                hover:bg-transparent hover:text-[#5800a9]
-                                !shadow-none cursor-pointer
-                                transition-all duration-300
-                              "
-                              onClick={() => handleSuggestedCourseAction(course)}
-                            >
-                              الاشتراك في الكورس!
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="pt-4 border-t border-gray-200 dark:border-[#262626]">
-                        <div className="flex items-end justify-between gap-4">
-
-                          <div
-                            className={`
-                              inline-flex items-center gap-1 rounded-xl p-1 shrink-0
-                              ${hasAccess || course.is_free ? "" : "bg-gradient-to-r from-[#5800a9] to-[#b600d7]"}
-                            `}
-                          >
-                            {course.is_free ? (
-                              <span className="flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded-full px-3.5 py-2 text-[12px] font-black whitespace-nowrap">
-                                كورس مجاني
+                            {course.grade && (
+                              <span
+                                className="
+                                  absolute top-3 left-3
+                                  bg-black/70 backdrop-blur-sm
+                                  text-white text-xs font-semibold
+                                  px-2.5 py-1 rounded-full
+                                "
+                              >
+                                {course.grade}
                               </span>
-                            ) : hasAccess ? (
-                              <span className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-md px-3.5 py-[6px] text-[12px] font-black whitespace-nowrap">
-                                <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="M20 6L9 17l-5-5" />
-                                </svg>
-                                تم الاشتراك
-                              </span>
-                            ) : (
-                              <>
-                                <span className="bg-white text-[#111111] rounded-md px-2.5 py-[5px] min-w-[40px] text-center text-[12px] font-black">
-                                  {Number(course.price).toFixed(2)}
-                                </span>
-                                <span className="px-1.5 text-[12px] font-black text-white">
-                                  جنيه
-                                </span>
-                              </>
                             )}
-                          </div>
 
-                          <div className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 text-[11px]">
-                            <HiArrowPath className="text-[12px]" />
-                            {formatSuggestedDate(course.updated_at || course.created_at)}
+                            <div className="
+                              absolute inset-0 opacity-0 group-hover:opacity-100
+                              transition-opacity duration-700
+                              bg-gradient-to-r from-transparent via-white/15 to-transparent
+                              -translate-x-full group-hover:translate-x-full
+                              transition-transform duration-500
+                            " />
                           </div>
-
                         </div>
-                      </div>
 
-                    </CardContent>
-                  </Card>
-                </div>
-              );
-            })}
+                        <CardContent className="relative z-20 p-4 sm:p-5 flex flex-col flex-1 gap-3">
+                          <h3
+                            className="
+                              text-[17px] sm:text-[19px] leading-tight font-black
+                              text-slate-900 dark:text-white
+                              line-clamp-2
+                              group-hover:text-[#5800a9] dark:group-hover:text-[#b600d7]
+                              transition-colors duration-300
+                            "
+                          >
+                            {course.title}
+                          </h3>
+
+                          {description && (
+                            <div>
+                              <p
+                                style={
+                                  !isExpanded && isLongDescription
+                                    ? {
+                                        display: "-webkit-box",
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: "vertical",
+                                        overflow: "hidden",
+                                      }
+                                    : undefined
+                                }
+                                className="text-sm leading-6 text-slate-500 dark:text-slate-300 whitespace-pre-line break-words"
+                              >
+                                {description}
+                              </p>
+
+                              {isLongDescription && (
+                                <button
+                                  onClick={() =>
+                                    setExpandedCourseId(isExpanded ? null : course.id)
+                                  }
+                                  className="
+                                    mt-1 inline-flex items-center gap-1
+                                    text-[12px] font-bold text-[#5800a9]
+                                    dark:text-[#c9a6ff]
+                                    hover:text-[#b600d7] dark:hover:text-[#b600d7]
+                                    transition-colors
+                                  "
+                                >
+                                  {isExpanded ? "أقل ▲" : "عرض تفاصيل ▼"}
+                                </button>
+                              )}
+                            </div>
+                          )}
+
+                          <div className="mt-auto pt-4 border-t border-slate-200 dark:border-[#262626]">
+                            <div className="flex flex-col gap-2.5">
+                              <Button
+                                className="
+                                  w-full h-11 rounded-xl font-black text-[14px]
+                                  text-white bg-[#b600d7] border-2 border-[#b600d7]
+                                  hover:bg-transparent hover:text-[#b600d7]
+                                  !shadow-none cursor-pointer
+                                  transition-all duration-300
+                                "
+                                onClick={() => navigate(`/courses/${course.id}`)}
+                              >
+                                الدخول للكورس
+                              </Button>
+
+                              {!hasAccess && (
+                                <Button
+                                  className="
+                                    w-full h-11 rounded-xl font-black text-[14px]
+                                    text-white bg-[#5800a9] border-2 border-[#5800a9]
+                                    hover:bg-transparent hover:text-[#5800a9]
+                                    !shadow-none cursor-pointer
+                                    transition-all duration-300
+                                  "
+                                  onClick={() => handleSuggestedCourseAction(course)}
+                                >
+                                  الاشتراك في الكورس!
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="pt-4 border-t border-gray-200 dark:border-[#262626]">
+                            <div className="flex items-end justify-between gap-4">
+
+                              <div
+                                className={`
+                                  inline-flex items-center gap-1 rounded-xl p-1 shrink-0
+                                  ${hasAccess || course.is_free ? "" : "bg-gradient-to-r from-[#5800a9] to-[#b600d7]"}
+                                `}
+                              >
+                                {course.is_free ? (
+                                  <span className="flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded-full px-3.5 py-2 text-[12px] font-black whitespace-nowrap">
+                                    كورس مجاني
+                                  </span>
+                                ) : hasAccess ? (
+                                  <span className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-md px-3.5 py-[6px] text-[12px] font-black whitespace-nowrap">
+                                    <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M20 6L9 17l-5-5" />
+                                    </svg>
+                                    تم الاشتراك
+                                  </span>
+                                ) : (
+                                  <>
+                                    <span className="bg-white text-[#111111] rounded-md px-2.5 py-[5px] min-w-[40px] text-center text-[12px] font-black">
+                                      {Number(course.price).toFixed(2)}
+                                    </span>
+                                    <span className="px-1.5 text-[12px] font-black text-white">
+                                      جنيه
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 text-[11px]">
+                                <HiArrowPath className="text-[12px]" />
+                                {formatSuggestedDate(course.updated_at || course.created_at)}
+                              </div>
+
+                            </div>
+                          </div>
+
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })()}
+              </AnimatePresence>
+            </div>
+
+            {/* Dots indicator */}
+            {courses.length > 1 && (
+              <div className="flex items-center justify-center gap-1.5 mt-4">
+                {courses.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setSuggestedDirection(i > suggestedIndex ? 1 : -1);
+                      setSuggestedIndex(i);
+                    }}
+                    className={`
+                      h-2 rounded-full transition-all duration-300
+                      ${i === suggestedIndex ? "w-6 bg-[#5800a9] dark:bg-[#b600d7]" : "w-2 bg-gray-300 dark:bg-gray-700"}
+                    `}
+                    aria-label={`اذهب للكورس ${i + 1}`}
+                  />
+                ))}
+              </div>
+            )}
 
           </div>
         </div>
