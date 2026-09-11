@@ -809,6 +809,7 @@ duration-700
 
 </section>
 
+{!user && (
 <ScrollReveal>
   <section className="relative py-14 sm:py-20 lg:py-24 bg-white dark:bg-[#09090B]">
     <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -909,6 +910,7 @@ duration-700
     </div>
   </section>
 </ScrollReveal>
+)}
 
 {/* ================= GRADES SECTION ================= */}
 <ScrollReveal>
