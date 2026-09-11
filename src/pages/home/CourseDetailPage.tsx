@@ -150,7 +150,7 @@ export function CourseDetailPage() {
   const seekBarRef = useRef<HTMLDivElement>(null);
   const [videoChapters, setVideoChapters] = useState<{ title: string; time: number }[]>([]);
   const [showChapters, setShowChapters] = useState(false);
-  const [previewPhase, setPreviewPhase] = useState<"image" | "video">("image");
+  const [previewPhase, setPreviewPhase] = useState<"image" | "video" | "image-final">("image");
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const previewVideoRef = useRef<HTMLVideoElement>(null);
@@ -1005,18 +1005,19 @@ const saveProgress = async (currentTime: number, duration: number) => {
       return () => clearTimeout(timer);
     }
 
-    // لو فيه صورة غلاف: دورة صورة ← فيديو ← صورة... باستمرار
+    // لو فيه صورة غلاف: صورة (4 ثواني) ← فيديو (4 ثواني) ← يثبت على الصورة نهائيًا
     if (previewPhase === "image") {
       const timer = setTimeout(() => setPreviewPhase("video"), 4000);
       return () => clearTimeout(timer);
-    } else {
+    } else if (previewPhase === "video") {
       previewVideoRef.current?.play().catch(() => {});
       const timer = setTimeout(() => {
         previewVideoRef.current?.pause();
-        setPreviewPhase("image");
+        setPreviewPhase("image-final");
       }, 4000);
       return () => clearTimeout(timer);
     }
+    // لو "image-final": متسيبهاش تعمل حاجة، تفضل ثابتة
   }, [playerStage, previewPhase, videoPlayerThumbnail, videoPlayerUrl]);
 
   useEffect(() => {
@@ -1911,13 +1912,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
             {playerStage === "info" ? (
               <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
                 {videoPlayerThumbnail ? (
-                  previewPhase === "image" ? (
-                    <img
-                      src={videoPlayerThumbnail}
-                      alt={videoPlayerTitle}
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                  ) : (
+                  previewPhase === "video" ? (
                     <video
                       ref={previewVideoRef}
                       key={videoPlayerUrl}
@@ -1925,6 +1920,12 @@ const saveProgress = async (currentTime: number, duration: number) => {
                       muted
                       playsInline
                       preload="auto"
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={videoPlayerThumbnail}
+                      alt={videoPlayerTitle}
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                   )
@@ -1955,7 +1956,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   className="absolute top-4 right-4 z-20 h-8 sm:h-10 w-auto object-contain"
                 />
 
-                <div className="absolute bottom-0 right-0 left-0 p-5 sm:p-8 z-10">
+                <div className="absolute bottom-0 right-0 left-0 p-5 sm:p-8 z-20">
                   <h3 className="text-white font-black text-xl sm:text-3xl text-right mb-2 sm:mb-3">
                     {videoPlayerTitle}
                   </h3>
