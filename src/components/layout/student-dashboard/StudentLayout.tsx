@@ -43,7 +43,7 @@ export default function StudentLayout({ children }: Props) {
       )}
 
       {/* Desktop Sidebar */}
-      <div className="hidden xl:block relative z-[60] p-4 pt-[104px]">
+      <div className="hidden xl:block relative z-30 p-4 pt-[104px]">
         <StudentDashboardSidebar />
       </div>
 
