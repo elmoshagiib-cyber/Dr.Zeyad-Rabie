@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { AppProvider, useApp } from "./context/AppContext";
 import { MaintenanceMode } from "./components/shared/MaintenanceMode";
 import { ThemeProvider } from "./context/ThemeContext";
+import { PageTransitionProvider } from "./context/PageTransitionContext";
 import { Toaster } from "react-hot-toast";
 import { useVisitTracker } from "./hooks/useVisitTracker";
 import StudentLayout from "./components/layout/student-dashboard/StudentLayout";
@@ -490,9 +491,11 @@ export default function App() {
           <DomainRedirect />
           <VisitTracker />
 
-          <div className="overflow-x-hidden w-full">
-            <AppRoutes />
-          </div>
+          <PageTransitionProvider>
+            <div className="overflow-x-hidden w-full">
+              <AppRoutes />
+            </div>
+          </PageTransitionProvider>
         </BrowserRouter>
       </ThemeProvider>
     </AppProvider>

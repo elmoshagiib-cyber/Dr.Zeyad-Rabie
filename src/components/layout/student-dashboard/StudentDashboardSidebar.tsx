@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { StudentSidebarHeader } from "./StudentSidebarHeader";
 import { StudentSidebarNavigation } from "./StudentSidebarNavigation";
 import { cn } from "../../../utils/cn";
+import { usePageTransition } from "../../../context/PageTransitionContext";
 import { BookOpen, FileText, ClipboardList, Trophy, Bell, User, MessageCircle, Home, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "../../../lib/supabase";
@@ -37,13 +38,14 @@ export function StudentDashboardSidebar({
 }: StudentDashboardSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const transitionTo = usePageTransition();
   const [collapsed, setCollapsed] = useState(false);
 
   const isCollapsed = mobileOpen ? false : collapsed;
 
   const handleNav = (path: string) => {
-    navigate(path);
     onClose?.();
+    transitionTo(path);
   };
 
   const handleLogout = async () => {

@@ -556,3 +556,80 @@ transform:translateX(350%) rotate(12deg);
     @apply font-sans;
   }
 }
+/* ===================== */
+/* Page Transition (Bubbles) */
+/* ===================== */
+:root {
+  --page-bubble-color: #5800a9;
+}
+.dark {
+  --page-bubble-color: #b600d7;
+}
+
+.page-bubbles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.page-bubbles__first,
+.page-bubbles__second {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  translate: -50% 100%;
+  width: 200vmax;
+  height: 200vmax;
+  border-radius: 200vmax;
+  background: var(--page-bubble-color);
+  animation-duration: 750ms;
+  animation-timing-function: ease-in-out;
+}
+
+.page-bubbles.covering .page-bubbles__first {
+  animation-name: page-bubble-move;
+  animation-fill-mode: forwards;
+}
+
+.page-bubbles.covering .page-bubbles__second {
+  animation-name: page-bubble-second-move;
+  animation-fill-mode: forwards;
+}
+
+.page-bubbles.holding .page-bubbles__second {
+  animation-name: page-bubble-hold;
+  animation-duration: 220ms;
+}
+
+@keyframes page-bubble-move {
+  20% {
+    border-radius: 200vmax;
+  }
+  50%,
+  100% {
+    translate: -50% 0;
+    border-radius: 0;
+  }
+}
+
+@keyframes page-bubble-second-move {
+  30% {
+    translate: -50% 100%;
+  }
+  50% {
+    border-radius: 200vmax;
+  }
+  100% {
+    translate: -50% 0;
+    border-radius: 0;
+  }
+}
+
+@keyframes page-bubble-hold {
+  from,
+  to {
+    translate: -50% 0;
+    border-radius: 0;
+  }
+}
