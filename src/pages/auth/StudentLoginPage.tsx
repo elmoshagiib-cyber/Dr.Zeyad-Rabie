@@ -626,9 +626,13 @@ w-full
 py-3 sm:py-3.5
 rounded-xl
 bg-[#5800a9]
-hover:bg-[#420080]
 dark:bg-[#b600d7]
-dark:hover:bg-[#9a00b5]
+border-2
+border-[#5800a9]
+dark:border-[#b600d7]
+hover:bg-transparent
+hover:text-[#5800a9]
+dark:hover:text-[#b600d7]
 text-white
 font-black
 text-sm sm:text-base
