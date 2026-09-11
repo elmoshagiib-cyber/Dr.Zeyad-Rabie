@@ -119,82 +119,88 @@ export function MyCoursesPage() {
                   <div
                     key={course.id}
                     className="
-                      bg-white dark:bg-[#111111]
+                      group
+                      bg-white
+                      dark:bg-[#151515]
                       border
-                      border-[#EAD8FF] dark:border-[#2A2A2A]
+                      border-gray-200
+                      dark:border-[#262626]
+                      shadow-[0_4px_20px_rgba(0,0,0,.06)]
+                      hover:shadow-[0_10px_35px_rgba(0,0,0,.1)]
                       rounded-[26px]
                       overflow-hidden
-                      shadow-[0_4px_20px_rgba(15,23,42,.06)]
-                      hover:shadow-[0_18px_40px_rgba(179,72,254,.15)]
+                      cursor-pointer
                       transition-all
                       duration-300
                     "
                   >
                     {/* Thumbnail */}
-                    <div
-                      className="relative cursor-pointer group"
-                      onClick={() => navigate(`/courses/${course.id}`)}
-                    >
-                      <img
-                        src={
-                          course.thumbnail ||
-                          "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=600"
-                        }
-                        alt={course.title}
-                        className="w-full h-44 object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=600&h=250&fit=crop";
-                        }}
-                      />
-
-                      <div className="absolute inset-0 bg-black/10 group-hover:bg-black/25 transition-colors" />
-
-                      {/* عدد المحاضرات */}
-                      <span
-                        className="
-                          absolute top-3 right-3
-                          bg-black/60 backdrop-blur-sm
-                          text-white
-                          text-[11px] font-bold
-                          px-2.5 py-1
-                          rounded-lg
-                          flex items-center gap-1
-                        "
+                    <div className="p-3 sm:p-3.5 pb-0">
+                      <div
+                        className="relative aspect-[1000/563] overflow-hidden rounded-2xl"
+                        onClick={() => navigate(`/courses/${course.id}`)}
                       >
-                        {lectures} محاضرة
-                      </span>
+                        <img
+                          src={
+                            course.thumbnail ||
+                            "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=600"
+                          }
+                          alt={course.title}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=600&h=250&fit=crop";
+                          }}
+                        />
 
-                      {/* زرار تشغيل */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="w-12 h-12 rounded-full bg-white/95 flex items-center justify-center shadow-xl">
-                          <Play className="text-[#B348FE] mr-[-2px]" size={18} fill="currentColor" />
-                        </div>
+                        {/* عدد المحاضرات */}
+                        <span
+                          className="
+                            absolute top-3 left-3
+                            bg-black/70 backdrop-blur-sm
+                            text-white
+                            text-xs font-semibold
+                            px-2.5 py-1
+                            rounded-full
+                          "
+                        >
+                          {lectures} محاضرة
+                        </span>
+
+                        <div className="
+                          absolute inset-0 opacity-0 group-hover:opacity-100
+                          transition-opacity duration-700
+                          bg-gradient-to-r from-transparent via-white/15 to-transparent
+                          -translate-x-full group-hover:translate-x-full
+                          transition-transform duration-500
+                        " />
                       </div>
                     </div>
 
                     {/* Content */}
-                    <div className="p-4 sm:p-5">
+                    <div className="p-4 sm:p-5 lg:p-6 flex flex-col gap-3">
                       <h3
                         className="
+                          text-[21px] sm:text-[24px] leading-tight
                           font-black text-slate-900 dark:text-white
-                          text-[16px] sm:text-[18px] leading-snug
-                          cursor-pointer hover:text-[#B348FE] transition-colors
-                          mb-2
+                          line-clamp-2
+                          group-hover:text-[#5800a9] dark:group-hover:text-[#b600d7]
+                          transition-colors duration-300
+                          cursor-pointer
                         "
                         onClick={() => navigate(`/courses/${course.id}`)}
                       >
-                        🎓 {course.title}
+                        {course.title}
                       </h3>
 
                       {/* الوصف مع عرض تفاصيل / أقل */}
                       {description && (
-                        <div className="mb-3">
+                        <div>
                           <p
                             className={`
-                              text-[13px] sm:text-sm leading-6
-                              text-slate-500 dark:text-gray-400
-                              whitespace-pre-line
+                              text-sm sm:text-base leading-7 sm:leading-8
+                              text-slate-500 dark:text-slate-300
+                              whitespace-pre-line break-words
                               ${!isExpanded && isLongDescription ? "line-clamp-3" : ""}
                             `}
                           >
@@ -207,9 +213,11 @@ export function MyCoursesPage() {
                                 setExpandedId(isExpanded ? null : course.id)
                               }
                               className="
-                                mt-1 inline-flex items-center gap-1
-                                text-[13px] font-bold text-[#B348FE]
-                                hover:text-[#9E2FFF]
+                                mt-2 inline-flex items-center gap-1
+                                text-[13px] sm:text-sm font-bold text-[#5800a9]
+                                dark:text-[#c9a6ff]
+                                hover:text-[#b600d7]
+                                dark:hover:text-[#b600d7]
                                 transition-colors
                               "
                             >
@@ -227,36 +235,77 @@ export function MyCoursesPage() {
                         </div>
                       )}
 
-                      {/* التواريخ */}
-                      <div className="flex flex-col gap-1.5 mb-4">
-                        <div className="flex items-center justify-end gap-1.5 text-xs text-slate-400 dark:text-gray-500">
-                          <span>{formatDate(course.created_at)}</span>
-                          <HiOutlineCalendarDays size={15} />
-                        </div>
-                        <div className="flex items-center justify-end gap-1.5 text-xs text-slate-400 dark:text-gray-500">
-                          <span>{formatDate(course.updated_at || course.created_at)}</span>
-                          <HiOutlineFolder size={15} />
-                        </div>
+                      <div className="border-t border-slate-200 dark:border-[#262626] pt-5">
+                        <button
+                          onClick={() => navigate(`/courses/${course.id}`)}
+                          className="
+                            w-full h-12
+                            rounded-xl
+                            font-black text-[15px]
+                            text-white
+                            bg-[#b600d7]
+                            border-2 border-[#b600d7]
+                            hover:bg-transparent
+                            hover:text-[#b600d7]
+                            !shadow-none
+                            cursor-pointer
+                            transition-all duration-300
+                          "
+                        >
+                          الدخول للكورس
+                        </button>
                       </div>
 
-                      {/* زرار الدخول */}
-                      <button
-                        onClick={() => navigate(`/courses/${course.id}`)}
-                        className="
-                          w-full
-                          py-3
-                          rounded-2xl
-                          bg-[#B348FE]
-                          hover:bg-[#9E2FFF]
-                          text-white
-                          font-black
-                          text-sm
-                          transition-colors
-                          duration-300
-                        "
-                      >
-                        الدخول للكورس
-                      </button>
+                      {/* بادچ الاشتراك + التواريخ */}
+                      <div className="mt-2 pt-5 border-t border-gray-200 dark:border-[#262626]">
+                        <div className="flex items-end justify-between gap-6">
+                          <span
+                            className="
+                              flex items-center gap-1.5
+                              bg-emerald-50 dark:bg-emerald-500/10
+                              text-emerald-600 dark:text-emerald-400
+                              rounded-md px-4 py-[6px]
+                              text-[13px] font-black
+                              whitespace-nowrap
+                              cursor-default select-none
+                              shrink-0
+                            "
+                          >
+                            <svg
+                              className="w-4 h-4 shrink-0"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M20 6L9 17l-5-5" />
+                            </svg>
+                            مشترك
+                          </span>
+
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                              <span className="text-[13px] font-medium">
+                                {formatDate(course.updated_at || course.created_at)}
+                              </span>
+                              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
+                                <HiOutlineFolder className="text-[13px]" />
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                              <span className="text-[13px] font-medium">
+                                {formatDate(course.created_at)}
+                              </span>
+                              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
+                                <HiOutlineCalendarDays className="text-[13px]" />
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
