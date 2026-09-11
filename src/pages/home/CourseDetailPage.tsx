@@ -141,6 +141,7 @@ export function CourseDetailPage() {
   const [isMuted, setIsMuted] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  const [showIntroCard, setShowIntroCard] = useState(false);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -925,6 +926,18 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
     return () => clearInterval(interval);
   }, [videoPlayerOpen]);
+
+  useEffect(() => {
+    if (!videoPlayerOpen || playerStage !== "playing") {
+      setShowIntroCard(false);
+      return;
+    }
+
+    setShowIntroCard(true);
+    const timer = setTimeout(() => setShowIntroCard(false), 3500);
+
+    return () => clearTimeout(timer);
+  }, [videoPlayerOpen, playerStage]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -1877,6 +1890,30 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   autoPlay
                 />
 
+                <AnimatePresence>
+                  {showIntroCard && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.6 }}
+                      className="absolute top-6 sm:top-10 right-6 sm:right-10 z-20 pointer-events-none select-none"
+                    >
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <span className="w-[3px] sm:w-1 h-10 sm:h-14 bg-red-600 rounded-full flex-shrink-0" />
+                        <div className="text-right">
+                          <h3 className="text-white font-black text-lg sm:text-2xl leading-tight">
+                            منصة الكيميائي
+                          </h3>
+                          <p className="text-gray-300 font-bold text-sm sm:text-base mt-1">
+                            مستر زياد ربيع
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <div
                   className="absolute pointer-events-none select-none transition-all duration-1000 ease-in-out z-10"
                   style={{
@@ -1907,7 +1944,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                     className="relative w-full h-1.5 bg-white/25 rounded-full cursor-pointer mb-3 sm:mb-4"
                   >
                     <div
-                      className="absolute top-0 left-0 h-full bg-[#5800a9] rounded-full"
+                      className="absolute top-0 left-0 h-full bg-red-600 rounded-full"
                       style={{ width: `${videoDuration ? (currentTime / videoDuration) * 100 : 0}%` }}
                     />
                     <div
@@ -1916,7 +1953,10 @@ const saveProgress = async (currentTime: number, duration: number) => {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between gap-3 sm:gap-4">
+                  <div className="relative flex items-center justify-between gap-3 sm:gap-4">
+                    <span className="absolute left-1/2 -translate-x-1/2 text-white text-xs sm:text-sm font-bold hidden sm:block truncate max-w-[220px] pointer-events-none">
+                      {videoPlayerTitle}
+                    </span>
                     <div className="flex items-center gap-3 sm:gap-5">
                       <button onClick={togglePlayPause} className="text-white hover:text-gray-300 transition-colors">
                         {isPlaying ? (
@@ -1944,9 +1984,6 @@ const saveProgress = async (currentTime: number, duration: number) => {
                         {isMuted ? <VolumeX size={20} className="sm:w-6 sm:h-6" /> : <Volume2 size={20} className="sm:w-6 sm:h-6" />}
                       </button>
 
-                      <span className="text-white text-xs sm:text-sm font-bold hidden sm:block truncate max-w-[220px]">
-                        {videoPlayerTitle}
-                      </span>
                     </div>
 
                     <div className="flex items-center gap-3 sm:gap-5">
@@ -1970,7 +2007,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                 key={rate}
                                 onClick={() => changeSpeed(rate)}
                                 className={`w-full text-center px-4 py-2 text-sm transition-colors ${
-                                  playbackRate === rate ? "text-[#b600d7] font-bold" : "text-white hover:bg-white/10"
+                                  playbackRate === rate ? "text-red-500 font-bold" : "text-white hover:bg-white/10"
                                 }`}
                               >
                                 {rate}x
