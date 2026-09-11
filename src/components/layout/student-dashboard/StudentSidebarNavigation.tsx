@@ -77,7 +77,7 @@ export function StudentSidebarNavigation({
                     `,
                     collapsed ? "justify-center" : "justify-between",
                     isActiveParent
-                      ? "bg-[#5800a9] text-white shadow-[0_8px_20px_rgba(179,72,254,.35)]"
+                      ? "bg-[#5800a9] text-white"
                       : "text-gray-700 dark:text-gray-300 hover:bg-[#F6EEFF] dark:hover:bg-[#1A1A1A] hover:text-[#5800a9]"
                   )}
                 >
