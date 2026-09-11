@@ -76,18 +76,18 @@ const GOVERNORATES = [
           ${
             error
               ? "border-red-400"
-              : "border-gray-200 focus-within:border-[#B348FE]"
+              : "border-gray-200 focus-within:border-[#5800a9]"
           }
-          ${isDark ? "border-gray-700 focus-within:border-[#B348FE]" : ""}
+          ${isDark ? "border-gray-700 focus-within:border-[#b600d7]" : ""}
         `}
       >
         <AnimatePresence>
           {showFlash && (
             <motion.div
               key={flashId}
-              className="absolute inset-0 bg-[#B348FE]/20 pointer-events-none"
+              className="absolute inset-0 bg-[#5800a9] dark:bg-[#b600d7] pointer-events-none"
               style={{ transformOrigin: "right" }}
-              initial={{ opacity: 0.6, scaleX: 0 }}
+              initial={{ opacity: 1, scaleX: 0 }}
               animate={{ opacity: 0, scaleX: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
@@ -95,7 +95,7 @@ const GOVERNORATES = [
           )}
         </AnimatePresence>
 
-        <Icon className="w-4 h-4 text-[#B348FE] flex-shrink-0 relative z-10" />
+        <Icon className="w-4 h-4 text-[#5800a9] dark:text-[#b600d7] flex-shrink-0 relative z-10" />
 
         <input
           type={type}
@@ -183,25 +183,25 @@ const GOVERNORATES = [
       <div
         onClick={() => { setIsOpen(o => !o); handleFocus(); }}
         className={`relative overflow-hidden flex items-center gap-2 border-b-2 py-2 transition-colors duration-200 cursor-pointer
-          ${error ? 'border-red-400' : 'border-gray-200 focus-within:border-[#B348FE]'}
-          ${isDark ? 'border-gray-700 focus-within:border-[#B348FE]' : ''}
-          ${isOpen ? 'border-[#B348FE]' : ''}
+          ${error ? 'border-red-400' : 'border-gray-200 focus-within:border-[#5800a9] dark:focus-within:border-[#b600d7]'}
+          ${isDark ? 'border-gray-700' : ''}
+          ${isOpen ? (isDark ? 'border-[#b600d7]' : 'border-[#5800a9]') : ''}
         `}
       >
         <AnimatePresence>
           {showFlash && (
             <motion.div
               key={flashId}
-              className="absolute inset-0 bg-[#B348FE]/20 pointer-events-none"
+              className="absolute inset-0 bg-[#5800a9] dark:bg-[#b600d7] pointer-events-none"
               style={{ transformOrigin: "right" }}
-              initial={{ opacity: 0.6, scaleX: 0 }}
+              initial={{ opacity: 1, scaleX: 0 }}
               animate={{ opacity: 0, scaleX: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
             />
           )}
         </AnimatePresence>
-        <Icon className="w-4 h-4 text-[#B348FE] flex-shrink-0 relative z-10" />
+        <Icon className="w-4 h-4 text-[#5800a9] dark:text-[#b600d7] flex-shrink-0 relative z-10" />
         <span
           className={`
             relative z-10
@@ -566,7 +566,8 @@ if (insertError) {
               onClick={() => navigate("/login", { replace: true })}
               className="
                 mt-6 w-full py-3 rounded-xl
-                bg-[#B348FE] hover:bg-[#9E2FFF]
+                bg-[#5800a9] hover:bg-[#420080]
+                dark:bg-[#b600d7] dark:hover:bg-[#9a00b5]
                 text-white font-black
                 transition-colors
               "
@@ -689,8 +690,8 @@ xl:pt-24
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.45 }}
               >
-                <div className="flex items-center gap-2 mb-1">
-                  <UserCheck className="w-6 h-6 sm:w-7 sm:h-7 text-[#B348FE] flex-shrink-0" />
+                <div className="flex items-center gap-2 mb-1 group cursor-default">
+                  <UserCheck className="w-6 h-6 sm:w-7 sm:h-7 text-[#5800a9] dark:text-[#b600d7] flex-shrink-0" />
 <h1
   className={`
     text-xl
@@ -699,10 +700,10 @@ xl:pt-24
     ${isDark ? "text-white" : "text-gray-900"}
   `}
 >
-  <span className={isDark ? "text-white" : "text-gray-900"}>
+  <span className={`font-black transition-colors duration-300 group-hover:text-[#5800a9] dark:group-hover:text-[#b600d7] ${isDark ? "text-white" : "text-gray-900"}`}>
     إنشاء
   </span>{" "}
-  <span className="text-[#B348FE]">
+  <span className={`font-black text-[#5800a9] dark:text-[#b600d7] transition-colors duration-300 ${isDark ? "group-hover:text-white" : "group-hover:text-gray-900"}`}>
     حساب
   </span>
   {" :"}
@@ -724,11 +725,11 @@ xl:pt-24
                   w-full
                   py-2.5 sm:py-3
                   rounded-xl
-                  border-2 border-[#B348FE]
-                  text-[#B348FE]
+                  border-2 border-[#5800a9] dark:border-[#b600d7]
+                  text-[#5800a9] dark:text-[#b600d7]
                   font-black
                   text-sm sm:text-base
-                  hover:bg-[#B348FE] hover:text-white
+                  hover:bg-[#5800a9] dark:hover:bg-[#b600d7] hover:text-white
                   transition-all duration-300
                   mb-4 sm:mb-5
                 `}
@@ -896,25 +897,25 @@ xl:pt-24
                       className={`relative overflow-hidden flex items-center gap-2 border-b-2 py-2 transition-colors duration-200
                         ${errors.password
                           ? 'border-red-400'
-                          : 'border-gray-200 focus-within:border-[#B348FE]'
+                          : 'border-gray-200 focus-within:border-[#5800a9] dark:focus-within:border-[#b600d7]'
                         }
-                        ${isDark ? 'border-gray-700 focus-within:border-[#B348FE]' : ''}
+                        ${isDark ? 'border-gray-700' : ''}
                       `}
                     >
                       <AnimatePresence>
                         {showPasswordFlash && (
                           <motion.div
                             key={passwordFlashId}
-                            className="absolute inset-0 bg-[#B348FE]/20 pointer-events-none"
+                            className="absolute inset-0 bg-[#5800a9] dark:bg-[#b600d7] pointer-events-none"
                             style={{ transformOrigin: "right" }}
-                            initial={{ opacity: 0.6, scaleX: 0 }}
+                            initial={{ opacity: 1, scaleX: 0 }}
                             animate={{ opacity: 0, scaleX: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.6, ease: "easeOut" }}
                           />
                         )}
                       </AnimatePresence>
-                      <Lock className="w-4 h-4 text-[#B348FE] flex-shrink-0 relative z-10" />
+                      <Lock className="w-4 h-4 text-[#5800a9] dark:text-[#b600d7] flex-shrink-0 relative z-10" />
                       <input
                         type={showPassword ? 'text' : 'password'}
                         placeholder="كلمة السر"
@@ -987,7 +988,7 @@ xl:pt-24
                           ? 'border-red-400'
                           : form.confirmPassword && form.password === form.confirmPassword
                             ? 'border-green-400'
-                            : 'border-gray-200 focus-within:border-[#B348FE]'
+                            : 'border-gray-200 focus-within:border-[#5800a9] dark:focus-within:border-[#b600d7]'
                         }
                         ${isDark ? 'border-gray-700' : ''}
                       `}
@@ -996,16 +997,16 @@ xl:pt-24
                         {showConfirmFlash && (
                           <motion.div
                             key={confirmFlashId}
-                            className="absolute inset-0 bg-[#B348FE]/20 pointer-events-none"
+                            className="absolute inset-0 bg-[#5800a9] dark:bg-[#b600d7] pointer-events-none"
                             style={{ transformOrigin: "right" }}
-                            initial={{ opacity: 0.6, scaleX: 0 }}
+                            initial={{ opacity: 1, scaleX: 0 }}
                             animate={{ opacity: 0, scaleX: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.6, ease: "easeOut" }}
                           />
                         )}
                       </AnimatePresence>
-                      <Lock className="w-4 h-4 text-[#B348FE] flex-shrink-0 relative z-10" />
+                      <Lock className="w-4 h-4 text-[#5800a9] dark:text-[#b600d7] flex-shrink-0 relative z-10" />
                       <input
                         type={showConfirm ? 'text' : 'password'}
                         placeholder="تأكيد كلمة السر"
@@ -1062,8 +1063,10 @@ xl:pt-24
     w-full
     py-3 sm:py-3.5
     rounded-xl
-bg-[#B348FE]
-hover:bg-[#9E2FFF]
+bg-[#5800a9]
+hover:bg-[#420080]
+dark:bg-[#b600d7]
+dark:hover:bg-[#9a00b5]
     text-white
     font-black
     text-sm sm:text-base
@@ -1099,8 +1102,8 @@ hover:bg-[#9E2FFF]
                 <button
                   type="button"
                   onClick={() => navigate("/login")}
-                  className="font-bold text-[#B348FE]
-hover:text-[#9E2FFF] transition-colors"
+                  className="font-bold text-[#5800a9] dark:text-[#b600d7]
+hover:text-[#420080] dark:hover:text-[#9a00b5] transition-colors"
                 >
                   ادخل إلى حسابك الآن !
                 </button>

@@ -430,7 +430,7 @@ overflow-hidden
                 <div className="flex items-center gap-2 mb-2 group cursor-default">
                  <LogIn className="w-6 h-6 sm:w-7 sm:h-7 text-[#5800a9] dark:text-[#b600d7]" />
                   <h1 className={`text-2xl sm:text-3xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    <span className="transition-colors duration-300 group-hover:text-[#5800a9] dark:group-hover:text-[#b600d7]">
+                    <span className="font-black transition-colors duration-300 group-hover:text-[#5800a9] dark:group-hover:text-[#b600d7]">
                       تسجيل
                     </span>{' '}
                    <span className="font-black text-[#5800a9] dark:text-[#b600d7] transition-colors duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
