@@ -411,7 +411,7 @@ case "video":
     description: item.description || "",
     fileName: "",
     fileSize: item.file_size || 0,
-    duration: item.duration || "",
+    duration: item.duration ? formatSecondsToTime(Number(item.duration)) : "",
     freePreview: item.is_preview || false,
     allowDownload: item.allow_download || false,
     uploadProgress: 100,
@@ -685,7 +685,7 @@ Object.assign(payload,{
     storage_path: item.storagePath || "",
     thumbnail: item.thumbnailUrl || "",
 
-    duration: Number(item.duration) || 0,
+    duration: parseTimeToSeconds(item.duration) || 0,
     file_size: item.fileSize || 0,
 
     is_preview: item.freePreview,
