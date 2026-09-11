@@ -91,7 +91,7 @@ const [errors, setErrors] = useState<{
   const [forgotError, setForgotError] = useState("");
   const [forgotSuccess, setForgotSuccess] = useState(false);
 const fieldIcon =
-"w-4 h-4 text-[#B348FE] flex-shrink-0";
+"w-4 h-4 text-[#5800a9] dark:text-[#b600d7] flex-shrink-0";
 
   const [phoneFlashId, setPhoneFlashId] = useState(0);
   const [showPhoneFlash, setShowPhoneFlash] = useState(false);
@@ -428,10 +428,10 @@ overflow-hidden
                 transition={{ delay: 0.1, duration: 0.45 }}
               >
                 <div className="flex items-center gap-2 mb-2">
-                 <LogIn className="w-6 h-6 sm:w-7 sm:h-7 text-[#B348FE]" />
+                 <LogIn className="w-6 h-6 sm:w-7 sm:h-7 text-[#5800a9] dark:text-[#b600d7]" />
                   <h1 className={`text-2xl sm:text-3xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     تسجيل{' '}
-                   <span className="text-[#B348FE]">الدخول</span>
+                   <span className="text-[#5800a9] dark:text-[#b600d7]">الدخول</span>
                     {' '}:
                   </h1>
                 </div>
@@ -460,8 +460,8 @@ overflow-hidden
                       ${errors.phone
                         ? 'border-red-400'
                         : isDark
-                          ? 'border-gray-700 focus-within:border-[#B348FE]'
-                          : 'border-gray-200 focus-within:border-[#B348FE]'
+                          ? 'border-gray-700 focus-within:border-[#b600d7]'
+                          : 'border-gray-200 focus-within:border-[#5800a9]'
                       }
                     `}
                   >
@@ -469,9 +469,9 @@ overflow-hidden
                       {showPhoneFlash && (
                         <motion.div
                           key={phoneFlashId}
-                          className="absolute inset-0 bg-[#B348FE]/20 pointer-events-none"
+                          className="absolute inset-0 bg-[#5800a9] dark:bg-[#b600d7] pointer-events-none"
                           style={{ transformOrigin: "right" }}
-                          initial={{ opacity: 0.6, scaleX: 0 }}
+                          initial={{ opacity: 1, scaleX: 0 }}
                           animate={{ opacity: 0, scaleX: 1 }}
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0.6, ease: "easeOut" }}
@@ -515,8 +515,8 @@ overflow-hidden
                       ${errors.password
                         ? 'border-red-400'
                         : isDark
-                          ? 'border-gray-700 focus-within:border-[#B348FE]'
-                          : 'border-gray-200 focus-within:border-[#B348FE]'
+                          ? 'border-gray-700 focus-within:border-[#b600d7]'
+                          : 'border-gray-200 focus-within:border-[#5800a9]'
                       }
                     `}
                   >
@@ -524,9 +524,9 @@ overflow-hidden
                       {showPasswordFlash && (
                         <motion.div
                           key={passwordFlashId}
-                          className="absolute inset-0 bg-[#B348FE]/20 pointer-events-none"
+                          className="absolute inset-0 bg-[#5800a9] dark:bg-[#b600d7] pointer-events-none"
                           style={{ transformOrigin: "right" }}
-                          initial={{ opacity: 0.6, scaleX: 0 }}
+                          initial={{ opacity: 1, scaleX: 0 }}
                           animate={{ opacity: 0, scaleX: 1 }}
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0.6, ease: "easeOut" }}
@@ -580,7 +580,7 @@ overflow-hidden
                         w-11 h-6 rounded-full
                         transition-colors duration-300
                         ${rememberMe
-                          ? 'bg-[#B348FE]'
+                          ? 'bg-[#5800a9] dark:bg-[#b600d7]'
                           : isDark ? 'bg-gray-700' : 'bg-gray-200'
                         }
                       `}
@@ -606,8 +606,8 @@ overflow-hidden
                       setForgotError("");
                       setForgotSuccess(false);
                     }}
-                    className="text-xs sm:text-sm font-semibold text-[#B348FE]
-hover:text-[#9E2FFF] transition-colors"
+                    className="text-xs sm:text-sm font-semibold text-[#5800a9] dark:text-[#b600d7]
+hover:text-[#420080] dark:hover:text-[#9a00b5] transition-colors"
                   >
                     نسيت كلمة المرور؟
                   </button>
@@ -621,8 +621,10 @@ className="
 w-full
 py-3 sm:py-3.5
 rounded-xl
-bg-[#B348FE]
-hover:bg-[#9E2FFF]
+bg-[#5800a9]
+hover:bg-[#420080]
+dark:bg-[#b600d7]
+dark:hover:bg-[#9a00b5]
 text-white
 font-black
 text-sm sm:text-base
@@ -678,8 +680,8 @@ duration-300
                 <button
                   type="button"
                   onClick={() => navigate('/register')}
-                  className="font-bold text-[#B348FE]
-hover:text-[#9E2FFF]
+                  className="font-bold text-[#5800a9] dark:text-[#b600d7]
+hover:text-[#420080] dark:hover:text-[#9a00b5]
  transition-colors"
                 >
                   أنشئ حسابك الآن !
@@ -717,7 +719,7 @@ hover:text-[#9E2FFF]
               >
 <div className="text-center">
                   <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#F6EEFF] dark:bg-[#2B103D]">
-                    <Lock size={32} className="text-[#B348FE]" />
+                    <Lock size={32} className="text-[#5800a9] dark:text-[#b600d7]" />
                   </div>
                   <h2 className={`text-xl font-black ${isDark ? "text-white" : "text-gray-900"}`}>
                     نسيت كلمة المرور؟
@@ -815,7 +817,8 @@ hover:text-[#9E2FFF]
                   onClick={() => navigate("/")}
                   className="
                     mt-6 w-full py-3 rounded-xl
-                    bg-[#B348FE] hover:bg-[#9E2FFF]
+                    bg-[#5800a9] hover:bg-[#420080]
+                    dark:bg-[#b600d7] dark:hover:bg-[#9a00b5]
                     text-white font-black
                     transition-colors
                   "
