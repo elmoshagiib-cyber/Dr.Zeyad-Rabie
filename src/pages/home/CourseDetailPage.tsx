@@ -1547,9 +1547,6 @@ const saveProgress = async (currentTime: number, duration: number) => {
           <div className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
          <div className="group relative py-6 px-5 sm:py-8 sm:px-7 mb-4 sm:mb-6 transition-all duration-500">
 
-  {/* Decorative line - top */}
-  <span className="block w-16 sm:w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700 ml-auto mb-3 sm:mb-4 transition-all duration-500 group-hover:-translate-x-24 sm:group-hover:-translate-x-40 group-hover:w-20" />
-
   {/* Title */}
   <h2 className="relative z-10 text-2xl sm:text-3xl xl:text-4xl font-black text-right transition-all duration-500 group-hover:translate-x-1">
 
@@ -1562,9 +1559,6 @@ const saveProgress = async (currentTime: number, duration: number) => {
     </span>
 
   </h2>
-
-  {/* Decorative line - bottom */}
-  <span className="block w-16 sm:w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-700 ml-auto mt-3 sm:mt-4 transition-all duration-500 group-hover:-translate-x-20 sm:group-hover:-translate-x-36 group-hover:w-20" />
 </div>
 
           <div className="space-y-3 sm:space-y-4">
@@ -1614,7 +1608,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.35, ease: "easeInOut" }}
-                      className="overflow-hidden border-t border-slate-200 dark:border-[#262626] bg-gray-50 dark:bg-[#0c0c0c] p-3 sm:p-4 space-y-3"
+                      className="overflow-hidden border-t border-slate-200 dark:border-[#262626] bg-white dark:bg-[#0c0c0c] p-3 sm:p-4 space-y-3"
                     >
                       {unit.lessons.map((lesson: any) => {
                         const isVideo = lesson.type === "video";
@@ -1630,7 +1624,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                         return (
                           <div
                             key={lesson.id}
-                            className="rounded-xl sm:rounded-2xl overflow-hidden bg-white dark:bg-[#1A1A1A] shadow-[0_8px_24px_rgba(15,23,42,0.08)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-all duration-300"
+                            className="rounded-xl sm:rounded-2xl overflow-hidden bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] transition-all duration-300"
                           >
                             <div
                               onClick={() => toggleLessonExpand(lesson.id)}
@@ -1656,7 +1650,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                             e.stopPropagation();
                                             openVideoPlayer(lesson.id, lesson.title, lesson.description, lesson.chapters, lesson.thumbnail);
                                           }}
-                                          className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                          className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                         >
                                           <Play size={13} />
                                           <span>مشاهدة</span>
@@ -1669,7 +1663,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                             e.stopPropagation();
                                             openPdf(lesson.id);
                                           }}
-                                          className="flex items-center gap-1.5 sm:gap-2 bg-blue-500 hover:bg-blue-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-blue-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                          className="flex items-center gap-1.5 sm:gap-2 bg-blue-500 hover:bg-blue-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                         >
                                           <FileText size={13} />
                                           <span>تحميل الملف</span>
@@ -1687,7 +1681,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                               },
                                             });
                                           }}
-                                          className="flex items-center gap-1.5 sm:gap-2 bg-green-500 hover:bg-green-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-green-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                          className="flex items-center gap-1.5 sm:gap-2 bg-green-500 hover:bg-green-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                         >
                                           <ClipboardCheck size={13} />
                                           <span>حل الواجب</span>
@@ -1712,7 +1706,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
                                             navigate(`/dashboard/exams/${data.id}`);
                                           }}
-                                          className="flex items-center gap-1.5 sm:gap-2 bg-red-500 hover:bg-red-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-red-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                          className="flex items-center gap-1.5 sm:gap-2 bg-red-500 hover:bg-red-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                         >
                                           <ClipboardList size={13} />
                                           <span>ابدأ الكويز</span>
@@ -1729,7 +1723,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                             }
                                             window.open(lesson.url, "_blank", "noopener,noreferrer");
                                           }}
-                                          className="flex items-center gap-1.5 sm:gap-2 bg-cyan-500 hover:bg-cyan-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-cyan-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                                          className="flex items-center gap-1.5 sm:gap-2 bg-cyan-500 hover:bg-cyan-600 text-white font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                         >
                                           <svg className="w-[13px] h-[13px]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l3-3a4 4 0 015.656 5.656l-1.5 1.5" /></svg>
                                           <span>فتح الرابط</span>
