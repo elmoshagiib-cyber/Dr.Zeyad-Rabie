@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactElement } from "react";
+import { useEffect, useState, useRef, type ReactElement } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import InstructorLayout from "../../layouts/InstructorLayout";
 import { supabase } from "../../lib/supabase";
@@ -27,6 +27,8 @@ interface VideoItem {
 thumbnailUrl: string;
 storagePath: string;
 chapters: { title: string; time: number }[];
+thumbnailUploadProgress?: number;
+thumbnailUploading?: boolean;
 file?: File;
 }
 
@@ -173,11 +175,7 @@ function getVideoDuration(file: File): Promise<string> {
       window.URL.revokeObjectURL(video.src);
 
       const totalSeconds = Math.floor(video.duration);
-      const minutes = Math.floor(totalSeconds / 60);
-      const seconds = totalSeconds % 60;
-
-      const formatted = `${minutes}:${seconds.toString().padStart(2, "0")}`;
-      resolve(formatted);
+      resolve(formatSecondsToTime(totalSeconds));
     };
 
     video.onerror = () => {
@@ -305,6 +303,7 @@ export function EditCourse() {
   const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
   const [expandedQuestions, setExpandedQuestions] = useState<Record<string, boolean>>({});
 const [collapsedItems, setCollapsedItems] = useState<Record<string, boolean>>({});
+const uploadControllersRef = useRef<Record<string, AbortController>>({});
   // ── Load Course ──────────────────────────────────────────
   async function loadCourse() {
     if (!id) return;
@@ -1351,6 +1350,9 @@ async function uploadVideo(
   // ── حساب مدة الفيديو تلقائيًا من الملف نفسه ──
   const autoDuration = await getVideoDuration(file);
 
+  const controller = new AbortController();
+  uploadControllersRef.current[itemId] = controller;
+
 setCourse((prev) => {
     if (!prev) return prev;
 
@@ -1403,7 +1405,8 @@ setCourse((prev) => {
             })),
           };
         });
-      }
+      },
+      controller.signal
     );
 
     setCourse((prev) => {
@@ -1432,6 +1435,9 @@ setCourse((prev) => {
       };
     });
   } catch (err: any) {
+    // لو كان إلغاء متعمد من المستخدم، متعملش أي حاجة هنا — cancelVideoUpload بيتكفل بتصفير الحالة
+    if (err?.name === "UploadCancelledError") return;
+
     setCourse((prev) => {
       if (!prev) return prev;
 
@@ -1455,10 +1461,44 @@ setCourse((prev) => {
 
     console.error("Video Upload Error:", err);
     alert("فشل رفع الفيديو: " + (err?.message || "خطأ غير معروف"));
+  } finally {
+    delete uploadControllersRef.current[itemId];
   }
 }
 
-  // ── PDF Upload ───────────────────────────────────────────
+  // ── Cancel Video Upload ──────────────────────────────────
+function cancelVideoUpload(sectionId: string, itemId: string) {
+  const controller = uploadControllersRef.current[itemId];
+  if (controller) {
+    controller.abort();
+    delete uploadControllersRef.current[itemId];
+  }
+
+  setCourse((prev) => {
+    if (!prev) return prev;
+
+    return {
+      ...prev,
+      sections: prev.sections.map((section) => ({
+        ...section,
+        items: section.items.map((item) => {
+          if (item.id !== itemId || item.type !== "video") return item;
+
+          return {
+            ...item,
+            status: "idle",
+            uploadProgress: 0,
+            uploadedBytes: 0,
+            totalBytes: 0,
+            fileName: "",
+          } as VideoItem;
+        }),
+      })),
+    };
+  });
+}
+
+// ── PDF Upload ───────────────────────────────────────────
 async function uploadPdf(
   sectionId: string,
   itemId: string,
@@ -1579,12 +1619,35 @@ async function uploadVideoThumbnail(
 ) {
   if (!course) return;
 
+  updateItem(sectionId, itemId, {
+    thumbnailUploading: true,
+    thumbnailUploadProgress: 0,
+  } as Partial<VideoItem>);
+
   try {
-    const data = await uploadToR2(file, `video-thumbnails/${course.id}/${sectionId}`);
-    updateItem(sectionId, itemId, { thumbnailUrl: data.url } as Partial<VideoItem>);
+    const data = await uploadToR2(
+      file,
+      `video-thumbnails/${course.id}/${sectionId}`,
+      (loadedBytes, totalBytes) => {
+        const percent = Math.round((loadedBytes / totalBytes) * 100);
+        updateItem(sectionId, itemId, {
+          thumbnailUploadProgress: percent,
+        } as Partial<VideoItem>);
+      }
+    );
+
+    updateItem(sectionId, itemId, {
+      thumbnailUrl: data.url,
+      thumbnailUploading: false,
+      thumbnailUploadProgress: 0,
+    } as Partial<VideoItem>);
   } catch (err: any) {
     console.error("Video Thumbnail Upload Error:", err);
     alert("فشل رفع صورة الغلاف: " + (err?.message || "خطأ غير معروف"));
+    updateItem(sectionId, itemId, {
+      thumbnailUploading: false,
+      thumbnailUploadProgress: 0,
+    } as Partial<VideoItem>);
   }
 }
 
@@ -2143,9 +2206,18 @@ async function uploadHomeworkInstructions(
         {formatFileSize(item.uploadedBytes)} / {formatFileSize(item.totalBytes)}
       </span>
     </div>
-    <p className="text-xs text-blue-500">
-      متبقي: {formatFileSize(item.totalBytes - item.uploadedBytes)}
-    </p>
+    <div className="flex items-center justify-between">
+      <p className="text-xs text-blue-500">
+        متبقي: {formatFileSize(item.totalBytes - item.uploadedBytes)}
+      </p>
+      <button
+        type="button"
+        onClick={() => cancelVideoUpload(sectionId, item.id)}
+        className="text-xs font-semibold text-red-600 hover:text-red-700 underline underline-offset-2"
+      >
+        إلغاء الرفع
+      </button>
+    </div>
   </div>
 ) : (
               <div className="w-full p-4 border border-emerald-200 rounded-2xl bg-emerald-50 flex items-center gap-3">
@@ -2226,7 +2298,25 @@ async function uploadHomeworkInstructions(
             <p className="text-xs text-slate-400 mb-2">
               تظهر للطالب قبل تشغيل الفيديو مباشرة، وتختفي تلقائيًا بعد ثوانٍ ليبدأ الفيديو. لو لم يتم رفع صورة، سيبدأ الفيديو مباشرة بدون شاشة تمهيدية.
             </p>
-            {item.thumbnailUrl ? (
+            {item.thumbnailUploading ? (
+              <div className="w-56 p-4 border border-blue-200 rounded-xl bg-blue-50 space-y-2.5">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5 text-blue-700 font-medium">
+                    <svg className="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    جاري الرفع...
+                  </div>
+                  <span className="text-blue-600 font-bold">{item.thumbnailUploadProgress || 0}%</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="bg-blue-600 h-1.5 rounded-full transition-all duration-200"
+                    style={{ width: `${item.thumbnailUploadProgress || 0}%` }}
+                  />
+                </div>
+              </div>
+            ) : item.thumbnailUrl ? (
               <div className="relative inline-block">
                 <img src={item.thumbnailUrl} alt="غلاف الفيديو" className="w-56 aspect-video object-cover rounded-xl border border-slate-200" />
                 <button
@@ -2258,19 +2348,6 @@ async function uploadHomeworkInstructions(
             )}
           </div>
 
-          {/* Toggles */}
-          <div className="flex flex-wrap gap-6 pt-1">
-            <label className="flex items-center gap-2.5 cursor-pointer group">
-              <div
-                onClick={() => updateItem(sectionId, item.id, { freePreview: !item.freePreview } as Partial<VideoItem>)}
-                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${item.freePreview ? "bg-blue-600" : "bg-slate-300"}`}
-              >
-                <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${item.freePreview ? "-translate-x-5" : "translate-x-0"}`} />
-              </div>
-              <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">معاينة مجانية</span>
-            </label>
-            
-          </div>
         </div>
         )}
       </div>

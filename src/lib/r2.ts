@@ -5,11 +5,23 @@ export interface UploadResult {
 
 export type ProgressCallback = (loadedBytes: number, totalBytes: number) => void;
 
+export class UploadCancelledError extends Error {
+  constructor() {
+    super("Upload cancelled");
+    this.name = "UploadCancelledError";
+  }
+}
+
 export async function uploadToR2(
   file: File,
   folder = "uploads",
-  onProgress?: ProgressCallback
+  onProgress?: ProgressCallback,
+  signal?: AbortSignal
 ): Promise<UploadResult> {
+  if (signal?.aborted) {
+    throw new UploadCancelledError();
+  }
+
   // اطلب رابط الرفع من الـ API
   const response = await fetch("/api/upload-url", {
     method: "POST",
@@ -21,6 +33,7 @@ export async function uploadToR2(
       fileType: file.type,
       folder,
     }),
+    signal,
   });
 
   if (!response.ok) {
@@ -54,7 +67,17 @@ export async function uploadToR2(
       reject(new Error("Network error during upload"));
     };
 
+    xhr.onabort = () => {
+      reject(new UploadCancelledError());
+    };
 
+    if (signal) {
+      if (signal.aborted) {
+        xhr.abort();
+        return;
+      }
+      signal.addEventListener("abort", () => xhr.abort());
+    }
 
     xhr.send(file);
   });
