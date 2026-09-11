@@ -10,10 +10,10 @@ export function StudentSidebarHeader({
   setCollapsed,
 }: StudentSidebarHeaderProps) {
   return (
-    <div className="border-b border-slate-200 bg-white px-4 py-4">
+    <div className="border-b border-slate-200 dark:border-[#2A2A2A] bg-white dark:bg-[#111111] px-4 py-4">
       <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
         {!collapsed && (
-          <h2 className="text-[15px] font-black text-slate-900 truncate">
+          <h2 className="text-[15px] font-black text-slate-900 dark:text-white truncate">
             لوحة التحكم 
           </h2>
         )}
