@@ -1151,6 +1151,36 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   </>
                 )}
 
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200 font-bold text-sm sm:text-base">
+                      <Clock size={16} className="text-[#5800a9]" />
+                      <span>المحتوى</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-sm sm:text-base">
+                      <span className="font-black text-gray-900 dark:text-white">
+                        {totalContentHours}+
+                      </span>
+                      <span className="text-gray-400 font-medium">ساعات</span>
+                    </div>
+                  </div>
+
+                  <div className="h-px w-full bg-gray-100 dark:bg-gray-700" />
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200 font-bold text-sm sm:text-base">
+                      <HelpCircle size={16} className="text-[#5800a9]" />
+                      <span>اجمالي الاسئلة</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-sm sm:text-base">
+                      <span className="font-black text-gray-900 dark:text-white">
+                        {totalQuestionsCount}+
+                      </span>
+                      <span className="text-gray-400 font-medium">سؤال</span>
+                    </div>
+                  </div>
+                </div>
+
                 {course.intro_video && (
                   <button
                     onClick={() => window.open(course.intro_video)}
@@ -1160,23 +1190,6 @@ const saveProgress = async (currentTime: number, duration: number) => {
                     <span>مشاهدة المقدمة</span>
                   </button>
                 )}
-
-                <div className="flex items-center justify-between mt-1 pb-1">
-                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                    <span className="text-[13px] font-medium">{formatDate(course.created_at)}</span>
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
-                      <HiDocumentPlus className="text-[13px]" />
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                    <span className="text-[13px] font-medium">{formatDate(course.updated_at)}</span>
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
-                      <HiArrowPath className="text-[13px]" />
-                    </span>
-                  </div>
-                </div>
-
 
               </div>
             </div>
