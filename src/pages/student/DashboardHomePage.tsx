@@ -233,7 +233,7 @@ export default function DashboardHomePage() {
                     </p>
                   </div>
                   <div className="w-11 h-11 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center flex-shrink-0">
-                    <Clock3 className="text-[#5800a9]" size={22} />
+                    <Clock3 className="text-[#5800a9] dark:text-[#b600d7]" size={22} />
                   </div>
                 </CardContent>
               </Card>
@@ -247,7 +247,7 @@ export default function DashboardHomePage() {
                     </p>
                   </div>
                   <div className="w-11 h-11 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center flex-shrink-0">
-                    <Clock3 className="text-[#5800a9]" size={22} />
+                    <Clock3 className="text-[#5800a9] dark:text-[#b600d7]" size={22} />
                   </div>
                 </CardContent>
               </Card>
@@ -261,7 +261,7 @@ export default function DashboardHomePage() {
                     </p>
                   </div>
                   <div className="w-11 h-11 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="text-[#5800a9]" size={22} />
+                    <CheckCircle2 className="text-[#5800a9] dark:text-[#b600d7]" size={22} />
                   </div>
                 </CardContent>
               </Card>
@@ -275,7 +275,7 @@ export default function DashboardHomePage() {
                     </p>
                   </div>
                   <div className="w-11 h-11 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="text-[#5800a9]" size={22} />
+                    <CheckCircle2 className="text-[#5800a9] dark:text-[#b600d7]" size={22} />
                   </div>
                 </CardContent>
               </Card>
@@ -292,7 +292,7 @@ export default function DashboardHomePage() {
                 </div>
               </div>
 
-              <div className="bg-[#5800a9] rounded-2xl p-5 flex items-center justify-between text-white shadow-md">
+              <div className="bg-[#5800a9] dark:bg-[#b600d7] rounded-2xl p-5 flex items-center justify-between text-white shadow-md">
                 <div>
                   <p className="text-3xl font-black">{activeCoursesCount}</p>
                   <p className="text-xs sm:text-sm font-bold mt-1">كورساتك الحالية</p>
@@ -302,7 +302,7 @@ export default function DashboardHomePage() {
                 </div>
               </div>
 
-              <div className="bg-[#5800a9] rounded-2xl p-5 flex items-center justify-between text-white shadow-md">
+              <div className="bg-[#5800a9] dark:bg-[#b600d7] rounded-2xl p-5 flex items-center justify-between text-white shadow-md">
                 <div>
                   <p className="text-3xl font-black">{completedCoursesCount}</p>
                   <p className="text-xs sm:text-sm font-bold mt-1">كورسات مكتملة</p>
@@ -442,7 +442,7 @@ export default function DashboardHomePage() {
                       {avgExamScores.map((d, i) => {
                         const x = (i / (avgExamScores.length - 1 || 1)) * 680 + 10;
                         const y = 150 - (d.score / 100) * 140;
-                        return <circle key={d.day} cx={x} cy={y} r="5" fill="#5800a9" />;
+                        return <circle key={d.day} cx={x} cy={y} r="5" fill="currentColor" className="text-[#5800a9] dark:text-[#b600d7]" />;
                       })}
                     </svg>
                   </div>
