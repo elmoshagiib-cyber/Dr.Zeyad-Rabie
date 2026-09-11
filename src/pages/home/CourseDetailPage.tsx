@@ -142,6 +142,10 @@ export function CourseDetailPage() {
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showIntroCard, setShowIntroCard] = useState(false);
+  const [isDraggingSeek, setIsDraggingSeek] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const seekBarRef = useRef<HTMLDivElement>(null);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -862,6 +866,29 @@ const saveProgress = async (currentTime: number, duration: number) => {
     setIsMuted(videoRef.current.muted);
   };
 
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!videoRef.current) return;
+    const newVolume = parseFloat(e.target.value);
+    videoRef.current.volume = newVolume;
+    videoRef.current.muted = newVolume === 0;
+    setVolume(newVolume);
+    setIsMuted(newVolume === 0);
+  };
+
+  const calculateSeekRatio = (clientX: number) => {
+    if (!seekBarRef.current) return 0;
+    const rect = seekBarRef.current.getBoundingClientRect();
+    return Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
+  };
+
+  const handleSeekMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!videoRef.current || !videoDuration) return;
+    setIsDraggingSeek(true);
+    const newTime = calculateSeekRatio(e.clientX) * videoDuration;
+    videoRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+
   const changeSpeed = (rate: number) => {
     if (!videoRef.current) return;
     videoRef.current.playbackRate = rate;
@@ -875,6 +902,27 @@ const saveProgress = async (currentTime: number, duration: number) => {
     const ratio = (e.clientX - rect.left) / rect.width;
     videoRef.current.currentTime = Math.min(Math.max(ratio, 0), 1) * videoDuration;
   };
+
+  useEffect(() => {
+    if (!isDraggingSeek) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!videoRef.current || !videoDuration) return;
+      const newTime = calculateSeekRatio(e.clientX) * videoDuration;
+      videoRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    };
+
+    const handleMouseUp = () => setIsDraggingSeek(false);
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDraggingSeek, videoDuration]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -1940,7 +1988,9 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   className="absolute bottom-0 left-0 right-0 z-20 px-4 sm:px-8 pb-3 sm:pb-5 pt-10 bg-gradient-to-t from-black/85 via-black/40 to-transparent"
                 >
                   <div
+                    ref={seekBarRef}
                     onClick={handleSeekClick}
+                    onMouseDown={handleSeekMouseDown}
                     className="relative w-full h-1.5 bg-white/25 rounded-full cursor-pointer mb-3 sm:mb-4"
                   >
                     <div
@@ -1980,9 +2030,31 @@ const saveProgress = async (currentTime: number, duration: number) => {
                         </span>
                       </button>
 
-                      <button onClick={toggleMute} className="text-white hover:text-gray-300 transition-colors">
-                        {isMuted ? <VolumeX size={20} className="sm:w-6 sm:h-6" /> : <Volume2 size={20} className="sm:w-6 sm:h-6" />}
-                      </button>
+                      <div
+                        className="flex items-center gap-2"
+                        onMouseEnter={() => setShowVolumeSlider(true)}
+                        onMouseLeave={() => setShowVolumeSlider(false)}
+                      >
+                        <button onClick={toggleMute} className="text-white hover:text-gray-300 transition-colors">
+                          {isMuted ? <VolumeX size={20} className="sm:w-6 sm:h-6" /> : <Volume2 size={20} className="sm:w-6 sm:h-6" />}
+                        </button>
+
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ${
+                            showVolumeSlider ? "w-16 sm:w-20 opacity-100" : "w-0 opacity-0"
+                          }`}
+                        >
+                          <input
+                            type="range"
+                            min={0}
+                            max={1}
+                            step={0.05}
+                            value={isMuted ? 0 : volume}
+                            onChange={handleVolumeChange}
+                            className="w-full h-1.5 accent-red-600 cursor-pointer"
+                          />
+                        </div>
+                      </div>
 
                     </div>
 
