@@ -1,6 +1,5 @@
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import { StudentDashboardSidebar } from "./StudentDashboardSidebar";
-import { Menu } from "lucide-react";
 import { Navbar } from "../Navbar";
 
 type Props = {
@@ -8,7 +7,6 @@ type Props = {
 };
 
 export default function StudentLayout({ children }: Props) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div
@@ -26,57 +24,12 @@ export default function StudentLayout({ children }: Props) {
       {/* Navbar الموحّد لكل الموقع */}
       <Navbar />
 
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-[110]">
-          <div
-            className="absolute inset-0 bg-black/60"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          <div className="absolute right-0 top-0 bottom-0 w-[320px] animate-slide-in-right">
-            <StudentDashboardSidebar
-              mobileOpen
-              onClose={() => setSidebarOpen(false)}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Desktop Sidebar */}
-      <div className="hidden xl:block relative z-[60] p-4 pt-[104px]">
+      {/* Sidebar - نفس السلوك في كل المقاسات */}
+      <div className="block relative z-[60] p-4 pt-[104px]">
         <StudentDashboardSidebar />
       </div>
 
       <main className="flex-1 overflow-y-auto pt-24">
-        {/* زرار فتح السايدبار — موبايل/تابلت بس */}
-        <div className="xl:hidden px-4 sm:px-6 pt-4">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="
-              flex
-              items-center
-              gap-2
-              px-4
-              py-2.5
-              rounded-xl
-              text-[#5800a9]
-              bg-[#F6EEFF]
-              dark:bg-[#111111]
-              border
-              border-[#EAD8FF]
-              dark:border-[#2A2A2A]
-              hover:scale-[1.02]
-              transition-all
-              duration-300
-              font-bold
-              text-sm
-            "
-          >
-            <Menu size={18} />
-            القائمة
-          </button>
-        </div>
-
         <div className="p-4 sm:p-6 lg:p-8">
           {children}
         </div>
