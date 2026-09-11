@@ -360,6 +360,15 @@ const gradeSlugMap: Record<string, string> = {
   "الصف الثالث الإعدادي": "third_prep",
 };
 
+const gradeSlugToName: Record<string, string> = {
+  sec_1: "الصف الأول الثانوي",
+  sec_2: "الصف الثاني الثانوي",
+  sec_3: "الصف الثالث الثانوي",
+  first_prep: "الصف الأول الإعدادي",
+  second_prep: "الصف الثاني الإعدادي",
+  third_prep: "الصف الثالث الإعدادي",
+};
+
 const userGradeSlug = gradeSlugMap[user?.grade ?? ""] ?? "";
 
 const FEATURES = [
@@ -1476,27 +1485,16 @@ duration-300
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                             />
 
-                            <div
-                              className="
-                                absolute top-3 right-3 flex items-center gap-1.5
-                                bg-[#F6AC08] text-white text-xs font-bold
-                                px-3 py-1.5 rounded-full shadow-lg
-                              "
-                            >
-                              <Star size={13} fill="currentColor" />
-                              مقترح
-                            </div>
-
                             {course.grade && (
                               <span
                                 className="
-                                  absolute top-3 left-3
+                                  absolute top-3 right-3
                                   bg-black/70 backdrop-blur-sm
                                   text-white text-xs font-semibold
                                   px-2.5 py-1 rounded-full
                                 "
                               >
-                                {course.grade}
+                                {gradeSlugToName[course.grade] || course.grade}
                               </span>
                             )}
 
