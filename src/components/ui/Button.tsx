@@ -40,7 +40,6 @@ const buttonVariants = cva(
           bg-[#B348FE]
           text-white
           hover:bg-[#9E2FFF]
-          hover:shadow-[0_10px_30px_rgba(179,72,254,.35)]
         `,
 
         outline: `

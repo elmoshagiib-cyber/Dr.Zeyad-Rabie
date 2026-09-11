@@ -652,7 +652,8 @@ lg:text-right
           text-[13px]
           sm:text-[16px]
           lg:text-[18px]
-          font-semibold
+          font-black
+          !shadow-none
           hover:scale-[1.03]
           transition-all
           duration-300
