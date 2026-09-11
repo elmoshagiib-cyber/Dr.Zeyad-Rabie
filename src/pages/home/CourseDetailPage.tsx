@@ -55,24 +55,24 @@ interface LessonProgress {
   updated_at: string;
 }
 
-const VideoLessonIcon = () => (
-  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+const VideoLessonIcon = ({ size = 22 }: { size?: number }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="5.5" width="13" height="13" rx="2" fill="#FDF6E3" stroke="#F0A500" strokeWidth="1.6" />
     <path d="M15 10L21.5 7v10L15 14v-4Z" fill="#FDF6E3" stroke="#F0A500" strokeWidth="1.6" strokeLinejoin="round" />
     <rect x="4.3" y="7.6" width="3" height="1.6" rx="0.4" fill="#F0A500" />
   </svg>
 );
 
-const FileLessonIcon = () => (
-  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+const FileLessonIcon = ({ size = 22 }: { size?: number }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="6" y="2.5" width="14" height="15" rx="2" fill="#DCE9FF" stroke="#4C9AFF" strokeWidth="1.6" />
     <rect x="3" y="5" width="14" height="15" rx="2" fill="#EAF2FF" stroke="#4C9AFF" strokeWidth="1.6" />
     <path d="M3 17.5h14" stroke="#4C9AFF" strokeWidth="1.6" strokeLinecap="round" />
   </svg>
 );
 
-const QuizLessonIcon = () => (
-  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+const QuizLessonIcon = ({ size = 22 }: { size?: number }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
       d="M3 3h18v11.5l-1.8-1.6-1.8 1.6-1.8-1.6-1.8 1.6-1.8-1.6-1.8 1.6-1.8-1.6-1.8 1.6-1.8-1.6-1.8 1.6V3Z"
       fill="#FDE1E5"
@@ -86,8 +86,8 @@ const QuizLessonIcon = () => (
   </svg>
 );
 
-const HomeworkLessonIcon = () => (
-  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+const HomeworkLessonIcon = ({ size = 22 }: { size?: number }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M2.5 8.5h10.5v11H4.5a2 2 0 0 1-2-2v-9Z" stroke="#14B8A6" strokeWidth="1.5" />
     <rect x="8" y="2.5" width="13.5" height="13.5" rx="2" fill="#D2F5F0" stroke="#14B8A6" strokeWidth="1.6" />
     <text x="14.7" y="12.3" textAnchor="middle" fontSize="7.5" fontWeight="700" fill="#14B8A6" fontFamily="Arial, sans-serif">
@@ -1335,22 +1335,22 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 {
                   label: "فيديوهات",
                   value: videosCount,
-                  icon: <Play size={14} />,
+                  icon: <VideoLessonIcon size={18} />,
                 },
                 {
                   label: "امتحانات",
                   value: examsCount,
-                  icon: <ClipboardList size={14} />,
+                  icon: <QuizLessonIcon size={18} />,
                 },
                 {
                   label: "واجبات",
                   value: homeworksCount,
-                  icon: <ClipboardCheck size={14} />,
+                  icon: <HomeworkLessonIcon size={18} />,
                 },
                 {
                   label: "ملفات",
                   value: filesCount,
-                  icon: <FileText size={14} />,
+                  icon: <FileLessonIcon size={18} />,
                 },
               ].map((item) => (
                 <div
