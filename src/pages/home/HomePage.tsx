@@ -1375,7 +1375,21 @@ duration-300
 
         {/* Single rotating suggested course card - positioned on the left */}
         <div dir="ltr" className="flex justify-start">
-          <div dir="rtl" className="relative w-full max-w-[340px] sm:max-w-[360px]">
+          <div dir="rtl" className="relative w-full max-w-[340px] sm:max-w-[360px] p-4 sm:p-5">
+
+            {/* Background image behind the slider */}
+            <img
+              src="/images/suggested-courses-banner.jpg"
+              alt=""
+              aria-hidden="true"
+              className="
+                absolute inset-0
+                w-full h-full
+                object-cover
+                rounded-[30px]
+                -z-10
+              "
+            />
 
             {/* Left Arrow (previous) */}
             <button
@@ -1645,19 +1659,6 @@ duration-300
                 ))}
               </div>
             )}
-
-            {/* Banner image below the slider - same width as the card */}
-            <img
-              src="/images/suggested-courses-banner.jpg"
-              alt="بانر الكورسات المقترحة"
-              className="
-                w-full
-                mt-5
-                rounded-[20px]
-                object-cover
-                shadow-[0_4px_20px_rgba(0,0,0,.06)]
-              "
-            />
 
           </div>
         </div>
