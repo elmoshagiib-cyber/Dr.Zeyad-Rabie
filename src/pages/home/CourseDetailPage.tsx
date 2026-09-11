@@ -150,6 +150,7 @@ export function CourseDetailPage() {
   const seekBarRef = useRef<HTMLDivElement>(null);
   const [videoChapters, setVideoChapters] = useState<{ title: string; time: number }[]>([]);
   const [showChapters, setShowChapters] = useState(false);
+  const [previewPhase, setPreviewPhase] = useState<"image" | "video">("image");
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const previewVideoRef = useRef<HTMLVideoElement>(null);
@@ -767,6 +768,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
       setVideoChapters(chapters || []);
       setVideoPlayerThumbnail(thumbnail || "");
       setShowChapters(false);
+      setPreviewPhase("image");
       setPlayerStage("info");
       setVideoPlayerOpen(true);
     } catch (error) {
@@ -993,14 +995,29 @@ const saveProgress = async (currentTime: number, duration: number) => {
   }, [videoPlayerOpen]);
 
   useEffect(() => {
-    if (playerStage !== "info" || videoPlayerThumbnail || !videoPlayerUrl) return;
+    if (playerStage !== "info" || !videoPlayerUrl) return;
 
-    const timer = setTimeout(() => {
-      previewVideoRef.current?.pause();
-    }, 5000);
+    // لو مفيش صورة غلاف: شغّل معاينة الفيديو 5 ثواني ثم قف عليها
+    if (!videoPlayerThumbnail) {
+      const timer = setTimeout(() => {
+        previewVideoRef.current?.pause();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
 
-    return () => clearTimeout(timer);
-  }, [playerStage, videoPlayerThumbnail, videoPlayerUrl]);
+    // لو فيه صورة غلاف: دورة صورة ← فيديو ← صورة... باستمرار
+    if (previewPhase === "image") {
+      const timer = setTimeout(() => setPreviewPhase("video"), 4000);
+      return () => clearTimeout(timer);
+    } else {
+      previewVideoRef.current?.play().catch(() => {});
+      const timer = setTimeout(() => {
+        previewVideoRef.current?.pause();
+        setPreviewPhase("image");
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [playerStage, previewPhase, videoPlayerThumbnail, videoPlayerUrl]);
 
   useEffect(() => {
     if (!videoPlayerOpen || playerStage !== "playing") {
@@ -1886,7 +1903,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
           <div
             className={
               playerStage === "info"
-                ? "relative w-full max-w-6xl xl:max-w-7xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
+                ? "relative w-full max-w-4xl xl:max-w-5xl bg-gray-900 rounded-2xl overflow-hidden shadow-[0_25px_90px_rgba(88,0,169,0.45)] ring-1 ring-white/10"
                 : "relative w-full h-full bg-black"
             }
             onClick={(e) => e.stopPropagation()}
@@ -1894,11 +1911,23 @@ const saveProgress = async (currentTime: number, duration: number) => {
             {playerStage === "info" ? (
               <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
                 {videoPlayerThumbnail ? (
-                  <img
-                    src={videoPlayerThumbnail}
-                    alt={videoPlayerTitle}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
+                  previewPhase === "image" ? (
+                    <img
+                      src={videoPlayerThumbnail}
+                      alt={videoPlayerTitle}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  ) : (
+                    <video
+                      ref={previewVideoRef}
+                      key={videoPlayerUrl}
+                      src={videoPlayerUrl}
+                      muted
+                      playsInline
+                      preload="auto"
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  )
                 ) : (
                   <video
                     ref={previewVideoRef}
@@ -1911,7 +1940,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
                 <button
                   onClick={closeVideoPlayer}
