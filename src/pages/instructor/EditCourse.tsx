@@ -26,6 +26,7 @@ interface VideoItem {
   videoUrl: string;
 thumbnailUrl: string;
 storagePath: string;
+chapters: { title: string; time: number }[];
 file?: File;
 }
 
@@ -142,6 +143,27 @@ function formatFileSize(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
+function parseTimeToSeconds(time: string): number {
+  const parts = time.split(":").map((p) => parseInt(p, 10) || 0);
+  if (parts.length === 3) {
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  }
+  if (parts.length === 2) {
+    return parts[0] * 60 + parts[1];
+  }
+  return parts[0] || 0;
+}
+
+function formatSecondsToTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (h > 0) {
+    return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  }
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
 function getVideoDuration(file: File): Promise<string> {
   return new Promise((resolve) => {
     const video = document.createElement("video");
@@ -184,6 +206,7 @@ function createDefaultVideo(): VideoItem {
     videoUrl: "",
 thumbnailUrl: "",
 storagePath: "",
+    chapters: [],
   };
 }
 
@@ -398,6 +421,7 @@ case "video":
     videoUrl: item.url || "",
     thumbnailUrl: item.thumbnail || "",
     storagePath: item.storage_path || "",
+    chapters: item.chapters || [],
   } as VideoItem;
 
 case "pdf":
@@ -666,6 +690,7 @@ Object.assign(payload,{
 
     is_preview: item.freePreview,
     allow_download: item.allowDownload,
+    chapters: item.chapters || [],
 });
     }
 
@@ -1229,6 +1254,83 @@ async function handleThumbnailChange(
                     ...s,
                     items: s.items.map((item) =>
                       item.id === itemId ? ({ ...item, ...updates } as CourseItem) : item
+                    ),
+                  }
+                : s
+            ),
+          }
+        : prev
+    );
+  }
+
+  // ── Chapter Helpers ──────────────────────────────────────
+  function addChapter(sectionId: string, itemId: string) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId
+                ? {
+                    ...s,
+                    items: s.items.map((item) =>
+                      item.id === itemId && item.type === "video"
+                        ? { ...item, chapters: [...item.chapters, { title: "", time: 0 }] }
+                        : item
+                    ),
+                  }
+                : s
+            ),
+          }
+        : prev
+    );
+  }
+
+  function removeChapter(sectionId: string, itemId: string, chapterIndex: number) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId
+                ? {
+                    ...s,
+                    items: s.items.map((item) =>
+                      item.id === itemId && item.type === "video"
+                        ? { ...item, chapters: item.chapters.filter((_, i) => i !== chapterIndex) }
+                        : item
+                    ),
+                  }
+                : s
+            ),
+          }
+        : prev
+    );
+  }
+
+  function updateChapter(
+    sectionId: string,
+    itemId: string,
+    chapterIndex: number,
+    updates: Partial<{ title: string; time: number }>
+  ) {
+    setCourse((prev) =>
+      prev
+        ? {
+            ...prev,
+            sections: prev.sections.map((s) =>
+              s.id === sectionId
+                ? {
+                    ...s,
+                    items: s.items.map((item) =>
+                      item.id === itemId && item.type === "video"
+                        ? {
+                            ...item,
+                            chapters: item.chapters.map((c, i) =>
+                              i === chapterIndex ? { ...c, ...updates } : c
+                            ),
+                          }
+                        : item
                     ),
                   }
                 : s
@@ -2046,6 +2148,59 @@ async function uploadHomeworkInstructions(
                 </label>
               </div>
             )}
+          </div>
+
+          {/* Chapters */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-semibold text-slate-700">فصول الفيديو (Chapters)</label>
+              <button
+                type="button"
+                onClick={() => addChapter(sectionId, item.id)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                إضافة فصل
+              </button>
+            </div>
+
+            {item.chapters.length === 0 ? (
+              <div className="text-center py-4 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs">
+                لا توجد فصول مضافة — الفصول اختيارية وتساعد الطالب على التنقل داخل الفيديو
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {item.chapters.map((chapter, cIdx) => (
+                  <div key={cIdx} className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                      {cIdx + 1}
+                    </span>
+                    <input
+                      type="text"
+                      value={chapter.title}
+                      onChange={(e) => updateChapter(sectionId, item.id, cIdx, { title: e.target.value })}
+                      className="flex-1 px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 bg-slate-50 text-sm"
+                      placeholder="عنوان الفصل"
+                    />
+                    <input
+                      type="text"
+                      defaultValue={formatSecondsToTime(chapter.time)}
+                      onBlur={(e) => updateChapter(sectionId, item.id, cIdx, { time: parseTimeToSeconds(e.target.value) })}
+                      className="w-24 px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 bg-slate-50 text-sm text-center"
+                      placeholder="00:00"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeChapter(sectionId, item.id, cIdx)}
+                      className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-slate-400 mt-1.5">اكتب الوقت بصيغة mm:ss أو h:mm:ss (مثال: 12:37)</p>
           </div>
 
           {/* Toggles */}

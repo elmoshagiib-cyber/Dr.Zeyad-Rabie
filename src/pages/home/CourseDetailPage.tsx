@@ -24,6 +24,7 @@ import {
   Timer,
   Hash,
   HelpCircle,
+  ListVideo,
 } from "lucide-react";
 import {
   HiArrowPath,
@@ -146,6 +147,8 @@ export function CourseDetailPage() {
   const [volume, setVolume] = useState(1);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const seekBarRef = useRef<HTMLDivElement>(null);
+  const [videoChapters, setVideoChapters] = useState<{ title: string; time: number }[]>([]);
+  const [showChapters, setShowChapters] = useState(false);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -696,7 +699,12 @@ const saveProgress = async (currentTime: number, duration: number) => {
     }
   };
 
-  const openVideoPlayer = async (lessonId: string, title: string, description?: string | null) => {
+  const openVideoPlayer = async (
+    lessonId: string,
+    title: string,
+    description?: string | null,
+    chapters?: { title: string; time: number }[] | null
+  ) => {
     if (!lessonId) {
       showToast("الفيديو غير متوفر");
       return;
@@ -753,6 +761,8 @@ const saveProgress = async (currentTime: number, duration: number) => {
       setVideoPlayerUrl(url);
       setVideoPlayerTitle(title);
       setVideoPlayerDescription(description || "");
+      setVideoChapters(chapters || []);
+      setShowChapters(false);
       setPlayerStage("info");
       setVideoPlayerOpen(true);
     } catch (error) {
@@ -815,6 +825,8 @@ const saveProgress = async (currentTime: number, duration: number) => {
     setVideoPlayerDescription("");
     setCurrentLessonId("");
     setPlayerStage("info");
+    setVideoChapters([]);
+    setShowChapters(false);
     lessonProgressRef.current = null;
     hasIncrementedWatchedLessonsRef.current = false;
   };
@@ -1335,7 +1347,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                           }
 
                           if (firstLesson.type === "video") {
-                            await openVideoPlayer(firstLesson.id, firstLesson.title, firstLesson.description);
+                            await openVideoPlayer(firstLesson.id, firstLesson.title, firstLesson.description, firstLesson.chapters);
                           }
 
                           return;
@@ -1504,7 +1516,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                         <button
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            openVideoPlayer(lesson.id, lesson.title, lesson.description);
+                                            openVideoPlayer(lesson.id, lesson.title, lesson.description, lesson.chapters);
                                           }}
                                           className="flex items-center gap-1.5 sm:gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 whitespace-nowrap"
                                         >
@@ -2089,6 +2101,16 @@ const saveProgress = async (currentTime: number, duration: number) => {
                         )}
                       </div>
 
+                      {videoChapters.length > 0 && (
+                        <button
+                          onClick={() => setShowChapters((prev) => !prev)}
+                          className={`transition-colors ${showChapters ? "text-red-500" : "text-white hover:text-gray-300"}`}
+                          title="الفصول"
+                        >
+                          <ListVideo size={20} className="sm:w-6 sm:h-6" />
+                        </button>
+                      )}
+
                       <button
                         onClick={toggleFullscreen}
                         className="text-white hover:text-gray-300 transition-colors"
@@ -2099,6 +2121,70 @@ const saveProgress = async (currentTime: number, duration: number) => {
                     </div>
                   </div>
                 </div>
+
+                <AnimatePresence>
+                  {showChapters && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute bottom-0 top-0 left-0 z-30 w-[280px] sm:w-[340px] bg-black/90 backdrop-blur-md overflow-y-auto"
+                      dir="rtl"
+                    >
+                      <div className="p-4 sm:p-5 border-b border-white/15 flex items-center justify-between">
+                        <button
+                          onClick={() => setShowChapters(false)}
+                          className="text-gray-400 hover:text-white transition-colors"
+                        >
+                          <X size={18} />
+                        </button>
+                        <h3 className="text-white font-black text-lg sm:text-xl">الفصول</h3>
+                      </div>
+
+                      <div className="p-2 sm:p-3">
+                        {videoChapters.map((chapter, index) => {
+                          const nextChapter = videoChapters[index + 1];
+                          const isActive =
+                            currentTime >= chapter.time &&
+                            (!nextChapter || currentTime < nextChapter.time);
+
+                          return (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                if (videoRef.current) {
+                                  videoRef.current.currentTime = chapter.time;
+                                }
+                              }}
+                              className={`w-full flex items-center justify-between gap-3 px-3 sm:px-4 py-3 rounded-xl transition-colors text-right ${
+                                isActive ? "bg-red-600/15" : "hover:bg-white/5"
+                              }`}
+                            >
+                              <span className="text-gray-300 text-sm sm:text-base font-bold tabular-nums flex-shrink-0">
+                                {formatTime(chapter.time)}
+                              </span>
+
+                              <span className="flex items-center gap-2 flex-1 min-w-0 justify-end">
+                                <span
+                                  className={`text-sm sm:text-base font-bold truncate ${
+                                    isActive ? "text-red-500" : "text-white"
+                                  }`}
+                                >
+                                  {chapter.title}
+                                </span>
+                                {isActive && (
+                                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                                )}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
           </div>
