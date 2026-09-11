@@ -1335,10 +1335,12 @@ duration-300
     >
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Title */}
-        <div className="text-center mb-8 sm:mb-12">
+        <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-6">
 
-          <div className="flex items-center justify-center gap-3 mb-3">
+        {/* Title */}
+        <div className="text-center lg:text-right lg:flex-1">
+
+          <div className="flex items-center justify-center lg:justify-start gap-3 mb-3">
             <div
               className="
                 w-11 h-11
@@ -1383,7 +1385,7 @@ duration-300
         </div>
 
         {/* Single rotating suggested course card - positioned on the left */}
-        <div dir="ltr" className="flex justify-start">
+        <div dir="ltr" className="flex justify-start lg:flex-1">
           <div dir="rtl" className="relative w-full max-w-[420px] sm:max-w-[460px] p-8 sm:p-10 md:p-12">
 
             {/* Background image behind the slider */}
@@ -1662,6 +1664,7 @@ duration-300
         </div>
 
       </div>
+    </div>
     </section>
   </ScrollReveal>
 )}
