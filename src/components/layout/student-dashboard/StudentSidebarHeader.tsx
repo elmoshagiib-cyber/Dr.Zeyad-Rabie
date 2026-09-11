@@ -27,6 +27,7 @@ export function StudentSidebarHeader({
             rounded-xl
             border border-transparent
             bg-[#5800a9]
+            dark:bg-[#b600d7]
             flex items-center justify-center
             text-white
             hover:opacity-90

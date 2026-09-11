@@ -42,6 +42,7 @@ export function StudentSidebarItem({
         active
           ? `
     bg-[#5800a9]
+    dark:bg-[#b600d7]
     text-white
     scale-[1.02]
   `
@@ -88,6 +89,7 @@ active:scale-[0.98]
     bg-[#F6EEFF]
     text-[#5800a9]
     dark:bg-[#2B103D]
+    dark:text-[#b600d7]
     group-hover:opacity-90
     group-hover:scale-110
   `
@@ -120,8 +122,8 @@ active:scale-[0.98]
                 font-bold
                 `,
                 active
-                  ? "bg-white text-[#5800a9]"
-                  : "bg-[#5800a9] text-white"
+                  ? "bg-white text-[#5800a9] dark:text-[#b600d7]"
+                  : "bg-[#5800a9] dark:bg-[#b600d7] text-white"
               )}
             >
               {badge > 99 ? "99+" : badge}

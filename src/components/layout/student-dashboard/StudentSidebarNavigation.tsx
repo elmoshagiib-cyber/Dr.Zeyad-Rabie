@@ -77,8 +77,8 @@ export function StudentSidebarNavigation({
                     `,
                     collapsed ? "justify-center" : "justify-between",
                     isActiveParent
-                      ? "bg-[#5800a9] text-white"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-[#F6EEFF] dark:hover:bg-[#1A1A1A] hover:text-[#5800a9]"
+                      ? "bg-[#5800a9] dark:bg-[#b600d7] text-white"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-[#F6EEFF] dark:hover:bg-[#1A1A1A] hover:text-[#5800a9] dark:hover:text-[#b600d7]"
                   )}
                 >
                   <div
@@ -96,7 +96,7 @@ export function StudentSidebarNavigation({
                       `,
                       isActiveParent
                         ? "bg-white/20"
-                        : "bg-[#F6EEFF] text-[#5800a9] dark:bg-[#2B103D]"
+                        : "bg-[#F6EEFF] text-[#5800a9] dark:bg-[#2B103D] dark:text-[#b600d7]"
                     )}
                   >
                     {item.icon}
