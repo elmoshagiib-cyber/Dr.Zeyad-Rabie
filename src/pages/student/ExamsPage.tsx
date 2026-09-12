@@ -141,7 +141,7 @@ export function ExamsPage() {
               <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-1.5">
                 الامتحانات
               </h1>
-              <p className="text-white/80 text-[11px] xs:text-xs sm:text-sm md:text-sm lg:text-base">
+              <p className="text-white text-[11px] xs:text-xs sm:text-sm md:text-sm lg:text-base">
                 جميع الاختبارات والنتائج الخاصة بك
               </p>
             </div>

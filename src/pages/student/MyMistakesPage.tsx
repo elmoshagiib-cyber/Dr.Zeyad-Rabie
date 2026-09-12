@@ -144,7 +144,7 @@ export function MyMistakesPage() {
               <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-black text-white mb-1 sm:mb-1.5">
                 أخطائي
               </h1>
-              <p className="text-white/80 text-[11px] xs:text-xs sm:text-sm leading-5">
+              <p className="text-white text-[11px] xs:text-xs sm:text-sm leading-5">
                 راجع أسئلتك اللي غلطت فيها في امتحان خاص بيك
               </p>
             </div>

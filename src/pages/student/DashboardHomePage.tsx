@@ -208,13 +208,44 @@ export default function DashboardHomePage() {
   return (
     <StudentLayout>
       <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
-        <div className="flex justify-end">
+
+        {/* Header */}
+        <div
+          className="
+            relative overflow-hidden
+            rounded-2xl sm:rounded-3xl
+            px-4 sm:px-6 md:px-8
+            py-5 sm:py-6 md:py-7
+            flex items-center justify-between gap-4
+            bg-[#5800a9] dark:bg-[#b600d7]
+          "
+        >
+          <div className="relative z-10 text-right">
+            <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-black text-white mb-1 sm:mb-1.5">
+              لوحة التحكم
+            </h1>
+            <p className="text-white text-[11px] xs:text-xs sm:text-sm">
+              نظرة عامة على نشاطك التعليمي وتقدمك
+            </p>
+          </div>
+
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[#5800a9] dark:text-[#b600d7] bg-[#F6EEFF] dark:bg-[#2B103D] hover:bg-[#EAD8FF] dark:hover:bg-[#3A1652] transition-all duration-300 font-bold text-xs sm:text-sm"
+            className="
+              relative z-10 flex-shrink-0
+              flex items-center gap-2
+              px-3.5 sm:px-4 py-2 sm:py-2.5
+              rounded-xl
+              bg-[#b600d7] dark:bg-[#5800a9]
+              text-white
+              hover:opacity-90
+              transition-all duration-300
+              font-bold text-xs sm:text-sm
+              whitespace-nowrap
+            "
           >
             <ArrowRight size={16} />
-          الرجوع للصفحة الرئيسية
+            الرجوع للصفحة الرئيسية
           </button>
         </div>
 

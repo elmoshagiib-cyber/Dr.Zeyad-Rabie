@@ -82,7 +82,7 @@ export function MyCoursesPage() {
               <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-black text-white mb-1 sm:mb-1.5">
                 كورساتي
               </h1>
-              <p className="text-white/80 text-[11px] xs:text-xs sm:text-sm">
+              <p className="text-white text-[11px] xs:text-xs sm:text-sm">
                 {enrolledCourses.length} كورس مشترك فيه
               </p>
             </div>
