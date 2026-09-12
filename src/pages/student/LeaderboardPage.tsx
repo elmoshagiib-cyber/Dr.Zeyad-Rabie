@@ -51,83 +51,91 @@ export function LeaderboardPage() {
             bg-[#5800a9] dark:bg-[#b600d7]
           "
         >
-          <div className="flex flex-col md:flex-row-reverse items-center md:items-start gap-6 md:gap-10">
+          <div className="flex flex-col md:flex-row items-stretch gap-6 md:gap-8">
 
-            {/* Text side */}
-            <div className="flex-1 text-center md:text-right">
-              <span
+            {/* Buttons column (left side) */}
+            <div className="flex flex-row md:flex-col gap-2.5 md:gap-3 order-1 md:order-1 flex-shrink-0 md:w-52 md:justify-center">
+              <button
+                onClick={showComingSoon}
                 className="
-                  inline-block mb-3 sm:mb-4
-                  px-3.5 py-1.5 rounded-full
-                  text-[11px] sm:text-xs font-black
+                  flex-1 md:flex-none
+                  px-5 py-3 rounded-xl
+                  font-black text-sm sm:text-base
                   bg-white/15 text-white
+                  hover:bg-white/25
+                  transition-all duration-300
                 "
               >
-                المكان ده مستنيك
-              </span>
-
-              <h2 className="text-lg sm:text-2xl md:text-[26px] font-black text-white mb-3 sm:mb-4">
-                اسمك مش على اللوحة... لسه!
-              </h2>
-
-              <p className="text-white/85 text-sm sm:text-base leading-7 sm:leading-8 mb-5 sm:mb-6">
-                20 طالب في الصف الثالث الثانوي ذاكروا وحققوا، ومكانهم اتسجّل بإطار وشارة. اللوحة الجديدة بتتحدث كل فترة — ذاكر بجدية، كمّل امتحاناتك، وخلّي صورتك هي اللي الكل يشوفها المرة الجاية.
-
-              </p>
-
-              {/* Stats row */}
-              <div className="flex flex-wrap justify-center md:justify-start gap-x-8 gap-y-4 mb-6 sm:mb-8">
-                <div className="text-center md:text-right">
-                  <p className="text-white font-black text-sm sm:text-base">ذاكر بانتظام</p>
-                  <p className="text-white/70 text-xs sm:text-sm mt-1">حضور واستمرار في الحصص</p>
-                </div>
-                <div className="text-center md:text-right">
-                  <p className="text-white font-black text-sm sm:text-base">حل الامتحانات</p>
-                  <p className="text-white/70 text-xs sm:text-sm mt-1">درجاتك هي تذكرتك للوحة</p>
-                </div>
-                <div className="text-center md:text-right">
-                  <p className="text-white font-black text-sm sm:text-base">اتفوق على نفسك</p>
-                  <p className="text-white/70 text-xs sm:text-sm mt-1">فضي، ذهبي، ماسي</p>
-                </div>
-              </div>
-
-              {/* Buttons */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
-                <button
-                  onClick={showComingSoon}
-                  className="
-                    px-5 py-3 rounded-xl
-                    font-black text-sm sm:text-base
-                    bg-white/15 text-white
-                    hover:bg-white/25
-                    transition-all duration-300
-                  "
-                >
-                  شوف اللي وصلوا
-                </button>
-                <button
-                  onClick={showComingSoon}
-                  className="
-                    px-5 py-3 rounded-xl
-                    font-black text-sm sm:text-base
-                    border-2 border-white/40 text-white
-                    hover:bg-white/10
-                    transition-all duration-300
-                  "
-                >
-                  ابدأ مذاكرة النهاردة
-                </button>
-              </div>
+                شوف اللي وصلوا
+              </button>
+              <button
+                onClick={showComingSoon}
+                className="
+                  flex-1 md:flex-none
+                  px-5 py-3 rounded-xl
+                  font-black text-sm sm:text-base
+                  border-2 border-white/40 text-white
+                  hover:bg-white/10
+                  transition-all duration-300
+                "
+              >
+                ابدأ مذاكرة النهاردة
+              </button>
             </div>
 
-            {/* Frame image */}
-            <div className="flex-shrink-0">
-              <div className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-44 md:h-44">
-                <img
-                  src="/images/leaderboard-frame.png"
-                  alt="برواز لوحة الشرف"
-                  className="w-full h-full object-contain"
-                />
+            {/* Content (right side): frame + text */}
+            <div className="flex-1 order-2 md:order-2">
+              <div className="flex flex-col md:flex-row-reverse items-center md:items-start gap-6">
+
+                {/* Frame image */}
+                <div className="flex-shrink-0">
+                  <div className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-44 md:h-44">
+                    <img
+                      src="/images/leaderboard-frame.png"
+                      alt="برواز لوحة الشرف"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+
+                {/* Text side */}
+                <div className="flex-1 text-center md:text-right">
+                  <span
+                    className="
+                      inline-block mb-3 sm:mb-4
+                      px-3.5 py-1.5 rounded-full
+                      text-[11px] sm:text-xs font-black
+                      bg-white/15 text-white
+                    "
+                  >
+                    المكان ده مستنيك
+                  </span>
+
+                  <h2 className="text-lg sm:text-2xl md:text-[26px] font-black text-white mb-3 sm:mb-4">
+                    اسمك مش على اللوحة... لسه!
+                  </h2>
+
+                  <p className="text-white/85 text-sm sm:text-base leading-7 sm:leading-8 mb-5 sm:mb-6">
+                    20 طالب في الصف الثالث الثانوي ذاكروا وحققوا، ومكانهم اتسجّل بإطار وشارة. اللوحة الجديدة بتتحدث كل فترة — ذاكر بجدية، كمّل امتحاناتك، وخلّي صورتك هي اللي الكل يشوفها المرة الجاية.
+                  </p>
+
+                  {/* Stats row */}
+                  <div className="flex flex-wrap justify-center md:justify-start gap-x-8 gap-y-4">
+                    <div className="text-center md:text-right">
+                      <p className="text-white font-black text-sm sm:text-base">ذاكر بانتظام</p>
+                      <p className="text-white/70 text-xs sm:text-sm mt-1">حضور واستمرار في الحصص</p>
+                    </div>
+                    <div className="text-center md:text-right">
+                      <p className="text-white font-black text-sm sm:text-base">حل الامتحانات</p>
+                      <p className="text-white/70 text-xs sm:text-sm mt-1">درجاتك هي تذكرتك للوحة</p>
+                    </div>
+                    <div className="text-center md:text-right">
+                      <p className="text-white font-black text-sm sm:text-base">اتفوق على نفسك</p>
+                      <p className="text-white/70 text-xs sm:text-sm mt-1">فضي، ذهبي، ماسي</p>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
 
