@@ -1,38 +1,11 @@
-import { useEffect, useState } from "react";
-
-const LAUNCH_DATE = new Date("2026-08-20T19:00:00+02:00");
-
-function getTimeLeft() {
-  const diff = LAUNCH_DATE.getTime() - Date.now();
-  if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-  return {
-    days: Math.floor(diff / 864e5),
-    hours: Math.floor((diff / 36e5) % 24),
-    minutes: Math.floor((diff / 6e4) % 60),
-    seconds: Math.floor((diff / 1e3) % 60),
-  };
-}
+import { Lock, TrafficCone, Clock } from "lucide-react";
+import { FaFacebookF, FaInstagram } from "react-icons/fa";
 
 export function MaintenanceMode() {
-  const [t, setT] = useState(getTimeLeft());
-  useEffect(() => {
-    const id = setInterval(() => setT(getTimeLeft()), 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const pad = (n: number) => String(n).padStart(2, "0");
-
-  const units = [
-    { label: "يوم", value: t.days },
-    { label: "ساعة", value: t.hours },
-    { label: "دقيقة", value: t.minutes },
-    { label: "ثانية", value: t.seconds },
-  ];
-
   return (
     <div
       dir="rtl"
-      className="fixed inset-0 z-[99999] flex items-center justify-center overflow-hidden px-6"
+      className="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto px-4 sm:px-6 py-10"
       style={{ background: "#0d0717", fontFamily: "'Cairo', sans-serif" }}
     >
       {/* Grid background */}
@@ -46,29 +19,27 @@ export function MaintenanceMode() {
       />
       <div className="absolute top-0 left-0 right-0 h-32" style={{ background: "linear-gradient(#0d0717,transparent)" }} />
       <div className="absolute bottom-0 left-0 right-0 h-32" style={{ background: "linear-gradient(transparent,#0d0717)" }} />
-      <div className="absolute rounded-full" style={{ top:"30%", left:"-80px", width:"320px", height:"320px", background:"rgba(179,72,254,0.12)", filter:"blur(90px)" }} />
-      <div className="absolute rounded-full" style={{ bottom:"20%", right:"-80px", width:"260px", height:"260px", background:"rgba(246,172,8,0.08)", filter:"blur(90px)" }} />
+      <div className="absolute rounded-full" style={{ top: "25%", left: "-80px", width: "320px", height: "320px", background: "rgba(179,72,254,0.12)", filter: "blur(90px)" }} />
+      <div className="absolute rounded-full" style={{ bottom: "15%", right: "-80px", width: "260px", height: "260px", background: "rgba(246,172,8,0.08)", filter: "blur(90px)" }} />
 
       <div className="relative z-10 text-center w-full max-w-lg mx-auto">
 
-        {/* Eyebrow */}
-        <div
-          className="inline-flex items-center gap-2 mb-7 px-5 py-2 rounded-full"
-          style={{ border: "1px solid rgba(179,72,254,0.35)" }}
-        >
-          <span
-            className="w-2 h-2 rounded-full animate-pulse"
-            style={{ background: "#B348FE" }}
+        {/* Logo */}
+        <div className="flex flex-col items-center gap-2 mb-8 sm:mb-10">
+          <img
+            src="/images/logo.png"
+            alt="مستر زياد ربيع"
+            className="w-14 h-14 sm:w-16 sm:h-16 mb-1 object-contain"
           />
-          <span className="text-xs font-bold tracking-wider" style={{ color: "#B348FE" }}>
-            جاري التطوير
+          <span className="text-white font-black text-lg sm:text-xl">مستر زياد ربيع</span>
+          <span className="text-[11px] sm:text-xs" style={{ color: "#8b8b9a" }}>
+            الكيمياء بأسلوب مختلف
           </span>
         </div>
 
         {/* Headline */}
-        <h1 className="text-white font-black leading-tight mb-4" style={{ fontSize: "clamp(22px,5vw,38px)" }}>
-          المنصة بتتحدث دلوقتي
-          <br />
+        <h1 className="text-white font-black leading-tight mb-4" style={{ fontSize: "clamp(24px,6vw,42px)" }}>
+          المنصة{" "}
           <span
             style={{
               background: "linear-gradient(90deg,#B348FE,#F6AC08)",
@@ -77,65 +48,112 @@ export function MaintenanceMode() {
               backgroundClip: "text",
             }}
           >
-            عشان تبقى أحسن ليك
-          </span>
+            مغلقة
+          </span>{" "}
+          حاليًا
         </h1>
 
-        {/* Divider */}
-        <div
-          className="mx-auto mb-8 rounded-full"
-          style={{ width: "48px", height: "2px", background: "linear-gradient(90deg,#B348FE,#F6AC08)" }}
-        />
-
-        <p className="text-sm leading-loose mb-9 max-w-sm mx-auto" style={{ color: "#8b8b9a" }}>
-          إحنا شغالين على تحسينات جديدة هتفيدك في رحلتك الدراسية.
-          هنرجع تاني قريبًا جدًا.
+        {/* Description */}
+        <p className="text-sm sm:text-[15px] leading-loose mb-3 max-w-sm mx-auto" style={{ color: "#8b8b9a" }}>
+          نحن نعمل حاليًا على بعض التحديثات لنقدم لك تجربة أفضل قريبًا
         </p>
 
-        {/* Countdown */}
-        <div className="grid grid-cols-4 gap-3 mb-8">
-          {units.map((u) => (
+        <p className="text-sm sm:text-[15px] font-bold mb-9 flex items-center justify-center gap-1.5" style={{ color: "#c9a6ff" }}>
+          شكرًا لتفهمك ودعمك المستمر
+          <span>💜</span>
+        </p>
+
+        {/* Illustration */}
+        <div className="relative w-full flex items-center justify-center mb-9 sm:mb-10">
+          <div className="relative">
             <div
-              key={u.label}
-              className="flex flex-col items-center justify-center py-4 rounded-xl gap-1"
+              className="w-24 h-24 sm:w-28 sm:h-28 rounded-[28px] flex items-center justify-center"
               style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
+                background: "linear-gradient(160deg, rgba(179,72,254,0.25), rgba(88,0,169,0.15))",
+                border: "1px solid rgba(179,72,254,0.35)",
+                boxShadow: "0 20px 60px rgba(179,72,254,.25)",
               }}
             >
-              <span className="text-white font-black text-2xl sm:text-3xl tabular-nums">
-                {pad(u.value)}
-              </span>
-              <span className="text-xs font-bold" style={{ color: "#555568" }}>
-                {u.label}
-              </span>
+              <Lock className="w-11 h-11 sm:w-12 sm:h-12" style={{ color: "#B348FE" }} strokeWidth={1.75} />
             </div>
-          ))}
+
+            {/* Caution stripe */}
+            <div
+              className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-28 sm:w-32 h-4 sm:h-5 rounded-full"
+              style={{
+                background: "repeating-linear-gradient(45deg, #F6AC08 0 10px, #0d0717 10px 20px)",
+                opacity: 0.9,
+              }}
+            />
+
+            {/* Cones */}
+            <TrafficCone
+              className="absolute -bottom-3 -right-8 sm:-right-10 w-7 h-7 sm:w-8 sm:h-8 rotate-6"
+              style={{ color: "#F6AC08" }}
+              strokeWidth={2}
+            />
+            <TrafficCone
+              className="absolute -bottom-4 -left-9 sm:-left-11 w-6 h-6 sm:w-7 sm:h-7 -rotate-12"
+              style={{ color: "#F6AC08" }}
+              strokeWidth={2}
+            />
+
+            {/* Badge: جاري الصيانة */}
+            <div
+              className="absolute -top-2 -left-16 sm:-left-20 whitespace-nowrap px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold"
+              style={{
+                background: "rgba(13,7,23,0.9)",
+                border: "1px solid rgba(179,72,254,0.35)",
+                color: "#B348FE",
+              }}
+            >
+              جاري الصيانة
+            </div>
+          </div>
         </div>
 
-        {/* Launch date */}
-        <p className="text-xs mb-7" style={{ color: "#555568" }}>
-          الإطلاق يوم{" "}
-          {LAUNCH_DATE.toLocaleDateString("ar-EG", { day: "numeric", month: "long", year: "numeric" })}{" "}
-          — الساعة{" "}
-          {LAUNCH_DATE.toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}{" "}
-          بتوقيت القاهرة
-        </p>
-
-        {/* Progress */}
+        {/* "We'll be back" pill */}
         <div
-          className="w-full max-w-xs mx-auto mb-4 rounded-full overflow-hidden"
-          style={{ height: "3px", background: "rgba(255,255,255,0.07)" }}
+          className="inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-3 px-5 py-3 rounded-2xl mb-6"
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
         >
-          <div
-            className="h-full rounded-full"
-            style={{ width: "62%", background: "linear-gradient(90deg,#B348FE,#F6AC08)" }}
-          />
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 shrink-0" style={{ color: "#B348FE" }} />
+            <span className="text-white text-sm font-bold">
+              سنعود قريبًا بمزيد من الميزات
+            </span>
+          </div>
+          <span className="hidden sm:block w-[1px] h-4" style={{ background: "rgba(255,255,255,0.15)" }} />
+          <span className="text-xs" style={{ color: "#8b8b9a" }}>
+            تابعنا للحصول على آخر المستجدات
+          </span>
         </div>
 
-        <p className="text-xs font-bold tracking-widest" style={{ color: "#555568" }}>
-          التحديث جاي في السكة
-        </p>
+        {/* Social icons */}
+        <div className="flex items-center justify-center gap-3">
+          <a
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            <FaFacebookF className="text-white text-[15px]" />
+          </a>
+          <a
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            <FaInstagram className="text-white text-[16px]" />
+          </a>
+        </div>
+
       </div>
     </div>
   );
