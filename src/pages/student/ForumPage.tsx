@@ -1,39 +1,85 @@
-import { MessageCircle, Clock } from "lucide-react";
+import { Swords, Trophy, Zap } from "lucide-react";
 
 export default function ForumPage() {
   return (
-    <div
-      dir="rtl"
-      className="min-h-full flex items-center justify-center p-5 sm:p-6"
-    >
-      <div className="w-full max-w-2xl text-center">
+    <div dir="rtl" className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
 
-        {/* Icon */}
-        <div className="mx-auto mb-5 sm:mb-6 flex h-16 w-16 sm:h-18 sm:w-18 md:h-20 md:w-20 items-center justify-center rounded-full bg-[#F6EEFF] dark:bg-[#B348FE]/10">
-          <MessageCircle
-            className="text-[#B348FE] w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10"
-          />
-        </div>
-
-        {/* Title */}
-        <h1 className="text-xl xs:text-2xl sm:text-2xl md:text-3xl font-bold text-[#5800a9] dark:text-white mb-2.5 sm:mb-3">
-          المنتدى العلمي
+      {/* Header */}
+      <div className="text-right">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#5800a9] dark:text-white mb-2">
+          بطولة الأسئلة
         </h1>
-
-        {/* Description */}
-        <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base leading-6 sm:leading-7 max-w-lg mx-auto px-2 sm:px-0">
-          مساحة مخصصة للطلاب لمناقشة الدروس، وطرح الأسئلة،
-          ومشاركة المعرفة والخبرات مع باقي الطلاب والمستر.
+        <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base leading-7 max-w-xl">
+          نافس زمايلك في حل الأسئلة واثبت إنك الأقوى في صفك الدراسي
         </p>
-
-        {/* Coming Soon */}
-        <div className="mt-6 sm:mt-8 inline-flex items-center gap-2 rounded-full bg-[#F6EEFF] dark:bg-[#B348FE]/10 px-4 sm:px-5 py-2.5 sm:py-3 text-[#B348FE] dark:text-[#C97AFF] font-medium text-sm sm:text-base">
-          <Clock size={16} className="sm:hidden" />
-          <Clock size={18} className="hidden sm:block" />
-          <span>المنتدى قريبًا</span>
-        </div>
-
       </div>
+
+      {/* Big colored card */}
+      <div
+        className="
+          relative overflow-hidden
+          rounded-2xl sm:rounded-3xl
+          p-5 sm:p-8 md:p-10
+          bg-[#5800a9] dark:bg-[#b600d7]
+        "
+      >
+        <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
+
+          {/* Icon side */}
+          <div className="flex-shrink-0">
+            <div
+              className="
+                w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40
+                rounded-full
+                bg-white/10
+                flex items-center justify-center
+              "
+            >
+              <Swords className="text-white w-12 h-12 sm:w-16 sm:h-16 md:w-[70px] md:h-[70px]" strokeWidth={1.75} />
+            </div>
+          </div>
+
+          {/* Text side */}
+          <div className="flex-1 text-center md:text-right">
+            <span
+              className="
+                inline-block mb-3 sm:mb-4
+                px-3.5 py-1.5 rounded-full
+                text-[11px] sm:text-xs font-black
+                bg-white/15 text-white
+              "
+            >
+              قريبًا
+            </span>
+
+            <h2 className="text-lg sm:text-2xl md:text-[26px] font-black text-white mb-3 sm:mb-4">
+              استعد للمنافسة!
+            </h2>
+
+            <p className="text-white text-sm sm:text-base leading-7 sm:leading-8 mb-5 sm:mb-6">
+              هنطلق قريبًا مسابقة أسئلة مباشرة بين طلاب المنصة، كل طالب يتنافس مع زمايله في صفه الدراسي، وأكتر واحد يجمع نقط ويجاوب صح هيبقى بطل المنصة في صفه.
+            </p>
+
+            {/* Stats row */}
+            <div className="flex flex-wrap justify-center md:justify-start gap-x-8 gap-y-4">
+              <div className="text-center md:text-right">
+                <p className="text-white font-black text-sm sm:text-base">منافسة مباشرة</p>
+                <p className="text-white text-xs sm:text-sm mt-1">تحدي حي بينك وبين زمايلك</p>
+              </div>
+              <div className="text-center md:text-right">
+                <p className="text-white font-black text-sm sm:text-base">بطل كل صف</p>
+                <p className="text-white text-xs sm:text-sm mt-1">لقب خاص لأقوى طالب في صفه</p>
+              </div>
+              <div className="text-center md:text-right">
+                <p className="text-white font-black text-sm sm:text-base">تحديث مستمر</p>
+                <p className="text-white text-xs sm:text-sm mt-1">مسابقات وجولات جديدة بانتظام</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   );
 }
