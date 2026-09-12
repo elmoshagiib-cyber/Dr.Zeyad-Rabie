@@ -1266,6 +1266,19 @@ const saveProgress = async (currentTime: number, duration: number) => {
     });
   };
 
+  const currentChapterTitle = (() => {
+    if (videoChapters.length === 0) return null;
+    let current = videoChapters[0];
+    for (const chapter of videoChapters) {
+      if (currentTime >= chapter.time) {
+        current = chapter;
+      } else {
+        break;
+      }
+    }
+    return current.title;
+  })();
+
   return (
     <div className="min-h-screen bg-white dark:bg-[#09090B]" dir="rtl">
       {toast && (
@@ -2254,6 +2267,18 @@ const saveProgress = async (currentTime: number, duration: number) => {
                           />
                         </div>
                       </div>
+
+                      {currentChapterTitle && (
+                        <button
+                          onClick={() => setShowChapters(true)}
+                          className="flex items-center gap-1.5 text-white hover:text-[#b600d7] transition-colors max-w-[140px] sm:max-w-[220px]"
+                        >
+                          <ListVideo size={16} className="sm:w-[18px] sm:h-[18px] flex-shrink-0" />
+                          <span className="text-xs sm:text-sm font-bold truncate">
+                            {currentChapterTitle}
+                          </span>
+                        </button>
+                      )}
 
                     </div>
 
