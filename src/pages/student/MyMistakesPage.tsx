@@ -123,26 +123,51 @@ export function MyMistakesPage() {
     });
   };
 
-  if (loading) {
-    return (
-      <StudentLayout>
-        <main className="flex-1 flex items-center justify-center min-h-[60vh]">
-          <div className="w-10 h-10 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
-        </main>
-      </StudentLayout>
-    );
-  }
-
   return (
     <StudentLayout>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto p-4 sm:p-6">
+
+          {/* Header */}
+          <div
+            className="
+              relative overflow-hidden
+              mb-5 sm:mb-6
+              rounded-2xl sm:rounded-3xl
+              px-4 sm:px-6 md:px-8
+              py-5 sm:py-6 md:py-7
+              flex items-center justify-between gap-4
+              bg-[#5800a9] dark:bg-[#b600d7]
+            "
+          >
+            <div className="relative z-10 text-right">
+              <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-black text-white mb-1 sm:mb-1.5">
+                أخطائي
+              </h1>
+              <p className="text-white/80 text-[11px] xs:text-xs sm:text-sm">
+                راجع أسئلتك اللي غلطت فيها وابقى أقوى
+              </p>
+            </div>
+
+            <div
+              className="
+                relative z-10 flex-shrink-0
+                w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11
+                rounded-xl sm:rounded-2xl
+                bg-white/15
+                flex items-center justify-center
+              "
+            >
+              <Sparkles className="text-white w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+          </div>
+
           <div className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 dark:border-[#2A2A2A] p-6 sm:p-10">
             <div className="text-center mb-6">
-              <h1 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white mb-2">
+              <h2 className="text-lg sm:text-xl font-black text-[#5800a9] dark:text-white mb-2">
                 خليك أقوى واحد وسط عيلتنا
-              </h1>
-              <div className="w-16 h-1 bg-gradient-to-r from-emerald-400 to-pink-400 rounded-full mx-auto" />
+              </h2>
+              <div className="w-16 h-1 bg-[#5800a9] dark:bg-[#b600d7] rounded-full mx-auto" />
             </div>
 
             {wrongQuestionIds.length === 0 ? (
@@ -155,11 +180,11 @@ export function MyMistakesPage() {
             ) : (
               <>
                 <p className="text-center text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
-                  عندك <span className="font-black text-[#B348FE]">{wrongQuestionIds.length} أسئلة</span> محتاج تراجعهم. يلا نبدأ مراجعة عشان اجمد واحد وسط العيلة
+                  عندك <span className="font-black text-[#5800a9] dark:text-[#b600d7]">{wrongQuestionIds.length} أسئلة</span> محتاج تراجعهم. يلا نبدأ مراجعة عشان اجمد واحد وسط العيلة
                 </p>
 
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-5 mb-6 text-center">
-                  <p className="font-black text-gray-900 dark:text-white mb-2">
+                  <p className="font-black text-[#5800a9] dark:text-white mb-2">
                     ازاي بتشتغل؟
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
@@ -168,7 +193,7 @@ export function MyMistakesPage() {
                 </div>
 
                 <div className="mb-6">
-                  <p className="text-center font-black text-gray-900 dark:text-white mb-3">
+                  <p className="text-center font-black text-[#5800a9] dark:text-white mb-3">
                     اختار عدد الأسئلة اللي عايز تراجعها
                   </p>
                   <div className="flex flex-wrap justify-center gap-2">
@@ -181,7 +206,7 @@ export function MyMistakesPage() {
                           onClick={() => setSelectedCount(n)}
                           className={`px-4 py-2 rounded-xl font-black text-sm transition-all ${
                             selectedCount === n
-                              ? "bg-[#B348FE] text-white"
+                              ? "bg-[#5800a9] dark:bg-[#b600d7] text-white"
                               : "bg-white dark:bg-[#111111] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-[#2A2A2A]"
                           }`}
                         >
@@ -194,7 +219,7 @@ export function MyMistakesPage() {
                 <Button
                   onClick={startReview}
                   disabled={selectedCount === 0}
-                  className="w-full bg-[#B348FE] hover:bg-[#9E2FFF] text-white font-black py-3 text-base disabled:opacity-50"
+                  className="w-full bg-[#5800a9] dark:bg-[#b600d7] hover:opacity-90 text-white font-black py-3 text-base disabled:opacity-50"
                 >
                   <Sparkles size={18} />
                   امتحان خاص بيك ({selectedCount} سؤال)

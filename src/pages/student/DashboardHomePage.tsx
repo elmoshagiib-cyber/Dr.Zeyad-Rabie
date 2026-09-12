@@ -214,14 +214,11 @@ export default function DashboardHomePage() {
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-[#5800a9] dark:text-[#b600d7] bg-[#F6EEFF] dark:bg-[#2B103D] hover:bg-[#EAD8FF] dark:hover:bg-[#3A1652] transition-all duration-300 font-bold text-xs sm:text-sm"
           >
             <ArrowRight size={16} />
-            الرجوع للموقع الرئيسي
+          الرجوع للصفحة الرئيسية
           </button>
         </div>
 
-        {loading ? (
-          <div className="py-20 text-center text-gray-400 font-bold">جاري التحميل...</div>
-        ) : (
-          <>
+        <>
             {/* ── إحصائيات إضافية (4 كروت) ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-sm">
@@ -457,7 +454,6 @@ export default function DashboardHomePage() {
               </Card>
             </div>
           </>
-        )}
       </div>
     </StudentLayout>
   );
