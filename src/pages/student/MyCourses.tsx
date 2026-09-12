@@ -65,7 +65,7 @@ export function MyCoursesPage() {
   return (
     <StudentLayout>
       <>
-        <div className="p-4 sm:p-6 space-y-6 min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#0B0B0B] dark:via-[#111111] dark:to-[#0B0B0B]">
+        <div className="p-4 sm:p-6 space-y-6 min-h-screen">
 
           {/* Header */}
           <div
@@ -207,7 +207,7 @@ export function MyCoursesPage() {
                           text-lg xs:text-xl sm:text-[22px] md:text-[24px] leading-tight
                           font-black text-[#5800a9] dark:text-white
                           line-clamp-2
-                          group-hover:text-[#b600d7] dark:group-hover:text-[#c9a6ff]
+                          group-hover:text-[#5800a9] dark:group-hover:text-[#b600d7]
                           transition-colors duration-300
                           cursor-pointer
                         "
@@ -238,8 +238,8 @@ export function MyCoursesPage() {
                               className="
                                 mt-2 inline-flex items-center gap-1
                                 text-[13px] sm:text-sm font-bold text-[#5800a9]
-                                dark:text-[#c9a6ff]
-                                hover:text-[#b600d7]
+                                dark:text-[#b600d7]
+                                hover:text-[#5800a9]
                                 dark:hover:text-[#b600d7]
                                 transition-colors
                               "
@@ -266,10 +266,10 @@ export function MyCoursesPage() {
                             rounded-xl
                             font-black text-[15px]
                             text-white
-                            bg-[#b600d7]
-                            border-2 border-[#b600d7]
+                            bg-[#5800a9] dark:bg-[#b600d7]
+                            border-2 border-[#5800a9] dark:border-[#b600d7]
                             hover:bg-transparent
-                            hover:text-[#b600d7]
+                            hover:text-[#5800a9] dark:hover:text-[#b600d7]
                             !shadow-none
                             cursor-pointer
                             transition-all duration-300
