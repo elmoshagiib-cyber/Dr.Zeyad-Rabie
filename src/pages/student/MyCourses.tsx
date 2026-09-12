@@ -68,13 +68,36 @@ export function MyCoursesPage() {
         <div className="p-4 sm:p-6 space-y-6 min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#0B0B0B] dark:via-[#111111] dark:to-[#0B0B0B]">
 
           {/* Header */}
-          <div className="text-right">
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-              كورساتي
-            </h1>
-            <p className="text-slate-500 dark:text-gray-400 text-sm mt-1">
-              {enrolledCourses.length} كورس مشترك فيه
-            </p>
+          <div
+            className="
+              relative overflow-hidden
+              rounded-2xl sm:rounded-3xl
+              px-4 sm:px-6 md:px-8
+              py-5 sm:py-6 md:py-7
+              flex items-center justify-between gap-4
+              bg-[#5800a9] dark:bg-[#b600d7]
+            "
+          >
+            <div className="relative z-10 text-right">
+              <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-black text-white mb-1 sm:mb-1.5">
+                كورساتي
+              </h1>
+              <p className="text-white/80 text-[11px] xs:text-xs sm:text-sm">
+                {enrolledCourses.length} كورس مشترك فيه
+              </p>
+            </div>
+
+            <div
+              className="
+                relative z-10 flex-shrink-0
+                w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11
+                rounded-xl sm:rounded-2xl
+                bg-white/15
+                flex items-center justify-center
+              "
+            >
+              <BookOpen className="text-white w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
           </div>
 
           {/* Loading skeleton */}
@@ -93,10 +116,10 @@ export function MyCoursesPage() {
               <div className="w-20 h-20 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center mb-5">
                 <BookOpen className="text-[#B348FE]" size={36} />
               </div>
-              <h3 className="text-lg font-black text-slate-800 dark:text-white">
+              <h3 className="text-base sm:text-lg font-black text-[#5800a9] dark:text-white">
                 لسه مشتركتش في أي كورس
               </h3>
-              <p className="text-slate-500 dark:text-gray-400 text-sm mt-2 max-w-xs">
+              <p className="text-slate-500 dark:text-gray-400 text-xs sm:text-sm mt-2 max-w-xs">
                 تصفح الكورسات المتاحة وابدأ رحلتك التعليمية دلوقتي
               </p>
             </div>
@@ -181,10 +204,10 @@ export function MyCoursesPage() {
                     <div className="p-4 sm:p-5 lg:p-6 flex flex-col gap-3">
                       <h3
                         className="
-                          text-[21px] sm:text-[24px] leading-tight
-                          font-black text-slate-900 dark:text-white
+                          text-lg xs:text-xl sm:text-[22px] md:text-[24px] leading-tight
+                          font-black text-[#5800a9] dark:text-white
                           line-clamp-2
-                          group-hover:text-[#5800a9] dark:group-hover:text-[#b600d7]
+                          group-hover:text-[#b600d7] dark:group-hover:text-[#c9a6ff]
                           transition-colors duration-300
                           cursor-pointer
                         "
