@@ -153,6 +153,9 @@ export function CourseDetailPage() {
   const seekBarRef = useRef<HTMLDivElement>(null);
   const [videoChapters, setVideoChapters] = useState<{ title: string; time: number }[]>([]);
   const [showChapters, setShowChapters] = useState(false);
+  const [chapterThumbnails, setChapterThumbnails] = useState<Record<number, string>>({});
+  const thumbVideoRef = useRef<HTMLVideoElement>(null);
+  const thumbCanvasRef = useRef<HTMLCanvasElement>(null);
   const [previewPhase, setPreviewPhase] = useState<"image" | "video" | "image-final">("image");
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -865,6 +868,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
     setPlayerStage("info");
     setVideoChapters([]);
     setShowChapters(false);
+    setChapterThumbnails({});
     lessonProgressRef.current = null;
     hasIncrementedWatchedLessonsRef.current = false;
 
@@ -1122,6 +1126,66 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
     return () => clearTimeout(timer);
   }, [videoPlayerOpen, playerStage]);
+
+  // توليد صور مصغرة (thumbnails) لكل فصل من الفيديو نفسه، زي يوتيوب
+  useEffect(() => {
+    if (!showChapters || videoChapters.length === 0 || !videoPlayerUrl) return;
+    if (Object.keys(chapterThumbnails).length >= videoChapters.length) return;
+
+    const video = thumbVideoRef.current;
+    const canvas = thumbCanvasRef.current;
+    if (!video || !canvas) return;
+
+    let cancelled = false;
+
+    const captureAt = (time: number): Promise<string> => {
+      return new Promise((resolve) => {
+        const handleSeeked = () => {
+          video.removeEventListener("seeked", handleSeeked);
+          const ctx = canvas.getContext("2d");
+          canvas.width = video.videoWidth || 320;
+          canvas.height = video.videoHeight || 180;
+          if (ctx) {
+            try {
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              resolve(canvas.toDataURL("image/jpeg", 0.6));
+            } catch {
+              resolve("");
+            }
+          } else {
+            resolve("");
+          }
+        };
+        video.addEventListener("seeked", handleSeeked);
+        video.currentTime = time;
+      });
+    };
+
+    const generateAll = async () => {
+      for (let i = 0; i < videoChapters.length; i++) {
+        if (cancelled) return;
+        const dataUrl = await captureAt(videoChapters[i].time + 0.5);
+        if (!cancelled && dataUrl) {
+          setChapterThumbnails((prev) => ({ ...prev, [i]: dataUrl }));
+        }
+      }
+    };
+
+    if (video.readyState >= 1) {
+      generateAll();
+    } else {
+      const handleLoaded = () => generateAll();
+      video.addEventListener("loadedmetadata", handleLoaded, { once: true });
+      return () => {
+        cancelled = true;
+        video.removeEventListener("loadedmetadata", handleLoaded);
+      };
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [showChapters, videoChapters, videoPlayerUrl, chapterThumbnails]);
 
 
 
@@ -2140,6 +2204,18 @@ const saveProgress = async (currentTime: number, duration: number) => {
                   autoPlay
                 />
 
+                {/* عناصر مخفية لتوليد صور الفصول المصغرة */}
+                <video
+                  ref={thumbVideoRef}
+                  src={videoPlayerUrl}
+                  crossOrigin="anonymous"
+                  muted
+                  playsInline
+                  preload="metadata"
+                  style={{ display: "none" }}
+                />
+                <canvas ref={thumbCanvasRef} style={{ display: "none" }} />
+
                 <AnimatePresence>
                   {showIntroCard && (
                     <motion.div
@@ -2371,11 +2447,26 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                   videoRef.current.currentTime = chapter.time;
                                 }
                               }}
-                              className={`w-full flex items-start justify-between gap-3 px-3 sm:px-4 py-3 rounded-xl transition-colors text-right ${
+                              className={`w-full flex items-start gap-3 px-3 sm:px-4 py-3 rounded-xl transition-colors text-right ${
                                 isActive ? "bg-[#5800a9]/25 dark:bg-[#b600d7]/25" : "hover:bg-white/5"
                               }`}
                             >
-                              <span className="flex items-start gap-2 flex-1 min-w-0 justify-start">
+                              <div className="relative w-24 h-14 sm:w-28 sm:h-16 flex-shrink-0 rounded-lg overflow-hidden bg-white/10">
+                                {chapterThumbnails[index] ? (
+                                  <img
+                                    src={chapterThumbnails[index]}
+                                    alt={chapter.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full animate-pulse bg-white/10" />
+                                )}
+                                <span className="absolute bottom-1 left-1 bg-black/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                                  {formatTime(chapter.time)}
+                                </span>
+                              </div>
+
+                              <span className="flex items-start gap-2 flex-1 min-w-0 justify-start pt-1">
                                 {isActive && (
                                   <span className="w-1.5 h-1.5 mt-2 rounded-full bg-[#c9a6ff] dark:bg-[#e9c9ff] flex-shrink-0" />
                                 )}
@@ -2386,10 +2477,6 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                 >
                                   {chapter.title}
                                 </span>
-                              </span>
-
-                              <span className="text-gray-300 text-sm sm:text-base font-bold tabular-nums flex-shrink-0">
-                                {formatTime(chapter.time)}
                               </span>
                             </button>
                           );
