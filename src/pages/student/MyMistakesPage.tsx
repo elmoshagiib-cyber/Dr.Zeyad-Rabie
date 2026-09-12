@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 import { Button } from "../../components/ui/Button";
 import { supabase } from "../../lib/supabase";
@@ -144,8 +144,8 @@ export function MyMistakesPage() {
               <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-black text-white mb-1 sm:mb-1.5">
                 أخطائي
               </h1>
-              <p className="text-white/80 text-[11px] xs:text-xs sm:text-sm">
-                راجع أسئلتك اللي غلطت فيها وابقى أقوى
+              <p className="text-white/80 text-[11px] xs:text-xs sm:text-sm leading-5">
+                هنا هتلاقي كل الأسئلة اللي غلطت فيها في الامتحانات والواجبات السابقة، وتقدر تعمل امتحان خاص بيك عشان تراجعها وتتأكد إنك فهمتها كويس
               </p>
             </div>
 
@@ -172,9 +172,8 @@ export function MyMistakesPage() {
 
             {wrongQuestionIds.length === 0 ? (
               <div className="text-center py-8">
-                <BookOpen className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />
                 <p className="text-gray-600 dark:text-gray-400 font-bold">
-                  مفيش عندك أي أسئلة غلط دلوقتي، أنت شاطر!
+                 مفيش عندك أي أسئلة غلط دلوقتي.
                 </p>
               </div>
             ) : (
