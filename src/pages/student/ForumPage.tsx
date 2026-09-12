@@ -52,7 +52,7 @@ export default function ForumPage() {
               قريبًا
             </span>
 
-            <h2 className="text-lg sm:text-2xl md:text-[26px] font-black text-white mb-3 sm:mb-4">
+            <h2 className="text-lg sm:text-2xl md:text-[26px] font-black text-white mb-3 sm:mb-4" style={{ color: "#ffffff" }}>
               استعد للمنافسة!
             </h2>
 
@@ -63,16 +63,16 @@ export default function ForumPage() {
             {/* Stats row */}
             <div className="flex flex-wrap justify-center md:justify-start gap-x-8 gap-y-4">
               <div className="text-center md:text-right">
-                <p className="text-white font-black text-sm sm:text-base">منافسة مباشرة</p>
-                <p className="text-white text-xs sm:text-sm mt-1">تحدي حي بينك وبين زمايلك</p>
+                <p className="font-black text-sm sm:text-base" style={{ color: "#ffffff" }}>منافسة مباشرة</p>
+                <p className="text-xs sm:text-sm mt-1" style={{ color: "#ffffff" }}>تحدي حي بينك وبين زمايلك</p>
               </div>
               <div className="text-center md:text-right">
-                <p className="text-white font-black text-sm sm:text-base">بطل كل صف</p>
-                <p className="text-white text-xs sm:text-sm mt-1">لقب خاص لأقوى طالب في صفه</p>
+                <p className="font-black text-sm sm:text-base" style={{ color: "#ffffff" }}>بطل كل صف</p>
+                <p className="text-xs sm:text-sm mt-1" style={{ color: "#ffffff" }}>لقب خاص لأقوى طالب في صفه</p>
               </div>
               <div className="text-center md:text-right">
-                <p className="text-white font-black text-sm sm:text-base">تحديث مستمر</p>
-                <p className="text-white text-xs sm:text-sm mt-1">مسابقات وجولات جديدة بانتظام</p>
+                <p className="font-black text-sm sm:text-base" style={{ color: "#ffffff" }}>تحديث مستمر</p>
+                <p className="text-xs sm:text-sm mt-1" style={{ color: "#ffffff" }}>مسابقات وجولات جديدة بانتظام</p>
               </div>
             </div>
           </div>

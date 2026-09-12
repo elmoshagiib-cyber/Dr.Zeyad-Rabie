@@ -57,7 +57,7 @@ const studentNavGroups: NavGroup[] = [
   {
     label: "المجتمع",
     items: [
-      { label: "المنتدى", path: "/dashboard/forum", icon: <MessageCircle size={20} /> },
+      { label: "المسابقة", path: "/dashboard/forum", icon: <MessageCircle size={20} /> },
       { label: "ابطال المنصه", path: "/dashboard/leaderboard", icon: <Trophy size={20} /> },
     ],
   },
