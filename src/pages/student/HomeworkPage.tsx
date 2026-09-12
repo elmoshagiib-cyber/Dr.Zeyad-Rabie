@@ -134,10 +134,10 @@ export function HomeworkPage() {
         <div className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 lg:py-8">
           {/* Header */}
           <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 dark:text-white mb-1.5 sm:mb-2">
+            <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-black text-[#5800a9] dark:text-white mb-1.5 sm:mb-2">
               الواجبات
             </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm lg:text-base">
+            <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm md:text-sm lg:text-base">
               متابعة وتسليم جميع الواجبات الدراسية
             </p>
           </div>
@@ -148,23 +148,23 @@ export function HomeworkPage() {
               <div className="w-9 h-9 sm:w-10 sm:h-10 border-4 border-[#B348FE]/20 border-t-[#B348FE] rounded-full animate-spin" />
             </div>
           ) : homeworks.length === 0 ? (
-            <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl p-8 sm:p-10 text-center">
-              <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={40} />
-              <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-2">لا توجد واجبات</h2>
-              <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">لا توجد واجبات متاحة حالياً.</p>
+            <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 text-center">
+              <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={36} />
+              <h2 className="text-base sm:text-lg md:text-xl font-black text-[#5800a9] dark:text-white mb-2">لا توجد واجبات</h2>
+              <p className="text-xs sm:text-sm md:text-base text-gray-500 dark:text-gray-400">لا توجد واجبات متاحة حالياً.</p>
             </div>
           ) : null}
 
           {/* سجل الواجبات - جدول تفصيلي زي صفحة تفاصيل الطالب */}
           {!loading && homeworks.length > 0 && (
             <div className="mt-8 sm:mt-10">
-              <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 dark:text-white mb-3.5 sm:mb-4">
+              <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-black text-[#5800a9] dark:text-white mb-3.5 sm:mb-4">
                 سجل الواجبات
               </h2>
 
               <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-xs sm:text-sm">
+                  <table className="w-full text-xs sm:text-sm md:text-sm lg:text-base">
                     <thead>
                       <tr className="bg-gray-50 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400">
                         <th className="text-right font-bold px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">#</th>
@@ -187,16 +187,16 @@ export function HomeworkPage() {
 
                           return (
                             <tr key={hw.id} className="border-t border-gray-100 dark:border-[#2A2A2A]">
-                              <td className="px-3 sm:px-4 py-2.5 sm:py-3 font-bold text-gray-900 dark:text-white">
+                              <td className="px-3 sm:px-4 py-2.5 sm:py-3 font-bold text-[#5800a9] dark:text-white">
                                 {(tablePage - 1) * tablePerPage + idx + 1}
                               </td>
-                              <td className="px-3 sm:px-4 py-2.5 sm:py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">
+                              <td className="px-3 sm:px-4 py-2.5 sm:py-3 font-bold text-[#5800a9] dark:text-white whitespace-nowrap">
                                 {hw.title}
                               </td>
                               <td className="px-3 sm:px-4 py-2.5 sm:py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
                                 {hw.courseTitle}
                               </td>
-                              <td className="px-3 sm:px-4 py-2.5 sm:py-3 font-bold text-gray-900 dark:text-white">
+                              <td className="px-3 sm:px-4 py-2.5 sm:py-3 font-bold text-[#5800a9] dark:text-white">
                                 {hasGrade ? `${hw.submission.grade} / ${total}` : "-"}
                               </td>
                               <td className="px-3 sm:px-4 py-2.5 sm:py-3">
