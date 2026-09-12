@@ -151,6 +151,19 @@ export function CourseDetailPage() {
   const [volume, setVolume] = useState(1);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const seekBarRef = useRef<HTMLDivElement>(null);
+
+  // معاينة السحب على الشريط (زي يوتيوب)
+  const [seekPreview, setSeekPreview] = useState<{
+    visible: boolean;
+    x: number;
+    time: number;
+    image: string;
+    chapterTitle: string | null;
+  } | null>(null);
+  const seekPreviewVideoRef = useRef<HTMLVideoElement>(null);
+  const seekPreviewCanvasRef = useRef<HTMLCanvasElement>(null);
+  const seekPreviewDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const lastCapturedSecondRef = useRef<number | null>(null);
   const [videoChapters, setVideoChapters] = useState<{ title: string; time: number }[]>([]);
   const [showChapters, setShowChapters] = useState(false);
   const [chapterThumbnails, setChapterThumbnails] = useState<Record<number, string>>({});
@@ -869,6 +882,8 @@ const saveProgress = async (currentTime: number, duration: number) => {
     setVideoChapters([]);
     setShowChapters(false);
     setChapterThumbnails({});
+    setSeekPreview(null);
+    lastCapturedSecondRef.current = null;
     lessonProgressRef.current = null;
     hasIncrementedWatchedLessonsRef.current = false;
 
@@ -949,6 +964,92 @@ const saveProgress = async (currentTime: number, duration: number) => {
     setCurrentTime(newTime);
   };
 
+  // يلقط فريم من الفيديو نفسه عند وقت معين (لما مفيش صورة فصل جاهزة)
+  const captureSeekPreviewFrame = (time: number) => {
+    const video = seekPreviewVideoRef.current;
+    const canvas = seekPreviewCanvasRef.current;
+    if (!video || !canvas) return;
+
+    const handleSeeked = () => {
+      video.removeEventListener("seeked", handleSeeked);
+      const ctx = canvas.getContext("2d");
+      canvas.width = video.videoWidth || 320;
+      canvas.height = video.videoHeight || 180;
+      if (ctx) {
+        try {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
+          setSeekPreview((prev) => (prev ? { ...prev, image: dataUrl } : prev));
+        } catch {
+          // تجاهل لو حصل خطأ في الرسم
+        }
+      }
+    };
+
+    video.addEventListener("seeked", handleSeeked);
+    video.currentTime = time;
+  };
+
+  const updateSeekPreview = (clientX: number) => {
+    if (!seekBarRef.current || !videoDuration) return;
+
+    const rect = seekBarRef.current.getBoundingClientRect();
+    const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
+    const time = ratio * videoDuration;
+    const x = Math.min(Math.max(clientX - rect.left, 0), rect.width);
+
+    let chapterTitle: string | null = null;
+    let chapterIndex: number | null = null;
+
+    if (videoChapters.length > 0) {
+      let current = videoChapters[0];
+      let idx = 0;
+      videoChapters.forEach((chapter, i) => {
+        if (time >= chapter.time) {
+          current = chapter;
+          idx = i;
+        }
+      });
+      chapterTitle = current.title;
+      chapterIndex = idx;
+    }
+
+    const hasReadyChapterImage = chapterIndex !== null && !!chapterThumbnails[chapterIndex];
+
+    setSeekPreview((prev) => ({
+      visible: true,
+      x,
+      time,
+      chapterTitle,
+      image: hasReadyChapterImage ? chapterThumbnails[chapterIndex as number] : prev?.image || "",
+    }));
+
+    // لو مفيش فصول (أو صورة الفصل لسه مش جاهزة) هات فريم من الفيديو نفسه
+    if (!hasReadyChapterImage) {
+      if (seekPreviewDebounceRef.current) clearTimeout(seekPreviewDebounceRef.current);
+      seekPreviewDebounceRef.current = setTimeout(() => {
+        const second = Math.floor(time);
+        if (lastCapturedSecondRef.current !== second) {
+          lastCapturedSecondRef.current = second;
+          captureSeekPreviewFrame(time);
+        }
+      }, 120);
+    }
+  };
+
+  const handleSeekHover = (e: React.MouseEvent<HTMLDivElement>) => {
+    updateSeekPreview(e.clientX);
+  };
+
+  const handleSeekLeave = () => {
+    if (isDraggingSeek) return; // لسه بيسحب، متقفلش المعاينة
+    setSeekPreview(null);
+    if (seekPreviewDebounceRef.current) {
+      clearTimeout(seekPreviewDebounceRef.current);
+      seekPreviewDebounceRef.current = null;
+    }
+  };
+
   const changeSpeed = (rate: number) => {
     if (!videoRef.current) return;
     videoRef.current.playbackRate = rate;
@@ -971,9 +1072,13 @@ const saveProgress = async (currentTime: number, duration: number) => {
       const newTime = calculateSeekRatio(e.clientX) * videoDuration;
       videoRef.current.currentTime = newTime;
       setCurrentTime(newTime);
+      updateSeekPreview(e.clientX);
     };
 
-    const handleMouseUp = () => setIsDraggingSeek(false);
+    const handleMouseUp = () => {
+      setIsDraggingSeek(false);
+      setSeekPreview(null);
+    };
 
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
@@ -2216,6 +2321,18 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 />
                 <canvas ref={thumbCanvasRef} style={{ display: "none" }} />
 
+                {/* عناصر مخفية لالتقاط فريم أثناء سحب شريط التقدم */}
+                <video
+                  ref={seekPreviewVideoRef}
+                  src={videoPlayerUrl}
+                  crossOrigin="anonymous"
+                  muted
+                  playsInline
+                  preload="metadata"
+                  style={{ display: "none" }}
+                />
+                <canvas ref={seekPreviewCanvasRef} style={{ display: "none" }} />
+
                 <AnimatePresence>
                   {showIntroCard && (
                     <motion.div
@@ -2269,6 +2386,8 @@ const saveProgress = async (currentTime: number, duration: number) => {
                     ref={seekBarRef}
                     onClick={handleSeekClick}
                     onMouseDown={handleSeekMouseDown}
+                    onMouseMove={handleSeekHover}
+                    onMouseLeave={handleSeekLeave}
                     className="relative w-full h-1.5 bg-white/25 rounded-full cursor-pointer mb-3 sm:mb-4"
                   >
                     <div
@@ -2290,6 +2409,33 @@ const saveProgress = async (currentTime: number, duration: number) => {
                             style={{ left: `${(chapter.time / videoDuration) * 100}%` }}
                           />
                         ))}
+
+                    {seekPreview?.visible && (
+                      <div
+                        className="absolute bottom-full mb-3 z-30 pointer-events-none"
+                        style={{ left: `${seekPreview.x}px`, transform: "translateX(-50%)" }}
+                      >
+                        <div className="w-28 sm:w-36 rounded-lg overflow-hidden shadow-xl border border-white/20 bg-black">
+                          <div className="relative w-full aspect-video bg-white/10">
+                            {seekPreview.image ? (
+                              <img src={seekPreview.image} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full animate-pulse bg-white/10" />
+                            )}
+                          </div>
+                          <div className="px-1.5 py-1 text-center">
+                            {seekPreview.chapterTitle && (
+                              <span className="text-white text-[9px] sm:text-[11px] font-bold block truncate">
+                                {seekPreview.chapterTitle}
+                              </span>
+                            )}
+                            <span className="text-gray-300 text-[9px] sm:text-[10px] font-bold tabular-nums block">
+                              {formatTime(seekPreview.time)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="relative flex items-center justify-between gap-3 sm:gap-4">
