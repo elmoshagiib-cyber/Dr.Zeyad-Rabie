@@ -1091,7 +1091,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
     if (!videoPlayerThumbnail) {
       const timer = setTimeout(() => {
         previewVideoRef.current?.pause();
-      }, 20000);
+      }, 10000);
       return () => clearTimeout(timer);
     }
 
@@ -1104,7 +1104,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
       const timer = setTimeout(() => {
         previewVideoRef.current?.pause();
         setPreviewPhase("image-final");
-      }, 20000);
+      }, 10000);
       return () => clearTimeout(timer);
     }
     // لو "image-final": متسيبهاش تعمل حاجة، تفضل ثابتة
