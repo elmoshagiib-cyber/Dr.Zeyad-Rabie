@@ -133,13 +133,39 @@ export function HomeworkPage() {
       <main className="flex-1 overflow-y-auto">
         <div className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 lg:py-8">
           {/* Header */}
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-black text-[#5800a9] dark:text-white mb-1.5 sm:mb-2">
-              الواجبات
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm md:text-sm lg:text-base">
-              متابعة وتسليم جميع الواجبات الدراسية
-            </p>
+          <div
+            className="
+              relative overflow-hidden
+              mb-6 sm:mb-8
+              rounded-2xl sm:rounded-3xl
+              px-4 sm:px-6 md:px-8
+              py-5 sm:py-6 md:py-7
+              flex items-center justify-between gap-4
+              bg-gradient-to-l
+              from-[#5800a9]/5 via-[#5800a9]/60 to-[#5800a9]
+              dark:from-[#b600d7]/5 dark:via-[#b600d7]/60 dark:to-[#b600d7]
+            "
+          >
+            <div className="relative z-10 text-right">
+              <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-1.5">
+                الواجبات
+              </h1>
+              <p className="text-white/80 text-[11px] xs:text-xs sm:text-sm md:text-sm lg:text-base">
+                متابعة وتسليم جميع الواجبات الدراسية
+              </p>
+            </div>
+
+            <div
+              className="
+                relative z-10 flex-shrink-0
+                w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11
+                rounded-xl sm:rounded-2xl
+                bg-white/15
+                flex items-center justify-center
+              "
+            >
+              <FileText className="text-white w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
           </div>
 
           {/* Loading */}
