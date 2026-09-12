@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Trophy } from "lucide-react";
 import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 import toast from "react-hot-toast";
+import { usePageTransition } from "../../context/PageTransitionContext";
 
 export function LeaderboardPage() {
-  const navigate = useNavigate();
+  const transitionTo = usePageTransition();
 
   const showComingSoon = () => {
     toast("الميزة دي هتتاح قريبًا، تابعنا!");
@@ -72,7 +72,7 @@ export function LeaderboardPage() {
                 شوف اللي وصلوا
               </button>
               <button
-                onClick={() => navigate("/dashboard/courses")}
+                onClick={() => transitionTo("/dashboard/courses")}
                 className="
                   flex-1 md:flex-none
                   px-5 py-3 rounded-xl
