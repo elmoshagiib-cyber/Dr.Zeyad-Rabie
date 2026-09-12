@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Trophy } from "lucide-react";
 import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 import toast from "react-hot-toast";
 
 export function LeaderboardPage() {
+  const navigate = useNavigate();
+
   const showComingSoon = () => {
     toast("الميزة دي هتتاح قريبًا، تابعنا!");
   };
@@ -69,12 +72,12 @@ export function LeaderboardPage() {
                 شوف اللي وصلوا
               </button>
               <button
-                onClick={showComingSoon}
+                onClick={() => navigate("/dashboard/courses")}
                 className="
                   flex-1 md:flex-none
                   px-5 py-3 rounded-xl
                   font-black text-sm sm:text-base
-                  bg-transparent text-[#b600d7]
+                  bg-transparent text-white
                   border-2 border-[#b600d7]
                   hover:bg-[#b600d7]/10
                   transition-all duration-300
@@ -86,7 +89,7 @@ export function LeaderboardPage() {
 
             {/* Content (right side): frame + text */}
             <div className="flex-1 order-1 md:order-1">
-              <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+              <div className="flex flex-col md:flex-row items-center gap-6">
 
                 {/* Frame image */}
                 <div className="flex-shrink-0">
