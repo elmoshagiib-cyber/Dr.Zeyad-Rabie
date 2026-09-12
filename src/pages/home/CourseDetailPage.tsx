@@ -4,6 +4,7 @@ import {
   ChevronDown,
   ChevronUp,
   ChevronRight,
+  ChevronLeft,
   Play,
   Pause,
   RotateCcw,
@@ -2271,12 +2272,12 @@ const saveProgress = async (currentTime: number, duration: number) => {
                       {currentChapterTitle && (
                         <button
                           onClick={() => setShowChapters(true)}
-                          className="flex items-center gap-1.5 text-white hover:text-[#b600d7] transition-colors max-w-[140px] sm:max-w-[220px]"
+                          className="flex items-center gap-1.5 bg-black/55 hover:bg-black/70 text-white rounded-full pl-3 pr-2 py-1.5 transition-colors max-w-[140px] sm:max-w-[220px]"
                         >
-                          <ListVideo size={16} className="sm:w-[18px] sm:h-[18px] flex-shrink-0" />
                           <span className="text-xs sm:text-sm font-bold truncate">
                             {currentChapterTitle}
                           </span>
+                          <ChevronLeft size={16} className="flex-shrink-0" />
                         </button>
                       )}
 
@@ -2312,16 +2313,6 @@ const saveProgress = async (currentTime: number, duration: number) => {
                           </div>
                         )}
                       </div>
-
-                      {videoChapters.length > 0 && (
-                        <button
-                          onClick={() => setShowChapters((prev) => !prev)}
-                          className={`transition-colors ${showChapters ? "text-[#5800a9] dark:text-[#b600d7]" : "text-white hover:text-gray-300"}`}
-                          title="الفصول"
-                        >
-                          <ListVideo size={20} className="sm:w-6 sm:h-6" />
-                        </button>
-                      )}
 
                       <button
                         onClick={toggleFullscreen}
