@@ -119,7 +119,7 @@ export function LeaderboardPage() {
                     ابدأ تجمع نقطك من دلوقتي!
                   </h2>
 
-                  <p className="text-white/85 text-sm sm:text-base leading-7 sm:leading-8 mb-5 sm:mb-6">
+                  <p className="text-white text-sm sm:text-base leading-7 sm:leading-8 mb-5 sm:mb-6">
                     قريبًا: كل امتحان وواجب تحله بدرجة حلوة هيجمعلك نقط، ولما نقطك تكفي هتاخد شارة فضية أو ذهبية أو ماسية، وأول 20 طالب هيتحطوا على المنصة.
                   </p>
 
