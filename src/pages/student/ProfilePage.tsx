@@ -186,14 +186,14 @@ function ImageCropModal({  file,
                 step={0.01}
                 value={scale}
                 onChange={(e) => zoom(e.target.value)}
-                className="flex-1 accent-[#B348FE]"
+                className="flex-1 accent-[#5800a9] dark:accent-[#b600d7]"
               />
               <span className="text-[11px] sm:text-xs text-gray-400 font-bold whitespace-nowrap">تكبير</span>
             </div>
           )}
         </div>
         <div className="p-4 sm:p-5 border-t border-gray-100 dark:border-[#2A2A2A] flex gap-2.5 sm:gap-3">
-          <Button onClick={confirm} className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl h-11 sm:h-12 font-black text-sm">
+          <Button onClick={confirm} className="flex-1 bg-[#5800a9] dark:bg-[#b600d7] hover:opacity-90 text-white rounded-xl h-11 sm:h-12 font-black text-sm">
             حفظ
           </Button>
           <Button variant="outline" onClick={onCancel} className="flex-1 rounded-xl h-11 sm:h-12 font-black text-sm">
@@ -523,6 +523,39 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
           onChange={onAvatarFileSelected}
         />
 
+        {/* Header */}
+        <div
+          className="
+            relative overflow-hidden
+            rounded-2xl sm:rounded-3xl
+            px-4 sm:px-6 md:px-8
+            py-5 sm:py-6 md:py-7
+            flex items-center justify-between gap-4
+            bg-[#5800a9] dark:bg-[#b600d7]
+          "
+        >
+          <div className="relative z-10 text-right">
+            <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-black text-white mb-1 sm:mb-1.5">
+              الملف الشخصي
+            </h1>
+            <p className="text-white/80 text-[11px] xs:text-xs sm:text-sm">
+              بياناتك واشتراكاتك وإعدادات حسابك
+            </p>
+          </div>
+
+          <div
+            className="
+              relative z-10 flex-shrink-0
+              w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11
+              rounded-xl sm:rounded-2xl
+              bg-white/15
+              flex items-center justify-center
+            "
+          >
+            <Shield className="text-white w-4 h-4 sm:w-5 sm:h-5" />
+          </div>
+        </div>
+
 
         {/* Success Message */}
         {saved && (
@@ -593,14 +626,14 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                         className="absolute -bottom-1 -left-1 w-8 h-8 sm:w-9 sm:h-9 bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 disabled:opacity-50"
                       >
                         {uploadingAvatar ? (
-                          <div className="w-4 h-4 border-2 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
+                          <div className="w-4 h-4 border-2 border-[#5800a9] dark:border-[#b600d7] border-t-transparent rounded-full animate-spin" />
                         ) : (
-                          <Camera size={15} className="text-[#B348FE]" />
+                          <Camera size={15} className="text-[#5800a9] dark:text-[#b600d7]" />
                         )}
                       </button>
                     </div>
 
-                    <h1 className="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-1 px-1 break-words leading-snug">
+                    <h1 className="text-base sm:text-lg font-black text-[#5800a9] dark:text-white mb-1 px-1 break-words leading-snug">
                       {editName}
                     </h1>
 
@@ -608,7 +641,7 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                       {displayUser.gradeLabel || "الصف الثالث الثانوي"}
                     </p>
 
-                    <span className="px-3 py-1.5 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] text-[11px] sm:text-xs font-black">
+                    <span className="px-3 py-1.5 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] text-[#5800a9] dark:text-[#b600d7] text-[11px] sm:text-xs font-black">
                       {studentType === "center" ? "طالب سنتر" : "طالب أونلاين"}
                     </span>
 
@@ -631,7 +664,7 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                       alt="لوجو منصة مستر زياد ربيع"
                       className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
                     />
-                    <p className="text-gray-900 dark:text-white font-black text-sm sm:text-base">
+                    <p className="text-[#5800a9] dark:text-white font-black text-sm sm:text-base">
                       منصة مستر زياد ربيع
                     </p>
                   </div>
@@ -640,7 +673,7 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
 
               <button
                 onClick={toggleDetails}
-                className="mt-5 w-full max-w-[280px] mx-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] font-black text-xs sm:text-sm hover:bg-[#EAD8FF] dark:hover:bg-[#3A1652] transition-all duration-300"
+                className="mt-5 w-full max-w-[280px] mx-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] text-[#5800a9] dark:text-[#b600d7] font-black text-xs sm:text-sm hover:bg-[#EAD8FF] dark:hover:bg-[#3A1652] transition-all duration-300"
               >
                 {showDetails ? "إخفاء باقي البيانات" : "عرض باقي البيانات"}
                 <ChevronDown
@@ -658,10 +691,10 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
               <CardContent className="p-4 sm:p-6 lg:p-8">
                 <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-6">
                   <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center shrink-0">
-                    <Receipt size={18} className="text-[#B348FE] sm:w-5 sm:h-5" />
+                    <Receipt size={18} className="text-[#5800a9] dark:text-[#b600d7] sm:w-5 sm:h-5" />
                   </div>
                   <div className="min-w-0">
-                    <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 dark:text-white">
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-[#5800a9] dark:text-white">
                       سجل الاشتراكات والفواتير
                     </h2>
                     <p className="text-[11px] sm:text-xs lg:text-sm text-gray-400 dark:text-gray-500">
@@ -687,10 +720,10 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                       <div
                         key={p.id}
                         onClick={() => { setSelectedInvoice(p); setShowInvoiceModal(true); }}
-                        className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:border-[#B348FE] transition-all duration-300 cursor-pointer"
+                        className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:border-[#5800a9] dark:hover:border-[#b600d7] transition-all duration-300 cursor-pointer"
                       >
                         <div className="flex items-start justify-between gap-3 mb-3">                          <div className="min-w-0">
-                            <p className="font-black text-gray-900 dark:text-white text-sm sm:text-base truncate">
+                            <p className="font-black text-[#5800a9] dark:text-white text-sm sm:text-base truncate">
                               {p.courseData?.title || "-"}
                             </p>
                             <p className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 mt-0.5">
@@ -731,7 +764,7 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                           <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[#2A2A2A] flex items-center justify-between">
                             <span className="text-[11px] sm:text-xs text-gray-400 font-bold">كود الاشتراك</span>
                             <span
-                              className="font-black text-[#B348FE] text-xs sm:text-sm tracking-widest"
+                              className="font-black text-[#5800a9] dark:text-[#b600d7] text-xs sm:text-sm tracking-widest"
                               dir="ltr"
                             >
                               {p.subscription_code}
@@ -750,7 +783,7 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
             <div ref={detailsRef}>
             <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
               <CardContent className="p-4 sm:p-6 lg:p-8">
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 dark:text-white mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-[#5800a9] dark:text-white mb-4 sm:mb-6">
                   البيانات الشخصية
                 </h2>
                 <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-5">
@@ -763,12 +796,12 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                   ].map((field, i) => (
                     <div
                       key={i}
-                      className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 lg:p-5 hover:border-[#B348FE] transition-all duration-300 min-w-0"
+                      className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 lg:p-5 hover:border-[#5800a9] dark:hover:border-[#b600d7] transition-all duration-300 min-w-0"
                     >
                       <p className="text-[11px] sm:text-xs lg:text-sm text-gray-400 dark:text-gray-500 mb-1 sm:mb-1.5 font-bold">
                         {field.label}
                       </p>
-                      <p className="font-black text-gray-900 dark:text-white text-xs sm:text-sm lg:text-base break-words">
+                      <p className="font-black text-[#5800a9] dark:text-white text-xs sm:text-sm lg:text-base break-words">
                         {field.value}
                       </p>
                     </div>
@@ -788,10 +821,10 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                   className="w-full flex items-center gap-2.5 sm:gap-3"
                 >
                   <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center shrink-0">
-                    <Lock size={18} className="text-[#B348FE] sm:w-5 sm:h-5" />
+                    <Lock size={18} className="text-[#5800a9] dark:text-[#b600d7] sm:w-5 sm:h-5" />
                   </div>
                   <div className="min-w-0 flex-1 text-right">
-                    <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 dark:text-white">
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-[#5800a9] dark:text-white">
                       تغيير كلمة المرور
                     </h2>
                     <p className="text-[11px] sm:text-xs lg:text-sm text-gray-400 dark:text-gray-500">
@@ -820,8 +853,8 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                     <div className="space-y-3.5 sm:space-y-4">
                       {/* New Password */}
                       <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2.5 sm:gap-3 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 focus-within:border-[#B348FE] transition-colors">
-                          <Lock size={15} className="text-[#B348FE] flex-shrink-0 sm:w-4 sm:h-4" />
+                        <div className="flex items-center gap-2.5 sm:gap-3 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 focus-within:border-[#5800a9] dark:focus-within:border-[#b600d7] transition-colors">
+                          <Lock size={15} className="text-[#5800a9] dark:text-[#b600d7] flex-shrink-0 sm:w-4 sm:h-4" />
                           <input
                             type={showPassword ? "text" : "password"}
                             placeholder="كلمة المرور الجديدة"
@@ -861,8 +894,8 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                       </div>
 
                       {/* Confirm Password */}
-                      <div className="flex items-center gap-2.5 sm:gap-3 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 focus-within:border-[#B348FE] transition-colors">
-                        <Lock size={15} className="text-[#B348FE] flex-shrink-0 sm:w-4 sm:h-4" />
+                      <div className="flex items-center gap-2.5 sm:gap-3 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 focus-within:border-[#5800a9] dark:focus-within:border-[#b600d7] transition-colors">
+                        <Lock size={15} className="text-[#5800a9] dark:text-[#b600d7] flex-shrink-0 sm:w-4 sm:h-4" />
                         <input
                           type={showConfirmPassword ? "text" : "password"}
                           placeholder="تأكيد كلمة المرور"
@@ -890,7 +923,7 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                       <Button
                         onClick={handleChangePassword}
                         disabled={passwordLoading || !newPassword || !confirmPassword}
-                        className="w-full bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl sm:rounded-2xl h-11 sm:h-12 font-black disabled:opacity-60 text-sm"
+                        className="w-full bg-[#5800a9] dark:bg-[#b600d7] hover:opacity-90 text-white rounded-xl sm:rounded-2xl h-11 sm:h-12 font-black disabled:opacity-60 text-sm"
                       >
                         {passwordLoading ? (
                           <span className="flex items-center justify-center gap-2">
@@ -1015,7 +1048,7 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                     onClick={() => copyToClipboard(selectedInvoice.invoice_number, "invoice")}
                     className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors"
                   >
-                    <Copy size={16} className="text-[#B348FE]" />
+                    <Copy size={16} className="text-[#5800a9] dark:text-[#b600d7]" />
                     <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
                       {copiedField === "invoice" ? "تم النسخ ✓" : "نسخ الفاتورة"}
                     </span>
@@ -1025,7 +1058,7 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                     disabled={!selectedInvoice.subscription_code}
                     className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors disabled:opacity-40"
                   >
-                    <Copy size={16} className="text-[#B348FE]" />
+                    <Copy size={16} className="text-[#5800a9] dark:text-[#b600d7]" />
                     <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
                       {copiedField === "code" ? "تم النسخ ✓" : "نسخ الكود"}
                     </span>
