@@ -10,7 +10,7 @@ import { useVisitTracker } from "./hooks/useVisitTracker";
 import StudentLayout from "./components/layout/student-dashboard/StudentLayout";
 
 // غيّر true/false هنا عشان تشغّل أو توقف وضع الصيانة
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 // ============================================================
 // LAZY-LOADED PAGES (Code Splitting)
