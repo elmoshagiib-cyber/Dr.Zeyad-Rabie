@@ -135,7 +135,7 @@ export function MaintenanceMode() {
         {/* Social icons */}
         <div className="flex items-center justify-center gap-3">
           <a
-            href="#"
+            href="https://www.facebook.com/mr.zeyadrabie?locale=ar_AR"
             target="_blank"
             rel="noopener noreferrer"
             className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
@@ -144,7 +144,7 @@ export function MaintenanceMode() {
             <FaFacebookF className="text-white text-[15px]" />
           </a>
           <a
-            href="#"
+            href="https://www.instagram.com/mr.zeyadrabie/"
             target="_blank"
             rel="noopener noreferrer"
             className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
