@@ -2277,7 +2277,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
                           <span className="text-xs sm:text-sm font-bold truncate">
                             {currentChapterTitle}
                           </span>
-                          <ChevronLeft size={16} className="flex-shrink-0" />
+                          <ChevronRight size={16} className="flex-shrink-0" />
                         </button>
                       )}
 
@@ -2313,6 +2313,16 @@ const saveProgress = async (currentTime: number, duration: number) => {
                           </div>
                         )}
                       </div>
+
+                      {videoChapters.length > 0 && (
+                        <button
+                          onClick={() => setShowChapters((prev) => !prev)}
+                          className={`transition-colors ${showChapters ? "text-[#5800a9] dark:text-[#b600d7]" : "text-white hover:text-gray-300"}`}
+                          title="الفصول"
+                        >
+                          <ListVideo size={20} className="sm:w-6 sm:h-6" />
+                        </button>
+                      )}
 
                       <button
                         onClick={toggleFullscreen}
@@ -2361,17 +2371,17 @@ const saveProgress = async (currentTime: number, duration: number) => {
                                   videoRef.current.currentTime = chapter.time;
                                 }
                               }}
-                              className={`w-full flex items-center justify-between gap-3 px-3 sm:px-4 py-3 rounded-xl transition-colors text-right ${
-                                isActive ? "bg-[#5800a9]/15 dark:bg-[#b600d7]/15" : "hover:bg-white/5"
+                              className={`w-full flex items-start justify-between gap-3 px-3 sm:px-4 py-3 rounded-xl transition-colors text-right ${
+                                isActive ? "bg-[#5800a9]/25 dark:bg-[#b600d7]/25" : "hover:bg-white/5"
                               }`}
                             >
-                              <span className="flex items-center gap-2 flex-1 min-w-0 justify-start">
+                              <span className="flex items-start gap-2 flex-1 min-w-0 justify-start">
                                 {isActive && (
-                                  <span className="w-1.5 h-1.5 rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
+                                  <span className="w-1.5 h-1.5 mt-2 rounded-full bg-[#c9a6ff] dark:bg-[#e9c9ff] flex-shrink-0" />
                                 )}
                                 <span
-                                  className={`text-sm sm:text-base font-bold truncate ${
-                                    isActive ? "text-[#5800a9] dark:text-[#b600d7]" : "text-white"
+                                  className={`text-sm sm:text-base font-bold leading-relaxed ${
+                                    isActive ? "text-[#c9a6ff] dark:text-[#e9c9ff]" : "text-white"
                                   }`}
                                 >
                                   {chapter.title}
