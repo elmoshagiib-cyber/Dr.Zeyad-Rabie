@@ -51,10 +51,10 @@ export function LeaderboardPage() {
             bg-[#5800a9] dark:bg-[#b600d7]
           "
         >
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-10">
+          <div className="flex flex-col md:flex-row-reverse items-center md:items-start gap-6 md:gap-10">
 
             {/* Text side */}
-            <div className="flex-1 text-center md:text-right order-2 md:order-1">
+            <div className="flex-1 text-center md:text-right">
               <span
                 className="
                   inline-block mb-3 sm:mb-4
@@ -121,7 +121,7 @@ export function LeaderboardPage() {
             </div>
 
             {/* Frame image */}
-            <div className="flex-shrink-0 order-1 md:order-2">
+            <div className="flex-shrink-0">
               <div className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-44 md:h-44">
                 <img
                   src="/images/leaderboard-frame.png"
