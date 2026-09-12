@@ -54,15 +54,15 @@ export function LeaderboardPage() {
           <div className="flex flex-col md:flex-row items-stretch gap-6 md:gap-8">
 
             {/* Buttons column (left side) */}
-            <div className="flex flex-row md:flex-col gap-2.5 md:gap-3 order-1 md:order-1 flex-shrink-0 md:w-52 md:justify-center">
+            <div className="flex flex-row md:flex-col gap-2.5 md:gap-3 order-2 md:order-2 flex-shrink-0 md:w-52 md:justify-center">
               <button
                 onClick={showComingSoon}
                 className="
                   flex-1 md:flex-none
                   px-5 py-3 rounded-xl
                   font-black text-sm sm:text-base
-                  bg-white/15 text-white
-                  hover:bg-white/25
+                  bg-[#b600d7] text-white
+                  hover:opacity-90
                   transition-all duration-300
                 "
               >
@@ -74,8 +74,8 @@ export function LeaderboardPage() {
                   flex-1 md:flex-none
                   px-5 py-3 rounded-xl
                   font-black text-sm sm:text-base
-                  border-2 border-white/40 text-white
-                  hover:bg-white/10
+                  bg-[#b600d7] text-white
+                  hover:opacity-90
                   transition-all duration-300
                 "
               >
@@ -84,7 +84,7 @@ export function LeaderboardPage() {
             </div>
 
             {/* Content (right side): frame + text */}
-            <div className="flex-1 order-2 md:order-2">
+            <div className="flex-1 order-1 md:order-1">
               <div className="flex flex-col md:flex-row-reverse items-center md:items-start gap-6">
 
                 {/* Frame image */}
@@ -105,7 +105,7 @@ export function LeaderboardPage() {
                       inline-block mb-3 sm:mb-4
                       px-3.5 py-1.5 rounded-full
                       text-[11px] sm:text-xs font-black
-                      bg-white/15 text-white
+                      bg-[#b600d7] text-white
                     "
                   >
                     المكان ده مستنيك
