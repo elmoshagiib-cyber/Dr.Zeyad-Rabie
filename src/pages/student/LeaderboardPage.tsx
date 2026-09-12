@@ -74,8 +74,9 @@ export function LeaderboardPage() {
                   flex-1 md:flex-none
                   px-5 py-3 rounded-xl
                   font-black text-sm sm:text-base
-                  bg-[#b600d7] text-white
-                  hover:opacity-90
+                  bg-transparent text-white
+                  border-2 border-white/50
+                  hover:bg-white/10
                   transition-all duration-300
                 "
               >
@@ -85,7 +86,7 @@ export function LeaderboardPage() {
 
             {/* Content (right side): frame + text */}
             <div className="flex-1 order-1 md:order-1">
-              <div className="flex flex-col md:flex-row-reverse items-center md:items-start gap-6">
+              <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
 
                 {/* Frame image */}
                 <div className="flex-shrink-0">
