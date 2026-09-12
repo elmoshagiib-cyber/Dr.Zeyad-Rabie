@@ -127,15 +127,15 @@ export function LeaderboardPage() {
                   <div className="flex flex-wrap justify-center md:justify-start gap-x-8 gap-y-4">
                     <div className="text-center md:text-right">
                       <p className="text-white font-black text-sm sm:text-base">ذاكر بانتظام</p>
-                      <p className="text-white/70 text-xs sm:text-sm mt-1">حضور واستمرار في الحصص</p>
+                      <p className="text-white text-xs sm:text-sm mt-1">حضور واستمرار في الحصص</p>
                     </div>
                     <div className="text-center md:text-right">
                       <p className="text-white font-black text-sm sm:text-base">حل الامتحانات</p>
-                      <p className="text-white/70 text-xs sm:text-sm mt-1">درجاتك هي تذكرتك للوحة</p>
+                      <p className="text-white text-xs sm:text-sm mt-1">درجاتك هي تذكرتك للوحة</p>
                     </div>
                     <div className="text-center md:text-right">
                       <p className="text-white font-black text-sm sm:text-base">اتفوق على نفسك</p>
-                      <p className="text-white/70 text-xs sm:text-sm mt-1">فضي، ذهبي، ماسي</p>
+                      <p className="text-white text-xs sm:text-sm mt-1">فضي، ذهبي، ماسي</p>
                     </div>
                   </div>
                 </div>

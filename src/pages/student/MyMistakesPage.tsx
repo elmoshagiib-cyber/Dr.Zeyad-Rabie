@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles } from "lucide-react";
+import { Sparkles, AlertTriangle } from "lucide-react";
 import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 import { Button } from "../../components/ui/Button";
 import { supabase } from "../../lib/supabase";
@@ -145,7 +145,7 @@ export function MyMistakesPage() {
                 أخطائي
               </h1>
               <p className="text-white/80 text-[11px] xs:text-xs sm:text-sm leading-5">
-                هنا هتلاقي كل الأسئلة اللي غلطت فيها في الامتحانات والواجبات السابقة، وتقدر تعمل امتحان خاص بيك عشان تراجعها وتتأكد إنك فهمتها كويس
+                راجع أسئلتك اللي غلطت فيها في امتحان خاص بيك
               </p>
             </div>
 
@@ -158,14 +158,14 @@ export function MyMistakesPage() {
                 flex items-center justify-center
               "
             >
-              <Sparkles className="text-white w-4 h-4 sm:w-5 sm:h-5" />
+              <AlertTriangle className="text-white w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
 
           <div className="bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 dark:border-[#2A2A2A] p-6 sm:p-10">
             <div className="text-center mb-6">
               <h2 className="text-lg sm:text-xl font-black text-[#5800a9] dark:text-white mb-2">
-                خليك أقوى واحد وسط عيلتنا
+                 مفيش عندك أي أسئلة غلط دلوقتي.
               </h2>
               <div className="w-16 h-1 bg-[#5800a9] dark:bg-[#b600d7] rounded-full mx-auto" />
             </div>
@@ -173,7 +173,7 @@ export function MyMistakesPage() {
             {wrongQuestionIds.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-600 dark:text-gray-400 font-bold">
-                 مفيش عندك أي أسئلة غلط دلوقتي.
+                هنا هتلاقي كل الأسئلة اللي غلطت فيها في الامتحانات والواجبات السابقة، وتقدر تعمل امتحان خاص بيك عشان تراجعها وتتأكد إنك فهمتها كويس
                 </p>
               </div>
             ) : (
