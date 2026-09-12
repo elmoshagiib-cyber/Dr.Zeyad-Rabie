@@ -16,7 +16,7 @@ export function LeaderboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="text-right order-2 sm:order-1">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#5800a9] dark:text-white mb-2">
-              لوحة الشرف
+              أبطال المنصة
             </h1>
             <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base leading-7 max-w-xl">
               أوائل طلابنا المتفوقون — ذاكر كويس و هات درجتك الكاملة في الامتحانات عشان تبقى من أوائل طلابنا!
@@ -74,9 +74,9 @@ export function LeaderboardPage() {
                   flex-1 md:flex-none
                   px-5 py-3 rounded-xl
                   font-black text-sm sm:text-base
-                  bg-transparent text-white
-                  border-2 border-white/50
-                  hover:bg-white/10
+                  bg-transparent text-[#b600d7]
+                  border-2 border-[#b600d7]
+                  hover:bg-[#b600d7]/10
                   transition-all duration-300
                 "
               >
@@ -117,7 +117,8 @@ export function LeaderboardPage() {
                   </h2>
 
                   <p className="text-white/85 text-sm sm:text-base leading-7 sm:leading-8 mb-5 sm:mb-6">
-                    20 طالب في الصف الثالث الثانوي ذاكروا وحققوا، ومكانهم اتسجّل بإطار وشارة. اللوحة الجديدة بتتحدث كل فترة — ذاكر بجدية، كمّل امتحاناتك، وخلّي صورتك هي اللي الكل يشوفها المرة الجاية.
+            هنعرض هنا ترتيبك ونقاطك ومقارنتك بزمايلك، بعد إطلاق
+            نظام النقاط والإنجازات داخل المنصة
                   </p>
 
                   {/* Stats row */}
