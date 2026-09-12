@@ -167,6 +167,11 @@ export function CourseDetailPage() {
   const [videoChapters, setVideoChapters] = useState<{ title: string; time: number }[]>([]);
   const [showChapters, setShowChapters] = useState(false);
   const [chapterThumbnails, setChapterThumbnails] = useState<Record<number, string>>({});
+  const chapterThumbnailsRef = useRef<Record<number, string>>({});
+
+  useEffect(() => {
+    chapterThumbnailsRef.current = chapterThumbnails;
+  }, [chapterThumbnails]);
   const thumbVideoRef = useRef<HTMLVideoElement>(null);
   const thumbCanvasRef = useRef<HTMLCanvasElement>(null);
   const [previewPhase, setPreviewPhase] = useState<"image" | "video" | "image-final">("image");
@@ -1296,8 +1301,10 @@ const saveProgress = async (currentTime: number, duration: number) => {
     const generateAll = async () => {
       for (let i = 0; i < videoChapters.length; i++) {
         if (cancelled) return;
+        if (chapterThumbnailsRef.current[i]) continue; // اتولدت خلاص، متعملهاش تاني
         const dataUrl = await captureAt(videoChapters[i].time + 0.5);
         if (!cancelled && dataUrl) {
+          chapterThumbnailsRef.current = { ...chapterThumbnailsRef.current, [i]: dataUrl };
           setChapterThumbnails((prev) => ({ ...prev, [i]: dataUrl }));
         }
       }
@@ -1317,7 +1324,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
     return () => {
       cancelled = true;
     };
-  }, [showChapters, videoChapters, videoPlayerUrl, chapterThumbnails]);
+  }, [showChapters, videoChapters, videoPlayerUrl]);
 
 
 
