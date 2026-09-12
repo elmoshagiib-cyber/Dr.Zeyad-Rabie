@@ -884,6 +884,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
     setChapterThumbnails({});
     setSeekPreview(null);
     lastCapturedSecondRef.current = null;
+    pendingSeekPreviewTimeRef.current = null;
     lessonProgressRef.current = null;
     hasIncrementedWatchedLessonsRef.current = false;
 
@@ -965,7 +966,9 @@ const saveProgress = async (currentTime: number, duration: number) => {
   };
 
   // يلقط فريم من الفيديو نفسه عند وقت معين (لما مفيش صورة فصل جاهزة)
-  const captureSeekPreviewFrame = (time: number) => {
+  const pendingSeekPreviewTimeRef = useRef<number | null>(null);
+
+  const doCaptureSeekPreviewFrame = (time: number) => {
     const video = seekPreviewVideoRef.current;
     const canvas = seekPreviewCanvasRef.current;
     if (!video || !canvas) return;
@@ -988,6 +991,30 @@ const saveProgress = async (currentTime: number, duration: number) => {
 
     video.addEventListener("seeked", handleSeeked);
     video.currentTime = time;
+  };
+
+  const captureSeekPreviewFrame = (time: number) => {
+    const video = seekPreviewVideoRef.current;
+    if (!video) return;
+
+    // لو الفيديو لسه مخلصش تحميل الـ metadata، سجّل الوقت المطلوب
+    // وحاول تاني أول ما يجهز بدل ما يفضل "بيحمل" للأبد
+    if (video.readyState < 1) {
+      pendingSeekPreviewTimeRef.current = time;
+
+      const handleLoadedMetadata = () => {
+        video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+        if (pendingSeekPreviewTimeRef.current !== null) {
+          doCaptureSeekPreviewFrame(pendingSeekPreviewTimeRef.current);
+          pendingSeekPreviewTimeRef.current = null;
+        }
+      };
+
+      video.addEventListener("loadedmetadata", handleLoadedMetadata);
+      return;
+    }
+
+    doCaptureSeekPreviewFrame(time);
   };
 
   const updateSeekPreview = (clientX: number) => {
