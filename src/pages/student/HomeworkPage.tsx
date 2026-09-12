@@ -141,9 +141,7 @@ export function HomeworkPage() {
               px-4 sm:px-6 md:px-8
               py-5 sm:py-6 md:py-7
               flex items-center justify-between gap-4
-              bg-gradient-to-l
-              from-[#5800a9]/5 via-[#5800a9]/60 to-[#5800a9]
-              dark:from-[#b600d7]/5 dark:via-[#b600d7]/60 dark:to-[#b600d7]
+              bg-[#5800a9] dark:bg-[#b600d7]
             "
           >
             <div className="relative z-10 text-right">
