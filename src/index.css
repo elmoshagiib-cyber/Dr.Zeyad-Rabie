@@ -736,3 +736,6 @@ transform:translateX(350%) rotate(12deg);
     transparent
   );
 }
+.theme-instructor {
+  --page-bubble-color: #155DFC;
+}

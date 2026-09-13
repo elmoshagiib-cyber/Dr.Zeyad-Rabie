@@ -6,7 +6,7 @@ import {
   type AnimationEvent,
   type ReactNode,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 type TransitionState = {
   path: string;
@@ -32,14 +32,17 @@ export function usePageTransition() {
 function Bubbles({
   transition,
   onAnimationEnd,
+  isInstructor,
 }: {
   transition: TransitionState;
   onAnimationEnd: (event: AnimationEvent<HTMLDivElement>) => void;
+  isInstructor: boolean;
 }) {
   return (
     <div
       className={
-        transition ? `page-bubbles ${transition.phase}` : "page-bubbles"
+        (transition ? `page-bubbles ${transition.phase}` : "page-bubbles") +
+        (isInstructor ? " theme-instructor" : "")
       }
     >
       <div className="page-bubbles__first" />
@@ -50,7 +53,14 @@ function Bubbles({
 
 export function PageTransitionProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [transition, setTransition] = useState<TransitionState>(null);
+
+  // بنحدد لون الفقاعة على أساس الصفحة اللي رايحينلها أثناء الانتقال،
+  // أو الصفحة الحالية لو مفيش انتقال شغال
+  const isInstructor = (transition?.path ?? location.pathname).startsWith(
+    "/instructor"
+  );
 
   const transitionTo = useCallback<TransitionFn>((path) => {
     setTransition((current) =>
@@ -89,7 +99,11 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
   return (
     <PageTransitionContext.Provider value={transitionTo}>
       {children}
-      <Bubbles transition={transition} onAnimationEnd={handleAnimationEnd} />
+      <Bubbles
+        transition={transition}
+        onAnimationEnd={handleAnimationEnd}
+        isInstructor={isInstructor}
+      />
     </PageTransitionContext.Provider>
   );
 }
