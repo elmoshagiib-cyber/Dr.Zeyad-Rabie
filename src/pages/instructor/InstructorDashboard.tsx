@@ -370,7 +370,7 @@ const quickActions = [
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-[#155DFC] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6"
+        className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6"
       >
         <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px]" />
         <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
