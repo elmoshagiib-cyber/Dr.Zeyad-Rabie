@@ -189,8 +189,8 @@ export function InstructorReports() {
           <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
 
           <div className="relative z-10 flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
-              <ClipboardList className="text-amber-400" size={20} />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white flex items-center justify-center flex-shrink-0">
+              <ClipboardList className="text-[#155DFC]" size={20} />
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-black">التقارير والإحصائيات</h1>
@@ -245,7 +245,7 @@ export function InstructorReports() {
                 <div className="flex gap-2">
                   <Button
                     onClick={loadReportData}
-                    className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-bold h-11"
+                    className="flex-1 bg-[#155DFC] hover:bg-[#1547D6] text-white rounded-xl font-bold h-11"
                   >
                     <Filter size={16} className="ml-1.5" />
                     تطبيق الفلاتر
@@ -338,7 +338,7 @@ export function InstructorReports() {
                               </div>
                               <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                                 <div
-                                  className="h-full bg-[#B348FE] rounded-full transition-all duration-500"
+                                  className="h-full bg-[#155DFC] rounded-full transition-all duration-500"
                                   style={{ width: `${percent}%` }}
                                 />
                               </div>
