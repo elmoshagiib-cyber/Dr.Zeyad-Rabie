@@ -12,7 +12,7 @@ import {
   Layers,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
-import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
+import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { supabase } from "../../lib/supabase";
 
@@ -57,6 +57,7 @@ export function InstructorReports() {
   const [payments, setPayments] = useState<PaymentRow[]>([]);
   const [topPayingStudents, setTopPayingStudents] = useState<TopPayingStudentRow[]>([]);
   const [bestSelling, setBestSelling] = useState<CourseSalesRow[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const loadCourses = async () => {
     const { data } = await supabase.from("courses").select("id, title");
@@ -176,21 +177,13 @@ export function InstructorReports() {
   }, {} as Record<string, { count: number; total: number }>);
 
   return (
-    <div
-      className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]"
-      dir="rtl"
-    >
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="instructor" />
-      </div>
-
-      <main className="flex-1 overflow-y-auto">
+    <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-6 mt-6"
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6"
         >
           <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px]" />
           <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
@@ -206,7 +199,7 @@ export function InstructorReports() {
           </div>
         </motion.div>
 
-        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="space-y-6 max-w-7xl mx-auto">
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
             <CardContent className="p-4 lg:p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
@@ -476,7 +469,6 @@ export function InstructorReports() {
             </>
           )}
         </div>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 }

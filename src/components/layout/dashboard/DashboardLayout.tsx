@@ -20,7 +20,8 @@ export function DashboardLayout({
 className={`
   flex
   items-stretch
-  min-h-screen
+  h-screen
+  overflow-hidden
   bg-white
   text-slate-900
   ${type === "instructor" ? "theme-instructor" : ""}

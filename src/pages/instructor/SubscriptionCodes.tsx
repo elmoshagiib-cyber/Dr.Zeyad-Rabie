@@ -9,7 +9,7 @@ import {
   Ticket,
   KeyRound,
 } from "lucide-react";
-import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
+import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import {
@@ -31,6 +31,7 @@ const grades = [
 
 const SubscriptionCodes = () => {
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [courses, setCourses] = useState<any[]>([]);
   const [codes, setCodes] = useState<any[]>([]);
   const [selectedGrade, setSelectedGrade] = React.useState("");
@@ -388,7 +389,7 @@ return (
 
 
 return (
-  <div className="flex min-h-screen bg-slate-100" dir="rtl">
+  <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
 
     {toast && (
       <div
@@ -425,16 +426,6 @@ return (
         to { width: 0%; }
       }
     `}</style>
-
-    {/* Sidebar */}
-    <div className="hidden lg:block">
-      <DashboardSidebar type="instructor" />
-    </div>
-
-    {/* Content */}
-    <main className="flex-1 overflow-y-auto">
-
-      <div className="p-6">
 
       {/* Hero */}
       <motion.div
@@ -1047,11 +1038,7 @@ hover:bg-blue-700
 
 </div>
 
-      </div>
-
-    </main>
-
-    </div>
+  </DashboardLayout>
 );
 };
 

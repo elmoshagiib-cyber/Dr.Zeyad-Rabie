@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
+import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
 import {
   Bell,
   FileText,
@@ -149,6 +149,7 @@ export default function InstructorNotifications() {
   const [showStudentDropdown, setShowStudentDropdown] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -518,24 +519,20 @@ const { error: studentNotifError } = await supabase
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-[#F8FAFC]" dir="rtl">
-        <DashboardSidebar type="instructor" />
-        <main className="flex-1 flex items-center justify-center">
+      <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+        <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-[#1E1B3A] border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="mt-4 text-slate-600 font-bold">جاري التحميل...</p>
           </div>
-        </main>
-      </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden" dir="rtl">
-      <DashboardSidebar type="instructor" />
-
-      <main className="flex-1 overflow-y-auto">
-        <div className="p-8 max-w-7xl mx-auto">
+    <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1285,7 +1282,6 @@ const { error: studentNotifError } = await supabase
             )}
           </motion.div>
         </div>
-      </main>
 
       <AnimatePresence>
         {showConfirm && (
@@ -1354,6 +1350,6 @@ const { error: studentNotifError } = await supabase
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </DashboardLayout>
   );
 }

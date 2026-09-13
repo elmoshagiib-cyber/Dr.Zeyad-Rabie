@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import InstructorLayout from "../../layouts/InstructorLayout";
+import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
 import { supabase } from "../../lib/supabase";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 export function CreateCourse() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [grade, setGrade] = useState("");
@@ -178,7 +179,7 @@ if (!title || !grade) {
     grades.find((g) => g.value === grade)?.label || "";
 
   return (
-    <InstructorLayout>
+    <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-5 sm:pt-6 lg:pt-8 pb-16">
 
 {/* ── Hero ── */}
@@ -607,6 +608,6 @@ if (!title || !grade) {
 
         </div>
       </div>
-    </InstructorLayout>
+    </DashboardLayout>
   );
 }

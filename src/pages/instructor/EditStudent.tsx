@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
-import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
+import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -33,6 +33,7 @@ export function EditStudent() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [student, setStudent] = useState<any>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Editable fields
   const [fullName, setFullName] = useState("");
@@ -165,27 +166,21 @@ export function EditStudent() {
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-white dark:bg-[#09090B]" dir="rtl">
-        <div className="hidden lg:block flex-shrink-0">
-          <DashboardSidebar type="instructor" />
-        </div>
-        <main className="flex-1 flex items-center justify-center">
+      <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+        <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <Loader2 className="w-12 h-12 text-[#B348FE] animate-spin mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400 font-bold">جاري تحميل بيانات الطالب...</p>
           </div>
-        </main>
-      </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="flex h-screen bg-white dark:bg-[#09090B]" dir="rtl">
-        <div className="hidden lg:block flex-shrink-0">
-          <DashboardSidebar type="instructor" />
-        </div>
-        <main className="flex-1 flex items-center justify-center">
+      <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+        <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <AlertCircle className="mx-auto text-red-500 mb-4" size={64} />
             <p className="text-gray-900 dark:text-white font-bold text-xl mb-4">{error}</p>
@@ -193,18 +188,13 @@ export function EditStudent() {
               العودة
             </Button>
           </div>
-        </main>
-      </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]" dir="rtl">
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="instructor" />
-      </div>
-
-      <main className="flex-1 overflow-y-auto">
+    <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -469,7 +459,6 @@ export function EditStudent() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 }

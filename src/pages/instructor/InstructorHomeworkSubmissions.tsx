@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "../../lib/supabase";
-import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
+import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
 import {
@@ -119,6 +119,7 @@ export function InstructorHomeworkSubmissions() {
   const [loadingEssayQuestions, setLoadingEssayQuestions] = useState(false);
   // على الموبايل: نتحكم هل نعرض القائمة ولا التفاصيل
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     loadSubmissions();
@@ -401,12 +402,9 @@ export function InstructorHomeworkSubmissions() {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]" dir="rtl">
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="instructor" />
-      </div>
-
-      <main className="flex-1 overflow-hidden flex flex-col">
+    <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+      <div className="flex h-full overflow-hidden bg-white dark:bg-[#09090B] -m-4 sm:-m-4 md:-m-6 lg:-m-8" dir="rtl">
+      <div className="flex-1 overflow-hidden flex flex-col">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -1026,7 +1024,7 @@ export function InstructorHomeworkSubmissions() {
             </>
           )}
         </div>
-      </main>
+      </div>
 
       {/* Image Preview Modal */}
       {imagePreview && (
@@ -1060,5 +1058,6 @@ export function InstructorHomeworkSubmissions() {
         }
       `}</style>
     </div>
+    </DashboardLayout>
   );
 }

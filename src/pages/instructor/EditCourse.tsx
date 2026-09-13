@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, type ReactElement } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import InstructorLayout from "../../layouts/InstructorLayout";
+import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
 import { supabase } from "../../lib/supabase";
 import { uploadToR2 } from "@/lib/r2";
 import { BookOpen } from "lucide-react";
@@ -297,6 +297,7 @@ export function EditCourse() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<"content" | "settings">("content");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -3614,7 +3615,7 @@ async function uploadHomeworkInstructions(
   // ── Loading State ────────────────────────────────────────
   if (loading) {
     return (
-      <InstructorLayout>
+      <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
         <div dir="rtl" className="min-h-screen bg-slate-50 flex items-center justify-center">
           <div className="text-center space-y-4">
             <div className="relative w-16 h-16 mx-auto">
@@ -3627,14 +3628,14 @@ async function uploadHomeworkInstructions(
             </div>
           </div>
         </div>
-      </InstructorLayout>
+      </DashboardLayout>
     );
   }
 
   // ── Error State ──────────────────────────────────────────
   if (error || !course) {
     return (
-      <InstructorLayout>
+      <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
         <div dir="rtl" className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-10 text-center max-w-md w-full space-y-5">
             <div className="w-16 h-16 mx-auto rounded-2xl bg-red-100 flex items-center justify-center">
@@ -3656,13 +3657,13 @@ async function uploadHomeworkInstructions(
             </div>
           </div>
         </div>
-      </InstructorLayout>
+      </DashboardLayout>
     );
   }
 
   // ── MAIN RENDER ──────────────────────────────────────────
   return (
-    <InstructorLayout>
+    <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
       <div dir="rtl" className="min-h-screen bg-slate-50">
 
         {/* Hero Header */}
@@ -3900,6 +3901,6 @@ async function uploadHomeworkInstructions(
           </div>
         )}
       </div>
-    </InstructorLayout>
+    </DashboardLayout>
   );
 }

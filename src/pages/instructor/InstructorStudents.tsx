@@ -101,13 +101,13 @@ export function InstructorStudents() {
 
   return (
     <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-      <div className="flex flex-col h-full bg-slate-50 min-h-screen">
+      <div className="flex flex-col h-full bg-slate-50">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-6 mt-6"
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg"
         >
           <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px]" />
           <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
@@ -124,7 +124,7 @@ export function InstructorStudents() {
         </motion.div>
 
         {/* Stats - كروت مضغوطة مثل صفحة التسليمات */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 px-6 py-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 py-6">
           <div
   className="
     bg-white
@@ -211,7 +211,7 @@ export function InstructorStudents() {
         </div>
 
         {/* Filters - مطابقة لتصميم صفحة التسليمات */}
-        <div className="p-4 lg:p-6 bg-white border-b border-slate-200 flex-shrink-0">
+        <div className="py-4 lg:py-6 bg-white border-b border-slate-200 flex-shrink-0">
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Filter size={18} className="text-[#B348FE]" />
@@ -268,7 +268,7 @@ export function InstructorStudents() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-4 lg:p-6 bg-slate-50">
+        <div className="flex-1 overflow-auto py-4 lg:py-6 bg-slate-50">
           {/* Header with count */}
           <div className="flex items-center gap-3 mb-4">
             <h2 className="text-lg font-black text-slate-900">قائمة الطلاب</h2>

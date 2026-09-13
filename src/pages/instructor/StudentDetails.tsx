@@ -34,7 +34,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
-import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
+import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "../../components/ui/Card";
 import { useParams, useNavigate } from "react-router-dom";
@@ -228,6 +228,7 @@ export function StudentDetails() {
   const navigate = useNavigate();
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [courses, setCourses] = useState<StudentCourse[]>([]);
   const [examResults, setExamResults] = useState<ExamResult[]>([]);
   const [homeworkResults, setHomeworkResults] = useState<HomeworkSubmission[]>([]);
@@ -1351,27 +1352,21 @@ const sendAnnouncement = async () => {
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-white dark:bg-[#09090B]" dir="rtl">
-        <div className="hidden lg:block flex-shrink-0">
-          <DashboardSidebar type="instructor" />
-        </div>
-        <main className="flex-1 flex items-center justify-center">
+      <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+        <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-600 dark:text-gray-400 font-bold">جاري تحميل بيانات الطالب...</p>
           </div>
-        </main>
-      </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (!student) {
     return (
-      <div className="flex h-screen bg-white dark:bg-[#09090B]" dir="rtl">
-        <div className="hidden lg:block flex-shrink-0">
-          <DashboardSidebar type="instructor" />
-        </div>
-        <main className="flex-1 flex items-center justify-center">
+      <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+        <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <AlertCircle className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={64} />
             <p className="text-gray-600 dark:text-gray-400 font-bold text-lg">الطالب غير موجود</p>
@@ -1379,8 +1374,8 @@ const sendAnnouncement = async () => {
               العودة
             </Button>
           </div>
-        </main>
-      </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -1480,7 +1475,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
   )[0];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#09090B] dark:via-[#111111] dark:to-[#09090B]" dir="rtl">
+    <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
       {toast && (
         <div
           key={toast.id}
@@ -1517,17 +1512,12 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
         }
       `}</style>
 
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="instructor" />
-      </div>
-
-      <main className="flex-1 overflow-y-auto">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-4 sm:mx-6 mt-4 sm:mt-6"
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6"
         >
           <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-blue-500/10 blur-[100px]" />
           <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-blue-500/10 blur-[100px]" />
@@ -1559,7 +1549,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
           </div>
         </motion.div>
 
-        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="space-y-6 max-w-7xl mx-auto">
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
             <CardContent className="p-4 lg:p-6">
               <div className="flex flex-wrap gap-3">
@@ -2530,7 +2520,6 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             </CardContent>
           </Card>
         </div>
-      </main>
 
       {showAnnouncementModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -3058,7 +3047,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
     </div>
   </div>
 )}
-    </div>
+    </DashboardLayout>
   );
 }
 

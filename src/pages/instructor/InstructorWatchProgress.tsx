@@ -19,7 +19,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
-import { DashboardSidebar } from "../../components/layout/dashboard/DashboardSidebar";
+import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 
@@ -79,6 +79,7 @@ export function InstructorWatchProgress() {
   const [sortBy, setSortBy] = useState<SortType>("recent");
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 20;
@@ -365,21 +366,13 @@ const colorClasses: Record<
     circumference - (overallCompletionRate / 100) * circumference;
 
   return (
-    <div
-      className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#09090B] dark:via-[#111111] dark:to-[#09090B]"
-      dir="rtl"
-    >
-      <div className="hidden lg:block flex-shrink-0">
-        <DashboardSidebar type="instructor" />
-      </div>
-
-      <main className="flex-1 overflow-y-auto">
+    <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-6 mt-6"
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6"
         >
           <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px]" />
           <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
@@ -416,7 +409,7 @@ const colorClasses: Record<
           </div>
         </motion.div>
 
-        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="space-y-6 max-w-7xl mx-auto">
 
           {/* الكروت الإحصائية */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -793,7 +786,6 @@ const colorClasses: Record<
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 }
