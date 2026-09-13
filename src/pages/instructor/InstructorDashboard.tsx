@@ -687,39 +687,43 @@ const quickActions = [
                   <>
                     {/* Desktop table */}
                     <div className="hidden md:block overflow-x-auto">
-                      <table className="w-full">
+                      <table className="w-full min-w-[880px]">
                         <thead>
                           <tr className="bg-slate-50 border-b border-slate-200">
-                            <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الطالب</th>
-                            <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الصف</th>
-                            <th className="px-4 py-3 text-right text-xs font-black text-slate-600">النوع</th>
-                            <th className="px-4 py-3 text-right text-xs font-black text-slate-600">تاريخ التسجيل</th>
-                            <th className="px-4 py-3 text-right text-xs font-black text-slate-600">الحالة</th>
-                            <th className="px-4 py-3 text-center text-xs font-black text-slate-600">إجراء</th>
+                            <th className="px-4 py-3.5 text-right text-xs font-black text-slate-500 uppercase tracking-wide">الطالب</th>
+                            <th className="px-4 py-3.5 text-right text-xs font-black text-slate-500 uppercase tracking-wide">الرقم</th>
+                            <th className="px-4 py-3.5 text-right text-xs font-black text-slate-500 uppercase tracking-wide">الصف</th>
+                            <th className="px-4 py-3.5 text-right text-xs font-black text-slate-500 uppercase tracking-wide">النوع</th>
+                            <th className="px-4 py-3.5 text-right text-xs font-black text-slate-500 uppercase tracking-wide">تاريخ التسجيل</th>
+                            <th className="px-4 py-3.5 text-right text-xs font-black text-slate-500 uppercase tracking-wide">وقت التسجيل</th>
+                            <th className="px-4 py-3.5 text-right text-xs font-black text-slate-500 uppercase tracking-wide">الحالة</th>
+                            <th className="px-4 py-3.5 text-center text-xs font-black text-slate-500 uppercase tracking-wide">إجراء</th>
                           </tr>
                         </thead>
                         <tbody>
                           {recentStudents.map((student) => (
                             <tr
                               key={student.id}
-                              className="border-b border-slate-100 hover:bg-slate-50 transition-all duration-200"
+                              className="border-b border-slate-50 hover:bg-slate-50/70 transition-colors duration-150"
                             >
-                              <td className="px-4 py-3">
+                              <td className="px-4 py-3.5">
                                 <div className="flex items-center gap-3">
-                                  <Avatar name={student.full_name} src={student.avatar_url} size="sm" className="h-8 w-8 text-xs" />
-                                  <div>
-                                    <p className="font-bold text-slate-900 text-sm">{student.full_name}</p>
-                                    <p className="text-xs text-slate-500">{student.phone || "لا يوجد رقم"}</p>
-                                  </div>
+                                  <Avatar name={student.full_name} src={student.avatar_url} size="sm" className="h-9 w-9 text-xs shrink-0" />
+                                  <p className="font-bold text-slate-900 text-sm whitespace-nowrap">{student.full_name}</p>
                                 </div>
                               </td>
-                              <td className="px-4 py-3">
-                                <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
+                              <td className="px-4 py-3.5">
+                                <span className="text-xs font-bold text-slate-500 tabular-nums" dir="ltr">
+                                  {student.phone || "—"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3.5">
+                                <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 whitespace-nowrap">
                                   {student.grade}
                                 </span>
                               </td>
-                              <td className="px-4 py-3">
-                                <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
+                              <td className="px-4 py-3.5">
+                                <span className={`px-2 py-1 rounded-lg text-xs font-black border whitespace-nowrap ${
                                   student.type === "online"
                                     ? "bg-blue-50 text-[#155DFC] border-blue-200"
                                     : "bg-amber-50 text-amber-700 border-amber-200"
@@ -727,21 +731,31 @@ const quickActions = [
                                   {student.type === "online" ? "أونلاين" : "سنتر"}
                                 </span>
                               </td>
-                              <td className="px-4 py-3">
-                                <span className="text-xs font-bold text-slate-600">
+                              <td className="px-4 py-3.5">
+                                <span className="text-xs font-bold text-slate-600 tabular-nums whitespace-nowrap" dir="ltr">
                                   {student.created_at ? new Date(student.created_at).toLocaleDateString("ar-EG-u-nu-latn") : "-"}
                                 </span>
                               </td>
-                              <td className="px-4 py-3">
-                                <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
+                              <td className="px-4 py-3.5">
+                                <span className="text-xs font-bold text-slate-400 tabular-nums whitespace-nowrap" dir="ltr">
+                                  {student.created_at
+                                    ? new Date(student.created_at).toLocaleTimeString("ar-EG-u-nu-latn", { hour: "2-digit", minute: "2-digit" })
+                                    : "-"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3.5">
+                                <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-black border whitespace-nowrap ${
                                   student.status === "نشط" || student.status === "active"
                                     ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                     : "bg-red-50 text-red-700 border-red-200"
                                 }`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${
+                                    student.status === "نشط" || student.status === "active" ? "bg-emerald-500" : "bg-red-500"
+                                  }`} />
                                   {student.status === "نشط" || student.status === "active" ? "نشط" : "موقوف"}
                                 </span>
                               </td>
-                              <td className="px-4 py-3">
+                              <td className="px-4 py-3.5">
                                 <div className="flex justify-center">
                                   <button
                                     onClick={() => navigate(`/instructor/students/${student.id}`)}
