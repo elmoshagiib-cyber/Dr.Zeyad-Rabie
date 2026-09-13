@@ -370,7 +370,7 @@ const quickActions = [
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-br from-blue-500 to-cyan-500 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6"
+        className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-[#155DFC] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6"
       >
         <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px]" />
         <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
@@ -391,7 +391,7 @@ const quickActions = [
         {/* ── Visitors stats ── */}
         <Card className="bg-white border border-slate-100 rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
           <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <div className="flex items-center gap-3 mb-4 sm:mb-6">
               <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
                 <BarChart2 className="text-indigo-600" size={18} />
               </div>
@@ -607,6 +607,10 @@ const quickActions = [
             <Card className="bg-white border border-slate-100 rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
               <CardContent className="p-0">
                 <div className="flex items-center justify-between p-4 sm:p-6 border-b border-slate-100">
+                  <div className="text-right">
+                    <h2 className="text-lg sm:text-xl font-black text-slate-900">أحدث الطلاب المسجلين</h2>
+                    <p className="text-slate-400 text-xs mt-0.5">آخر {recentStudents.length} طالب سجلوا على المنصة</p>
+                  </div>
                   <button
                     onClick={() => navigate("/instructor/students")}
                     className="flex items-center gap-1 text-xs sm:text-sm font-bold text-sky-600 hover:text-sky-700 transition-colors"
@@ -614,10 +618,6 @@ const quickActions = [
                     عرض الكل
                     <ArrowLeft size={14} />
                   </button>
-                  <div className="text-right">
-                    <h2 className="text-lg sm:text-xl font-black text-slate-900">أحدث الطلاب المسجلين</h2>
-                    <p className="text-slate-400 text-xs mt-0.5">آخر {recentStudents.length} طالب سجلوا على المنصة</p>
-                  </div>
                 </div>
 
                 {recentStudents.length === 0 ? (
