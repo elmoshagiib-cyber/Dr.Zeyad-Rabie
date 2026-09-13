@@ -210,7 +210,7 @@ export function InstructorReports() {
                   <select
                     value={courseFilter}
                     onChange={(e) => setCourseFilter(e.target.value)}
-                    className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
+                    className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#155DFC]"
                   >
                     <option value="all">-- كل الكورسات --</option>
                     {courses.map((c) => (
@@ -228,7 +228,7 @@ export function InstructorReports() {
                     type="date"
                     value={dateFrom}
                     onChange={(e) => setDateFrom(e.target.value)}
-                    className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
+                    className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#155DFC]"
                   />
                 </div>
                 <div>
@@ -239,7 +239,7 @@ export function InstructorReports() {
                     type="date"
                     value={dateTo}
                     onChange={(e) => setDateTo(e.target.value)}
-                    className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
+                    className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#155DFC]"
                   />
                 </div>
                 <div className="flex gap-2">
@@ -260,7 +260,7 @@ export function InstructorReports() {
 
           {loading ? (
             <div className="py-24 text-center">
-              <div className="w-10 h-10 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+              <div className="w-10 h-10 border-4 border-[#155DFC] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
               <p className="text-gray-500 dark:text-gray-400 font-bold text-sm">جاري تحميل التقرير...</p>
             </div>
           ) : (
@@ -272,10 +272,10 @@ export function InstructorReports() {
                       <p className="text-gray-600 dark:text-gray-300 text-xs font-bold mb-1">
                         عدد الاشتراكات المدفوعة
                       </p>
-                      <h3 className="text-3xl font-black text-[#B348FE]">{paidSubscriptionsCount}</h3>
+                      <h3 className="text-3xl font-black text-[#155DFC]">{paidSubscriptionsCount}</h3>
                     </div>
                     <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#111111] flex items-center justify-center">
-                      <ShoppingCart className="text-[#B348FE]" size={24} />
+                      <ShoppingCart className="text-[#155DFC]" size={24} />
                     </div>
                   </CardContent>
                 </Card>
@@ -317,7 +317,7 @@ export function InstructorReports() {
                 <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
                   <CardContent className="p-0">
                     <div className="flex items-center gap-2 p-5 border-b border-gray-100 dark:border-[#2A2A2A]">
-                      <CreditCard className="text-[#B348FE]" size={20} />
+                      <CreditCard className="text-[#155DFC]" size={20} />
                       <h3 className="font-black text-gray-900 dark:text-white">طرق الدفع</h3>
                     </div>
                     {Object.keys(paymentMethodBreakdown).length === 0 ? (
@@ -353,7 +353,7 @@ export function InstructorReports() {
                 <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
                   <CardContent className="p-0">
                     <div className="flex items-center gap-2 p-5 border-b border-gray-100 dark:border-[#2A2A2A]">
-                      <Layers className="text-[#B348FE]" size={20} />
+                      <Layers className="text-[#155DFC]" size={20} />
                       <h3 className="font-black text-gray-900 dark:text-white">الإيرادات حسب نوع الطالب</h3>
                     </div>
                     {Object.keys(studentTypeBreakdown).length === 0 ? (
@@ -391,7 +391,7 @@ export function InstructorReports() {
                 <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
                   <CardContent className="p-0">
                     <div className="flex items-center gap-2 p-5 border-b border-gray-100 dark:border-[#2A2A2A]">
-                      <Award className="text-[#B348FE]" size={20} />
+                      <Award className="text-[#155DFC]" size={20} />
                       <h3 className="font-black text-gray-900 dark:text-white">أكثر الطلاب دفعاً</h3>
                     </div>
                     {topPayingStudents.length === 0 ? (
@@ -428,7 +428,7 @@ export function InstructorReports() {
                 <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
                   <CardContent className="p-0">
                     <div className="flex items-center gap-2 p-5 border-b border-gray-100 dark:border-[#2A2A2A]">
-                      <TrendingUp className="text-[#B348FE]" size={20} />
+                      <TrendingUp className="text-[#155DFC]" size={20} />
                       <h3 className="font-black text-gray-900 dark:text-white">الكورسات الأكثر مبيعاً</h3>
                     </div>
                     {bestSelling.length === 0 ? (
@@ -453,7 +453,7 @@ export function InstructorReports() {
                                   {c.price.toFixed(2)} ج.م
                                 </td>
                                 <td className="px-4 py-2.5">
-                                  <span className="w-7 h-7 inline-flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-950/30 text-[#B348FE] font-black text-xs">
+                                  <span className="w-7 h-7 inline-flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-950/30 text-[#155DFC] font-black text-xs">
                                     {c.subscriptions}
                                   </span>
                                 </td>

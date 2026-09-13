@@ -1355,7 +1355,7 @@ const sendAnnouncement = async () => {
       <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-12 h-12 border-4 border-[#155DFC] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-600 dark:text-gray-400 font-bold">جاري تحميل بيانات الطالب...</p>
           </div>
         </div>
@@ -1370,7 +1370,7 @@ const sendAnnouncement = async () => {
           <div className="text-center">
             <AlertCircle className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={64} />
             <p className="text-gray-600 dark:text-gray-400 font-bold text-lg">الطالب غير موجود</p>
-            <Button onClick={() => navigate(-1)} className="mt-4 bg-[#B348FE] hover:bg-[#9E2FFF]">
+            <Button onClick={() => navigate(-1)} className="mt-4 bg-[#155DFC] hover:bg-[#9E2FFF]">
               العودة
             </Button>
           </div>
@@ -1555,7 +1555,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               <div className="flex flex-wrap gap-3">
                 <Button
                   onClick={() => setShowCourseModal(true)}
-                  className="bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-bold shadow-md h-12"
+                  className="bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl font-bold shadow-md h-12"
                 >
                   <Plus size={18} className="ml-2" />
                   إضافة كورس
@@ -1599,21 +1599,21 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
           </Card>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#B348FE] transition-all duration-300">
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#155DFC] transition-all duration-300">
               <CardContent className="p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">محاضرة مشاهدة</p>
-                    <h3 className="text-2xl lg:text-3xl font-black text-[#B348FE]">{realWatchedLessons}</h3>
+                    <h3 className="text-2xl lg:text-3xl font-black text-[#155DFC]">{realWatchedLessons}</h3>
                   </div>
                   <div className="w-12 h-12 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
-                    <BookOpen className="text-[#B348FE]" size={24} />
+                    <BookOpen className="text-[#155DFC]" size={24} />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#B348FE] transition-all duration-300">
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#155DFC] transition-all duration-300">
               <CardContent className="p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -1627,7 +1627,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#B348FE] transition-all duration-300">
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#155DFC] transition-all duration-300">
               <CardContent className="p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -1641,7 +1641,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#B348FE] transition-all duration-300">
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#155DFC] transition-all duration-300">
               <CardContent className="p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -1655,15 +1655,15 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#B348FE] transition-all duration-300">
+            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#155DFC] transition-all duration-300">
               <CardContent className="p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">مرات فتح الاختبار</p>
-                    <h3 className="text-2xl lg:text-3xl font-black text-[#B348FE]">{examOpensCount}</h3>
+                    <h3 className="text-2xl lg:text-3xl font-black text-[#155DFC]">{examOpensCount}</h3>
                   </div>
                   <div className="w-12 h-12 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
-                    <FileText className="text-[#B348FE]" size={24} />
+                    <FileText className="text-[#155DFC]" size={24} />
                   </div>
                 </div>
               </CardContent>
@@ -1683,7 +1683,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <InfoCardItem label="رقم الطالب" value={student.phone} icon={<Phone size={18} />} />
                 <InfoCardItem label="رقم ولي الأمر" value={student.parent_phone || "-"} icon={<Phone size={18} />} />
                 <InfoCardItem label="المحافظة" value={student.governorate || "-"} icon={<Mail size={18} />} />
-                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE] transition-all duration-200">
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A] hover:border-[#155DFC] transition-all duration-200">
                   <div className="flex items-start gap-2 mb-2">
                     <Calendar size={18} className="text-gray-500 dark:text-gray-400 mt-0.5" />
                     <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">حالة الاشتراك</p>
@@ -1696,7 +1696,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     {realSubscriptionStatus === "active" ? "نشط" : "منتهي"}
                   </p>
                 </div>
-                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE] transition-all duration-200">
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A] hover:border-[#155DFC] transition-all duration-200">
                   <div className="flex items-start gap-2 mb-2">
                     <Calendar size={18} className="text-gray-500 dark:text-gray-400 mt-0.5" />
                     <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">تاريخ انتهاء الاشتراك</p>
@@ -1723,11 +1723,11 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-6 border border-gray-100 dark:border-[#2A2A2A] mb-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-black text-gray-900 dark:text-white">التقدم الكلي في جميع الكورسات</h3>
-                  <span className="text-3xl font-black text-[#B348FE]">{overallProgress}%</span>
+                  <span className="text-3xl font-black text-[#155DFC]">{overallProgress}%</span>
                 </div>
                 <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-[#B348FE] to-[#9E2FFF] rounded-full transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-[#155DFC] to-[#9E2FFF] rounded-full transition-all duration-500"
                     style={{ width: `${overallProgress}%` }}
                   />
                 </div>
@@ -1780,7 +1780,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
-                    <BookOpen className="text-[#B348FE]" size={20} />
+                    <BookOpen className="text-[#155DFC]" size={20} />
                   </div>
                   <div>
                     <h3 className="font-black text-gray-900 dark:text-white">الاشتراكات والكورسات</h3>
@@ -1799,7 +1799,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                           ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900"
                           : course.isStalled
                           ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900"
-                          : "bg-gray-50 dark:bg-[#1A1A1A] border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE]"
+                          : "bg-gray-50 dark:bg-[#1A1A1A] border-gray-100 dark:border-[#2A2A2A] hover:border-[#155DFC]"
                       }`}
                     >
                       <div className="flex items-start justify-between mb-4 flex-wrap gap-2">
@@ -1910,11 +1910,11 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                       <div className="mb-3">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs font-bold text-gray-600 dark:text-gray-400">نسبة الإنجاز</span>
-                          <span className="text-sm font-black text-[#B348FE]">{course.completionPercent}%</span>
+                          <span className="text-sm font-black text-[#155DFC]">{course.completionPercent}%</span>
                         </div>
                         <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-[#B348FE] to-[#9E2FFF] rounded-full transition-all duration-500"
+                            className="h-full bg-gradient-to-r from-[#155DFC] to-[#9E2FFF] rounded-full transition-all duration-500"
                             style={{ width: `${course.completionPercent}%` }}
                           />
                         </div>
@@ -1942,7 +1942,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                           onClick={() =>
                             setExpandedCourseId(expandedCourseId === course.id ? null : course.id)
                           }
-                          className="text-xs font-bold text-[#B348FE] hover:text-[#9E2FFF] transition-colors"
+                          className="text-xs font-bold text-[#155DFC] hover:text-[#9E2FFF] transition-colors"
                         >
                           {expandedCourseId === course.id ? "إخفاء تفاصيل المحاضرات ▲" : "عرض تفاصيل كل محاضرة ▼"}
                         </button>
@@ -2027,7 +2027,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   </div>
                   <Button
                     onClick={openAddSubscriptionModal}
-                    className="bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-bold h-11 px-5"
+                    className="bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl font-bold h-11 px-5"
                   >
                     <Plus size={16} className="ml-1.5" />
                     إضافة اشتراك
@@ -2041,7 +2041,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                       value={subPaymentsSearch}
                       onChange={(e) => { setSubPaymentsSearch(e.target.value); setSubPaymentsPage(1); }}
                       placeholder="بحث برقم الفاتورة..."
-                      className="w-full h-10 pr-9 pl-3 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
+                      className="w-full h-10 pr-9 pl-3 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#155DFC]"
                     />
                   </div>
 
@@ -2080,7 +2080,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                               onClick={() => { setSelectedInvoice(p); setShowInvoiceModal(true); }}
                               className="border-t border-gray-100 dark:border-[#2A2A2A] cursor-pointer hover:bg-[#FAF7FF] dark:hover:bg-[#171717] transition-colors"
                             >
-                              <td className="px-4 py-3 font-black text-[#B348FE] whitespace-nowrap">{p.invoice_number}</td>
+                              <td className="px-4 py-3 font-black text-[#155DFC] whitespace-nowrap">{p.invoice_number}</td>
                               <td className="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">{p.courseData?.title || "-"}</td>
                               <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">{p.student_type === "online" ? "Online" : "Center"}</td>
                               <td className="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">{p.amount} جنيه</td>
@@ -2113,7 +2113,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   </div>
 
                   <div className="flex items-center justify-between px-4 py-4 border-t border-gray-100 dark:border-[#2A2A2A]">
-                    <span className="text-xs font-bold text-[#B348FE]">
+                    <span className="text-xs font-bold text-[#155DFC]">
                       {(subPaymentsPage - 1) * subPaymentsPerPage + 1} -{" "}
                       {Math.min(subPaymentsPage * subPaymentsPerPage, filteredSubPayments.length)} من {filteredSubPayments.length}
                     </span>
@@ -2125,7 +2125,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                       >
                         ‹
                       </button>
-                      <span className="w-8 h-8 rounded-lg bg-[#B348FE] text-white flex items-center justify-center text-xs font-black">
+                      <span className="w-8 h-8 rounded-lg bg-[#155DFC] text-white flex items-center justify-center text-xs font-black">
                         {subPaymentsPage}
                       </span>
                       <button
@@ -2219,7 +2219,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                                   <span
                                     className={`px-2 py-1 rounded-lg text-xs font-black whitespace-nowrap ${
                                       hasGrade
-                                        ? "bg-[#F6EEFF] text-[#B348FE] dark:bg-[#2B103D] dark:text-[#B348FE]"
+                                        ? "bg-[#F6EEFF] text-[#155DFC] dark:bg-[#2B103D] dark:text-[#155DFC]"
                                         : "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400"
                                     }`}
                                   >
@@ -2238,7 +2238,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                                       href={hw.file_url}
                                       target="_blank"
                                       rel="noreferrer"
-                                      className="text-[#B348FE] hover:text-[#9E2FFF] font-bold text-xs underline whitespace-nowrap"
+                                      className="text-[#155DFC] hover:text-[#9E2FFF] font-bold text-xs underline whitespace-nowrap"
                                     >
                                       عرض الملف
                                     </a>
@@ -2254,7 +2254,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   </div>
 
                   <div className="flex items-center justify-between px-4 py-4 border-t border-gray-100 dark:border-[#2A2A2A]">
-                    <span className="text-xs font-bold text-[#B348FE]">
+                    <span className="text-xs font-bold text-[#155DFC]">
                       {(homeworksPage - 1) * homeworksPerPage + 1} -{" "}
                       {Math.min(homeworksPage * homeworksPerPage, homeworkResults.length)} من {homeworkResults.length}
                     </span>
@@ -2266,7 +2266,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                       >
                         ‹
                       </button>
-                      <span className="w-8 h-8 rounded-lg bg-[#B348FE] text-white flex items-center justify-center text-xs font-black">
+                      <span className="w-8 h-8 rounded-lg bg-[#155DFC] text-white flex items-center justify-center text-xs font-black">
                         {homeworksPage}
                       </span>
                       <button
@@ -2365,7 +2365,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   </div>
 
                   <div className="flex items-center justify-between px-4 py-4 border-t border-gray-100 dark:border-[#2A2A2A]">
-                    <span className="text-xs font-bold text-[#B348FE]">
+                    <span className="text-xs font-bold text-[#155DFC]">
                       {(examsPage - 1) * examsPerPage + 1} -{" "}
                       {Math.min(examsPage * examsPerPage, examResults.length)} من {examResults.length}
                     </span>
@@ -2377,7 +2377,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                       >
                         ‹
                       </button>
-                      <span className="w-8 h-8 rounded-lg bg-[#B348FE] text-white flex items-center justify-center text-xs font-black">
+                      <span className="w-8 h-8 rounded-lg bg-[#155DFC] text-white flex items-center justify-center text-xs font-black">
                         {examsPage}
                       </span>
                       <button
@@ -2407,7 +2407,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A2A]">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
-                      <Calendar className="text-[#B348FE]" size={20} />
+                      <Calendar className="text-[#155DFC]" size={20} />
                     </div>
                     <p className="text-xs font-bold text-gray-500 dark:text-gray-400">آخر دخول</p>
                   </div>
@@ -2419,7 +2419,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A2A]">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
-                      <Monitor className="text-[#B348FE]" size={20} />
+                      <Monitor className="text-[#155DFC]" size={20} />
                     </div>
                     <p className="text-xs font-bold text-gray-500 dark:text-gray-400">آخر جهاز استخدمه</p>
                   </div>
@@ -2438,7 +2438,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
-                    <Monitor className="text-[#B348FE]" size={20} />
+                    <Monitor className="text-[#155DFC]" size={20} />
                   </div>
                   <div>
                     <h3 className="font-black text-gray-900 dark:text-white">سجل الأجهزة وتسجيلات الدخول</h3>
@@ -2527,7 +2527,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             <div className="p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
-                  <Bell className="text-[#B348FE]" size={24} />
+                  <Bell className="text-[#155DFC]" size={24} />
                 </div>
                 <div>
                   <h3 className="text-xl font-black text-gray-900 dark:text-white">رسالة خاصة للطالب</h3>
@@ -2565,7 +2565,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             <div className="p-6 border-t border-gray-100 dark:border-[#2A2A2A] flex gap-3">
               <Button
                 onClick={sendAnnouncement}
-                className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl h-12 font-black"
+                className="flex-1 bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl h-12 font-black"
               >
                 إرسال الرسالة
               </Button>
@@ -2606,7 +2606,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
 
               {passwordLoading && (
                 <div className="flex flex-col items-center justify-center py-6 gap-3">
-                  <div className="w-8 h-8 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-4 border-[#155DFC] border-t-transparent rounded-full animate-spin" />
                   <p className="text-sm text-gray-500 dark:text-gray-400">جاري توليد كلمة المرور...</p>
                 </div>
               )}
@@ -2629,7 +2629,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     </span>
                     <button
                       onClick={copyPassword}
-                      className="h-12 w-12 flex-shrink-0 rounded-xl bg-[#B348FE] hover:bg-[#9E2FFF] text-white flex items-center justify-center transition-colors"
+                      className="h-12 w-12 flex-shrink-0 rounded-xl bg-[#155DFC] hover:bg-[#9E2FFF] text-white flex items-center justify-center transition-colors"
                     >
                       {copied ? <Check size={20} /> : <Copy size={20} />}
                     </button>
@@ -2647,7 +2647,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   <Button
                     onClick={generateNewPassword}
                     disabled={passwordLoading}
-                    className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl h-12 font-black disabled:opacity-70"
+                    className="flex-1 bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl h-12 font-black disabled:opacity-70"
                   >
                     {passwordLoading ? "جاري التوليد..." : "توليد كلمة المرور"}
                   </Button>
@@ -2662,7 +2662,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               ) : (
                 <Button
                   onClick={() => setShowPasswordModal(false)}
-                  className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl h-12 font-black"
+                  className="flex-1 bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl h-12 font-black"
                 >
                   تم
                 </Button>
@@ -2682,7 +2682,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <select
                   value={selectedCourse}
                   onChange={(e) => setSelectedCourse(e.target.value)}
-                  className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                  className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
                 >
                   <option value="">اختر الكورس</option>
                   {availableCourses.length === 0 ? (
@@ -2701,7 +2701,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 </select>
               </div>
               <div className="flex gap-3 pt-2">
-                <Button onClick={addCourse} className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-black h-12">
+                <Button onClick={addCourse} className="flex-1 bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl font-black h-12">
                   إضافة
                 </Button>
                 <Button variant="outline" onClick={() => setShowCourseModal(false)} className="flex-1 border-2 border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] rounded-xl font-black h-12">
@@ -2719,7 +2719,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             <div className="p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
-                  <Receipt className="text-[#B348FE]" size={24} />
+                  <Receipt className="text-[#155DFC]" size={24} />
                 </div>
                 <div>
                   <h3 className="text-xl font-black text-gray-900 dark:text-white">
@@ -2736,7 +2736,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <select
                   value={subForm.course_id}
                   onChange={(e) => setSubForm((p) => ({ ...p, course_id: e.target.value }))}
-                  className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                  className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
                 >
                   <option value="">اختر الكورس</option>
                   {availableCourses.map((course) => (
@@ -2754,7 +2754,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                       const type = e.target.value as "online" | "center";
                       setSubForm((p) => ({ ...p, student_type: type, amount: SUBSCRIPTION_PRICING[type] }));
                     }}
-                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
                   >
                     <option value="online">Online</option>
                     <option value="center">Center</option>
@@ -2765,7 +2765,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   <select
                     value={subForm.payment_method}
                     onChange={(e) => setSubForm((p) => ({ ...p, payment_method: e.target.value as any }))}
-                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
                   >
                     <option value="vodafone_cash">Vodafone Cash</option>
                     <option value="instapay">InstaPay</option>
@@ -2781,7 +2781,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     min={1}
                     value={subForm.amount}
                     onChange={(e) => setSubForm((p) => ({ ...p, amount: Number(e.target.value) }))}
-                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
                   />
                 </div>
                 <div>
@@ -2792,7 +2792,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     onChange={(e) => setSubForm((p) => ({ ...p, payer_phone: e.target.value }))}
                     placeholder="01XXXXXXXXX"
                     dir="ltr"
-                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE] text-center"
+                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC] text-center"
                   />
                 </div>
               </div>
@@ -2805,7 +2805,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   onChange={(e) => setSubForm((p) => ({ ...p, subscription_code: e.target.value.toUpperCase() }))}
                   placeholder="XXXX-XXXX"
                   dir="ltr"
-                  className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE] text-center tracking-widest font-bold"
+                  className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC] text-center tracking-widest font-bold"
                 />
               </div>
 
@@ -2821,7 +2821,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                       end.setMonth(end.getMonth() + 1);
                       setSubForm((p) => ({ ...p, start_date: start, end_date: end.toISOString().slice(0, 10) }));
                     }}
-                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
                   />
                 </div>
                 <div>
@@ -2830,7 +2830,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     type="date"
                     value={subForm.end_date}
                     onChange={(e) => setSubForm((p) => ({ ...p, end_date: e.target.value }))}
-                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                    className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
                   />
                 </div>
               </div>
@@ -2840,7 +2840,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <select
                   value={subForm.payment_status}
                   onChange={(e) => setSubForm((p) => ({ ...p, payment_status: e.target.value as any }))}
-                  className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                  className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
                 >
                   <option value="verified">تم التأكيد</option>
                   <option value="pending">قيد المراجعة</option>
@@ -2854,7 +2854,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   rows={3}
                   value={subForm.notes}
                   onChange={(e) => setSubForm((p) => ({ ...p, notes: e.target.value }))}
-                  className="w-full rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] p-4 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+                  className="w-full rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] p-4 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
                 />
               </div>
             </div>
@@ -2863,7 +2863,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               <Button
                 onClick={saveSubscriptionPayment}
                 disabled={savingSubscription}
-                className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-black h-12 disabled:opacity-70"
+                className="flex-1 bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl font-black h-12 disabled:opacity-70"
               >
                 {savingSubscription ? "جاري الحفظ..." : editingPaymentId ? "حفظ التعديل" : "حفظ الاشتراك"}
               </Button>
@@ -2968,7 +2968,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
           <div className="px-6 pb-5">
             <div className="rounded-2xl border-2 border-dashed border-[#155DFC]/40 bg-[#EFF6FF] px-5 py-4 text-center">
               <p className="text-[11px] font-bold text-gray-400 mb-1.5">كود الاشتراك</p>
-              <p className="text-2xl font-black text-[#B348FE] tracking-[4px]" dir="ltr">
+              <p className="text-2xl font-black text-[#155DFC] tracking-[4px]" dir="ltr">
                 {selectedInvoice.subscription_code}
               </p>
             </div>
@@ -3000,7 +3000,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             onClick={() => copyToClipboard(selectedInvoice.invoice_number, "invoice")}
             className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors"
           >
-            <Copy size={16} className="text-[#B348FE]" />
+            <Copy size={16} className="text-[#155DFC]" />
             <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
               {copiedField === "invoice" ? "تم النسخ ✓" : "نسخ الفاتورة"}
             </span>
@@ -3010,7 +3010,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             disabled={!selectedInvoice.subscription_code}
             className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors disabled:opacity-40"
           >
-            <Copy size={16} className="text-[#B348FE]" />
+            <Copy size={16} className="text-[#155DFC]" />
             <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
               {copiedField === "code" ? "تم النسخ ✓" : "نسخ الكود"}
             </span>
@@ -3020,7 +3020,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             disabled={!selectedInvoice.payer_phone}
             className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors disabled:opacity-40"
           >
-            <Copy size={16} className="text-[#B348FE]" />
+            <Copy size={16} className="text-[#155DFC]" />
             <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
               {copiedField === "phone" ? "تم النسخ ✓" : "نسخ رقم التحويل"}
             </span>
@@ -3062,7 +3062,7 @@ function formatWatchTime(totalSeconds: number): string {
 
 function InfoCardItem({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A] hover:border-[#B348FE] transition-all duration-200">
+    <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A] hover:border-[#155DFC] transition-all duration-200">
       <div className="flex items-start gap-2 mb-2">
         <span className="text-gray-500 dark:text-gray-400 mt-0.5">{icon}</span>
         <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">{label}</p>

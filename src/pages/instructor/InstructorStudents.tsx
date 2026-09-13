@@ -214,12 +214,12 @@ export function InstructorStudents() {
         <div className="py-4 lg:py-6 bg-white border-b border-slate-200 flex-shrink-0">
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Filter size={18} className="text-[#B348FE]" />
+              <Filter size={18} className="text-[#155DFC]" />
               <h3 className="text-base font-black text-slate-900">البحث والفلاتر</h3>
             </div>
             <button
               onClick={() => { setSearchTerm(""); setGradeFilter(""); setStatusFilter(""); setTypeFilter(""); }}
-              className="text-xs font-bold text-[#B348FE] hover:text-[#9E2FFF] transition-colors"
+              className="text-xs font-bold text-[#155DFC] hover:text-[#9E2FFF] transition-colors"
             >
               إعادة تعيين الفلاتر
             </button>
@@ -239,7 +239,7 @@ export function InstructorStudents() {
             <select 
               value={gradeFilter} 
               onChange={(e) => setGradeFilter(e.target.value)}
-              className="w-full h-12 border border-slate-200 rounded-xl px-4 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+              className="w-full h-12 border border-slate-200 rounded-xl px-4 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
             >
               <option value="">كل الصفوف</option>
               {grades.map((g) => <option key={g} value={g}>{g}</option>)}
@@ -248,7 +248,7 @@ export function InstructorStudents() {
             <select 
               value={statusFilter} 
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full h-12 border border-slate-200 rounded-xl px-4 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+              className="w-full h-12 border border-slate-200 rounded-xl px-4 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
             >
               <option value="">جميع الحالات</option>
               <option value="نشط">نشط</option>
@@ -258,7 +258,7 @@ export function InstructorStudents() {
             <select 
               value={typeFilter} 
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full h-12 border border-slate-200 rounded-xl px-4 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+              className="w-full h-12 border border-slate-200 rounded-xl px-4 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
             >
               <option value="">جميع الأنواع</option>
               <option value="center">سنتر</option>
@@ -272,7 +272,7 @@ export function InstructorStudents() {
           {/* Header with count */}
           <div className="flex items-center gap-3 mb-4">
             <h2 className="text-lg font-black text-slate-900">قائمة الطلاب</h2>
-            <span className="px-2.5 py-1 rounded-lg bg-[#F6EEFF] text-[#B348FE] text-xs font-black border border-[#EAD8FF]">
+            <span className="px-2.5 py-1 rounded-lg bg-[#F6EEFF] text-[#155DFC] text-xs font-black border border-[#EAD8FF]">
               {filteredStudents.length} طالب
             </span>
           </div>
@@ -416,7 +416,7 @@ export function InstructorStudents() {
                         <div className="bg-slate-50 rounded-xl p-2.5">
                           <p className="text-xs text-slate-500 mb-1">النوع</p>
                           <span className={`text-xs font-black ${
-                            student.type === "online" ? "text-[#B348FE]" : "text-amber-600"
+                            student.type === "online" ? "text-[#155DFC]" : "text-amber-600"
                           }`}>
                             {getStudentTypeLabel(student.type)}
                           </span>
@@ -438,7 +438,7 @@ export function InstructorStudents() {
                       <div className="flex gap-2">
                         <Button
                           onClick={() => navigate(`/instructor/students/${student.id}`)}
-                          className="flex-1 bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl py-2 text-xs font-black"
+                          className="flex-1 bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl py-2 text-xs font-black"
                         >
                           <Eye size={14} className="ml-1" />
                           عرض

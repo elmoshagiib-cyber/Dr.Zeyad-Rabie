@@ -467,7 +467,7 @@ const colorClasses: Record<
                         cy="50"
                         r="46"
                         fill="none"
-                        stroke="#B348FE"
+                        stroke="#155DFC"
                         strokeWidth="8"
                         strokeLinecap="round"
                         strokeDasharray={circumference}
@@ -503,7 +503,7 @@ const colorClasses: Record<
                     <select
                       value={selectedCourse}
                       onChange={(e) => setSelectedCourse(e.target.value)}
-                      className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm font-bold text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
+                      className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm font-bold text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#155DFC]"
                     >
                       <option value="all">-- كل الكورسات --</option>
                       {courses.map((c) => (
@@ -522,7 +522,7 @@ const colorClasses: Record<
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as SortType)}
-                      className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm font-bold text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
+                      className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm font-bold text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#155DFC]"
                     >
                       <option value="recent">الأحدث اشتراكًا</option>
                       <option value="lowest_completion">الأقل إنجازًا</option>
@@ -542,7 +542,7 @@ const colorClasses: Record<
                 onClick={() => setActiveTab(tab.key)}
                 className={`px-4 py-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${
                   activeTab === tab.key
-                    ? "border-[#B348FE] text-[#B348FE]"
+                    ? "border-[#155DFC] text-[#155DFC]"
                     : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                 }`}
               >
@@ -559,7 +559,7 @@ const colorClasses: Record<
               placeholder="ابحث بالاسم أو رقم الهاتف أو اسم الكورس..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pr-10 pl-4 py-3 border border-gray-200 dark:border-[#2A2A2A] rounded-xl bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#B348FE]"
+              className="w-full pr-10 pl-4 py-3 border border-gray-200 dark:border-[#2A2A2A] rounded-xl bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#155DFC]"
             />
           </div>
 
@@ -568,7 +568,7 @@ const colorClasses: Record<
             <CardContent className="p-0">
               {loading ? (
                 <div className="py-24 text-center">
-                  <div className="w-10 h-10 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                  <div className="w-10 h-10 border-4 border-[#155DFC] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
                   <p className="text-gray-500 dark:text-gray-400 font-bold text-sm">
                     جاري التحميل...
                   </p>
@@ -576,7 +576,7 @@ const colorClasses: Record<
               ) : fetchError ? (
                 <div className="py-16 text-center">
                   <p className="text-red-600 dark:text-red-400 font-bold mb-3">{fetchError}</p>
-                  <Button onClick={fetchData} className="bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-bold">
+                  <Button onClick={fetchData} className="bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl font-bold">
                     إعادة المحاولة
                   </Button>
                 </div>
@@ -655,7 +655,7 @@ const colorClasses: Record<
                             >
                               <td className="px-4 py-3">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-9 h-9 rounded-full bg-white/10 text-[#B348FE] flex items-center justify-center font-black text-sm flex-shrink-0">
+                                  <div className="w-9 h-9 rounded-full bg-white/10 text-[#155DFC] flex items-center justify-center font-black text-sm flex-shrink-0">
                                     {row.full_name?.trim()?.charAt(0) || "؟"}
                                   </div>
                                   <div>
@@ -669,7 +669,7 @@ const colorClasses: Record<
                                       {row.phone && (
                                         <button
                                           onClick={() => copyPhone(row.phone!)}
-                                          className="text-gray-300 hover:text-[#B348FE] transition-colors"
+                                          className="text-gray-300 hover:text-[#155DFC] transition-colors"
                                         >
                                           {copiedPhone === row.phone ? (
                                             <Check size={11} className="text-emerald-500" />
@@ -703,7 +703,7 @@ const colorClasses: Record<
                                   <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                                     <div
                                       className={`h-full rounded-full transition-all duration-500 ${
-                                        pct === 100 ? "bg-emerald-500" : stalled ? "bg-amber-500" : "bg-[#B348FE]"
+                                        pct === 100 ? "bg-emerald-500" : stalled ? "bg-amber-500" : "bg-[#155DFC]"
                                       }`}
                                       style={{ width: `${pct}%` }}
                                     />
@@ -756,7 +756,7 @@ const colorClasses: Record<
                   {/* Pagination */}
                   {totalPages > 1 && (
                     <div className="flex items-center justify-between px-4 py-4 border-t border-gray-100 dark:border-[#2A2A2A]">
-                      <span className="text-xs font-bold text-[#B348FE]">
+                      <span className="text-xs font-bold text-[#155DFC]">
                         {(currentPage - 1) * rowsPerPage + 1} -{" "}
                         {Math.min(currentPage * rowsPerPage, filteredData.length)} من {filteredData.length}
                       </span>
@@ -768,7 +768,7 @@ const colorClasses: Record<
                         >
                           ‹
                         </button>
-                        <span className="w-8 h-8 rounded-lg bg-[#B348FE] text-white flex items-center justify-center text-xs font-black">
+                        <span className="w-8 h-8 rounded-lg bg-[#155DFC] text-white flex items-center justify-center text-xs font-black">
                           {currentPage}
                         </span>
                         <button

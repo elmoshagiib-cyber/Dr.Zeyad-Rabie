@@ -169,7 +169,7 @@ export function EditStudent() {
       <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <Loader2 className="w-12 h-12 text-[#B348FE] animate-spin mx-auto mb-4" />
+            <Loader2 className="w-12 h-12 text-[#155DFC] animate-spin mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400 font-bold">جاري تحميل بيانات الطالب...</p>
           </div>
         </div>
@@ -184,7 +184,7 @@ export function EditStudent() {
           <div className="text-center">
             <AlertCircle className="mx-auto text-red-500 mb-4" size={64} />
             <p className="text-gray-900 dark:text-white font-bold text-xl mb-4">{error}</p>
-            <Button onClick={() => navigate(-1)} className="bg-[#B348FE] hover:bg-[#9E2FFF]">
+            <Button onClick={() => navigate(-1)} className="bg-[#155DFC] hover:bg-[#9E2FFF]">
               العودة
             </Button>
           </div>
@@ -238,7 +238,7 @@ export function EditStudent() {
                       className="w-24 h-24 lg:w-28 lg:h-28 rounded-2xl object-cover border-4 border-[#F6EEFF] dark:border-[#2B103D] shadow-lg"
                     />
                   ) : (
-                    <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-2xl bg-[#B348FE] flex items-center justify-center text-white text-4xl font-black border-4 border-[#F6EEFF] dark:border-[#2B103D] shadow-lg">
+                    <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-2xl bg-[#155DFC] flex items-center justify-center text-white text-4xl font-black border-4 border-[#F6EEFF] dark:border-[#2B103D] shadow-lg">
                       {fullName?.charAt(0) || "?"}
                     </div>
                   )}
@@ -254,7 +254,7 @@ export function EditStudent() {
                       <div className={`w-2 h-2 rounded-full ${isBlocked ? "bg-red-500" : "bg-emerald-500"}`} />
                       {isBlocked ? "موقوف" : "نشط"}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black border bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] border-[#EAD8FF] dark:border-[#2A2A2A]">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black border bg-[#F6EEFF] dark:bg-[#2B103D] text-[#155DFC] border-[#EAD8FF] dark:border-[#2A2A2A]">
                       {type === "online" ? "أونلاين" : "سنتر"}
                     </span>
                   </div>
@@ -270,7 +270,7 @@ export function EditStudent() {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
-                      <User className="text-[#B348FE]" size={20} />
+                      <User className="text-[#155DFC]" size={20} />
                     </div>
                     <h3 className="text-lg font-black text-gray-900 dark:text-white">البيانات الأساسية</h3>
                   </div>
@@ -284,7 +284,7 @@ export function EditStudent() {
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="اسم الطالب"
-                        className="bg-gray-50 dark:bg-[#1A1A1A] border-gray-200 dark:border-[#2A2A2A] focus:border-[#B348FE] focus:ring-[#B348FE]"
+                        className="bg-gray-50 dark:bg-[#1A1A1A] border-gray-200 dark:border-[#2A2A2A] focus:border-[#155DFC] focus:ring-[#155DFC]"
                       />
                     </div>
 
@@ -299,7 +299,7 @@ export function EditStudent() {
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             placeholder="رقم الهاتف"
-                            className="pr-10 bg-gray-50 dark:bg-[#1A1A1A] border-gray-200 dark:border-[#2A2A2A] focus:border-[#B348FE] focus:ring-[#B348FE]"
+                            className="pr-10 bg-gray-50 dark:bg-[#1A1A1A] border-gray-200 dark:border-[#2A2A2A] focus:border-[#155DFC] focus:ring-[#155DFC]"
                           />
                         </div>
                       </div>
@@ -314,7 +314,7 @@ export function EditStudent() {
                             value={parentPhone}
                             onChange={(e) => setParentPhone(e.target.value)}
                             placeholder="رقم ولي الأمر"
-                            className="pr-10 bg-gray-50 dark:bg-[#1A1A1A] border-gray-200 dark:border-[#2A2A2A] focus:border-[#B348FE] focus:ring-[#B348FE]"
+                            className="pr-10 bg-gray-50 dark:bg-[#1A1A1A] border-gray-200 dark:border-[#2A2A2A] focus:border-[#155DFC] focus:ring-[#155DFC]"
                           />
                         </div>
                       </div>
@@ -330,7 +330,7 @@ export function EditStudent() {
                           <select
                             value={grade}
                             onChange={(e) => setGrade(e.target.value)}
-                            className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-10 bg-gray-50 dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE] appearance-none"
+                            className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-10 bg-gray-50 dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC] appearance-none"
                           >
                             <option value="">اختر الصف</option>
                             {grades.map((g) => (
@@ -349,7 +349,7 @@ export function EditStudent() {
                           <select
                             value={governorate}
                             onChange={(e) => setGovernorate(e.target.value)}
-                            className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-10 bg-gray-50 dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE] appearance-none"
+                            className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-10 bg-gray-50 dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC] appearance-none"
                           >
                             <option value="">اختر المحافظة</option>
                             {governorates.map((g) => (
@@ -370,7 +370,7 @@ export function EditStudent() {
                           <select
                             value={type}
                             onChange={(e) => setType(e.target.value)}
-                            className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-10 bg-gray-50 dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE] appearance-none"
+                            className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-10 bg-gray-50 dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC] appearance-none"
                           >
                             <option value="center">سنتر</option>
                             <option value="online">أونلاين</option>
@@ -387,7 +387,7 @@ export function EditStudent() {
                           <select
                             value={isActivated ? "true" : "false"}
                             onChange={(e) => setIsActivated(e.target.value === "true")}
-                            className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-10 bg-gray-50 dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE] appearance-none"
+                            className="w-full h-12 border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-10 bg-gray-50 dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC] appearance-none"
                           >
                             <option value="true">مفعل</option>
                             <option value="false">غير مفعل</option>
@@ -408,7 +408,7 @@ export function EditStudent() {
                             type="radio"
                             checked={!isBlocked}
                             onChange={() => setIsBlocked(false)}
-                            className="w-4 h-4 text-[#B348FE] focus:ring-[#B348FE]"
+                            className="w-4 h-4 text-[#155DFC] focus:ring-[#155DFC]"
                           />
                           <span className="text-sm text-gray-700 dark:text-gray-300">نشط</span>
                         </label>
@@ -434,7 +434,7 @@ export function EditStudent() {
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="w-full bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-2xl font-black h-14 shadow-lg text-lg"
+                className="w-full bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-2xl font-black h-14 shadow-lg text-lg"
               >
                 {saving ? (
                   <>

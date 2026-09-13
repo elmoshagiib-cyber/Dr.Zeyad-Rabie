@@ -123,7 +123,7 @@ const typeColorMap: Record<string, string> = {
   live: "#EF4444",
   announcement: "#10B981",
   offer: "#A855F7",
-  general: "#B348FE",
+  general: "#155DFC",
 };
 
 const filterOptions = [
@@ -354,7 +354,7 @@ const getStageFromGrade = (grade: string): string => {
             : formData.type === "offer"
             ? "gift"
             : "bell",
-        color: typeColorMap[formData.type] || "#B348FE",
+        color: typeColorMap[formData.type] || "#155DFC",
       };
 
       if (editingId) {
