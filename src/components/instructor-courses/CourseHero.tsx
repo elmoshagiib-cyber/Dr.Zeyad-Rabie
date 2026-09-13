@@ -39,11 +39,11 @@ return (
     initial={{ opacity: 0, y: -20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4, ease: "easeOut" }}
-    className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg"
+    className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg"
   >
     {/* Background Blur */}
-    <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
-    <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+    <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px]" />
+    <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
 
     <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
 
@@ -68,7 +68,7 @@ return (
             onClick={() => setView("list")}
             className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl transition-all ${
               view === "list"
-                ? "bg-white text-[#1E1B3A] shadow"
+                ? "bg-white text-[#1547D6] shadow"
                 : "text-white hover:bg-white/10"
             }`}
           >
@@ -79,7 +79,7 @@ return (
             onClick={() => setView("grid")}
             className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl transition-all ${
               view === "grid"
-                ? "bg-white text-[#1E1B3A] shadow"
+                ? "bg-white text-[#1547D6] shadow"
                 : "text-white hover:bg-white/10"
             }`}
           >

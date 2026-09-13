@@ -49,9 +49,9 @@ px-4
 outline-none
 transition
 shadow-sm
-focus:border-violet-600
+focus:border-[#155DFC]
 focus:ring-4
-focus:ring-violet-100
+focus:ring-blue-100
 `;
 
   const activeFilters =
@@ -75,7 +75,7 @@ focus:ring-violet-100
           </p>
         </div>
 
-        <div className="inline-flex items-center justify-center min-w-[95px] h-11 rounded-full bg-violet-100 text-violet-700 font-bold">
+        <div className="inline-flex items-center justify-center min-w-[95px] h-11 rounded-full bg-blue-100 text-[#155DFC] font-bold">
           {resultsCount} كورس
         </div>
 
@@ -118,9 +118,9 @@ pl-4
 shadow-sm
 transition
 outline-none
-focus:border-violet-600
+focus:border-[#155DFC]
 focus:ring-4
-focus:ring-violet-100
+focus:ring-blue-100
 "
           />
 
@@ -267,7 +267,7 @@ focus:ring-violet-100
               onClick={() =>
                 setGradeFilter("all")
               }
-              className="px-3 py-1 rounded-full bg-violet-100 text-violet-700 text-sm"
+              className="px-3 py-1 rounded-full bg-blue-100 text-[#155DFC] text-sm"
             >
               {gradeFilter} ✕
             </button>
