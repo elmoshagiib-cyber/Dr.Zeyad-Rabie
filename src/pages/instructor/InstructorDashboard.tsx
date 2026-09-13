@@ -267,7 +267,7 @@ const recentActivities = [
     value: students.filter((s) => s.type === "center").length,
     subtitle: "طلاب داخل السنتر",
     icon: Building2,
-    color: "bg-violet-50 text-violet-600",
+    color: "bg-sky-50 text-sky-600",
   },
 
   {
@@ -342,7 +342,7 @@ const quickActions = [
     title: "الإشعارات",
     subtitle: "إرسال إشعار",
     icon: Bell,
-    color: "from-indigo-500 to-violet-600",
+    color: "from-sky-500 to-cyan-600",
     path: "/instructor/notifications",
   },
 ];
@@ -370,10 +370,10 @@ const quickActions = [
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6"
+        className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-sky-600 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6"
       >
-        <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
-        <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+        <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-sky-300/20 blur-[100px]" />
+        <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-sky-300/20 blur-[100px]" />
 
         <div className="relative z-10 flex items-center gap-3">
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
@@ -469,7 +469,7 @@ const quickActions = [
                   إجمالي
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-violet-400 inline-block" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block" />
                   فريد
                 </span>
               </div>
@@ -523,11 +523,11 @@ const quickActions = [
                   <Area
                     type="monotone"
                     dataKey="فريد"
-                    stroke="#c084fc"
+                    stroke="#38bdf8"
                     fill="transparent"
                     strokeWidth={2}
                     strokeDasharray="5 5"
-                    dot={{ r: 3, fill: "#c084fc", strokeWidth: 0 }}
+                    dot={{ r: 3, fill: "#38bdf8", strokeWidth: 0 }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -609,7 +609,7 @@ const quickActions = [
                 <div className="flex items-center justify-between p-4 sm:p-6 border-b border-slate-100">
                   <button
                     onClick={() => navigate("/instructor/students")}
-                    className="flex items-center gap-1 text-xs sm:text-sm font-bold text-[#B348FE] hover:text-[#9E2FFF] transition-colors"
+                    className="flex items-center gap-1 text-xs sm:text-sm font-bold text-sky-600 hover:text-sky-700 transition-colors"
                   >
                     عرض الكل
                     <ArrowLeft size={14} />
@@ -663,7 +663,7 @@ const quickActions = [
                               <td className="px-4 py-3">
                                 <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
                                   student.type === "online"
-                                    ? "bg-[#F6EEFF] text-[#B348FE] border-[#EAD8FF]"
+                                    ? "bg-sky-50 text-sky-600 border-sky-200"
                                     : "bg-amber-50 text-amber-700 border-amber-200"
                                 }`}>
                                   {student.type === "online" ? "أونلاين" : "سنتر"}
@@ -687,7 +687,7 @@ const quickActions = [
                                 <div className="flex justify-center">
                                   <button
                                     onClick={() => navigate(`/instructor/students/${student.id}`)}
-                                    className="w-8 h-8 rounded-lg bg-[#F6EEFF] text-[#B348FE] hover:bg-[#EAD8FF] flex items-center justify-center transition-all duration-200"
+                                    className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 flex items-center justify-center transition-all duration-200"
                                   >
                                     <Eye size={14} />
                                   </button>
