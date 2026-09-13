@@ -40,6 +40,8 @@ import {
   Clock,
   TrendingUp,
   TrendingDown,
+  AlertTriangle,
+  Phone,
 } from "lucide-react";
 
 export function InstructorDashboard() {
@@ -122,7 +124,7 @@ supabase
 
   supabase
     .from("subscription_payments")
-    .select("id, course_id, student_id")
+    .select("id, course_id, student_id, subscription_end_date, amount")
     .eq("payment_status", "verified"),
 
 ]);
@@ -198,6 +200,33 @@ setVisits(visitsRes.data || []);
       فريد: uniqueCount(dayVisits),
     };
   });
+  const nowDate = new Date();
+  const in7Days = new Date(nowDate);
+  in7Days.setDate(nowDate.getDate() + 7);
+
+  const expiringSoon = verifiedPayments
+    .filter(
+      (p) =>
+        p.subscription_end_date &&
+        new Date(p.subscription_end_date) >= nowDate &&
+        new Date(p.subscription_end_date) <= in7Days
+    )
+    .map((p) => {
+      const st = students.find((s) => s.id === p.student_id);
+      const co = courses.find((c) => c.id === p.course_id);
+      const daysLeft = Math.ceil(
+        (new Date(p.subscription_end_date).getTime() - nowDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      return {
+        ...p,
+        studentName: st?.full_name || "طالب غير معروف",
+        studentPhone: st?.phone || "",
+        courseTitle: co?.title || "-",
+        daysLeft,
+      };
+    })
+    .sort((a, b) => a.daysLeft - b.daysLeft);
+
   const courseStudentsMap = new Map<string, number>();
   studentCourses.forEach((item) => {
     courseStudentsMap.set(item.course_id, (courseStudentsMap.get(item.course_id) || 0) + 1);
@@ -593,6 +622,74 @@ const quickActions = [
           </CardContent>
         </Card>
 
+        {expiringSoon.length > 0 && (
+          <Card className="bg-white border border-amber-100 rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between gap-3 p-4 sm:p-6 border-b border-amber-100 bg-amber-50/40">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                    <AlertTriangle className="text-amber-600" size={18} />
+                  </div>
+                  <div className="text-right">
+                    <h2 className="text-lg sm:text-xl font-black text-slate-900">اشتراكات قاربت على الانتهاء</h2>
+                    <p className="text-slate-500 text-xs mt-0.5">
+                      {expiringSoon.length} اشتراك هينتهي خلال 7 أيام — تواصل معاهم قبل ما يفوتك التجديد
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="divide-y divide-slate-50">
+                {expiringSoon.slice(0, 6).map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between gap-3 p-4 sm:p-5 hover:bg-slate-50/70 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar name={item.studentName} size="sm" className="h-9 w-9 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-900 text-sm truncate">{item.studentName}</p>
+                        <p className="text-xs text-slate-500 truncate">{item.courseTitle}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span
+                        className={`px-2.5 py-1 rounded-lg text-xs font-black whitespace-nowrap ${
+                          item.daysLeft <= 2
+                            ? "bg-red-50 text-red-600"
+                            : "bg-amber-50 text-amber-700"
+                        }`}
+                      >
+                        باقي {item.daysLeft} {item.daysLeft === 1 ? "يوم" : "أيام"}
+                      </span>
+                      {item.studentPhone && (
+                        <button
+                          onClick={() => {
+                            const phone = item.studentPhone.replace(/^0/, "20");
+                            const message = `السلام عليكم ${item.studentName}، حابب أفكّرك إن اشتراكك في "${item.courseTitle}" هينتهي خلال ${item.daysLeft} ${item.daysLeft === 1 ? "يوم" : "أيام"}. تحب تجدد الاشتراك دلوقتي؟`;
+                            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
+                          }}
+                          className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center transition-colors"
+                        >
+                          <Phone size={14} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {expiringSoon.length > 6 && (
+                <div className="p-3 text-center border-t border-slate-50">
+                  <span className="text-xs text-slate-400 font-bold">
+                    و{expiringSoon.length - 6} اشتراك آخر هينتهي قريب
+                  </span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* ── Stats grid ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
           {overviewCards.map((card, index) => {
@@ -691,12 +788,12 @@ const quickActions = [
                         <thead>
                           <tr className="bg-slate-50 border-b border-slate-200">
                             <th className="px-4 py-3.5 text-right text-xs font-black text-slate-500 uppercase tracking-wide">الطالب</th>
-                            <th className="px-4 py-3.5 text-right text-xs font-black text-slate-500 uppercase tracking-wide">الرقم</th>
-                            <th className="px-4 py-3.5 text-right text-xs font-black text-slate-500 uppercase tracking-wide">الصف</th>
-                            <th className="px-4 py-3.5 text-right text-xs font-black text-slate-500 uppercase tracking-wide">النوع</th>
-                            <th className="px-4 py-3.5 text-right text-xs font-black text-slate-500 uppercase tracking-wide">تاريخ التسجيل</th>
-                            <th className="px-4 py-3.5 text-right text-xs font-black text-slate-500 uppercase tracking-wide">وقت التسجيل</th>
-                            <th className="px-4 py-3.5 text-right text-xs font-black text-slate-500 uppercase tracking-wide">الحالة</th>
+                            <th className="px-4 py-3.5 text-center text-xs font-black text-slate-500 uppercase tracking-wide">الرقم</th>
+                            <th className="px-4 py-3.5 text-center text-xs font-black text-slate-500 uppercase tracking-wide">الصف</th>
+                            <th className="px-4 py-3.5 text-center text-xs font-black text-slate-500 uppercase tracking-wide">النوع</th>
+                            <th className="px-4 py-3.5 text-center text-xs font-black text-slate-500 uppercase tracking-wide">تاريخ التسجيل</th>
+                            <th className="px-4 py-3.5 text-center text-xs font-black text-slate-500 uppercase tracking-wide">وقت التسجيل</th>
+                            <th className="px-4 py-3.5 text-center text-xs font-black text-slate-500 uppercase tracking-wide">الحالة</th>
                             <th className="px-4 py-3.5 text-center text-xs font-black text-slate-500 uppercase tracking-wide">إجراء</th>
                           </tr>
                         </thead>
@@ -712,17 +809,17 @@ const quickActions = [
                                   <p className="font-bold text-slate-900 text-sm whitespace-nowrap">{student.full_name}</p>
                                 </div>
                               </td>
-                              <td className="px-4 py-3.5">
+                              <td className="px-4 py-3.5 text-center">
                                 <span className="text-xs font-bold text-slate-500 tabular-nums" dir="ltr">
                                   {student.phone || "—"}
                                 </span>
                               </td>
-                              <td className="px-4 py-3.5">
+                              <td className="px-4 py-3.5 text-center">
                                 <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 whitespace-nowrap">
                                   {student.grade}
                                 </span>
                               </td>
-                              <td className="px-4 py-3.5">
+                              <td className="px-4 py-3.5 text-center">
                                 <span className={`px-2 py-1 rounded-lg text-xs font-black border whitespace-nowrap ${
                                   student.type === "online"
                                     ? "bg-blue-50 text-[#155DFC] border-blue-200"
@@ -731,19 +828,19 @@ const quickActions = [
                                   {student.type === "online" ? "أونلاين" : "سنتر"}
                                 </span>
                               </td>
-                              <td className="px-4 py-3.5">
+                              <td className="px-4 py-3.5 text-center">
                                 <span className="text-xs font-bold text-slate-600 tabular-nums whitespace-nowrap" dir="ltr">
                                   {student.created_at ? new Date(student.created_at).toLocaleDateString("ar-EG-u-nu-latn") : "-"}
                                 </span>
                               </td>
-                              <td className="px-4 py-3.5">
+                              <td className="px-4 py-3.5 text-center">
                                 <span className="text-xs font-bold text-slate-400 tabular-nums whitespace-nowrap" dir="ltr">
                                   {student.created_at
                                     ? new Date(student.created_at).toLocaleTimeString("ar-EG-u-nu-latn", { hour: "2-digit", minute: "2-digit" })
                                     : "-"}
                                 </span>
                               </td>
-                              <td className="px-4 py-3.5">
+                              <td className="px-4 py-3.5 text-center">
                                 <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-black border whitespace-nowrap ${
                                   student.status === "نشط" || student.status === "active"
                                     ? "bg-emerald-50 text-emerald-700 border-emerald-200"
