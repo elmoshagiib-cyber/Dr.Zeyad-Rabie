@@ -33,6 +33,11 @@ import {
   QrCode,
   Eye,
   ArrowLeft,
+  CalendarRange,
+  CalendarDays,
+  CalendarClock,
+  History,
+  Clock,
 } from "lucide-react";
 
 export function InstructorDashboard() {
@@ -107,7 +112,9 @@ supabase
 
   supabase
     .from("site_visits")
-    .select("visitor_id, created_at"),
+    .select("visitor_id, created_at")
+    .order("created_at", { ascending: false })
+    .limit(50000),
 
 ]);
 
@@ -408,11 +415,15 @@ const quickActions = [
                   data: visitStats.year,
                   valueColor: "text-violet-600",
                   badge: null,
+                  icon: CalendarRange,
+                  highlight: false,
                 },
                 {
                   label: "هذا الشهر",
                   data: visitStats.month,
                   valueColor: "text-emerald-600",
+                  icon: CalendarDays,
+                  highlight: false,
                   badge: {
                     text: `${changeMonthVsPrev >= 0 ? "+" : ""}${changeMonthVsPrev}% الشهر الماضي`,
                     color: changeMonthVsPrev >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700",
@@ -423,6 +434,8 @@ const quickActions = [
                   label: "هذا الأسبوع",
                   data: visitStats.week,
                   valueColor: "text-amber-500",
+                  icon: CalendarClock,
+                  highlight: false,
                   badge: {
                     text: `${changeWeekVsPrev >= 0 ? "+" : ""}${changeWeekVsPrev}% الأسبوع الماضي`,
                     color: changeWeekVsPrev >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700",
@@ -434,32 +447,53 @@ const quickActions = [
                   data: visitStats.yesterday,
                   valueColor: "text-slate-900",
                   badge: null,
+                  icon: History,
+                  highlight: false,
                 },
                 {
                   label: "اليوم",
                   data: visitStats.today,
                   valueColor: "text-blue-600",
+                  icon: Clock,
+                  highlight: true,
                   badge: {
                     text: `${changeVsYesterday >= 0 ? "+" : ""}${changeVsYesterday}% عن أمس`,
                     color: changeVsYesterday >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700",
                     up: changeVsYesterday >= 0,
                   },
                 },
-              ].map((item, i) => (
-                <div key={i} className="rounded-2xl border border-slate-100 p-3 sm:p-4 text-center flex flex-col items-center">
-                  <p className="text-xs text-slate-500 font-bold">{item.label}</p>
-                  <p className={`text-2xl sm:text-3xl font-black mt-1 ${item.valueColor}`}>
-                    {item.data.total}
-                  </p>
-                  <p className="text-xs text-slate-400">زيارة</p>
-                  <p className="text-xs text-slate-500 mt-1">{item.data.unique} فريد</p>
-                  {item.badge && (
-                    <span className={`mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold ${item.badge.color}`}>
-                      {item.badge.up ? "▲" : "▼"} {item.badge.text}
-                    </span>
-                  )}
-                </div>
-              ))}
+              ].map((item, i) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={i}
+                    className={`rounded-2xl p-3 sm:p-4 text-center flex flex-col items-center border transition-all duration-200 ${
+                      item.highlight
+                        ? "border-blue-200 bg-blue-50/60 shadow-sm"
+                        : "border-slate-100 hover:border-slate-200 hover:shadow-sm"
+                    }`}
+                  >
+                    <div
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${
+                        item.highlight ? "bg-blue-100 text-blue-600" : "bg-slate-50 text-slate-400"
+                      }`}
+                    >
+                      <Icon size={14} />
+                    </div>
+                    <p className="text-xs text-slate-500 font-bold">{item.label}</p>
+                    <p className={`text-2xl sm:text-3xl font-black mt-1 ${item.valueColor}`}>
+                      {item.data.total.toLocaleString("ar-EG")}
+                    </p>
+                    <p className="text-xs text-slate-400">زيارة</p>
+                    <p className="text-xs text-slate-500 mt-1">{item.data.unique.toLocaleString("ar-EG")} فريد</p>
+                    {item.badge && (
+                      <span className={`mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold ${item.badge.color}`}>
+                        {item.badge.up ? "▲" : "▼"} {item.badge.text}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             <div className="flex items-center justify-between mb-2">
