@@ -186,10 +186,10 @@ if (!title || !grade) {
   initial={{ opacity: 0, y: -20 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.4, ease: "easeOut" }}
-  className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6"
+  className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6"
 >
-  <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
-  <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+  <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px]" />
+  <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
 
   <div className="relative z-10 flex items-center gap-3">
     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
@@ -213,8 +213,8 @@ if (!title || !grade) {
             {/* اسم الكورس */}
             <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-7">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center">
-                  <BookOpen size={15} className="text-violet-600" />
+                <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center">
+                  <BookOpen size={15} className="text-[#155DFC]" />
                 </div>
                 <label className="font-black text-slate-800">
                   اسم الكورس
@@ -231,9 +231,9 @@ if (!title || !grade) {
                   text-slate-800
                   placeholder:text-slate-400
                   focus:outline-none
-                  focus:border-violet-400
+                  focus:border-[#155DFC]
                   focus:ring-2
-                  focus:ring-violet-100
+                  focus:ring-blue-100
                   transition
                   text-sm sm:text-base
                 "
@@ -264,9 +264,9 @@ if (!title || !grade) {
                   text-slate-800
                   placeholder:text-slate-400
                   focus:outline-none
-                  focus:border-violet-400
+                  focus:border-[#155DFC]
                   focus:ring-2
-                  focus:ring-violet-100
+                  focus:ring-blue-100
                   transition
                   text-sm sm:text-base
                 "
@@ -358,7 +358,7 @@ if (!title || !grade) {
                     }
                     className={`
                       w-11 h-6 rounded-full transition-colors duration-300 flex items-center px-0.5
-                      ${price === "0" ? "bg-violet-600" : "bg-slate-200"}
+                      ${price === "0" ? "bg-[#155DFC]" : "bg-slate-200"}
                     `}
                   >
                     <div
@@ -368,7 +368,7 @@ if (!title || !grade) {
                       `}
                     />
                   </div>
-                  <span className="text-sm font-bold text-slate-600 group-hover:text-violet-700 transition">
+                  <span className="text-sm font-bold text-slate-600 group-hover:text-[#155DFC] transition">
                     الكورس مجاني
                   </span>
                 </label>
@@ -396,8 +396,8 @@ if (!title || !grade) {
                   border-slate-300
                   rounded-2xl
                   bg-slate-50
-                  hover:border-violet-400
-                  hover:bg-violet-50
+                  hover:border-[#155DFC]
+                  hover:bg-blue-50
                   transition-all
                   duration-300
                   cursor-pointer
@@ -440,14 +440,14 @@ if (!title || !grade) {
                     <div className="
                       w-16 h-16 sm:w-20 sm:h-20
                       rounded-2xl
-                      bg-violet-100
+                      bg-blue-100
                       flex items-center justify-center
                       mx-auto mb-4
                       group-hover:scale-110
                       transition-transform
                       duration-300
                     ">
-                      <ImagePlus size={28} className="text-violet-500" />
+                      <ImagePlus size={28} className="text-[#155DFC]" />
                     </div>
                     <h3 className="text-lg sm:text-xl font-black text-slate-700">
                       ارفع صورة الكورس
@@ -486,8 +486,8 @@ if (!title || !grade) {
               className="
                 w-full h-14 sm:h-16
                 rounded-2xl
-                bg-violet-600
-                hover:bg-violet-700
+                bg-[#155DFC]
+                hover:bg-[#1547D6]
                 active:scale-[0.98]
                 disabled:opacity-60
                 disabled:cursor-not-allowed
@@ -496,7 +496,6 @@ if (!title || !grade) {
                 text-base sm:text-lg
                 transition-all
                 duration-200
-                shadow-lg shadow-violet-200
                 flex items-center justify-center gap-3
               "
             >
@@ -535,7 +534,7 @@ if (!title || !grade) {
             <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 sticky top-6">
 
               <h2 className="text-lg sm:text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-violet-500 inline-block" />
+                <span className="w-2 h-2 rounded-full bg-[#155DFC] inline-block" />
                 معاينة الكورس
               </h2>
 
@@ -558,7 +557,7 @@ if (!title || !grade) {
               <div className="mt-4 space-y-3">
 
                 {selectedGradeLabel && (
-                  <span className="inline-block text-xs font-bold text-violet-700 bg-violet-50 px-3 py-1 rounded-full">
+                  <span className="inline-block text-xs font-bold text-[#155DFC] bg-blue-50 px-3 py-1 rounded-full">
                     {selectedGradeLabel}
                   </span>
                 )}
@@ -590,7 +589,7 @@ if (!title || !grade) {
                         : "مدفوع"}
                     </span>
                   </div>
-                  <span className="text-xl sm:text-2xl font-black text-violet-700">
+                  <span className="text-xl sm:text-2xl font-black text-[#155DFC]">
                     {price || "0"} ج.م
                   </span>
                 </div>
