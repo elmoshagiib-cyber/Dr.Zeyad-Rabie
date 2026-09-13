@@ -107,10 +107,10 @@ export function InstructorStudents() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-6 mt-6"
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-6 mt-6"
         >
-          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
-          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px]" />
+          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
 
           <div className="relative z-10 flex items-center gap-3">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
@@ -329,7 +329,7 @@ export function InstructorStudents() {
                             <td className="px-4 py-3 whitespace-nowrap">
                               <span className={`px-2 py-1 rounded-lg text-xs font-black border whitespace-nowrap ${
                                 student.type === "online" 
-                                  ? "bg-[#F6EEFF] text-[#B348FE] border-[#EAD8FF]" 
+                              ? "bg-blue-50 text-[#155DFC] border-blue-200"
                                   : "bg-amber-50 text-amber-700 border-amber-200"
                               }`}>
                                 {getStudentTypeLabel(student.type)}
@@ -353,7 +353,7 @@ export function InstructorStudents() {
                               <div className="flex justify-center gap-1">
                                 <button
                                   onClick={() => navigate(`/instructor/students/${student.id}`)}
-                                  className="w-8 h-8 rounded-lg bg-[#F6EEFF] text-[#B348FE] hover:bg-[#EAD8FF] flex items-center justify-center transition-all duration-200"
+                                  className="w-8 h-8 rounded-lg bg-blue-50 text-[#155DFC] hover:bg-blue-100 flex items-center justify-center transition-all duration-200"
                                 >
                                   <Eye size={14} />
                                 </button>

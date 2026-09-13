@@ -1527,7 +1527,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-4 sm:mx-6 mt-4 sm:mt-6"
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-4 sm:mx-6 mt-4 sm:mt-6"
         >
           <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-blue-500/10 blur-[100px]" />
           <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-blue-500/10 blur-[100px]" />
@@ -1540,7 +1540,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 ) : (
                   <span className="text-white">{student.full_name?.charAt(0)}</span>
                 )}
-                <div className={`absolute -bottom-1 -left-1 w-3.5 h-3.5 rounded-full border-2 border-[#1E1B3A] ${student.is_blocked ? "bg-red-500" : "bg-emerald-400"}`} />
+                <div className={`absolute -bottom-1 -left-1 w-3.5 h-3.5 rounded-full border-2 border-[#1547D6] ${student.is_blocked ? "bg-red-500" : "bg-emerald-400"}`} />
               </div>
               <div className="min-w-0">
                 <h1 className="text-base sm:text-xl lg:text-2xl font-black truncate">{student.full_name}</h1>
@@ -1565,7 +1565,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               <div className="flex flex-wrap gap-3">
                 <Button
                   onClick={() => setShowCourseModal(true)}
-                  className="bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-bold shadow-md hover:shadow-[0_8px_20px_rgba(179,72,254,.35)] h-12"
+                  className="bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-xl font-bold shadow-md h-12"
                 >
                   <Plus size={18} className="ml-2" />
                   إضافة كورس
@@ -2977,7 +2977,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
         {/* كود الاشتراك */}
         {selectedInvoice.subscription_code && (
           <div className="px-6 pb-5">
-            <div className="rounded-2xl border-2 border-dashed border-[#B348FE]/40 bg-[#FAF5FF] px-5 py-4 text-center">
+            <div className="rounded-2xl border-2 border-dashed border-[#155DFC]/40 bg-[#EFF6FF] px-5 py-4 text-center">
               <p className="text-[11px] font-bold text-gray-400 mb-1.5">كود الاشتراك</p>
               <p className="text-2xl font-black text-[#B348FE] tracking-[4px]" dir="ltr">
                 {selectedInvoice.subscription_code}

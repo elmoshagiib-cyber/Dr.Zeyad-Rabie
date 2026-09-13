@@ -210,10 +210,10 @@ export function EditStudent() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-4 sm:mx-6 mt-4 sm:mt-6"
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-4 sm:mx-6 mt-4 sm:mt-6"
         >
-          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
-          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px]" />
+          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
 
           <div className="relative z-10 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -444,7 +444,7 @@ export function EditStudent() {
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="w-full bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-2xl font-black h-14 shadow-lg shadow-[#B348FE]/30 text-lg"
+                className="w-full bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-2xl font-black h-14 shadow-lg text-lg"
               >
                 {saving ? (
                   <>

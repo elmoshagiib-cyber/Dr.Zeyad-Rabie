@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import InstructorLayout from "../../layouts/InstructorLayout";
 import { supabase } from "../../lib/supabase";
 import { uploadToR2 } from "@/lib/r2";
+import { BookOpen } from "lucide-react";
+import { motion } from "framer-motion";
 // ============================================================
 // TYPES & INTERFACES
 // ============================================================
@@ -3199,7 +3201,7 @@ async function uploadHomeworkInstructions(
       <div key={section.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible transition-all duration-200 hover:shadow-md">
         {/* Section Header */}
         <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-gradient-to-l from-slate-50 to-white">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-sm font-bold shadow-sm shadow-indigo-200 flex-shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#3183FF] flex items-center justify-center text-white text-sm font-bold shadow-sm shadow-indigo-200 flex-shrink-0">
             {sectionIndex + 1}
           </div>
           <input
@@ -3250,7 +3252,7 @@ async function uploadHomeworkInstructions(
             <div className="relative">
               <button
                 onClick={() => setOpenDropdownSectionId(isDropdownOpen ? null : section.id)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border-2 border-dashed border-indigo-300 text-indigo-600 font-semibold text-sm hover:border-indigo-500 hover:bg-indigo-50 transition-all"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border-2 border-dashed border-blue-300 text-[#155DFC] font-semibold text-sm hover:border-[#155DFC] hover:bg-blue-50 transition-all"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                 إضافة محتوى
@@ -3339,7 +3341,7 @@ async function uploadHomeworkInstructions(
         ))}
         <button
           onClick={addSection}
-          className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-2xl border-2 border-dashed border-slate-300 text-slate-500 font-semibold hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+          className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-2xl border-2 border-dashed border-slate-300 text-slate-500 font-semibold hover:border-[#155DFC] hover:text-[#155DFC] hover:bg-blue-50 transition-all"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
           إضافة قسم جديد
@@ -3663,13 +3665,34 @@ async function uploadHomeworkInstructions(
     <InstructorLayout>
       <div dir="rtl" className="min-h-screen bg-slate-50">
 
+        {/* Hero Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-4 sm:mx-6 mt-4 sm:mt-6"
+        >
+          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px]" />
+          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
+
+          <div className="relative z-10 flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
+              <BookOpen className="text-amber-400" size={20} />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black truncate">تعديل الدورة</h1>
+              <p className="text-white/60 text-xs sm:text-sm mt-0.5 truncate">{course.title || "بدون عنوان"}</p>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Sticky Top Bar */}
         <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
           <div className="max-w-5xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between gap-4">
               {/* Title */}
               <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-sm shadow-indigo-200 flex-shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#3183FF] flex items-center justify-center shadow-sm shadow-indigo-200 flex-shrink-0">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                 </div>
                 <div className="min-w-0">
@@ -3726,15 +3749,11 @@ async function uploadHomeworkInstructions(
 
         {/* Page Content */}
         <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-          {/* Page Title */}
-          <div>
-            <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
-              <button onClick={() => navigate("/instructor/courses")} className="hover:text-indigo-600 transition-colors">الدورات</button>
-              <svg className="w-4 h-4 rotate-180" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-              <span className="text-slate-800 font-medium truncate max-w-xs">{course.title || "بدون عنوان"}</span>
-            </div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">تعديل الدورة</h1>
-            <p className="text-slate-500 mt-1.5">أدِر محتوى الدورة وأقسامها وإعداداتها من هنا</p>
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <button onClick={() => navigate("/instructor/courses")} className="hover:text-[#155DFC] transition-colors">الدورات</button>
+            <svg className="w-4 h-4 rotate-180" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+            <span className="text-slate-800 font-medium truncate max-w-xs">{course.title || "بدون عنوان"}</span>
           </div>
 
           {/* Stats Row */}
@@ -3744,7 +3763,7 @@ async function uploadHomeworkInstructions(
                 label: "الأقسام",
                 value: course.sections.length,
                 icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
-                color: "text-indigo-600 bg-indigo-50",
+                color: "text-[#155DFC] bg-blue-50",
               },
               {
                 label: "الفيديوهات",

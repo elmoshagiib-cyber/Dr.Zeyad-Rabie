@@ -539,10 +539,10 @@ const { error: studentNotifError } = await supabase
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6 sm:mb-8"
+            className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mb-6 sm:mb-8"
           >
-            <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#1E1B3A]/20 blur-[100px]" />
-            <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#1E1B3A]/20 blur-[100px]" />
+            <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px]" />
+            <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
 
             <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -615,9 +615,9 @@ const { error: studentNotifError } = await supabase
                 title: "عدد الطلاب",
                 value: stats.students,
                 icon: Users,
-                gradient: "from-purple-500 to-purple-600",
-                bg: "bg-purple-50",
-                color: "text-purple-600",
+                gradient: "from-[#155DFC] to-[#1547D6]",
+                bg: "bg-blue-50",
+                color: "text-[#155DFC]",
               },
               {
                 title: "آخر إرسال",
@@ -1151,7 +1151,7 @@ const { error: studentNotifError } = await supabase
                                   onClick={() => toggleBannerActive(notification.id, notification.is_active)}
                                   className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
                                     notification.is_active
-                                      ? "bg-[#1E1B3A]/10 text-[#1E1B3A] hover:bg-[#1E1B3A]/20"
+                                      ? "bg-[#1E1B3A]/10 text-[#1E1B3A] hover:bg-white/10"
                                       : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                                   }`}
                                   title={notification.is_active ? "إخفاء من الشريط العلوي" : "إظهار في الشريط العلوي"}

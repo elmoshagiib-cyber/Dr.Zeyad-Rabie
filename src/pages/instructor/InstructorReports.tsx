@@ -177,7 +177,7 @@ export function InstructorReports() {
 
   return (
     <div
-      className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-[#09090B] dark:via-[#111111] dark:to-[#09090B]"
+      className="flex h-screen overflow-hidden bg-white dark:bg-[#09090B]"
       dir="rtl"
     >
       <div className="hidden lg:block flex-shrink-0">
@@ -190,10 +190,10 @@ export function InstructorReports() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-6 mt-6"
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-6 mt-6"
         >
-          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
-          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px]" />
+          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
 
           <div className="relative z-10 flex items-center gap-3">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
@@ -273,7 +273,7 @@ export function InstructorReports() {
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Card className="bg-[#F6EEFF] dark:bg-[#1E1030] border border-[#EAD8FF] dark:border-[#2A2A2A] rounded-3xl shadow-sm">
+                <Card className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-3xl shadow-sm">
                   <CardContent className="p-5 flex items-center justify-between">
                     <div>
                       <p className="text-gray-600 dark:text-gray-300 text-xs font-bold mb-1">
@@ -460,7 +460,7 @@ export function InstructorReports() {
                                   {c.price.toFixed(2)} ج.م
                                 </td>
                                 <td className="px-4 py-2.5">
-                                  <span className="w-7 h-7 inline-flex items-center justify-center rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] text-[#B348FE] font-black text-xs">
+                                  <span className="w-7 h-7 inline-flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-950/30 text-[#B348FE] font-black text-xs">
                                     {c.subscriptions}
                                   </span>
                                 </td>
