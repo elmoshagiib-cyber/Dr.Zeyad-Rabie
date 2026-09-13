@@ -44,6 +44,28 @@ import {
   Phone,
 } from "lucide-react";
 
+function formatDateEn(dateStr: string | null | undefined): string {
+  if (!dateStr) return "-";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "-";
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+function formatTimeEn(dateStr: string | null | undefined): string {
+  if (!dateStr) return "-";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "-";
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  const period = hours >= 12 ? "م" : "ص";
+  hours = hours % 12;
+  if (hours === 0) hours = 12;
+  return `${String(hours).padStart(2, "0")}:${minutes} ${period}`;
+}
+
 export function InstructorDashboard() {
   const navigate = useNavigate();
   const { user } = useApp();
@@ -195,7 +217,7 @@ setVisits(visitsRes.data || []);
     const nextDay = new Date(day); nextDay.setDate(day.getDate() + 1);
     const dayVisits = inRange(day, nextDay);
     return {
-      day: day.toLocaleDateString("ar-EG-u-nu-latn", { weekday: "short", day: "2-digit", month: "2-digit" }),
+      day: `${day.toLocaleDateString("ar-EG", { weekday: "short" })} ${formatDateEn(day.toISOString()).slice(0, 5)}`,
       إجمالي: dayVisits.length,
       فريد: uniqueCount(dayVisits),
     };
@@ -279,7 +301,7 @@ const recentActivities = [
   .slice(0, 6)
   .map((item) => ({
     ...item,
-    time: new Date(item.time).toLocaleDateString("ar-EG-u-nu-latn"),
+    time: formatDateEn(item.time),
   }));
 
   const analyticsData = [
@@ -829,15 +851,13 @@ const quickActions = [
                                 </span>
                               </td>
                               <td className="px-4 py-3.5 text-center">
-                                <span className="text-xs font-bold text-slate-600 tabular-nums whitespace-nowrap" dir="ltr">
-                                  {student.created_at ? new Date(student.created_at).toLocaleDateString("ar-EG-u-nu-latn") : "-"}
+                                <span className="text-xs font-bold text-slate-600 tabular-nums whitespace-nowrap">
+                                  {formatDateEn(student.created_at)}
                                 </span>
                               </td>
                               <td className="px-4 py-3.5 text-center">
-                                <span className="text-xs font-bold text-slate-400 tabular-nums whitespace-nowrap" dir="ltr">
-                                  {student.created_at
-                                    ? new Date(student.created_at).toLocaleTimeString("ar-EG-u-nu-latn", { hour: "2-digit", minute: "2-digit" })
-                                    : "-"}
+                                <span className="text-xs font-bold text-slate-400 tabular-nums whitespace-nowrap">
+                                  {formatTimeEn(student.created_at)}
                                 </span>
                               </td>
                               <td className="px-4 py-3.5 text-center">
@@ -894,7 +914,7 @@ const quickActions = [
                           </div>
                           <div className="flex items-center justify-between text-xs text-slate-500 mt-2 pt-2 border-t border-slate-200">
                             <span>{student.type === "online" ? "أونلاين" : "سنتر"}</span>
-                            <span>{student.created_at ? new Date(student.created_at).toLocaleDateString("ar-EG-u-nu-latn") : "-"}</span>
+                            <span>{formatDateEn(student.created_at)}</span>
                           </div>
                         </div>
                       ))}
