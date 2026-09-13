@@ -576,7 +576,7 @@ const colorClasses: Record<
               ) : fetchError ? (
                 <div className="py-16 text-center">
                   <p className="text-red-600 dark:text-red-400 font-bold mb-3">{fetchError}</p>
-                  <Button onClick={fetchData} className="bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl font-bold">
+                  <Button onClick={fetchData} className="bg-[#155DFC] hover:bg-[#1547D6] text-white rounded-xl font-bold">
                     إعادة المحاولة
                   </Button>
                 </div>

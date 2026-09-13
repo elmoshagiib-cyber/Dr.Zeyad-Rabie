@@ -1542,7 +1542,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
 
             <Button
               onClick={() => navigate(`/instructor/students/edit/${student.id}`)}
-              className="flex items-center gap-1.5 h-9 sm:h-10 rounded-xl bg-blue-600 hover:bg-blue-700 px-3 sm:px-4 text-xs sm:text-sm font-bold text-white transition-colors flex-shrink-0"
+              className="flex items-center gap-1.5 h-9 sm:h-10 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 px-3 sm:px-4 text-xs sm:text-sm font-bold text-white transition-colors flex-shrink-0"
             >
               تعديل البيانات
             </Button>
@@ -1555,7 +1555,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               <div className="flex flex-wrap gap-3">
                 <Button
                   onClick={() => setShowCourseModal(true)}
-                  className="bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl font-bold shadow-md h-12"
+                  className="bg-[#155DFC] hover:bg-[#1547D6] text-white rounded-xl font-bold shadow-md h-12"
                 >
                   <Plus size={18} className="ml-2" />
                   إضافة كورس
@@ -1727,7 +1727,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 </div>
                 <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-[#155DFC] to-[#9E2FFF] rounded-full transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-[#155DFC] to-[#1547D6] rounded-full transition-all duration-500"
                     style={{ width: `${overallProgress}%` }}
                   />
                 </div>
@@ -1914,7 +1914,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                         </div>
                         <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-[#155DFC] to-[#9E2FFF] rounded-full transition-all duration-500"
+                            className="h-full bg-gradient-to-r from-[#155DFC] to-[#1547D6] rounded-full transition-all duration-500"
                             style={{ width: `${course.completionPercent}%` }}
                           />
                         </div>
@@ -1942,7 +1942,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                           onClick={() =>
                             setExpandedCourseId(expandedCourseId === course.id ? null : course.id)
                           }
-                          className="text-xs font-bold text-[#155DFC] hover:text-[#9E2FFF] transition-colors"
+                          className="text-xs font-bold text-[#155DFC] hover:text-[#1547D6] transition-colors"
                         >
                           {expandedCourseId === course.id ? "إخفاء تفاصيل المحاضرات ▲" : "عرض تفاصيل كل محاضرة ▼"}
                         </button>
@@ -2027,7 +2027,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   </div>
                   <Button
                     onClick={openAddSubscriptionModal}
-                    className="bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl font-bold h-11 px-5"
+                    className="bg-[#155DFC] hover:bg-[#1547D6] text-white rounded-xl font-bold h-11 px-5"
                   >
                     <Plus size={16} className="ml-1.5" />
                     إضافة اشتراك
@@ -2238,7 +2238,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                                       href={hw.file_url}
                                       target="_blank"
                                       rel="noreferrer"
-                                      className="text-[#155DFC] hover:text-[#9E2FFF] font-bold text-xs underline whitespace-nowrap"
+                                      className="text-[#155DFC] hover:text-[#1547D6] font-bold text-xs underline whitespace-nowrap"
                                     >
                                       عرض الملف
                                     </a>
@@ -2565,7 +2565,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             <div className="p-6 border-t border-gray-100 dark:border-[#2A2A2A] flex gap-3">
               <Button
                 onClick={sendAnnouncement}
-                className="flex-1 bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl h-12 font-black"
+                className="flex-1 bg-[#155DFC] hover:bg-[#1547D6] text-white rounded-xl h-12 font-black"
               >
                 إرسال الرسالة
               </Button>
@@ -2629,7 +2629,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     </span>
                     <button
                       onClick={copyPassword}
-                      className="h-12 w-12 flex-shrink-0 rounded-xl bg-[#155DFC] hover:bg-[#9E2FFF] text-white flex items-center justify-center transition-colors"
+                      className="h-12 w-12 flex-shrink-0 rounded-xl bg-[#155DFC] hover:bg-[#1547D6] text-white flex items-center justify-center transition-colors"
                     >
                       {copied ? <Check size={20} /> : <Copy size={20} />}
                     </button>
@@ -2647,7 +2647,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   <Button
                     onClick={generateNewPassword}
                     disabled={passwordLoading}
-                    className="flex-1 bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl h-12 font-black disabled:opacity-70"
+                    className="flex-1 bg-[#155DFC] hover:bg-[#1547D6] text-white rounded-xl h-12 font-black disabled:opacity-70"
                   >
                     {passwordLoading ? "جاري التوليد..." : "توليد كلمة المرور"}
                   </Button>
@@ -2662,7 +2662,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               ) : (
                 <Button
                   onClick={() => setShowPasswordModal(false)}
-                  className="flex-1 bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl h-12 font-black"
+                  className="flex-1 bg-[#155DFC] hover:bg-[#1547D6] text-white rounded-xl h-12 font-black"
                 >
                   تم
                 </Button>
@@ -2701,7 +2701,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 </select>
               </div>
               <div className="flex gap-3 pt-2">
-                <Button onClick={addCourse} className="flex-1 bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl font-black h-12">
+                <Button onClick={addCourse} className="flex-1 bg-[#155DFC] hover:bg-[#1547D6] text-white rounded-xl font-black h-12">
                   إضافة
                 </Button>
                 <Button variant="outline" onClick={() => setShowCourseModal(false)} className="flex-1 border-2 border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] rounded-xl font-black h-12">
@@ -2863,7 +2863,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               <Button
                 onClick={saveSubscriptionPayment}
                 disabled={savingSubscription}
-                className="flex-1 bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl font-black h-12 disabled:opacity-70"
+                className="flex-1 bg-[#155DFC] hover:bg-[#1547D6] text-white rounded-xl font-black h-12 disabled:opacity-70"
               >
                 {savingSubscription ? "جاري الحفظ..." : editingPaymentId ? "حفظ التعديل" : "حفظ الاشتراك"}
               </Button>

@@ -219,7 +219,7 @@ export function InstructorStudents() {
             </div>
             <button
               onClick={() => { setSearchTerm(""); setGradeFilter(""); setStatusFilter(""); setTypeFilter(""); }}
-              className="text-xs font-bold text-[#155DFC] hover:text-[#9E2FFF] transition-colors"
+              className="text-xs font-bold text-[#155DFC] hover:text-[#1547D6] transition-colors"
             >
               إعادة تعيين الفلاتر
             </button>
@@ -272,7 +272,7 @@ export function InstructorStudents() {
           {/* Header with count */}
           <div className="flex items-center gap-3 mb-4">
             <h2 className="text-lg font-black text-slate-900">قائمة الطلاب</h2>
-            <span className="px-2.5 py-1 rounded-lg bg-[#F6EEFF] text-[#155DFC] text-xs font-black border border-[#EAD8FF]">
+            <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-[#155DFC] text-xs font-black border border-blue-200">
               {filteredStudents.length} طالب
             </span>
           </div>
@@ -438,7 +438,7 @@ export function InstructorStudents() {
                       <div className="flex gap-2">
                         <Button
                           onClick={() => navigate(`/instructor/students/${student.id}`)}
-                          className="flex-1 bg-[#155DFC] hover:bg-[#9E2FFF] text-white rounded-xl py-2 text-xs font-black"
+                          className="flex-1 bg-[#155DFC] hover:bg-[#1547D6] text-white rounded-xl py-2 text-xs font-black"
                         >
                           <Eye size={14} className="ml-1" />
                           عرض

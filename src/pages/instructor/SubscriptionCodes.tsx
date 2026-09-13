@@ -439,8 +439,8 @@ return (
 
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
-              <KeyRound className="text-blue-400" size={20} />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white flex items-center justify-center flex-shrink-0">
+              <KeyRound className="text-[#155DFC]" size={20} />
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-black">إدارة أكواد الوصول</h1>
@@ -451,7 +451,7 @@ return (
           <div className="flex items-center gap-2 flex-wrap w-full lg:w-auto">
             <button
               onClick={() => document.getElementById("generate-section")?.scrollIntoView({ behavior: "smooth" })}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold transition-colors"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white/10 backdrop-blur border border-white/10 text-white text-xs sm:text-sm font-bold hover:bg-white/20 transition-colors"
             >
               + توليد أكواد جديدة
             </button>

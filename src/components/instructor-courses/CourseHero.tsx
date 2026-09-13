@@ -90,7 +90,7 @@ return (
         {/* إنشاء كورس جديد */}
         <Button
           onClick={onCreateCourse}
-          className="flex items-center gap-1.5 h-9 sm:h-10 rounded-xl bg-blue-600 hover:bg-blue-700 px-3 sm:px-4 text-xs sm:text-sm font-bold text-white transition-colors whitespace-nowrap"
+          className="flex items-center gap-1.5 h-9 sm:h-10 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 px-3 sm:px-4 text-xs sm:text-sm font-bold text-white transition-colors whitespace-nowrap"
         >
           <Plus size={16} />
           إنشاء كورس جديد
