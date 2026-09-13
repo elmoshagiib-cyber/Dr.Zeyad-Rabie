@@ -54,6 +54,7 @@ export function InstructorDashboard() {
 const [exams, setExams] = useState<any[]>([]);
   const [studentCourses, setStudentCourses] = useState<any[]>([]);
   const [visits, setVisits] = useState<any[]>([]);
+  const [verifiedPayments, setVerifiedPayments] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen]     = useState(false);
   const [loading, setLoading]             = useState(true);
 
@@ -80,6 +81,7 @@ const [
   homeworksRes,
   examsRes,
   visitsRes,
+  verifiedPaymentsRes,
 ] = await Promise.all([
 
   supabase
@@ -118,6 +120,11 @@ supabase
     .order("created_at", { ascending: false })
     .limit(50000),
 
+  supabase
+    .from("subscription_payments")
+    .select("id, course_id, student_id")
+    .eq("payment_status", "verified"),
+
 ]);
 
     setCourses(coursesRes.data || []);
@@ -127,6 +134,7 @@ supabase
 setExams(examsRes.data || []);
 setVisits(visitsRes.data || []);
     setStudentCourses(studentCoursesRes.data || []);
+    setVerifiedPayments(verifiedPaymentsRes.data || []);
     setLoading(false);
 
 
@@ -139,7 +147,7 @@ setVisits(visitsRes.data || []);
   const totalStudents      = students.length;
   const totalCourses       = courses.length;
   const totalNotifications = notifications.length;
-  const totalSubscriptions = studentCourses.length;
+  const totalSubscriptions = verifiedPayments.length;
   const recentStudents     = students.slice(0, 10);
  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const today = startOfDay(new Date());
@@ -770,7 +778,7 @@ const quickActions = [
                           </div>
                           <div className="flex items-center justify-between text-xs text-slate-500 mt-2 pt-2 border-t border-slate-200">
                             <span>{student.type === "online" ? "أونلاين" : "سنتر"}</span>
-                            <span>{student.created_at ? new Date(student.created_at).toLocaleDateString("ar-EG") : "-"}</span>
+                            <span>{student.created_at ? new Date(student.created_at).toLocaleDateString("ar-EG-u-nu-latn") : "-"}</span>
                           </div>
                         </div>
                       ))}
