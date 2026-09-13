@@ -116,7 +116,7 @@ transition-all
 duration-300
 hover:bg-[#ECECF2]
 dark:hover:bg-[#1A1A1A]
-hover:text-[#1E1B3A]
+hover:text-[#155DFC]
 active:scale-[0.98]
 "
           >
@@ -128,10 +128,7 @@ w-10
 items-center
 justify-center
 rounded-xl
-bg-gradient-to-br
-from-[#0F172A]
-via-[#1E1B3A]
-to-[#2A1B4D]
+bg-[#155DFC]
 text-white
 transition-all
 duration-300

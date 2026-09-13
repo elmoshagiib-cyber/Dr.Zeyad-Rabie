@@ -26,10 +26,7 @@ export function DashboardSidebarHeader({
             w-10 h-10
             rounded-xl
             border border-transparent
-            bg-gradient-to-br
-            from-[#0F172A]
-            via-[#1E1B3A]
-            to-[#2A1B4D]
+            bg-[#155DFC]
             flex items-center justify-center
             text-white
             hover:opacity-90
@@ -37,7 +34,6 @@ export function DashboardSidebarHeader({
             active:scale-95
             transition-all
             duration-200
-            shadow-sm
           "
         >
           <Menu size={18} strokeWidth={2.3} />

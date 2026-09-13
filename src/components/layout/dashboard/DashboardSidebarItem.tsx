@@ -41,12 +41,8 @@ export function DashboardSidebarItem({
 
 active
   ? `
-    bg-gradient-to-br
-    from-[#0F172A]
-    via-[#1E1B3A]
-    to-[#2A1B4D]
+    bg-[#155DFC]
     text-white
-    shadow-[0_8px_20px_rgba(15,23,42,.35)]
     scale-[1.02]
   `
           : `
@@ -54,7 +50,7 @@ text-gray-700
 dark:text-gray-300
 hover:bg-[#ECECF2]
 dark:hover:bg-[#1A1A1A]
-hover:text-[#1E1B3A]
+hover:text-[#155DFC]
 active:scale-[0.98]
           `
       )}
@@ -88,8 +84,8 @@ active:scale-[0.98]
   `
   : `
     bg-[#ECECF2]
-    text-[#1E1B3A]
-    dark:bg-[#1E1B3A]
+    text-[#155DFC]
+    dark:bg-[#155DFC]/20
     group-hover:opacity-90
     group-hover:scale-110
   `
@@ -123,8 +119,8 @@ active:scale-[0.98]
                 font-bold
                 `,
 active
-  ? "bg-white text-[#1E1B3A]"
-  : "bg-[#1E1B3A] text-white"
+  ? "bg-white text-[#155DFC]"
+  : "bg-[#155DFC] text-white"
               )}
             >
               {badge > 99 ? "99+" : badge}
