@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import { usePageTransition } from "../../../context/PageTransitionContext";
 import { DashboardSidebarHeader } from "./DashboardSidebarHeader";
 import { DashboardSidebarNavigation } from "./DashboardSidebarNavigation";
 import { cn } from "../../../utils/cn";
@@ -140,6 +141,7 @@ export function DashboardSidebar({
   
   const navigate = useNavigate();
   const location = useLocation();
+  const transitionTo = usePageTransition();
 const [collapsed, setCollapsed] = useState(() => {
   if (type === "student") return false;
 
@@ -161,7 +163,7 @@ useEffect(() => {
       : adminNavGroups;
 
   const handleNav = (path: string) => {
-    navigate(path);
+    transitionTo(path);
     onClose?.();
   };
 

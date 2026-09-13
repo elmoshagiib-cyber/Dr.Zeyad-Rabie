@@ -17,13 +17,14 @@ export function DashboardLayout({
   return (
 <div
   dir="rtl"
-className="
+className={`
   flex
   items-stretch
   min-h-screen
   bg-white
   text-slate-900
-"
+  ${type === "instructor" ? "theme-instructor" : ""}
+`}
 >
       {/* ───────── Desktop Sidebar (Instructor & Admin only) ───────── */}
       {type !== "student" && (

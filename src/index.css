@@ -671,3 +671,68 @@ transform:translateX(350%) rotate(12deg);
     border-radius: 200vmax;
   }
 }
+/* ===================== */
+/* Instructor Theme (Blue)*/
+/* ===================== */
+.theme-instructor {
+  --page-bubble-color: #155DFC;
+}
+
+.theme-instructor .btn-purple {
+  background: linear-gradient(135deg, #1547D6, #155DFC, #3183FF);
+  box-shadow: 0 4px 20px rgba(21, 93, 252, 0.45);
+}
+
+.theme-instructor .btn-purple:hover:not(:disabled) {
+  box-shadow: 0 8px 35px rgba(21, 93, 252, 0.65);
+}
+
+.theme-instructor .tab-active {
+  background: linear-gradient(135deg, #155DFC, #3183FF);
+  box-shadow: 0 4px 15px rgba(21, 93, 252, 0.35);
+}
+
+.theme-instructor .hero-gradient {
+  background: linear-gradient(145deg, #0B2A6B 0%, #1547D6 38%, #155DFC 68%, #3183FF 100%);
+}
+
+.theme-instructor .gradient-text {
+  background: linear-gradient(135deg, #93C5FD, #3183FF, #BFDBFE);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.theme-instructor .gradient-text-white {
+  background: linear-gradient(135deg, #FFFFFF 0%, #DBEAFE 50%, #BFDBFE 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.theme-instructor .orb-1 {
+  background: radial-gradient(circle, #3183FF, #155DFC);
+}
+.theme-instructor .orb-2 {
+  background: radial-gradient(circle, #60A5FA, #1547D6);
+}
+.theme-instructor .orb-3 {
+  background: radial-gradient(circle, #93C5FD, #3183FF);
+}
+
+.theme-instructor .stat-card:hover {
+  border-color: rgba(21, 93, 252, 0.4);
+}
+
+.theme-instructor ::-webkit-scrollbar-thumb {
+  background: #155DFC;
+}
+
+.theme-instructor .hero-light::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(21, 93, 252, 0.12),
+    transparent
+  );
+}
