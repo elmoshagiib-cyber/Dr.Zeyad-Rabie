@@ -613,7 +613,7 @@ const quickActions = [
                   </div>
                   <button
                     onClick={() => navigate("/instructor/students")}
-                    className="flex items-center gap-1 text-xs sm:text-sm font-bold text-sky-600 hover:text-sky-700 transition-colors"
+                    className="flex items-center gap-1 text-xs sm:text-sm font-bold text-[#155DFC] hover:text-[#1547D6] transition-colors"
                   >
                     عرض الكل
                     <ArrowLeft size={14} />
@@ -663,7 +663,7 @@ const quickActions = [
                               <td className="px-4 py-3">
                                 <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
                                   student.type === "online"
-                                    ? "bg-sky-50 text-sky-600 border-sky-200"
+                                    ? "bg-blue-50 text-[#155DFC] border-blue-200"
                                     : "bg-amber-50 text-amber-700 border-amber-200"
                                 }`}>
                                   {student.type === "online" ? "أونلاين" : "سنتر"}
@@ -687,7 +687,7 @@ const quickActions = [
                                 <div className="flex justify-center">
                                   <button
                                     onClick={() => navigate(`/instructor/students/${student.id}`)}
-                                    className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 flex items-center justify-center transition-all duration-200"
+                                    className="w-8 h-8 rounded-lg bg-blue-50 text-[#155DFC] hover:bg-blue-100 flex items-center justify-center transition-all duration-200"
                                   >
                                     <Eye size={14} />
                                   </button>
