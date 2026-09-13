@@ -408,13 +408,13 @@ const quickActions = [
         {/* ── Visitors stats ── */}
         <Card className="bg-white border border-slate-100 rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
           <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center gap-3 mb-4 sm:mb-6">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
-                <BarChart2 className="text-indigo-600" size={18} />
-              </div>
+            <div className="flex items-center justify-between gap-3 mb-4 sm:mb-6 pb-4 sm:pb-5 border-b border-slate-100">
               <div className="text-right">
                 <h2 className="text-lg sm:text-xl font-black text-slate-900">إحصائيات الزوار</h2>
                 <p className="text-slate-400 text-xs mt-0.5">تتبع حركة الزوار الحقيقية على المنصة</p>
+              </div>
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
+                <BarChart2 className="text-indigo-600" size={18} />
               </div>
             </div>
 
@@ -520,20 +520,20 @@ const quickActions = [
               })}
             </div>
 
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-3 text-xs text-slate-500">
-                <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block" />
-                  إجمالي
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block" />
-                  فريد
-                </span>
-              </div>
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
               <div className="text-right">
                 <h3 className="font-bold text-slate-900 text-sm sm:text-base">الزوار — آخر 7 أيام</h3>
                 <p className="text-xs text-slate-400">مقارنة الزيارات الكلية والزوار الفريدين يومياً</p>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full font-bold">
+                  <span className="w-2 h-2 rounded-full bg-indigo-500 inline-block" />
+                  إجمالي
+                </span>
+                <span className="flex items-center gap-1.5 bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full font-bold">
+                  <span className="w-2 h-2 rounded-full bg-sky-400 inline-block" />
+                  فريد
+                </span>
               </div>
             </div>
 
