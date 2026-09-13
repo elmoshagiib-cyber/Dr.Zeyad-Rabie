@@ -38,6 +38,8 @@ import {
   CalendarClock,
   History,
   Clock,
+  TrendingUp,
+  TrendingDown,
 } from "lucide-react";
 
 export function InstructorDashboard() {
@@ -183,7 +185,7 @@ setVisits(visitsRes.data || []);
     const nextDay = new Date(day); nextDay.setDate(day.getDate() + 1);
     const dayVisits = inRange(day, nextDay);
     return {
-      day: day.toLocaleDateString("ar-EG", { weekday: "short", day: "2-digit", month: "2-digit" }),
+      day: day.toLocaleDateString("ar-EG-u-nu-latn", { weekday: "short", day: "2-digit", month: "2-digit" }),
       إجمالي: dayVisits.length,
       فريد: uniqueCount(dayVisits),
     };
@@ -240,7 +242,7 @@ const recentActivities = [
   .slice(0, 6)
   .map((item) => ({
     ...item,
-    time: new Date(item.time).toLocaleDateString("ar-EG"),
+    time: new Date(item.time).toLocaleDateString("ar-EG-u-nu-latn"),
   }));
 
   const analyticsData = [
@@ -464,31 +466,40 @@ const quickActions = [
                 },
               ].map((item, i) => {
                 const Icon = item.icon;
+                const TrendIcon = item.badge?.up ? TrendingUp : TrendingDown;
                 return (
                   <div
                     key={i}
-                    className={`rounded-2xl p-3 sm:p-4 text-center flex flex-col items-center border transition-all duration-200 ${
+                    className={`relative rounded-2xl p-3 sm:p-4 text-center flex flex-col items-center border transition-all duration-200 ${
                       item.highlight
-                        ? "border-blue-200 bg-blue-50/60 shadow-sm"
-                        : "border-slate-100 hover:border-slate-200 hover:shadow-sm"
+                        ? "border-blue-200 bg-gradient-to-b from-blue-50 to-white shadow-md ring-1 ring-blue-100"
+                        : "border-slate-100 bg-white hover:border-slate-200 hover:shadow-sm"
                     }`}
                   >
                     <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center mb-2 ${
                         item.highlight ? "bg-blue-100 text-blue-600" : "bg-slate-50 text-slate-400"
                       }`}
                     >
-                      <Icon size={14} />
+                      <Icon size={16} />
                     </div>
                     <p className="text-xs text-slate-500 font-bold">{item.label}</p>
-                    <p className={`text-2xl sm:text-3xl font-black mt-1 ${item.valueColor}`}>
-                      {item.data.total.toLocaleString("ar-EG")}
+                    <p
+                      className={`text-2xl sm:text-3xl font-black mt-1 tabular-nums ${item.valueColor}`}
+                      dir="ltr"
+                    >
+                      {item.data.total.toLocaleString("en-US")}
                     </p>
                     <p className="text-xs text-slate-400">زيارة</p>
-                    <p className="text-xs text-slate-500 mt-1">{item.data.unique.toLocaleString("ar-EG")} فريد</p>
+                    <p className="text-xs text-slate-500 mt-1 tabular-nums" dir="ltr">
+                      {item.data.unique.toLocaleString("en-US")} <span className="font-normal">فريد</span>
+                    </p>
                     {item.badge && (
-                      <span className={`mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold ${item.badge.color}`}>
-                        {item.badge.up ? "▲" : "▼"} {item.badge.text}
+                      <span
+                        className={`mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${item.badge.color}`}
+                      >
+                        <TrendIcon size={10} />
+                        {item.badge.text}
                       </span>
                     )}
                   </div>
@@ -705,7 +716,7 @@ const quickActions = [
                               </td>
                               <td className="px-4 py-3">
                                 <span className="text-xs font-bold text-slate-600">
-                                  {student.created_at ? new Date(student.created_at).toLocaleDateString("ar-EG") : "-"}
+                                  {student.created_at ? new Date(student.created_at).toLocaleDateString("ar-EG-u-nu-latn") : "-"}
                                 </span>
                               </td>
                               <td className="px-4 py-3">
@@ -864,13 +875,13 @@ const quickActions = [
                   <div className="space-y-3 sm:space-y-4">
                     {performanceData.map((data, i) => (
                       <div key={i} className="flex items-center justify-between gap-2">
-                        <span className="text-xs sm:text-sm font-black text-emerald-600 shrink-0">{data.revenue.toLocaleString("ar-EG")} ج</span>
+                        <span className="text-xs sm:text-sm font-black text-emerald-600 shrink-0" dir="ltr">{data.revenue.toLocaleString("en-US")} ج</span>
                         <span className="text-xs sm:text-sm text-slate-600 text-right truncate">{data.course}</span>
                       </div>
                     ))}
                     <div className="border-t border-slate-200 pt-3 flex items-center justify-between gap-2">
                       <span className="font-black text-lg sm:text-xl text-emerald-600">
-                        {performanceData.reduce((s, d) => s + d.revenue, 0).toLocaleString("ar-EG")} ج
+                        {performanceData.reduce((s, d) => s + d.revenue, 0).toLocaleString("en-US")} ج
                       </span>
                       <span className="font-black text-slate-900 text-sm sm:text-base">الإجمالي</span>
                     </div>
