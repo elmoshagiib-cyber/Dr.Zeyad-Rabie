@@ -374,8 +374,8 @@ export function InstructorHomeworkSubmissions() {
     {
       label: "إجمالي التسليمات",
       value: submissions.length,
-      icon: <FileText className="text-violet-600" size={26} />,
-      bg: "bg-violet-100",
+      icon: <FileText className="text-[#155DFC]" size={26} />,
+      bg: "bg-blue-100",
     },
     {
       label: "تم التصحيح",
@@ -394,9 +394,9 @@ export function InstructorHomeworkSubmissions() {
     {
       label: "معدل الدرجات",
       value: averageGrade !== null ? `${averageGrade}%` : "-",
-      icon: <TrendingUp className="text-[#B348FE]" size={26} />,
-      bg: "bg-[#F6EEFF]",
-      valueClass: "text-[#B348FE]",
+      icon: <TrendingUp className="text-[#155DFC]" size={26} />,
+      bg: "bg-blue-50",
+      valueClass: "text-[#155DFC]",
     },
   ];
 
@@ -412,10 +412,10 @@ export function InstructorHomeworkSubmissions() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-4 lg:mx-6 mt-4 lg:mt-6 flex-shrink-0"
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-4 lg:mx-6 mt-4 lg:mt-6 flex-shrink-0"
         >
-          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-[#B348FE]/10 blur-[100px]" />
-          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-[#B348FE]/10 blur-[100px]" />
+          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px]" />
+          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
 
           <div className="relative z-10 flex items-center gap-3">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
@@ -464,7 +464,7 @@ export function InstructorHomeworkSubmissions() {
             <select
               value={homeworkFilter}
               onChange={(e) => setHomeworkFilter(e.target.value)}
-              className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+              className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
             >
               {homeworkOptions.map((hw, idx) => (
                 <option key={idx}>{hw}</option>
@@ -474,7 +474,7 @@ export function InstructorHomeworkSubmissions() {
             <select
               value={gradeFilter}
               onChange={(e) => setGradeFilter(e.target.value)}
-              className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+              className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
             >
               {GRADE_OPTIONS.map((grade) => (
                 <option key={grade}>{grade}</option>
@@ -484,7 +484,7 @@ export function InstructorHomeworkSubmissions() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#B348FE]"
+              className="w-full border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2 bg-white dark:bg-[#111111] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
             >
               <option>الكل</option>
               <option>تم التصحيح</option>
@@ -499,7 +499,7 @@ export function InstructorHomeworkSubmissions() {
               </p>
               <button
                 onClick={clearFilters}
-                className="flex items-center gap-1.5 text-xs font-bold text-[#B348FE] hover:text-[#9E2FFF] transition-colors"
+                className="flex items-center gap-1.5 text-xs font-bold text-[#155DFC] hover:text-[#1547D6] transition-colors"
               >
                 <RotateCcw size={14} />
                 مسح الفلاتر
@@ -513,7 +513,7 @@ export function InstructorHomeworkSubmissions() {
           {loading ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
-                <div className="w-12 h-12 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <div className="w-12 h-12 border-4 border-[#155DFC] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                 <p className="text-gray-600 dark:text-gray-400 font-bold">جاري تحميل البيانات...</p>
               </div>
             </div>
@@ -528,7 +528,7 @@ export function InstructorHomeworkSubmissions() {
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-[#B348FE] hover:text-[#9E2FFF] transition-colors"
+                    className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-[#155DFC] hover:text-[#1547D6] transition-colors"
                   >
                     <RotateCcw size={14} />
                     مسح الفلاتر
@@ -565,8 +565,8 @@ export function InstructorHomeworkSubmissions() {
                           onClick={() => selectSubmission(submission)}
                           className={`w-full text-right p-4 rounded-2xl transition-all duration-200 ${
                             selectedSubmission?.id === submission.id
-                              ? "bg-white dark:bg-[#111111] shadow-md border-2 border-[#B348FE]"
-                              : "bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE] hover:shadow-sm"
+                              ? "bg-white dark:bg-[#111111] shadow-md border-2 border-[#155DFC]"
+                              : "bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] hover:border-[#155DFC] hover:shadow-sm"
                           }`}
                         >
                           <div className="flex items-start justify-between gap-3 mb-2">
@@ -579,7 +579,7 @@ export function InstructorHomeworkSubmissions() {
                                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
                                   {submission.homeworks?.title}
                                 </p>
-                                <p className="text-[11px] font-bold text-[#B348FE] mt-1">
+                                <p className="text-[11px] font-bold text-[#155DFC] mt-1">
                                   {GRADE_LABELS[submission.homeworks?.courses?.grade || ""] || ""}
                                 </p>
                               </div>
@@ -616,7 +616,7 @@ export function InstructorHomeworkSubmissions() {
                       {/* زرار رجوع للقائمة على الموبايل بس */}
                       <button
                         onClick={() => setMobileView("list")}
-                        className="lg:hidden flex items-center gap-1.5 text-sm font-bold text-gray-600 dark:text-gray-300 p-2 rounded-xl border-2 border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE] transition-all"
+                        className="lg:hidden flex items-center gap-1.5 text-sm font-bold text-gray-600 dark:text-gray-300 p-2 rounded-xl border-2 border-gray-200 dark:border-[#2A2A2A] hover:border-[#155DFC] transition-all"
                       >
                         <ArrowRight size={16} />
                         القائمة
@@ -630,7 +630,7 @@ export function InstructorHomeworkSubmissions() {
                         <button
                           onClick={handlePrevious}
                           disabled={currentIndex === 1}
-                          className="p-2 rounded-xl border-2 border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE] hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                          className="p-2 rounded-xl border-2 border-gray-200 dark:border-[#2A2A2A] hover:border-[#155DFC] hover:bg-blue-50 dark:hover:bg-blue-950/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                           title="السابق"
                         >
                           <ChevronRight size={20} />
@@ -638,7 +638,7 @@ export function InstructorHomeworkSubmissions() {
                         <button
                           onClick={handleNext}
                           disabled={currentIndex === filteredSubmissions.length}
-                          className="p-2 rounded-xl border-2 border-gray-200 dark:border-[#2A2A2A] hover:border-[#B348FE] hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                          className="p-2 rounded-xl border-2 border-gray-200 dark:border-[#2A2A2A] hover:border-[#155DFC] hover:bg-blue-50 dark:hover:bg-blue-950/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                           title="التالي"
                         >
                           <ChevronLeft size={20} />
@@ -650,8 +650,8 @@ export function InstructorHomeworkSubmissions() {
                     <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm mb-6">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4 flex-wrap mb-5">
-                          <div className="bg-[#F6EEFF] dark:bg-[#2B103D] p-3 rounded-2xl">
-                            <User className="text-[#B348FE]" size={24} />
+                          <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-2xl">
+                            <User className="text-[#155DFC]" size={24} />
                           </div>
                           <div className="flex-1 min-w-[150px]">
                             <h2 className="text-xl font-black text-gray-900 dark:text-white mb-1">
@@ -748,7 +748,7 @@ export function InstructorHomeworkSubmissions() {
                           <CardContent className="p-6">
                             <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                               <h3 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
-                                <Eye size={20} className="text-[#B348FE]" />
+                                <Eye size={20} className="text-[#155DFC]" />
                                 الأسئلة المقالية
                               </h3>
                               {essayQuestions.length > 0 && (
@@ -820,7 +820,7 @@ export function InstructorHomeworkSubmissions() {
                       <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm mb-6">
                         <CardContent className="p-6">
                           <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                            <Eye size={20} className="text-[#B348FE]" />
+                            <Eye size={20} className="text-[#155DFC]" />
                             معاينة الإجابة
                           </h3>
 
@@ -838,7 +838,7 @@ export function InstructorHomeworkSubmissions() {
                                         href={fileUrl}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="text-sm text-[#B348FE] hover:underline font-bold flex items-center gap-2"
+                                        className="text-sm text-[#155DFC] hover:underline font-bold flex items-center gap-2"
                                       >
                                         <Eye size={16} />
                                         فتح في تبويب جديد
@@ -860,7 +860,7 @@ export function InstructorHomeworkSubmissions() {
                                     <div className="p-3 bg-gray-50 dark:bg-[#1A1A1A] border-t border-gray-200 dark:border-[#2A2A2A]">
                                       <button
                                         onClick={() => setImagePreview(fileUrl)}
-                                        className="text-sm text-[#B348FE] hover:underline font-bold flex items-center gap-2"
+                                        className="text-sm text-[#155DFC] hover:underline font-bold flex items-center gap-2"
                                       >
                                         <Eye size={16} />
                                         عرض بحجم كامل
@@ -901,7 +901,7 @@ export function InstructorHomeworkSubmissions() {
                     <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
                       <CardContent className="p-6">
                         <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                          <Award size={20} className="text-[#B348FE]" />
+                          <Award size={20} className="text-[#155DFC]" />
                           التصحيح
                         </h3>
 
@@ -925,7 +925,7 @@ export function InstructorHomeworkSubmissions() {
                                   [selectedSubmission.id]: Number(e.target.value),
                                 })
                               }
-                              className="w-full border-2 border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#B348FE] focus:border-[#B348FE] transition-all duration-200"
+                              className="w-full border-2 border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#155DFC] focus:border-[#155DFC] transition-all duration-200"
                             />
                             {!isGraded(selectedSubmission) &&
                               selectedSubmission.auto_score !== null &&
@@ -952,7 +952,7 @@ export function InstructorHomeworkSubmissions() {
                                 })
                               }
                               rows={4}
-                              className="w-full border-2 border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#B348FE] focus:border-[#B348FE] resize-none transition-all duration-200"
+                              className="w-full border-2 border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#155DFC] focus:border-[#155DFC] resize-none transition-all duration-200"
                             />
                           </div>
 
@@ -981,7 +981,7 @@ export function InstructorHomeworkSubmissions() {
                                   const url = selectedSubmission.file_url || selectedSubmission.answer;
                                   if (url) window.open(url, "_blank");
                                 }}
-                                className="flex-1 sm:flex-initial bg-[#B348FE] hover:bg-[#9E2FFF] text-white rounded-2xl py-3 px-6 flex items-center justify-center gap-2 transition-all duration-300 font-black shadow-md hover:shadow-[0_8px_20px_rgba(179,72,254,.35)]"
+                                className="flex-1 sm:flex-initial bg-[#155DFC] hover:bg-[#1547D6] text-white rounded-2xl py-3 px-6 flex items-center justify-center gap-2 transition-all duration-300 font-black shadow-md hover:shadow-[0_8px_20px_rgba(21,93,252,.35)]"
                               >
                                 <Eye size={18} />
                                 عرض الملف
