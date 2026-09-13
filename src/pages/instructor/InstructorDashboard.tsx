@@ -421,28 +421,34 @@ const quickActions = [
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-6">
               {[
                 {
-                  label: "هذا العام",
-                  data: visitStats.year,
-                  valueColor: "text-violet-600",
-                  badge: null,
-                  icon: CalendarRange,
-                  highlight: false,
+                  label: "اليوم",
+                  data: visitStats.today,
+                  accent: "border-t-blue-500",
+                  iconBg: "bg-blue-50 text-blue-600",
+                  valueColor: "text-blue-600",
+                  icon: Clock,
+                  highlight: true,
+                  badge: {
+                    text: `${changeVsYesterday >= 0 ? "+" : ""}${changeVsYesterday}% عن أمس`,
+                    color: changeVsYesterday >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700",
+                    up: changeVsYesterday >= 0,
+                  },
                 },
                 {
-                  label: "هذا الشهر",
-                  data: visitStats.month,
-                  valueColor: "text-emerald-600",
-                  icon: CalendarDays,
+                  label: "أمس",
+                  data: visitStats.yesterday,
+                  accent: "border-t-slate-300",
+                  iconBg: "bg-slate-50 text-slate-500",
+                  valueColor: "text-slate-900",
+                  icon: History,
                   highlight: false,
-                  badge: {
-                    text: `${changeMonthVsPrev >= 0 ? "+" : ""}${changeMonthVsPrev}% الشهر الماضي`,
-                    color: changeMonthVsPrev >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700",
-                    up: changeMonthVsPrev >= 0,
-                  },
+                  badge: null,
                 },
                 {
                   label: "هذا الأسبوع",
                   data: visitStats.week,
+                  accent: "border-t-amber-400",
+                  iconBg: "bg-amber-50 text-amber-600",
                   valueColor: "text-amber-500",
                   icon: CalendarClock,
                   highlight: false,
@@ -453,24 +459,28 @@ const quickActions = [
                   },
                 },
                 {
-                  label: "أمس",
-                  data: visitStats.yesterday,
-                  valueColor: "text-slate-900",
-                  badge: null,
-                  icon: History,
+                  label: "هذا الشهر",
+                  data: visitStats.month,
+                  accent: "border-t-emerald-400",
+                  iconBg: "bg-emerald-50 text-emerald-600",
+                  valueColor: "text-emerald-600",
+                  icon: CalendarDays,
                   highlight: false,
+                  badge: {
+                    text: `${changeMonthVsPrev >= 0 ? "+" : ""}${changeMonthVsPrev}% الشهر الماضي`,
+                    color: changeMonthVsPrev >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700",
+                    up: changeMonthVsPrev >= 0,
+                  },
                 },
                 {
-                  label: "اليوم",
-                  data: visitStats.today,
-                  valueColor: "text-blue-600",
-                  icon: Clock,
-                  highlight: true,
-                  badge: {
-                    text: `${changeVsYesterday >= 0 ? "+" : ""}${changeVsYesterday}% عن أمس`,
-                    color: changeVsYesterday >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700",
-                    up: changeVsYesterday >= 0,
-                  },
+                  label: "هذا العام",
+                  data: visitStats.year,
+                  accent: "border-t-violet-400",
+                  iconBg: "bg-violet-50 text-violet-600",
+                  valueColor: "text-violet-600",
+                  icon: CalendarRange,
+                  highlight: false,
+                  badge: null,
                 },
               ].map((item, i) => {
                 const Icon = item.icon;
@@ -478,30 +488,25 @@ const quickActions = [
                 return (
                   <div
                     key={i}
-                    className={`relative rounded-2xl p-3 sm:p-4 text-center flex flex-col items-center border transition-all duration-200 ${
-                      item.highlight
-                        ? "border-blue-200 bg-gradient-to-b from-blue-50 to-white shadow-md ring-1 ring-blue-100"
-                        : "border-slate-100 bg-white hover:border-slate-200 hover:shadow-sm"
+                    className={`rounded-2xl border-t-4 ${item.accent} bg-white shadow-sm hover:shadow-md transition-all duration-200 p-3 sm:p-4 ${
+                      item.highlight ? "ring-1 ring-blue-100" : ""
                     }`}
                   >
-                    <div
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center mb-2 ${
-                        item.highlight ? "bg-blue-100 text-blue-600" : "bg-slate-50 text-slate-400"
-                      }`}
-                    >
-                      <Icon size={16} />
+                    <div className="flex items-center justify-between mb-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.iconBg}`}>
+                        <Icon size={14} />
+                      </div>
+                      <p className="text-xs text-slate-500 font-bold">{item.label}</p>
                     </div>
-                    <p className="text-xs text-slate-500 font-bold">{item.label}</p>
-                    <p
-                      className={`text-2xl sm:text-3xl font-black mt-1 tabular-nums ${item.valueColor}`}
-                      dir="ltr"
-                    >
+                    <p className={`text-2xl sm:text-3xl font-black tabular-nums ${item.valueColor}`} dir="ltr">
                       {item.data.total.toLocaleString("en-US")}
                     </p>
-                    <p className="text-xs text-slate-400">زيارة</p>
-                    <p className="text-xs text-slate-500 mt-1 tabular-nums" dir="ltr">
-                      {item.data.unique.toLocaleString("en-US")} <span className="font-normal">فريد</span>
-                    </p>
+                    <div className="flex items-center justify-between mt-1 pt-2 border-t border-slate-50">
+                      <span className="text-[11px] text-slate-400">زيارة</span>
+                      <span className="text-[11px] text-slate-500 tabular-nums" dir="ltr">
+                        {item.data.unique.toLocaleString("en-US")} فريد
+                      </span>
+                    </div>
                     {item.badge && (
                       <span
                         className={`mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${item.badge.color}`}
