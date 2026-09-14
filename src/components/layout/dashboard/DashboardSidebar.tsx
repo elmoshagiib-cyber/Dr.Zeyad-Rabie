@@ -25,6 +25,7 @@ import {
   MessageCircle,
   TrendingUp,  // ← أضفها هنا
   Layers,
+  Receipt,
 } from "lucide-react";
 import { useApp } from "../../../context/AppContext";
 import { useState, useEffect } from "react";
@@ -86,6 +87,7 @@ const instructorNavGroups: NavGroup[] = [
       { label: "إنشاء كورس", path: "/instructor/courses/create", icon: <PlusCircle size={20} /> },
       { label: "المحتوى", path: "/instructor/content", icon: <Layers size={20} /> },
       { label: "أكواد الاشتراك", path: "/instructor/subscription-codes", icon: <QrCode size={20} /> },
+      { label: "إدارة الاشتراكات", path: "/instructor/subscriptions", icon: <Receipt size={20} /> },
     ],
   },
   {

@@ -130,6 +130,11 @@ const InstructorContent = lazy(() =>
     default: m.InstructorContent,
   }))
 );
+const InstructorSubscriptions = lazy(() =>
+  import("./pages/instructor/InstructorSubscriptions").then((m) => ({
+    default: m.InstructorSubscriptions,
+  }))
+);
 
 // ============================================================
 // شاشة تحميل بسيطة تظهر لحد ما الصفحة المطلوبة تحمل
@@ -454,6 +459,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute roles={["instructor"]}>
               <InstructorContent />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/instructor/subscriptions"
+          element={
+            <ProtectedRoute roles={["instructor"]}>
+              <InstructorSubscriptions />
             </ProtectedRoute>
           }
         />
