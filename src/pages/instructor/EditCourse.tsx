@@ -3672,7 +3672,7 @@ async function uploadHomeworkInstructions(
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="sticky top-4 z-50 overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-4 sm:mx-6 mt-4 sm:mt-6"
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-4 sm:mx-6 mt-4 sm:mt-6"
         >
           <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px] pointer-events-none" />
           <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px] pointer-events-none" />
@@ -3709,7 +3709,7 @@ async function uploadHomeworkInstructions(
 
               <button
                 onClick={() => setShowDeleteModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-sm bg-red-500/20 hover:bg-red-500/30 border border-red-200/30 backdrop-blur transition-all"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-sm bg-red-600 hover:bg-red-700 shadow-sm transition-all"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 <span className="hidden sm:inline">حذف</span>
@@ -3746,7 +3746,7 @@ async function uploadHomeworkInstructions(
         </motion.div>
 
         {/* Page Content */}
-        <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
+        <div className="mx-4 sm:mx-6 py-8 space-y-6">
 
           {/* Stats Row */}
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4">
