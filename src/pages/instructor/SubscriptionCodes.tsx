@@ -40,6 +40,7 @@ const [selectedCourse, setSelectedCourse] = React.useState("");
 const [codesCount, setCodesCount] = React.useState(10);
 
 const [subscriptionPeriod, setSubscriptionPeriod] = React.useState("شهر");
+const [codeAmount, setCodeAmount] = React.useState(220);
 
 const [exportGrade, setExportGrade] = React.useState("");
 const [exportCourse, setExportCourse] = React.useState("");
@@ -180,6 +181,11 @@ const generateCodes = async () => {
     return;
   }
 
+  if (!codeAmount || codeAmount <= 0) {
+    showToast("قيمة الكود غير صحيحة");
+    return;
+  }
+
   const duration = getDurationDays();
 
   const codes = [];
@@ -190,6 +196,7 @@ const generateCodes = async () => {
       course_id: selectedCourse,
       duration_days: duration,
       status: "active",
+      amount: codeAmount,
     });
   }
 
@@ -621,6 +628,20 @@ return (
           type="number"
           value={codesCount}
           onChange={(e)=>setCodesCount(Number(e.target.value))}
+          className="w-full h-12 rounded-xl border border-slate-300 px-4"
+        />
+      </div>
+
+      <div>
+        <label className="block mb-2 text-sm font-bold">
+          قيمة الكود (جنيه)
+        </label>
+
+        <input
+          type="number"
+          min={1}
+          value={codeAmount}
+          onChange={(e)=>setCodeAmount(Number(e.target.value))}
           className="w-full h-12 rounded-xl border border-slate-300 px-4"
         />
       </div>

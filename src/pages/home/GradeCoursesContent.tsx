@@ -108,6 +108,19 @@ if (!user) {
   setShowSubscriptionModal(true);
 };
 
+const generateInvoiceNumber = async (): Promise<string> => {
+  const { data } = await supabase
+    .from("subscription_payments")
+    .select("invoice_number")
+    .order("id", { ascending: false })
+    .limit(1);
+
+  const last = data?.[0]?.invoice_number as string | undefined;
+  const lastNum = last ? parseInt(last.replace("INV-", ""), 10) : 0;
+  const nextNum = (isNaN(lastNum) ? 0 : lastNum) + 1;
+  return `INV-${String(nextNum).padStart(5, "0")}`;
+};
+
 const activateSubscription = async () => {
 
   const { data, error } = await supabase
@@ -168,6 +181,7 @@ if (enrollError) {
 }
 
 // تحديث حالة الكود
+const startDate = new Date();
 const expiresAt = new Date();
 expiresAt.setDate(expiresAt.getDate() + data.duration_days);
 
@@ -184,6 +198,31 @@ const { error: codeError } = await supabase
 if (codeError) {
   showToast("تم الاشتراك لكن حدث خطأ أثناء تحديث الكود");
   return;
+}
+
+// ── إنشاء فاتورة/سجل دفع تلقائي بنفس بيانات الكود ─────────
+try {
+  const invoiceNumber = await generateInvoiceNumber();
+
+  await supabase.from("subscription_payments").insert({
+    student_id: studentId,
+    course_id: selectedCourse.id,
+    invoice_number: invoiceNumber,
+    student_type: "online",
+    subscription_type: "monthly",
+    amount: Number(data.amount) || Number(selectedCourse.price) || 0,
+    payment_method: "vodafone_cash",
+    payer_phone: null,
+    payment_status: "verified",
+    payment_verified_at: new Date().toISOString(),
+    subscription_start_date: startDate.toISOString().slice(0, 10),
+    subscription_end_date: expiresAt.toISOString().slice(0, 10),
+    subscription_code: data.code,
+    notes: "تم التفعيل تلقائيًا عبر كود الاشتراك",
+  });
+} catch (invoiceErr) {
+  // لو فشل إنشاء الفاتورة، الاشتراك يفضل شغال عادي، مفيش داعي نوقف الطالب
+  console.error("فشل إنشاء الفاتورة التلقائية:", invoiceErr);
 }
 
 // تحديث الواجهة
