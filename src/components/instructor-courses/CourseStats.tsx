@@ -2,6 +2,7 @@ import {
   BookOpen,
   CheckCircle2,
   Sparkles,
+  FileClock,
 } from "lucide-react";
 
 type Props = {
@@ -21,6 +22,9 @@ const freeCourses = courses.filter(
   (course) => course.is_free
 ).length;
 
+const draftCourses = courses.filter(
+  (course) => !course.is_published
+).length;
 
   const stats = [
     {
@@ -43,6 +47,13 @@ const freeCourses = courses.filter(
       icon: Sparkles,
       color: "text-orange-500",
       bg: "bg-orange-100",
+    },
+    {
+      title: "كورسات في المسودة",
+      value: draftCourses,
+      icon: FileClock,
+      color: "text-amber-600",
+      bg: "bg-amber-100",
     },
   ];
 

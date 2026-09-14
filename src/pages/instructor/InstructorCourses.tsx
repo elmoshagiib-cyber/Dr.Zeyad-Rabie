@@ -14,6 +14,7 @@ export function InstructorCourses() {
 const navigate = useNavigate();
 const { user } = useApp();
 const [courses, setCourses] = useState<any[]>([]);
+const [isLoading, setIsLoading] = useState(true);
 const [sidebarOpen, setSidebarOpen] = useState(false);
 
 const [search, setSearch] = useState("");
@@ -70,6 +71,7 @@ const matchSearch =
   });
 
 const loadCourses = async () => {
+setIsLoading(true);
 const { data, error } = await supabase
   .from("courses")
   .select(`
@@ -89,7 +91,8 @@ const { data, error } = await supabase
   .select("student_id, course_id, active");
 
 if (error) {
-
+  console.error(error);
+  setIsLoading(false);
   return;
 }
 
@@ -113,6 +116,7 @@ const coursesWithStudents = (data || []).map((course) => {
 });
 
 setCourses(coursesWithStudents);
+setIsLoading(false);
 
 };
 
@@ -190,12 +194,31 @@ return (
         setView={setView}
         resultsCount={filteredCourses.length}
       />
-      <CourseGrid
-        courses={filteredCourses}
-        onDelete={deleteCourse}
-        onFeature={toggleFeature}
-        view={view}
-      />
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-64 rounded-[30px] bg-slate-100 animate-pulse"
+            />
+          ))}
+        </div>
+      ) : filteredCourses.length === 0 ? (
+        <div className="text-center py-16 bg-white rounded-[30px] border border-slate-200">
+          <p className="text-slate-500 text-lg font-medium">
+            {courses.length === 0
+              ? "لسه معملتش أي كورس، ابدأ بإنشاء أول كورس ليك"
+              : "لا توجد كورسات مطابقة لبحثك، جرّب تغيير الفلاتر"}
+          </p>
+        </div>
+      ) : (
+        <CourseGrid
+          courses={filteredCourses}
+          onDelete={deleteCourse}
+          onFeature={toggleFeature}
+          view={view}
+        />
+      )}
     </div>
 
   </DashboardLayout>

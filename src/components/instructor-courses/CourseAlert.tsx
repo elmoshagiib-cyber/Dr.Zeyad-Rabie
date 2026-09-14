@@ -28,6 +28,7 @@ const noImageCourses = courses.filter(
 
   const hasWarnings =
     draftCourses.length ||
+    hiddenCourses.length ||
     noImageCourses.length ||
     noDescriptionCourses.length;
 
@@ -67,6 +68,13 @@ const noImageCourses = courses.filter(
               <p>
                 • يوجد {draftCourses.length} كورس
                 في وضع المسودة.
+              </p>
+            )}
+
+            {hiddenCourses.length > 0 && (
+              <p>
+                • يوجد {hiddenCourses.length} كورس
+                مخفي عن الطلاب.
               </p>
             )}
 

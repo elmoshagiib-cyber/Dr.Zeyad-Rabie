@@ -180,6 +180,9 @@ focus:ring-blue-100
             }
             className={selectClass}
           >
+            <option value="all">
+              كل الحالات
+            </option>
 
             <option value="published">
               منشور
@@ -261,6 +264,15 @@ focus:ring-blue-100
       <div className="mt-6 flex items-center justify-between">
 
         <div className="flex gap-2 flex-wrap">
+
+          {search.trim() !== "" && (
+            <button
+              onClick={() => setSearch("")}
+              className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-sm"
+            >
+              "{search}" ✕
+            </button>
+          )}
 
           {gradeFilter !== "all" && (
             <button
