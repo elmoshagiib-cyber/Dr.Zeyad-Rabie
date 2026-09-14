@@ -3671,82 +3671,70 @@ async function uploadHomeworkInstructions(
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-4 sm:mx-6 mt-4 sm:mt-6"
+          className="sticky top-4 z-50 overflow-hidden rounded-[24px] sm:rounded-[28px] bg-gradient-to-r from-[#1547D6] to-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white shadow-lg mx-4 sm:mx-6 mt-4 sm:mt-6"
         >
-          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px]" />
-          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px]" />
+          <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white/10 blur-[100px] pointer-events-none" />
+          <div className="absolute -right-20 bottom-0 w-56 h-56 rounded-full bg-white/10 blur-[100px] pointer-events-none" />
 
-          <div className="relative z-10 flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
-              <BookOpen className="text-amber-400" size={20} />
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
+            {/* العنوان والأيقونة */}
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center flex-shrink-0">
+                <BookOpen className="text-amber-400" size={20} />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-black truncate">تعديل الدورة</h1>
+                <p className="text-white/60 text-xs sm:text-sm mt-0.5 truncate">{course.title || "بدون عنوان"}</p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black truncate">تعديل الدورة</h1>
-              <p className="text-white/60 text-xs sm:text-sm mt-0.5 truncate">{course.title || "بدون عنوان"}</p>
+
+            {/* الأزرار */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={() => navigate("/instructor/courses")}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-sm bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                <span className="hidden sm:inline">العودة</span>
+              </button>
+
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-sm bg-red-500/20 hover:bg-red-500/30 border border-red-200/30 backdrop-blur transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                <span className="hidden sm:inline">حذف</span>
+              </button>
+
+              <button
+                onClick={saveCourse}
+                disabled={saving}
+                className={`inline-flex items-center gap-2 px-5 py-2 rounded-xl font-semibold text-sm shadow-sm transition-all ${
+                  saveSuccess
+                    ? "bg-emerald-500 text-white"
+                    : "bg-white text-[#1547D6] hover:bg-white/90"
+                } disabled:opacity-70 disabled:cursor-not-allowed`}
+              >
+                {saving ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    جاري الحفظ...
+                  </>
+                ) : saveSuccess ? (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    تم الحفظ
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                    حفظ التغييرات
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </motion.div>
-
-        {/* Sticky Top Bar */}
-        <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
-          <div className="max-w-5xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between gap-4">
-              {/* Title */}
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#3183FF] flex items-center justify-center shadow-sm shadow-indigo-200 flex-shrink-0">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                </div>
-                <div className="min-w-0">
-                  <h1 className="text-base font-bold text-slate-900 truncate">{course.title || "بدون عنوان"}</h1>
-                  <p className="text-xs text-slate-500">تعديل محتوى وإعدادات الدورة</p>
-                </div>
-              </div>
-              {/* Actions */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={() => navigate("/instructor/courses")}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-slate-600 font-semibold text-sm bg-slate-100 hover:bg-slate-200 transition-all"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                  <span className="hidden sm:inline">العودة</span>
-                </button>
-                <button
-                  onClick={() => setShowDeleteModal(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-red-600 font-semibold text-sm bg-red-50 hover:bg-red-100 transition-all border border-red-200"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                  <span className="hidden sm:inline">حذف</span>
-                </button>
-                <button
-                  onClick={saveCourse}
-                  disabled={saving}
-                  className={`inline-flex items-center gap-2 px-5 py-2 rounded-xl font-semibold text-sm shadow-sm transition-all ${
-                    saveSuccess
-                      ? "bg-emerald-500 text-white shadow-emerald-200"
-                      : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-200"
-                  } disabled:opacity-70 disabled:cursor-not-allowed`}
-                >
-                  {saving ? (
-                    <>
-                      <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                      جاري الحفظ...
-                    </>
-                  ) : saveSuccess ? (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                      تم الحفظ
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
-                      حفظ التغييرات
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Page Content */}
         <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
