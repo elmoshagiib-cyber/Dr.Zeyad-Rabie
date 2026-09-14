@@ -301,6 +301,7 @@ export function EditCourse() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<"content" | "settings">("content");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [openDropdownSectionId, setOpenDropdownSectionId] = useState<string | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
@@ -3616,7 +3617,7 @@ async function uploadHomeworkInstructions(
   if (loading) {
     return (
       <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-        <div dir="rtl" className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div dir="rtl" className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center space-y-4">
             <div className="relative w-16 h-16 mx-auto">
               <div className="absolute inset-0 rounded-full border-4 border-indigo-100" />
@@ -3636,7 +3637,7 @@ async function uploadHomeworkInstructions(
   if (error || !course) {
     return (
       <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-        <div dir="rtl" className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div dir="rtl" className="min-h-screen bg-white flex items-center justify-center p-6">
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-10 text-center max-w-md w-full space-y-5">
             <div className="w-16 h-16 mx-auto rounded-2xl bg-red-100 flex items-center justify-center">
               <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -3664,7 +3665,7 @@ async function uploadHomeworkInstructions(
   // ── MAIN RENDER ──────────────────────────────────────────
   return (
     <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-      <div dir="rtl" className="min-h-screen bg-slate-50">
+      <div dir="rtl" className="min-h-screen bg-white">
 
         {/* Hero Header */}
         <motion.div
@@ -3696,6 +3697,14 @@ async function uploadHomeworkInstructions(
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                 <span className="hidden sm:inline">العودة</span>
+              </button>
+
+              <button
+                onClick={() => setShowSettingsModal(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-sm bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <span className="hidden sm:inline">الإعدادات</span>
               </button>
 
               <button
@@ -3738,12 +3747,6 @@ async function uploadHomeworkInstructions(
 
         {/* Page Content */}
         <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <button onClick={() => navigate("/instructor/courses")} className="hover:text-[#155DFC] transition-colors">الدورات</button>
-            <svg className="w-4 h-4 rotate-180" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-            <span className="text-slate-800 font-medium truncate max-w-xs">{course.title || "بدون عنوان"}</span>
-          </div>
 
           {/* Stats Row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -3785,38 +3788,9 @@ async function uploadHomeworkInstructions(
             ))}
           </div>
 
-          {/* Tab Navigation */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-1.5 flex gap-1">
-            {[
-              {
-                key: "content" as const,
-                label: "المحتوى",
-                icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
-              },
-              {
-                key: "settings" as const,
-                label: "الإعدادات",
-                icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
-              },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 ${
-                  activeTab === tab.key
-                    ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200"
-                    : "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
-                }`}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Tab Content */}
+          {/* المحتوى فقط — الإعدادات بقت في مودال منفصل */}
           <div>
-            {activeTab === "content" ? renderContentTab() : renderSettingsTab()}
+            {renderContentTab()}
           </div>
 
           {/* Bottom Save Button */}
@@ -3849,6 +3823,52 @@ async function uploadHomeworkInstructions(
             </button>
           </div>
         </div>
+
+        {/* Settings Modal */}
+        {showSettingsModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowSettingsModal(false)} />
+            <div className="relative bg-slate-50 rounded-3xl shadow-2xl border border-slate-200 max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+
+              {/* Modal Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white flex-shrink-0">
+                <h3 className="text-lg font-bold text-slate-900">إعدادات الدورة</h3>
+                <button
+                  onClick={() => setShowSettingsModal(false)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+
+              {/* Modal Body — scrollable */}
+              <div className="overflow-y-auto p-6">
+                {renderSettingsTab()}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-white flex-shrink-0">
+                <button
+                  onClick={() => setShowSettingsModal(false)}
+                  className="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-semibold text-sm hover:bg-slate-200 transition-colors"
+                >
+                  إلغاء
+                </button>
+                <button
+                  onClick={async () => {
+                    await saveCourse();
+                    setShowSettingsModal(false);
+                  }}
+                  disabled={saving}
+                  className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-200 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {saving ? "جاري الحفظ..." : "حفظ وإغلاق"}
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
 
         {/* Delete Confirmation Modal */}
         {showDeleteModal && (
