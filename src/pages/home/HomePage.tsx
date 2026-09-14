@@ -783,9 +783,9 @@ lg:text-right
     lg:mx-0
     "
   >
-    لا تستعجل النتيجة، فبعض التفاعلات تحتاج وقتًا، لكنها
+    لا تستعجل النتيجة، فبعض التفاعلات تحتاج وقتًا، لكنها في النهاية
     <br className="hidden sm:block" />
-     في النهاية تعطي أقوى النتائج.
+     تعطي أقوى النتائج.
   </p>
 
   <div
@@ -1743,7 +1743,7 @@ duration-300
         onClick={() =>
           window.open(
             `https://wa.me/201109414585?text=${encodeURIComponent(
-              `السلام عليكم، عايز الاشتراك في كورس ${selectedCourse?.title}`
+              `السلام عليكم، عايز الاشتراك في  ${selectedCourse?.title}`
             )}`,
             "_blank"
           )
@@ -1786,11 +1786,7 @@ duration-300
     flex
     items-center
     justify-center
-    shadow-[0_12px_30px_rgba(88,0,169,.35)]
-    dark:shadow-[0_12px_30px_rgba(182,0,215,.35)]
     hover:scale-110
-    hover:shadow-[0_18px_40px_rgba(88,0,169,.45)]
-    dark:hover:shadow-[0_18px_40px_rgba(182,0,215,.45)]
     transition-all
     duration-300
   "
@@ -1890,11 +1886,9 @@ duration-300
       flex
       items-center
       justify-center
-      shadow-[0_12px_30px_rgba(37,211,102,.35)]
       transition-all
       duration-300
       hover:scale-110
-      hover:shadow-[0_18px_40px_rgba(37,211,102,.45)]
     "
   >
     <FaWhatsapp className="text-white text-[28px] sm:text-[34px]" />
@@ -1934,7 +1928,6 @@ className="
         border
         border-gray-200
         dark:border-[#262626]
-        shadow-[0_25px_70px_rgba(15,23,42,.25)]
         flex
         flex-col
         md:flex-row
