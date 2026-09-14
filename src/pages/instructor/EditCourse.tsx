@@ -8,6 +8,8 @@ import { motion } from "framer-motion";
 import { EditCourseHeader } from "../../components/instructor-edit-course/EditCourseHeader";
 import { EditCourseStats } from "../../components/instructor-edit-course/EditCourseStats";
 import { EditCourseSettings } from "../../components/instructor-edit-course/EditCourseSettings";
+import { EditCourseLinkItem } from "../../components/instructor-edit-course/EditCourseLinkItem";
+import { EditCoursePdfItem } from "../../components/instructor-edit-course/EditCoursePdfItem";
 // ============================================================
 // TYPES & INTERFACES
 // ============================================================
@@ -37,7 +39,7 @@ thumbnailUploading?: boolean;
 file?: File;
 }
 
-interface PdfItem {
+export interface PdfItem {
   type: "pdf";
   id: string;
   title: string;
@@ -54,7 +56,7 @@ storagePath: string;
 file?: File;
 }
 
-interface LinkItem {
+export interface LinkItem {
   type: "link";
   id: string;
   title: string;
@@ -142,7 +144,7 @@ function generateId(): string {
 
 
 
-function formatFileSize(bytes: number): string {
+export function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 بايت";
   const k = 1024;
   const sizes = ["بايت", "كيلوبايت", "ميغابايت", "غيغابايت"];
@@ -2361,219 +2363,6 @@ async function uploadHomeworkInstructions(
     );
   }
 
- // ── Render PDF Item ──────────────────────────────────────
-  function renderPdfItem(sectionId: string, item: PdfItem, itemIndex: number, totalItems: number) {
-    return (
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:border-slate-300">
-        <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-l from-rose-50 to-transparent border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-            </div>
-            {renderItemTypeBadge("pdf")}
-          </div>
-          <div className="flex items-center gap-1">
-            <button
-  type="button"
-  onClick={() => toggleItemCollapse(item.id)}
-  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
-  title="إظهار / إخفاء"
->
-  <svg
-    className={`w-4 h-4 transition-transform duration-300 ${
-      collapsedItems[item.id] ? "" : "rotate-180"
-    }`}
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M19 9l-7 7-7-7"
-    />
-  </svg>
-</button>
-            <button onClick={() => moveItem(sectionId, itemIndex, "up")} disabled={itemIndex === 0} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
-            </button>
-            <button onClick={() => moveItem(sectionId, itemIndex, "down")} disabled={itemIndex === totalItems - 1} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-            </button>
-            <button onClick={() => removeItem(sectionId, item.id)} className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-            </button>
-          </div>
-        </div>
-
-        {!collapsedItems[item.id] && (
-
-<div className="p-5 space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">عنوان الملف</label>
-            <input
-              type="text"
-              value={item.title}
-              onChange={(e) => updateItem(sectionId, item.id, { title: e.target.value } as Partial<PdfItem>)}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm"
-              placeholder="أدخل عنوان الملف"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">الوصف</label>
-            <textarea
-              value={item.description}
-              onChange={(e) => updateItem(sectionId, item.id, { description: e.target.value } as Partial<PdfItem>)}
-              rows={2}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm resize-none"
-              placeholder="وصف مختصر للملف"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">رفع ملف PDF</label>            {item.status === "idle" || item.status === "error" ? (
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer bg-slate-50 hover:bg-rose-50 hover:border-rose-400 transition-all group">
-                <div className="flex flex-col items-center gap-2 text-slate-400 group-hover:text-rose-500 transition-colors">
-                  <svg className="w-9 h-9" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-                  <span className="text-sm font-medium">اسحب ملف PDF هنا أو انقر للرفع</span>
-                </div>
-                <input type="file" accept=".pdf" className="hidden" onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) uploadPdf(sectionId, item.id, file);
-                }} />
-              </label>
-) : item.status === "uploading" ? (
-  <div className="w-full p-5 border border-rose-200 rounded-2xl bg-rose-50 space-y-3">
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-rose-700 font-medium">جاري الرفع...</span>
-      <span className="text-rose-600 font-bold">{item.uploadProgress}%</span>
-    </div>
-    <div className="w-full bg-rose-200 rounded-full h-2 overflow-hidden">
-      <div
-        className="bg-rose-600 h-2 rounded-full transition-all duration-200"
-        style={{ width: `${item.uploadProgress}%` }}
-      />
-    </div>
-    <div className="flex items-center justify-between text-xs text-rose-600">
-      <span className="truncate">{item.fileName}</span>
-      <span className="flex-shrink-0 mr-2 font-medium">
-        {formatFileSize(item.uploadedBytes)} / {formatFileSize(item.totalBytes)}
-      </span>
-    </div>
-    <p className="text-xs text-rose-500">
-      متبقي: {formatFileSize(item.totalBytes - item.uploadedBytes)}
-    </p>
-  </div>
-) : (
-              <div className="w-full p-4 border border-emerald-200 rounded-2xl bg-emerald-50 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-emerald-800 truncate">{item.fileName}</p>
-                  <p className="text-xs text-emerald-600">{formatFileSize(item.fileSize)}</p>
-                </div>
-                <label className="text-xs text-emerald-600 hover:text-emerald-800 cursor-pointer underline underline-offset-2 font-medium">
-                  تغيير
-                  <input type="file" accept=".pdf" className="hidden" onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) uploadPdf(sectionId, item.id, file);
-                  }} />
-                </label>
-              </div>
-            )}
-          </div>
-          <label className="flex items-center gap-2.5 cursor-pointer group">
-            <div
-              onClick={() => updateItem(sectionId, item.id, { allowDownload: !item.allowDownload } as Partial<PdfItem>)}
-              className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${item.allowDownload ? "bg-rose-500" : "bg-slate-300"}`}
-            >
-              <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${item.allowDownload ? "-translate-x-5" : "translate-x-0"}`} />
-            </div>
-            <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">السماح بتحميل الملف</span>
-          </label>
-        </div>
-        )}
-      </div>
-      
-    );
-  }
-
-  // ── Render Link Item ─────────────────────────────────────
-  function renderLinkItem(sectionId: string, item: LinkItem, itemIndex: number, totalItems: number) {
-    return (
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:border-slate-300">
-        <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-l from-cyan-50 to-transparent border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-cyan-100 flex items-center justify-center text-cyan-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l3-3a4 4 0 015.656 5.656l-1.5 1.5" /></svg>
-            </div>
-            {renderItemTypeBadge("link")}
-          </div>
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => toggleItemCollapse(item.id)}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
-              title="إظهار / إخفاء"
-            >
-              <svg
-                className={`w-4 h-4 transition-transform duration-300 ${collapsedItems[item.id] ? "" : "rotate-180"}`}
-                fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            <button onClick={() => moveItem(sectionId, itemIndex, "up")} disabled={itemIndex === 0} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
-            </button>
-            <button onClick={() => moveItem(sectionId, itemIndex, "down")} disabled={itemIndex === totalItems - 1} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-            </button>
-            <button onClick={() => removeItem(sectionId, item.id)} className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-            </button>
-          </div>
-        </div>
-
-        {!collapsedItems[item.id] && (
-          <div className="p-5 space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">عنوان الرابط</label>
-              <input
-                type="text"
-                value={item.title}
-                onChange={(e) => updateItem(sectionId, item.id, { title: e.target.value } as Partial<LinkItem>)}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm"
-                placeholder="أدخل عنوان الرابط"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">الوصف</label>
-              <textarea
-                value={item.description}
-                onChange={(e) => updateItem(sectionId, item.id, { description: e.target.value } as Partial<LinkItem>)}
-                rows={2}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm resize-none"
-                placeholder="وصف مختصر للرابط"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">رابط URL</label>
-              <input
-                type="url"
-                value={item.url}
-                onChange={(e) => updateItem(sectionId, item.id, { url: e.target.value } as Partial<LinkItem>)}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors text-sm"
-                placeholder="https://example.com"
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   // ── Render Quiz Item ─────────────────────────────────────
   function renderQuizItem(sectionId: string, item: QuizItem, itemIndex: number, totalItems: number) {
     return (
@@ -3189,13 +2978,40 @@ async function uploadHomeworkInstructions(
       case "video":
         return renderVideoItem(sectionId, item, itemIndex, totalItems);
       case "pdf":
-        return renderPdfItem(sectionId, item, itemIndex, totalItems);
+        return (
+          <EditCoursePdfItem
+            sectionId={sectionId}
+            item={item}
+            itemIndex={itemIndex}
+            totalItems={totalItems}
+            collapsed={!!collapsedItems[item.id]}
+            onToggleCollapse={() => toggleItemCollapse(item.id)}
+            onMoveUp={() => moveItem(sectionId, itemIndex, "up")}
+            onMoveDown={() => moveItem(sectionId, itemIndex, "down")}
+            onRemove={() => removeItem(sectionId, item.id)}
+            onUpdate={(updates) => updateItem(sectionId, item.id, updates)}
+            onUploadFile={(file) => uploadPdf(sectionId, item.id, file)}
+          />
+        );
       case "quiz":
         return renderQuizItem(sectionId, item, itemIndex, totalItems);
       case "homework":
         return renderHomeworkItem(sectionId, item, itemIndex, totalItems);
       case "link":
-        return renderLinkItem(sectionId, item, itemIndex, totalItems);
+        return (
+          <EditCourseLinkItem
+            sectionId={sectionId}
+            item={item}
+            itemIndex={itemIndex}
+            totalItems={totalItems}
+            collapsed={!!collapsedItems[item.id]}
+            onToggleCollapse={() => toggleItemCollapse(item.id)}
+            onMoveUp={() => moveItem(sectionId, itemIndex, "up")}
+            onMoveDown={() => moveItem(sectionId, itemIndex, "down")}
+            onRemove={() => removeItem(sectionId, item.id)}
+            onUpdate={(updates) => updateItem(sectionId, item.id, updates)}
+          />
+        );
     }
   }
 
