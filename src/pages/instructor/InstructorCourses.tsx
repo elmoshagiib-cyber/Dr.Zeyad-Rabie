@@ -101,6 +101,7 @@ const coursesWithStudents = (data || []).map((course) => {
   const students = (subscriptions || []).filter(
     (s: any) =>
       s.active &&
+      s.student_id != null &&
       String(s.course_id) === String(course.id)
   );
 

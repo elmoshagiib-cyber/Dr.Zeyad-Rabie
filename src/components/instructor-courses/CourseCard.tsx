@@ -8,6 +8,18 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+const GRADE_LABELS: Record<string, string> = {
+  prep_1: "الصف الأول الإعدادي",
+  prep_2: "الصف الثاني الإعدادي",
+  prep_3: "الصف الثالث الإعدادي",
+  sec_1: "الصف الأول الثانوي",
+  sec_2: "الصف الثاني الثانوي",
+  sec_3: "الصف الثالث الثانوي",
+};
+
+const getGradeLabel = (grade?: string) =>
+  (grade && GRADE_LABELS[grade]) || grade || "غير محدد";
+
 type Props = {
   course: any;
   onDelete: (id: string) => void;
@@ -71,7 +83,7 @@ export function CourseCard({ course, onDelete, onFeature, view }: Props) {
             <span>📄 {files} PDF</span>
             <span>👨‍🎓 {course.students_count || 0} طالب</span>
             <span>📚 {lectures} باب</span>
-            <span>🎓 {course.grade}</span>
+            <span>🎓 {getGradeLabel(course.grade)}</span>
           </div>
 
           <div className="flex flex-wrap justify-between items-center mt-6 gap-3">
@@ -169,7 +181,7 @@ export function CourseCard({ course, onDelete, onFeature, view }: Props) {
         {/* الصف الدراسي */}
         <div className="flex items-center gap-2 mb-2">
           <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-            {course.grade}
+            {getGradeLabel(course.grade)}
           </span>
           {/* نقطة الحالة */}
           <span

@@ -97,7 +97,7 @@ const noImageCourses = courses.filter(
         ) : (
 
           <h3 className="font-bold text-lg mt-2">
-            جميع الكورسات مكتملة ✅
+            جميع الكورسات مكتملة
           </h3>
 
         )}
