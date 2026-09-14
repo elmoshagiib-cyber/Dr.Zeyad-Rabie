@@ -771,6 +771,11 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
                             </span>
                           </div>
                         )}
+
+                        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[#2A2A2A] flex items-center justify-center gap-1.5 text-[#5800a9] dark:text-[#b600d7]">
+                          <Receipt size={13} />
+                          <span className="text-[11px] sm:text-xs font-black">اضغط لعرض الفاتورة</span>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -947,87 +952,140 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="w-full max-w-[420px] max-h-[90vh] overflow-y-auto">
               <div ref={invoiceCardRef} className="relative bg-white rounded-t-[28px] overflow-hidden">
-                <div className="pt-6 pb-3 px-6 text-center">
-                  <p className="text-gray-900 font-black text-base">منصة مستر زياد ربيع</p>
+                <div className="pt-7 pb-1 px-6 text-center">
+                  <h2 className="text-gray-900 font-black text-xl">إيصال</h2>
+                  <p className="text-gray-400 text-xs font-bold mt-1.5" dir="ltr">
+                    معاملة {selectedInvoice.invoice_number}
+                  </p>
                 </div>
 
-                <div className="px-6 pb-4 text-center">
-                  <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
-                    <CheckCircle className="text-emerald-500" size={34} />
+                <div className="px-5 pb-6 pt-4 space-y-3">
+                  {/* الخدمة / مقدم الخدمة */}
+                  <div className="bg-gray-50 rounded-2xl px-5 py-4 space-y-3.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-[11px] font-bold">الخدمة</span>
+                      <span className="text-gray-900 font-black text-sm">اشتراك كورس</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-[11px] font-bold">مقدم الخدمة</span>
+                      <span className="text-gray-900 font-black text-sm">منصة مستر زياد ربيع</span>
+                    </div>
                   </div>
-                  <p className="text-emerald-600 font-black text-[15px]">تمت عملية الدفع بنجاح</p>
-                  <p className="text-gray-400 text-[11px] font-bold mt-1" dir="ltr">
-                    {new Date(selectedInvoice.created_at).toLocaleString("ar-EG")}
-                  </p>
-                </div>
 
-                <div className="mx-6 border-t-2 border-dashed border-gray-200" />
-
-                <div className="px-6 py-5 text-center">
-                  <p className="text-gray-400 text-[11px] font-bold mb-1">قيمة الاشتراك</p>
-                  <p className="text-4xl font-black text-gray-900" dir="ltr">
-                    {selectedInvoice.amount}
-                    <span className="text-base font-bold text-gray-400 mr-1">جنيه</span>
-                  </p>
-                </div>
-
-                <div className="mx-6 border-t-2 border-dashed border-gray-200" />
-
-                <div className="px-6 py-5 space-y-3">
-                  {[
-                    { label: "الكورس", value: selectedInvoice.courseData?.title || "-" },
-                    { label: "نوع الاشتراك", value: selectedInvoice.student_type === "online" ? "Online" : "Center" },
-                    { label: "طريقة الدفع", value: selectedInvoice.payment_method === "vodafone_cash" ? "Vodafone Cash" : "InstaPay" },
-                    { label: "تاريخ الاشتراك", value: new Date(selectedInvoice.subscription_start_date).toLocaleDateString("ar-EG") },
-                    { label: "تاريخ الانتهاء", value: new Date(selectedInvoice.subscription_end_date).toLocaleDateString("ar-EG") },
-                  ].map((row) => (
-                    <div key={row.label} className="flex items-end justify-between gap-2 text-[13px]">
-                      <span className="text-gray-400 font-bold whitespace-nowrap bg-white pl-1 relative z-10">
-                        {row.label}
-                      </span>
-                      <span className="flex-1 border-b-2 border-dotted border-gray-300 mb-[3px]" />
-                      <span className="font-black text-gray-800 whitespace-nowrap bg-white pr-1 relative z-10">
-                        {row.value}
+                  {/* التاريخ / الوقت */}
+                  <div className="bg-gray-50 rounded-2xl px-5 py-4 space-y-3.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-[11px] font-bold">التاريخ</span>
+                      <span className="text-gray-900 font-black text-sm" dir="ltr">
+                        {new Date(selectedInvoice.created_at).toLocaleDateString("ar-EG", { day: "numeric", month: "long", year: "numeric" })}
                       </span>
                     </div>
-                  ))}
-
-                  <div className="flex items-end justify-between gap-2 text-[13px]">
-                    <span className="text-gray-400 font-bold whitespace-nowrap bg-white pl-1 relative z-10">
-                      حالة الدفع
-                    </span>
-                    <span className="flex-1 border-b-2 border-dotted border-gray-300 mb-[3px]" />
-                    <span className="bg-white pr-1 relative z-10">{paymentStatusBadge(selectedInvoice.payment_status)}</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-[11px] font-bold">الوقت</span>
+                      <span className="text-gray-900 font-black text-sm" dir="ltr">
+                        {new Date(selectedInvoice.created_at).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="flex items-end justify-between gap-2 text-[13px]">
-                    <span className="text-gray-400 font-bold whitespace-nowrap bg-white pl-1 relative z-10">
-                      حالة الاشتراك
-                    </span>
-                    <span className="flex-1 border-b-2 border-dotted border-gray-300 mb-[3px]" />
-                    <span className="bg-white pr-1 relative z-10">{subscriptionStatusBadge(selectedInvoice)}</span>
+                  {/* رقم الفاتورة */}
+                  <div className="bg-gray-50 rounded-2xl px-5 py-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-gray-400 text-[11px] font-bold whitespace-nowrap">رقم الفاتورة</span>
+                      <span className="text-gray-900 font-black text-sm text-left break-all" dir="ltr">
+                        {selectedInvoice.invoice_number}
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="mx-6 border-t-2 border-dashed border-gray-200" />
+                  {/* الحالة / الكورس / نوع الاشتراك */}
+                  <div className="bg-gray-50 rounded-2xl px-5 py-4 space-y-3.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-[11px] font-bold">الحالة</span>
+                      <span
+                        className={`font-black text-sm ${
+                          selectedInvoice.payment_status === "verified"
+                            ? "text-emerald-600"
+                            : selectedInvoice.payment_status === "rejected"
+                            ? "text-red-600"
+                            : "text-amber-600"
+                        }`}
+                      >
+                        {selectedInvoice.payment_status === "verified"
+                          ? "عملية ناجحة"
+                          : selectedInvoice.payment_status === "rejected"
+                          ? "عملية مرفوضة"
+                          : "قيد المراجعة"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-gray-400 text-[11px] font-bold whitespace-nowrap">الكورس</span>
+                      <span className="text-gray-900 font-black text-sm text-left">
+                        {selectedInvoice.courseData?.title || "-"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-[11px] font-bold">نوع الاشتراك</span>
+                      <span className="text-gray-900 font-black text-sm">
+                        {selectedInvoice.student_type === "online" ? "Online" : "Center"}
+                      </span>
+                    </div>
+                  </div>
 
-                <div className="px-6 py-4 flex items-center justify-between">
-                  <span className="text-[11px] text-gray-400 font-bold">رقم الفاتورة</span>
-                  <span className="font-black text-gray-800 text-sm tracking-widest" dir="ltr">
-                    {selectedInvoice.invoice_number}
-                  </span>
-                </div>
+                  {/* المبلغ / طريقة الدفع / رسوم الخدمة */}
+                  <div className="bg-gray-50 rounded-2xl px-5 py-4 space-y-3.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-[11px] font-bold">المبلغ</span>
+                      <span className="text-gray-900 font-black text-sm" dir="ltr">
+                        {selectedInvoice.amount} ج.م.
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-[11px] font-bold">طريقة الدفع</span>
+                      <span className="text-gray-900 font-black text-sm">
+                        {selectedInvoice.payment_method === "vodafone_cash" ? "Vodafone Cash" : "InstaPay"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-[11px] font-bold">رسوم الخدمة</span>
+                      <span className="text-gray-900 font-black text-sm" dir="ltr">0 ج.م.</span>
+                    </div>
+                  </div>
 
-                {selectedInvoice.subscription_code && selectedInvoice.payment_status === "verified" && (
-                  <div className="px-6 pb-5">
+                  {/* المبلغ الإجمالي */}
+                  <div className="bg-gray-50 rounded-2xl px-5 py-4 flex items-center justify-between">
+                    <span className="text-gray-900 font-black text-sm">المبلغ الإجمالي</span>
+                    <span className="text-gray-900 font-black text-base" dir="ltr">
+                      {selectedInvoice.amount} ج.م.
+                    </span>
+                  </div>
+
+                  {/* تواريخ الاشتراك */}
+                  <div className="bg-gray-50 rounded-2xl px-5 py-4 space-y-3.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-[11px] font-bold">تاريخ الاشتراك</span>
+                      <span className="text-gray-900 font-black text-sm" dir="ltr">
+                        {new Date(selectedInvoice.subscription_start_date).toLocaleDateString("ar-EG")}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-[11px] font-bold">تاريخ الانتهاء</span>
+                      <span className="text-gray-900 font-black text-sm" dir="ltr">
+                        {new Date(selectedInvoice.subscription_end_date).toLocaleDateString("ar-EG")}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* كود الاشتراك */}
+                  {selectedInvoice.subscription_code && selectedInvoice.payment_status === "verified" && (
                     <div className="rounded-2xl border-2 border-dashed border-[#B348FE]/40 bg-[#FAF5FF] px-5 py-4 text-center">
                       <p className="text-[11px] font-bold text-gray-400 mb-1.5">كود الاشتراك</p>
                       <p className="text-2xl font-black text-[#B348FE] tracking-[4px]" dir="ltr">
                         {selectedInvoice.subscription_code}
                       </p>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
 
                 <div className="px-6 pb-6 flex items-center justify-center gap-[2px] h-8">
                   {Array.from({ length: 40 }).map((_, i) => (
