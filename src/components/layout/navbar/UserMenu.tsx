@@ -215,11 +215,9 @@ const avatar = user.avatar_url || "/images/default-avatar.png";
     }}
   />
 </div>
-                  {user.grade && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {user.grade}
-                    </p>
-                  )}
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    أهلاً، {user.name}
+                  </p>
                 </div>
               </div>
 

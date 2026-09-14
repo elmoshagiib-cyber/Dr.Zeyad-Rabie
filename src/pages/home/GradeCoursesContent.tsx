@@ -225,9 +225,9 @@ return (
     p-0
     bg-white
     dark:bg-[#151515]
-    border
-    border-gray-200
-    dark:border-[#262626]
+    border-2
+    border-[#5800a9]
+    dark:border-[#b600d7]
     shadow-[0_4px_20px_rgba(0,0,0,.06)]
     hover:shadow-[0_10px_35px_rgba(0,0,0,.1)]
     rounded-[26px]
