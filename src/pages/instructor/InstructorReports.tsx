@@ -7,9 +7,9 @@ import {
   Wallet,
   TrendingUp,
   ClipboardList,
-  Award,
   CreditCard,
   Layers,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
@@ -40,12 +40,6 @@ interface CourseSalesRow {
   subscriptions: number;
 }
 
-interface TopPayingStudentRow {
-  student_id: number;
-  name: string;
-  totalPaid: number;
-  paymentsCount: number;
-}
 
 export function InstructorReports() {
   const [loading, setLoading] = useState(true);
@@ -55,8 +49,11 @@ export function InstructorReports() {
   const [dateTo, setDateTo] = useState("");
 
   const [payments, setPayments] = useState<PaymentRow[]>([]);
-  const [topPayingStudents, setTopPayingStudents] = useState<TopPayingStudentRow[]>([]);
   const [bestSelling, setBestSelling] = useState<CourseSalesRow[]>([]);
+  const [pendingPayments, setPendingPayments] = useState<{ count: number; total: number }>({
+    count: 0,
+    total: 0,
+  });
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const loadCourses = async () => {
@@ -81,7 +78,7 @@ export function InstructorReports() {
     if (error || !paymentsData) {
       setPayments([]);
       setBestSelling([]);
-      setTopPayingStudents([]);
+      setPendingPayments({ count: 0, total: 0 });
       setLoading(false);
       return;
     }
@@ -112,32 +109,22 @@ export function InstructorReports() {
     });
     setBestSelling(Object.values(salesMap).sort((a, b) => b.subscriptions - a.subscriptions));
 
-    // أكثر الطلاب دفعاً
-    const studentIds = [...new Set(mergedPayments.map((p) => p.student_id))];
+    // مدفوعات قيد المراجعة (نفس الفلاتر المطبقة، لكن حالتها pending)
+    let pendingQuery = supabase
+      .from("subscription_payments")
+      .select("amount")
+      .eq("payment_status", "pending");
 
-    if (studentIds.length > 0) {
-      const { data: studentsData } = await supabase
-        .from("students")
-        .select("id, full_name")
-        .in("id", studentIds);
+    if (courseFilter !== "all") pendingQuery = pendingQuery.eq("course_id", courseFilter);
+    if (dateFrom) pendingQuery = pendingQuery.gte("created_at", dateFrom);
+    if (dateTo) pendingQuery = pendingQuery.lte("created_at", dateTo + "T23:59:59");
 
-      const topPayingList: TopPayingStudentRow[] = (studentsData || [])
-        .map((s: any) => {
-          const studentPayments = mergedPayments.filter((p) => p.student_id === s.id);
-          return {
-            student_id: s.id,
-            name: s.full_name,
-            totalPaid: studentPayments.reduce((sum, p) => sum + (p.amount || 0), 0),
-            paymentsCount: studentPayments.length,
-          };
-        })
-        .sort((a, b) => b.totalPaid - a.totalPaid)
-        .slice(0, 10);
+    const { data: pendingData } = await pendingQuery;
 
-      setTopPayingStudents(topPayingList);
-    } else {
-      setTopPayingStudents([]);
-    }
+    setPendingPayments({
+      count: pendingData?.length || 0,
+      total: (pendingData || []).reduce((sum: number, p: any) => sum + (p.amount || 0), 0),
+    });
 
     setLoading(false);
   };
@@ -265,7 +252,7 @@ export function InstructorReports() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-3xl shadow-sm">
                   <CardContent className="p-5 flex items-center justify-between">
                     <div>
@@ -308,6 +295,25 @@ export function InstructorReports() {
                     </div>
                     <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#111111] flex items-center justify-center">
                       <TrendingUp className="text-amber-600" size={24} />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-3xl shadow-sm">
+                  <CardContent className="p-5 flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-600 dark:text-gray-300 text-xs font-bold mb-1">
+                        مدفوعات قيد المراجعة
+                      </p>
+                      <h3 className="text-3xl font-black text-red-600">{pendingPayments.count}</h3>
+                      {pendingPayments.count > 0 && (
+                        <p className="text-[11px] text-gray-500 dark:text-gray-400 font-bold mt-0.5">
+                          بقيمة {pendingPayments.total.toLocaleString("ar-EG")} ج.م
+                        </p>
+                      )}
+                    </div>
+                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#111111] flex items-center justify-center">
+                      <AlertCircle className="text-red-600" size={24} />
                     </div>
                   </CardContent>
                 </Card>
@@ -387,85 +393,50 @@ export function InstructorReports() {
                 </Card>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
-                  <CardContent className="p-0">
-                    <div className="flex items-center gap-2 p-5 border-b border-gray-100 dark:border-[#2A2A2A]">
-                      <Award className="text-[#155DFC]" size={20} />
-                      <h3 className="font-black text-gray-900 dark:text-white">أكثر الطلاب دفعاً</h3>
+              <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="flex items-center gap-2 p-5 border-b border-gray-100 dark:border-[#2A2A2A]">
+                    <TrendingUp className="text-[#155DFC]" size={20} />
+                    <h3 className="font-black text-gray-900 dark:text-white">الكورسات الأكثر مبيعاً</h3>
+                  </div>
+                  {bestSelling.length === 0 ? (
+                    <div className="py-12 text-center text-sm text-gray-500 dark:text-gray-400 font-bold">
+                      لا توجد مبيعات في هذه الفترة
                     </div>
-                    {topPayingStudents.length === 0 ? (
-                      <div className="py-12 text-center text-sm text-gray-500 dark:text-gray-400 font-bold">
-                        لا توجد مدفوعات في هذه الفترة
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="bg-gray-50 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400">
-                              <th className="text-right font-bold px-4 py-2.5">الطالب</th>
-                              <th className="text-right font-bold px-4 py-2.5">عدد العمليات</th>
-                              <th className="text-right font-bold px-4 py-2.5">إجمالي المدفوع</th>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-gray-50 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400">
+                            <th className="text-right font-bold px-4 py-2.5">الكورس / الشهر</th>
+                            <th className="text-right font-bold px-4 py-2.5">السعر</th>
+                            <th className="text-right font-bold px-4 py-2.5">الاشتراكات</th>
+                            <th className="text-right font-bold px-4 py-2.5">إجمالي الإيراد</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {bestSelling.map((c) => (
+                            <tr key={c.course_id} className="border-t border-gray-100 dark:border-[#2A2A2A]">
+                              <td className="px-4 py-2.5 font-bold text-gray-900 dark:text-white">{c.title}</td>
+                              <td className="px-4 py-2.5 text-emerald-600 font-bold">
+                                {c.price.toFixed(2)} ج.م
+                              </td>
+                              <td className="px-4 py-2.5">
+                                <span className="w-7 h-7 inline-flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-950/30 text-[#155DFC] font-black text-xs">
+                                  {c.subscriptions}
+                                </span>
+                              </td>
+                              <td className="px-4 py-2.5 font-bold text-gray-700 dark:text-gray-300">
+                                {(c.price * c.subscriptions).toLocaleString("ar-EG")} ج.م
+                              </td>
                             </tr>
-                          </thead>
-                          <tbody>
-                            {topPayingStudents.map((s) => (
-                              <tr key={s.student_id} className="border-t border-gray-100 dark:border-[#2A2A2A]">
-                                <td className="px-4 py-2.5 font-bold text-gray-900 dark:text-white">{s.name}</td>
-                                <td className="px-4 py-2.5 text-gray-600 dark:text-gray-300">{s.paymentsCount}</td>
-                                <td className="px-4 py-2.5 font-bold text-emerald-600">
-                                  {s.totalPaid.toLocaleString("ar-EG")} ج.م
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
-                  <CardContent className="p-0">
-                    <div className="flex items-center gap-2 p-5 border-b border-gray-100 dark:border-[#2A2A2A]">
-                      <TrendingUp className="text-[#155DFC]" size={20} />
-                      <h3 className="font-black text-gray-900 dark:text-white">الكورسات الأكثر مبيعاً</h3>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                    {bestSelling.length === 0 ? (
-                      <div className="py-12 text-center text-sm text-gray-500 dark:text-gray-400 font-bold">
-                        لا توجد مبيعات في هذه الفترة
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="bg-gray-50 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400">
-                              <th className="text-right font-bold px-4 py-2.5">الكورس / الشهر</th>
-                              <th className="text-right font-bold px-4 py-2.5">السعر</th>
-                              <th className="text-right font-bold px-4 py-2.5">الاشتراكات</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {bestSelling.map((c) => (
-                              <tr key={c.course_id} className="border-t border-gray-100 dark:border-[#2A2A2A]">
-                                <td className="px-4 py-2.5 font-bold text-gray-900 dark:text-white">{c.title}</td>
-                                <td className="px-4 py-2.5 text-emerald-600 font-bold">
-                                  {c.price.toFixed(2)} ج.م
-                                </td>
-                                <td className="px-4 py-2.5">
-                                  <span className="w-7 h-7 inline-flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-950/30 text-[#155DFC] font-black text-xs">
-                                    {c.subscriptions}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
+                  )}
+                </CardContent>
+              </Card>
             </>
           )}
         </div>
