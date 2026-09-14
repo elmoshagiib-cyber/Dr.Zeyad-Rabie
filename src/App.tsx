@@ -125,6 +125,11 @@ const InstructorWatchProgress = lazy(() =>
     default: m.InstructorWatchProgress,
   }))
 );
+const InstructorContent = lazy(() =>
+  import("./pages/instructor/InstructorContent").then((m) => ({
+    default: m.InstructorContent,
+  }))
+);
 
 // ============================================================
 // شاشة تحميل بسيطة تظهر لحد ما الصفحة المطلوبة تحمل
@@ -440,6 +445,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute roles={["instructor"]}>
               <InstructorWatchProgress />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/instructor/content"
+          element={
+            <ProtectedRoute roles={["instructor"]}>
+              <InstructorContent />
             </ProtectedRoute>
           }
         />
