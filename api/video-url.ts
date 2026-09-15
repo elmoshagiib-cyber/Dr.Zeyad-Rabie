@@ -58,7 +58,6 @@ export default async function handler(req: any, res: any) {
       .select("id, storage_path, section_id")
       .eq("id", lessonId)
       .single();
-;
     if (lessonError || !lesson) {
       return res.status(404).json({
         error: "Lesson not found",
@@ -125,17 +124,11 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({
       url: signedUrl,
     });
-} catch (err: any) {
-  console.error("========== VIDEO API ERROR ==========");
-  console.error(err);
-  console.error("MESSAGE:", err?.message);
-  console.error("STACK:", err?.stack);
-  console.error("CAUSE:", err?.cause);
+  } catch (err: any) {
+    console.error("VIDEO API ERROR:", err);
 
-  return res.status(500).json({
-    success: false,
-    message: err?.message || "Unknown error",
-    stack: err?.stack || null,
-  });
-}
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
 }
