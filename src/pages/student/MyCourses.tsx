@@ -165,8 +165,9 @@ export function MyCoursesPage() {
                       >
                         <img
                           src={
-                            course.thumbnail ||
-                            "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=600"
+                            course.thumbnail
+                              ? `${import.meta.env.VITE_R2_PUBLIC_URL}/${course.thumbnail}`
+                              : "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=600"
                           }
                           alt={course.title}
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"

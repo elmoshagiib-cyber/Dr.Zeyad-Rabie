@@ -54,9 +54,10 @@ export function CourseCard({ course, onDelete, onFeature, view }: Props) {
       <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm hover:shadow-lg transition p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
         <img
           src={
-            course.thumbnail ||
-            course.cover_image ||
-            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3"
+            course.thumbnail
+              ? `${import.meta.env.VITE_R2_PUBLIC_URL}/${course.thumbnail}`
+              : course.cover_image ||
+                "https://images.unsplash.com/photo-1516321318423-f06f85e504b3"
           }
           className="w-full sm:w-52 md:w-64 h-40 rounded-2xl object-cover shrink-0"
         />
@@ -156,9 +157,10 @@ export function CourseCard({ course, onDelete, onFeature, view }: Props) {
         <div className="relative aspect-[16/9] overflow-hidden rounded-2xl">
           <img
             src={
-              course.thumbnail ||
-              course.cover_image ||
-              "https://images.unsplash.com/photo-1516321318423-f06f85e504b3"
+              course.thumbnail
+                ? `${import.meta.env.VITE_R2_PUBLIC_URL}/${course.thumbnail}`
+                : course.cover_image ||
+                  "https://images.unsplash.com/photo-1516321318423-f06f85e504b3"
             }
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
