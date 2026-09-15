@@ -316,6 +316,7 @@ const MAX_WATER = 100;
 export default function ChemistryLabPage() {
   const [activeTab, setActiveTab] = useState<Tab>("table");
   const [filter, setFilter] = useState<Category | "all">("all");
+  const [hoverFilter, setHoverFilter] = useState<Category | null>(null);
   const [selected, setSelected] = useState<Elem | null>(null);
 
   // ── المختبر الافتراضي ──
@@ -375,37 +376,26 @@ export default function ChemistryLabPage() {
         {/* ── تاب الجدول ── */}
         {activeTab === "table" && (
           <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4 sm:p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-              <div className="flex flex-wrap gap-2">
-                {(Object.keys(CATEGORY_INFO) as Category[]).map((cat) => (
-                  <span
+            <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-3 sm:p-4 mb-4 inline-flex flex-wrap gap-2">
+              {(Object.keys(CATEGORY_INFO) as Category[]).map((cat) => {
+                const active = (hoverFilter ?? filter) === cat;
+                return (
+                  <button
                     key={cat}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border border-gray-100 dark:border-[#2A2A2A]"
+                    onMouseEnter={() => setHoverFilter(cat)}
+                    onMouseLeave={() => setHoverFilter(null)}
+                    onClick={() => setFilter((prev) => (prev === cat ? "all" : cat))}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold border transition-all duration-150 ${
+                      active
+                        ? "border-[#5800a9] dark:border-[#b600d7] bg-white dark:bg-[#111111] shadow-sm"
+                        : "border-gray-100 dark:border-[#2A2A2A] bg-white dark:bg-[#111111] hover:border-gray-300 dark:hover:border-gray-500"
+                    }`}
                   >
                     <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CATEGORY_INFO[cat].bg }} />
                     {CATEGORY_INFO[cat].label}
-                  </span>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <select
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value as Category | "all")}
-                  className="text-xs sm:text-sm font-bold px-3 py-2 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5800a9]/30"
-                >
-                  <option value="all">الفئة</option>
-                  {(Object.keys(CATEGORY_INFO) as Category[]).map((cat) => (
-                    <option key={cat} value={cat}>{CATEGORY_INFO[cat].label}</option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => setFilter("all")}
-                  className="text-xs sm:text-sm font-bold px-3 py-2 rounded-xl bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#232323] transition-colors"
-                >
-                  إعادة تعيين
-                </button>
-              </div>
+                  </button>
+                );
+              })}
             </div>
 
             <div className="overflow-x-auto pb-2">
@@ -414,7 +404,8 @@ export default function ChemistryLabPage() {
                 style={{ gridTemplateColumns: "repeat(18, minmax(46px, 1fr))", minWidth: 1100 }}
               >
                 {ELEMENTS.map((el) => {
-                  const dimmed = filter !== "all" && el.category !== filter;
+                  const activeCat = hoverFilter ?? filter;
+                  const dimmed = activeCat !== "all" && el.category !== activeCat;
                   return (
                     <button
                       key={el.number}
