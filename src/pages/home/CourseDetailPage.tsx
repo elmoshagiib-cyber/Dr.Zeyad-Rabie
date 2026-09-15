@@ -127,6 +127,7 @@ export function CourseDetailPage() {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [units, setUnits] = useState<any[]>([]);
   const [course, setCourse] = useState<any>(null);
+  const [courseThumbnailUrl, setCourseThumbnailUrl] = useState("");
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscriptionCode, setSubscriptionCode] = useState("");
 
@@ -232,10 +233,50 @@ useEffect(() => {
       .eq("id", slug)
       .single();
 
-
+    if (error) {
+      console.error("Error loading course:", error);
+      return;
+    }
 
     if (data) {
       setCourse(data);
+
+      // ==========================================
+      // تحميل Signed URL لصورة الدورة
+      // ==========================================
+      if (data.thumbnail) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+
+          if (session?.access_token) {
+            const response = await fetch("/api/thumbnail-url", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({
+                key: data.thumbnail,
+              }),
+            });
+
+            if (response.ok) {
+              const thumbnailData = await response.json();
+              setCourseThumbnailUrl(thumbnailData.url || "");
+            } else {
+              console.error(
+                "Course thumbnail URL error:",
+                await response.text()
+              );
+            }
+          }
+        } catch (thumbnailError) {
+          console.error(
+            "Failed to load course thumbnail:",
+            thumbnailError
+          );
+        }
+      }
     }
   };
 
@@ -1589,7 +1630,7 @@ const handleSeekClick = (e: React.MouseEvent<HTMLDivElement>) => {
       <div className="relative overflow-hidden pt-24 sm:pt-28 lg:pt-32 pb-40 sm:pb-48 lg:pb-56">
         <img
           src={
-            course.thumbnail ||
+            courseThumbnailUrl ||
             course.cover_image ||
             "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1600"
           }

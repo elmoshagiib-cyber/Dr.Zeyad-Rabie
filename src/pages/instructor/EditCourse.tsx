@@ -309,9 +309,11 @@ export function EditCourse() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [openDropdownSectionId, setOpenDropdownSectionId] = useState<string | null>(null);
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
-  const [expandedQuestions, setExpandedQuestions] = useState<Record<string, boolean>>({});
+const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
+const [thumbnailUploading, setThumbnailUploading] = useState(false);
+const [thumbnailUploadProgress, setThumbnailUploadProgress] = useState(0);
+const [expandedQuestions, setExpandedQuestions] = useState<Record<string, boolean>>({});
 const [collapsedItems, setCollapsedItems] = useState<Record<string, boolean>>({});
 const uploadControllersRef = useRef<Record<string, AbortController>>({});
   // ── Load Course ──────────────────────────────────────────
@@ -1136,33 +1138,56 @@ async function handleThumbnailChange(
   setThumbnailFile(file);
   setThumbnailPreview(localPreviewUrl);
 
+  // ==========================================
+  // 2. تشغيل حالة الرفع
+  // ==========================================
+  setThumbnailUploading(true);
+  setThumbnailUploadProgress(0);
+
   try {
     // ==========================================
-    // 2. رفع الصورة إلى R2
+    // 3. رفع الصورة إلى R2 مع Progress
     // ==========================================
     const data = await uploadToR2(
       file,
-      "course-thumbnails"
+      "course-thumbnails",
+      (loadedBytes, totalBytes) => {
+        const percent = Math.round(
+          (loadedBytes / totalBytes) * 100
+        );
+
+        setThumbnailUploadProgress(percent);
+      }
     );
 
     // ==========================================
-    // 3. نخزن الـ R2 Key وليس الـ public URL
+    // 4. حفظ R2 Key
     // ==========================================
     (course as any).thumbnailPath = data.key;
 
-    // مهم:
-    // منخليش thumbnailPreview يبقى data.url
-    // لأن R2 Private ومش هيتفتح مباشرة.
-    //
-    // نخلي localPreviewUrl شغال على الصفحة الحالية.
+    // ==========================================
+    // 5. نخلي الـ Preview المحلي شغال
+    // ==========================================
     updateCourseField("thumbnailUrl", localPreviewUrl);
+
+    // ==========================================
+    // 6. الرفع خلص
+    // ==========================================
+    setThumbnailUploading(false);
+    setThumbnailUploadProgress(100);
 
   } catch (err) {
     console.error("Course thumbnail upload error:", err);
 
-    // لو الرفع فشل نشيل المعاينة المحلية
-    setThumbnailPreview("");
+    // ==========================================
+    // 7. لو الرفع فشل
+    // ==========================================
+    setThumbnailUploading(false);
+    setThumbnailUploadProgress(0);
 
+    URL.revokeObjectURL(localPreviewUrl);
+
+    setThumbnailPreview("");
     setThumbnailFile(null);
 
     alert("فشل رفع صورة الدورة");
@@ -3419,6 +3444,8 @@ updateItem(sectionId, item.id, {
         updateCourseField={updateCourseField}
         thumbnailPreview={thumbnailPreview}
         thumbnailFile={thumbnailFile}
+        thumbnailUploading={thumbnailUploading}
+        thumbnailUploadProgress={thumbnailUploadProgress}
         setThumbnailPreview={setThumbnailPreview}
         setThumbnailFile={setThumbnailFile}
         handleThumbnailChange={handleThumbnailChange}
