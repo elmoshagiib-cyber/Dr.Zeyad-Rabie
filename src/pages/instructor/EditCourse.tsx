@@ -1128,19 +1128,44 @@ async function handleThumbnailChange(
   const file = e.target.files?.[0];
   if (!file || !course) return;
 
+  // ==========================================
+  // 1. عرض الصورة فورًا من الجهاز
+  // ==========================================
+  const localPreviewUrl = URL.createObjectURL(file);
+
   setThumbnailFile(file);
+  setThumbnailPreview(localPreviewUrl);
 
   try {
-    const data = await uploadToR2(file, "course-thumbnails");
+    // ==========================================
+    // 2. رفع الصورة إلى R2
+    // ==========================================
+    const data = await uploadToR2(
+      file,
+      "course-thumbnails"
+    );
 
-    setThumbnailPreview(data.url);
-
-    updateCourseField("thumbnailUrl", data.url);
-
+    // ==========================================
+    // 3. نخزن الـ R2 Key وليس الـ public URL
+    // ==========================================
     (course as any).thumbnailPath = data.key;
+
+    // مهم:
+    // منخليش thumbnailPreview يبقى data.url
+    // لأن R2 Private ومش هيتفتح مباشرة.
+    //
+    // نخلي localPreviewUrl شغال على الصفحة الحالية.
+    updateCourseField("thumbnailUrl", localPreviewUrl);
+
   } catch (err) {
-    console.error(err);
-    alert("فشل رفع الصورة");
+    console.error("Course thumbnail upload error:", err);
+
+    // لو الرفع فشل نشيل المعاينة المحلية
+    setThumbnailPreview("");
+
+    setThumbnailFile(null);
+
+    alert("فشل رفع صورة الدورة");
   }
 }
 
