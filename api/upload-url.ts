@@ -62,7 +62,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // ==========================================
-    // 2. التحقق من المستخدم في Supabase Auth
+    // 2. التحقق من Supabase Auth
     // ==========================================
     const {
       data: { user },
@@ -91,7 +91,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // ==========================================
-    // 4. قراءة بيانات الرفع
+    // 4. بيانات الرفع
     // ==========================================
     const {
       fileName,
@@ -116,11 +116,12 @@ export default async function handler(req: any, res: any) {
     }
 
     // ==========================================
-    // 5. تنظيف والتحقق من الـ folder
+    // 5. تنظيف الـ folder
     // ==========================================
-    const normalizedFolder = folder.trim().replace(/^\/+|\/+$/g, "");
+    const normalizedFolder = folder
+      .trim()
+      .replace(/^\/+|\/+$/g, "");
 
-    // ممنوع path traversal أو backslashes
     if (
       normalizedFolder.includes("..") ||
       normalizedFolder.includes("\\") ||
@@ -135,10 +136,10 @@ export default async function handler(req: any, res: any) {
     // 6. course-thumbnails
     // ==========================================
     if (normalizedFolder === "course-thumbnails") {
-      // مسموح للـ instructors فقط
+      // Instructor authenticated بالفعل
     } else {
       // ==========================================
-      // 7. باقي الـ folders لازم تكون:
+      // باقي الـ folders:
       //
       // course-videos/{courseId}/{sectionId}
       // video-thumbnails/{courseId}/{sectionId}
@@ -156,41 +157,65 @@ export default async function handler(req: any, res: any) {
 
       const [folderType, courseId, sectionId] = parts;
 
+      // ------------------------------------------
+      // التحقق من نوع الـ folder
+      // ------------------------------------------
       if (!ALLOWED_COURSE_FOLDERS.has(folderType)) {
         return res.status(403).json({
           error: "Upload folder not allowed",
         });
       }
 
-      if (!UUID_REGEX.test(courseId) || !UUID_REGEX.test(sectionId)) {
+      // ------------------------------------------
+      // courseId لازم يكون UUID
+      // ------------------------------------------
+      if (!UUID_REGEX.test(courseId)) {
         return res.status(400).json({
-          error: "Invalid course or section ID",
+          error: "Invalid course ID",
         });
       }
 
       // ==========================================
-      // 8. التحقق أن الـ Section تابع للكورس
-      //    وأن الكورس ملك للـ Instructor الحالي
+      // 7. التأكد أن الكورس ملك للـ Instructor
       // ==========================================
-      const { data: section, error: sectionError } = await supabase
-        .from("course_sections")
-        .select(`
-          id,
-          course_id,
-          courses!inner (
-            id,
-            teacher_id
-          )
-        `)
-        .eq("id", sectionId)
-        .eq("course_id", courseId)
-        .eq("courses.teacher_id", instructor.id)
+      const { data: course, error: courseError } = await supabase
+        .from("courses")
+        .select("id, teacher_id")
+        .eq("id", courseId)
+        .eq("teacher_id", instructor.id)
         .single();
 
-      if (sectionError || !section) {
+      if (courseError || !course) {
         return res.status(403).json({
           error: "You do not own this course",
         });
+      }
+
+      // ==========================================
+      // 8. التحقق من الـ Section
+      // ==========================================
+      //
+      // لو sectionId UUID:
+      // نتأكد أنه موجود وتابع للكورس.
+      //
+      // لو مش UUID:
+      // فهو temporary ID من الواجهة أثناء إنشاء
+      // قسم جديد قبل حفظ الكورس.
+      //
+      if (UUID_REGEX.test(sectionId)) {
+        const { data: section, error: sectionError } =
+          await supabase
+            .from("course_sections")
+            .select("id")
+            .eq("id", sectionId)
+            .eq("course_id", courseId)
+            .single();
+
+        if (sectionError || !section) {
+          return res.status(403).json({
+            error: "Section does not belong to this course",
+          });
+        }
       }
     }
 
@@ -206,12 +231,12 @@ export default async function handler(req: any, res: any) {
     }
 
     // ==========================================
-    // 10. إنشاء R2 Object Key
+    // 10. إنشاء R2 Key
     // ==========================================
     const key = `${normalizedFolder}/${Date.now()}-${safeFileName}`;
 
     // ==========================================
-    // 11. إنشاء Signed PUT URL
+    // 11. إنشاء Signed Upload URL
     // ==========================================
     const command = new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME!,
@@ -224,7 +249,7 @@ export default async function handler(req: any, res: any) {
     });
 
     // ==========================================
-    // 12. إرجاع بيانات الرفع
+    // 12. النتيجة
     // ==========================================
     return res.status(200).json({
       uploadUrl,
