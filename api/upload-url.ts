@@ -18,20 +18,34 @@ const client = new S3Client({
 
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({
+      error: "Method not allowed",
+    });
   }
 
   try {
-        const authHeader = req.headers.authorization;
+    // ================================
+    // 1. التحقق من تسجيل الدخول
+    // ================================
+    const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
-        error: "Unauthorized - No token provided",
+        error: "Unauthorized",
       });
     }
 
-    const token = authHeader.replace("Bearer ", "");
+    const token = authHeader.replace("Bearer ", "").trim();
 
+    if (!token) {
+      return res.status(401).json({
+        error: "Unauthorized",
+      });
+    }
+
+    // ================================
+    // 2. التحقق من Supabase Session
+    // ================================
     const {
       data: { user },
       error: authError,
@@ -39,10 +53,33 @@ export default async function handler(req: any, res: any) {
 
     if (authError || !user) {
       return res.status(401).json({
-        error: "Unauthorized - Invalid token",
+        error: "Unauthorized",
       });
     }
-    const { fileName, fileType, folder = "uploads" } = req.body;
+
+    // ================================
+    // 3. التحقق أن المستخدم Instructor
+    // ================================
+    const { data: instructor, error: instructorError } = await supabase
+      .from("instructors")
+      .select("id")
+      .eq("auth_id", user.id)
+      .single();
+
+    if (instructorError || !instructor) {
+      return res.status(403).json({
+        error: "Forbidden",
+      });
+    }
+
+    // ================================
+    // 4. بيانات الملف
+    // ================================
+    const {
+      fileName,
+      fileType,
+      folder = "uploads",
+    } = req.body;
 
     if (!fileName || !fileType) {
       return res.status(400).json({
@@ -50,8 +87,14 @@ export default async function handler(req: any, res: any) {
       });
     }
 
+    // ================================
+    // 5. إنشاء Key للملف
+    // ================================
     const key = `${folder}/${Date.now()}-${fileName}`;
 
+    // ================================
+    // 6. إنشاء Signed Upload URL
+    // ================================
     const command = new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME!,
       Key: key,
@@ -62,13 +105,17 @@ export default async function handler(req: any, res: any) {
       expiresIn: 60 * 5,
     });
 
+    // ================================
+    // 7. إرسال البيانات
+    // ================================
     return res.status(200).json({
       uploadUrl,
       key,
       publicUrl: `${process.env.R2_PUBLIC_URL}/${key}`,
     });
+
   } catch (error) {
-    console.error(error);
+    console.error("UPLOAD URL ERROR:", error);
 
     return res.status(500).json({
       error: "Failed to generate upload URL",
