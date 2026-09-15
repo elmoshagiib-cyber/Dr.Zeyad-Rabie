@@ -66,6 +66,7 @@ const ExamsPage = lazy(() =>
 );
 const ForumPage = lazy(() => import("./pages/student/ForumPage"));
 const DashboardHomePage = lazy(() => import("./pages/student/DashboardHomePage"));
+const ChemistryLabPage = lazy(() => import("./pages/student/ChemistryLabPage"));
 const MyMistakesPage = lazy(() =>
   import("./pages/student/MyMistakesPage").then((m) => ({ default: m.MyMistakesPage }))
 );
@@ -356,6 +357,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute roles={["student"]}>
               <DashboardHomePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/chemistry-lab"
+          element={
+            <ProtectedRoute roles={["student"]}>
+              <ChemistryLabPage />
             </ProtectedRoute>
           }
         />

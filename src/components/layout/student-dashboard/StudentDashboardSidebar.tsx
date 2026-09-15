@@ -3,7 +3,7 @@ import { StudentSidebarHeader } from "./StudentSidebarHeader";
 import { StudentSidebarNavigation } from "./StudentSidebarNavigation";
 import { cn } from "../../../utils/cn";
 import { usePageTransition } from "../../../context/PageTransitionContext";
-import { BookOpen, FileText, ClipboardList, Trophy, Bell, User, MessageCircle, Home, AlertCircle } from "lucide-react";
+import { BookOpen, FileText, ClipboardList, Trophy, Bell, User, MessageCircle, Home, AlertCircle, FlaskConical } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "../../../lib/supabase";
 
@@ -23,6 +23,7 @@ const studentNavItems: NavItem[] = [
   { label: "أخطائي", path: "/dashboard/mistakes", icon: <AlertCircle size={20} /> },
   { label: "المسابقة", path: "/dashboard/forum", icon: <MessageCircle size={20} /> },
   { label: "ابطال المنصه", path: "/dashboard/leaderboard", icon: <Trophy size={20} /> },
+  { label: "معمل الكيميائي", path: "/dashboard/chemistry-lab", icon: <FlaskConical size={20} /> },
   { label: "الإشعارات", path: "/dashboard/announcements", icon: <Bell size={20} /> },
   { label: "ملفي الشخصي", path: "/profile", icon: <User size={20} /> },
 ];
