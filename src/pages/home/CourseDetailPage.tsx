@@ -255,8 +255,9 @@ useEffect(() => {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${session.access_token}`,
               },
-              body: JSON.stringify({
+                            body: JSON.stringify({
                 key: data.thumbnail,
+                courseId: data.id,
               }),
             });
 

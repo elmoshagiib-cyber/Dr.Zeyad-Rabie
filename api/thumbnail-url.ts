@@ -80,10 +80,10 @@ export default async function handler(req: any, res: any) {
     }
 
     // ==========================================
-    // 4. Thumbnail Key
+    // 4. Thumbnail Key + Course ID
     // ==========================================
 
-    const { key } = req.body || {};
+    const { key, courseId } = req.body || {};
 
     if (!key || typeof key !== "string") {
       return res.status(400).json({
@@ -92,55 +92,68 @@ export default async function handler(req: any, res: any) {
     }
 
     // ==========================================
-    // 5. التأكد أن الـ Key خاص بالـ thumbnails
+    // 5. منع Path Traversal
     // ==========================================
 
-    if (!key.startsWith("video-thumbnails/")) {
+    if (
+      key.includes("..") ||
+      key.includes("\\") ||
+      key.includes("//")
+    ) {
+      return res.status(400).json({
+        error: "Invalid thumbnail key",
+      });
+    }
+
+    // ==========================================
+    // 6. Video Thumbnail
+    // ==========================================
+
+    if (key.startsWith("video-thumbnails/")) {
+      const parts = key.split("/");
+
+      if (parts.length < 3) {
+        return res.status(400).json({
+          error: "Invalid video thumbnail key",
+        });
+      }
+
+      const videoCourseId = parts[1];
+
+      if (!UUID_REGEX.test(videoCourseId)) {
+        return res.status(400).json({
+          error: "Invalid course ID",
+        });
+      }
+
+      // التأكد أن الكورس ملك للـ Instructor
+      const { data: course, error: courseError } =
+        await supabase
+          .from("courses")
+          .select("id")
+          .eq("id", videoCourseId)
+          .eq("teacher_id", instructor.id)
+          .single();
+
+      if (courseError || !course) {
+        return res.status(403).json({
+          error: "You do not own this course",
+        });
+      }
+    }
+
+    // ==========================================
+    // 8. أي Folder غير مسموح (course-thumbnails بقت public ومش محتاجة signing)
+    // ==========================================
+
+    else {
       return res.status(403).json({
         error: "Invalid thumbnail",
       });
     }
 
     // ==========================================
-    // 6. استخراج Course ID
-    // ==========================================
-
-    const parts = key.split("/");
-
-    if (parts.length < 3) {
-      return res.status(400).json({
-        error: "Invalid thumbnail key",
-      });
-    }
-
-    const courseId = parts[1];
-
-    if (!UUID_REGEX.test(courseId)) {
-      return res.status(400).json({
-        error: "Invalid course ID",
-      });
-    }
-
-    // ==========================================
-    // 7. التأكد أن الكورس ملك للـ Instructor
-    // ==========================================
-
-    const { data: course, error: courseError } =
-      await supabase
-        .from("courses")
-        .select("id")
-        .eq("id", courseId)
-        .eq("teacher_id", instructor.id)
-        .single();
-
-    if (courseError || !course) {
-      return res.status(403).json({
-        error: "You do not own this course",
-      });
-    }
-
-    // ==========================================
-    // 8. إنشاء Signed GET URL
+    // 9. إنشاء Signed GET URL
     // ==========================================
 
     const command = new GetObjectCommand({
@@ -153,7 +166,7 @@ export default async function handler(req: any, res: any) {
     });
 
     // ==========================================
-    // 9. Return
+    // 10. Return
     // ==========================================
 
     return res.status(200).json({

@@ -1161,14 +1161,9 @@ async function handleThumbnailChange(
     );
 
     // ==========================================
-    // 4. حفظ R2 Key
+    // 4. حفظ R2 Key في الحقل الفعلي اللي بيتبعت للداتابيز
     // ==========================================
-    (course as any).thumbnailPath = data.key;
-
-    // ==========================================
-    // 5. نخلي الـ Preview المحلي شغال
-    // ==========================================
-    updateCourseField("thumbnailUrl", localPreviewUrl);
+    updateCourseField("thumbnailUrl", data.key);
 
     // ==========================================
     // 6. الرفع خلص

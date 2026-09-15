@@ -236,10 +236,24 @@ export default async function handler(req: any, res: any) {
     const key = `${normalizedFolder}/${Date.now()}-${safeFileName}`;
 
     // ==========================================
+    // 10.5. تحديد الـ Bucket والـ Public URL المناسبين
+    //       (صور الأغلفة على bucket عام منفصل)
+    // ==========================================
+    const isThumbnail = normalizedFolder === "course-thumbnails";
+
+    const targetBucket = isThumbnail
+      ? process.env.R2_THUMBNAILS_BUCKET_NAME!
+      : process.env.R2_BUCKET_NAME!;
+
+    const targetPublicUrl = isThumbnail
+      ? process.env.R2_THUMBNAILS_PUBLIC_URL!
+      : process.env.R2_PUBLIC_URL!;
+
+    // ==========================================
     // 11. إنشاء Signed Upload URL
     // ==========================================
     const command = new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME!,
+      Bucket: targetBucket,
       Key: key,
       ContentType: fileType,
     });
@@ -254,7 +268,7 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({
       uploadUrl,
       key,
-      publicUrl: `${process.env.R2_PUBLIC_URL}/${key}`,
+      publicUrl: `${targetPublicUrl}/${key}`,
     });
   } catch (error) {
     console.error("UPLOAD URL ERROR:", error);
