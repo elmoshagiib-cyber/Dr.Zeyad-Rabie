@@ -172,12 +172,12 @@ export function CourseDetailPage() {
 
 useEffect(() => {
   const handleVisibilityChange = () => {
-    if (document.visibilityState === "hidden") {
-      setIsPageHidden(true);
+    const hidden = document.visibilityState === "hidden";
 
-      if (videoRef.current) {
-        videoRef.current.pause();
-      }
+    setIsPageHidden(hidden);
+
+    if (hidden && videoRef.current) {
+      videoRef.current.pause();
     }
   };
 
@@ -946,12 +946,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
   };
 
 const togglePlayPause = () => {
-  if (!videoRef.current) return;
-
-  if (isPageHidden) {
-    setIsPageHidden(false);
-    return;
-  }
+  if (!videoRef.current || isPageHidden) return;
 
   if (videoRef.current.paused) {
     videoRef.current.play().catch(() => {});

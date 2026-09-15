@@ -1634,22 +1634,31 @@ async function uploadVideoThumbnail(
   } as Partial<VideoItem>);
 
   try {
-    const data = await uploadToR2(
-      file,
-      `video-thumbnails/${course.id}/${sectionId}`,
-      (loadedBytes, totalBytes) => {
-        const percent = Math.round((loadedBytes / totalBytes) * 100);
-        updateItem(sectionId, itemId, {
-          thumbnailUploadProgress: percent,
-        } as Partial<VideoItem>);
-      }
-    );
+const previewUrl = URL.createObjectURL(file);
+
+updateItem(sectionId, itemId, {
+  thumbnailUrl: previewUrl,
+  thumbnailUploading: true,
+  thumbnailUploadProgress: 0,
+} as Partial<VideoItem>);
+
+const data = await uploadToR2(
+  file,
+  `video-thumbnails/${course.id}/${sectionId}`,
+  (loadedBytes, totalBytes) => {
+    const percent = Math.round((loadedBytes / totalBytes) * 100);
 
     updateItem(sectionId, itemId, {
-      thumbnailUrl: data.url,
-      thumbnailUploading: false,
-      thumbnailUploadProgress: 0,
+      thumbnailUploadProgress: percent,
     } as Partial<VideoItem>);
+  }
+);
+
+updateItem(sectionId, itemId, {
+  thumbnailUrl: previewUrl,
+  thumbnailUploading: false,
+  thumbnailUploadProgress: 0,
+} as Partial<VideoItem>);
   } catch (err: any) {
     console.error("Video Thumbnail Upload Error:", err);
     alert("فشل رفع صورة الغلاف: " + (err?.message || "خطأ غير معروف"));
