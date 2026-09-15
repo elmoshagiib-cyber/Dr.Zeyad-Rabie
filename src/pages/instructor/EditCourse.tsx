@@ -572,20 +572,9 @@ for (const section of loadedCourse.sections) {
       item.type === "video" &&
       item.thumbnailPath
     ) {
-      try {
-        const signedUrl = await getThumbnailSignedUrl(
-          item.thumbnailPath
-        );
-
-        updateItem(section.id, item.id, {
-          thumbnailUrl: signedUrl,
-        } as Partial<VideoItem>);
-      } catch (error) {
-        console.error(
-          "Failed to load video thumbnail:",
-          error
-        );
-      }
+      updateItem(section.id, item.id, {
+        thumbnailUrl: `${import.meta.env.VITE_R2_PUBLIC_URL}/${item.thumbnailPath}`,
+      } as Partial<VideoItem>);
     }
   }
 }
@@ -1775,17 +1764,17 @@ async function uploadVideoThumbnail(
     );
 
     // ==========================================
-    // 3. الحصول على Signed URL
+    // 3. بناء الرابط العام مباشرة (video-thumbnails بقت public)
     // ==========================================
 
-    const signedUrl = await getThumbnailSignedUrl(data.key);
+    const publicThumbnailUrl = `${import.meta.env.VITE_R2_PUBLIC_URL}/${data.key}`;
 
     // ==========================================
-    // 4. حفظ الـ key + عرض Signed URL
+    // 4. حفظ الـ key + عرض الرابط العام
     // ==========================================
 
     updateItem(sectionId, itemId, {
-      thumbnailUrl: signedUrl,
+      thumbnailUrl: publicThumbnailUrl,
       thumbnailPath: data.key,
       thumbnailUploading: false,
       thumbnailUploadProgress: 0,

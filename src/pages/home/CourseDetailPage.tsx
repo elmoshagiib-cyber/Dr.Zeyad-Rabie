@@ -839,37 +839,9 @@ const saveProgress = async (currentTime: number, duration: number) => {
 // تحميل صورة غلاف الفيديو Signed URL
 // ==========================================
 
-let thumbnailUrl = "";
-
-if (thumbnail) {
-  try {
-    const thumbnailResponse = await fetch("/api/thumbnail-url", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({
-        key: thumbnail,
-      }),
-    });
-
-    if (thumbnailResponse.ok) {
-      const thumbnailData = await thumbnailResponse.json();
-      thumbnailUrl = thumbnailData.url || "";
-    } else {
-      console.error(
-        "Thumbnail URL error:",
-        await thumbnailResponse.text()
-      );
-    }
-  } catch (thumbnailError) {
-    console.error(
-      "Failed to load video thumbnail:",
-      thumbnailError
-    );
-  }
-}
+const thumbnailUrl = thumbnail
+  ? `${import.meta.env.VITE_R2_PUBLIC_URL}/${thumbnail}`
+  : "";
       const progress = await loadOrCreateLessonProgress(studentId, lessonId, slug);
       lessonProgressRef.current = progress;
       hasIncrementedWatchedLessonsRef.current = progress?.is_completed || false;

@@ -239,7 +239,9 @@ export default async function handler(req: any, res: any) {
     // 10.5. تحديد الـ Bucket والـ Public URL المناسبين
     //       (صور الأغلفة على bucket عام منفصل)
     // ==========================================
-    const isThumbnail = normalizedFolder === "course-thumbnails";
+    const isThumbnail =
+      normalizedFolder === "course-thumbnails" ||
+      normalizedFolder.startsWith("video-thumbnails/");
 
     const targetBucket = isThumbnail
       ? process.env.R2_THUMBNAILS_BUCKET_NAME!
