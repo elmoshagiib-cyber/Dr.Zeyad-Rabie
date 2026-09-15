@@ -37,18 +37,46 @@ export function MyCoursesPage() {
 
     const ids = enrollments.map((c) => c.course_id);
 
-    const { data: courses } = await supabase
+    const { data: courses, error: coursesError } = await supabase
       .from("courses")
-      .select(`
-        *,
-        course_sections(
-          *,
-          course_items(*)
-        )
-      `)
+      .select("*")
       .in("id", ids);
 
-    setEnrolledCourses(courses || []);
+    if (coursesError || !courses) {
+      console.error("Error loading courses:", coursesError);
+      setEnrolledCourses([]);
+      setLoading(false);
+      return;
+    }
+
+    // ==========================================
+    // تحميل الأقسام + عناصرها من الـ view العام
+    // (الطالب مش مالك الكورس، فـ RLS بيمنعه من قراءة
+    // جدول course_items الخام مباشرة)
+    // ==========================================
+    const { data: sections } = await supabase
+      .from("course_sections")
+      .select("*")
+      .in("course_id", ids);
+
+    const sectionIds = (sections || []).map((s) => s.id);
+
+    const { data: items } = await supabase
+      .from("course_items_public")
+      .select("*")
+      .in("section_id", sectionIds.length ? sectionIds : ["00000000-0000-0000-0000-000000000000"]);
+
+    const coursesWithSections = courses.map((course) => ({
+      ...course,
+      course_sections: (sections || [])
+        .filter((s) => s.course_id === course.id)
+        .map((s) => ({
+          ...s,
+          course_items: (items || []).filter((i) => i.section_id === s.id),
+        })),
+    }));
+
+    setEnrolledCourses(coursesWithSections);
     setLoading(false);
   };
 
