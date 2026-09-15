@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FlaskConical, X, Wrench, GraduationCap, Settings, Scale, Calculator, Droplets, Atom, Plus, RotateCcw, Pencil, Lightbulb, ArrowLeft } from "lucide-react";
+import { FlaskConical, X, GraduationCap, Settings, Scale, Calculator, Droplets, Atom, Plus, RotateCcw, Pencil, Lightbulb, ArrowLeft } from "lucide-react";
 import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 
 // ============================================================
@@ -248,7 +248,7 @@ type Tab = "table" | "ions" | "tools" | "learn" | "settings";
 const TABS: { id: Tab; label: string; icon: React.ReactNode; ready: boolean }[] = [
   { id: "table", label: "الجدول", icon: null, ready: true },
   { id: "ions", label: "الأيونات", icon: null, ready: true },
-  { id: "tools", label: "الأدوات", icon: <Wrench size={14} />, ready: false },
+  { id: "tools", label: "الأدوات", icon: null, ready: false },
   { id: "learn", label: "ساحة التعلّم", icon: <GraduationCap size={14} />, ready: false },
   { id: "settings", label: "الإعدادات", icon: <Settings size={14} />, ready: false },
 ];
@@ -298,7 +298,7 @@ const TOOLS: ToolItem[] = [
     desc: "قم بإمالة الكأس وتفاعل مع جزيئات الماء داخل مشهد مختبر بسيط.",
     icon: <FlaskConical size={20} className="text-[#5800a9] dark:text-[#b600d7]" />,
     iconBg: "bg-[#F6EEFF] dark:bg-[#2B103D]",
-    ready: true,
+    ready: false,
   },
   {
     id: "spdf",
