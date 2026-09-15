@@ -2310,62 +2310,164 @@ async function uploadHomeworkInstructions(
             <p className="text-xs text-slate-400 mt-1.5">اكتب الوقت بصيغة mm:ss أو h:mm:ss (مثال: 12:37)</p>
           </div>
 
-          {/* Video Thumbnail (Cover Image) */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">صورة غلاف الفيديو (اختياري)</label>
-            <p className="text-xs text-slate-400 mb-2">
-              تظهر للطالب قبل تشغيل الفيديو مباشرة، وتختفي تلقائيًا بعد ثوانٍ ليبدأ الفيديو. لو لم يتم رفع صورة، سيبدأ الفيديو مباشرة بدون شاشة تمهيدية.
-            </p>
-            {item.thumbnailUploading ? (
-              <div className="w-56 p-4 border border-blue-200 rounded-xl bg-blue-50 space-y-2.5">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5 text-blue-700 font-medium">
-                    <svg className="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    جاري الرفع...
-                  </div>
-                  <span className="text-blue-600 font-bold">{item.thumbnailUploadProgress || 0}%</span>
-                </div>
-                <div className="w-full bg-blue-200 rounded-full h-1.5 overflow-hidden">
-                  <div
-                    className="bg-blue-600 h-1.5 rounded-full transition-all duration-200"
-                    style={{ width: `${item.thumbnailUploadProgress || 0}%` }}
-                  />
-                </div>
-              </div>
-            ) : item.thumbnailUrl ? (
-              <div className="relative inline-block">
-                <img src={item.thumbnailUrl} alt="غلاف الفيديو" className="w-56 aspect-video object-cover rounded-xl border border-slate-200" />
-                <button
-                  type="button"
-                  onClick={() => updateItem(sectionId, item.id, { thumbnailUrl: "" } as Partial<VideoItem>)}
-                  className="absolute -top-2 -left-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow hover:bg-red-600 transition-colors"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-                <label className="absolute bottom-1 right-1 text-[11px] bg-black/60 text-white px-2 py-1 rounded-md cursor-pointer hover:bg-black/80 transition-colors">
-                  تغيير
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) uploadVideoThumbnail(sectionId, item.id, file);
-                  }} />
-                </label>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center w-56 aspect-video border-2 border-dashed border-slate-300 rounded-xl cursor-pointer bg-slate-50 hover:bg-blue-50 hover:border-blue-400 transition-all group">
-                <div className="flex flex-col items-center gap-1.5 text-slate-400 group-hover:text-blue-500 transition-colors">
-                  <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                  <span className="text-xs font-medium">رفع صورة الغلاف</span>
-                </div>
-                <input type="file" accept="image/*" className="hidden" onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) uploadVideoThumbnail(sectionId, item.id, file);
-                }} />
-              </label>
-            )}
+         {/* Video Thumbnail (Cover Image) */}
+<div>
+  <label className="block text-sm font-semibold text-slate-700 mb-2">
+    صورة غلاف الفيديو (اختياري)
+  </label>
+
+  <p className="text-xs text-slate-400 mb-2">
+    تظهر للطالب قبل تشغيل الفيديو مباشرة، وتختفي تلقائيًا بعد ثوانٍ ليبدأ الفيديو.
+    لو لم يتم رفع صورة، سيبدأ الفيديو مباشرة بدون شاشة تمهيدية.
+  </p>
+
+  {item.thumbnailUrl ? (
+    <div className="relative inline-block">
+      <img
+        src={item.thumbnailUrl}
+        alt="غلاف الفيديو"
+        className="w-56 aspect-video object-cover rounded-xl border border-slate-200"
+      />
+
+      {/* Progress أثناء رفع الصورة */}
+      {item.thumbnailUploading && (
+        <div className="absolute inset-x-0 bottom-0 p-2 bg-black/60 rounded-b-xl">
+          <div className="flex items-center justify-between text-[10px] text-white mb-1">
+            <span>جاري الرفع...</span>
+            <span className="font-bold">
+              {item.thumbnailUploadProgress || 0}%
+            </span>
           </div>
 
+          <div className="w-full bg-white/30 rounded-full h-1.5 overflow-hidden">
+            <div
+              className="bg-white h-1.5 rounded-full transition-all duration-200"
+              style={{
+                width: `${item.thumbnailUploadProgress || 0}%`,
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* زر حذف الصورة */}
+      {!item.thumbnailUploading && (
+        <>
+          <button
+            type="button"
+            onClick={() =>
+              updateItem(sectionId, item.id, {
+                thumbnailUrl: "",
+              } as Partial<VideoItem>)
+            }
+            className="absolute -top-2 -left-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow hover:bg-red-600 transition-colors"
+          >
+            <svg
+              className="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          {/* زر تغيير الصورة */}
+          <label className="absolute bottom-1 right-1 text-[11px] bg-black/60 text-white px-2 py-1 rounded-md cursor-pointer hover:bg-black/80 transition-colors">
+            تغيير
+
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  uploadVideoThumbnail(sectionId, item.id, file);
+                }
+              }}
+            />
+          </label>
+        </>
+      )}
+    </div>
+  ) : item.thumbnailUploading ? (
+    <div className="w-56 p-4 border border-blue-200 rounded-xl bg-blue-50 space-y-2.5">
+      <div className="flex items-center justify-between text-xs">
+        <div className="flex items-center gap-1.5 text-blue-700 font-medium">
+          <svg
+            className="w-3.5 h-3.5 animate-spin"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+
+          جاري الرفع...
+        </div>
+
+        <span className="text-blue-600 font-bold">
+          {item.thumbnailUploadProgress || 0}%
+        </span>
+      </div>
+
+      <div className="w-full bg-blue-200 rounded-full h-1.5 overflow-hidden">
+        <div
+          className="bg-blue-600 h-1.5 rounded-full transition-all duration-200"
+          style={{
+            width: `${item.thumbnailUploadProgress || 0}%`,
+          }}
+        />
+      </div>
+    </div>
+  ) : (
+    <label className="flex flex-col items-center justify-center w-56 aspect-video border-2 border-dashed border-slate-300 rounded-xl cursor-pointer bg-slate-50 hover:bg-blue-50 hover:border-blue-400 transition-all group">
+      <div className="flex flex-col items-center gap-1.5 text-slate-400 group-hover:text-blue-500 transition-colors">
+        <svg
+          className="w-7 h-7"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
+        </svg>
+
+        <span className="text-xs font-medium">
+          رفع صورة الغلاف
+        </span>
+      </div>
+
+      <input
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+
+          if (file) {
+            uploadVideoThumbnail(sectionId, item.id, file);
+          }
+        }}
+      />
+    </label>
+  )}
+</div>
         </div>
         )}
       </div>
