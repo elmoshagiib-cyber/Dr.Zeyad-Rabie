@@ -41,6 +41,7 @@ export function LessonPlayer() {
   const saveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [loading, setLoading] = useState(true);
+const [videoUrl, setVideoUrl] = useState("");
   const [lesson, setLesson] = useState<CourseItem | null>(null);
   const [section, setSection] = useState<CourseSection | null>(null);
   const [allSections, setAllSections] = useState<CourseSection[]>([]);
@@ -58,6 +59,7 @@ export function LessonPlayer() {
     const loadLesson = async () => {
       if (!id) return;
       setLoading(true);
+setVideoUrl("");
 
       const { data: lessonData, error: lessonError } = await supabase
         .from("course_items")
@@ -71,7 +73,40 @@ export function LessonPlayer() {
         return;
       }
 
-      setLesson(lessonData as CourseItem);
+      // Get secure signed video URL
+if (lessonData.url) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session?.access_token) {
+    setVideoUrl("");
+    setLoading(false);
+    return;
+  }
+
+  const videoResponse = await fetch("/api/video-url", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({
+      lessonId: lessonData.id,
+    }),
+  });
+
+  const videoData = await videoResponse.json();
+
+  if (!videoResponse.ok || !videoData.url) {
+    console.error("Failed to get secure video URL:", videoData);
+    setVideoUrl("");
+    setLoading(false);
+    return;
+  }
+
+  setVideoUrl(videoData.url);
+}
 
       const { data: sectionData } = await supabase
         .from("course_sections")
@@ -301,11 +336,15 @@ export function LessonPlayer() {
         <div className="flex flex-1 overflow-hidden">
           <div className="flex-1 flex flex-col overflow-y-auto">
             <div className="bg-black relative" style={{ aspectRatio: "16/9" }}>
-              {lesson.url ? (
+              {videoUrl ? (
                 <video
-                  ref={videoRef}
-                  src={lesson.url}
+                ref={videoRef}
+                src={videoUrl}
                   controls
+controlsList="nodownload noremoteplayback"
+disablePictureInPicture
+playsInline
+onContextMenu={(e) => e.preventDefault()}
                   className="w-full h-full"
                   onLoadedMetadata={handleLoadedMetadata}
                   onPlay={handlePlay}
