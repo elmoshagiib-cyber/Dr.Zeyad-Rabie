@@ -253,7 +253,7 @@ useEffect(() => {
 
     for (const section of sections) {
       const { data: items, error: itemsError } = await supabase
-        .from("course_items")
+        .from("course_items_public")
         .select("*")
         .eq("section_id", section.id)
         .order("sort_order");
