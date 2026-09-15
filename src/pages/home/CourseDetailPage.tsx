@@ -138,6 +138,7 @@ export function CourseDetailPage() {
   const [currentLessonId, setCurrentLessonId] = useState<string>("");
   const [playerStage, setPlayerStage] = useState<"info" | "playing">("info");
   const [watermarkPosition, setWatermarkPosition] = useState({ top: "10%", left: "10%" });
+  const [isPageHidden, setIsPageHidden] = useState(false);
   const [videoContentRect, setVideoContentRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -168,6 +169,27 @@ export function CourseDetailPage() {
   const [showChapters, setShowChapters] = useState(false);
   const [chapterThumbnails, setChapterThumbnails] = useState<Record<number, string>>({});
   const chapterThumbnailsRef = useRef<Record<number, string>>({});
+
+useEffect(() => {
+  const handleVisibilityChange = () => {
+    const hidden = document.visibilityState === "hidden";
+
+    setIsPageHidden(hidden);
+
+    if (hidden && videoRef.current) {
+      videoRef.current.pause();
+    }
+  };
+
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+
+  return () => {
+    document.removeEventListener(
+      "visibilitychange",
+      handleVisibilityChange
+    );
+  };
+}, []);
 
   useEffect(() => {
     chapterThumbnailsRef.current = chapterThumbnails;
@@ -923,23 +945,26 @@ const saveProgress = async (currentTime: number, duration: number) => {
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
 
-  const togglePlayPause = () => {
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play();
-    } else {
-      videoRef.current.pause();
-    }
-  };
+const togglePlayPause = () => {
+  if (!videoRef.current || isPageHidden) return;
 
-  const skipTime = (seconds: number) => {
-    if (!videoRef.current) return;
-    const newTime = Math.min(
-      Math.max(videoRef.current.currentTime + seconds, 0),
-      videoRef.current.duration || 0
-    );
-    videoRef.current.currentTime = newTime;
-  };
+  if (videoRef.current.paused) {
+    videoRef.current.play().catch(() => {});
+  } else {
+    videoRef.current.pause();
+  }
+};
+
+const skipTime = (seconds: number) => {
+  if (!videoRef.current || isPageHidden) return;
+
+  const newTime = Math.min(
+    Math.max(videoRef.current.currentTime + seconds, 0),
+    videoRef.current.duration || 0
+  );
+
+  videoRef.current.currentTime = newTime;
+};
 
   const toggleMute = () => {
     if (!videoRef.current) return;
@@ -963,6 +988,7 @@ const saveProgress = async (currentTime: number, duration: number) => {
   };
 
   const handleSeekMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!videoRef.current || !videoDuration || isPageHidden) return;
     if (!videoRef.current || !videoDuration) return;
     setIsDraggingSeek(true);
     const newTime = calculateSeekRatio(e.clientX) * videoDuration;
@@ -1089,13 +1115,15 @@ const saveProgress = async (currentTime: number, duration: number) => {
     setShowSpeedMenu(false);
   };
 
-  const handleSeekClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!videoRef.current || !videoDuration) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const ratio = (e.clientX - rect.left) / rect.width;
-    videoRef.current.currentTime = Math.min(Math.max(ratio, 0), 1) * videoDuration;
-  };
+const handleSeekClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  if (!videoRef.current || !videoDuration || isPageHidden) return;
 
+  const rect = e.currentTarget.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+
+  videoRef.current.currentTime =
+    Math.min(Math.max(ratio, 0), 1) * videoDuration;
+};
   useEffect(() => {
     if (!isDraggingSeek) return;
 
@@ -2331,17 +2359,24 @@ const saveProgress = async (currentTime: number, duration: number) => {
                 </button>
 
                 <video
-                  ref={videoRef}
-                  key={videoPlayerUrl}
-                  src={videoPlayerUrl}
-                  controlsList="nodownload noremoteplayback"
-                  disablePictureInPicture
-                  preload="metadata"
-                  playsInline
-                  onContextMenu={(e) => e.preventDefault()}
-                  className="w-full h-full object-contain"
-                  autoPlay
-                />
+  ref={videoRef}
+  key={videoPlayerUrl}
+  src={videoPlayerUrl}
+  controlsList="nodownload noremoteplayback"
+  disablePictureInPicture
+  preload="metadata"
+  playsInline
+  onContextMenu={(e) => e.preventDefault()}
+  className="w-full h-full object-contain"
+  autoPlay
+/>
+
+{isPageHidden && (
+  <div
+    className="absolute inset-0 z-[100] bg-black"
+    aria-hidden="true"
+  />
+)}
 
                 {/* عناصر مخفية لتوليد صور الفصول المصغرة */}
                 <video

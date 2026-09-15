@@ -55,7 +55,7 @@ export default async function handler(req: any, res: any) {
 
     const { data: lesson, error: lessonError } = await supabase
       .from("course_items")
-      .select("id, storage_path, section_id")
+      .select("id, storage_path, section_id, type, is_visible")
       .eq("id", lessonId)
       .single();
     if (lessonError || !lesson) {
@@ -64,11 +64,17 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    if (!lesson.storage_path) {
-      return res.status(404).json({
-        error: "Video not available",
-      });
-    }
+if (lesson.type !== "video" || !lesson.is_visible) {
+  return res.status(404).json({
+    error: "Video not found",
+  });
+}
+
+if (!lesson.storage_path) {
+  return res.status(404).json({
+    error: "Video not available",
+  });
+}
 
     const { data: section, error: sectionError } = await supabase
       .from("course_sections")
