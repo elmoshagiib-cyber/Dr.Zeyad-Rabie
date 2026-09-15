@@ -32,6 +32,7 @@ interface VideoItem {
   status: "idle" | "uploading" | "done" | "error";
   videoUrl: string;
 thumbnailUrl: string;
+thumbnailPath?: string;
 storagePath: string;
 chapters: { title: string; time: number }[];
 thumbnailUploadProgress?: number;
@@ -426,9 +427,10 @@ case "video":
     uploadedBytes: item.file_size || 0,
     totalBytes: item.file_size || 0,
     status: "done",
-    videoUrl: item.url || "",
-    thumbnailUrl: item.thumbnail || "",
-    storagePath: item.storage_path || "",
+videoUrl: item.url || "",
+thumbnailUrl: "",
+thumbnailPath: item.thumbnail || "",
+storagePath: item.storage_path || "",
     chapters: item.chapters || [],
   } as VideoItem;
 
@@ -552,9 +554,39 @@ case "link":
 })),
       };
                   
-      setCourse(loadedCourse);
-      if (data.thumbnail)
-    setThumbnailPreview(data.thumbnail);
+setCourse(loadedCourse);
+
+if (data.thumbnail) {
+  setThumbnailPreview(data.thumbnail);
+}
+
+// ==========================================
+// تحميل Signed URLs لصور أغلفة الفيديوهات
+// ==========================================
+
+for (const section of loadedCourse.sections) {
+  for (const item of section.items) {
+    if (
+      item.type === "video" &&
+      item.thumbnailPath
+    ) {
+      try {
+        const signedUrl = await getThumbnailSignedUrl(
+          item.thumbnailPath
+        );
+
+        updateItem(section.id, item.id, {
+          thumbnailUrl: signedUrl,
+        } as Partial<VideoItem>);
+      } catch (error) {
+        console.error(
+          "Failed to load video thumbnail:",
+          error
+        );
+      }
+    }
+  }
+}
     } catch {
       setError("حدث خطأ أثناء تحميل بيانات الدورة. يرجى المحاولة مرة أخرى.");
     } finally {
@@ -691,7 +723,7 @@ Object.assign(payload,{
 
     url: item.videoUrl || "",
     storage_path: item.storagePath || "",
-    thumbnail: item.thumbnailUrl || "",
+    thumbnail: item.thumbnailPath || "",
 
     duration: parseTimeToSeconds(item.duration) || 0,
     file_size: item.fileSize || 0,
@@ -1620,6 +1652,44 @@ async function uploadPdf(
     alert("فشل رفع الملف: " + (err?.message || "خطأ غير معروف"));
   }
 }
+// ── Get Signed Thumbnail URL ─────────────────────────────
+async function getThumbnailSignedUrl(key: string): Promise<string> {
+  if (!key) return "";
+
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session?.access_token) {
+    throw new Error("Authentication required");
+  }
+
+  const response = await fetch("/api/thumbnail-url", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({
+      key,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+
+    throw new Error(
+      errorData?.error || "Failed to generate thumbnail URL"
+    );
+  }
+
+  const data = await response.json();
+
+  if (!data.url) {
+    throw new Error("Invalid thumbnail URL response");
+  }
+
+  return data.url;
+}
+
 // ── Video Thumbnail Upload ────────────────────────────────
 async function uploadVideoThumbnail(
   sectionId: string,
@@ -1628,41 +1698,73 @@ async function uploadVideoThumbnail(
 ) {
   if (!course) return;
 
+  // ==========================================
+  // 1. عرض الصورة فورًا Preview
+  // ==========================================
+
+  const previewUrl = URL.createObjectURL(file);
+
   updateItem(sectionId, itemId, {
+    thumbnailUrl: previewUrl,
     thumbnailUploading: true,
     thumbnailUploadProgress: 0,
   } as Partial<VideoItem>);
 
   try {
-const previewUrl = URL.createObjectURL(file);
+    // ==========================================
+    // 2. رفع الصورة إلى R2
+    // ==========================================
 
-updateItem(sectionId, itemId, {
-  thumbnailUrl: previewUrl,
-  thumbnailUploading: true,
-  thumbnailUploadProgress: 0,
-} as Partial<VideoItem>);
+    const data = await uploadToR2(
+      file,
+      `video-thumbnails/${course.id}/${sectionId}`,
+      (loadedBytes, totalBytes) => {
+        const percent = Math.round(
+          (loadedBytes / totalBytes) * 100
+        );
 
-const data = await uploadToR2(
-  file,
-  `video-thumbnails/${course.id}/${sectionId}`,
-  (loadedBytes, totalBytes) => {
-    const percent = Math.round((loadedBytes / totalBytes) * 100);
+        updateItem(sectionId, itemId, {
+          thumbnailUploadProgress: percent,
+        } as Partial<VideoItem>);
+      }
+    );
+
+    // ==========================================
+    // 3. الحصول على Signed URL
+    // ==========================================
+
+    const signedUrl = await getThumbnailSignedUrl(data.key);
+
+    // ==========================================
+    // 4. حفظ الـ key + عرض Signed URL
+    // ==========================================
 
     updateItem(sectionId, itemId, {
-      thumbnailUploadProgress: percent,
+      thumbnailUrl: signedUrl,
+      thumbnailPath: data.key,
+      thumbnailUploading: false,
+      thumbnailUploadProgress: 0,
     } as Partial<VideoItem>);
-  }
-);
 
-updateItem(sectionId, itemId, {
-  thumbnailUrl: previewUrl,
-  thumbnailUploading: false,
-  thumbnailUploadProgress: 0,
-} as Partial<VideoItem>);
+    // ==========================================
+    // 5. حذف الـ blob من الذاكرة
+    // ==========================================
+
+    URL.revokeObjectURL(previewUrl);
+
   } catch (err: any) {
     console.error("Video Thumbnail Upload Error:", err);
-    alert("فشل رفع صورة الغلاف: " + (err?.message || "خطأ غير معروف"));
+
+    URL.revokeObjectURL(previewUrl);
+
+    alert(
+      "فشل رفع صورة الغلاف: " +
+      (err?.message || "خطأ غير معروف")
+    );
+
     updateItem(sectionId, itemId, {
+      thumbnailUrl: "",
+      thumbnailPath: "",
       thumbnailUploading: false,
       thumbnailUploadProgress: 0,
     } as Partial<VideoItem>);
@@ -2356,9 +2458,10 @@ async function uploadHomeworkInstructions(
           <button
             type="button"
             onClick={() =>
-              updateItem(sectionId, item.id, {
-                thumbnailUrl: "",
-              } as Partial<VideoItem>)
+updateItem(sectionId, item.id, {
+  thumbnailUrl: "",
+  thumbnailPath: "",
+} as Partial<VideoItem>)
             }
             className="absolute -top-2 -left-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow hover:bg-red-600 transition-colors"
           >
