@@ -470,28 +470,28 @@ export default function ChemistryLabPage() {
 
             <div>
               <h2 className="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-3">أحادي الذرة أساسي</h2>
-              <div className="flex flex-wrap gap-2.5">
+              <div dir="ltr" className="flex flex-wrap gap-2.5">
                 {monoatomicIons.map((ion, i) => <IonCard key={i} ion={ion} />)}
               </div>
             </div>
 
             <div>
               <h2 className="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-3">متعدد الذرات أساسي</h2>
-              <div className="flex flex-wrap gap-2.5">
+              <div dir="ltr" className="flex flex-wrap gap-2.5">
                 {polyatomicBasicIons.map((ion, i) => <IonCard key={i} ion={ion} />)}
               </div>
             </div>
 
             <div>
               <h2 className="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-3">الفلزات الانتقالية</h2>
-              <div className="flex flex-wrap gap-2.5">
+              <div dir="ltr" className="flex flex-wrap gap-2.5">
                 {transitionIons.map((ion, i) => <IonCard key={i} ion={ion} />)}
               </div>
             </div>
 
             <div>
               <h2 className="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-3">خاص وعضوي</h2>
-              <div className="flex flex-wrap gap-2.5">
+              <div dir="ltr" className="flex flex-wrap gap-2.5">
                 {specialOrganicIons.map((ion, i) => <IonCard key={i} ion={ion} />)}
               </div>
             </div>
