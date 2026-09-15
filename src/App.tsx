@@ -125,11 +125,7 @@ const InstructorWatchProgress = lazy(() =>
     default: m.InstructorWatchProgress,
   }))
 );
-const InstructorContent = lazy(() =>
-  import("./pages/instructor/InstructorContent").then((m) => ({
-    default: m.InstructorContent,
-  }))
-);
+
 const InstructorLeaderboard = lazy(() =>
   import("./pages/instructor/InstructorLeaderboard").then((m) => ({
     default: m.InstructorLeaderboard,
@@ -460,15 +456,6 @@ function AppRoutes() {
           element={
             <ProtectedRoute roles={["instructor"]}>
               <InstructorWatchProgress />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/instructor/content"
-          element={
-            <ProtectedRoute roles={["instructor"]}>
-              <InstructorContent />
             </ProtectedRoute>
           }
         />
