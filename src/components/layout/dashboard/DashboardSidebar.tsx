@@ -9,6 +9,7 @@ import {
   FileText,
   ClipboardList,
   Trophy,
+  Swords,
   Bell,
   User,
   BarChart2,
@@ -88,6 +89,13 @@ const instructorNavGroups: NavGroup[] = [
       { label: "المحتوى", path: "/instructor/content", icon: <Layers size={20} /> },
       { label: "أكواد الاشتراك", path: "/instructor/subscription-codes", icon: <QrCode size={20} /> },
       { label: "إدارة الاشتراكات", path: "/instructor/subscriptions", icon: <Receipt size={20} /> },
+    ],
+  },
+  {
+    label: "المجتمع",
+    items: [
+      { label: "بطولة الأسئلة", path: "/instructor/forum", icon: <Swords size={20} /> },
+      { label: "أبطال المنصة", path: "/instructor/leaderboard", icon: <Trophy size={20} /> },
     ],
   },
   {

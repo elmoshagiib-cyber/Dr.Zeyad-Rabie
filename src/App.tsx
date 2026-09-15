@@ -130,6 +130,16 @@ const InstructorContent = lazy(() =>
     default: m.InstructorContent,
   }))
 );
+const InstructorLeaderboard = lazy(() =>
+  import("./pages/instructor/InstructorLeaderboard").then((m) => ({
+    default: m.InstructorLeaderboard,
+  }))
+);
+const InstructorForum = lazy(() =>
+  import("./pages/instructor/InstructorForum").then((m) => ({
+    default: m.InstructorForum,
+  }))
+);
 const InstructorSubscriptions = lazy(() =>
   import("./pages/instructor/InstructorSubscriptions").then((m) => ({
     default: m.InstructorSubscriptions,
@@ -459,6 +469,24 @@ function AppRoutes() {
           element={
             <ProtectedRoute roles={["instructor"]}>
               <InstructorContent />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/instructor/leaderboard"
+          element={
+            <ProtectedRoute roles={["instructor"]}>
+              <InstructorLeaderboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/instructor/forum"
+          element={
+            <ProtectedRoute roles={["instructor"]}>
+              <InstructorForum />
             </ProtectedRoute>
           }
         />
