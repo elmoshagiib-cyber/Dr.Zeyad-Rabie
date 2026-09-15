@@ -824,17 +824,52 @@ const saveProgress = async (currentTime: number, duration: number) => {
       }
 
       const { url } = await response.json();
+// ==========================================
+// تحميل صورة غلاف الفيديو Signed URL
+// ==========================================
 
+let thumbnailUrl = "";
+
+if (thumbnail) {
+  try {
+    const thumbnailResponse = await fetch("/api/thumbnail-url", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        key: thumbnail,
+      }),
+    });
+
+    if (thumbnailResponse.ok) {
+      const thumbnailData = await thumbnailResponse.json();
+      thumbnailUrl = thumbnailData.url || "";
+    } else {
+      console.error(
+        "Thumbnail URL error:",
+        await thumbnailResponse.text()
+      );
+    }
+  } catch (thumbnailError) {
+    console.error(
+      "Failed to load video thumbnail:",
+      thumbnailError
+    );
+  }
+}
       const progress = await loadOrCreateLessonProgress(studentId, lessonId, slug);
       lessonProgressRef.current = progress;
       hasIncrementedWatchedLessonsRef.current = progress?.is_completed || false;
 
-      setCurrentLessonId(lessonId);
-      setVideoPlayerUrl(url);
-      setVideoPlayerTitle(title);
-      setVideoPlayerDescription(description || "");
-      setVideoChapters(chapters || []);
-      setVideoPlayerThumbnail(thumbnail || "");
+setCurrentLessonId(lessonId);
+setVideoPlayerUrl(url);
+setVideoPlayerTitle(title);
+setVideoPlayerDescription(description || "");
+setVideoChapters(chapters || []);
+setVideoPlayerThumbnail(thumbnailUrl);
+
       setShowChapters(false);
       setPreviewPhase("image");
       setPlayerStage("info");
