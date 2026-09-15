@@ -242,41 +242,10 @@ useEffect(() => {
       setCourse(data);
 
       // ==========================================
-      // تحميل Signed URL لصورة الدورة
+      // بناء رابط الصورة العام مباشرة (course-thumbnails بقت public)
       // ==========================================
       if (data.thumbnail) {
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-
-          if (session?.access_token) {
-            const response = await fetch("/api/thumbnail-url", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${session.access_token}`,
-              },
-                            body: JSON.stringify({
-                key: data.thumbnail,
-                courseId: data.id,
-              }),
-            });
-
-            if (response.ok) {
-              const thumbnailData = await response.json();
-              setCourseThumbnailUrl(thumbnailData.url || "");
-            } else {
-              console.error(
-                "Course thumbnail URL error:",
-                await response.text()
-              );
-            }
-          }
-        } catch (thumbnailError) {
-          console.error(
-            "Failed to load course thumbnail:",
-            thumbnailError
-          );
-        }
+        setCourseThumbnailUrl(`${import.meta.env.VITE_R2_PUBLIC_URL}/${data.thumbnail}`);
       }
     }
   };
@@ -1759,7 +1728,7 @@ const handleSeekClick = (e: React.MouseEvent<HTMLDivElement>) => {
               <div className="relative w-full aspect-[16/9] overflow-hidden">
                 <img
                   src={
-                    course.thumbnail ||
+                    courseThumbnailUrl ||
                     course.cover_image ||
                     "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800"
                   }
