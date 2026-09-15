@@ -400,6 +400,7 @@ export default function ChemistryLabPage() {
 
             <div className="overflow-x-auto pb-2">
               <div
+                dir="ltr"
                 className="grid gap-1"
                 style={{ gridTemplateColumns: "repeat(18, minmax(46px, 1fr))", minWidth: 1100 }}
               >
