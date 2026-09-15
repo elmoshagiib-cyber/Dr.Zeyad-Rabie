@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FlaskConical, X, Wrench, GraduationCap, Settings } from "lucide-react";
+import { FlaskConical, X, Wrench, GraduationCap, Settings, Scale, Calculator, Droplets, Atom, Plus, RotateCcw, Pencil, Lightbulb, ArrowLeft } from "lucide-react";
 import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 
 // ============================================================
@@ -253,10 +253,87 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode; ready: boolean }[] 
   { id: "settings", label: "الإعدادات", icon: <Settings size={14} />, ready: false },
 ];
 
+interface ToolItem {
+  id: string;
+  number: number;
+  title: string;
+  desc: string;
+  icon: React.ReactNode;
+  iconBg: string;
+  ready: boolean;
+}
+
+const TOOLS: ToolItem[] = [
+  {
+    id: "balancer",
+    number: 1,
+    title: "موازن المعادلات",
+    desc: "وازن المعادلات الكيميائية المعقدة تلقائياً مع الحصول على تغذية مرتدة راجعة للحسابات الكيميائية (Stoichiometry).",
+    icon: <Scale size={20} className="text-red-500" />,
+    iconBg: "bg-red-50",
+    ready: false,
+  },
+  {
+    id: "molar-mass",
+    number: 2,
+    title: "الكتلة المولية",
+    desc: "احسب الأوزان الجزيئية فوراً مع تفصيل دقيق لكتلة كل عنصر على حدة.",
+    icon: <Calculator size={20} className="text-amber-500" />,
+    iconBg: "bg-amber-50",
+    ready: false,
+  },
+  {
+    id: "solubility",
+    number: 3,
+    title: "جدول الذوبانية",
+    desc: "استعرض بسرعة المخططات التفاعلية وقواعد ذوبانية المركبات الأيونية.",
+    icon: <Droplets size={20} className="text-emerald-500" />,
+    iconBg: "bg-emerald-50",
+    ready: false,
+  },
+  {
+    id: "virtual-lab",
+    number: 4,
+    title: "المختبر الافتراضي",
+    desc: "قم بإمالة الكأس وتفاعل مع جزيئات الماء داخل مشهد مختبر بسيط.",
+    icon: <FlaskConical size={20} className="text-[#5800a9] dark:text-[#b600d7]" />,
+    iconBg: "bg-[#F6EEFF] dark:bg-[#2B103D]",
+    ready: true,
+  },
+  {
+    id: "spdf",
+    number: 5,
+    title: "أطلس مدارات SPDF",
+    desc: "استكشف جميع أشكال المدارات الذرية الـ16 باستخدام نماذج ثلاثية الأبعاد تفاعلية لكثافة الاحتمال.",
+    icon: <Atom size={20} className="text-violet-500" />,
+    iconBg: "bg-violet-50",
+    ready: false,
+  },
+];
+
+const MAX_WATER = 100;
+
 export default function ChemistryLabPage() {
   const [activeTab, setActiveTab] = useState<Tab>("table");
   const [filter, setFilter] = useState<Category | "all">("all");
   const [selected, setSelected] = useState<Elem | null>(null);
+
+  // ── المختبر الافتراضي ──
+  const [labOpen, setLabOpen] = useState(false);
+  const [waterLevel, setWaterLevel] = useState(0);
+  const [heaterOn, setHeaterOn] = useState(false);
+  const [temp, setTemp] = useState(20);
+  const [labElement, setLabElement] = useState("Na");
+
+  const handleAddWater = () => {
+    setWaterLevel((prev) => Math.min(MAX_WATER, prev + 20));
+  };
+
+  const handleResetLab = () => {
+    setWaterLevel(0);
+    setHeaterOn(false);
+    setTemp(20);
+  };
 
   return (
     <StudentLayout>
@@ -430,8 +507,57 @@ export default function ChemistryLabPage() {
           </div>
         )}
 
+        {/* ── تاب الأدوات ── */}
+        {activeTab === "tools" && (
+          <div>
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-1.5">أدوات الكيمياء</h2>
+              <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base">أدوات ومختبرات الكيمياء للصفوف 9-12</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+              {TOOLS.map((tool) => (
+                <button
+                  key={tool.id}
+                  onClick={() => tool.ready && setLabOpen(true)}
+                  className={`text-right rounded-2xl border p-5 sm:p-6 transition-all duration-200 ${
+                    tool.ready
+                      ? "border-[#5800a9]/30 dark:border-[#b600d7]/40 bg-white dark:bg-[#111111] hover:shadow-lg cursor-pointer"
+                      : "border-gray-100 dark:border-[#2A2A2A] bg-gray-50/60 dark:bg-[#151515] cursor-not-allowed opacity-80"
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-6 sm:mb-8">
+                    <div className={`relative w-11 h-11 rounded-xl flex items-center justify-center ${tool.iconBg}`}>
+                      {tool.icon}
+                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] text-[9px] font-black text-gray-500 flex items-center justify-center">
+                        {tool.number}
+                      </span>
+                    </div>
+                    <span
+                      className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        tool.ready ? "bg-[#5800a9] dark:bg-[#b600d7] text-white" : "bg-gray-100 dark:bg-[#1A1A1A] text-gray-400"
+                      }`}
+                    >
+                      <ArrowLeft size={14} />
+                    </span>
+                  </div>
+
+                  <h3 className="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-2">{tool.title}</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-6">{tool.desc}</p>
+
+                  {!tool.ready && (
+                    <span className="inline-block mt-4 px-2.5 py-1 rounded-full text-[10px] font-black bg-gray-100 dark:bg-[#1A1A1A] text-gray-400">
+                      قريبًا
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ── تابات لسه هتتعمل ── */}
-        {(activeTab === "tools" || activeTab === "learn" || activeTab === "settings") && (
+        {(activeTab === "learn" || activeTab === "settings") && (
           <div className="flex flex-col items-center justify-center text-center py-20 sm:py-28 px-4">
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center mb-4 sm:mb-5">
               <FlaskConical className="text-[#5800a9] dark:text-[#b600d7]" size={32} />
@@ -440,6 +566,104 @@ export default function ChemistryLabPage() {
               قريبًا
             </span>
             <h2 className="text-lg sm:text-xl font-black text-gray-800 dark:text-gray-200">الميزة دي هتتاح قريبًا</h2>
+          </div>
+        )}
+
+        {/* ── مودال المختبر الافتراضي ── */}
+        {labOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white dark:bg-[#111111] rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden">
+
+              {/* Modal header */}
+              <div className="flex items-center justify-between px-5 sm:px-7 py-4 sm:py-5 border-b border-gray-100 dark:border-[#2A2A2A]">
+                <h3 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">المختبر الافتراضي</h3>
+                <button
+                  onClick={() => setLabOpen(false)}
+                  className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-[#1A1A1A] text-gray-500 hover:bg-gray-200 dark:hover:bg-[#232323] flex items-center justify-center transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Lab scene */}
+              <div className="relative px-5 sm:px-7 py-8 sm:py-10 min-h-[340px] flex flex-col items-center justify-end bg-gradient-to-b from-gray-50 to-white dark:from-[#151515] dark:to-[#0d0d0d]">
+
+                {/* Hint bubble */}
+                <div className="absolute top-4 left-4 sm:left-7 flex items-center gap-2 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl px-3 py-2 shadow-sm">
+                  <Lightbulb size={14} className="text-amber-400" />
+                  <span className="text-[11px] sm:text-xs font-bold text-gray-500 dark:text-gray-400">
+                    استخدم زرار "إضافة ماء" عشان تملأ الكأس
+                  </span>
+                </div>
+
+                {/* Temp gauge */}
+                <div className="absolute right-4 sm:right-7 top-1/3 -translate-y-1/2 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl w-16 sm:w-20 py-3 flex flex-col items-center gap-2 shadow-sm">
+                  <div className="w-2 h-16 sm:h-20 rounded-full bg-gray-100 dark:bg-[#232323] relative overflow-hidden">
+                    <div
+                      className="absolute bottom-0 w-full bg-blue-400 rounded-full transition-all duration-500"
+                      style={{ height: `${Math.min(100, ((temp - 0) / 100) * 100)}%` }}
+                    />
+                  </div>
+                  <p className="text-xs sm:text-sm font-black text-gray-800 dark:text-gray-200">{temp}°</p>
+                  <p className="text-[9px] font-bold text-gray-400">TEMP</p>
+                </div>
+
+                {/* Beaker */}
+                <div className="relative w-24 sm:w-28 h-40 sm:h-48 border-2 border-gray-200 dark:border-[#2A2A2A] border-t-0 rounded-b-2xl overflow-hidden bg-white/40 dark:bg-white/5 mb-4">
+                  <div
+                    className="absolute bottom-0 left-0 w-full bg-blue-300/80 transition-all duration-500"
+                    style={{ height: `${waterLevel}%` }}
+                  />
+                  {/* stand */}
+                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-1.5 h-8 bg-gray-700 dark:bg-gray-400" />
+                </div>
+                <div className="w-20 h-2 bg-gray-700 dark:bg-gray-500 rounded-full mb-8" />
+
+                {/* Selected element chip */}
+                <div className="absolute bottom-8 left-4 sm:left-10 w-14 h-14 rounded-xl bg-red-100 border border-red-200 flex flex-col items-center justify-center shadow-sm">
+                  <span className="text-sm font-black text-red-600">{labElement}</span>
+                </div>
+              </div>
+
+              {/* Controls */}
+              <div className="flex flex-wrap items-center gap-3 px-5 sm:px-7 py-4 sm:py-5 border-t border-gray-100 dark:border-[#2A2A2A]">
+                <div className="flex items-center gap-2 bg-gray-50 dark:bg-[#1A1A1A] rounded-xl px-3 py-2">
+                  <button
+                    onClick={() => setHeaterOn((prev) => !prev)}
+                    className={`text-[11px] font-black px-2 py-1 rounded-lg ${
+                      heaterOn ? "bg-red-500 text-white" : "bg-white dark:bg-[#232323] text-gray-400"
+                    }`}
+                  >
+                    {heaterOn ? "ON" : "OFF"}
+                  </button>
+                  <span className="text-xs font-bold text-gray-500 dark:text-gray-400">سخان</span>
+                </div>
+
+                <button
+                  onClick={handleAddWater}
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs sm:text-sm font-bold hover:opacity-90 transition-all"
+                >
+                  <Plus size={14} />
+                  إضافة ماء
+                </button>
+
+                <button
+                  onClick={handleResetLab}
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300 text-xs sm:text-sm font-bold hover:bg-gray-200 dark:hover:bg-[#232323] transition-all"
+                >
+                  <RotateCcw size={14} />
+                  إعادة تعيين
+                </button>
+
+                <button
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300 text-xs sm:text-sm font-bold hover:bg-gray-200 dark:hover:bg-[#232323] transition-all"
+                >
+                  <Pencil size={14} />
+                  عنصر
+                </button>
+              </div>
+
+            </div>
           </div>
         )}
 
