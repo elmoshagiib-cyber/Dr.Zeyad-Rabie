@@ -1,4 +1,4 @@
-import { Settings } from "lucide-react";
+
 import { DashboardSidebarItem } from "./DashboardSidebarItem";
 
 type NavItem = {
@@ -80,71 +80,6 @@ sm:py-5
         ))}
 
       </div>
-
-      {!collapsed && (
-        <>
-          <div className="my-6 h-px bg-gray-200 dark:bg-[#2A2A2A]" />
-
-          <p
-            className="
-              mb-3
-              px-3
-              text-[10px]
-              sm:text-[11px]
-              font-bold
-              tracking-wider
-              uppercase
-              text-gray-400 dark:text-gray-500
-            "
-          >
-            النظام
-          </p>
-
-          <button
-          className="
-group
-flex
-w-full
-items-center
-gap-3
-rounded-2xl
-px-3
-py-3
-text-gray-700
-dark:text-gray-300
-transition-all
-duration-300
-hover:bg-[#ECECF2]
-dark:hover:bg-[#1A1A1A]
-hover:text-[#155DFC]
-active:scale-[0.98]
-"
-          >
-            <div
-         className="
-flex
-h-10
-w-10
-items-center
-justify-center
-rounded-xl
-bg-[#155DFC]
-text-white
-transition-all
-duration-300
-group-hover:scale-110
-group-hover:opacity-90
-"
-            >
-              <Settings size={18} />
-            </div>
-
-            <span className="font-semibold text-sm sm:text-[15px]">
-              الإعدادات
-            </span>
-          </button>
-        </>
-      )}
 
     </nav>
   );
