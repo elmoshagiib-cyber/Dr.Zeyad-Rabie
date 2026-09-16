@@ -794,6 +794,29 @@ const addCourse = async () => {
     setShowAddSubscriptionModal(true);
   };
 
+  const openRenewSubscriptionModal = (course: CourseWithProgress) => {
+    const start = new Date();
+    const end = new Date(start);
+    end.setMonth(end.getMonth() + 1);
+
+    const type: "online" | "center" = student?.type === "online" ? "online" : "center";
+
+    setEditingPaymentId(null);
+    setSubForm({
+      course_id: String(course.course_id),
+      student_type: type,
+      payment_method: "vodafone_cash",
+      amount: SUBSCRIPTION_PRICING[type],
+      payer_phone: "",
+      subscription_code: "",
+      start_date: start.toISOString().slice(0, 10),
+      end_date: end.toISOString().slice(0, 10),
+      payment_status: "verified",
+      notes: "",
+    });
+    setShowAddSubscriptionModal(true);
+  };
+
   const openEditSubscriptionModal = (payment: SubscriptionPayment) => {
     setEditingPaymentId(payment.id);
     setSubForm({
@@ -1534,18 +1557,9 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 ) : (
                   <span className="text-white">{student.full_name?.charAt(0)}</span>
                 )}
-                <div className={`absolute -bottom-1 -left-1 w-3.5 h-3.5 rounded-full border-2 border-[#1547D6] ${student.is_blocked ? "bg-red-500" : "bg-emerald-400"}`} />
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-base sm:text-xl lg:text-2xl font-black truncate">{student.full_name}</h1>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-black whitespace-nowrap ${student.is_blocked ? "bg-red-500/20 text-red-200" : "bg-emerald-400/20 text-emerald-200"}`}>
-                    {student.is_blocked ? "موقوف" : "نشط"}
-                  </span>
-                </div>
-                <p className="text-white/60 text-xs sm:text-sm mt-0.5 truncate">
-                  {student.grade}{student.code ? ` • كود: ${student.code}` : ""}
-                </p>
+                <h1 className="text-base sm:text-xl lg:text-2xl font-black truncate">{student.full_name}</h1>
               </div>
             </div>
 
@@ -1586,7 +1600,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   variant="outline"
                   onClick={clearRegisterAttempts}
                   disabled={clearingAttempts}
-                  className="border-2 border-amber-200 text-amber-600 hover:bg-amber-50 dark:border-amber-900 dark:text-amber-400 dark:hover:bg-amber-950/30 rounded-xl font-bold h-12 transition-all duration-300 disabled:opacity-70"
+                  className="border-2 border-amber-200 text-amber-600 !hover:bg-amber-50 hover:!bg-amber-50 dark:border-amber-900 dark:text-amber-400 hover:dark:!bg-amber-950/30 rounded-xl font-bold h-12 transition-all duration-300 disabled:opacity-70"
                 >
                   <Unlock size={18} className="ml-2" />
                   {clearingAttempts ? "جاري الإلغاء..." : "إلغاء حظر التسجيل"}
@@ -1931,7 +1945,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     >
                       <div className="flex items-start justify-between mb-4 flex-wrap gap-2">
                         <div className="flex-1 min-w-[200px]">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <div className="flex items-center gap-2 flex-wrap mb-2">
                             <h4 className="font-black text-gray-900 dark:text-white">{course.courseData?.title}</h4>
                             {course.needsFollowup && (
                               <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold">
@@ -1943,34 +1957,49 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                                 متعثر
                               </span>
                             )}
+                            {course.expires_at && new Date(course.expires_at) < new Date() && (
+                              <span className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold">
+                                الاشتراك منتهي
+                              </span>
+                            )}
                             {!course.active && (
                               <span className="px-2 py-0.5 rounded-full bg-gray-400 text-white text-[10px] font-bold">
                                 غير مفعّل
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {course.courseData?.grade} • اشترك في {course.created_at ? new Date(course.created_at).toLocaleDateString("ar-EG") : "-"}
-                          </p>
-                          <p className="text-xs font-bold mt-1">
+                          <div className="flex items-center gap-2 flex-wrap text-[11px]">
+                            <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] text-gray-600 dark:text-gray-300 font-bold">
+                              <Calendar size={11} />
+                              اشترك في {course.created_at ? new Date(course.created_at).toLocaleDateString("ar-EG") : "-"}
+                            </span>
                             {course.expires_at ? (
                               new Date(course.expires_at) < new Date() ? (
-                                <span className="text-red-600">⛔ انتهى الاشتراك في {new Date(course.expires_at).toLocaleDateString("ar-EG")}</span>
+                                <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 font-bold">
+                                  <XCircle size={11} />
+                                  انتهى في {new Date(course.expires_at).toLocaleDateString("ar-EG")}
+                                </span>
                               ) : (
-                                <span className="text-emerald-600">✅ ينتهي في {new Date(course.expires_at).toLocaleDateString("ar-EG")}</span>
+                                <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 font-bold">
+                                  <Clock size={11} />
+                                  باقي {Math.max(Math.ceil((new Date(course.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)), 0)} يوم
+                                </span>
                               )
                             ) : (
-                              <span className="text-blue-600">♾️ اشتراك دائم</span>
+                              <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 font-bold">
+                                ♾️ اشتراك دائم
+                              </span>
                             )}
-                          </p>
+                            {course.daysSinceLastWatch !== null && (
+                              <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-bold">
+                                <Eye size={11} />
+                                آخر مشاهدة {course.daysSinceLastWatch === 0 ? "النهاردة" : `من ${course.daysSinceLastWatch} يوم`}
+                              </span>
+                            )}
+                          </div>
                           {course.needsFollowup && course.followupNote && (
-                            <p className="text-xs text-red-600 dark:text-red-400 font-bold mt-1.5">
+                            <p className="text-xs text-red-600 dark:text-red-400 font-bold mt-2">
                               ملاحظة: {course.followupNote}
-                            </p>
-                          )}
-                          {course.daysSinceLastWatch !== null && (
-                            <p className="text-xs text-gray-400 mt-1">
-                              آخر مشاهدة منذ {course.daysSinceLastWatch === 0 ? "اليوم" : `${course.daysSinceLastWatch} يوم`}
                             </p>
                           )}
                         </div>
@@ -2009,6 +2038,18 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                           >
                             {course.needsFollowup ? "إلغاء المتابعة" : "تحتاج متابعة"}
                           </Button>
+                          {course.expires_at &&
+                            Math.ceil((new Date(course.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) <= 7 && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => openRenewSubscriptionModal(course)}
+                                className="text-[#155DFC] border-blue-200 hover:bg-blue-50 dark:border-blue-900 dark:text-blue-400 dark:hover:bg-blue-950/30 rounded-lg text-xs font-bold h-8"
+                              >
+                                <Receipt size={14} className="ml-1" />
+                                تجديد الاشتراك
+                              </Button>
+                            )}
                           <Button
                             size="sm"
                             variant="outline"
