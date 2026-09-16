@@ -1,10 +1,12 @@
 import {
   Search, Users, UserCheck, GraduationCap,
   Trash2, Eye, Power, UsersRound,
-  ChevronRight, ChevronLeft, Filter
+  ChevronRight, ChevronLeft, Filter,
+  Download, ArrowUp, ArrowDown, ArrowUpDown,
+  Copy, Check, AlertTriangle, X
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
@@ -22,20 +24,45 @@ const grades = [
   "الصف الثالث الثانوي",
 ];
 
+type SortField = "full_name" | "grade" | "status" | "courses" | null;
+
 export function InstructorStudents() {
   const navigate = useNavigate();
 
-  const [students, setStudents]       = useState<any[]>([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchTerm, setSearchTerm]   = useState("");
-  const [gradeFilter, setGradeFilter] = useState("");
+  const [students, setStudents]         = useState<any[]>([]);
+  const [sidebarOpen, setSidebarOpen]   = useState(false);
+  const [searchInput, setSearchInput]   = useState("");
+  const [searchTerm, setSearchTerm]     = useState("");
+  const [gradeFilter, setGradeFilter]   = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [typeFilter, setTypeFilter]   = useState("");
-  const [loading, setLoading]         = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [typeFilter, setTypeFilter]     = useState("");
+  const [loading, setLoading]           = useState(true);
+  const [currentPage, setCurrentPage]   = useState(1);
   const pageSize = 10;
 
+  const [sortField, setSortField]         = useState<SortField>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [copiedKey, setCopiedKey]     = useState<string | null>(null);
+
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    danger?: boolean;
+    onConfirm: () => void;
+  } | null>(null);
+
   useEffect(() => { loadStudents(); }, []);
+
+  // Debounce البحث عشان مايعملش فلترة مع كل حرف
+  useEffect(() => {
+    const t = setTimeout(() => setSearchTerm(searchInput), 300);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  useEffect(() => { setCurrentPage(1); }, [searchTerm, gradeFilter, statusFilter, typeFilter]);
 
   const loadStudents = async () => {
     setLoading(true);
@@ -62,9 +89,97 @@ export function InstructorStudents() {
     return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
   }).length;
 
+  // ----- فلترة -----
+  const filteredStudents = students.filter((s) => {
+    const matchesSearch =
+      s.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.phone?.includes(searchTerm);
+    return (
+      matchesSearch &&
+      (!gradeFilter  || s.grade  === gradeFilter)  &&
+      (!statusFilter || s.status === statusFilter) &&
+      (!typeFilter   || s.type   === typeFilter)
+    );
+  });
+
+  const hasActiveFilters = !!(searchInput || gradeFilter || statusFilter || typeFilter);
+
+  // ----- ترتيب -----
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const sortedStudents = useMemo(() => {
+    if (!sortField) return filteredStudents;
+    const arr = [...filteredStudents];
+    arr.sort((a, b) => {
+      let aVal: any, bVal: any;
+      switch (sortField) {
+        case "full_name":
+          aVal = (a.full_name || a.name || "").toString();
+          bVal = (b.full_name || b.name || "").toString();
+          return sortDirection === "asc" ? aVal.localeCompare(bVal, "ar") : bVal.localeCompare(aVal, "ar");
+        case "grade":
+          aVal = grades.indexOf(a.grade);
+          bVal = grades.indexOf(b.grade);
+          return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+        case "status":
+          aVal = a.status === "نشط" || a.status === "active" ? 1 : 0;
+          bVal = b.status === "نشط" || b.status === "active" ? 1 : 0;
+          return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+        case "courses":
+          aVal = a.student_courses?.length || 0;
+          bVal = b.student_courses?.length || 0;
+          return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+        default:
+          return 0;
+      }
+    });
+    return arr;
+  }, [filteredStudents, sortField, sortDirection]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedStudents.length / pageSize));
+  const paginatedStudents = sortedStudents.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  const getStudentTypeLabel = (type?: string) => {
+    switch (type) {
+      case "center":
+        return "سنتر";
+      case "online":
+        return "أونلاين";
+      default:
+        return "سنتر";
+    }
+  };
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return <ArrowUpDown size={12} className="text-slate-300" />;
+    return sortDirection === "asc"
+      ? <ArrowUp size={12} className="text-[#155DFC]" />
+      : <ArrowDown size={12} className="text-[#155DFC]" />;
+  };
+
+  // ----- تأكيد الإجراءات -----
+  const openConfirm = (title: string, message: string, onConfirm: () => void, danger = true) => {
+    setConfirmState({ open: true, title, message, onConfirm, danger });
+  };
+  const closeConfirm = () => setConfirmState(null);
+
   const deleteStudent = async (id: number) => {
     const { error } = await supabase.from("students").delete().eq("id", id);
-    if (!error) loadStudents();
+    if (!error) {
+      setSelectedIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
+      loadStudents();
+    }
   };
 
   const toggleStudentStatus = async (id: number, currentStatus: string) => {
@@ -79,36 +194,106 @@ export function InstructorStudents() {
     loadStudents();
   };
 
-  useEffect(() => { setCurrentPage(1); }, [searchTerm, gradeFilter, statusFilter, typeFilter]);
-
-  const filteredStudents = students.filter((s) => {
-    const matchesSearch =
-      s.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.phone?.includes(searchTerm);
-    return (
-      matchesSearch &&
-      (!gradeFilter  || s.grade  === gradeFilter)  &&
-      (!statusFilter || s.status === statusFilter) &&
-      (!typeFilter   || s.type   === typeFilter)
+  const handleDeleteClick = (id: number) => {
+    openConfirm(
+      "حذف الطالب",
+      "هل أنت متأكد من حذف هذا الطالب؟ لا يمكن التراجع عن هذا الإجراء.",
+      () => { deleteStudent(id); closeConfirm(); }
     );
-  });
+  };
 
-  const totalPages = Math.max(1, Math.ceil(filteredStudents.length / pageSize));
-  const paginatedStudents = filteredStudents.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  const handleToggleClick = (id: number, status: string) => {
+    const willActivate = status !== "نشط";
+    openConfirm(
+      willActivate ? "تفعيل الطالب" : "إيقاف الطالب",
+      willActivate ? "هل تريد تفعيل هذا الطالب؟" : "هل تريد إيقاف هذا الطالب مؤقتًا؟",
+      () => { toggleStudentStatus(id, status); closeConfirm(); },
+      !willActivate
+    );
+  };
 
-  const getStudentTypeLabel = (type?: string) => {
-    switch (type) {
-      case "center":
-        return "سنتر";
-      case "online":
-        return "أونلاين";
-      default:
-        return "سنتر";
+  // ----- إجراءات جماعية -----
+  const toggleSelectAll = () => {
+    if (selectedIds.size === paginatedStudents.length && paginatedStudents.length > 0) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(paginatedStudents.map((s) => s.id)));
     }
+  };
+
+  const toggleSelectOne = (id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const bulkDisable = () => {
+    openConfirm(
+      "إيقاف الطلاب المحددين",
+      `هل تريد إيقاف ${selectedIds.size} طالب محدد؟`,
+      async () => {
+        await supabase.from("students")
+          .update({ status: "موقوف", is_blocked: true })
+          .in("id", Array.from(selectedIds));
+        setSelectedIds(new Set());
+        loadStudents();
+        closeConfirm();
+      }
+    );
+  };
+
+  const bulkDelete = () => {
+    openConfirm(
+      "حذف الطلاب المحددين",
+      `هل أنت متأكد من حذف ${selectedIds.size} طالب؟ لا يمكن التراجع عن هذا الإجراء.`,
+      async () => {
+        await supabase.from("students").delete().in("id", Array.from(selectedIds));
+        setSelectedIds(new Set());
+        loadStudents();
+        closeConfirm();
+      }
+    );
+  };
+
+  // ----- نسخ للحافظة -----
+  const copyToClipboard = (value: string, key: string) => {
+    if (!value) return;
+    navigator.clipboard.writeText(value);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 1500);
+  };
+
+  // ----- تصدير CSV -----
+  const exportToCSV = () => {
+    const headers = ["الاسم", "الهاتف", "الإيميل", "الصف", "النوع", "الحالة", "عدد الكورسات"];
+    const rows = filteredStudents.map((s) => [
+      s.full_name || s.name || "",
+      s.phone || "",
+      s.email || "",
+      s.grade || "",
+      getStudentTypeLabel(s.type),
+      s.status === "نشط" || s.status === "active" ? "نشط" : "موقوف",
+      s.student_courses?.length || 0,
+    ]);
+    const csvContent = "\uFEFF" + [headers, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `الطلاب-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const resetFilters = () => {
+    setSearchInput("");
+    setGradeFilter("");
+    setStatusFilter("");
+    setTypeFilter("");
   };
 
   return (
@@ -135,9 +320,8 @@ export function InstructorStudents() {
           </div>
         </motion.div>
 
-        {/* Stats - كروت مضغوطة مثل صفحة التسليمات */}
+        {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 py-6">
-          {/* إجمالي الطلاب */}
           <div className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-[#155DFC] p-5 hover:shadow-md transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-bold text-slate-500">إجمالي الطلاب</span>
@@ -149,7 +333,6 @@ export function InstructorStudents() {
             <div className="text-xs text-slate-400 font-medium">كل الطلاب المسجلين</div>
           </div>
 
-          {/* النشطون */}
           <div className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-emerald-500 p-5 hover:shadow-md transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-bold text-slate-500">النشطون</span>
@@ -163,7 +346,6 @@ export function InstructorStudents() {
             <div className="text-xs text-slate-400 font-medium">طالب متاح للتعلم</div>
           </div>
 
-          {/* هذا الشهر */}
           <div className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-amber-500 p-5 hover:shadow-md transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-bold text-slate-500">هذا الشهر</span>
@@ -175,7 +357,6 @@ export function InstructorStudents() {
             <div className="text-xs text-slate-400 font-medium">طالب جديد انضم</div>
           </div>
 
-          {/* الموقوفون */}
           <div className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-red-500 p-5 hover:shadow-md transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-bold text-slate-500">الموقوفون</span>
@@ -190,19 +371,28 @@ export function InstructorStudents() {
           </div>
         </div>
 
-        {/* Filters - مطابقة لتصميم صفحة التسليمات */}
+        {/* Filters */}
         <div className="py-4 lg:py-6 bg-white border-b border-slate-200 flex-shrink-0">
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Filter size={18} className="text-[#155DFC]" />
               <h3 className="text-base font-black text-slate-900">البحث والفلاتر</h3>
             </div>
-            <button
-              onClick={() => { setSearchTerm(""); setGradeFilter(""); setStatusFilter(""); setTypeFilter(""); }}
-              className="text-xs font-bold text-[#155DFC] hover:text-[#1547D6] transition-colors"
-            >
-              إعادة تعيين الفلاتر
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={exportToCSV}
+                className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-[#155DFC] transition-colors border border-slate-200 hover:border-blue-200 rounded-lg px-3 py-2"
+              >
+                <Download size={14} />
+                تصدير CSV
+              </button>
+              <button
+                onClick={resetFilters}
+                className="text-xs font-bold text-[#155DFC] hover:text-[#1547D6] transition-colors"
+              >
+                إعادة تعيين الفلاتر
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -210,14 +400,14 @@ export function InstructorStudents() {
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <Input
                 placeholder="اسم الطالب أو الكود..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 className="pr-10 bg-white border-slate-200 rounded-xl h-12"
               />
             </div>
 
-            <select 
-              value={gradeFilter} 
+            <select
+              value={gradeFilter}
               onChange={(e) => setGradeFilter(e.target.value)}
               className="w-full h-12 border border-slate-200 rounded-xl px-4 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
             >
@@ -225,8 +415,8 @@ export function InstructorStudents() {
               {grades.map((g) => <option key={g} value={g}>{g}</option>)}
             </select>
 
-            <select 
-              value={statusFilter} 
+            <select
+              value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full h-12 border border-slate-200 rounded-xl px-4 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
             >
@@ -235,8 +425,8 @@ export function InstructorStudents() {
               <option value="موقوف">موقوف</option>
             </select>
 
-            <select 
-              value={typeFilter} 
+            <select
+              value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               className="w-full h-12 border border-slate-200 rounded-xl px-4 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#155DFC]"
             >
@@ -249,12 +439,38 @@ export function InstructorStudents() {
 
         {/* Content */}
         <div className="flex-1 overflow-auto py-4 lg:py-6 bg-white">
-          {/* Header with count */}
-          <div className="flex items-center gap-3 mb-4">
-            <h2 className="text-lg font-black text-slate-900">قائمة الطلاب</h2>
-            <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-[#155DFC] text-xs font-black border border-blue-200">
-              {filteredStudents.length} طالب
-            </span>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-black text-slate-900">قائمة الطلاب</h2>
+              <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-[#155DFC] text-xs font-black border border-blue-200">
+                {filteredStudents.length} طالب
+              </span>
+            </div>
+
+            {/* شريط الإجراءات الجماعية */}
+            {selectedIds.size > 0 && (
+              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+                <span className="text-xs font-black text-slate-700">{selectedIds.size} محدد</span>
+                <button
+                  onClick={bulkDisable}
+                  className="flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg px-2.5 py-1.5 transition-colors"
+                >
+                  <Power size={13} /> إيقاف
+                </button>
+                <button
+                  onClick={bulkDelete}
+                  className="flex items-center gap-1 text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 rounded-lg px-2.5 py-1.5 transition-colors"
+                >
+                  <Trash2 size={13} /> حذف
+                </button>
+                <button
+                  onClick={() => setSelectedIds(new Set())}
+                  className="text-slate-400 hover:text-slate-600 p-1"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
           </div>
 
           {loading ? (
@@ -266,7 +482,17 @@ export function InstructorStudents() {
           ) : filteredStudents.length === 0 ? (
             <div className="text-center py-16">
               <Users className="mx-auto text-slate-300 mb-4" size={48} />
-              <p className="text-slate-600 font-bold">لا يوجد طلاب</p>
+              <p className="text-slate-600 font-bold">
+                {hasActiveFilters ? "لا يوجد طلاب مطابقين لهذا البحث أو الفلاتر" : "لا يوجد طلاب"}
+              </p>
+              {hasActiveFilters && (
+                <button
+                  onClick={resetFilters}
+                  className="mt-3 text-sm font-bold text-[#155DFC] hover:text-[#1547D6] transition-colors"
+                >
+                  إعادة تعيين الفلاتر
+                </button>
+              )}
             </div>
           ) : (
             <>
@@ -274,25 +500,59 @@ export function InstructorStudents() {
               <div className="hidden md:block">
                 <Card className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
                   <CardContent className="p-0 overflow-x-auto">
-                    <table className="w-full min-w-[900px]">
+                    <table className="w-full min-w-[950px]">
                       <thead>
                         <tr className="bg-slate-50 border-b border-slate-200">
-                          <th className="w-[20%] px-4 py-3 text-center text-xs font-black text-slate-600">الطالب</th>
+                          <th className="w-[3%] px-4 py-3 text-center">
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 accent-[#155DFC] cursor-pointer"
+                              checked={paginatedStudents.length > 0 && selectedIds.size === paginatedStudents.length}
+                              onChange={toggleSelectAll}
+                            />
+                          </th>
+                          <th className="w-[18%] px-4 py-3 text-center text-xs font-black text-slate-600">
+                            <button onClick={() => handleSort("full_name")} className="flex items-center gap-1 justify-center w-full hover:text-[#155DFC]">
+                              الطالب <SortIcon field="full_name" />
+                            </button>
+                          </th>
                           <th className="w-[12%] px-4 py-3 text-center text-xs font-black text-slate-600">رقم الهاتف</th>
-                          <th className="w-[18%] px-4 py-3 text-center text-xs font-black text-slate-600">الإيميل</th>
-                          <th className="w-[14%] px-4 py-3 text-center text-xs font-black text-slate-600">الصف</th>
+                          <th className="w-[17%] px-4 py-3 text-center text-xs font-black text-slate-600">الإيميل</th>
+                          <th className="w-[13%] px-4 py-3 text-center text-xs font-black text-slate-600">
+                            <button onClick={() => handleSort("grade")} className="flex items-center gap-1 justify-center w-full hover:text-[#155DFC]">
+                              الصف <SortIcon field="grade" />
+                            </button>
+                          </th>
                           <th className="w-[8%] px-4 py-3 text-center text-xs font-black text-slate-600">النوع</th>
-                          <th className="w-[8%] px-4 py-3 text-center text-xs font-black text-slate-600">الحالة</th>
-                          <th className="w-[8%] px-4 py-3 text-center text-xs font-black text-slate-600">الكورسات</th>
-                          <th className="w-[12%] px-4 py-3 text-center text-xs font-black text-slate-600">الإجراءات</th>
+                          <th className="w-[8%] px-4 py-3 text-center text-xs font-black text-slate-600">
+                            <button onClick={() => handleSort("status")} className="flex items-center gap-1 justify-center w-full hover:text-[#155DFC]">
+                              الحالة <SortIcon field="status" />
+                            </button>
+                          </th>
+                          <th className="w-[8%] px-4 py-3 text-center text-xs font-black text-slate-600">
+                            <button onClick={() => handleSort("courses")} className="flex items-center gap-1 justify-center w-full hover:text-[#155DFC]">
+                              الكورسات <SortIcon field="courses" />
+                            </button>
+                          </th>
+                          <th className="w-[13%] px-4 py-3 text-center text-xs font-black text-slate-600">الإجراءات</th>
                         </tr>
                       </thead>
                       <tbody>
                         {paginatedStudents.map((student) => (
-                          <tr 
-                            key={student.id} 
-                            className="border-b border-slate-100 hover:bg-slate-50 transition-all duration-200"
+                          <tr
+                            key={student.id}
+                            className={`border-b border-slate-100 hover:bg-slate-50 transition-all duration-200 ${
+                              selectedIds.has(student.id) ? "bg-blue-50/50" : ""
+                            }`}
                           >
+                            <td className="px-4 py-3 text-center">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4 accent-[#155DFC] cursor-pointer"
+                                checked={selectedIds.has(student.id)}
+                                onChange={() => toggleSelectOne(student.id)}
+                              />
+                            </td>
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
                                 <Avatar name={student.full_name || student.name} src={student.avatar_url} size="sm" className="h-8 w-8 text-xs" />
@@ -302,10 +562,32 @@ export function InstructorStudents() {
                               </div>
                             </td>
                             <td className="px-4 py-3 text-slate-700 text-xs font-medium">
-                              {student.phone || "لا يوجد رقم"}
+                              <div className="flex items-center justify-center gap-1.5">
+                                {student.phone || "لا يوجد رقم"}
+                                {student.phone && (
+                                  <button
+                                    title="نسخ رقم الهاتف"
+                                    onClick={() => copyToClipboard(student.phone, `phone-${student.id}`)}
+                                    className="text-slate-300 hover:text-[#155DFC] transition-colors"
+                                  >
+                                    {copiedKey === `phone-${student.id}` ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                                  </button>
+                                )}
+                              </div>
                             </td>
-                            <td className="px-4 py-3 text-slate-700 text-xs font-medium truncate">
-                              {student.email}
+                            <td className="px-4 py-3 text-slate-700 text-xs font-medium">
+                              <div className="flex items-center justify-center gap-1.5">
+                                <span className="truncate">{student.email}</span>
+                                {student.email && (
+                                  <button
+                                    title="نسخ الإيميل"
+                                    onClick={() => copyToClipboard(student.email, `email-${student.id}`)}
+                                    className="text-slate-300 hover:text-[#155DFC] transition-colors flex-shrink-0"
+                                  >
+                                    {copiedKey === `email-${student.id}` ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                                  </button>
+                                )}
+                              </div>
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap">
                               <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 whitespace-nowrap">
@@ -314,7 +596,7 @@ export function InstructorStudents() {
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap">
                               <span className={`px-2 py-1 rounded-lg text-xs font-black border whitespace-nowrap ${
-                                student.type === "online" 
+                                student.type === "online"
                               ? "bg-blue-50 text-[#155DFC] border-blue-200"
                                   : "bg-amber-50 text-amber-700 border-amber-200"
                               }`}>
@@ -346,14 +628,14 @@ export function InstructorStudents() {
                                 </button>
                                 <button
                                   title={student.status === "نشط" ? "إيقاف الطالب" : "تفعيل الطالب"}
-                                  onClick={() => toggleStudentStatus(student.id, student.status)}
+                                  onClick={() => handleToggleClick(student.id, student.status)}
                                   className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 flex items-center justify-center transition-all duration-200"
                                 >
                                   <Power size={14} />
                                 </button>
                                 <button
                                   title="حذف الطالب"
-                                  onClick={() => { if (confirm("هل أنت متأكد من حذف الطالب؟")) deleteStudent(student.id); }}
+                                  onClick={() => handleDeleteClick(student.id)}
                                   className="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition-all duration-200"
                                 >
                                   <Trash2 size={14} />
@@ -371,21 +653,39 @@ export function InstructorStudents() {
               {/* Mobile Cards */}
               <div className="md:hidden space-y-3">
                 {paginatedStudents.map((student) => (
-                  <Card 
-                    key={student.id} 
-                    className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm"
+                  <Card
+                    key={student.id}
+                    className={`bg-white border rounded-2xl overflow-hidden shadow-sm ${
+                      selectedIds.has(student.id) ? "border-[#155DFC]" : "border-slate-200"
+                    }`}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4 accent-[#155DFC] cursor-pointer mt-1"
+                            checked={selectedIds.has(student.id)}
+                            onChange={() => toggleSelectOne(student.id)}
+                          />
                           <Avatar name={student.full_name || student.name} src={student.avatar_url} size="sm" className="h-10 w-10" />
                           <div>
                             <h3 className="font-black text-slate-900 text-sm">
                               {student.full_name || student.name}
                             </h3>
-                            <p className="text-xs text-slate-500 mt-0.5">
-                              {student.email}
-                            </p>
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-xs text-slate-500 mt-0.5">
+                                {student.email}
+                              </p>
+                              {student.email && (
+                                <button
+                                  onClick={() => copyToClipboard(student.email, `m-email-${student.id}`)}
+                                  className="text-slate-300 hover:text-[#155DFC] transition-colors"
+                                >
+                                  {copiedKey === `m-email-${student.id}` ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                         <span className={`px-2 py-1 rounded-lg text-xs font-black border ${
@@ -416,11 +716,21 @@ export function InstructorStudents() {
                             {student.student_courses?.length || 0}
                           </p>
                         </div>
-                        <div className="bg-slate-50 rounded-xl p-2.5">
-                          <p className="text-xs text-slate-500 mb-1">الهاتف</p>
-                          <p className="text-xs font-bold text-slate-900 truncate">
-                            {student.phone || "-"}
-                          </p>
+                        <div className="bg-slate-50 rounded-xl p-2.5 flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-slate-500 mb-1">الهاتف</p>
+                            <p className="text-xs font-bold text-slate-900 truncate">
+                              {student.phone || "-"}
+                            </p>
+                          </div>
+                          {student.phone && (
+                            <button
+                              onClick={() => copyToClipboard(student.phone, `m-phone-${student.id}`)}
+                              className="text-slate-300 hover:text-[#155DFC] transition-colors flex-shrink-0"
+                            >
+                              {copiedKey === `m-phone-${student.id}` ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                            </button>
+                          )}
                         </div>
                       </div>
 
@@ -434,7 +744,7 @@ export function InstructorStudents() {
                         </Button>
                         <Button
                           variant="outline"
-                          onClick={() => toggleStudentStatus(student.id, student.status)}
+                          onClick={() => handleToggleClick(student.id, student.status)}
                           className="flex-1 border-amber-200 text-amber-600 hover:bg-amber-50 rounded-xl py-2 text-xs font-black"
                         >
                           <Power size={14} className="ml-1" />
@@ -442,7 +752,7 @@ export function InstructorStudents() {
                         </Button>
                         <Button
                           variant="outline"
-                          onClick={() => { if (confirm("هل أنت متأكد من حذف الطالب؟")) deleteStudent(student.id); }}
+                          onClick={() => handleDeleteClick(student.id)}
                           className="flex-1 border-red-200 text-red-600 hover:bg-red-50 rounded-xl py-2 text-xs font-black"
                         >
                           <Trash2 size={14} className="ml-1" />
@@ -453,6 +763,7 @@ export function InstructorStudents() {
                   </Card>
                 ))}
               </div>
+
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 mt-6">
                   <button
@@ -478,6 +789,37 @@ export function InstructorStudents() {
           )}
         </div>
       </div>
+
+      {/* Confirm Modal */}
+      {confirmState?.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${
+              confirmState.danger ? "bg-red-50" : "bg-blue-50"
+            }`}>
+              <AlertTriangle className={confirmState.danger ? "text-red-600" : "text-[#155DFC]"} size={22} />
+            </div>
+            <h3 className="text-base font-black text-slate-900 mb-2">{confirmState.title}</h3>
+            <p className="text-sm text-slate-500 mb-6">{confirmState.message}</p>
+            <div className="flex gap-2">
+              <button
+                onClick={closeConfirm}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-black hover:bg-slate-50 transition-colors"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={confirmState.onConfirm}
+                className={`flex-1 py-2.5 rounded-xl text-white text-sm font-black transition-colors ${
+                  confirmState.danger ? "bg-red-600 hover:bg-red-700" : "bg-[#155DFC] hover:bg-[#1547D6]"
+                }`}
+              >
+                تأكيد
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }
