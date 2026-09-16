@@ -1706,30 +1706,74 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <p className="text-gray-500 dark:text-gray-400 text-sm">معلومات الطالب الأساسية</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                 <InfoCardItem label="اسم الطالب" value={student.full_name} icon={<User size={18} />} />
                 <InfoCardItem label="الصف الدراسي" value={student.grade} icon={<GraduationCap size={18} />} />
-                <InfoCardItem label="رقم الطالب" value={student.phone} icon={<Phone size={18} />} />
-                <InfoCardItem label="رقم ولي الأمر" value={student.parent_phone || "-"} icon={<Phone size={18} />} />
-                <InfoCardItem label="المحافظة" value={student.governorate || "-"} icon={<Mail size={18} />} />
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A] hover:border-[#155DFC] transition-all duration-200">
-                  <div className="flex items-start gap-2 mb-2">
-                    <Calendar size={18} className="text-gray-500 dark:text-gray-400 mt-0.5" />
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">حالة الاشتراك</p>
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <Phone size={18} className="text-gray-500 dark:text-gray-400" />
+                      <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">رقم الطالب</p>
+                    </div>
+                    {student.phone && (
+                      <button
+                        onClick={() => window.open(`https://wa.me/${student.phone.replace(/^0/, "20")}`, "_blank")}
+                        className="w-6 h-6 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 flex items-center justify-center flex-shrink-0 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
+                        title="تواصل واتساب"
+                      >
+                        <MessageCircle size={13} />
+                      </button>
+                    )}
                   </div>
-                  <p className={`font-black text-sm ${
-                    realSubscriptionStatus === "active" 
-                      ? "text-emerald-600" 
-                      : "text-red-600"
-                  }`}>
-                    {realSubscriptionStatus === "active" ? "نشط" : "منتهي"}
-                  </p>
+                  <p className="font-bold text-gray-900 dark:text-white text-sm" dir="ltr">{student.phone}</p>
                 </div>
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A] hover:border-[#155DFC] transition-all duration-200">
-                  <div className="flex items-start gap-2 mb-2">
-                    <Calendar size={18} className="text-gray-500 dark:text-gray-400 mt-0.5" />
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">تاريخ انتهاء الاشتراك</p>
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <Phone size={18} className="text-gray-500 dark:text-gray-400" />
+                      <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">رقم ولي الأمر</p>
+                    </div>
+                    {student.parent_phone && (
+                      <button
+                        onClick={() => window.open(`https://wa.me/${student.parent_phone!.replace(/^0/, "20")}`, "_blank")}
+                        className="w-6 h-6 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 flex items-center justify-center flex-shrink-0 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
+                        title="تواصل واتساب"
+                      >
+                        <MessageCircle size={13} />
+                      </button>
+                    )}
                   </div>
+                  <p className="font-bold text-gray-900 dark:text-white text-sm" dir="ltr">{student.parent_phone || "-"}</p>
+                </div>
+                <InfoCardItem label="المحافظة" value={student.governorate || "-"} icon={<Mail size={18} />} />
+              </div>
+
+              <div className={`rounded-2xl p-5 border flex items-center justify-between flex-wrap gap-4 ${
+                realSubscriptionStatus === "active"
+                  ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900"
+                  : "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900"
+              }`}>
+                <div className="flex items-center gap-3">
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                    realSubscriptionStatus === "active" ? "bg-emerald-100 dark:bg-emerald-900/40" : "bg-red-100 dark:bg-red-900/40"
+                  }`}>
+                    {realSubscriptionStatus === "active" ? (
+                      <CheckCircle2 className="text-emerald-600" size={22} />
+                    ) : (
+                      <XCircle className="text-red-600" size={22} />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-0.5">حالة الاشتراك</p>
+                    <p className={`font-black text-base ${
+                      realSubscriptionStatus === "active" ? "text-emerald-600" : "text-red-600"
+                    }`}>
+                      {realSubscriptionStatus === "active" ? "نشط" : "منتهي"}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-0.5">تاريخ انتهاء الاشتراك</p>
                   <p className="font-bold text-gray-900 dark:text-white text-sm">
                     {permanentActiveExists
                       ? "اشتراك دائم"
@@ -1762,21 +1806,48 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">المحاضرات</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center flex-shrink-0">
+                      <BookOpen size={14} className="text-[#155DFC]" />
+                    </div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">المحاضرات</p>
+                  </div>
                   <p className="text-gray-900 dark:text-white font-black text-lg">
                     {realTotalLessons > 0 ? `${realWatchedLessons} / ${realTotalLessons}` : "لا يوجد دروس بعد"}
                   </p>
                 </div>
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">الواجبات</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 size={14} className="text-emerald-600" />
+                    </div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">الواجبات</p>
+                  </div>
                   <p className="text-gray-900 dark:text-white font-black text-lg">
                     {student.completed_homework || 0} / {student.total_homework || 0}
                   </p>
                 </div>
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">الحضور</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                      (student.attendance_percentage || 0) >= 80
+                        ? "bg-emerald-50 dark:bg-emerald-950/30"
+                        : (student.attendance_percentage || 0) >= 50
+                        ? "bg-amber-50 dark:bg-amber-950/30"
+                        : "bg-red-50 dark:bg-red-950/30"
+                    }`}>
+                      <TrendingUp size={14} className={
+                        (student.attendance_percentage || 0) >= 80
+                          ? "text-emerald-600"
+                          : (student.attendance_percentage || 0) >= 50
+                          ? "text-amber-600"
+                          : "text-red-600"
+                      } />
+                    </div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">الحضور</p>
+                  </div>
                   <p className={`font-black text-lg ${
                     (student.attendance_percentage || 0) >= 80
                       ? "text-emerald-600"
@@ -1788,7 +1859,12 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   </p>
                 </div>
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">وقت المشاهدة</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center flex-shrink-0">
+                      <Clock size={14} className="text-[#155DFC]" />
+                    </div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">وقت المشاهدة</p>
+                  </div>
                   <p className="text-gray-900 dark:text-white font-black text-lg">
                     {totalWatchHours}س {remainingMinutes}د
                   </p>
