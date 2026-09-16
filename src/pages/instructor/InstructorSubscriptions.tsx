@@ -15,6 +15,7 @@ import {
 import { Button } from "../../components/ui/Button";
 import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
 import { Card, CardContent } from "../../components/ui/Card";
+import { Avatar } from "../../components/ui/Avatar";
 import { supabase } from "../../lib/supabase";
 
 interface StudentLite {
@@ -24,6 +25,7 @@ interface StudentLite {
   grade: string;
   governorate: string | null;
   is_blocked: boolean;
+  avatar_url: string | null;
 }
 
 interface CourseLite {
@@ -93,7 +95,7 @@ export function InstructorSubscriptions() {
       studentIds.length
         ? supabase
             .from("students")
-            .select("id, full_name, phone, grade, governorate, is_blocked")
+            .select("id, full_name, phone, grade, governorate, is_blocked, avatar_url")
             .in("id", studentIds)
         : Promise.resolve({ data: [] as any[] }),
       courseIds.length
@@ -364,7 +366,7 @@ export function InstructorSubscriptions() {
           <CardContent className="p-0">
             <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
                   <Receipt className="text-[#155DFC]" size={20} />
                 </div>
                 <div>
@@ -407,16 +409,21 @@ export function InstructorSubscriptions() {
                       {filteredRows.slice((page - 1) * perPage, page * perPage).map((r, idx) => (
                         <tr
                           key={r.id}
-                          className="border-t border-gray-100 dark:border-[#2A2A2A] hover:bg-[#FAF7FF] dark:hover:bg-[#171717] transition-colors"
+                          className={`border-t border-gray-100 dark:border-[#2A2A2A] hover:bg-[#EFF6FF] dark:hover:bg-[#171717] transition-colors ${
+                            idx % 2 === 1 ? "bg-gray-50/60 dark:bg-white/[0.02]" : ""
+                          }`}
                         >
                           <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">
                             {(page - 1) * perPage + idx + 1}
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-[#155DFC] text-white flex items-center justify-center text-xs font-black flex-shrink-0">
-                                {r.student?.full_name?.charAt(0) || "?"}
-                              </div>
+                              <Avatar
+                                name={r.student?.full_name}
+                                src={r.student?.avatar_url}
+                                size="sm"
+                                className="h-8 w-8 text-xs flex-shrink-0"
+                              />
                               <span className="font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                 {r.student?.full_name || "-"}
                               </span>

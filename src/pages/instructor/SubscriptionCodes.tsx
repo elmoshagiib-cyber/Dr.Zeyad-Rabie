@@ -8,6 +8,12 @@ import {
   Clock3,
   Ticket,
   KeyRound,
+  CheckCircle2,
+  XCircle,
+  Sparkles,
+  PackageX,
+  Wallet,
+  Search,
 } from "lucide-react";
 import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
 import { motion } from "framer-motion";
@@ -52,6 +58,10 @@ const [stats, setStats] = useState({
   expired: 0,
   cancelled: 0,
 });
+
+const activeCodesValue = codes
+  .filter((item) => item.status === "active")
+  .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
 
 const [searchTerm, setSearchTerm] = useState("");
 const [selectedStatus, setSelectedStatus] = useState("");
@@ -481,74 +491,72 @@ return (
       </motion.div>
 
 {/* Statistics */}
-<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+<div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
 
-  {/* Total */}
-  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex items-center justify-between hover:shadow-md transition">
-    <div className="text-right">
-      <p className="text-slate-500 font-medium text-sm">
-        إجمالي الأكواد
-      </p>
-
-      <h2 className="text-4xl font-black mt-2 text-slate-900">
-        {stats.total}
-      </h2>
+  <div className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-[#155DFC] p-5 hover:shadow-md transition-all duration-300">
+    <div className="flex items-center justify-between mb-4">
+      <span className="text-sm font-bold text-slate-500">إجمالي الأكواد</span>
+      <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+        <Database className="text-[#155DFC]" size={16} />
+      </div>
     </div>
-
-    <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center">
-      <Database className="text-blue-600" size={28} />
-    </div>
+    <div className="text-3xl font-black text-[#155DFC] mb-1">{stats.total}</div>
+    <div className="text-xs text-slate-400 font-medium">كل الأكواد المولّدة</div>
   </div>
 
-  {/* Used */}
-  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex items-center justify-between hover:shadow-md transition">
-    <div className="text-right">
-      <p className="text-slate-500 font-medium text-sm">
-        أكواد مستخدمة
-      </p>
-
-      <h2 className="text-4xl font-black mt-2 text-slate-900">
-        {stats.used}
-      </h2>
+  <div className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-emerald-500 p-5 hover:shadow-md transition-all duration-300">
+    <div className="flex items-center justify-between mb-4">
+      <span className="text-sm font-bold text-slate-500">أكواد صالحة</span>
+      <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+        <CheckCircle2 className="text-emerald-600" size={16} />
+      </div>
     </div>
-
-    <div className="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center">
-      <Users className="text-green-600" size={28} />
-    </div>
+    <div className="text-3xl font-black text-emerald-600 mb-1">{stats.active}</div>
+    <div className="text-xs text-slate-400 font-medium">جاهزة للاستخدام</div>
   </div>
 
-  {/* Active */}
-  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex items-center justify-between hover:shadow-md transition">
-    <div className="text-right">
-      <p className="text-slate-500 font-medium text-sm">
-        أكواد صالحة
-      </p>
-
-      <h2 className="text-4xl font-black mt-2 text-slate-900">
-        {stats.active}
-      </h2>
+  <div className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-sky-500 p-5 hover:shadow-md transition-all duration-300">
+    <div className="flex items-center justify-between mb-4">
+      <span className="text-sm font-bold text-slate-500">أكواد مستخدمة</span>
+      <div className="w-9 h-9 rounded-xl bg-sky-50 flex items-center justify-center flex-shrink-0">
+        <Users className="text-sky-600" size={16} />
+      </div>
     </div>
-
-    <div className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center">
-      <Ticket className="text-orange-600" size={28} />
-    </div>
+    <div className="text-3xl font-black text-sky-600 mb-1">{stats.used}</div>
+    <div className="text-xs text-slate-400 font-medium">مفعّلة لطلاب بالفعل</div>
   </div>
 
-  {/* Expired */}
-  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex items-center justify-between hover:shadow-md transition">
-    <div className="text-right">
-      <p className="text-slate-500 font-medium text-sm">
-        أكواد منتهية
-      </p>
-
-      <h2 className="text-4xl font-black mt-2 text-slate-900">
-        {stats.expired}
-      </h2>
+  <div className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-amber-500 p-5 hover:shadow-md transition-all duration-300">
+    <div className="flex items-center justify-between mb-4">
+      <span className="text-sm font-bold text-slate-500">أكواد منتهية</span>
+      <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
+        <Clock3 className="text-amber-600" size={16} />
+      </div>
     </div>
+    <div className="text-3xl font-black text-amber-600 mb-1">{stats.expired}</div>
+    <div className="text-xs text-slate-400 font-medium">انتهت صلاحيتها</div>
+  </div>
 
-    <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
-      <Clock3 className="text-gray-600" size={28} />
+  <div className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-red-500 p-5 hover:shadow-md transition-all duration-300">
+    <div className="flex items-center justify-between mb-4">
+      <span className="text-sm font-bold text-slate-500">أكواد ملغاة</span>
+      <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+        <XCircle className="text-red-600" size={16} />
+      </div>
     </div>
+    <div className="text-3xl font-black text-red-600 mb-1">{stats.cancelled}</div>
+    <div className="text-xs text-slate-400 font-medium">تم إلغاؤها يدويًا</div>
+  </div>
+
+  <div className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-violet-500 p-5 hover:shadow-md transition-all duration-300">
+    <div className="flex items-center justify-between mb-4">
+      <span className="text-sm font-bold text-slate-500">قيمة الأكواد الصالحة</span>
+      <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center flex-shrink-0">
+        <Wallet className="text-violet-600" size={16} />
+      </div>
+    </div>
+    <div className="text-3xl font-black text-violet-600 mb-1">{activeCodesValue} ج</div>
+    <div className="text-xs text-slate-400 font-medium">فلوس لسه ما اتحصلتش</div>
   </div>
 
 </div>
@@ -559,9 +567,12 @@ return (
   {/* Generate Codes */}
   <div id="generate-section" className="xl:col-span-3 bg-white rounded-3xl shadow-sm border border-slate-200 p-7">
 
-    <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center gap-3 mb-6">
+      <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+        <Sparkles className="text-[#155DFC]" size={20} />
+      </div>
       <h2 className="text-2xl font-black text-slate-800">
-        ✨ توليد أكواد جديدة
+        توليد أكواد جديدة
       </h2>
     </div>
 
@@ -672,18 +683,10 @@ return (
 
    <button
   onClick={generateCodes}
-  className="
-bg-blue-600
-hover:bg-blue-700
-    text-white
-    font-bold
-    rounded-xl
-    px-8
-    h-12
-    transition
-  "
+  className="flex items-center gap-2 bg-[#155DFC] hover:bg-[#1547D6] text-white font-bold rounded-xl px-8 h-12 transition"
 >
-  ✨ توليد الأكواد الآن
+  <Sparkles size={18} />
+  توليد الأكواد الآن
 </button>
 
     </div>
@@ -705,7 +708,7 @@ hover:bg-blue-700
         onChange={(e)=>setExportGrade(e.target.value)}
         className="w-full h-12 rounded-xl border border-slate-300 px-4"
       >
-        <option>اختر الصف</option>
+        <option value="">كل الصفوف</option>
 
      {grades.map((g) => (
   <option key={g.value} value={g.value}>
@@ -718,7 +721,7 @@ hover:bg-blue-700
 <select
   value={exportCourse}
   onChange={(e) => setExportCourse(e.target.value)}
-  
+  className="w-full h-12 rounded-xl border border-slate-300 px-4"
 >
 
   <option value="">كل الكورسات</option>
@@ -755,7 +758,7 @@ hover:bg-blue-700
 
       <button
         onClick={() => handleExport("excel")}
-        className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 font-bold"
+        className="bg-[#155DFC] hover:bg-[#1547D6] text-white rounded-xl h-11 font-bold"
       >
         Excel
       </button>
@@ -769,9 +772,12 @@ hover:bg-blue-700
 {/* Search */}
 <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-7 mb-8">
 
-  <div className="flex items-center justify-between mb-6">
+  <div className="flex items-center gap-3 mb-6">
+    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+      <Search className="text-[#155DFC]" size={20} />
+    </div>
     <h2 className="text-2xl font-black text-slate-800">
-      🔎 البحث والفلترة
+      البحث والفلترة
     </h2>
   </div>
 
@@ -878,14 +884,16 @@ hover:bg-blue-700
       </label>
 
       <select
+        value={filterDuration}
+        onChange={(e) => setFilterDuration(e.target.value)}
         className="w-full h-12 rounded-xl border border-slate-300 px-4"
       >
-        <option>الكل</option>
-        <option>شهر</option>
-        <option>3 شهور</option>
-        <option>6 شهور</option>
-        <option>سنة</option>
-        <option>دائم</option>
+        <option value="">الكل</option>
+        <option value="30">شهر</option>
+        <option value="90">3 شهور</option>
+        <option value="180">6 شهور</option>
+        <option value="365">سنة</option>
+        <option value="0">دائم</option>
       </select>
     </div>
 
@@ -929,9 +937,7 @@ hover:bg-blue-700
 
     <div className="py-24 flex flex-col items-center justify-center">
 
-      <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center text-4xl mb-5">
-        📦
-      </div>
+      <PackageX className="text-slate-300 mb-5" size={64} />
 
       <h3 className="text-xl font-black text-slate-700">
         لا توجد أكواد حالياً
@@ -973,7 +979,7 @@ hover:bg-blue-700
             return (
               <tr
                 key={item.id}
-                className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                className="border-b border-slate-100 hover:bg-[#EFF6FF] transition-colors"
               >
                 <td className="px-6 py-4">
                   <span className="font-black tracking-wider text-slate-900">{item.code}</span>
