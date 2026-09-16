@@ -2190,7 +2190,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
             <CardContent className="p-0">
               <div className="p-6 lg:p-8 pb-4">
-                <div className="flex items-center justify-between flex-wrap gap-3 mb-2">
+                <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
                   <div>
                     <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">سجل الاشتراكات والمدفوعات</h2>
                     <p className="text-gray-500 dark:text-gray-400 text-sm">تاريخ كل عمليات الدفع والاشتراك لهذا الطالب</p>
@@ -2204,7 +2204,30 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   </Button>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 mt-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                  <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] p-4">
+                    <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1">إجمالي المدفوع</p>
+                    <p className="text-lg font-black text-emerald-600">
+                      {verifiedPayments.reduce((sum, p) => sum + (p.amount || 0), 0)} ج.م
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] p-4">
+                    <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1">اشتراكات نشطة</p>
+                    <p className="text-lg font-black text-[#155DFC]">
+                      {subscriptionPayments.filter((p) => p.payment_status === "verified" && new Date(p.subscription_end_date) > new Date()).length}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] p-4">
+                    <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1">قيد المراجعة</p>
+                    <p className="text-lg font-black text-amber-600">{pendingPaymentsCount}</p>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] p-4">
+                    <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1">إجمالي العمليات</p>
+                    <p className="text-lg font-black text-gray-900 dark:text-white">{subscriptionPayments.length}</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
                   <div className="relative flex-1 min-w-[180px]">
                     <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
@@ -2221,8 +2244,8 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     { key: "rejected", label: "مرفوض" },
                     { key: "active", label: "نشط" },
                     { key: "expired", label: "منتهي" },
-                    { key: "online", label: "Online" },
-                    { key: "center", label: "Center" },
+                    { key: "online", label: "أونلاين" },
+                    { key: "center", label: "سنتر" },
                   ] as { key: SubPaymentsFilterType; label: string }[]).map((f) => (
                     <button
                       key={f.key}
@@ -2273,7 +2296,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                             >
                               <td className="px-4 py-3 font-black text-[#155DFC] whitespace-nowrap">{p.invoice_number}</td>
                               <td className="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">{p.courseData?.title || "-"}</td>
-                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">{p.student_type === "online" ? "Online" : "Center"}</td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">{p.student_type === "online" ? "أونلاين" : "سنتر"}</td>
                               <td className="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">{p.amount} جنيه</td>
                               <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">{p.payment_method === "vodafone_cash" ? "Vodafone Cash" : "InstaPay"}</td>
                               <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">{new Date(p.subscription_start_date).toLocaleDateString("ar-EG")}</td>
