@@ -1537,9 +1537,14 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <div className={`absolute -bottom-1 -left-1 w-3.5 h-3.5 rounded-full border-2 border-[#1547D6] ${student.is_blocked ? "bg-red-500" : "bg-emerald-400"}`} />
               </div>
               <div className="min-w-0">
-                <h1 className="text-base sm:text-xl lg:text-2xl font-black truncate">{student.full_name}</h1>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-base sm:text-xl lg:text-2xl font-black truncate">{student.full_name}</h1>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-black whitespace-nowrap ${student.is_blocked ? "bg-red-500/20 text-red-200" : "bg-emerald-400/20 text-emerald-200"}`}>
+                    {student.is_blocked ? "موقوف" : "نشط"}
+                  </span>
+                </div>
                 <p className="text-white/60 text-xs sm:text-sm mt-0.5 truncate">
-                  {student.code ? `كود: ${student.code}` : student.grade}
+                  {student.grade}{student.code ? ` • كود: ${student.code}` : ""}
                 </p>
               </div>
             </div>
@@ -1707,8 +1712,22 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-                <InfoCardItem label="اسم الطالب" value={student.full_name} icon={<User size={18} />} />
                 <InfoCardItem label="الصف الدراسي" value={student.grade} icon={<GraduationCap size={18} />} />
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A] hover:border-[#155DFC] transition-all duration-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Monitor size={18} className="text-gray-500 dark:text-gray-400" />
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">نوع الطالب</p>
+                  </div>
+                  <span
+                    className={`inline-block px-2 py-1 rounded-lg text-xs font-black border whitespace-nowrap ${
+                      student.type === "online"
+                        ? "bg-blue-50 text-[#155DFC] border-blue-200 dark:bg-blue-950/30 dark:border-blue-900"
+                        : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:border-amber-900"
+                    }`}
+                  >
+                    {student.type === "online" ? "أونلاين" : "سنتر"}
+                  </span>
+                </div>
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-4 border border-gray-100 dark:border-[#2A2A2A] hover:border-[#155DFC] transition-all duration-200">
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2">
