@@ -76,7 +76,7 @@ export default function DashboardHomePage() {
 
         const { data: lessons } = sectionIds.length
           ? await supabase
-              .from("course_items")
+              .from("course_items_public")
               .select("id, section_id")
               .in("section_id", sectionIds)
               .eq("type", "video")
@@ -145,7 +145,7 @@ export default function DashboardHomePage() {
         // ── عدد الاختبارات المتاحة في كورسات الطالب ──
         const { data: quizItems } = sectionIds.length
           ? await supabase
-              .from("course_items")
+              .from("course_items_public")
               .select("id")
               .in("section_id", sectionIds)
               .eq("type", "quiz")
