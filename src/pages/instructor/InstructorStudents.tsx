@@ -136,52 +136,57 @@ export function InstructorStudents() {
         </motion.div>
 
         {/* Stats - كروت مضغوطة مثل صفحة التسليمات */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 py-6">
-          <div className="group relative bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 p-6 flex items-center justify-between overflow-hidden">
-            <div className="absolute -left-6 -bottom-6 w-24 h-24 rounded-full bg-blue-50/60 blur-2xl group-hover:bg-blue-100/60 transition-colors duration-300" />
-            <div className="relative z-10">
-              <div className="text-2xl lg:text-3xl font-black text-slate-900">{students.length}</div>
-              <div className="text-xs lg:text-sm text-slate-500 font-bold mt-1">إجمالي الطلاب</div>
-            </div>
-            <div className="relative z-10 w-12 h-12 rounded-2xl bg-gradient-to-br from-[#1547D6] to-[#3183FF] flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-300">
-              <Users className="text-white" size={20} />
-            </div>
-          </div>
-          <div className="group relative bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 p-6 flex items-center justify-between overflow-hidden">
-            <div className="absolute -left-6 -bottom-6 w-24 h-24 rounded-full bg-emerald-50/60 blur-2xl group-hover:bg-emerald-100/60 transition-colors duration-300" />
-            <div className="relative z-10">
-              <div className="text-2xl lg:text-3xl font-black text-emerald-600">
-                {students.filter((s) => s.status === "نشط" || s.status === "active").length}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 py-6">
+          {/* إجمالي الطلاب */}
+          <div className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-[#155DFC] p-5 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-bold text-slate-500">إجمالي الطلاب</span>
+              <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <Users className="text-[#155DFC]" size={16} />
               </div>
-              <div className="text-xs lg:text-sm text-slate-500 font-bold mt-1">النشطون</div>
             </div>
-            <div className="relative z-10 w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform duration-300">
-              <UserCheck className="text-white" size={20} />
-            </div>
-          </div>
-          <div className="group relative bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 p-6 flex items-center justify-between overflow-hidden">
-            <div className="absolute -left-6 -bottom-6 w-24 h-24 rounded-full bg-amber-50/60 blur-2xl group-hover:bg-amber-100/60 transition-colors duration-300" />
-            <div className="relative z-10">
-              <div className="text-2xl lg:text-3xl font-black text-amber-600">{newStudentsThisMonth}</div>
-              <div className="text-xs lg:text-sm text-slate-500 font-bold mt-1">هذا الشهر</div>
-            </div>
-            <div className="relative z-10 w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform duration-300">
-              <GraduationCap className="text-white" size={20} />
-            </div>
+            <div className="text-3xl font-black text-[#155DFC] mb-1">{students.length}</div>
+            <div className="text-xs text-slate-400 font-medium">كل الطلاب المسجلين</div>
           </div>
 
-          {/* كارت رابع: الموقوفون */}
-          <div className="group relative bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 p-6 flex items-center justify-between overflow-hidden">
-            <div className="absolute -left-6 -bottom-6 w-24 h-24 rounded-full bg-red-50/60 blur-2xl group-hover:bg-red-100/60 transition-colors duration-300" />
-            <div className="relative z-10">
-              <div className="text-2xl lg:text-3xl font-black text-red-600">
-                {students.filter((s) => s.status === "موقوف").length}
+          {/* النشطون */}
+          <div className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-emerald-500 p-5 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-bold text-slate-500">النشطون</span>
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                <UserCheck className="text-emerald-600" size={16} />
               </div>
-              <div className="text-xs lg:text-sm text-slate-500 font-bold mt-1">الموقوفون</div>
             </div>
-            <div className="relative z-10 w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform duration-300">
-              <Power className="text-white" size={20} />
+            <div className="text-3xl font-black text-emerald-600 mb-1">
+              {students.filter((s) => s.status === "نشط" || s.status === "active").length}
             </div>
+            <div className="text-xs text-slate-400 font-medium">طالب متاح للتعلم</div>
+          </div>
+
+          {/* هذا الشهر */}
+          <div className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-amber-500 p-5 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-bold text-slate-500">هذا الشهر</span>
+              <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
+                <GraduationCap className="text-amber-600" size={16} />
+              </div>
+            </div>
+            <div className="text-3xl font-black text-amber-600 mb-1">{newStudentsThisMonth}</div>
+            <div className="text-xs text-slate-400 font-medium">طالب جديد انضم</div>
+          </div>
+
+          {/* الموقوفون */}
+          <div className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-red-500 p-5 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-bold text-slate-500">الموقوفون</span>
+              <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+                <Power className="text-red-600" size={16} />
+              </div>
+            </div>
+            <div className="text-3xl font-black text-red-600 mb-1">
+              {students.filter((s) => s.status === "موقوف").length}
+            </div>
+            <div className="text-xs text-slate-400 font-medium">غير متاح للتعلم حاليًا</div>
           </div>
         </div>
 
