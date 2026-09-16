@@ -1717,6 +1717,8 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             ))}
           </div>
 
+          {activeTab === "overview" && (
+          <>
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
             <CardContent className="p-6 lg:p-8">
               <div className="mb-6">
@@ -1821,7 +1823,10 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               )}
             </CardContent>
           </Card>
+          </>
+          )}
 
+          {activeTab === "courses" && (
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] border-r-4 border-r-[#155DFC] rounded-3xl shadow-sm overflow-hidden">
             <CardContent className="p-0">
               <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
@@ -2063,7 +2068,9 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               )}
             </CardContent>
           </Card>
+          )}
 
+          {activeTab === "payments" && (
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
             <CardContent className="p-0">
               <div className="p-6 lg:p-8 pb-4">
@@ -2211,7 +2218,10 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               )}
             </CardContent>
           </Card>
+          )}
 
+          {activeTab === "homework" && (
+          <>
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
             <CardContent className="p-0">
               <div className="p-6 lg:p-8 pb-4">
@@ -2463,7 +2473,11 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               )}
             </CardContent>
           </Card>
+          </>
+          )}
 
+          {activeTab === "activity" && (
+          <>
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
             <CardContent className="p-6 lg:p-8">
               <div className="mb-6">
@@ -2587,6 +2601,8 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               )}
             </CardContent>
           </Card>
+          </>
+          )}
         </div>
 
       {showAnnouncementModal && (
