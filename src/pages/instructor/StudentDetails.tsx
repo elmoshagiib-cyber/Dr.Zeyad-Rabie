@@ -229,6 +229,7 @@ export function StudentDetails() {
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"overview" | "courses" | "payments" | "homework" | "activity">("overview");
   const [courses, setCourses] = useState<StudentCourse[]>([]);
   const [examResults, setExamResults] = useState<ExamResult[]>([]);
   const [homeworkResults, setHomeworkResults] = useState<HomeworkSubmission[]>([]);
@@ -1379,7 +1380,9 @@ const sendAnnouncement = async () => {
     );
   }
 
-const uniqueCourses = [...new Set(courses.map((c) => c.course_id))];
+  const coursesNeedingAttention = coursesWithProgress.filter((c) => c.needsFollowup || c.isStalled).length;
+  const pendingPaymentsCount = subscriptionPayments.filter((p) => p.payment_status === "pending").length;
+  const ungradedHomeworkCount = homeworkResults.filter((h) => h.grade === null || h.grade === undefined).length;
 
   // حساب حالة الاشتراك الحقيقية من الكورسات الفعلية (مش من عمود الطالب المخزّن)
   const now = new Date();
@@ -1597,8 +1600,20 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               </div>
             </CardContent>
           </Card>
+          {coursesWithProgress.some((c) => c.needsFollowup || c.isStalled) && (
+            <div className="rounded-2xl border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/20 px-5 py-4 flex items-center gap-3">
+              <AlertCircle className="text-amber-600 flex-shrink-0" size={20} />
+              <p className="text-sm font-bold text-amber-700 dark:text-amber-400">
+                {coursesWithProgress.filter((c) => c.needsFollowup).length} كورس محتاج متابعة
+                {" • "}
+                {coursesWithProgress.filter((c) => !c.needsFollowup && c.isStalled).length} كورس متعثر —
+                راجع قسم "الاشتراكات والكورسات" تحت
+              </p>
+            </div>
+          )}
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"></div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#155DFC] transition-all duration-300">
               <CardContent className="p-4 lg:p-6">
                 <div className="flex items-center justify-between">
@@ -1668,6 +1683,38 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+            {[
+              { key: "overview", label: "نظرة عامة", icon: <User size={16} />, count: 0 },
+              { key: "courses", label: "الكورسات", icon: <BookOpen size={16} />, count: coursesNeedingAttention },
+              { key: "payments", label: "المدفوعات", icon: <Receipt size={16} />, count: pendingPaymentsCount },
+              { key: "homework", label: "الواجبات والامتحانات", icon: <FileText size={16} />, count: ungradedHomeworkCount },
+              { key: "activity", label: "النشاط والأجهزة", icon: <Monitor size={16} />, count: 0 },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as typeof activeTab)}
+                className={`flex items-center gap-2 h-11 px-4 rounded-xl text-sm font-bold whitespace-nowrap transition-colors flex-shrink-0 ${
+                  activeTab === tab.key
+                    ? "bg-[#155DFC] text-white shadow-md"
+                    : "bg-white dark:bg-[#111111] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A]"
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+                {tab.count > 0 && (
+                  <span
+                    className={`min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black flex items-center justify-center ${
+                      activeTab === tab.key ? "bg-white/25 text-white" : "bg-red-500 text-white"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            ))}
           </div>
 
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
@@ -1775,7 +1822,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] border-r-4 border-r-[#155DFC] rounded-3xl shadow-sm overflow-hidden">
             <CardContent className="p-0">
               <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
                 <div className="flex items-center gap-3">
@@ -2044,7 +2091,28 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                       className="w-full h-10 pr-9 pl-3 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#155DFC]"
                     />
                   </div>
-
+                  {([
+                    { key: "all", label: "الكل" },
+                    { key: "verified", label: "مؤكد" },
+                    { key: "pending", label: "قيد المراجعة" },
+                    { key: "rejected", label: "مرفوض" },
+                    { key: "active", label: "نشط" },
+                    { key: "expired", label: "منتهي" },
+                    { key: "online", label: "Online" },
+                    { key: "center", label: "Center" },
+                  ] as { key: SubPaymentsFilterType; label: string }[]).map((f) => (
+                    <button
+                      key={f.key}
+                      onClick={() => { setSubPaymentsFilter(f.key); setSubPaymentsPage(1); }}
+                      className={`h-9 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-colors border ${
+                        subPaymentsFilter === f.key
+                          ? "bg-[#155DFC] text-white border-[#155DFC]"
+                          : "bg-white dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300 border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#222]"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
