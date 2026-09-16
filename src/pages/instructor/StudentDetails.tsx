@@ -2367,7 +2367,26 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">الواجبات</h2>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">إحصائيات وسجل الواجبات المسلّمة</p>
 
-               
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] p-4">
+                    <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1">واجبات مسلّمة</p>
+                    <p className="text-lg font-black text-gray-900 dark:text-white">{completedHomework} / {totalHomework}</p>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] p-4">
+                    <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1">لسه محتاجة تصحيح</p>
+                    <p className="text-lg font-black text-amber-600">{ungradedHomeworkCount}</p>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] p-4">
+                    <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1">متوسط الدرجات</p>
+                    <p className={`text-lg font-black ${avgHomeworkScore >= 80 ? "text-emerald-600" : avgHomeworkScore >= 50 ? "text-amber-600" : "text-red-600"}`}>
+                      {homeworkScores.length > 0 ? `${avgHomeworkScore}%` : "-"}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] p-4">
+                    <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1">واجبات متبقية</p>
+                    <p className="text-lg font-black text-gray-900 dark:text-white">{remainingHomework}</p>
+                  </div>
+                </div>
               </div>
 
               {homeworkResults.length === 0 ? (
@@ -2509,7 +2528,24 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white mb-2">الامتحانات</h2>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">نتائج وسجل الاختبارات</p>
 
-             
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] p-4">
+                    <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1">عدد المحاولات</p>
+                    <p className="text-lg font-black text-gray-900 dark:text-white">{examResults.length}</p>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] p-4">
+                    <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1">متوسط الدرجات</p>
+                    <p className="text-lg font-black text-[#155DFC]">{examResults.length > 0 ? averageScore : "-"}</p>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] p-4">
+                    <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1">أعلى درجة</p>
+                    <p className="text-lg font-black text-emerald-600">{examResults.length > 0 ? highestScore : "-"}</p>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A] p-4">
+                    <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1">أقل درجة</p>
+                    <p className="text-lg font-black text-red-600">{examResults.length > 0 ? lowestScore : "-"}</p>
+                  </div>
+                </div>
               </div>
 
               {examResults.length === 0 ? (
