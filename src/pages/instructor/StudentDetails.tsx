@@ -2660,7 +2660,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                 <p className="text-gray-500 dark:text-gray-400 text-sm">آخر الأنشطة والتفاعلات</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A2A]">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
@@ -2668,7 +2668,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     </div>
                     <p className="text-xs font-bold text-gray-500 dark:text-gray-400">آخر دخول</p>
                   </div>
-                  <p className="font-bold text-gray-900 dark:text-white">
+                  <p className="font-bold text-gray-900 dark:text-white text-sm">
                     {student.last_login ? new Date(student.last_login).toLocaleString("ar-EG") : "لم يسجل دخول بعد"}
                   </p>
                 </div>
@@ -2680,10 +2680,32 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                     </div>
                     <p className="text-xs font-bold text-gray-500 dark:text-gray-400">آخر جهاز استخدمه</p>
                   </div>
-                  <p className="font-bold text-gray-900 dark:text-white">
+                  <p className="font-bold text-gray-900 dark:text-white text-sm">
                     {loginSessions[0]
                       ? `${loginSessions[0].device_type || "-"} • ${loginSessions[0].os || "-"} • ${loginSessions[0].browser || "-"}`
                       : student.device_name || "غير محدد"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A2A]">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
+                      <Activity className="text-[#155DFC]" size={20} />
+                    </div>
+                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400">إجمالي مرات الدخول</p>
+                  </div>
+                  <p className="font-black text-gray-900 dark:text-white text-xl">{loginSessions.length}</p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A2A]">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
+                      <Monitor className="text-[#155DFC]" size={20} />
+                    </div>
+                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400">عدد الأجهزة المستخدمة</p>
+                  </div>
+                  <p className="font-black text-gray-900 dark:text-white text-xl">
+                    {new Set(loginSessions.map((s) => s.device_name).filter(Boolean)).size || 0}
                   </p>
                 </div>
               </div>
@@ -2740,7 +2762,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                   </div>
 
                   <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 dark:border-[#2A2A2A]">
-                    <span className="text-xs font-bold text-emerald-600">
+                    <span className="text-xs font-bold text-[#155DFC]">
                       {(sessionsPage - 1) * sessionsPerPage + 1} - {Math.min(sessionsPage * sessionsPerPage, loginSessions.length)} من {loginSessions.length}
                     </span>
                     <div className="flex items-center gap-2">
@@ -2751,7 +2773,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                       >
                         ‹
                       </button>
-                      <span className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-black">
+                      <span className="w-8 h-8 rounded-lg bg-[#155DFC] text-white flex items-center justify-center text-xs font-black">
                         {sessionsPage}
                       </span>
                       <button
