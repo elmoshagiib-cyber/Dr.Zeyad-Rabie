@@ -1614,75 +1614,55 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
           )}
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#155DFC] transition-all duration-300">
-              <CardContent className="p-4 lg:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">محاضرة مشاهدة</p>
-                    <h3 className="text-2xl lg:text-3xl font-black text-[#155DFC]">{realWatchedLessons}</h3>
-                  </div>
-                  <div className="w-12 h-12 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
-                    <BookOpen className="text-[#155DFC]" size={24} />
-                  </div>
+            <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-violet-500 bg-white dark:bg-[#111111] p-4 lg:p-5 shadow-sm hover:shadow-lg transition-all duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">محاضرة مشاهدة</p>
+                <div className="w-8 h-8 rounded-full bg-violet-50 dark:bg-violet-950/30 flex items-center justify-center flex-shrink-0">
+                  <BookOpen className="text-violet-600" size={16} />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              <h3 className="text-2xl lg:text-3xl font-black text-violet-600">{realWatchedLessons}</h3>
+            </div>
 
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#155DFC] transition-all duration-300">
-              <CardContent className="p-4 lg:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">واجب محلول</p>
-                    <h3 className="text-2xl lg:text-3xl font-black text-emerald-600">{completedHomework}</h3>
-                  </div>
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
-                    <CheckCircle2 className="text-emerald-600" size={24} />
-                  </div>
+            <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-emerald-500 bg-white dark:bg-[#111111] p-4 lg:p-5 shadow-sm hover:shadow-lg transition-all duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">واجب محلول</p>
+                <div className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle2 className="text-emerald-600" size={16} />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              <h3 className="text-2xl lg:text-3xl font-black text-emerald-600">{completedHomework}</h3>
+            </div>
 
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#155DFC] transition-all duration-300">
-              <CardContent className="p-4 lg:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">كورس مشترك</p>
-                    <h3 className="text-2xl lg:text-3xl font-black text-amber-500">{uniqueCourses.length}</h3>
-                  </div>
-                  <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center">
-                    <GraduationCap className="text-amber-600" size={24} />
-                  </div>
+            <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-amber-500 bg-white dark:bg-[#111111] p-4 lg:p-5 shadow-sm hover:shadow-lg transition-all duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">كورس مشترك</p>
+                <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center flex-shrink-0">
+                  <GraduationCap className="text-amber-600" size={16} />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              <h3 className="text-2xl lg:text-3xl font-black text-amber-500">{uniqueCourses.length}</h3>
+            </div>
 
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#155DFC] transition-all duration-300">
-              <CardContent className="p-4 lg:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">نسبة الإنجاز</p>
-                    <h3 className="text-2xl lg:text-3xl font-black text-blue-600">{lessonsPercent}%</h3>
-                  </div>
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
-                    <Activity className="text-blue-600" size={24} />
-                  </div>
+            <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-gray-300 dark:border-t-gray-600 bg-white dark:bg-[#111111] p-4 lg:p-5 shadow-sm hover:shadow-lg transition-all duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">نسبة الإنجاز</p>
+                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                  <Activity className="text-gray-500" size={16} />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              <h3 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white">{lessonsPercent}%</h3>
+            </div>
 
-            <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#155DFC] transition-all duration-300">
-              <CardContent className="p-4 lg:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">مرات فتح الاختبار</p>
-                    <h3 className="text-2xl lg:text-3xl font-black text-[#155DFC]">{examOpensCount}</h3>
-                  </div>
-                  <div className="w-12 h-12 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
-                    <FileText className="text-[#155DFC]" size={24} />
-                  </div>
+            <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-[#155DFC] bg-white dark:bg-[#111111] p-4 lg:p-5 shadow-sm hover:shadow-lg transition-all duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">مرات فتح الاختبار</p>
+                <div className="w-8 h-8 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center flex-shrink-0">
+                  <FileText className="text-[#155DFC]" size={16} />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              <h3 className="text-2xl lg:text-3xl font-black text-[#155DFC]">{examOpensCount}</h3>
+            </div>
           </div>
 
                     <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1">
