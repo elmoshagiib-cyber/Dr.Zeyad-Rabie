@@ -31,10 +31,14 @@ export function InstructorStudents() {
   const [gradeFilter, setGradeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [typeFilter, setTypeFilter]   = useState("");
+  const [loading, setLoading]         = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => { loadStudents(); }, []);
 
   const loadStudents = async () => {
+    setLoading(true);
     const { data, error } = await supabase
       .from("students")
       .select(`
@@ -44,9 +48,9 @@ export function InstructorStudents() {
           active
         )
       `);
- 
 
     if (!error) setStudents(data || []);
+    setLoading(false);
   };
 
   const currentMonth = new Date().getMonth();
@@ -75,6 +79,8 @@ export function InstructorStudents() {
     loadStudents();
   };
 
+  useEffect(() => { setCurrentPage(1); }, [searchTerm, gradeFilter, statusFilter, typeFilter]);
+
   const filteredStudents = students.filter((s) => {
     const matchesSearch =
       s.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,6 +93,12 @@ export function InstructorStudents() {
       (!typeFilter   || s.type   === typeFilter)
     );
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredStudents.length / pageSize));
+  const paginatedStudents = filteredStudents.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const getStudentTypeLabel = (type?: string) => {
     switch (type) {
@@ -149,37 +161,13 @@ export function InstructorStudents() {
     justify-between
   "
 >
-            <div className="text-2xl lg:text-3xl font-black text-slate-900">{students.length}</div>
-            <div className="text-xs lg:text-sm text-slate-500 font-bold mt-1">إجمالي الطلاب</div>
-          </div>
-          <div
-  className="
-    bg-white
-
-    rounded-3xl
-
-    border
-    border-slate-200
-
-    shadow-sm
-
-    hover:shadow-lg
-
-    transition
-
-    p-6
-
-    flex
-
-    items-center
-
-    justify-between
-  "
->
-            <div className="text-2xl lg:text-3xl font-black text-emerald-600">
-              {students.filter((s) => s.status === "نشط" || s.status === "active").length}
+            <div>
+              <div className="text-2xl lg:text-3xl font-black text-slate-900">{students.length}</div>
+              <div className="text-xs lg:text-sm text-slate-500 font-bold mt-1">إجمالي الطلاب</div>
             </div>
-            <div className="text-xs lg:text-sm text-slate-500 font-bold mt-1">النشطون</div>
+            <div className="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center">
+              <Users className="text-[#155DFC]" size={20} />
+            </div>
           </div>
           <div
   className="
@@ -205,8 +193,47 @@ export function InstructorStudents() {
     justify-between
   "
 >
-            <div className="text-2xl lg:text-3xl font-black text-amber-600">{newStudentsThisMonth}</div>
-            <div className="text-xs lg:text-sm text-slate-500 font-bold mt-1">هذا الشهر</div>
+            <div>
+              <div className="text-2xl lg:text-3xl font-black text-emerald-600">
+                {students.filter((s) => s.status === "نشط" || s.status === "active").length}
+              </div>
+              <div className="text-xs lg:text-sm text-slate-500 font-bold mt-1">النشطون</div>
+            </div>
+            <div className="w-11 h-11 rounded-2xl bg-emerald-50 flex items-center justify-center">
+              <UserCheck className="text-emerald-600" size={20} />
+            </div>
+          </div>
+          <div
+  className="
+    bg-white
+
+    rounded-3xl
+
+    border
+    border-slate-200
+
+    shadow-sm
+
+    hover:shadow-lg
+
+    transition
+
+    p-6
+
+    flex
+
+    items-center
+
+    justify-between
+  "
+>
+            <div>
+              <div className="text-2xl lg:text-3xl font-black text-amber-600">{newStudentsThisMonth}</div>
+              <div className="text-xs lg:text-sm text-slate-500 font-bold mt-1">هذا الشهر</div>
+            </div>
+            <div className="w-11 h-11 rounded-2xl bg-amber-50 flex items-center justify-center">
+              <GraduationCap className="text-amber-600" size={20} />
+            </div>
           </div>
         </div>
 
@@ -277,7 +304,13 @@ export function InstructorStudents() {
             </span>
           </div>
 
-          {filteredStudents.length === 0 ? (
+          {loading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-20 rounded-2xl bg-white border border-slate-200 animate-pulse" />
+              ))}
+            </div>
+          ) : filteredStudents.length === 0 ? (
             <div className="text-center py-16">
               <Users className="mx-auto text-slate-300 mb-4" size={48} />
               <p className="text-slate-600 font-bold">لا يوجد طلاب</p>
@@ -302,7 +335,7 @@ export function InstructorStudents() {
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredStudents.map((student) => (
+                        {paginatedStudents.map((student) => (
                           <tr 
                             key={student.id} 
                             className="border-b border-slate-100 hover:bg-slate-50 transition-all duration-200"
@@ -352,18 +385,21 @@ export function InstructorStudents() {
                             <td className="px-4 py-3">
                               <div className="flex justify-center gap-1">
                                 <button
+                                  title="عرض بيانات الطالب"
                                   onClick={() => navigate(`/instructor/students/${student.id}`)}
                                   className="w-8 h-8 rounded-lg bg-blue-50 text-[#155DFC] hover:bg-blue-100 flex items-center justify-center transition-all duration-200"
                                 >
                                   <Eye size={14} />
                                 </button>
                                 <button
+                                  title={student.status === "نشط" ? "إيقاف الطالب" : "تفعيل الطالب"}
                                   onClick={() => toggleStudentStatus(student.id, student.status)}
                                   className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 flex items-center justify-center transition-all duration-200"
                                 >
                                   <Power size={14} />
                                 </button>
                                 <button
+                                  title="حذف الطالب"
                                   onClick={() => { if (confirm("هل أنت متأكد من حذف الطالب؟")) deleteStudent(student.id); }}
                                   className="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition-all duration-200"
                                 >
@@ -381,7 +417,7 @@ export function InstructorStudents() {
 
               {/* Mobile Cards */}
               <div className="md:hidden space-y-3">
-                {filteredStudents.map((student) => (
+                {paginatedStudents.map((student) => (
                   <Card 
                     key={student.id} 
                     className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm"
@@ -464,6 +500,27 @@ export function InstructorStudents() {
                   </Card>
                 ))}
               </div>
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-6">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    className="w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                  <span className="text-xs font-bold text-slate-600 px-2">
+                    صفحة {currentPage} من {totalPages}
+                  </span>
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    className="w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
