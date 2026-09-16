@@ -1371,7 +1371,7 @@ const sendAnnouncement = async () => {
           <div className="text-center">
             <AlertCircle className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={64} />
             <p className="text-gray-600 dark:text-gray-400 font-bold text-lg">الطالب غير موجود</p>
-            <Button onClick={() => navigate(-1)} className="mt-4 bg-[#155DFC] hover:bg-[#9E2FFF]">
+            <Button onClick={() => navigate(-1)} className="mt-4 bg-[#155DFC] hover:bg-[#1547D6]">
               العودة
             </Button>
           </div>
@@ -1614,14 +1614,14 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
           )}
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-violet-500 bg-white dark:bg-[#111111] p-4 lg:p-5 shadow-sm hover:shadow-lg transition-all duration-300">
+            <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-sky-500 bg-white dark:bg-[#111111] p-4 lg:p-5 shadow-sm hover:shadow-lg transition-all duration-300">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">محاضرة مشاهدة</p>
-                <div className="w-8 h-8 rounded-full bg-violet-50 dark:bg-violet-950/30 flex items-center justify-center flex-shrink-0">
-                  <BookOpen className="text-violet-600" size={16} />
+                <div className="w-8 h-8 rounded-full bg-sky-50 dark:bg-sky-950/30 flex items-center justify-center flex-shrink-0">
+                  <BookOpen className="text-sky-600" size={16} />
                 </div>
               </div>
-              <h3 className="text-2xl lg:text-3xl font-black text-violet-600">{realWatchedLessons}</h3>
+              <h3 className="text-2xl lg:text-3xl font-black text-sky-600">{realWatchedLessons}</h3>
             </div>
 
             <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-emerald-500 bg-white dark:bg-[#111111] p-4 lg:p-5 shadow-sm hover:shadow-lg transition-all duration-300">
@@ -1657,7 +1657,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             <div className="rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-[#155DFC] bg-white dark:bg-[#111111] p-4 lg:p-5 shadow-sm hover:shadow-lg transition-all duration-300">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-gray-500 dark:text-gray-400 text-xs font-bold">مرات فتح الاختبار</p>
-                <div className="w-8 h-8 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center flex-shrink-0">
                   <FileText className="text-[#155DFC]" size={16} />
                 </div>
               </div>
@@ -1811,7 +1811,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             <CardContent className="p-0">
               <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
                     <BookOpen className="text-[#155DFC]" size={20} />
                   </div>
                   <div>
@@ -2133,7 +2133,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
                             <tr
                               key={p.id}
                               onClick={() => { setSelectedInvoice(p); setShowInvoiceModal(true); }}
-                              className="border-t border-gray-100 dark:border-[#2A2A2A] cursor-pointer hover:bg-[#FAF7FF] dark:hover:bg-[#171717] transition-colors"
+                              className="border-t border-gray-100 dark:border-[#2A2A2A] cursor-pointer hover:bg-[#EFF6FF] dark:hover:bg-[#171717] transition-colors"
                             >
                               <td className="px-4 py-3 font-black text-[#155DFC] whitespace-nowrap">{p.invoice_number}</td>
                               <td className="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">{p.courseData?.title || "-"}</td>
@@ -2468,7 +2468,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A2A]">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
                       <Calendar className="text-[#155DFC]" size={20} />
                     </div>
                     <p className="text-xs font-bold text-gray-500 dark:text-gray-400">آخر دخول</p>
@@ -2480,7 +2480,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
 
                 <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A2A]">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
                       <Monitor className="text-[#155DFC]" size={20} />
                     </div>
                     <p className="text-xs font-bold text-gray-500 dark:text-gray-400">آخر جهاز استخدمه</p>
@@ -2499,7 +2499,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             <CardContent className="p-0">
               <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
                     <Monitor className="text-[#155DFC]" size={20} />
                   </div>
                   <div>
@@ -2590,7 +2590,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
           <div className="bg-white dark:bg-[#111111] w-full max-w-[650px] rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-[#2A2A2A]">
             <div className="p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
                   <Bell className="text-[#155DFC]" size={24} />
                 </div>
                 <div>
@@ -2782,7 +2782,7 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
           <div className="bg-white dark:bg-[#111111] w-full max-w-[600px] max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl border border-gray-200 dark:border-[#2A2A2A]">
             <div className="p-6 border-b border-gray-100 dark:border-[#2A2A2A]">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
                   <Receipt className="text-[#155DFC]" size={24} />
                 </div>
                 <div>
