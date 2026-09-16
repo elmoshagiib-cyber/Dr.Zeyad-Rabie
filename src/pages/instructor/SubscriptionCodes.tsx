@@ -22,6 +22,8 @@ import {
   Copy,
   Trash2,
   X,
+  Calendar,
+  Infinity as InfinityIcon,
 } from "lucide-react";
 
 
@@ -273,35 +275,35 @@ const getStatusBadge = (status: string) => {
   switch (status) {
     case "active":
       return (
-        <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold">
-           صالح
+        <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-xs font-black border border-emerald-200 whitespace-nowrap">
+          صالح
         </span>
       );
 
     case "used":
       return (
-        <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold">
-           مستخدم
+        <span className="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-600 text-xs font-black border border-sky-200 whitespace-nowrap">
+          مستخدم
         </span>
       );
 
     case "expired":
       return (
-        <span className="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold">
-           منتهي
+        <span className="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-600 text-xs font-black border border-amber-200 whitespace-nowrap">
+          منتهي
         </span>
       );
 
     case "cancelled":
       return (
-        <span className="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold">
-           ملغي
+        <span className="px-2.5 py-1 rounded-lg bg-red-50 text-red-600 text-xs font-black border border-red-200 whitespace-nowrap">
+          ملغي
         </span>
       );
 
     default:
       return (
-        <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
+        <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-black border border-slate-200 whitespace-nowrap">
           غير معروف
         </span>
       );
@@ -961,7 +963,7 @@ return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-slate-50 border-b border-slate-200 text-slate-600">
+          <tr className="bg-slate-50 border-b border-slate-200 text-slate-500">
             <th className="text-right font-bold px-6 py-3 whitespace-nowrap">الكود</th>
             <th className="text-right font-bold px-6 py-3 whitespace-nowrap">الكورس / المدة</th>
             <th className="text-center font-bold px-6 py-3 whitespace-nowrap">الحالة</th>
@@ -972,17 +974,26 @@ return (
           </tr>
         </thead>
         <tbody>
-          {filteredCodes.map((item) => {
+          {filteredCodes.map((item, idx) => {
             const isExpired =
               item.expires_at && new Date(item.expires_at) < new Date();
 
             return (
               <tr
                 key={item.id}
-                className="border-b border-slate-100 hover:bg-[#EFF6FF] transition-colors"
+                className={`border-b border-slate-100 hover:bg-[#EFF6FF] transition-colors ${
+                  idx % 2 === 1 ? "bg-slate-50/60" : ""
+                }`}
               >
                 <td className="px-6 py-4">
-                  <span className="font-black tracking-wider text-slate-900">{item.code}</span>
+                  <button
+                    onClick={() => copyCode(item.code)}
+                    title="اضغط لنسخ الكود"
+                    className="font-black tracking-wider text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg px-2.5 py-1 transition-colors"
+                    dir="ltr"
+                  >
+                    {item.code}
+                  </button>
                 </td>
 
                 <td className="px-6 py-4">
@@ -1000,45 +1011,47 @@ return (
                   {item.students ? (
                     <div>
                       <p className="font-bold text-slate-800">{item.students.full_name}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{item.students.phone}</p>
+                      <p className="text-xs text-slate-500 mt-0.5" dir="ltr">{item.students.phone}</p>
                     </div>
                   ) : (
                     <span className="text-slate-400 text-xs font-bold">غير مستخدم بعد</span>
                   )}
                 </td>
 
-                <td className="px-6 py-4 text-slate-600 whitespace-nowrap">
-                  {new Date(item.created_at).toLocaleDateString("ar-EG")}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className="flex items-center gap-1.5 text-slate-600 text-xs font-bold">
+                    <Calendar size={13} className="text-slate-400" />
+                    {new Date(item.created_at).toLocaleDateString("ar-EG")}
+                  </span>
                 </td>
 
                 <td className="px-6 py-4 whitespace-nowrap">
                   {item.duration_days === 0 ? (
-                    <span className="text-blue-600 font-bold text-xs">♾️ لا ينتهي</span>
+                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 text-[#155DFC] text-xs font-bold w-fit">
+                      <InfinityIcon size={13} />
+                      لا ينتهي
+                    </span>
                   ) : item.expires_at ? (
-                    <span className={`font-bold text-xs ${isExpired ? "text-red-600" : "text-emerald-600"}`}>
-                      {isExpired ? "⛔ " : "✅ "}
+                    <span
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold w-fit ${
+                        isExpired ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"
+                      }`}
+                    >
+                      {isExpired ? <XCircle size={13} /> : <CheckCircle2 size={13} />}
                       {new Date(item.expires_at).toLocaleDateString("ar-EG")}
                     </span>
                   ) : (
-                    <span className="text-slate-400 text-xs">لم يُستخدم بعد</span>
+                    <span className="text-slate-400 text-xs font-bold">لم يُستخدم بعد</span>
                   )}
                 </td>
 
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-center gap-1">
-                    <button
-                      onClick={() => copyCode(item.code)}
-                      title="نسخ الكود"
-                      className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition"
-                    >
-                      <Copy size={16} />
-                    </button>
-
                     <select
                       value={item.status}
                       onChange={(e) => updateCodeStatus(item.id, e.target.value)}
                       title="تغيير حالة الكود"
-                      className="text-xs font-bold rounded-lg border border-slate-300 px-2 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-700"
+                      className="text-xs font-bold rounded-lg border border-slate-200 px-2 py-1.5 outline-none focus:ring-2 focus:ring-[#155DFC] bg-white text-slate-700"
                     >
                       <option value="active">صالح</option>
                       <option value="used">مستخدم</option>
@@ -1049,9 +1062,9 @@ return (
                     <button
                       onClick={() => deleteCode(item.id)}
                       title="حذف الكود"
-                      className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition"
+                      className="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition-colors"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </td>
