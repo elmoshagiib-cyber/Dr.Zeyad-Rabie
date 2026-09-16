@@ -10,6 +10,7 @@ import {
   Search,
   RotateCcw,
   Eye,
+  Clock,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
@@ -131,6 +132,7 @@ export function InstructorSubscriptions() {
   const blockedSubscriptionsCount = rows.filter((r) => r.student?.is_blocked).length;
   const activeSubscriptionsCount = rows.filter(isRowActive).length;
   const totalSubscriptionsCount = rows.length;
+  const pendingSubscriptionsCount = rows.filter((r) => r.payment_status === "pending").length;
 
   // ── الفلاتر ──────────────────────────────────────────
   const filteredRows = rows.filter((r) => {
@@ -210,54 +212,61 @@ export function InstructorSubscriptions() {
 
       <div className="space-y-6 max-w-7xl mx-auto">
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
-            <CardContent className="p-4 lg:p-6 flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">الطلاب المشتركين</p>
-                <h3 className="text-2xl lg:text-3xl font-black text-[#155DFC]">{uniqueSubscribedStudents}</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-[#155DFC] p-5 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-bold text-gray-500 dark:text-gray-400">الطلاب المشتركين</span>
+              <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center flex-shrink-0">
+                <Users className="text-[#155DFC]" size={16} />
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center">
-                <Users className="text-[#155DFC]" size={24} />
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="text-3xl font-black text-[#155DFC] mb-1">{uniqueSubscribedStudents}</div>
+            <div className="text-xs text-gray-400 font-medium">طالب لديه اشتراك مؤكد</div>
+          </div>
 
-          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
-            <CardContent className="p-4 lg:p-6 flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">اشتراكات محظورة</p>
-                <h3 className="text-2xl lg:text-3xl font-black text-red-600">{blockedSubscriptionsCount}</h3>
+          <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-emerald-500 p-5 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-bold text-gray-500 dark:text-gray-400">اشتراكات نشطة</span>
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center flex-shrink-0">
+                <CheckCircle2 className="text-emerald-600" size={16} />
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
-                <Ban className="text-red-600" size={24} />
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="text-3xl font-black text-emerald-600 mb-1">{activeSubscriptionsCount}</div>
+            <div className="text-xs text-gray-400 font-medium">مؤكدة ولسه سارية</div>
+          </div>
 
-          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
-            <CardContent className="p-4 lg:p-6 flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">اشتراكات نشطة</p>
-                <h3 className="text-2xl lg:text-3xl font-black text-emerald-600">{activeSubscriptionsCount}</h3>
+          <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-amber-500 p-5 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-bold text-gray-500 dark:text-gray-400">قيد المراجعة</span>
+              <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center flex-shrink-0">
+                <Clock className="text-amber-600" size={16} />
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
-                <CheckCircle2 className="text-emerald-600" size={24} />
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="text-3xl font-black text-amber-600 mb-1">{pendingSubscriptionsCount}</div>
+            <div className="text-xs text-gray-400 font-medium">محتاجة تأكيد دفع</div>
+          </div>
 
-          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
-            <CardContent className="p-4 lg:p-6 flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">إجمالي الاشتراكات</p>
-                <h3 className="text-2xl lg:text-3xl font-black text-amber-600">{totalSubscriptionsCount}</h3>
+          <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-red-500 p-5 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-bold text-gray-500 dark:text-gray-400">اشتراكات محظورة</span>
+              <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950/30 flex items-center justify-center flex-shrink-0">
+                <Ban className="text-red-600" size={16} />
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center">
-                <Layers className="text-amber-600" size={24} />
+            </div>
+            <div className="text-3xl font-black text-red-600 mb-1">{blockedSubscriptionsCount}</div>
+            <div className="text-xs text-gray-400 font-medium">لطلاب موقوفين حاليًا</div>
+          </div>
+
+          <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-gray-300 dark:border-t-gray-600 p-5 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-bold text-gray-500 dark:text-gray-400">إجمالي الاشتراكات</span>
+              <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                <Layers className="text-gray-500" size={16} />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="text-3xl font-black text-gray-900 dark:text-white mb-1">{totalSubscriptionsCount}</div>
+            <div className="text-xs text-gray-400 font-medium">كل العمليات المسجلة</div>
+          </div>
         </div>
 
         {/* Filters */}
