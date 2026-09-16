@@ -1380,6 +1380,7 @@ const sendAnnouncement = async () => {
     );
   }
 
+  const uniqueCourses = [...new Set(courses.map((c) => c.course_id))];
   const coursesNeedingAttention = coursesWithProgress.filter((c) => c.needsFollowup || c.isStalled).length;
   const pendingPaymentsCount = subscriptionPayments.filter((p) => p.payment_status === "pending").length;
   const ungradedHomeworkCount = homeworkResults.filter((h) => h.grade === null || h.grade === undefined).length;
@@ -1612,7 +1613,6 @@ const totalWatchHours = Math.floor(realTotalWatchMinutes / 60);
             </div>
           )}
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"></div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm hover:shadow-lg hover:border-[#155DFC] transition-all duration-300">
               <CardContent className="p-4 lg:p-6">
