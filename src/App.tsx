@@ -27,6 +27,11 @@ const CourseDetailPage = lazy(() =>
 );
 const GradesPage = lazy(() => import("./pages/home/GradesPage"));
 const GradeCoursesPage = lazy(() => import("./pages/home/GradeCoursesPage"));
+const LeaderboardFullPage = lazy(() =>
+  import("./pages/leaderboard/LeaderboardFullPage").then((m) => ({
+    default: m.LeaderboardFullPage,
+  }))
+);
 
 /* Auth */
 const StudentLoginPage = lazy(() => import("./pages/auth/StudentLoginPage"));
@@ -224,6 +229,7 @@ function AppRoutes() {
         {/* Public */}
         <Route path="/" element={<HomePage />} />
         <Route path="/courses/:slug" element={<CourseDetailPage />} />
+        <Route path="/leaderboard" element={<LeaderboardFullPage />} />
 
         <Route path="/staff-login" element={<StaffLoginPage />} />
         <Route path="/parent-dashboard" element={<ParentDashboardPage />} />

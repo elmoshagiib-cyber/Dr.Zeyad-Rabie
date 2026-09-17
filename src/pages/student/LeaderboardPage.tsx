@@ -27,7 +27,7 @@ export function LeaderboardPage() {
           </div>
 
           <button
-            onClick={showComingSoon}
+            onClick={() => transitionTo("/leaderboard")}
             className="
               order-1 sm:order-2
               flex-shrink-0
@@ -59,7 +59,7 @@ export function LeaderboardPage() {
             {/* Buttons column (left side) */}
             <div className="flex flex-row md:flex-col gap-2.5 md:gap-3 order-2 md:order-2 flex-shrink-0 md:w-52 md:justify-center">
               <button
-                onClick={showComingSoon}
+                onClick={() => transitionTo("/leaderboard")}
                 className="
                   flex-1 md:flex-none
                   px-5 py-3 rounded-xl
@@ -95,7 +95,7 @@ export function LeaderboardPage() {
                 <div className="flex-shrink-0">
                   <div className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-44 md:h-44">
                     <img
-                      src="/images/leaderboard-frame.png"
+                      src="/images/frames/gold-frame.png"
                       alt="برواز لوحة الشرف"
                       className="w-full h-full object-contain"
                     />
