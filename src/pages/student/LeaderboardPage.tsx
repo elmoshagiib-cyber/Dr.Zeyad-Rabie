@@ -18,7 +18,7 @@ export function LeaderboardPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="text-right order-2 sm:order-1">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-emerald-700 dark:text-emerald-400 mb-2">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#5800a9] dark:text-white mb-2">
               أبطال المنصة
             </h1>
             <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base leading-7 max-w-xl">
@@ -34,9 +34,9 @@ export function LeaderboardPage() {
               inline-flex items-center gap-1.5
               px-4 py-2.5 rounded-xl
               text-sm font-bold
-              bg-emerald-50 dark:bg-emerald-900/20
-              text-emerald-700 dark:text-emerald-400
-              hover:bg-emerald-100 dark:hover:bg-emerald-900/30
+              bg-[#F6EEFF] dark:bg-[#2B103D]
+              text-[#5800a9] dark:text-[#c9a6ff]
+              hover:bg-[#EAD8FF] dark:hover:bg-[#3A1652]
               transition-all duration-300
             "
           >
@@ -45,15 +45,13 @@ export function LeaderboardPage() {
           </button>
         </div>
 
-        {/* Big card */}
+        {/* Big colored card */}
         <div
           className="
             relative overflow-hidden
             rounded-2xl sm:rounded-3xl
             p-5 sm:p-8 md:p-10
-            bg-white dark:bg-[#151515]
-            border border-gray-200 dark:border-[#262626]
-            shadow-sm
+            bg-[#5800a9] dark:bg-[#b600d7]
           "
         >
           <div className="flex flex-col md:flex-row items-stretch gap-6 md:gap-8">
@@ -66,8 +64,8 @@ export function LeaderboardPage() {
                   flex-1 md:flex-none
                   px-5 py-3 rounded-xl
                   font-black text-sm sm:text-base
-                  bg-emerald-600 text-white
-                  hover:bg-emerald-700
+                  bg-[#b600d7] text-white
+                  hover:opacity-90
                   transition-all duration-300
                 "
               >
@@ -79,9 +77,9 @@ export function LeaderboardPage() {
                   flex-1 md:flex-none
                   px-5 py-3 rounded-xl
                   font-black text-sm sm:text-base
-                  bg-transparent text-emerald-700 dark:text-emerald-400
-                  border-2 border-emerald-600 dark:border-emerald-500
-                  hover:bg-emerald-50 dark:hover:bg-emerald-900/20
+                  bg-transparent text-white
+                  border-2 border-[#b600d7]
+                  hover:bg-[#b600d7]/10
                   transition-all duration-300
                 "
               >
@@ -111,33 +109,33 @@ export function LeaderboardPage() {
                       inline-block mb-3 sm:mb-4
                       px-3.5 py-1.5 rounded-full
                       text-[11px] sm:text-xs font-black
-                      bg-emerald-600 text-white
+                      bg-[#b600d7] text-white
                     "
                   >
                     المكان ده مستنيك
                   </span>
 
-                  <h2 className="text-lg sm:text-2xl md:text-[26px] font-black text-slate-900 dark:text-white mb-3 sm:mb-4">
+                  <h2 className="text-lg sm:text-2xl md:text-[26px] font-black text-white mb-3 sm:mb-4">
                     ابدأ تجمع نقطك من دلوقتي!
                   </h2>
 
-                  <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-7 sm:leading-8 mb-5 sm:mb-6">
+                  <p className="text-white text-sm sm:text-base leading-7 sm:leading-8 mb-5 sm:mb-6">
                     قريبًا: كل امتحان وواجب تحله بدرجة حلوة هيجمعلك نقط، ولما نقطك تكفي هتاخد شارة فضية أو ذهبية أو ماسية، وأول 20 طالب هيتحطوا على المنصة.
                   </p>
 
                   {/* Stats row */}
                   <div className="flex flex-wrap justify-center md:justify-start gap-x-8 gap-y-4">
                     <div className="text-center md:text-right">
-                      <p className="text-slate-900 dark:text-white font-black text-sm sm:text-base">ذاكر بانتظام</p>
-                      <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-1">حضور واستمرار في الحصص</p>
+                      <p className="text-white font-black text-sm sm:text-base">ذاكر بانتظام</p>
+                      <p className="text-white text-xs sm:text-sm mt-1">حضور واستمرار في الحصص</p>
                     </div>
                     <div className="text-center md:text-right">
-                      <p className="text-slate-900 dark:text-white font-black text-sm sm:text-base">حل الامتحانات</p>
-                      <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-1">درجاتك هي تذكرتك للوحة</p>
+                      <p className="text-white font-black text-sm sm:text-base">حل الامتحانات</p>
+                      <p className="text-white text-xs sm:text-sm mt-1">درجاتك هي تذكرتك للوحة</p>
                     </div>
                     <div className="text-center md:text-right">
-                      <p className="text-slate-900 dark:text-white font-black text-sm sm:text-base">اتفوق على نفسك</p>
-                      <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-1">فضي، ذهبي، ماسي</p>
+                      <p className="text-white font-black text-sm sm:text-base">اتفوق على نفسك</p>
+                      <p className="text-white text-xs sm:text-sm mt-1">فضي، ذهبي، ماسي</p>
                     </div>
                   </div>
                 </div>
