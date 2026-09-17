@@ -377,42 +377,42 @@ const FEATURES = [
     number: "01",
     title: "شرح تفصيلي مبسط",
     description:
-      "فيديوهات شرح تفصيلي لكل درس في كورساتك، بأسلوب سهل وممتع تقدر تراجعه في أي وقت.",
+      "فيديوهات لكل درس بأسلوب سهل تقدر تراجعه في أي وقت.",
   },
   {
     image: "/images/features/feature-2.png",
     number: "02",
-    title: "نتائج امتحانات فورية",
+    title: "معمل الكيميائي الافتراضي",
     description:
-      "اختبر نفسك بعد كل درس وشوف نتيجتك وتحليل إجاباتك على طول.",
+      "تجرّب بنفسك وتشوف التفاعل بين العناصر لحظة بلحظة.",
   },
   {
     image: "/images/features/feature-3.png",
     number: "03",
-    title: "معمل الكيميائي الافتراضي",
+    title: "نتائج امتحانات فورية",
     description:
-      "معمل كيميائي أونلاين تقدر تجرّب فيه بنفسك وتشوف التفاعل بين العناصر لحظة بلحظة.",
+      "اختبر نفسك بعد كل درس وشوف نتيجتك على طول.",
   },
   {
     image: "/images/features/feature-4.png",
     number: "04",
     title: "راجع أخطائك بسهولة",
     description:
-      "كل أسئلتك الغلط بتتجمع في مكان واحد عشان تراجعها وما تكررش نفس الغلطة.",
+      "كل أسئلتك الغلط بتتجمع في مكان واحد عشان تراجعها.",
   },
   {
     image: "/images/features/feature-5.png",
     number: "05",
     title: "أبطال المنصة والمسابقات",
     description:
-      "نافس زمايلك في المسابقة الأسبوعية وادخل تصنيف أبطال المنصة.",
+      "نافس زمايلك أسبوعيًا وادخل تصنيف الأبطال.",
   },
   {
     image: "/images/features/feature-6.png",
     number: "06",
     title: "دعم فني وتعليمي مستمر",
     description:
-      "لو محتاج تسأل أو مش فاهم حاجة، فريق الدعم موجود يرد عليك في أي وقت.",
+      "فريق الدعم موجود يرد عليك في أي وقت.",
   },
 ];
 
@@ -1013,15 +1013,20 @@ duration-700
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        {/* ستايل ثابت لكل كارت حسب موقعه (بدل الدورة التلقائية) */}
+        {(() => null)()}
         {FEATURES.map((feature, index) => {
-          // ألوان متبادلة بدرجات من نفس لون المنصة
-          const bgStyles = [
-            "bg-[#F6EEFF] dark:bg-[#1A1029] border border-[#EAD8FF] dark:border-[#2B103D]",
-            "bg-[#5800a9] dark:bg-[#b600d7]",
-            "bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#262626]",
-            "bg-[#420080] dark:bg-[#8a00ab]",
+          const cardStyles = [
+            "bg-[#F6EEFF] dark:bg-[#1A1029] border border-[#EAD8FF] dark:border-[#2B103D]", // 01
+            "bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#262626]", // 02 (كان بنفسجي، بقى أبيض)
+            "bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#262626]", // 03
+            "bg-[#420080] dark:bg-[#8a00ab]", // 04
+            "bg-[#F6EEFF] dark:bg-[#1A1029] border border-[#EAD8FF] dark:border-[#2B103D]", // 05
+            "bg-[#5800a9] dark:bg-[#b600d7]", // 06
           ];
-          const isColored = index % 4 === 1 || index % 4 === 3;
+          const coloredFlags = [false, false, false, true, false, true];
+          const bgStyles = cardStyles;
+          const isColored = coloredFlags[index];
           // الكارت الأول والأخير عريضين (بياخدوا عمودين) زي المرجع، والباقي عادي
           const isWide = index === 0 || index === 5;
 
@@ -1043,7 +1048,7 @@ duration-700
                 flex
                 h-full
                 ${isWide ? "lg:col-span-2" : ""}
-                ${bgStyles[index % bgStyles.length]}
+                ${bgStyles[index]}
               `}
             >
               {/* الرقم الكبير */}
@@ -1078,7 +1083,7 @@ duration-700
                       {feature.description}
                     </p>
                   </div>
-                  <div className="flex-shrink-0 w-[38%] sm:w-[42%]">
+                  <div className="flex-shrink-0 w-[45%] sm:w-[50%]">
                     <img
                       src={feature.image}
                       alt={feature.title}
@@ -1093,7 +1098,7 @@ duration-700
                     <img
                       src={feature.image}
                       alt={feature.title}
-                      className="object-contain select-none pointer-events-none h-24 sm:h-28 lg:h-32"
+                      className="object-contain select-none pointer-events-none h-32 sm:h-36 lg:h-44"
                     />
                   </div>
 
