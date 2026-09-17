@@ -422,11 +422,13 @@ const [subscriptionPayments, setSubscriptionPayments] = useState<StudentSubscrip
         return;
       }
 
-      const { data: lbData } = await supabase
+      const { data: lbData, error: lbError } = await supabase
         .from("leaderboard_view")
         .select("points, badge, rank_in_grade")
         .eq("student_id", studentRow.id)
         .maybeSingle();
+
+      if (lbError) console.error("leaderboard_view error:", lbError);
 
       if (lbData) {
         setLeaderboardStats(lbData as LeaderboardStats);
@@ -434,11 +436,13 @@ const [subscriptionPayments, setSubscriptionPayments] = useState<StudentSubscrip
         return;
       }
 
-      const { data: pointsData } = await supabase
+      const { data: pointsData, error: pointsError } = await supabase
         .from("student_points_view")
         .select("points")
         .eq("student_id", studentRow.id)
         .maybeSingle();
+
+      if (pointsError) console.error("student_points_view error:", pointsError);
 
       if (pointsData) {
         setLeaderboardStats({
