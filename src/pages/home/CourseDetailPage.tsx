@@ -1836,11 +1836,11 @@ const handleSeekClick = (e: React.MouseEvent<HTMLDivElement>) => {
   {/* Title */}
   <h2 className="relative z-10 text-2xl sm:text-3xl xl:text-4xl font-black text-right transition-all duration-500 group-hover:translate-x-1">
 
-    <span className="text-gray-900 dark:text-white transition-colors duration-500 group-hover:text-[#5800a9] dark:group-hover:text-[#b600d7]">
+    <span className="font-black text-gray-900 dark:text-white transition-colors duration-500 group-hover:text-[#5800a9] dark:group-hover:text-[#b600d7]">
       محتوى
     </span>
 
-    <span className="text-[#5800a9] dark:text-[#b600d7] transition-colors duration-500 group-hover:text-gray-900 dark:group-hover:text-white">
+    <span className="font-black text-[#5800a9] dark:text-[#b600d7] transition-colors duration-500 group-hover:text-gray-900 dark:group-hover:text-white">
       {" "}الكورس
     </span>
 

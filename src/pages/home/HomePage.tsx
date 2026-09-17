@@ -1007,7 +1007,7 @@ duration-700
     <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
 
       <div className="mb-10 sm:mb-14 lg:mb-16">
-        <h2 className="text-[24px] sm:text-[34px] lg:text-[42px] font-black text-slate-900 dark:text-white text-right">
+        <h2 className="text-[24px] sm:text-[34px] lg:text-[42px] font-black text-[#5800a9] dark:text-white text-right">
           ليه تختار مستر زياد ربيع؟
         </h2>
       </div>
@@ -1257,11 +1257,11 @@ duration-300
               <h3 className="
                 text-[18px] sm:text-[22px] lg:text-[26px]
                 font-black mb-3 sm:mb-4
-                text-slate-900 dark:text-white
+                text-[#5800a9] dark:text-white
               ">
                 المراحل الثانوية
               </h3>
-              <div className="h-[3px] bg-[#b600d7] rounded-full mb-3 sm:mb-4" />
+              <div className="h-[3px] bg-[#5800a9] dark:bg-[#b600d7] rounded-full mb-3 sm:mb-4" />
               <p className="text-slate-500 dark:text-slate-300 text-[13px] sm:text-[15px]">
                 الصف الأول والثاني والثالث الثانوي
               </p>
@@ -1350,11 +1350,11 @@ duration-300
               <h3 className="
                 text-[18px] sm:text-[22px] lg:text-[26px]
                 font-black mb-3 sm:mb-4
-                text-slate-900 dark:text-white
+                text-[#5800a9] dark:text-white
               ">
                 المراحل الإعدادية
               </h3>
-              <div className="h-[3px] bg-[#b600d7] rounded-full mb-3 sm:mb-4" />
+              <div className="h-[3px] bg-[#5800a9] dark:bg-[#b600d7] rounded-full mb-3 sm:mb-4" />
               <p className="text-slate-500 dark:text-slate-300 text-[13px] sm:text-[15px]">
                 الصف الأول والثاني والثالث الإعدادي
               </p>
