@@ -65,6 +65,27 @@ export default function ParentDashboardPage() {
   const subscriptionColor =
     student.subscription_status === "active" ? "text-emerald-600" : "text-red-600";
 
+  const daysRemaining = student.subscription_end_date
+    ? Math.ceil((new Date(student.subscription_end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
+
+  const examScoresList = (student.examResults || []).filter((e: any) => e.percentage != null);
+  const avgExamScore =
+    examScoresList.length > 0
+      ? Math.round(examScoresList.reduce((sum: number, e: any) => sum + e.percentage, 0) / examScoresList.length)
+      : null;
+
+  const gradedHomeworkList = (student.homeworkResults || []).filter(
+    (h: any) => h.grade !== null && h.grade !== undefined
+  );
+  const avgHomeworkGrade =
+    gradedHomeworkList.length > 0
+      ? Math.round(
+          gradedHomeworkList.reduce((sum: number, h: any) => sum + (h.grade / (h.total_score || 100)) * 100, 0) /
+            gradedHomeworkList.length
+        )
+      : null;
+
       const paymentStatusBadge = (status: string) => {
     const map: Record<string, { label: string; className: string }> = {
       pending: { label: "قيد المراجعة", className: "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400" },
@@ -198,12 +219,70 @@ export default function ParentDashboardPage() {
           </CardContent>
         </Card>
 
+        {daysRemaining !== null && daysRemaining <= 7 && (
+          <div
+            className={`rounded-2xl border px-5 py-4 flex items-center gap-3 mb-6 ${
+              daysRemaining <= 0
+                ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900"
+                : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900"
+            }`}
+          >
+            <Clock className={daysRemaining <= 0 ? "text-red-600" : "text-amber-600"} size={20} />
+            <p className={`text-sm font-bold ${daysRemaining <= 0 ? "text-red-700 dark:text-red-400" : "text-amber-700 dark:text-amber-400"}`}>
+              {daysRemaining <= 0
+                ? "الاشتراك منتهي — برجاء التجديد لاستمرار وصول الطالب للكورسات"
+                : `الاشتراك هينتهي خلال ${daysRemaining} يوم — برجاء التجديد قريبًا`}
+            </p>
+          </div>
+        )}
+
         {/* Stat cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <StatCard icon={<BookOpen size={22} />} label="محاضرات مكتملة" value={`${completedLessons} / ${totalLessons}`} />
           <StatCard icon={<CheckCircle2 size={22} />} label="واجبات مسلّمة" value={String(student.homeworkResults?.length || 0)} />
           <StatCard icon={<GraduationCap size={22} />} label="كورسات مشترك بها" value={String(courses.length)} />
           <StatCard icon={<Clock size={22} />} label="وقت المشاهدة" value={`${Math.floor(totalWatchMinutes / 60)}س ${totalWatchMinutes % 60}د`} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Award size={18} className="text-[#B348FE]" />
+              <p className="text-xs font-bold text-gray-500 dark:text-gray-400">متوسط درجات الامتحانات</p>
+            </div>
+            <p
+              className={`text-2xl font-black ${
+                avgExamScore === null
+                  ? "text-gray-400"
+                  : avgExamScore >= 80
+                  ? "text-emerald-600"
+                  : avgExamScore >= 50
+                  ? "text-amber-600"
+                  : "text-red-600"
+              }`}
+            >
+              {avgExamScore !== null ? `${avgExamScore}%` : "-"}
+            </p>
+          </div>
+          <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <FileText size={18} className="text-[#B348FE]" />
+              <p className="text-xs font-bold text-gray-500 dark:text-gray-400">متوسط درجات الواجبات</p>
+            </div>
+            <p
+              className={`text-2xl font-black ${
+                avgHomeworkGrade === null
+                  ? "text-gray-400"
+                  : avgHomeworkGrade >= 80
+                  ? "text-emerald-600"
+                  : avgHomeworkGrade >= 50
+                  ? "text-amber-600"
+                  : "text-red-600"
+              }`}
+            >
+              {avgHomeworkGrade !== null ? `${avgHomeworkGrade}%` : "-"}
+            </p>
+          </div>
         </div>
 
         {/* Subscription status */}
@@ -224,11 +303,26 @@ export default function ParentDashboardPage() {
                 <Calendar size={18} className="text-[#B348FE]" />
                 <p className="text-xs font-bold text-gray-500 dark:text-gray-400">تاريخ انتهاء الاشتراك</p>
               </div>
-              <p className="text-sm font-black text-gray-900 dark:text-white">
-                {student.subscription_end_date
-                  ? new Date(student.subscription_end_date).toLocaleDateString("ar-EG")
-                  : "-"}
-              </p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-sm font-black text-gray-900 dark:text-white">
+                  {student.subscription_end_date
+                    ? new Date(student.subscription_end_date).toLocaleDateString("ar-EG")
+                    : "-"}
+                </p>
+                {daysRemaining !== null && (
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-black whitespace-nowrap ${
+                      daysRemaining <= 0
+                        ? "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400"
+                        : daysRemaining <= 7
+                        ? "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400"
+                        : "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
+                    }`}
+                  >
+                    {daysRemaining <= 0 ? "منتهي" : `باقي ${daysRemaining} يوم`}
+                  </span>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -343,7 +437,7 @@ export default function ParentDashboardPage() {
                       <div>
                         <p className="text-[10px] text-gray-400 font-bold mb-0.5">النوع</p>
                         <p className="font-bold text-gray-800 dark:text-gray-200 text-xs">
-                          {p.student_type === "online" ? "Online" : "Center"}
+                          {p.student_type === "online" ? "أونلاين" : "سنتر"}
                         </p>
                       </div>
                       <div>
@@ -494,7 +588,7 @@ export default function ParentDashboardPage() {
                 {[
                   { label: "اسم الطالب", value: student.full_name },
                   { label: "الكورس", value: selectedInvoice.course_title || "-" },
-                  { label: "نوع الاشتراك", value: selectedInvoice.student_type === "online" ? "Online" : "Center" },
+                  { label: "نوع الاشتراك", value: selectedInvoice.student_type === "online" ? "أونلاين" : "سنتر" },
                   { label: "طريقة الدفع", value: selectedInvoice.payment_method === "vodafone_cash" ? "Vodafone Cash" : "InstaPay" },
                   { label: "تاريخ الاشتراك", value: new Date(selectedInvoice.subscription_start_date).toLocaleDateString("ar-EG") },
                   { label: "تاريخ الانتهاء", value: new Date(selectedInvoice.subscription_end_date).toLocaleDateString("ar-EG") },

@@ -23,6 +23,7 @@ import {
   FileType,
   X,
   RotateCcw,
+  Filter,
 } from "lucide-react";
 
 interface Submission {
@@ -371,35 +372,7 @@ export function InstructorHomeworkSubmissions() {
     [essayQuestions]
   );
 
-  const statCards = [
-    {
-      label: "إجمالي التسليمات",
-      value: submissions.length,
-      icon: <FileText className="text-[#155DFC]" size={26} />,
-      bg: "bg-blue-100",
-    },
-    {
-      label: "تم التصحيح",
-      value: gradedCount,
-      icon: <CheckCircle className="text-emerald-600" size={26} />,
-      bg: "bg-emerald-100",
-      valueClass: "text-emerald-600",
-    },
-    {
-      label: "بانتظار التصحيح",
-      value: pendingCount,
-      icon: <Clock className="text-amber-600" size={26} />,
-      bg: "bg-amber-100",
-      valueClass: "text-amber-600",
-    },
-    {
-      label: "معدل الدرجات",
-      value: averageGrade !== null ? `${averageGrade}%` : "-",
-      icon: <TrendingUp className="text-[#155DFC]" size={26} />,
-      bg: "bg-blue-50",
-      valueClass: "text-[#155DFC]",
-    },
-  ];
+  const gradingProgress = submissions.length > 0 ? Math.round((gradedCount / submissions.length) * 100) : 0;
 
   return (
     <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
@@ -427,27 +400,75 @@ export function InstructorHomeworkSubmissions() {
         </motion.div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 p-4 lg:p-6 bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
-          {statCards.map((stat) => (
-            <div
-              key={stat.label}
-              className="bg-white dark:bg-[#111111] rounded-2xl lg:rounded-3xl border border-slate-200 dark:border-[#2A2A2A] shadow-sm hover:shadow-lg transition p-4 lg:p-6 flex items-center justify-between"
-            >
-              <div>
-                <p className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 font-bold mb-1">{stat.label}</p>
-                <div className={`text-xl lg:text-3xl font-black text-gray-900 dark:text-white ${stat.valueClass || ""}`}>
-                  {stat.value}
+        <div className="p-4 lg:p-6 bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-4">
+            <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-[#155DFC] p-4 lg:p-5 shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs lg:text-sm font-bold text-gray-500 dark:text-gray-400">إجمالي التسليمات</span>
+                <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center flex-shrink-0">
+                  <FileText className="text-[#155DFC]" size={16} />
                 </div>
               </div>
-              <div className={`w-11 h-11 lg:w-14 lg:h-14 rounded-xl lg:rounded-2xl ${stat.bg} flex items-center justify-center flex-shrink-0`}>
-                {stat.icon}
+              <div className="text-xl lg:text-3xl font-black text-[#155DFC]">{submissions.length}</div>
+            </div>
+
+            <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-emerald-500 p-4 lg:p-5 shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs lg:text-sm font-bold text-gray-500 dark:text-gray-400">تم التصحيح</span>
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="text-emerald-600" size={16} />
+                </div>
+              </div>
+              <div className="text-xl lg:text-3xl font-black text-emerald-600">{gradedCount}</div>
+            </div>
+
+            <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-amber-500 p-4 lg:p-5 shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs lg:text-sm font-bold text-gray-500 dark:text-gray-400">بانتظار التصحيح</span>
+                <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center flex-shrink-0">
+                  <Clock className="text-amber-600" size={16} />
+                </div>
+              </div>
+              <div className="text-xl lg:text-3xl font-black text-amber-600">{pendingCount}</div>
+            </div>
+
+            <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-[#155DFC] p-4 lg:p-5 shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs lg:text-sm font-bold text-gray-500 dark:text-gray-400">معدل الدرجات</span>
+                <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center flex-shrink-0">
+                  <TrendingUp className="text-[#155DFC]" size={16} />
+                </div>
+              </div>
+              <div className="text-xl lg:text-3xl font-black text-[#155DFC]">
+                {averageGrade !== null ? `${averageGrade}%` : "-"}
               </div>
             </div>
-          ))}
+          </div>
+
+          {submissions.length > 0 && (
+            <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-[#2A2A2A] p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs lg:text-sm font-bold text-gray-600 dark:text-gray-300">
+                  نسبة إنجاز التصحيح
+                </span>
+                <span className="text-sm font-black text-[#155DFC]">{gradingProgress}%</span>
+              </div>
+              <div className="w-full h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-[#155DFC] to-[#1547D6] rounded-full transition-all duration-500"
+                  style={{ width: `${gradingProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Filters */}
         <div className="p-4 lg:p-6 bg-white dark:bg-[#09090B] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
+          <div className="flex items-center gap-2 mb-4">
+            <Filter size={18} className="text-[#155DFC]" />
+            <h3 className="text-base font-black text-gray-900 dark:text-white">البحث والفلاتر</h3>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
             <div className="relative xl:col-span-2">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
