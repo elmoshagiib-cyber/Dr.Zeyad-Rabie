@@ -170,8 +170,9 @@ export default function ParentDashboardPage() {
           </div>
         )}
 
+        <div className="grid lg:grid-cols-3 gap-6 items-start">
         {/* ID Card */}
-        <div className="flex justify-center mb-6">
+        <div className="lg:col-span-1 flex justify-center lg:sticky lg:top-24 mb-6 lg:mb-0">
           <div
             onClick={() => setIdFlipped((f) => !f)}
             className="relative w-full max-w-[280px] aspect-[3/4] cursor-pointer select-none"
@@ -259,6 +260,9 @@ export default function ParentDashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Rest of content */}
+        <div className="lg:col-span-2">
 
         {daysRemaining !== null && daysRemaining <= 7 && (
           <div
@@ -580,6 +584,9 @@ export default function ParentDashboardPage() {
             )}
           </CardContent>
         </Card>
+
+        </div>
+        </div>
 
         <Button
           variant="ghost"
