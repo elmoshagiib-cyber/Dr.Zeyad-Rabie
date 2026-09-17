@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
-import { Trophy, Search } from "lucide-react";
-import { motion } from "framer-motion";
+import { Trophy, Search, X, Loader2, Upload } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
 import { supabase } from "../../lib/supabase";
 import { LeaderboardCard } from "../../components/leaderboard/LeaderboardCard";
 
@@ -17,6 +18,7 @@ const BADGE_TABS = [
   { key: "diamond", label: "ماسي" },
   { key: "gold", label: "ذهبي" },
   { key: "silver", label: "فضي" },
+  { key: "none", label: "لسه مأهلش" },
 ];
 
 export function InstructorLeaderboard() {
@@ -27,13 +29,20 @@ export function InstructorLeaderboard() {
   const [badgeFilter, setBadgeFilter] = useState("all");
   const [search, setSearch] = useState("");
 
+  const [editingStudent, setEditingStudent] = useState<any>(null);
+  const [editNote, setEditNote] = useState("");
+  const [editAvatarPreview, setEditAvatarPreview] = useState<string | null>(null);
+  const [editAvatarFile, setEditAvatarFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     loadLeaderboard();
   }, []);
 
   const loadLeaderboard = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from("leaderboard_view").select("*");
+    const { data, error } = await supabase.from("leaderboard_admin_view").select("*");
     if (!error) setEntries(data || []);
     setLoading(false);
   };
@@ -52,6 +61,79 @@ export function InstructorLeaderboard() {
       return true;
     });
   }, [entries, gradeFilter, badgeFilter, search]);
+
+  const openEditModal = (student: any) => {
+    setEditingStudent(student);
+    setEditNote(student.leaderboard_note || "");
+    setEditAvatarPreview(student.avatar_url || null);
+    setEditAvatarFile(null);
+  };
+
+  const closeEditModal = () => {
+    setEditingStudent(null);
+    setEditNote("");
+    setEditAvatarPreview(null);
+    setEditAvatarFile(null);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setEditAvatarFile(file);
+    setEditAvatarPreview(URL.createObjectURL(file));
+  };
+
+  const saveEdit = async () => {
+    if (!editingStudent) return;
+    setSaving(true);
+
+    try {
+      let avatarUrl = editingStudent.avatar_url;
+
+      if (editAvatarFile) {
+        const ext = editAvatarFile.name.split(".").pop();
+        const path = `student-${editingStudent.student_id}-${Date.now()}.${ext}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("student-avatars")
+          .upload(path, editAvatarFile, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage
+          .from("student-avatars")
+          .getPublicUrl(path);
+
+        avatarUrl = publicUrlData.publicUrl;
+      }
+
+      const { error: updateError } = await supabase
+        .from("students")
+        .update({
+          avatar_url: avatarUrl,
+          leaderboard_note: editNote.trim() || null,
+        })
+        .eq("id", editingStudent.student_id);
+
+      if (updateError) throw updateError;
+
+      setEntries((prev) =>
+        prev.map((e) =>
+          e.student_id === editingStudent.student_id
+            ? { ...e, avatar_url: avatarUrl, leaderboard_note: editNote.trim() || null }
+            : e
+        )
+      );
+
+      toast.success("تم حفظ التعديلات بنجاح");
+      closeEditModal();
+    } catch (err) {
+      console.error(err);
+      toast.error("حصل خطأ أثناء الحفظ، حاول تاني");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
@@ -74,6 +156,9 @@ export function InstructorLeaderboard() {
               </div>
               <div className="min-w-0">
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-black truncate">أبطال المنصة</h1>
+                <p className="text-white/70 text-xs sm:text-sm mt-0.5">
+                  النقط والتصنيف بيتحسبوا أوتوماتيك — إنت بس ضيف صورة ووصف لكل طالب
+                </p>
               </div>
             </div>
 
@@ -88,7 +173,7 @@ export function InstructorLeaderboard() {
         {/* Filters */}
         <div className="px-4 sm:px-6 lg:px-8 mt-6">
           <div className="bg-white dark:bg-[#151515] rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-[#262626] shadow-sm p-4 sm:p-5 mb-8 flex flex-col lg:flex-row lg:items-center gap-4">
-            <div className="flex items-center gap-2 order-3 lg:order-1">
+            <div className="flex items-center gap-2 order-3 lg:order-1 flex-wrap">
               {BADGE_TABS.map((tab) => (
                 <button
                   key={tab.key}
@@ -150,13 +235,17 @@ export function InstructorLeaderboard() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 sm:gap-8 pb-10">
               {filtered.map((student, index) => (
                 <motion.div
-                  key={`${student.student_id}-${student.badge}`}
+                  key={student.student_id}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.2 }}
                   transition={{ duration: 0.4, delay: Math.min(index * 0.04, 0.4) }}
                 >
-                  <LeaderboardCard student={student} showPhone />
+                  <LeaderboardCard
+                    student={student}
+                    showPhone
+                    onEdit={() => openEditModal(student)}
+                  />
                 </motion.div>
               ))}
             </div>
@@ -164,6 +253,99 @@ export function InstructorLeaderboard() {
         </div>
 
       </div>
+
+      {/* Edit Modal */}
+      <AnimatePresence>
+        {editingStudent && (
+          <div
+            className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={closeEditModal}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+              dir="rtl"
+              className="w-full max-w-md rounded-[24px] bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#262626] p-6"
+            >
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="font-black text-lg text-slate-900 dark:text-white">
+                  تعديل بيانات الطالب
+                </h3>
+                <button
+                  onClick={closeEditModal}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-[#232323] hover:text-red-500 transition-all"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="flex flex-col items-center mb-5">
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 cursor-pointer group border-2 border-dashed border-gray-300 dark:border-gray-700"
+                >
+                  <img
+                    src={editAvatarPreview || "/images/default-avatar.png"}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <Upload className="text-white" size={20} />
+                  </div>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="mt-2 text-xs font-bold text-[#1547D6] hover:underline"
+                >
+                  تغيير الصورة
+                </button>
+              </div>
+
+              <div className="rounded-2xl bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 mb-4 text-center">
+                <p className="font-black text-slate-900 dark:text-white">{editingStudent.full_name}</p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {editingStudent.points} نقطة — {editingStudent.grade}
+                </p>
+              </div>
+
+              <label className="block text-sm font-bold text-slate-700 dark:text-gray-200 mb-2">
+                وصف / ملاحظة عن الطالب
+              </label>
+              <textarea
+                value={editNote}
+                onChange={(e) => setEditNote(e.target.value)}
+                placeholder="مثال: متفوق في الكيمياء العضوية ومتزم في الحضور"
+                className="w-full min-h-[90px] resize-none rounded-2xl border border-gray-200 dark:border-[#262626] bg-gray-50 dark:bg-[#0b0b0b] text-slate-800 dark:text-white placeholder-gray-400 p-3.5 text-sm outline-none focus:border-[#1547D6] transition-colors"
+              />
+
+              <button
+                onClick={saveEdit}
+                disabled={saving}
+                className="w-full mt-5 py-3 rounded-xl bg-[#1547D6] hover:bg-[#0f38ad] text-white font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-70 transition-all"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    جاري الحفظ...
+                  </>
+                ) : (
+                  "حفظ التعديلات"
+                )}
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </DashboardLayout>
   );
 }
