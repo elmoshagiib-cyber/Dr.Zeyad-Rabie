@@ -373,25 +373,29 @@ const userGradeSlug = gradeSlugMap[user?.grade ?? ""] ?? "";
 
 const FEATURES = [
   {
-    icon: BookOpen,
+    image: "/images/features/feature-1.png",
+    number: "01",
     title: "شرح مبسط",
     description:
       "شرح بأسلوب سهل ومنظم يساعدك على فهم الكيمياء من أول مرة.",
   },
   {
-    icon: GraduationCap,
+    image: "/images/features/feature-2.png",
+    number: "02",
     title: "مراجعات شاملة",
     description:
       "مراجعات مركزة تغطي جميع أجزاء المنهج مع أهم الأفكار والأسئلة.",
   },
   {
-    icon: Star,
+    image: "/images/features/feature-3.png",
+    number: "03",
     title: "اختبارات تفاعلية",
     description:
       "اختبر مستواك بعد كل درس مع تصحيح فوري وتحليل للنتيجة.",
   },
   {
-    icon: TrendingUp,
+    image: "/images/features/feature-4.png",
+    number: "04",
     title: "متابعة مستمرة",
     description:
       "تابع تقدمك أولًا بأول واعرف نقاط القوة والضعف بسهولة.",
@@ -994,10 +998,18 @@ duration-700
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 lg:gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {FEATURES.map((feature, index) => {
-          const Icon = feature.icon;
-          const isColored = index % 2 === 1;
+          // ألوان متبادلة بدرجات من نفس لون المنصة، زي الأصلي
+          const bgStyles = [
+            "bg-[#F6EEFF] dark:bg-[#1A1029] border border-[#EAD8FF] dark:border-[#2B103D]",
+            "bg-[#5800a9] dark:bg-[#b600d7]",
+            "bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#262626]",
+            "bg-[#420080] dark:bg-[#8a00ab]",
+          ];
+          const isColored = index === 1 || index === 3;
+          // البلاطة الأولى والرابعة أكبر شوية عشان يبقى فيه تنويع في الأحجام
+          const isLarge = index === 0 || index === 3;
 
           return (
             <motion.div
@@ -1011,53 +1023,39 @@ duration-700
                 ease: [0.22, 1, 0.36, 1],
               }}
               className={`
-                rounded-[36px]
-                sm:rounded-[40px]
-                px-6
-                sm:px-7
-                pt-8
-                sm:pt-9
-                pb-8
-                sm:pb-9
-                flex
-                flex-col
-                gap-5
-                sm:gap-6
+                relative overflow-hidden
+                rounded-[28px] sm:rounded-[32px]
+                p-6 sm:p-7
+                flex flex-col
                 h-full
-                ${
-                  isColored
-                    ? "bg-[#5800a9] dark:bg-[#b600d7]"
-                    : "bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#262626]"
-                }
+                ${isLarge ? "lg:col-span-2" : ""}
+                ${bgStyles[index % bgStyles.length]}
               `}
             >
-              <div
+              {/* الرقم الكبير */}
+              <span
                 className={`
-                  w-16 h-16
-                  sm:w-[72px] sm:h-[72px]
-                  rounded-full
-                  flex items-center justify-center
-                  ${
-                    isColored
-                      ? "bg-white/15"
-                      : "bg-[#5800a9]/10 dark:bg-[#b600d7]/10"
-                  }
+                  absolute top-4 left-5 sm:top-5 sm:left-6
+                  text-3xl sm:text-4xl font-black
+                  ${isColored ? "text-white/25" : "text-[#5800a9]/10 dark:text-white/10"}
                 `}
               >
-                <Icon
+                {feature.number}
+              </span>
+
+              {/* الرسمة */}
+              <div className="flex justify-center mb-4">
+                <img
+                  src={feature.image}
+                  alt={feature.title}
                   className={`
-                    w-8 h-8 sm:w-9 sm:h-9
-                    ${
-                      isColored
-                        ? "text-white"
-                        : "text-[#5800a9] dark:text-[#b600d7]"
-                    }
+                    object-contain select-none pointer-events-none
+                    ${isLarge ? "h-32 sm:h-40" : "h-24 sm:h-28"}
                   `}
-                  strokeWidth={2}
                 />
               </div>
 
-              <div>
+              <div className="mt-auto text-center">
                 <h3
                   className={`
                     text-lg sm:text-xl font-black mb-2
