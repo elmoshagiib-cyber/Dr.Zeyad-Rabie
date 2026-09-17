@@ -7,6 +7,7 @@ interface LeaderboardStudent {
   leaderboard_note?: string | null;
   leaderboard_published?: boolean;
   points: number;
+  rank_in_grade?: number;
   badge: "gold" | "silver" | "diamond" | "none";
 }
 
@@ -29,6 +30,32 @@ const badgeLabelColor: Record<string, string> = {
   diamond: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
   none: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
 };
+
+function getProgressToNextBadge(student: {
+  badge: "gold" | "silver" | "diamond" | "none";
+  points: number;
+  rank_in_grade?: number;
+}): string | null {
+  const { badge, points, rank_in_grade } = student;
+
+  if (badge === "diamond") return null;
+
+  if (badge === "gold") {
+    if (rank_in_grade && rank_in_grade > 20) {
+      const spotsLeft = rank_in_grade - 20;
+      return `ناقصك ${spotsLeft} مركز للماسية`;
+    }
+    return null;
+  }
+
+  if (badge === "silver") {
+    const remaining = Math.max(0, 80 - points);
+    return remaining > 0 ? `ناقصك ${remaining} نقطة للذهبية` : null;
+  }
+
+  const remaining = Math.max(0, 50 - points);
+  return remaining > 0 ? `ناقصك ${remaining} نقطة تدخل اللوحة` : null;
+}
 
 export function LeaderboardCard({
   student,
@@ -107,6 +134,12 @@ export function LeaderboardCard({
       <span className={`inline-block mt-2 px-3 py-1 rounded-full text-[11px] font-black ${badgeLabelColor[student.badge]}`}>
         {badgeLabel[student.badge]}
       </span>
+
+      {getProgressToNextBadge(student) && (
+        <p className="text-[10px] sm:text-[11px] text-gray-400 dark:text-gray-500 mt-1 font-bold">
+          {getProgressToNextBadge(student)}
+        </p>
+      )}
 
       {onTogglePublish && (
         <button

@@ -30,6 +30,12 @@ interface StudentSubscriptionPayment {
   courseData?: SubCourseInfo;
 }
 
+interface LeaderboardStats {
+  points: number;
+  badge: "gold" | "silver" | "diamond" | "none";
+  rank_in_grade: number | null;
+}
+
 function ImageCropModal({  file,
   aspect,
   shape = "rect",
@@ -247,6 +253,9 @@ export function ProfilePage() {
   const [studentType, setStudentType] = useState<string>("");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
+  const [leaderboardStats, setLeaderboardStats] = useState<LeaderboardStats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+
   const [cropFile, setCropFile] = useState<File | null>(null);
 const [idFlipped, setIdFlipped] = useState(false);
 const [showDetails, setShowDetails] = useState(false);
@@ -393,6 +402,94 @@ const [subscriptionPayments, setSubscriptionPayments] = useState<StudentSubscrip
 
     loadPayments();
   }, [user?.id]);
+
+  useEffect(() => {
+    const loadLeaderboardStats = async () => {
+      if (!user?.id) {
+        setLoadingStats(false);
+        return;
+      }
+      setLoadingStats(true);
+
+      const { data: studentRow } = await supabase
+        .from("students")
+        .select("id")
+        .eq("auth_id", user.id)
+        .single();
+
+      if (!studentRow) {
+        setLoadingStats(false);
+        return;
+      }
+
+      const { data: lbData } = await supabase
+        .from("leaderboard_view")
+        .select("points, badge, rank_in_grade")
+        .eq("student_id", studentRow.id)
+        .maybeSingle();
+
+      if (lbData) {
+        setLeaderboardStats(lbData as LeaderboardStats);
+        setLoadingStats(false);
+        return;
+      }
+
+      const { data: pointsData } = await supabase
+        .from("student_points_view")
+        .select("points")
+        .eq("student_id", studentRow.id)
+        .maybeSingle();
+
+      if (pointsData) {
+        setLeaderboardStats({
+          points: pointsData.points || 0,
+          badge: "none",
+          rank_in_grade: null,
+        });
+      } else {
+        setLeaderboardStats(null);
+      }
+
+      setLoadingStats(false);
+    };
+
+    loadLeaderboardStats();
+  }, [user?.id]);
+
+  const badgeLabelAr: Record<string, string> = {
+    gold: "الذهبية",
+    silver: "الفضية",
+    diamond: "الماسية",
+    none: "لسه مأهلتش",
+  };
+
+  const getBadgeProgress = (stats: LeaderboardStats) => {
+    const { badge, points, rank_in_grade } = stats;
+
+    if (badge === "diamond") {
+      return { message: "وصلت لأعلى شارة، الشارة الماسية!", color: "#22d3ee" };
+    }
+
+    if (badge === "gold") {
+      if (rank_in_grade && rank_in_grade > 20) {
+        const spotsLeft = rank_in_grade - 20;
+        return { message: `ناقصك ${spotsLeft} مركز عشان توصل للشارة الماسية`, color: "#22d3ee" };
+      }
+      return { message: "وصلت لأعلى شارة، الشارة الماسية!", color: "#22d3ee" };
+    }
+
+    if (badge === "silver") {
+      const remaining = Math.max(0, 80 - points);
+      return remaining > 0
+        ? { message: `ناقصك ${remaining} نقطة عشان توصل للشارة الذهبية`, color: "#f59e0b" }
+        : { message: "أنت جاهز للترقية للشارة الذهبية!", color: "#f59e0b" };
+    }
+
+    const remaining = Math.max(0, 50 - points);
+    return remaining > 0
+      ? { message: `ناقصك ${remaining} نقطة عشان تدخل لوحة الشرف`, color: "#94a3b8" }
+      : { message: "أنت جاهز تدخل لوحة الشرف!", color: "#94a3b8" };
+  };
 
     const paymentStatusBadge = (status: string) => {
     const map: Record<string, { label: string; className: string }> = {
@@ -567,6 +664,53 @@ const [showPasswordForm, setShowPasswordForm] = useState(false);
               تم حفظ التغييرات بنجاح!
             </p>
           </div>
+        )}
+
+        {!loadingStats && leaderboardStats && (
+          <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl sm:rounded-3xl shadow-sm">
+            <CardContent className="p-4 sm:p-6 lg:p-8">
+              <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-5">
+                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center shrink-0">
+                  <Trophy size={18} className="text-[#5800a9] dark:text-[#b600d7] sm:w-5 sm:h-5" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-[#5800a9] dark:text-white">
+                    نقاطك ولوحة الشرف
+                  </h2>
+                  <p className="text-[11px] sm:text-xs lg:text-sm text-gray-400 dark:text-gray-500">
+                    ترتيبك الحالي وتقدمك نحو الشارة الجاية
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-5">
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-center">
+                  <p className="text-[10px] sm:text-[11px] text-gray-400 font-bold mb-1">نقاطك</p>
+                  <p className="font-black text-[#5800a9] dark:text-white text-lg sm:text-xl">{leaderboardStats.points}</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-center">
+                  <p className="text-[10px] sm:text-[11px] text-gray-400 font-bold mb-1">شارتك</p>
+                  <p className="font-black text-[#5800a9] dark:text-white text-lg sm:text-xl">{badgeLabelAr[leaderboardStats.badge]}</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-center col-span-2 sm:col-span-1">
+                  <p className="text-[10px] sm:text-[11px] text-gray-400 font-bold mb-1">ترتيبك في الصف</p>
+                  <p className="font-black text-[#5800a9] dark:text-white text-lg sm:text-xl">
+                    {leaderboardStats.rank_in_grade ? `#${leaderboardStats.rank_in_grade}` : "-"}
+                  </p>
+                </div>
+              </div>
+
+              <div
+                className="rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-3.5 text-center font-black text-xs sm:text-sm"
+                style={{
+                  backgroundColor: `${getBadgeProgress(leaderboardStats).color}1A`,
+                  color: getBadgeProgress(leaderboardStats).color,
+                }}
+              >
+                {getBadgeProgress(leaderboardStats).message}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {cropFile && (
