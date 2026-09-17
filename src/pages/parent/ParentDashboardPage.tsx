@@ -31,6 +31,7 @@ export default function ParentDashboardPage() {
   const invoiceCardRef = useRef<HTMLDivElement>(null);
   const [downloadingImage, setDownloadingImage] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [idFlipped, setIdFlipped] = useState(false);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("parent_students");
@@ -48,7 +49,7 @@ export default function ParentDashboardPage() {
   if (!student) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#B348FE] border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-[#5800a9] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -159,7 +160,7 @@ export default function ParentDashboardPage() {
                 onClick={() => setSelectedId(s.id)}
                 className={`flex-shrink-0 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${
                   s.id === selectedId
-                    ? "bg-[#B348FE] text-white"
+                    ? "bg-[#5800a9] text-white"
                     : "bg-white dark:bg-[#111111] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-[#2A2A2A]"
                 }`}
               >
@@ -169,55 +170,95 @@ export default function ParentDashboardPage() {
           </div>
         )}
 
-        {/* Header */}
-        <div className="bg-gradient-to-r from-[#0F172A] via-[#1E1B3A] to-[#2A1B4D] rounded-3xl p-6 sm:p-8 text-white mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center text-2xl font-black overflow-hidden">
-              {student.avatar_url ? (
-                <img src={student.avatar_url} alt={student.full_name} className="w-full h-full object-cover" />
-              ) : (
-                student.full_name?.charAt(0)
-              )}
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-black">{student.full_name}</h1>
-              <p className="text-white/60 text-sm mt-1">{student.grade}</p>
+        {/* ID Card */}
+        <div className="flex justify-center mb-6">
+          <div
+            onClick={() => setIdFlipped((f) => !f)}
+            className="relative w-full max-w-[280px] aspect-[3/4] cursor-pointer select-none"
+            style={{ perspective: "1400px" }}
+          >
+            <div
+              className="relative w-full h-full transition-transform duration-700 ease-out"
+              style={{
+                transformStyle: "preserve-3d",
+                transform: idFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+              }}
+            >
+              {/* الوش الأمامي */}
+              <div
+                className="absolute inset-0 w-full h-full rounded-3xl bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] shadow-lg px-5 py-7 flex flex-col items-center text-center"
+                style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
+              >
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-[#F6EEFF] dark:border-[#2B103D] shadow-md bg-gray-50 dark:bg-[#1A1A1A] mb-4 flex items-center justify-center text-2xl font-black text-[#5800a9]">
+                  {student.avatar_url ? (
+                    <img src={student.avatar_url} alt={student.full_name} className="w-full h-full object-cover" />
+                  ) : (
+                    student.full_name?.charAt(0)
+                  )}
+                </div>
+
+                <h1 className="text-base sm:text-lg font-black text-[#5800a9] dark:text-white mb-1 px-1 break-words leading-snug">
+                  {student.full_name}
+                </h1>
+
+                <p className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 font-bold mb-3">
+                  {student.grade || "-"}
+                </p>
+
+                <span className={`px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-black ${subscriptionColor === "text-emerald-600" ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30" : "bg-red-50 text-red-600 dark:bg-red-950/30"}`}>
+                  {subscriptionLabel === "نشط" ? "اشتراك نشط" : subscriptionLabel === "منتهي" ? "اشتراك منتهي" : "-"}
+                </span>
+
+                <p className="mt-auto pt-4 text-[10px] sm:text-[11px] text-gray-300 dark:text-gray-600 font-bold">
+                  اضغط لعرض باقي البيانات
+                </p>
+              </div>
+
+              {/* الوش الخلفي */}
+              <div
+                className="absolute inset-0 w-full h-full rounded-3xl bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] shadow-lg px-5 py-7 flex flex-col justify-center gap-4"
+                style={{
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                  transform: "rotateY(180deg)",
+                }}
+              >
+                <div className="text-center mb-1">
+                  <User className="mx-auto text-[#5800a9] mb-2" size={22} />
+                  <p className="font-black text-gray-900 dark:text-white text-sm">بيانات الطالب</p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-3.5 border border-gray-100 dark:border-[#2A2A2A]">
+                  <div className="flex items-center gap-2 mb-1">
+                    <GraduationCap size={14} className="text-gray-400" />
+                    <p className="text-[10px] font-bold text-gray-400">الصف الدراسي</p>
+                  </div>
+                  <p className="font-bold text-gray-900 dark:text-white text-xs">{student.grade || "-"}</p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-3.5 border border-gray-100 dark:border-[#2A2A2A]">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Phone size={14} className="text-gray-400" />
+                    <p className="text-[10px] font-bold text-gray-400">رقم الطالب</p>
+                  </div>
+                  <p className="font-bold text-gray-900 dark:text-white text-xs" dir="ltr">{student.phone || "-"}</p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-3.5 border border-gray-100 dark:border-[#2A2A2A]">
+                  <div className="flex items-center gap-2 mb-1">
+                    <MapPin size={14} className="text-gray-400" />
+                    <p className="text-[10px] font-bold text-gray-400">المحافظة</p>
+                  </div>
+                  <p className="font-bold text-gray-900 dark:text-white text-xs">{student.governorate || "-"}</p>
+                </div>
+
+                <p className="text-center text-[10px] text-gray-300 dark:text-gray-600 font-bold mt-1">
+                  اضغط للرجوع
+                </p>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Student info */}
-        <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl mb-6">
-          <CardContent className="p-6">
-            <h2 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <User className="text-[#B348FE]" size={20} />
-              بيانات الطالب
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <GraduationCap size={16} className="text-gray-400" />
-                  <p className="text-[11px] font-bold text-gray-400">الصف الدراسي</p>
-                </div>
-                <p className="font-bold text-gray-900 dark:text-white text-sm">{student.grade || "-"}</p>
-              </div>
-              <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <Phone size={16} className="text-gray-400" />
-                  <p className="text-[11px] font-bold text-gray-400">رقم الطالب</p>
-                </div>
-                <p className="font-bold text-gray-900 dark:text-white text-sm" dir="ltr">{student.phone || "-"}</p>
-              </div>
-              <div className="bg-gray-50 dark:bg-[#1A1A1A] rounded-xl p-4 border border-gray-100 dark:border-[#2A2A2A]">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <MapPin size={16} className="text-gray-400" />
-                  <p className="text-[11px] font-bold text-gray-400">المحافظة</p>
-                </div>
-                <p className="font-bold text-gray-900 dark:text-white text-sm">{student.governorate || "-"}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {daysRemaining !== null && daysRemaining <= 7 && (
           <div
@@ -247,7 +288,7 @@ export default function ParentDashboardPage() {
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Award size={18} className="text-[#B348FE]" />
+              <Award size={18} className="text-[#5800a9]" />
               <p className="text-xs font-bold text-gray-500 dark:text-gray-400">متوسط درجات الامتحانات</p>
             </div>
             <p
@@ -266,7 +307,7 @@ export default function ParentDashboardPage() {
           </div>
           <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
-              <FileText size={18} className="text-[#B348FE]" />
+              <FileText size={18} className="text-[#5800a9]" />
               <p className="text-xs font-bold text-gray-500 dark:text-gray-400">متوسط درجات الواجبات</p>
             </div>
             <p
@@ -290,7 +331,7 @@ export default function ParentDashboardPage() {
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl">
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-2">
-                <CheckCircle2 size={18} className="text-[#B348FE]" />
+                <CheckCircle2 size={18} className="text-[#5800a9]" />
                 <p className="text-xs font-bold text-gray-500 dark:text-gray-400">حالة الاشتراك</p>
               </div>
               <p className={`text-2xl font-black ${subscriptionColor}`}>{subscriptionLabel}</p>
@@ -300,7 +341,7 @@ export default function ParentDashboardPage() {
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl">
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-2">
-                <Calendar size={18} className="text-[#B348FE]" />
+                <Calendar size={18} className="text-[#5800a9]" />
                 <p className="text-xs font-bold text-gray-500 dark:text-gray-400">تاريخ انتهاء الاشتراك</p>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -331,7 +372,7 @@ export default function ParentDashboardPage() {
         <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl mb-6">
           <CardContent className="p-6">
             <h2 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <BookOpen className="text-[#B348FE]" size={20} />
+              <BookOpen className="text-[#5800a9]" size={20} />
               الكورسات ونسبة التقدم
             </h2>
             {courses.length === 0 ? (
@@ -379,11 +420,11 @@ export default function ParentDashboardPage() {
                       <div className="mt-3">
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400">نسبة الإنجاز</span>
-                          <span className="text-xs font-black text-[#B348FE]">{percent}%</span>
+                          <span className="text-xs font-black text-[#5800a9]">{percent}%</span>
                         </div>
                         <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-[#B348FE] to-[#9E2FFF] rounded-full transition-all duration-500"
+                            className="h-full bg-gradient-to-r from-[#5800a9] to-[#9E2FFF] rounded-full transition-all duration-500"
                             style={{ width: `${percent}%` }}
                           />
                         </div>
@@ -408,7 +449,7 @@ export default function ParentDashboardPage() {
         <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl mb-6">
           <CardContent className="p-6">
             <h2 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Receipt className="text-[#B348FE]" size={20} />
+              <Receipt className="text-[#5800a9]" size={20} />
               سجل الاشتراكات والفواتير
             </h2>
             {(!student.subscriptionPayments || student.subscriptionPayments.length === 0) ? (
@@ -419,7 +460,7 @@ export default function ParentDashboardPage() {
                   <div
                     key={p.id}
                     onClick={() => { setSelectedInvoice(p); setShowInvoiceModal(true); }}
-                    className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl p-4 cursor-pointer hover:border-[#B348FE] transition-colors"
+                    className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl p-4 cursor-pointer hover:border-[#5800a9] transition-colors"
                   >
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="min-w-0">
@@ -461,7 +502,7 @@ export default function ParentDashboardPage() {
                     {p.subscription_code && (
                       <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[#2A2A2A] flex items-center justify-between">
                         <span className="text-[11px] text-gray-400 font-bold">كود الاشتراك</span>
-                        <span className="font-black text-[#B348FE] text-xs tracking-widest" dir="ltr">
+                        <span className="font-black text-[#5800a9] text-xs tracking-widest" dir="ltr">
                           {p.subscription_code}
                         </span>
                       </div>
@@ -477,7 +518,7 @@ export default function ParentDashboardPage() {
         <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl mb-6">
           <CardContent className="p-6">
             <h2 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Award className="text-[#B348FE]" size={20} />
+              <Award className="text-[#5800a9]" size={20} />
               نتائج الامتحانات
             </h2>
             {(!student.examResults || student.examResults.length === 0) ? (
@@ -496,7 +537,7 @@ export default function ParentDashboardPage() {
                         </span>
                       )}
                     </div>
-                    <span className="font-black text-[#B348FE]">
+                    <span className="font-black text-[#5800a9]">
                       {exam.score ?? "-"}
                       {exam.percentage != null ? ` (${exam.percentage}%)` : ""}
                     </span>
@@ -511,7 +552,7 @@ export default function ParentDashboardPage() {
         <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl">
           <CardContent className="p-6">
             <h2 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <FileText className="text-[#B348FE]" size={20} />
+              <FileText className="text-[#5800a9]" size={20} />
               الواجبات
             </h2>
             {(!student.homeworkResults || student.homeworkResults.length === 0) ? (
@@ -530,7 +571,7 @@ export default function ParentDashboardPage() {
                         </span>
                       )}
                     </div>
-                    <span className="font-black text-[#B348FE]">
+                    <span className="font-black text-[#5800a9]">
                       {hw.grade !== null ? `${hw.grade} / ${hw.total_score || 100}` : "بانتظار التصحيح"}
                     </span>
                   </div>
@@ -632,9 +673,9 @@ export default function ParentDashboardPage() {
 
               {selectedInvoice.subscription_code && selectedInvoice.payment_status === "verified" && (
                 <div className="px-6 pb-5">
-                  <div className="rounded-2xl border-2 border-dashed border-[#B348FE]/40 bg-[#FAF5FF] px-5 py-4 text-center">
+                  <div className="rounded-2xl border-2 border-dashed border-[#5800a9]/40 bg-[#FAF5FF] px-5 py-4 text-center">
                     <p className="text-[11px] font-bold text-gray-400 mb-1.5">كود الاشتراك</p>
-                    <p className="text-2xl font-black text-[#B348FE] tracking-[4px]" dir="ltr">
+                    <p className="text-2xl font-black text-[#5800a9] tracking-[4px]" dir="ltr">
                       {selectedInvoice.subscription_code}
                     </p>
                   </div>
@@ -660,7 +701,7 @@ export default function ParentDashboardPage() {
                   onClick={() => copyToClipboard(selectedInvoice.invoice_number, "invoice")}
                   className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors"
                 >
-                  <Copy size={16} className="text-[#B348FE]" />
+                  <Copy size={16} className="text-[#5800a9]" />
                   <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
                     {copiedField === "invoice" ? "تم النسخ ✓" : "نسخ الفاتورة"}
                   </span>
@@ -670,7 +711,7 @@ export default function ParentDashboardPage() {
                   disabled={!selectedInvoice.subscription_code}
                   className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors disabled:opacity-40"
                 >
-                  <Copy size={16} className="text-[#B348FE]" />
+                  <Copy size={16} className="text-[#5800a9]" />
                   <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
                     {copiedField === "code" ? "تم النسخ ✓" : "نسخ الكود"}
                   </span>
@@ -704,7 +745,7 @@ export default function ParentDashboardPage() {
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4">
-      <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center text-[#B348FE] mb-2">
+      <div className="w-10 h-10 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center text-[#5800a9] mb-2">
         {icon}
       </div>
       <p className="text-gray-500 dark:text-gray-400 text-xs font-bold mb-1">{label}</p>

@@ -400,7 +400,7 @@ export function InstructorHomeworkSubmissions() {
         </motion.div>
 
         {/* Stats */}
-        <div className="p-4 lg:p-6 bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#2A2A2A] flex-shrink-0">
+        <div className="p-4 lg:p-6 bg-gray-50 dark:bg-[#0A0A0A] flex-shrink-0">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-4">
             <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-[#2A2A2A] border-t-4 border-t-[#155DFC] p-4 lg:p-5 shadow-sm hover:shadow-md transition-all duration-300">
               <div className="flex items-center justify-between mb-3">
