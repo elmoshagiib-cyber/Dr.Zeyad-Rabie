@@ -6,11 +6,18 @@ import toast from "react-hot-toast";
 import { supabase } from "../../lib/supabase";
 import { LeaderboardCard } from "../../components/leaderboard/LeaderboardCard";
 
+// ثانوي بس، مفيش إعدادي هنا
 const GRADE_TABS = [
   { key: "all", label: "الكل" },
   { key: "الصف الثالث الثانوي", label: "الثالث الثانوي" },
   { key: "الصف الثاني الثانوي", label: "الثاني الثانوي" },
   { key: "الصف الأول الثانوي", label: "الأول الثانوي" },
+];
+
+const SECONDARY_GRADES = [
+  "الصف الثالث الثانوي",
+  "الصف الثاني الثانوي",
+  "الصف الأول الثانوي",
 ];
 
 const BADGE_TABS = [
@@ -43,7 +50,9 @@ export function InstructorLeaderboard() {
   const loadLeaderboard = async () => {
     setLoading(true);
     const { data, error } = await supabase.from("leaderboard_admin_view").select("*");
-    if (!error) setEntries(data || []);
+    // فلترة إضافية للتأكيد إننا ثانوي بس، حتى لو الـ view مبنية صح من الأساس
+    const secondaryOnly = (data || []).filter((e) => SECONDARY_GRADES.includes(e.grade));
+    if (!error) setEntries(secondaryOnly);
     setLoading(false);
   };
 
@@ -135,6 +144,35 @@ export function InstructorLeaderboard() {
     }
   };
 
+  const togglePublish = async (student: any) => {
+    const newValue = !student.leaderboard_published;
+
+    // تحديث فوري في الواجهة (optimistic update)
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.student_id === student.student_id ? { ...e, leaderboard_published: newValue } : e
+      )
+    );
+
+    const { error } = await supabase
+      .from("students")
+      .update({ leaderboard_published: newValue })
+      .eq("id", student.student_id);
+
+    if (error) {
+      // رجّع الحالة القديمة لو فشل
+      setEntries((prev) =>
+        prev.map((e) =>
+          e.student_id === student.student_id ? { ...e, leaderboard_published: !newValue } : e
+        )
+      );
+      toast.error("حصل خطأ أثناء تحديث حالة النشر");
+      return;
+    }
+
+    toast.success(newValue ? "تم نشر الطالب في اللوحة العامة" : "تم إلغاء نشر الطالب");
+  };
+
   return (
     <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
       <div dir="rtl" className="min-h-screen bg-white dark:bg-[#09090B]">
@@ -157,7 +195,7 @@ export function InstructorLeaderboard() {
               <div className="min-w-0">
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-black truncate">أبطال المنصة</h1>
                 <p className="text-white/70 text-xs sm:text-sm mt-0.5">
-                  النقط والتصنيف بيتحسبوا أوتوماتيك — إنت بس ضيف صورة ووصف لكل طالب
+                  التصنيف بيتحسب أوتوماتيك — إنت بس ضيف صورة ووصف واضغط نشر عشان تظهر للطلاب
                 </p>
               </div>
             </div>
@@ -245,6 +283,7 @@ export function InstructorLeaderboard() {
                     student={student}
                     showPhone
                     onEdit={() => openEditModal(student)}
+                    onTogglePublish={() => togglePublish(student)}
                   />
                 </motion.div>
               ))}
@@ -313,9 +352,7 @@ export function InstructorLeaderboard() {
 
               <div className="rounded-2xl bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 mb-4 text-center">
                 <p className="font-black text-slate-900 dark:text-white">{editingStudent.full_name}</p>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  {editingStudent.points} نقطة — {editingStudent.grade}
-                </p>
+                <p className="text-xs text-gray-400 mt-0.5">{editingStudent.grade}</p>
               </div>
 
               <label className="block text-sm font-bold text-slate-700 dark:text-gray-200 mb-2">
