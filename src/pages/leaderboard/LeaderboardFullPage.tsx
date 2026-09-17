@@ -57,7 +57,7 @@ export function LeaderboardFullPage() {
   }, [entries, gradeFilter, badgeFilter, search]);
 
   return (
-    <div className="min-h-screen bg-[#FAF8F0] dark:bg-[#09090B]" dir="rtl">
+    <div className="min-h-screen bg-white dark:bg-[#09090B]" dir="rtl">
       <Navbar />
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 lg:pt-32 pb-16 sm:pb-20 lg:pb-24">
@@ -70,7 +70,7 @@ export function LeaderboardFullPage() {
         </button>
 
         <div className="text-center mb-8 sm:mb-10">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-emerald-700 dark:text-emerald-400">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#5800a9] dark:text-white">
             لوحة الشرف
           </h1>
           <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm sm:text-base">
@@ -86,7 +86,7 @@ export function LeaderboardFullPage() {
                 onClick={() => setBadgeFilter(tab.key)}
                 className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 whitespace-nowrap ${
                   badgeFilter === tab.key
-                    ? "bg-emerald-600 text-white"
+                    ? "bg-[#5800a9] dark:bg-[#b600d7] text-white"
                     : "bg-gray-100 dark:bg-[#1c1c1c] text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#252525]"
                 }`}
               >
@@ -102,7 +102,7 @@ export function LeaderboardFullPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث بالاسم أو رقم الهاتف أو المدرسة..."
-              className="w-full rounded-xl border border-gray-200 dark:border-[#262626] bg-gray-50 dark:bg-[#0b0b0b] text-slate-700 dark:text-gray-200 placeholder-gray-400 pr-10 pl-4 py-2.5 text-sm outline-none focus:border-emerald-500 transition-colors"
+              className="w-full rounded-xl border border-gray-200 dark:border-[#262626] bg-gray-50 dark:bg-[#0b0b0b] text-slate-700 dark:text-gray-200 placeholder-gray-400 pr-10 pl-4 py-2.5 text-sm outline-none focus:border-[#5800a9] dark:focus:border-[#b600d7] transition-colors"
             />
           </div>
 
@@ -131,7 +131,7 @@ export function LeaderboardFullPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-24">
-            <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-[#5800a9] dark:border-[#b600d7] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <EmptyState />
@@ -159,22 +159,22 @@ export function LeaderboardFullPage() {
 
 function EmptyState() {
   return (
-    <div className="relative overflow-hidden rounded-[24px] sm:rounded-[30px] bg-gradient-to-br from-lime-300 to-lime-400 p-6 sm:p-10 text-center">
+    <div className="relative overflow-hidden rounded-[24px] sm:rounded-[30px] bg-[#5800a9] dark:bg-[#b600d7] p-6 sm:p-10 text-center">
       <div className="flex justify-center gap-3 sm:gap-4 mb-5 sm:mb-6">
         <img src="/images/frames/silver-frame.png" alt="" className="w-16 sm:w-20 h-auto object-contain opacity-90" />
         <img src="/images/frames/gold-frame.png" alt="" className="w-20 sm:w-24 h-auto object-contain" />
         <img src="/images/frames/silver-frame.png" alt="" className="w-16 sm:w-20 h-auto object-contain opacity-90" />
       </div>
 
-      <span className="inline-block mb-3 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-black bg-[#1f2e1a] text-lime-300">
+      <span className="inline-block mb-3 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-black bg-white/15 text-white border border-white/20">
         لوحة الشرف لسه فاضية
       </span>
 
-      <h2 className="text-xl sm:text-2xl font-black text-[#1f2e1a] mb-3">
+      <h2 className="text-xl sm:text-2xl font-black text-white mb-3">
         تخيّل صورتك أول صورة على اللوحة
       </h2>
 
-      <p className="text-[#2d3d26] text-sm sm:text-base leading-7 max-w-xl mx-auto mb-5 sm:mb-6">
+      <p className="text-white/90 text-sm sm:text-base leading-7 max-w-xl mx-auto mb-5 sm:mb-6">
         مفيش حد اتكرم لحد الآن — يعني الأماكن الماسية والذهبية والفضية كلها لسه مفتوحة. ابدأ
         مذاكرة من النهاردة، حل امتحاناتك بجدية، وخلّي أول اسم يظهر هنا اسمك.
       </p>
