@@ -5,6 +5,7 @@ interface LeaderboardStudent {
   school_name?: string | null;
   phone?: string | null;
   leaderboard_note?: string | null;
+  leaderboard_published?: boolean;
   points: number;
   badge: "gold" | "silver" | "diamond" | "none";
 }
@@ -33,10 +34,12 @@ export function LeaderboardCard({
   student,
   showPhone = false,
   onEdit,
+  onTogglePublish,
 }: {
   student: LeaderboardStudent;
   showPhone?: boolean;
   onEdit?: () => void;
+  onTogglePublish?: () => void;
 }) {
   const hasFrame = student.badge !== "none";
 
@@ -101,14 +104,22 @@ export function LeaderboardCard({
         </p>
       )}
 
-      <div className="flex items-center gap-2 mt-2">
-        <span className={`inline-block px-3 py-1 rounded-full text-[11px] font-black ${badgeLabelColor[student.badge]}`}>
-          {badgeLabel[student.badge]}
-        </span>
-        <span className="text-[11px] font-bold text-gray-400">
-          {student.points} نقطة
-        </span>
-      </div>
+      <span className={`inline-block mt-2 px-3 py-1 rounded-full text-[11px] font-black ${badgeLabelColor[student.badge]}`}>
+        {badgeLabel[student.badge]}
+      </span>
+
+      {onTogglePublish && (
+        <button
+          onClick={onTogglePublish}
+          className={`mt-2 px-3 py-1.5 rounded-full text-[11px] font-black transition-all ${
+            student.leaderboard_published
+              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200"
+              : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200"
+          }`}
+        >
+          {student.leaderboard_published ? "منشور ✓ (اضغط للإلغاء)" : "غير منشور (اضغط للنشر)"}
+        </button>
+      )}
     </div>
   );
 }
