@@ -437,12 +437,12 @@ const [subscriptionPayments, setSubscriptionPayments] = useState<StudentSubscrip
       }
 
       const { data: pointsData, error: pointsError } = await supabase
-        .from("student_points_view")
+        .from("leaderboard_points_view")
         .select("points")
         .eq("student_id", studentRow.id)
         .maybeSingle();
 
-      if (pointsError) console.error("student_points_view error:", pointsError);
+      if (pointsError) console.error("leaderboard_points_view error:", pointsError);
 
       if (pointsData) {
         setLeaderboardStats({
