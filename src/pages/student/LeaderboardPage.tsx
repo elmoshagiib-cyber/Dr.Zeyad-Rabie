@@ -22,7 +22,7 @@ export function LeaderboardPage() {
               أبطال المنصة
             </h1>
             <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base leading-7 max-w-xl">
-              حل امتحاناتك وواجباتك بجد واجمع نقط تاخدك لمركز في اللوحة — قريبًا!
+              حل امتحاناتك وواجباتك بجد واجمع نقط تاخدك لمركز في اللوحة
             </p>
           </div>
 
@@ -120,7 +120,7 @@ export function LeaderboardPage() {
                   </h2>
 
                   <p className="text-white text-sm sm:text-base leading-7 sm:leading-8 mb-5 sm:mb-6">
-                    قريبًا: كل امتحان وواجب تحله بدرجة حلوة هيجمعلك نقط، ولما نقطك تكفي هتاخد شارة فضية أو ذهبية أو ماسية، وأول 20 طالب هيتحطوا على المنصة.
+                   كل امتحان وواجب تحله بدرجة حلوة هيجمعلك نقط، ولما نقطك تكفي هتاخد شارة فضية أو ذهبية أو ماسية، وأول 20 طالب هيتحطوا على المنصة 
                   </p>
 
                   {/* Stats row */}
