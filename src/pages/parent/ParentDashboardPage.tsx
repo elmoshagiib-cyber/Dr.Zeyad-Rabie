@@ -172,7 +172,7 @@ export default function ParentDashboardPage() {
 
         <div className="grid lg:grid-cols-3 gap-6 items-start">
         {/* ID Card */}
-        <div className="lg:col-span-1 flex justify-center lg:sticky lg:top-24 mb-6 lg:mb-0">
+        <div className="lg:col-span-1 flex flex-col items-center lg:sticky lg:top-24 mb-6 lg:mb-0">
           <div
             onClick={() => setIdFlipped((f) => !f)}
             className="relative w-full max-w-[280px] aspect-[3/4] cursor-pointer select-none"
