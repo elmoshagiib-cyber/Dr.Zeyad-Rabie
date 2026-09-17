@@ -1016,15 +1016,15 @@ duration-700
         {/* ستايل ثابت لكل كارت حسب موقعه (بدل الدورة التلقائية) */}
         {(() => null)()}
         {FEATURES.map((feature, index) => {
-          const cardStyles = [
-            "bg-[#F6EEFF] dark:bg-[#1A1029] border border-[#EAD8FF] dark:border-[#2B103D]", // 01
-            "bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#262626]", // 02 (كان بنفسجي، بقى أبيض)
-            "bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#262626]", // 03
-            "bg-[#420080] dark:bg-[#8a00ab]", // 04
-            "bg-[#F6EEFF] dark:bg-[#1A1029] border border-[#EAD8FF] dark:border-[#2B103D]", // 05
-            "bg-[#5800a9] dark:bg-[#b600d7]", // 06
-          ];
-          const coloredFlags = [false, false, false, true, false, true];
+const cardStyles = [
+  "bg-[#F6EEFF] dark:bg-[#1A1029] border border-[#EAD8FF] dark:border-[#2B103D]", // 01 - فاتح
+  "bg-[#7000c4] dark:bg-[#9b00c2]", // 02 - غامق (بدل الأبيض)
+  "bg-[#F6EEFF] dark:bg-[#1A1029] border border-[#EAD8FF] dark:border-[#2B103D]", // 03 - فاتح (بدل الأبيض)
+  "bg-[#420080] dark:bg-[#8a00ab]", // 04 - غامق
+  "bg-[#5800a9] dark:bg-[#b600d7]", // 05 - غامق (بدل الفاتح)
+  "bg-[#F6EEFF] dark:bg-[#1A1029] border border-[#EAD8FF] dark:border-[#2B103D]", // 06 - فاتح (بدل الغامق)
+];
+const coloredFlags = [false, true, false, true, true, false];
           const bgStyles = cardStyles;
           const isColored = coloredFlags[index];
           // الكارت الأول والأخير عريضين (بياخدوا عمودين) زي المرجع، والباقي عادي
