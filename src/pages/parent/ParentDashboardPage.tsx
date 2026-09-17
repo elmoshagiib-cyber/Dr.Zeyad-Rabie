@@ -259,6 +259,13 @@ export default function ParentDashboardPage() {
               </div>
             </div>
           </div>
+
+          <div className="grid grid-cols-2 gap-3 w-full max-w-[280px] mt-4">
+            <StatCard icon={<BookOpen size={20} />} label="محاضرات مكتملة" value={`${completedLessons} / ${totalLessons}`} />
+            <StatCard icon={<CheckCircle2 size={20} />} label="واجبات مسلّمة" value={String(student.homeworkResults?.length || 0)} />
+            <StatCard icon={<GraduationCap size={20} />} label="كورسات مشترك بها" value={String(courses.length)} />
+            <StatCard icon={<Clock size={20} />} label="وقت المشاهدة" value={`${Math.floor(totalWatchMinutes / 60)}س ${totalWatchMinutes % 60}د`} />
+          </div>
         </div>
 
         {/* Rest of content */}
@@ -280,14 +287,6 @@ export default function ParentDashboardPage() {
             </p>
           </div>
         )}
-
-        {/* Stat cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <StatCard icon={<BookOpen size={22} />} label="محاضرات مكتملة" value={`${completedLessons} / ${totalLessons}`} />
-          <StatCard icon={<CheckCircle2 size={22} />} label="واجبات مسلّمة" value={String(student.homeworkResults?.length || 0)} />
-          <StatCard icon={<GraduationCap size={22} />} label="كورسات مشترك بها" value={String(courses.length)} />
-          <StatCard icon={<Clock size={22} />} label="وقت المشاهدة" value={`${Math.floor(totalWatchMinutes / 60)}س ${totalWatchMinutes % 60}د`} />
-        </div>
 
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4">
