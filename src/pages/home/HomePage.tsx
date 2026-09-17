@@ -375,30 +375,44 @@ const FEATURES = [
   {
     image: "/images/features/feature-1.png",
     number: "01",
-    title: "شرح مبسط",
+    title: "شرح تفصيلي مبسط",
     description:
-      "شرح بأسلوب سهل ومنظم يساعدك على فهم الكيمياء من أول مرة.",
+      "فيديوهات شرح تفصيلي لكل درس بأسلوب سهل وممتع.",
   },
   {
     image: "/images/features/feature-2.png",
     number: "02",
-    title: "مراجعات شاملة",
+    title: "تجارب حقيقية",
     description:
-      "مراجعات مركزة تغطي جميع أجزاء المنهج مع أهم الأفكار والأسئلة.",
+      "تجارب حقيقية تتكشف وتتطبق خطوة بخطوة.",
   },
   {
     image: "/images/features/feature-3.png",
     number: "03",
-    title: "اختبارات تفاعلية",
+    title: "امتحانات تفاعلية",
     description:
-      "اختبر مستواك بعد كل درس مع تصحيح فوري وتحليل للنتيجة.",
+      "امتحانات تفاعلية بعد كل درس علشان تقيس مستواك.",
   },
   {
     image: "/images/features/feature-4.png",
     number: "04",
-    title: "متابعة مستمرة",
+    title: "تقارير أداء شهرية",
     description:
-      "تابع تقدمك أولًا بأول واعرف نقاط القوة والضعف بسهولة.",
+      "تقارير أداء شهرية تساعدك تتابع تطورك.",
+  },
+  {
+    image: "/images/features/feature-5.png",
+    number: "05",
+    title: "نظام جوائز وتكريمات",
+    description:
+      "نظام جوائز وتكريمات للمجتهدين والمتفوقين.",
+  },
+  {
+    image: "/images/features/feature-6.png",
+    number: "06",
+    title: "دعم فني وتعليمي مستمر",
+    description:
+      "دعم فني وتعليمي مستمر لو محتاج تسأل أو مش فاهم حاجة.",
   },
 ];
 
@@ -1000,16 +1014,16 @@ duration-700
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {FEATURES.map((feature, index) => {
-          // ألوان متبادلة بدرجات من نفس لون المنصة، زي الأصلي
+          // ألوان متبادلة بدرجات من نفس لون المنصة
           const bgStyles = [
             "bg-[#F6EEFF] dark:bg-[#1A1029] border border-[#EAD8FF] dark:border-[#2B103D]",
             "bg-[#5800a9] dark:bg-[#b600d7]",
             "bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#262626]",
             "bg-[#420080] dark:bg-[#8a00ab]",
           ];
-          const isColored = index === 1 || index === 3;
-          // البلاطة الأولى والرابعة أكبر شوية عشان يبقى فيه تنويع في الأحجام
-          const isLarge = index === 0 || index === 3;
+          const isColored = index % 4 === 1 || index % 4 === 3;
+          // الكارت الأول والأخير عريضين (بياخدوا عمودين) زي المرجع، والباقي عادي
+          const isWide = index === 0 || index === 5;
 
           return (
             <motion.div
@@ -1024,56 +1038,85 @@ duration-700
               }}
               className={`
                 relative overflow-hidden
-                rounded-[28px] sm:rounded-[32px]
-                p-6 sm:p-7
-                flex flex-col
+                rounded-[24px] sm:rounded-[28px] lg:rounded-[32px]
+                p-5 sm:p-6 lg:p-7
+                flex
                 h-full
-                ${isLarge ? "lg:col-span-2" : ""}
+                ${isWide ? "lg:col-span-2" : ""}
                 ${bgStyles[index % bgStyles.length]}
               `}
             >
               {/* الرقم الكبير */}
               <span
                 className={`
-                  absolute top-4 left-5 sm:top-5 sm:left-6
-                  text-3xl sm:text-4xl font-black
+                  absolute top-3 right-4 sm:top-4 sm:right-5
+                  text-2xl sm:text-3xl font-black
                   ${isColored ? "text-white/25" : "text-[#5800a9]/10 dark:text-white/10"}
                 `}
               >
                 {feature.number}
               </span>
 
-              {/* الرسمة */}
-              <div className="flex justify-center mb-4">
-                <img
-                  src={feature.image}
-                  alt={feature.title}
-                  className={`
-                    object-contain select-none pointer-events-none
-                    ${isLarge ? "h-32 sm:h-40" : "h-24 sm:h-28"}
-                  `}
-                />
-              </div>
+              {isWide ? (
+                // كارت عريض: النص على اليمين، الصورة على الشمال جنب بعض
+                <div className="flex items-center gap-4 sm:gap-6 w-full">
+                  <div className="flex-1 text-right">
+                    <h3
+                      className={`
+                        text-base sm:text-lg lg:text-xl font-black mb-2
+                        ${isColored ? "text-white" : "text-slate-900 dark:text-white"}
+                      `}
+                    >
+                      {feature.title}
+                    </h3>
+                    <p
+                      className={`
+                        text-[13px] sm:text-sm lg:text-[15px] leading-6 sm:leading-7
+                        ${isColored ? "text-white/85" : "text-slate-500 dark:text-slate-400"}
+                      `}
+                    >
+                      {feature.description}
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0 w-[38%] sm:w-[42%]">
+                    <img
+                      src={feature.image}
+                      alt={feature.title}
+                      className="w-full h-auto object-contain select-none pointer-events-none"
+                    />
+                  </div>
+                </div>
+              ) : (
+                // كارت عادي: الصورة فوق، النص تحتها
+                <div className="flex flex-col w-full">
+                  <div className="flex justify-center mb-3 sm:mb-4">
+                    <img
+                      src={feature.image}
+                      alt={feature.title}
+                      className="object-contain select-none pointer-events-none h-24 sm:h-28 lg:h-32"
+                    />
+                  </div>
 
-              <div className="mt-auto text-center">
-                <h3
-                  className={`
-                    text-lg sm:text-xl font-black mb-2
-                    ${isColored ? "text-white" : "text-slate-900 dark:text-white"}
-                  `}
-                >
-                  {feature.title}
-                </h3>
-
-                <p
-                  className={`
-                    text-sm sm:text-[15px] leading-7
-                    ${isColored ? "text-white/85" : "text-slate-500 dark:text-slate-400"}
-                  `}
-                >
-                  {feature.description}
-                </p>
-              </div>
+                  <div className="mt-auto text-center">
+                    <h3
+                      className={`
+                        text-base sm:text-lg lg:text-xl font-black mb-2
+                        ${isColored ? "text-white" : "text-slate-900 dark:text-white"}
+                      `}
+                    >
+                      {feature.title}
+                    </h3>
+                    <p
+                      className={`
+                        text-[13px] sm:text-sm lg:text-[15px] leading-6 sm:leading-7
+                        ${isColored ? "text-white/85" : "text-slate-500 dark:text-slate-400"}
+                      `}
+                    >
+                      {feature.description}
+                    </p>
+                  </div>
+                </div>
+              )}
             </motion.div>
           );
         })}
