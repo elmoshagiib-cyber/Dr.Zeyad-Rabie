@@ -23,6 +23,7 @@ import {
   Settings,
   Timer,
   Pencil,
+  RefreshCw,
 } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import toast from "react-hot-toast";
@@ -66,15 +67,6 @@ interface Stats {
   lastSent: string;
 }
 
-const notificationTypeMap: Record<string, { label: string; icon: any; color: string }> = {
-  lecture: { label: "محاضرة", icon: BookOpen, color: "bg-blue-50 text-blue-700" },
-  exam: { label: "امتحان", icon: FileText, color: "bg-violet-50 text-violet-700" },
-  homework: { label: "واجب", icon: Calendar, color: "bg-amber-50 text-amber-700" },
-  live: { label: "بث مباشر", icon: Video, color: "bg-rose-50 text-rose-700" },
-  announcement: { label: "إعلان", icon: Bell, color: "bg-emerald-50 text-emerald-700" },
-  offer: { label: "عرض خاص", icon: Gift, color: "bg-purple-50 text-purple-700" },
-  general: { label: "عام", icon: Bell, color: "bg-slate-50 text-slate-700" },
-};
 
 const settingsMap: Record<string, { title: string; description: string; icon: any }> = {
   new_lecture: {
@@ -126,15 +118,6 @@ const typeColorMap: Record<string, string> = {
   general: "#155DFC",
 };
 
-const filterOptions = [
-  { key: "all", label: "الكل" },
-  { key: "announcement", label: "الإعلانات" },
-  { key: "lecture", label: "المحاضرات" },
-  { key: "exam", label: "الامتحانات" },
-  { key: "homework", label: "الواجبات" },
-  { key: "offer", label: "العروض" },
-];
-
 export default function InstructorNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
@@ -147,7 +130,6 @@ export default function InstructorNotifications() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [studentSearch, setStudentSearch] = useState("");
   const [showStudentDropdown, setShowStudentDropdown] = useState(false);
-  const [activeFilter, setActiveFilter] = useState("all");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -230,9 +212,6 @@ export default function InstructorNotifications() {
 
   const filteredNotifications = useMemo(() => {
     let result = notifications;
-    if (activeFilter !== "all") {
-      result = result.filter((n) => n.type === activeFilter);
-    }
     if (historySearch.trim()) {
       const q = historySearch.trim().toLowerCase();
       result = result.filter(
@@ -242,7 +221,7 @@ export default function InstructorNotifications() {
       );
     }
     return result;
-  }, [notifications, activeFilter, historySearch]);
+  }, [notifications, historySearch]);
 
 const getStageFromGrade = (grade: string): string => {
   if (grade.includes("ثانوي")) return "الثانوية";
@@ -522,7 +501,7 @@ const { error: studentNotifError } = await supabase
       <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <div className="w-16 h-16 border-4 border-[#1E1B3A] border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="w-16 h-16 border-4 border-[#155DFC] border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="mt-4 text-slate-600 font-bold">جاري التحميل...</p>
           </div>
         </div>
@@ -580,6 +559,14 @@ const { error: studentNotifError } = await supabase
                   إرسال إشعار يدوي
                 </button>
                 <button
+                  onClick={() => loadData()}
+                  title="تحديث البيانات"
+                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-xs sm:text-sm font-bold hover:bg-white/20 transition-colors"
+                >
+                  <RefreshCw size={16} />
+                  تحديث
+                </button>
+                <button
                   onClick={() => setShowSettings(!showSettings)}
                   className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white text-slate-900 text-xs sm:text-sm font-bold hover:bg-white/90 transition-colors"
                 >
@@ -590,39 +577,46 @@ const { error: studentNotifError } = await supabase
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
             {[
               {
                 title: "إجمالي الإشعارات",
                 value: stats.total,
                 icon: Bell,
-                gradient: "from-blue-500 to-blue-600",
+                accent: "#155DFC",
                 bg: "bg-blue-50",
-                color: "text-blue-600",
+                color: "text-[#155DFC]",
+                hint: "كل الإشعارات المرسلة",
+                isText: false,
               },
               {
                 title: "إشعارات اليوم",
                 value: stats.today,
                 icon: TrendingUp,
-                gradient: "from-emerald-500 to-emerald-600",
+                accent: "#10B981",
                 bg: "bg-emerald-50",
                 color: "text-emerald-600",
+                hint: "اتبعتت خلال اليوم",
+                isText: false,
               },
               {
                 title: "عدد الطلاب",
                 value: stats.students,
                 icon: Users,
-                gradient: "from-[#155DFC] to-[#1547D6]",
-                bg: "bg-blue-50",
-                color: "text-[#155DFC]",
+                accent: "#8B5CF6",
+                bg: "bg-violet-50",
+                color: "text-violet-600",
+                hint: "إجمالي المستلمين",
+                isText: false,
               },
               {
                 title: "آخر إرسال",
                 value: stats.lastSent,
                 icon: Clock,
-                gradient: "from-amber-500 to-amber-600",
+                accent: "#F59E0B",
                 bg: "bg-amber-50",
                 color: "text-amber-600",
+                hint: "تاريخ آخر إشعار",
                 isText: true,
               },
             ].map((stat, index) => (
@@ -630,20 +624,33 @@ const { error: studentNotifError } = await supabase
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
+                transition={{ delay: index * 0.08 }}
+                className="relative overflow-hidden bg-white rounded-2xl border border-slate-100 shadow-sm p-5 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-600 mb-1">{stat.title}</p>
-                    <p className={`text-2xl font-black ${stat.isText ? "text-base" : ""}`}>
-                      {stat.value}
-                    </p>
-                  </div>
-                  <div className={`w-14 h-14 rounded-xl ${stat.bg} flex items-center justify-center`}>
-                    <stat.icon className={stat.color} size={28} />
+                <span
+                  className="absolute inset-x-0 top-0 h-1.5"
+                  style={{ background: stat.accent }}
+                />
+
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-xs sm:text-sm font-bold text-slate-600">{stat.title}</p>
+                  <div
+                    className={`w-9 h-9 rounded-xl ${stat.bg} flex items-center justify-center flex-shrink-0`}
+                  >
+                    <stat.icon className={stat.color} size={18} />
                   </div>
                 </div>
+
+                <p
+                  className={`mt-3 font-black ${
+                    stat.isText ? "text-base sm:text-lg text-slate-800" : "text-3xl sm:text-4xl"
+                  }`}
+                  style={stat.isText ? undefined : { color: stat.accent }}
+                >
+                  {stat.value}
+                </p>
+
+                <p className="mt-1.5 text-[11px] text-slate-400">{stat.hint}</p>
               </motion.div>
             ))}
           </div>
@@ -664,7 +671,7 @@ const { error: studentNotifError } = await supabase
                       if (showSendForm) resetForm();
                       setShowSendForm(!showSendForm);
                     }}
-                    className="p-2 rounded-xl bg-[#1E1B3A] text-white hover:bg-[#0F172A] transition-colors"
+                    className="p-2 rounded-xl bg-[#155DFC] text-white hover:bg-[#1547D6] transition-colors"
                   >
                     {showSendForm ? <X size={20} /> : <Plus size={20} />}
                   </button>
@@ -687,7 +694,7 @@ const { error: studentNotifError } = await supabase
                           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                           rows={formData.isBanner ? 2 : 4}
                           maxLength={formData.isBanner ? 120 : 500}
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all resize-none"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#155DFC] focus:ring-2 focus:ring-[#155DFC]/20 outline-none transition-all resize-none"
                           placeholder={
                             formData.isBanner
                               ? "مثال: فاضل على نهاية رحلة الثانوية العامة"
@@ -699,7 +706,7 @@ const { error: studentNotifError } = await supabase
                         </p>
                       </div>
 
-                      <div className="border border-dashed border-[#1E1B3A]/40 rounded-xl p-4 bg-[#1E1B3A]/5">
+                      <div className="border border-dashed border-[#155DFC]/40 rounded-xl p-4 bg-[#155DFC]/5">
                         <label className="flex items-center gap-2 cursor-pointer mb-3">
                           <input
                             type="checkbox"
@@ -707,9 +714,9 @@ const { error: studentNotifError } = await supabase
                             onChange={(e) =>
                               setFormData({ ...formData, isBanner: e.target.checked, targetType: "all", targetValue: "" })
                             }
-                            className="w-5 h-5 rounded border-slate-300 text-[#1E1B3A] focus:ring-[#1E1B3A]"
+                            className="w-5 h-5 rounded border-slate-300 text-[#155DFC] focus:ring-[#155DFC]"
                           />
-                          <Timer size={18} className="text-[#1E1B3A]" />
+                          <Timer size={18} className="text-[#155DFC]" />
                           <span className="text-sm font-bold text-slate-700">
                             عرضه كشريط عد تنازلي أعلى الموقع (فوق الـ Navbar)
                           </span>
@@ -727,11 +734,30 @@ const { error: studentNotifError } = await supabase
                               onChange={(e) =>
                                 setFormData({ ...formData, bannerEndAt: e.target.value })
                               }
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all"
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#155DFC] focus:ring-2 focus:ring-[#155DFC]/20 outline-none transition-all"
                             />
                             <p className="text-xs text-slate-500 mt-2 leading-relaxed">
                               العداد هيحسب تلقائيًا (أيام : ساعات : دقايق : ثواني) لحد التاريخ والوقت ده.
                             </p>
+
+                            {formData.title.trim() && (
+                              <div className="mt-4">
+                                <p className="text-[11px] font-bold text-slate-500 mb-2">معاينة الشريط</p>
+                                <div className="rounded-xl bg-gradient-to-r from-[#1547D6] to-[#3183FF] text-white px-4 py-2.5 flex items-center justify-between gap-3">
+                                  <span className="text-xs font-bold truncate">{formData.title}</span>
+                                  <span className="text-[11px] font-black bg-white/15 rounded-lg px-2 py-1 flex-shrink-0">
+                                    {formData.bannerEndAt
+                                      ? `${Math.max(
+                                          0,
+                                          Math.ceil(
+                                            (new Date(formData.bannerEndAt).getTime() - Date.now()) / 86400000
+                                          )
+                                        )} يوم`
+                                      : "--"}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         ) : (
                           <p className="text-xs text-slate-500 leading-relaxed">
@@ -748,7 +774,7 @@ const { error: studentNotifError } = await supabase
                             onChange={(e) =>
                               setFormData({ ...formData, isPinned: e.target.checked })
                             }
-                            className="w-5 h-5 rounded border-slate-300 text-[#1E1B3A] focus:ring-[#1E1B3A]"
+                            className="w-5 h-5 rounded border-slate-300 text-[#155DFC] focus:ring-[#155DFC]"
                           />
                           <Pin size={18} className="text-slate-600" />
                           <span className="text-sm font-bold text-slate-700">تثبيت الإشعار</span>
@@ -760,22 +786,6 @@ const { error: studentNotifError } = await supabase
 
                       {!formData.isBanner && (
                         <>
-                          <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                              نوع الإشعار
-                            </label>
-                            <select
-                              value={formData.type}
-                              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all"
-                            >
-                              {Object.entries(notificationTypeMap).map(([key, value]) => (
-                                <option key={key} value={key}>
-                                  {value.label}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
 
                           <div>
                             <label className="block text-sm font-bold text-slate-700 mb-2">
@@ -786,7 +796,7 @@ const { error: studentNotifError } = await supabase
                               onChange={(e) =>
                                 setFormData({ ...formData, targetType: e.target.value, targetValue: "" })
                               }
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all"
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#155DFC] focus:ring-2 focus:ring-[#155DFC]/20 outline-none transition-all"
                             >
                               {Object.entries(targetTypeMap).map(([key, value]) => (
                                 <option key={key} value={key}>
@@ -806,7 +816,7 @@ const { error: studentNotifError } = await supabase
                                 onChange={(e) =>
                                   setFormData({ ...formData, targetValue: e.target.value })
                                 }
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all"
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#155DFC] focus:ring-2 focus:ring-[#155DFC]/20 outline-none transition-all"
                               >
                                 <option value="">اختر المرحلة</option>
                                 <option value="الثانوية">الثانوية</option>
@@ -825,7 +835,7 @@ const { error: studentNotifError } = await supabase
                                 onChange={(e) =>
                                   setFormData({ ...formData, targetValue: e.target.value })
                                 }
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all"
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#155DFC] focus:ring-2 focus:ring-[#155DFC]/20 outline-none transition-all"
                               >
                                 <option value="">اختر الصف</option>
                                 <optgroup label="المرحلة الإعدادية">
@@ -862,7 +872,7 @@ const { error: studentNotifError } = await supabase
                                   }}
                                   onFocus={() => setShowStudentDropdown(true)}
                                   onBlur={() => setTimeout(() => setShowStudentDropdown(false), 150)}
-                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all"
+                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#155DFC] focus:ring-2 focus:ring-[#155DFC]/20 outline-none transition-all"
                                   placeholder="ابحث عن طالب..."
                                 />
                                 <Search
@@ -905,7 +915,7 @@ const { error: studentNotifError } = await supabase
                           <div className="bg-slate-50 rounded-xl p-4">
                             <div className="flex items-center justify-between">
                               <span className="text-sm font-bold text-slate-700">عدد المستلمين:</span>
-                              <span className="text-lg font-black text-[#1E1B3A]">
+                              <span className="text-lg font-black text-[#155DFC]">
                                 {recipientCount} طالب
                               </span>
                             </div>
@@ -920,7 +930,7 @@ const { error: studentNotifError } = await supabase
                           (formData.isBanner ? !formData.bannerEndAt : recipientCount === 0) ||
                           sending
                         }
-                        className="w-full bg-[#1E1B3A] text-white font-bold py-4 rounded-xl hover:bg-[#0F172A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full bg-[#155DFC] text-white font-bold py-4 rounded-xl hover:bg-[#1547D6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       >
                         <Send size={20} />
                         {editingId ? "تحديث الإشعار" : "إرسال الإشعار"}
@@ -973,7 +983,7 @@ const { error: studentNotifError } = await supabase
                               className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
                             >
                               <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                                <Icon size={18} className="text-[#1E1B3A]" />
+                                <Icon size={18} className="text-[#155DFC]" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <h3 className="font-bold text-slate-900 text-sm mb-1">
@@ -984,7 +994,7 @@ const { error: studentNotifError } = await supabase
                               <button
                                 onClick={() => toggleSetting(setting.id, setting.enabled)}
                                 className={`flex-shrink-0 w-11 h-6 rounded-full transition-colors relative ${
-                                  setting.enabled ? "bg-[#1E1B3A]" : "bg-slate-300"
+                                  setting.enabled ? "bg-[#155DFC]" : "bg-slate-300"
                                 }`}
                               >
                                 <div
@@ -1010,33 +1020,22 @@ const { error: studentNotifError } = await supabase
             className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6"
           >
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
-              <h2 className="text-xl font-black text-slate-900">سجل الإشعارات</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-black text-slate-900">سجل الإشعارات</h2>
+                <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-[#155DFC] text-xs font-black">
+                  {filteredNotifications.length}
+                </span>
+              </div>
               <div className="relative w-full sm:w-72">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <input
                   type="text"
                   value={historySearch}
                   onChange={(e) => setHistorySearch(e.target.value)}
-                  placeholder="عنوان الإشعار، محتوى، أو اسم الطالب..."
-                  className="w-full pr-9 pl-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#1E1B3A] focus:ring-2 focus:ring-[#1E1B3A]/20 outline-none transition-all"
+                  placeholder="ابحث بعنوان أو محتوى الإشعار..."
+                  className="w-full pr-9 pl-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#155DFC] focus:ring-2 focus:ring-[#155DFC]/20 outline-none transition-all"
                 />
               </div>
-            </div>
-
-            <div className="flex gap-2 mb-6 flex-wrap">
-              {filterOptions.map((option) => (
-                <button
-                  key={option.key}
-                  onClick={() => setActiveFilter(option.key)}
-                  className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${
-                    activeFilter === option.key
-                      ? "bg-[#1E1B3A] text-white shadow-md"
-                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
             </div>
 
             {filteredNotifications.length === 0 ? (
@@ -1046,7 +1045,7 @@ const { error: studentNotifError } = await supabase
                 </div>
                 <h3 className="text-lg font-black text-slate-900 mb-2">لا توجد إشعارات</h3>
                 <p className="text-slate-600">
-                  {activeFilter === "all" ? "لم يتم إرسال أي إشعارات بعد" : "لا توجد إشعارات من هذا النوع"}
+                  {historySearch.trim() ? "لا توجد نتائج مطابقة لبحثك" : "لم يتم إرسال أي إشعارات بعد"}
                 </p>
               </div>
             ) : (
@@ -1064,8 +1063,6 @@ const { error: studentNotifError } = await supabase
                     </thead>
                     <tbody>
                       {filteredNotifications.map((notification) => {
-                        const typeInfo = notificationTypeMap[notification.type] || notificationTypeMap.general;
-
                         return (
                           <tr
                             key={notification.id}
@@ -1086,7 +1083,7 @@ const { error: studentNotifError } = await supabase
                                       <span
                                         className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold ${
                                           notification.is_active
-                                            ? "bg-[#1E1B3A]/10 text-[#1E1B3A]"
+                                            ? "bg-[#155DFC]/10 text-[#155DFC]"
                                             : "bg-slate-100 text-slate-500"
                                         }`}
                                       >
@@ -1099,9 +1096,6 @@ const { error: studentNotifError } = await supabase
                                     {notification.content}
                                   </p>
                                   <div className="flex items-center gap-2 flex-wrap mt-1.5">
-                                    <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${typeInfo.color}`}>
-                                      {typeInfo.label}
-                                    </span>
                                     {notification.is_banner && notification.banner_end_at && (
                                       <span className="text-[10px] text-slate-400">
                                         ينتهي: {new Date(notification.banner_end_at).toLocaleString("ar-EG", {
@@ -1148,7 +1142,7 @@ const { error: studentNotifError } = await supabase
                                   onClick={() => toggleBannerActive(notification.id, notification.is_active)}
                                   className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
                                     notification.is_active
-                                      ? "bg-[#1E1B3A]/10 text-[#1E1B3A] hover:bg-white/10"
+                                      ? "bg-[#155DFC]/10 text-[#155DFC] hover:bg-white/10"
                                       : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                                   }`}
                                   title={notification.is_active ? "إخفاء من الشريط العلوي" : "إظهار في الشريط العلوي"}
@@ -1188,8 +1182,6 @@ const { error: studentNotifError } = await supabase
                 {/* Mobile cards */}
                 <div className="md:hidden space-y-3">
                   {filteredNotifications.map((notification) => {
-                    const typeInfo = notificationTypeMap[notification.type] || notificationTypeMap.general;
-
                     return (
                       <div
                         key={notification.id}
@@ -1209,7 +1201,7 @@ const { error: studentNotifError } = await supabase
                                 <span
                                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold ${
                                     notification.is_active
-                                      ? "bg-[#1E1B3A]/10 text-[#1E1B3A]"
+                                      ? "bg-[#155DFC]/10 text-[#155DFC]"
                                       : "bg-slate-100 text-slate-500"
                                   }`}
                                 >
@@ -1225,9 +1217,6 @@ const { error: studentNotifError } = await supabase
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2 mb-3">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${typeInfo.color}`}>
-                            {typeInfo.label}
-                          </span>
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 flex items-center gap-1">
                             <Users size={10} />
                             {notification.recipient_count} طالب
@@ -1245,7 +1234,7 @@ const { error: studentNotifError } = await supabase
                             onClick={() => toggleBannerActive(notification.id, notification.is_active)}
                             className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold ${
                               notification.is_active
-                                ? "bg-[#1E1B3A]/10 text-[#1E1B3A]"
+                                ? "bg-[#155DFC]/10 text-[#155DFC]"
                                 : "bg-slate-100 text-slate-500"
                             }`}
                           >
@@ -1315,7 +1304,7 @@ const { error: studentNotifError } = await supabase
                 ) : (
                   <>
                     هل أنت متأكد من إرسال هذا الإشعار إلى{" "}
-                    <span className="font-black text-[#1E1B3A]">{recipientCount}</span> طالب؟
+                    <span className="font-black text-[#155DFC]">{recipientCount}</span> طالب؟
                   </>
                 )}
               </p>
@@ -1331,7 +1320,7 @@ const { error: studentNotifError } = await supabase
                 <button
                   onClick={handleSendNotification}
                   disabled={sending}
-                  className="flex-1 px-6 py-3 rounded-xl bg-[#1E1B3A] text-white hover:bg-[#0F172A] transition-colors font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+                  className="flex-1 px-6 py-3 rounded-xl bg-[#155DFC] text-white hover:bg-[#1547D6] transition-colors font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
                 >
                   {sending ? (
                     <>
