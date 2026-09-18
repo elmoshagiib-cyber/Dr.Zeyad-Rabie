@@ -162,8 +162,8 @@ function EmptyState() {
     <div className="relative overflow-hidden rounded-[24px] sm:rounded-[30px] bg-[#5800a9] dark:bg-[#b600d7] p-6 sm:p-10 text-center">
       <div className="flex justify-center gap-3 sm:gap-4 mb-5 sm:mb-6">
         <img src="/images/frames/silver-frame.png" alt="" className="w-16 sm:w-20 h-auto object-contain opacity-90" />
-        <img src="/images/frames/gold-frame.png" alt="" className="w-20 sm:w-24 h-auto object-contain" />
-        <img src="/images/frames/silver-frame.png" alt="" className="w-16 sm:w-20 h-auto object-contain opacity-90" />
+        <img src="/images/frames/diamond-frame.png" alt="" className="w-20 sm:w-24 h-auto object-contain" />
+        <img src="/images/frames/gold-frame.png" alt="" className="w-16 sm:w-20 h-auto object-contain opacity-90" />
       </div>
 
       <span className="inline-block mb-3 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-black bg-white/15 text-white border border-white/20">
