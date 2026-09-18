@@ -122,117 +122,23 @@ const generateInvoiceNumber = async (): Promise<string> => {
 };
 
 const activateSubscription = async () => {
-
-  const { data, error } = await supabase
-    .from("subscription_codes")
-    .select("*")
-    .eq("code", subscriptionCode)
-    .single();
-
-  if (error || !data) {
-    showToast("كود الاشتراك غير صحيح");
-    return;
-  }
-
-  if (data.status !== "active") {
-    showToast("هذا الكود غير صالح أو تم استخدامه");
-    return;
-  }
-
-  if (data.course_id !== selectedCourse.id) {
-    showToast("هذا الكود لا يخص هذا الكورس");
-    return;
-  }
-
-  const currentUser = JSON.parse(localStorage.getItem("user")!);
-
-const studentId = currentUser.studentId;
-
-// التحقق أولًا هل الطالب مشترك بالفعل
-const { data: existingSubscription } = await supabase
-  .from("student_courses")
-  .select("id")
-  .eq("student_id", studentId)
-  .eq("course_id", selectedCourse.id)
-  .eq("active", true)
-  .maybeSingle();
-
-if (existingSubscription) {
-  showToast("أنت مشترك بالفعل في هذا الكورس.");
-  return;
-}
-
-// إضافة الاشتراك
-const { error: enrollError } = await supabase
-  .from("student_courses")
-  .insert({
-    student_id: studentId,
-    course_id: selectedCourse.id,
-    active: true,
-    subscription_type: "كود اشتراك",
-    expires_at: new Date(
-      Date.now() + data.duration_days * 24 * 60 * 60 * 1000
-    ).toISOString(),
+  const { data, error } = await supabase.rpc("redeem_subscription_code", {
+    p_code: subscriptionCode,
+    p_course_id: selectedCourse.id,
   });
 
-if (enrollError) {
-  showToast("حدث خطأ أثناء إضافة الاشتراك");
-  return;
-}
+  if (error || !data?.success) {
+    showToast(data?.error || "حدث خطأ أثناء تفعيل الاشتراك");
+    return;
+  }
 
-// تحديث حالة الكود
-const startDate = new Date();
-const expiresAt = new Date();
-expiresAt.setDate(expiresAt.getDate() + data.duration_days);
+  await loadMyCourses();
 
-const { error: codeError } = await supabase
-  .from("subscription_codes")
-  .update({
-    status: "used",
-    student_id: studentId,
-    used_at: new Date().toISOString(),
-    expires_at: expiresAt.toISOString(),
-  })
-  .eq("id", data.id);
+  setShowSubscriptionModal(false);
+  setSubscriptionCode("");
+  setSelectedCourse(null);
 
-if (codeError) {
-  showToast("تم الاشتراك لكن حدث خطأ أثناء تحديث الكود");
-  return;
-}
-
-// ── إنشاء فاتورة/سجل دفع تلقائي بنفس بيانات الكود ─────────
-try {
-  const invoiceNumber = await generateInvoiceNumber();
-
-  await supabase.from("subscription_payments").insert({
-    student_id: studentId,
-    course_id: selectedCourse.id,
-    invoice_number: invoiceNumber,
-    student_type: "online",
-    subscription_type: "monthly",
-    amount: Number(data.amount) || Number(selectedCourse.price) || 0,
-    payment_method: "vodafone_cash",
-    payer_phone: null,
-    payment_status: "verified",
-    payment_verified_at: new Date().toISOString(),
-    subscription_start_date: startDate.toISOString().slice(0, 10),
-    subscription_end_date: expiresAt.toISOString().slice(0, 10),
-    subscription_code: data.code,
-    notes: "تم التفعيل تلقائيًا عبر كود الاشتراك",
-  });
-} catch (invoiceErr) {
-  // لو فشل إنشاء الفاتورة، الاشتراك يفضل شغال عادي، مفيش داعي نوقف الطالب
-  console.error("فشل إنشاء الفاتورة التلقائية:", invoiceErr);
-}
-
-// تحديث الواجهة
-await loadMyCourses();
-
-setShowSubscriptionModal(false);
-setSubscriptionCode("");
-setSelectedCourse(null);
-
-showToast("تم تفعيل الاشتراك بنجاح");
+  showToast("تم تفعيل الاشتراك بنجاح");
 };
 
 
