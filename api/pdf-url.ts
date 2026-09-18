@@ -55,13 +55,20 @@ export default async function handler(req: any, res: any) {
 
     const { data: lesson, error: lessonError } = await supabase
       .from("course_items")
-      .select("id, storage_path, section_id")
+      .select("id, storage_path, section_id, type, is_visible")   // ← ضفنا type, is_visible
       .eq("id", lessonId)
       .single();
 
     if (lessonError || !lesson) {
       return res.status(404).json({
         error: "Lesson not found",
+      });
+    }
+
+    // ===== السطر الجديد: نفس فحص video-url.ts بالظبط =====
+    if (lesson.type !== "pdf" || !lesson.is_visible) {
+      return res.status(404).json({
+        error: "PDF not found",
       });
     }
 
@@ -125,17 +132,11 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({
       url: signedUrl,
     });
-} catch (err: any) {
-  console.error("========== VIDEO API ERROR ==========");
-  console.error(err);
-  console.error("MESSAGE:", err?.message);
-  console.error("STACK:", err?.stack);
-  console.error("CAUSE:", err?.cause);
+  } catch (err: any) {
+    console.error("PDF API ERROR:", err);
 
-  return res.status(500).json({
-    success: false,
-    message: err?.message || "Unknown error",
-    stack: err?.stack || null,
-  });
-}
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
 }
