@@ -243,14 +243,12 @@ function IonCard({ ion }: { ion: Ion }) {
 // ============================================================
 // التابس
 // ============================================================
-type Tab = "table" | "ions" | "tools" | "learn" | "settings";
+type Tab = "table" | "ions" | "tools";
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode; ready: boolean }[] = [
   { id: "table", label: "الجدول", icon: null, ready: true },
   { id: "ions", label: "الأيونات", icon: null, ready: true },
-  { id: "tools", label: "الأدوات", icon: null, ready: false },
-  { id: "learn", label: "ساحة التعلّم", icon: <GraduationCap size={14} />, ready: false },
-  { id: "settings", label: "الإعدادات", icon: <Settings size={14} />, ready: false },
+  { id: "tools", label: "المختبر", icon: null, ready: false },
 ];
 
 interface ToolItem {
@@ -503,7 +501,7 @@ export default function ChemistryLabPage() {
         {activeTab === "tools" && (
           <div>
             <div className="text-center mb-6 sm:mb-8">
-              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-1.5">أدوات الكيمياء</h2>
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-1.5">مختبر الكيمياء</h2>
               <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base">أدوات ومختبرات الكيمياء للصفوف 9-12</p>
             </div>
 
@@ -548,18 +546,6 @@ export default function ChemistryLabPage() {
           </div>
         )}
 
-        {/* ── تابات لسه هتتعمل ── */}
-        {(activeTab === "learn" || activeTab === "settings") && (
-          <div className="flex flex-col items-center justify-center text-center py-20 sm:py-28 px-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center mb-4 sm:mb-5">
-              <FlaskConical className="text-[#5800a9] dark:text-[#b600d7]" size={32} />
-            </div>
-            <span className="inline-block mb-3 px-3.5 py-1.5 rounded-full text-xs font-black bg-[#F6EEFF] dark:bg-[#2B103D] text-[#5800a9] dark:text-[#b600d7]">
-              قريبًا
-            </span>
-            <h2 className="text-lg sm:text-xl font-black text-gray-800 dark:text-gray-200">الميزة دي هتتاح قريبًا</h2>
-          </div>
-        )}
 
         {/* ── مودال المختبر الافتراضي ── */}
         {labOpen && (
