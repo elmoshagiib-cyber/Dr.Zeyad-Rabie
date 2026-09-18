@@ -232,9 +232,14 @@ export function InstructorReports() {
                 <div className="flex gap-2">
                   <Button
                     onClick={loadReportData}
-                    className="flex-1 bg-[#155DFC] hover:bg-[#1547D6] text-white rounded-xl font-bold h-11"
+                    disabled={loading || (Boolean(dateFrom) && Boolean(dateTo) && dateFrom > dateTo)}
+                    className="flex-1 bg-[#155DFC] hover:bg-[#1547D6] text-white rounded-xl font-bold h-11 disabled:opacity-50"
                   >
-                    <Filter size={16} className="ml-1.5" />
+                    {loading ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin ml-1.5" />
+                    ) : (
+                      <Filter size={16} className="ml-1.5" />
+                    )}
                     تطبيق الفلاتر
                   </Button>
                   <Button variant="outline" onClick={resetFilters} className="rounded-xl font-bold h-11 px-3">
@@ -242,6 +247,11 @@ export function InstructorReports() {
                   </Button>
                 </div>
               </div>
+              {Boolean(dateFrom) && Boolean(dateTo) && dateFrom > dateTo && (
+                <p className="text-xs font-bold text-red-500 mt-3">
+                  تاريخ "من" لازم يكون قبل تاريخ "إلى"
+                </p>
+              )}
             </CardContent>
           </Card>
 
@@ -253,70 +263,58 @@ export function InstructorReports() {
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-3xl shadow-sm">
-                  <CardContent className="p-5 flex items-center justify-between">
-                    <div>
-                      <p className="text-gray-600 dark:text-gray-300 text-xs font-bold mb-1">
-                        عدد الاشتراكات المدفوعة
-                      </p>
-                      <h3 className="text-3xl font-black text-[#155DFC]">{paidSubscriptionsCount}</h3>
-                    </div>
-                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#111111] flex items-center justify-center">
-                      <ShoppingCart className="text-[#155DFC]" size={24} />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900 rounded-3xl shadow-sm">
-                  <CardContent className="p-5 flex items-center justify-between">
-                    <div>
-                      <p className="text-gray-600 dark:text-gray-300 text-xs font-bold mb-1">
-                        إجمالي المبيعات والأرباح
-                      </p>
-                      <h3 className="text-3xl font-black text-emerald-600">
-                        {totalSalesAndProfit.toLocaleString("ar-EG")} ج.م
+                {[
+                  {
+                    title: "عدد الاشتراكات المدفوعة",
+                    value: paidSubscriptionsCount.toLocaleString("ar-EG"),
+                    icon: ShoppingCart,
+                    accent: "#155DFC",
+                    bg: "bg-blue-50 dark:bg-blue-950/30",
+                  },
+                  {
+                    title: "إجمالي المبيعات والأرباح",
+                    value: `${totalSalesAndProfit.toLocaleString("ar-EG")} ج.م`,
+                    icon: Wallet,
+                    accent: "#10B981",
+                    bg: "bg-emerald-50 dark:bg-emerald-950/30",
+                  },
+                  {
+                    title: "متوسط قيمة الاشتراك",
+                    value: `${avgSubscriptionValue.toLocaleString("ar-EG")} ج.م`,
+                    icon: TrendingUp,
+                    accent: "#F59E0B",
+                    bg: "bg-amber-50 dark:bg-amber-950/30",
+                  },
+                  {
+                    title: "مدفوعات قيد المراجعة",
+                    value: pendingPayments.count.toLocaleString("ar-EG"),
+                    hint: pendingPayments.count > 0 ? `بقيمة ${pendingPayments.total.toLocaleString("ar-EG")} ج.م` : undefined,
+                    icon: AlertCircle,
+                    accent: "#EF4444",
+                    bg: "bg-red-50 dark:bg-red-950/30",
+                  },
+                ].map((stat) => (
+                  <Card
+                    key={stat.title}
+                    className="relative overflow-hidden bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm"
+                  >
+                    <span className="absolute inset-x-0 top-0 h-1.5" style={{ background: stat.accent }} />
+                    <CardContent className="p-5">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-gray-600 dark:text-gray-300 text-xs font-bold">{stat.title}</p>
+                        <div className={`w-10 h-10 rounded-xl ${stat.bg} flex items-center justify-center flex-shrink-0`}>
+                          <stat.icon size={18} style={{ color: stat.accent }} />
+                        </div>
+                      </div>
+                      <h3 className="mt-3 text-3xl font-black" style={{ color: stat.accent }}>
+                        {stat.value}
                       </h3>
-                    </div>
-                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#111111] flex items-center justify-center">
-                      <Wallet className="text-emerald-600" size={24} />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-3xl shadow-sm">
-                  <CardContent className="p-5 flex items-center justify-between">
-                    <div>
-                      <p className="text-gray-600 dark:text-gray-300 text-xs font-bold mb-1">
-                        متوسط قيمة الاشتراك
-                      </p>
-                      <h3 className="text-3xl font-black text-amber-600">
-                        {avgSubscriptionValue.toLocaleString("ar-EG")} ج.م
-                      </h3>
-                    </div>
-                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#111111] flex items-center justify-center">
-                      <TrendingUp className="text-amber-600" size={24} />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-3xl shadow-sm">
-                  <CardContent className="p-5 flex items-center justify-between">
-                    <div>
-                      <p className="text-gray-600 dark:text-gray-300 text-xs font-bold mb-1">
-                        مدفوعات قيد المراجعة
-                      </p>
-                      <h3 className="text-3xl font-black text-red-600">{pendingPayments.count}</h3>
-                      {pendingPayments.count > 0 && (
-                        <p className="text-[11px] text-gray-500 dark:text-gray-400 font-bold mt-0.5">
-                          بقيمة {pendingPayments.total.toLocaleString("ar-EG")} ج.م
-                        </p>
+                      {stat.hint && (
+                        <p className="text-[11px] text-gray-500 dark:text-gray-400 font-bold mt-1">{stat.hint}</p>
                       )}
-                    </div>
-                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#111111] flex items-center justify-center">
-                      <AlertCircle className="text-red-600" size={24} />
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -332,12 +330,21 @@ export function InstructorReports() {
                       </div>
                     ) : (
                       <div className="p-5 space-y-4">
-                        {Object.entries(paymentMethodBreakdown).map(([method, stats]) => {
+                        {Object.entries(paymentMethodBreakdown)
+                          .sort((a, b) => b[1].count - a[1].count)
+                          .map(([method, stats], index) => {
                           const percent = paidSubscriptionsCount > 0 ? Math.round((stats.count / paidSubscriptionsCount) * 100) : 0;
                           return (
                             <div key={method}>
                               <div className="flex items-center justify-between mb-1.5">
-                                <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{method}</span>
+                                <span className="text-sm font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                  {method}
+                                  {index === 0 && (
+                                    <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/30 text-[#155DFC] text-[10px] font-black">
+                                      الأكثر استخدامًا
+                                    </span>
+                                  )}
+                                </span>
                                 <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
                                   {stats.count} عملية • {stats.total.toLocaleString("ar-EG")} ج.م
                                 </span>
@@ -432,6 +439,21 @@ export function InstructorReports() {
                             </tr>
                           ))}
                         </tbody>
+                        <tfoot>
+                          <tr className="border-t-2 border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#1A1A1A]">
+                            <td className="px-4 py-3 font-black text-gray-900 dark:text-white">الإجمالي</td>
+                            <td className="px-4 py-3"></td>
+                            <td className="px-4 py-3 font-black text-[#155DFC]">
+                              {bestSelling.reduce((sum, c) => sum + c.subscriptions, 0)}
+                            </td>
+                            <td className="px-4 py-3 font-black text-emerald-600">
+                              {bestSelling
+                                .reduce((sum, c) => sum + c.price * c.subscriptions, 0)
+                                .toLocaleString("ar-EG")}{" "}
+                              ج.م
+                            </td>
+                          </tr>
+                        </tfoot>
                       </table>
                     </div>
                   )}

@@ -20,10 +20,10 @@ import {
   TrendingUp,
   Clock,
   Pin,
-  Settings,
   Timer,
   Pencil,
   RefreshCw,
+  ClipboardCopy,
 } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import toast from "react-hot-toast";
@@ -54,11 +54,6 @@ interface Student {
   grade: string;
 }
 
-interface NotificationSetting {
-  id: number;
-  setting_key: string;
-  enabled: boolean;
-}
 
 interface Stats {
   total: number;
@@ -67,39 +62,6 @@ interface Stats {
   lastSent: string;
 }
 
-
-const settingsMap: Record<string, { title: string; description: string; icon: any }> = {
-  new_lecture: {
-    title: "إضافة محاضرة جديدة",
-    description: "إرسال إشعار للطلاب عند إضافة محاضرة جديدة",
-    icon: BookOpen,
-  },
-  new_exam: {
-    title: "إضافة امتحان جديد",
-    description: "إرسال إشعار للطلاب عند إضافة امتحان جديد",
-    icon: FileText,
-  },
-  new_homework: {
-    title: "رفع واجب جديد",
-    description: "إرسال إشعار للطلاب عند رفع واجب منزلي جديد",
-    icon: Calendar,
-  },
-  exam_result: {
-    title: "ظهور نتيجة امتحان",
-    description: "إرسال إشعار للطلاب عند نشر نتائج الامتحانات",
-    icon: TrendingUp,
-  },
-  live_stream: {
-    title: "بث مباشر",
-    description: "إرسال إشعار للطلاب عند بدء بث مباشر",
-    icon: Video,
-  },
-  new_offer: {
-    title: "تفعيل عرض",
-    description: "إرسال إشعار للطلاب عند تفعيل عرض خاص جديد",
-    icon: Gift,
-  },
-};
 
 const targetTypeMap: Record<string, string> = {
   all: "الكل",
@@ -121,12 +83,10 @@ const typeColorMap: Record<string, string> = {
 export default function InstructorNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
-  const [settings, setSettings] = useState<NotificationSetting[]>([]);
   const [stats, setStats] = useState<Stats>({ total: 0, today: 0, students: 0, lastSent: "-" });
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [showSendForm, setShowSendForm] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [studentSearch, setStudentSearch] = useState("");
   const [showStudentDropdown, setShowStudentDropdown] = useState(false);
@@ -153,23 +113,19 @@ export default function InstructorNotifications() {
         toast.error("يجب تسجيل الدخول أولاً");
         return;
       }
-
-      const [notificationsRes, studentsRes, settingsRes] = await Promise.all([
+      const [notificationsRes, studentsRes] = await Promise.all([
         supabase
           .from("notifications")
           .select("*")
           .order("created_at", { ascending: false }),
         supabase.from("students").select("id, full_name, grade"),
-        supabase.from("notification_settings").select("*"),
       ]);
 
       if (notificationsRes.error) throw notificationsRes.error;
       if (studentsRes.error) throw studentsRes.error;
-      if (settingsRes.error) throw settingsRes.error;
 
       setNotifications(notificationsRes.data || []);
       setStudents(studentsRes.data || []);
-      setSettings(settingsRes.data || []);
 
       const today = new Date().toISOString().split("T")[0];
       const todayCount = (notificationsRes.data || []).filter(
@@ -394,6 +350,11 @@ const getStageFromGrade = (grade: string): string => {
     }
   };
 
+  const handleCopyText = (content: string) => {
+    navigator.clipboard.writeText(content);
+    toast.success("تم نسخ نص الإشعار");
+  };
+
   const handleDuplicate = (notification: Notification) => {
     setEditingId(null);
     setFormData({
@@ -476,25 +437,6 @@ const { error: studentNotifError } = await supabase
     }
   };
 
-  const toggleSetting = async (id: number, currentEnabled: boolean) => {
-    try {
-      const { error } = await supabase
-        .from("notification_settings")
-        .update({ enabled: !currentEnabled })
-        .eq("id", id);
-
-      if (error) throw error;
-
-      setSettings((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, enabled: !currentEnabled } : s))
-      );
-
-      toast.success("تم تحديث الإعدادات بنجاح");
-    } catch (error: any) {
-      toast.error("حدث خطأ أثناء تحديث الإعدادات");
-      console.error(error);
-    }
-  };
 
   if (loading) {
     return (
@@ -553,7 +495,7 @@ const { error: studentNotifError } = await supabase
                 )}
                 <button
                   onClick={() => setShowSendForm(!showSendForm)}
-                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold transition-colors"
+                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white text-[#155DFC] text-xs sm:text-sm font-bold hover:bg-white/90 transition-colors"
                 >
                   <Send size={16} />
                   إرسال إشعار يدوي
@@ -565,13 +507,6 @@ const { error: studentNotifError } = await supabase
                 >
                   <RefreshCw size={16} />
                   تحديث
-                </button>
-                <button
-                  onClick={() => setShowSettings(!showSettings)}
-                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white text-slate-900 text-xs sm:text-sm font-bold hover:bg-white/90 transition-colors"
-                >
-                  <Settings size={16} />
-                  الإعدادات
                 </button>
               </div>
             </div>
@@ -655,8 +590,7 @@ const { error: studentNotifError } = await supabase
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div className="lg:col-span-2">
+          <div className="mb-8">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -666,6 +600,7 @@ const { error: studentNotifError } = await supabase
                   <h2 className="text-xl font-black text-slate-900">
                     {editingId ? "تعديل الإشعار" : "إرسال إشعار جديد"}
                   </h2>
+
                   <button
                     onClick={() => {
                       if (showSendForm) resetForm();
@@ -701,7 +636,15 @@ const { error: studentNotifError } = await supabase
                               : "اكتب نص الإشعار هنا"
                           }
                         />
-                        <p className="text-xs text-slate-400 mt-1 text-left">
+                        <p
+                          className={`text-xs mt-1 text-left font-bold ${
+                            formData.title.length >= (formData.isBanner ? 120 : 500)
+                              ? "text-red-500"
+                              : formData.title.length >= (formData.isBanner ? 100 : 450)
+                              ? "text-amber-500"
+                              : "text-slate-400"
+                          }`}
+                        >
                           {formData.title.length}/{formData.isBanner ? 120 : 500}
                         </p>
                       </div>
@@ -939,79 +882,6 @@ const { error: studentNotifError } = await supabase
                   )}
                 </AnimatePresence>
               </motion.div>
-            </div>
-
-            <div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-black text-slate-900">الإعدادات</h2>
-                  <button
-                    onClick={() => setShowSettings(!showSettings)}
-                    className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
-                  >
-                    <Settings size={20} className={showSettings ? "rotate-90 transition-transform" : "transition-transform"} />
-                  </button>
-                </div>
-
-                <AnimatePresence>
-                  {showSettings && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="space-y-3 max-h-[500px] overflow-y-auto"
-                    >
-                      {settings.length === 0 ? (
-                        <div className="text-center py-8">
-                          <Settings size={40} className="text-slate-300 mx-auto mb-3" />
-                          <p className="text-sm text-slate-600">لا توجد إعدادات متاحة</p>
-                        </div>
-                      ) : (
-                        settings.map((setting) => {
-                          const mapped = settingsMap[setting.setting_key];
-                          if (!mapped) return null;
-
-                          const Icon = mapped.icon;
-
-                          return (
-                            <div
-                              key={setting.id}
-                              className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
-                            >
-                              <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                                <Icon size={18} className="text-[#155DFC]" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-slate-900 text-sm mb-1">
-                                  {mapped.title}
-                                </h3>
-                                <p className="text-xs text-slate-600 leading-relaxed">{mapped.description}</p>
-                              </div>
-                              <button
-                                onClick={() => toggleSetting(setting.id, setting.enabled)}
-                                className={`flex-shrink-0 w-11 h-6 rounded-full transition-colors relative ${
-                                  setting.enabled ? "bg-[#155DFC]" : "bg-slate-300"
-                                }`}
-                              >
-                                <div
-                                  className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${
-                                    setting.enabled ? "right-1" : "right-6"
-                                  }`}
-                                />
-                              </button>
-                            </div>
-                          );
-                        })
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </div>
           </div>
 
           <motion.div
@@ -1033,8 +903,16 @@ const { error: studentNotifError } = await supabase
                   value={historySearch}
                   onChange={(e) => setHistorySearch(e.target.value)}
                   placeholder="ابحث بعنوان أو محتوى الإشعار..."
-                  className="w-full pr-9 pl-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#155DFC] focus:ring-2 focus:ring-[#155DFC]/20 outline-none transition-all"
+                  className="w-full pr-9 pl-9 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#155DFC] focus:ring-2 focus:ring-[#155DFC]/20 outline-none transition-all"
                 />
+                {historySearch && (
+                  <button
+                    onClick={() => setHistorySearch("")}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -1097,14 +975,18 @@ const { error: studentNotifError } = await supabase
                                   </p>
                                   <div className="flex items-center gap-2 flex-wrap mt-1.5">
                                     {notification.is_banner && notification.banner_end_at && (
-                                      <span className="text-[10px] text-slate-400">
-                                        ينتهي: {new Date(notification.banner_end_at).toLocaleString("ar-EG", {
-                                          year: "numeric",
-                                          month: "short",
-                                          day: "numeric",
-                                          hour: "2-digit",
-                                          minute: "2-digit",
-                                        })}
+                                      <span
+                                        className={`text-[10px] font-bold ${
+                                          new Date(notification.banner_end_at).getTime() > Date.now()
+                                            ? "text-[#155DFC]"
+                                            : "text-slate-400"
+                                        }`}
+                                      >
+                                        {new Date(notification.banner_end_at).getTime() > Date.now()
+                                          ? `متبقي: ${Math.ceil(
+                                              (new Date(notification.banner_end_at).getTime() - Date.now()) / 86400000
+                                            )} يوم`
+                                          : "انتهى العداد"}
                                       </span>
                                     )}
                                   </div>
@@ -1148,6 +1030,13 @@ const { error: studentNotifError } = await supabase
                                   title={notification.is_active ? "إخفاء من الشريط العلوي" : "إظهار في الشريط العلوي"}
                                 >
                                   <Timer size={14} />
+                                </button>
+                                <button
+                                  onClick={() => handleCopyText(notification.content)}
+                                  className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center transition-all duration-200"
+                                  title="نسخ النص"
+                                >
+                                  <ClipboardCopy size={14} />
                                 </button>
                                 <button
                                   onClick={() => handleEdit(notification)}
@@ -1240,6 +1129,13 @@ const { error: studentNotifError } = await supabase
                           >
                             <Timer size={14} />
                             {notification.is_active ? "إيقاف" : "تفعيل"}
+                          </button>
+                          <button
+                            onClick={() => handleCopyText(notification.content)}
+                            className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold"
+                          >
+                            <ClipboardCopy size={14} />
+                            نسخ النص
                           </button>
                           <button
                             onClick={() => handleEdit(notification)}
