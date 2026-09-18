@@ -518,90 +518,24 @@ useEffect(() => {
   };
 
   const activateSubscription = async () => {
-    if (!course) return;
+  if (!course) return;
 
-    const { data, error } = await supabase
-      .from("subscription_codes")
-      .select("*")
-      .eq("code", subscriptionCode)
-      .single();
+  const { data, error } = await supabase.rpc("redeem_subscription_code", {
+    p_code: subscriptionCode,
+    p_course_id: course.id,
+  });
 
-    if (error || !data) {
-      showToast("كود الاشتراك غير صحيح");
-      return;
-    }
+  if (error || !data?.success) {
+    showToast(data?.error || "حدث خطأ أثناء تفعيل الاشتراك");
+    return;
+  }
 
-    if (data.status !== "active") {
-      showToast("هذا الكود غير صالح أو تم استخدامه");
-      return;
-    }
+  setIsEnrolled(true);
+  setShowSubscriptionModal(false);
+  setSubscriptionCode("");
 
-    if (data.course_id !== course.id) {
-      showToast("هذا الكود لا يخص هذا الكورس");
-      return;
-    }
-
-    const studentId = getStudentId();
-
-    if (!studentId) {
-      showToast("يجب تسجيل الدخول أولاً");
-      return;
-    }
-
-    const { data: existingSubscription } = await supabase
-      .from("student_courses")
-      .select("id")
-      .eq("student_id", studentId)
-      .eq("course_id", course.id)
-      .eq("active", true)
-      .maybeSingle();
-
-    if (existingSubscription) {
-      showToast("أنت مشترك بالفعل في هذا الكورس.");
-      return;
-    }
-
-    const { error: enrollError } = await supabase
-      .from("student_courses")
-      .insert({
-        student_id: studentId,
-        course_id: course.id,
-        active: true,
-        subscription_type: "كود اشتراك",
-        expires_at: new Date(
-          Date.now() + data.duration_days * 24 * 60 * 60 * 1000
-        ).toISOString(),
-      });
-
-    if (enrollError) {
-      showToast("حدث خطأ أثناء إضافة الاشتراك");
-      return;
-    }
-
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + data.duration_days);
-
-    const { error: codeError } = await supabase
-      .from("subscription_codes")
-      .update({
-        status: "used",
-        student_id: studentId,
-        used_at: new Date().toISOString(),
-        expires_at: expiresAt.toISOString(),
-      })
-      .eq("id", data.id);
-
-    if (codeError) {
-      showToast("تم الاشتراك لكن حدث خطأ أثناء تحديث الكود");
-      return;
-    }
-
-    setIsEnrolled(true);
-    setShowSubscriptionModal(false);
-    setSubscriptionCode("");
-
-    showToast("تم تفعيل الاشتراك بنجاح");
-  };
+  showToast("تم تفعيل الاشتراك بنجاح");
+};
 
   const videosCount = units.reduce(
     (t, u) => t + u.lessons.filter((l: any) => l.type === "video").length,
