@@ -193,8 +193,10 @@ dark:border-[#262626]
 
                  <button
   className="
-    bg-[#b600d7]
-    hover:bg-[#9a00b5]
+    bg-[#5800a9]
+    hover:bg-[#46007f]
+    dark:bg-[#b600d7]
+    dark:hover:bg-[#9a00b5]
     text-white
     h-10
     sm:h-11
