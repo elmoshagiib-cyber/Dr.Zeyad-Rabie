@@ -501,7 +501,7 @@ export default function ChemistryLabPage() {
         {activeTab === "tools" && (
           <div>
             <div className="text-center mb-6 sm:mb-8">
-              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-1.5">مختبر الكيمياء</h2>
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-1.5">مختبر الكيميائي</h2>
               <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base">أدوات ومختبرات الكيمياء للصفوف 9-12</p>
             </div>
 
