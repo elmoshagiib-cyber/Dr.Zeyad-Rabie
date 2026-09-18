@@ -18,32 +18,61 @@ export function LoginPage({ staffMode = false }: { staffMode?: boolean }) {
   const [error, setError] = useState("");
   const [activeRole, setActiveRole] = useState<LoginRole>(staffMode ? "instructor" : "student");
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setError("");
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
-    }
+  const cleanEmail = email.trim().toLowerCase();
 
-    const { data: instructor, error: instructorError } = await supabase
-      .from("instructors").select("*").eq("auth_id", data.user.id).single();
+  // 1. تحقق هل مسموح بمحاولة دخول من الإيميل ده
+  const { data: allowed, error: allowedError } = await supabase.rpc(
+    "check_login_allowed",
+    { p_phone: cleanEmail }
+  );
 
-    if (instructorError || !instructor) {
-      setError("هذا الحساب ليس مدرساً");
-      await supabase.auth.signOut();
-      setLoading(false);
-      return;
-    }
+  if (allowedError) {
+    console.error("RATE LIMIT CHECK ERROR:", allowedError);
+  }
 
-    login({ id: instructor.id, name: instructor.full_name, role: "instructor", phone: instructor.phone });
-    navigate("/instructor");
+  if (allowed === false) {
+    setError("تم إيقاف الدخول مؤقتًا بسبب محاولات كثيرة خاطئة، حاول بعد 15 دقيقة");
     setLoading(false);
-  };
+    return;
+  }
+
+  // 2. تسجيل الدخول
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: cleanEmail,
+    password,
+  });
+
+  if (error) {
+    await supabase.rpc("record_failed_login", { p_phone: cleanEmail });
+    setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+    setLoading(false);
+    return;
+  }
+
+  // 3. تحقق إنه فعلاً مدرّس
+  const { data: instructor, error: instructorError } = await supabase
+    .from("instructors").select("*").eq("auth_id", data.user.id).single();
+
+  if (instructorError || !instructor) {
+    await supabase.rpc("record_failed_login", { p_phone: cleanEmail });
+    setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+    await supabase.auth.signOut();
+    setLoading(false);
+    return;
+  }
+
+  // 4. نجح الدخول: صفّر عداد المحاولات
+  await supabase.rpc("reset_login_attempts", { p_phone: cleanEmail });
+
+  login({ id: instructor.id, name: instructor.full_name, role: "instructor", phone: instructor.phone });
+  navigate("/instructor");
+  setLoading(false);
+};
 
 
   return (

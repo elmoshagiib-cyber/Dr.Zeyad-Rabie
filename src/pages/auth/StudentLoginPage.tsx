@@ -208,7 +208,7 @@ if (phoneError || !email) {
   await supabase.rpc("record_failed_login", { p_phone: phone });
 
   setErrors({
-    phone: "رقم الهاتف غير مسجل",
+    password: "رقم الهاتف أو كلمة المرور غير صحيحة",
   });
 
   setLoading(false);
