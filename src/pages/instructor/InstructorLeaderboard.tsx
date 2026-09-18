@@ -96,8 +96,9 @@ export function InstructorLeaderboard() {
 
   const loadLeaderboard = async () => {
     setLoading(true);
-    const { data, error } = await supabase.rpc("get_leaderboard_admin");    // فلترة إضافية للتأكيد إننا ثانوي بس، حتى لو الـ view مبنية صح من الأساس
-    const secondaryOnly = (data || []).filter((e) => SECONDARY_GRADES.includes(e.grade));
+    const { data, error } = await supabase.rpc("get_leaderboard_admin");
+    // فلترة إضافية للتأكيد إننا ثانوي بس، حتى لو الـ view مبنية صح من الأساس
+    const secondaryOnly = (data || []).filter((e: any) => SECONDARY_GRADES.includes(e.grade));
     if (!error) setEntries(secondaryOnly);
     setLoading(false);
   };
