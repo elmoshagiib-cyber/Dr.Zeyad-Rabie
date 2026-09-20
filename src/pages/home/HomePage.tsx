@@ -327,49 +327,6 @@ const installApp = async () => {
   setDeferredPrompt(null);
 };
 
-const gradeMap = {
-  "الصف الأول الثانوي": {
-    title: "الصف الأول الثانوي",
-    slug: "sec_1",
-    image: "/images/secondary-stage.jpg",
-  },
-
-  "الصف الثاني الثانوي": {
-    title: "الصف الثاني الثانوي",
-    slug: "sec_2",
-    image: "/images/secondary-stage.jpg",
-  },
-
-  "الصف الثالث الثانوي": {
-    title: "الصف الثالث الثانوي",
-    slug: "sec_3",
-    image: "/images/secondary-stage.jpg",
-  },
-};
-
-const studentGrade =
-  gradeMap[user?.grade as keyof typeof gradeMap];
-
-
-const gradeSlugMap: Record<string, string> = {
-  "الصف الأول الثانوي": "sec_1",
-  "الصف الثاني الثانوي": "sec_2",
-  "الصف الثالث الثانوي": "sec_3",
-  "الصف الأول الإعدادي": "first_prep",
-  "الصف الثاني الإعدادي": "second_prep",
-  "الصف الثالث الإعدادي": "third_prep",
-};
-
-const gradeSlugToName: Record<string, string> = {
-  sec_1: "الصف الأول الثانوي",
-  sec_2: "الصف الثاني الثانوي",
-  sec_3: "الصف الثالث الثانوي",
-  first_prep: "الصف الأول الإعدادي",
-  second_prep: "الصف الثاني الإعدادي",
-  third_prep: "الصف الثالث الإعدادي",
-};
-
-const userGradeSlug = gradeSlugMap[user?.grade ?? ""] ?? "";
 
 const FEATURES = [
   {
@@ -1168,7 +1125,7 @@ const coloredFlags = [false, true, false, true, true, false];
       
       {user ? (
         
-  <GradeCoursesContent grade={userGradeSlug} />
+  <GradeCoursesContent grade={user?.grade ?? ""} />
 ) : (
         <div className="
           grid grid-cols-1 sm:grid-cols-2
@@ -1533,7 +1490,7 @@ duration-300
                                   px-2.5 py-1 rounded-full
                                 "
                               >
-                                {gradeSlugToName[course.grade] || course.grade}
+                                {course.grade}
                               </span>
                             )}
 
