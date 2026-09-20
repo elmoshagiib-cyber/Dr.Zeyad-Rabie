@@ -408,10 +408,10 @@ backdrop-blur-md backdrop-blur-sm text-white
     inline-flex
     items-center
     gap-1
-    rounded-full
+    rounded-xl
     p-1
     shrink-0
-    ${hasAccess || course.is_free ? "" : "bg-[#5800a9] dark:bg-[#b600d7]"}
+    ${hasAccess || course.is_free ? "" : "bg-gradient-to-r from-[#5800a9] to-[#b600d7]"}
   `}
 >
   
@@ -486,8 +486,8 @@ className="
       <span
         className="
           bg-white
-          text-[#5800a9]
-          rounded-full
+          text-[#111111]
+          rounded-md
           px-3
           py-[5px]
           min-w-[46px]
@@ -506,22 +506,22 @@ className="
   )}
 </div>
 
-  <div className="flex flex-col gap-2 w-full max-w-[180px]">
+  <div className="flex flex-col gap-2">
 
-    <div className="grid grid-cols-[1fr_24px] items-center gap-2 text-slate-500 dark:text-slate-400">
-      <span className="text-[13px] font-medium text-right truncate">
+    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+      <span className="text-[13px] font-medium">
         {formatDate(course.updated_at)}
       </span>
-      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
         <HiArrowPath className="text-[13px]" />
       </span>
     </div>
 
-    <div className="grid grid-cols-[1fr_24px] items-center gap-2 text-slate-500 dark:text-slate-400">
-      <span className="text-[13px] font-medium text-right truncate">
+    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+      <span className="text-[13px] font-medium">
         {formatDate(course.created_at)}
       </span>
-      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
         <HiDocumentPlus className="text-[13px]" />
       </span>
     </div>
