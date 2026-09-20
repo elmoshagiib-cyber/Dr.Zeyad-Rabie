@@ -300,7 +300,7 @@ backdrop-blur-md backdrop-blur-sm text-white
           leading-6
           sm:leading-7
           font-medium
-          text-slate-500
+          text-[#5800a9]
           dark:text-white
           whitespace-pre-line
           break-words
@@ -507,23 +507,23 @@ className="
   )}
 </div>
 
-  <div className="flex flex-col gap-2.5">
+  <div className="flex flex-col items-start gap-2.5">
 
-    <div className="flex items-center gap-2.5">
-      <span className="text-[12px] font-medium text-slate-500 dark:text-white">
-        {formatDate(course.updated_at)}
-      </span>
+    <div className="flex items-center gap-2">
       <span className="flex items-center justify-center w-7 h-7 rounded-full shrink-0 bg-[#F6EEFF] text-[#5800a9] dark:bg-[#b600d7] dark:text-white">
         <HiArrowPath className="text-[14px]" />
       </span>
+      <span className="text-[12px] font-medium text-[#5800a9] dark:text-white whitespace-nowrap">
+        {formatDate(course.updated_at)}
+      </span>
     </div>
 
-    <div className="flex items-center gap-2.5">
-      <span className="text-[12px] font-medium text-slate-500 dark:text-white">
-        {formatDate(course.created_at)}
-      </span>
+    <div className="flex items-center gap-2">
       <span className="flex items-center justify-center w-7 h-7 rounded-full shrink-0 bg-[#F6EEFF] text-[#5800a9] dark:bg-[#b600d7] dark:text-white">
         <HiDocumentPlus className="text-[14px]" />
+      </span>
+      <span className="text-[12px] font-medium text-[#5800a9] dark:text-white whitespace-nowrap">
+        {formatDate(course.created_at)}
       </span>
     </div>
 
