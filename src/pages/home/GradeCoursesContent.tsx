@@ -301,7 +301,7 @@ backdrop-blur-md backdrop-blur-sm text-white
           sm:leading-7
           font-medium
           text-slate-500
-          dark:text-slate-400
+          dark:text-white
           whitespace-pre-line
           break-words
         "
@@ -317,7 +317,7 @@ backdrop-blur-md backdrop-blur-sm text-white
           className="
             mt-2 inline-flex items-center gap-1
             text-[12px] sm:text-[13px] font-bold text-[#5800a9]
-            dark:text-[#c9a6ff]
+            dark:text-white
             hover:text-[#b600d7]
             dark:hover:text-[#b600d7]
             transition-colors
@@ -501,7 +501,7 @@ className="
       </span>
 
       <span className="px-2 text-[13px] font-black text-white">
-        جنيه
+        جنيهًا
       </span>
     </>
   )}
@@ -510,19 +510,19 @@ className="
   <div className="flex flex-col gap-2.5">
 
     <div className="flex items-center gap-2.5">
-      <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">
+      <span className="text-[12px] font-medium text-slate-500 dark:text-white">
         {formatDate(course.updated_at)}
       </span>
-      <span className="flex items-center justify-center w-7 h-7 rounded-full shrink-0 bg-[#F6EEFF] text-[#5800a9] dark:bg-[#2B103D] dark:text-[#c9a6ff]">
+      <span className="flex items-center justify-center w-7 h-7 rounded-full shrink-0 bg-[#F6EEFF] text-[#5800a9] dark:bg-[#b600d7] dark:text-white">
         <HiArrowPath className="text-[14px]" />
       </span>
     </div>
 
     <div className="flex items-center gap-2.5">
-      <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">
+      <span className="text-[12px] font-medium text-slate-500 dark:text-white">
         {formatDate(course.created_at)}
       </span>
-      <span className="flex items-center justify-center w-7 h-7 rounded-full shrink-0 bg-[#F6EEFF] text-[#5800a9] dark:bg-[#2B103D] dark:text-[#c9a6ff]">
+      <span className="flex items-center justify-center w-7 h-7 rounded-full shrink-0 bg-[#F6EEFF] text-[#5800a9] dark:bg-[#b600d7] dark:text-white">
         <HiDocumentPlus className="text-[14px]" />
       </span>
     </div>
