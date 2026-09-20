@@ -1520,9 +1520,9 @@ duration-300
                           </h3>
 
                           <div className="flex items-center gap-1.5 -mt-1">
-                            <span className="w-[5px] h-[5px] rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
-                            <span className="flex-1 h-[1.5px] bg-[#5800a9]/50 dark:bg-[#b600d7]/50" />
-                            <span className="w-[5px] h-[5px] rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
+                            <span className="w-[7px] h-[7px] rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
+                            <span className="flex-1 h-[2.5px] rounded-full bg-[#5800a9] dark:bg-[#b600d7]" />
+                            <span className="w-[7px] h-[7px] rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
                           </div>
 
                           {description && (

@@ -264,9 +264,9 @@ backdrop-blur-md backdrop-blur-sm text-white
 </h3>
 
 <div className="flex items-center gap-2 mt-3">
-  <span className="w-[6px] h-[6px] rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
-  <span className="flex-1 h-[1.5px] bg-[#5800a9]/50 dark:bg-[#b600d7]/50" />
-  <span className="w-[6px] h-[6px] rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
+  <span className="w-[8px] h-[8px] rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
+  <span className="flex-1 h-[3px] rounded-full bg-[#5800a9] dark:bg-[#b600d7]" />
+  <span className="w-[8px] h-[8px] rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
 </div>
 
 <div className="mt-4">
