@@ -308,6 +308,7 @@ export function EditCourse() {
   const [activeTab, setActiveTab] = useState<"content" | "settings">("content");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [deletingCourse, setDeletingCourse] = useState(false);
   const [openDropdownSectionId, setOpenDropdownSectionId] = useState<string | null>(null);
 const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
 const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
@@ -316,9 +317,12 @@ const [thumbnailUploadProgress, setThumbnailUploadProgress] = useState(0);
 const [expandedQuestions, setExpandedQuestions] = useState<Record<string, boolean>>({});
 const [collapsedItems, setCollapsedItems] = useState<Record<string, boolean>>({});
 const uploadControllersRef = useRef<Record<string, AbortController>>({});
+const [isDirty, setIsDirty] = useState(false);
+const isInitialLoad = useRef(true);
   // ── Load Course ──────────────────────────────────────────
   async function loadCourse() {
     if (!id) return;
+    isInitialLoad.current = true;
     setLoading(true);
     setError(null);
     try {
@@ -590,9 +594,37 @@ for (const section of loadedCourse.sections) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // تتبّع التعديلات غير المحفوظة لتحذير المستخدم قبل مغادرة الصفحة
+  useEffect(() => {
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      return;
+    }
+    setIsDirty(true);
+  }, [course]);
+
+  useEffect(() => {
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
   // ── Save Course ──────────────────────────────────────────
 async function saveCourse() {
   if (!course) return;
+
+  const stillUploading = course.sections.some((s) =>
+    s.items.some((i) => i.type === "video" && i.status === "uploading")
+  );
+  if (stillUploading) {
+    alert("يوجد فيديو قيد الرفع حاليًا، برجاء الانتظار حتى ينتهي الرفع قبل الحفظ.");
+    return;
+  }
 
   setSaving(true);
   setSaveSuccess(false);
@@ -1082,6 +1114,7 @@ if (deletedItemIds.length > 0) {
 }
 
     setSaveSuccess(true);
+    setIsDirty(false);
     setTimeout(() => setSaveSuccess(false), 3000);
   } catch (err: any) {
 
@@ -1097,13 +1130,15 @@ if (deletedItemIds.length > 0) {
   // ── Delete Course ────────────────────────────────────────
   async function deleteCourse() {
     if (!course) return;
-    
+    setDeletingCourse(true);
     try {
-      // Placeholder: ready for Supabase integration
-      // await supabase.from("courses").delete().eq("id", course.id);
+      const { error } = await supabase.from("courses").delete().eq("id", course.id);
+      if (error) throw error;
       navigate("/instructor/courses");
-    } catch {
-      // handle error
+    } catch (err: any) {
+      alert(err?.message || "حدث خطأ أثناء حذف الدورة");
+    } finally {
+      setDeletingCourse(false);
     }
   }
 
@@ -1159,6 +1194,7 @@ async function handleThumbnailChange(
     // ==========================================
     setThumbnailUploading(false);
     setThumbnailUploadProgress(100);
+    URL.revokeObjectURL(localPreviewUrl);
 
   } catch (err) {
     console.error("Course thumbnail upload error:", err);
@@ -1191,7 +1227,31 @@ async function handleThumbnailChange(
     );
   }
 
+  function duplicateSection(sectionId: string) {
+    setCourse((prev) => {
+      if (!prev) return prev;
+      const section = prev.sections.find((s) => s.id === sectionId);
+      if (!section) return prev;
+      const newSection: Section = {
+        id: generateId(),
+        title: `${section.title} (نسخة)`,
+        collapsed: false,
+        items: section.items.map((item) => ({ ...item, id: generateId() } as CourseItem)),
+      };
+      const index = prev.sections.findIndex((s) => s.id === sectionId);
+      const sections = [...prev.sections];
+      sections.splice(index + 1, 0, newSection);
+      return { ...prev, sections };
+    });
+  }
+
   function removeSection(sectionId: string) {
+    const section = course?.sections.find((s) => s.id === sectionId);
+    const itemsCount = section?.items.length || 0;
+    const message = itemsCount > 0
+      ? `هذا القسم يحتوي على ${itemsCount} عنصر (فيديو/ملف/اختبار). هل أنت متأكد من حذفه بالكامل؟`
+      : "هل أنت متأكد من حذف هذا القسم؟";
+    if (!window.confirm(message)) return;
     setCourse((prev) =>
       prev
         ? { ...prev, sections: prev.sections.filter((s) => s.id !== sectionId) }
@@ -1279,6 +1339,7 @@ async function handleThumbnailChange(
   }
 
   function removeItem(sectionId: string, itemId: string) {
+    if (!window.confirm("هل أنت متأكد من حذف هذا العنصر؟")) return;
     setCourse((prev) =>
       prev
         ? {
@@ -3287,7 +3348,9 @@ updateItem(sectionId, item.id, {
             <button onClick={() => moveSectionDown(sectionIndex)} disabled={sectionIndex === totalSections - 1} className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all" title="تحريك لأسفل">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
             </button>
-           
+            <button onClick={() => duplicateSection(section.id)} className="p-2 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all" title="تكرار القسم">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+            </button>
             <button onClick={() => removeSection(section.id)} className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all" title="حذف القسم">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </button>
@@ -3495,7 +3558,10 @@ updateItem(sectionId, item.id, {
         {/* Hero Header */}
         <EditCourseHeader
           courseTitle={course.title}
-          onBack={() => navigate("/instructor/courses")}
+          onBack={() => {
+            if (isDirty && !window.confirm("لديك تغييرات غير محفوظة، هل تريد الخروج بدون حفظ؟")) return;
+            navigate("/instructor/courses");
+          }}
           onOpenSettings={() => setShowSettingsModal(true)}
           onDelete={() => setShowDeleteModal(true)}
           onSave={saveCourse}
@@ -3621,9 +3687,10 @@ updateItem(sectionId, item.id, {
                 </button>
                 <button
                   onClick={deleteCourse}
-                  className="flex-1 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold text-sm hover:bg-red-700 transition-colors shadow-sm shadow-red-200"
+                  disabled={deletingCourse}
+                  className="flex-1 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold text-sm hover:bg-red-700 transition-colors shadow-sm shadow-red-200 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  نعم، احذف الدورة
+                  {deletingCourse ? "جاري الحذف..." : "نعم، احذف الدورة"}
                 </button>
               </div>
             </div>

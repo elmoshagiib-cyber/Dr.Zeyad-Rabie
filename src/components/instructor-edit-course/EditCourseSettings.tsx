@@ -32,6 +32,32 @@ export function EditCourseSettings({
   handleThumbnailChange,
   onOpenDeleteModal,
 }: Props) {
+  const MAX_THUMBNAIL_MB = 5;
+
+  function handleThumbnailChangeValidated(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("من فضلك اختر ملف صورة صالح (PNG أو JPG).");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_THUMBNAIL_MB * 1024 * 1024) {
+      alert(`حجم الصورة كبير جدًا، الحد الأقصى ${MAX_THUMBNAIL_MB} ميجابايت.`);
+      e.target.value = "";
+      return;
+    }
+
+    handleThumbnailChange(e);
+  }
+
+  function clampWatchPercentage(value: number) {
+    if (Number.isNaN(value)) return 0;
+    return Math.min(100, Math.max(0, value));
+  }
+
   return (
     <div className="space-y-6">
       {/* Basic Info Card */}
@@ -42,9 +68,15 @@ export function EditCourseSettings({
         </div>
         <div className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">عنوان الدورة</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-semibold text-slate-700">عنوان الدورة</label>
+              <span className={`text-xs font-medium ${course.title.length > 70 ? "text-red-500" : "text-slate-400"}`}>
+                {course.title.length}/80
+              </span>
+            </div>
             <input
               type="text"
+              maxLength={80}
               value={course.title}
               onChange={(e) => updateCourseField("title", e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors"
@@ -52,7 +84,10 @@ export function EditCourseSettings({
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">وصف الدورة</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-semibold text-slate-700">وصف الدورة</label>
+              <span className="text-xs font-medium text-slate-400">{course.description.length} حرف</span>
+            </div>
             <textarea
               value={course.description}
               onChange={(e) => updateCourseField("description", e.target.value)}
@@ -69,12 +104,12 @@ export function EditCourseSettings({
               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-800 bg-slate-50"
             >
               <option value="">اختر المرحلة الدراسية</option>
-              <option value="prep_1">الصف الأول الإعدادي</option>
-              <option value="prep_2">الصف الثاني الإعدادي</option>
-              <option value="prep_3">الصف الثالث الإعدادي</option>
-              <option value="sec_1">الصف الأول الثانوي</option>
-              <option value="sec_2">الصف الثاني الثانوي</option>
-              <option value="sec_3">الصف الثالث الثانوي</option>
+              <option value="الصف الأول الإعدادي">الصف الأول الإعدادي</option>
+              <option value="الصف الثاني الإعدادي">الصف الثاني الإعدادي</option>
+              <option value="الصف الثالث الإعدادي">الصف الثالث الإعدادي</option>
+              <option value="الصف الأول الثانوي">الصف الأول الثانوي</option>
+              <option value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
+              <option value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
             </select>
           </div>
         </div>
@@ -93,8 +128,12 @@ export function EditCourseSettings({
               <p className="text-xs text-slate-500 mt-0.5">إتاحة الدورة مجاناً لجميع الطلاب</p>
             </div>
             <div
+              role="switch"
+              aria-checked={course.isFree}
+              tabIndex={0}
               onClick={() => updateCourseField("isFree", !course.isFree)}
-              className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-200 ${course.isFree ? "bg-emerald-500" : "bg-slate-300"}`}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateCourseField("isFree", !course.isFree); } }}
+              className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 ${course.isFree ? "bg-emerald-500" : "bg-slate-300"}`}
             >
               <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${course.isFree ? "-translate-x-6" : "translate-x-0"}`} />
             </div>
@@ -107,7 +146,7 @@ export function EditCourseSettings({
                   type="number"
                   min={0}
                   value={course.price}
-                  onChange={(e) => updateCourseField("price", Number(e.target.value))}
+                  onChange={(e) => updateCourseField("price", Math.max(0, Number(e.target.value) || 0))}
                   className="w-full pl-4 pr-16 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-800 bg-slate-50 hover:bg-white transition-colors"
                   placeholder="0"
                 />
@@ -204,7 +243,7 @@ export function EditCourseSettings({
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 00-2 2H6a2 2 0 00-2-2V6a2 2 0 002-2h12a2 2 0 002 2v12a2 2 0 00-2 2z"
+        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 9a1 1 0 11-2 0 1 1 0 012 0z"
       />
     </svg>
   </div>
@@ -216,7 +255,7 @@ export function EditCourseSettings({
                   <span className="text-sm font-medium">{thumbnailPreview ? "تغيير الصورة" : "رفع صورة الدورة"}</span>
                   <span className="text-xs">PNG, JPG — الحجم الموصى به 1280×720</span>
                 </div>
-                <input type="file" accept="image/*" className="hidden" onChange={handleThumbnailChange} />
+                <input type="file" accept="image/*" className="hidden" onChange={handleThumbnailChangeValidated} />
               </label>
               {thumbnailFile && (
                 <p className="text-xs text-slate-500">تم اختيار: {thumbnailFile.name}</p>
@@ -239,8 +278,12 @@ export function EditCourseSettings({
               <p className="text-xs text-slate-500 mt-0.5">جعل الدورة متاحة للطلاب</p>
             </div>
             <div
+              role="switch"
+              aria-checked={course.published}
+              tabIndex={0}
               onClick={() => updateCourseField("published", !course.published)}
-              className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-200 ${course.published ? "bg-indigo-600" : "bg-slate-300"}`}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateCourseField("published", !course.published); } }}
+              className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${course.published ? "bg-indigo-600" : "bg-slate-300"}`}
             >
               <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${course.published ? "-translate-x-6" : "translate-x-0"}`} />
             </div>
@@ -279,8 +322,12 @@ export function EditCourseSettings({
               <p className="text-xs text-slate-500 mt-0.5">إظهار رقم هاتف الطالب واسمه بشكل متحرك على الفيديوهات وملفات الـ PDF لمنع السرقة.</p>
             </div>
             <div
+              role="switch"
+              aria-checked={course.watermarkEnabled}
+              tabIndex={0}
               onClick={() => updateCourseField("watermarkEnabled", !course.watermarkEnabled)}
-              className={`relative w-12 h-6 rounded-full cursor-pointer flex-shrink-0 transition-colors duration-200 ${course.watermarkEnabled ? "bg-indigo-600" : "bg-slate-300"}`}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateCourseField("watermarkEnabled", !course.watermarkEnabled); } }}
+              className={`relative w-12 h-6 rounded-full cursor-pointer flex-shrink-0 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${course.watermarkEnabled ? "bg-indigo-600" : "bg-slate-300"}`}
             >
               <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${course.watermarkEnabled ? "-translate-x-6" : "translate-x-0"}`} />
             </div>
@@ -292,8 +339,12 @@ export function EditCourseSettings({
               <p className="text-xs text-slate-500 mt-0.5">ربط الفيديو بنظام إكمال المحاضرات ومنع الانتقال.</p>
             </div>
             <div
+              role="switch"
+              aria-checked={course.sequentialViewingEnabled}
+              tabIndex={0}
               onClick={() => updateCourseField("sequentialViewingEnabled", !course.sequentialViewingEnabled)}
-              className={`relative w-12 h-6 rounded-full cursor-pointer flex-shrink-0 transition-colors duration-200 ${course.sequentialViewingEnabled ? "bg-indigo-600" : "bg-slate-300"}`}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateCourseField("sequentialViewingEnabled", !course.sequentialViewingEnabled); } }}
+              className={`relative w-12 h-6 rounded-full cursor-pointer flex-shrink-0 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${course.sequentialViewingEnabled ? "bg-indigo-600" : "bg-slate-300"}`}
             >
               <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${course.sequentialViewingEnabled ? "-translate-x-6" : "translate-x-0"}`} />
             </div>
@@ -305,8 +356,12 @@ export function EditCourseSettings({
               <p className="text-xs text-slate-500 mt-0.5">منح حق تنزيل ملفات الـ PDF وطباعتها.</p>
             </div>
             <div
+              role="switch"
+              aria-checked={course.allowAttachmentDownload}
+              tabIndex={0}
               onClick={() => updateCourseField("allowAttachmentDownload", !course.allowAttachmentDownload)}
-              className={`relative w-12 h-6 rounded-full cursor-pointer flex-shrink-0 transition-colors duration-200 ${course.allowAttachmentDownload ? "bg-indigo-600" : "bg-slate-300"}`}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateCourseField("allowAttachmentDownload", !course.allowAttachmentDownload); } }}
+              className={`relative w-12 h-6 rounded-full cursor-pointer flex-shrink-0 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${course.allowAttachmentDownload ? "bg-indigo-600" : "bg-slate-300"}`}
             >
               <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${course.allowAttachmentDownload ? "-translate-x-6" : "translate-x-0"}`} />
             </div>
@@ -321,7 +376,7 @@ export function EditCourseSettings({
               min={0}
               max={100}
               value={course.minWatchPercentage}
-              onChange={(e) => updateCourseField("minWatchPercentage", Number(e.target.value))}
+              onChange={(e) => updateCourseField("minWatchPercentage", clampWatchPercentage(Number(e.target.value)))}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-800 bg-slate-50"
               placeholder="0"
             />
