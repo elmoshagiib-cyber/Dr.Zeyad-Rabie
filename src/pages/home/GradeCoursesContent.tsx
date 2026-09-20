@@ -263,10 +263,10 @@ backdrop-blur-md backdrop-blur-sm text-white
   {course.title}
 </h3>
 
-<div className="flex items-center gap-2 mt-3">
-  <span className="w-[8px] h-[8px] rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
-  <span className="flex-1 h-[3px] rounded-full bg-[#5800a9] dark:bg-[#b600d7]" />
-  <span className="w-[8px] h-[8px] rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
+<div className="flex items-center gap-0 mt-3">
+  <span className="w-[8px] h-[8px] rounded-full bg-[#5800a9] dark:bg-white flex-shrink-0" />
+  <span className="flex-1 h-[3px] rounded-full bg-[#5800a9] dark:bg-white" />
+  <span className="w-[8px] h-[8px] rounded-full bg-[#5800a9] dark:bg-white flex-shrink-0" />
 </div>
 
 <div className="mt-4">
@@ -408,10 +408,10 @@ backdrop-blur-md backdrop-blur-sm text-white
     inline-flex
     items-center
     gap-1
-    rounded-xl
+    rounded-lg
     p-1
     shrink-0
-    ${hasAccess || course.is_free ? "" : "bg-gradient-to-r from-[#5800a9] to-[#b600d7]"}
+    ${hasAccess || course.is_free ? "" : "bg-[#5800a9] dark:bg-[#b600d7]"}
   `}
 >
   
