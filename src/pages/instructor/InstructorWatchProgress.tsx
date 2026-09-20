@@ -3,20 +3,20 @@ import { motion } from "framer-motion";
 import { supabase } from "../../lib/supabase";
 import { useApp } from "../../context/AppContext";
 import {
-  UserCheck,
-  UserX,
   CheckCircle,
   Users,
   Search,
   Phone,
   RefreshCw,
-  Clock,
   Download,
   AlertTriangle,
   Copy,
   Check,
   ArrowUpDown,
   TrendingUp,
+  X,
+  ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
@@ -68,6 +68,63 @@ function isNearCompletion(r: ProgressRecord): boolean {
   return pct >= 70 && pct < 100;
 }
 
+// هل الطالب متعثر؟ (5 أيام أو أكتر بدون مشاهدة ولسه ما خلصش)
+function isStalled(r: ProgressRecord): boolean {
+  if ((r.completion_percentage || 0) >= 100) return false;
+  const days = daysSince(r.last_watched_at) ?? daysSince(r.enrolled_at) ?? 0;
+  return days >= 5;
+}
+
+// حالة الطالب + لون البادج (مكان واحد بدل ما كانت متكررة في الجدول)
+function getStatus(r: ProgressRecord) {
+  const pct = r.completion_percentage || 0;
+  if (pct === 100)
+    return { label: "مكتمل", cls: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" };
+  if (r.bypassed_count > 0)
+    return { label: "متجاوز", cls: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400" };
+  if (isStalled(r))
+    return { label: "متعثر", cls: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400" };
+  if (pct > 0)
+    return { label: "جاري", cls: "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400" };
+  return { label: "لم يبدأ", cls: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400" };
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleDateString("ar-EG", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function relativeDays(dateStr: string | null): string {
+  const d = daysSince(dateStr);
+  if (d === null) return "لم يشاهد بعد";
+  if (d <= 0) return "اليوم";
+  if (d === 1) return "أمس";
+  return `منذ ${d} يوم`;
+}
+
+// رابط واتساب برسالة جاهزة حسب حالة الطالب
+function buildWhatsAppLink(r: ProgressRecord): string {
+  const status = getStatus(r).label;
+  const pct = r.completion_percentage || 0;
+  const name = r.full_name?.trim().split(" ")[0] || "";
+  const course = r.course_title || "الكورس";
+
+  const messages: Record<string, string> = {
+    "لم يبدأ": `أهلاً ${name} 👋 لاحظت إنك اشتركت في "${course}" ولسه ما بدأتش المشاهدة. لو واجهتك أي مشكلة أنا معاك، وابدأ من أول فيديو 🌟`,
+    "متعثر": `أهلاً ${name} 👋 بقالك فترة ما دخلتش على "${course}". كمّل معانا عشان الدروس ما تتراكمش عليك 💪`,
+    "جاري": `أهلاً ${name} 👋 ماشي كويس في "${course}" وتقدمك وصل ${pct}%. كمّل لحد ما تخلص 🔥`,
+    "مكتمل": `مبروك يا ${name} 🎉 خلصت "${course}" بنجاح!`,
+  };
+
+  const phone = (r.phone || "").replace(/\D/g, "").replace(/^0/, "20");
+  const text = messages[status] ?? messages["جاري"];
+  return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+}
+
 export function InstructorWatchProgress() {
   const [data, setData] = useState<ProgressRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,7 +132,7 @@ export function InstructorWatchProgress() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<string>("all");
-  const [activeTab, setActiveTab] = useState<TabType>("not_started");
+  const [activeTab, setActiveTab] = useState<TabType>("all");
   const [sortBy, setSortBy] = useState<SortType>("recent");
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
@@ -86,7 +143,6 @@ export function InstructorWatchProgress() {
 
   useEffect(() => {
     loadCourses();
-    fetchData();
   }, []);
 
   useEffect(() => {
@@ -144,10 +200,7 @@ export function InstructorWatchProgress() {
     ).length;
     const bypassed = data.filter((r) => r.bypassed_count > 0).length;
     const completed = data.filter((r) => r.completion_percentage === 100).length;
-    const stalled = data.filter((r) => {
-      const days = daysSince(r.last_watched_at);
-      return r.completion_percentage < 100 && ((days === null && daysSince(r.enrolled_at)! >= 5) || (days !== null && days >= 5));
-    }).length;
+    const stalled = data.filter(isStalled).length;
 
     const stalledDaysList = data
       .filter((r) => r.completion_percentage < 100)
@@ -168,14 +221,6 @@ export function InstructorWatchProgress() {
       data.length;
     return Math.round(avg);
   }, [data]);
-
-  // هل الطالب متعثر؟ (نفس منطق صفحة تفاصيل الطالب)
-  function isStalled(r: ProgressRecord): boolean {
-    if (r.completion_percentage >= 100) return false;
-    const daysSinceWatch = daysSince(r.last_watched_at);
-    const daysSinceEnroll = daysSince(r.enrolled_at) ?? 0;
-    return (daysSinceWatch === null && daysSinceEnroll >= 5) || (daysSinceWatch !== null && daysSinceWatch >= 5);
-  }
 
   // الفلاتر (تاب + بحث)
   const filteredData = useMemo(() => {
@@ -231,24 +276,33 @@ export function InstructorWatchProgress() {
   );
 
   function exportToCSV() {
-    const headers = ["الاسم", "الهاتف", "الكورس", "نسبة الإنجاز", "الحالة", "تاريخ الاشتراك", "آخر دخول"];
-    const rows = filteredData.map((r) => [
-      r.full_name,
-      r.phone || "",
-      r.course_title,
-      `${r.completion_percentage || 0}%`,
-      r.bypassed_count > 0
-        ? "متجاوز"
-        : r.completion_percentage === 100
-        ? "مكتمل"
-        : r.completion_percentage > 0
-        ? "جاري"
-        : "لم يبدأ",
-      formatDateTime(r.enrolled_at),
-      formatDateTime(r.last_watched_at),
-    ]);
-    const csvContent =
-      "\uFEFF" + [headers, ...rows].map((row) => row.join(",")).join("\n");
+    const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+
+    const headers = [
+      "الاسم",
+      "الهاتف",
+      "الكورس",
+      "الدروس المكتملة",
+      "إجمالي الدروس",
+      "نسبة الإنجاز",
+      "الحالة",
+      "تاريخ الاشتراك",
+      "آخر مشاهدة",
+    ].map(esc);
+    const rows = filteredData.map((r) =>
+      [
+        esc(r.full_name),
+        r.phone ? `="${r.phone}"` : "", // عشان الإكسيل ما يشيلش الصفر
+        esc(r.course_title || ""),
+        r.completed_lessons || 0,
+        r.total_lessons || 0,
+        esc(`${r.completion_percentage || 0}%`),
+        esc(getStatus(r).label),
+        esc(formatDateTime(r.enrolled_at)),
+        esc(formatDateTime(r.last_watched_at)),
+      ].join(",")
+    );
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -258,6 +312,16 @@ export function InstructorWatchProgress() {
     URL.revokeObjectURL(url);
   }
 
+  function copyAllPhones() {
+    const phones = filteredData
+      .map((r) => r.phone)
+      .filter(Boolean)
+      .join("\n");
+    if (!phones) return;
+    navigator.clipboard.writeText(phones);
+    setCopiedPhone("all");
+    setTimeout(() => setCopiedPhone(null), 2000);
+  }
   const tabs: { key: TabType; label: string; count: number }[] = [
     { key: "not_started", label: "لم يفتحوا", count: stats.notStarted },
     { key: "completed", label: "اكتملت", count: stats.completed },
@@ -268,50 +332,54 @@ export function InstructorWatchProgress() {
     { key: "all", label: "السجل الكامل", count: stats.total },
   ];
 
-  const statCards = [
+  const completedPct = stats.total
+    ? Math.round((stats.completed / stats.total) * 100)
+    : 0;
+
+  const kpiCards = [
     {
-      label: "متجاوزون يدويًا",
-      value: stats.bypassed,
-      icon: UserCheck,
-      color: "blue",
-    },
-    {
-      label: "لم يفتحوا نهائيًا",
-      value: stats.notStarted,
-      icon: UserX,
-      color: "red",
-    },
-    {
-      label: "مشاهدة جزئية",
-      value: stats.partial,
-      icon: Clock,
-      color: "orange",
-    },
-    {
-      label: "متعثرون (+5 أيام)",
-      value: stats.stalled,
-      icon: AlertTriangle,
-      color: "amber",
-    },
-    {
-      label: "قربوا الإكمال (+70%)",
-      value: stats.nearCompletion,
-      icon: TrendingUp,
-      color: "teal",
-    },
-    {
-      label: "أكملوا المحاضرة",
-      value: stats.completed,
-      icon: CheckCircle,
-      color: "green",
-    },
-    {
-      label: "إجمالي المستهدفين",
+      label: "إجمالي الطلاب",
       value: stats.total,
+      sub: selectedCourse === "all" ? "في كل الكورسات" : "في الكورس المختار",
       icon: Users,
       color: "purple",
+      tab: "all" as TabType,
+    },
+    {
+      label: "متوسط الإنجاز",
+      value: `${overallCompletionRate}%`,
+      sub: `${stats.nearCompletion} طالب قربوا يخلصوا`,
+      icon: TrendingUp,
+      color: "teal",
+      tab: "near_completion" as TabType,
+    },
+    {
+      label: "أكملوا الكورس",
+      value: stats.completed,
+      sub: `${completedPct}% من الطلاب`,
+      icon: CheckCircle,
+      color: "green",
+      tab: "completed" as TabType,
+    },
+    {
+      label: "متعثرون",
+      value: stats.stalled,
+      sub: stats.avgStalledDays > 0 ? `متوسط ${stats.avgStalledDays} يوم بدون مشاهدة` : "الكل ماشي كويس",
+      icon: AlertTriangle,
+      color: "amber",
+      tab: "stalled" as TabType,
     },
   ];
+
+  const emptyMessages: Record<TabType, string> = {
+    not_started: "🎉 كل الطلاب فتحوا الكورس وبدأوا المشاهدة",
+    completed: "لسه محدش أكمل الكورس",
+    near_completion: "مفيش طلاب قربوا يخلصوا حاليًا",
+    partial: "مفيش طلاب في مرحلة المشاهدة الجزئية",
+    bypassed: "مفيش طلاب متجاوزين",
+    stalled: "🎉 مفيش طلاب متعثرين، الكل ماشي كويس",
+    all: "مفيش طلاب مشتركين لسه",
+  };
 
 const colorClasses: Record<
   string,
@@ -361,9 +429,6 @@ const colorClasses: Record<
     },
   };
 
-  const circumference = 2 * Math.PI * 46;
-  const dashOffset =
-    circumference - (overallCompletionRate / 100) * circumference;
 
   return (
     <DashboardLayout type="instructor" sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
@@ -384,7 +449,7 @@ const colorClasses: Record<
               </div>
               <div>
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-black">مركز متابعة تقدم الطلاب</h1>
-                <p className="text-white/60 text-xs sm:text-sm mt-0.5">تحليل المشاهدة، متابعة الطلاب، وإدارة اجتياز المحاضرات بدقة</p>
+                <p className="text-white/70 text-xs sm:text-sm mt-0.5">تابع تقدم طلابك، واعرف مين متعثر وتواصل معاه بضغطة واحدة</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -402,7 +467,7 @@ const colorClasses: Record<
                 onClick={fetchData}
                 className="rounded-xl font-bold flex bg-white/10 border-white/10 text-white hover:bg-white/20"
               >
-                <RefreshCw size={16} className="sm:ml-1.5" />
+                <RefreshCw size={16} className={`sm:ml-1.5 ${loading ? "animate-spin" : ""}`} />
                 <span className="hidden sm:inline">تحديث البيانات</span>
               </Button>
             </div>
@@ -411,36 +476,41 @@ const colorClasses: Record<
 
         <div className="space-y-6 max-w-7xl mx-auto">
 
-          {/* الكروت الإحصائية */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {statCards.map((stat, i) => {
-              const c = colorClasses[stat.color];
+          {/* الكروت الإحصائية (بتشتغل كفلتر برضو) */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {kpiCards.map((card, i) => {
+              const c = colorClasses[card.color];
+              const active = activeTab === card.tab;
               return (
-                <motion.div
-                  key={i}
+                <motion.button
+                  key={card.label}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
+                  whileHover={{ y: -2 }}
                   transition={{ duration: 0.3, delay: i * 0.05 }}
+                  onClick={() => setActiveTab(card.tab)}
+                  className={`relative overflow-hidden text-right rounded-2xl border bg-white dark:bg-[#111111] p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow ${c.border} ${
+                    active ? "ring-2 ring-[#155DFC]/30" : ""
+                  }`}
                 >
-                  <Card
-                    className={`relative overflow-hidden bg-white dark:bg-[#111111] border ${c.border} rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300`}
-                  >
-                    <div className={`absolute inset-0 bg-gradient-to-br ${c.gradient} pointer-events-none`} />
-                    <CardContent className="p-4 relative z-10">
-                      <div
-                        className={`w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center mb-3`}
-                      >
-                        <stat.icon className={`w-5 h-5 ${c.text}`} />
-                      </div>
-                      <p className="text-2xl font-black text-gray-900 dark:text-white">
-                        {stat.value}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${c.gradient} pointer-events-none`} />
+                  <div className="relative z-10 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400">
+                        {card.label}
                       </p>
-                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mt-1">
-                        {stat.label}
+                      <p className="mt-1 text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
+                        {card.value}
                       </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                    </div>
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${c.bg}`}>
+                      <card.icon className={`w-5 h-5 ${c.text}`} />
+                    </div>
+                  </div>
+                  <p className="relative z-10 mt-3 text-[11px] sm:text-xs font-medium text-gray-400 dark:text-gray-500 truncate">
+                    {card.sub}
+                  </p>
+                </motion.button>
               );
             })}
           </div>
@@ -449,53 +519,9 @@ const colorClasses: Record<
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm">
             <CardContent className="p-5 lg:p-6">
               <div className="flex flex-col lg:flex-row lg:items-center gap-6">
-                {/* الدائرة */}
-                <div className="flex items-center gap-4 flex-shrink-0">
-                  <div className="relative w-28 h-28">
-                    <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="46"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="8"
-                        className="text-gray-100 dark:text-[#2A2A2A]"
-                      />
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="46"
-                        fill="none"
-                        stroke="#155DFC"
-                        strokeWidth="8"
-                        strokeLinecap="round"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={dashOffset}
-                        style={{ transition: "stroke-dashoffset 0.6s ease" }}
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-xl font-black text-gray-900 dark:text-white">
-                        {overallCompletionRate}%
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-bold">
-                      إجمالي نجاح الدفعة
-                    </p>
-                    {stats.avgStalledDays > 0 && (
-                      <p className="text-xs text-amber-600 dark:text-amber-400 font-bold mt-1 flex items-center gap-1">
-                        <AlertTriangle size={12} />
-                        متوسط التعثر: {stats.avgStalledDays} يوم
-                      </p>
-                    )}
-                  </div>
-                </div>
 
                 {/* اختيار الكورس + الترتيب */}
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 block">
                       الكورس:
@@ -529,6 +555,30 @@ const colorClasses: Record<
                       <option value="most_stalled">الأكثر تعثرًا (أيام بلا نشاط)</option>
                     </select>
                   </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 block">
+                      بحث:
+                    </label>
+                    <div className="relative">
+                      <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <input
+                        type="text"
+                        placeholder="الاسم أو رقم الهاتف أو الكورس..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full h-11 pr-10 pl-9 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] text-sm font-bold text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#155DFC]"
+                      />
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery("")}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -551,18 +601,6 @@ const colorClasses: Record<
             ))}
           </div>
 
-          {/* بحث */}
-          <div className="relative">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="ابحث بالاسم أو رقم الهاتف أو اسم الكورس..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pr-10 pl-4 py-3 border border-gray-200 dark:border-[#2A2A2A] rounded-xl bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#155DFC]"
-            />
-          </div>
-
           {/* الجدول */}
           <Card className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-sm overflow-hidden">
             <CardContent className="p-0">
@@ -581,81 +619,79 @@ const colorClasses: Record<
                   </Button>
                 </div>
               ) : filteredData.length === 0 ? (
-                <div className="py-16 text-center">
-                  <div className="text-4xl mb-3">🎉</div>
-                  <p className="text-gray-500 dark:text-gray-400 font-bold">
-                    جميع الطلاب المتوقعين قاموا بفتح المحاضرة!
+                <div className="py-16 text-center px-4">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center">
+                    {searchQuery ? (
+                      <Search className="w-7 h-7 text-gray-400" />
+                    ) : (
+                      <Users className="w-7 h-7 text-gray-400" />
+                    )}
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-300 font-bold">
+                    {searchQuery
+                      ? `مفيش نتايج للبحث عن "${searchQuery}"`
+                      : emptyMessages[activeTab]}
                   </p>
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="mt-3 text-sm font-bold text-[#155DFC] hover:underline"
+                    >
+                      مسح البحث
+                    </button>
+                  )}
                 </div>
               ) : (
                 <>
+                  <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-gray-100 dark:border-[#2A2A2A]">
+                    <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                      {tabs.find((t) => t.key === activeTab)?.label}
+                      <span className="text-gray-400 font-medium"> • {filteredData.length} طالب</span>
+                    </p>
+                    <button
+                      onClick={copyAllPhones}
+                      className="flex items-center gap-1.5 text-xs font-bold text-[#155DFC] hover:bg-[#155DFC]/10 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      {copiedPhone === "all" ? (
+                        <Check size={14} className="text-emerald-500" />
+                      ) : (
+                        <Copy size={14} />
+                      )}
+                      {copiedPhone === "all" ? "تم النسخ" : "نسخ كل الأرقام"}
+                    </button>
+                  </div>
+
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-gray-50 dark:bg-[#161616] sticky top-0 z-10">
+                      <thead className="bg-gray-50 dark:bg-[#161616]">
                         <tr className="border-b border-gray-100 dark:border-[#2A2A2A]">
-                          <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
-                            بيانات الطالب
-                          </th>
-                          <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
-                            الكورس
-                          </th>
-                          <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
-                            تاريخ الاشتراك
-                          </th>
-                          <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
-                            آخر دخول للمنصة
-                          </th>
-                          <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
-                            نسبة الإنجاز
-                          </th>
-                          <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
-                            الحالة
-                          </th>
-                          <th className="px-4 py-3 text-right font-bold text-gray-500 dark:text-gray-400">
-                            الإجراءات
-                          </th>
+                          <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400">الطالب</th>
+                          {selectedCourse === "all" && (
+                            <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400">الكورس</th>
+                          )}
+                          <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400">الاشتراك</th>
+                          <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400">آخر مشاهدة</th>
+                          <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400">التقدم</th>
+                          <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400">الحالة</th>
+                          <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400">تواصل</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 dark:divide-[#2A2A2A]">
-                        {paginatedData.map((row, idx) => {
+                        {paginatedData.map((row) => {
                           const pct = row.completion_percentage || 0;
                           const stalled = isStalled(row);
-                          const daysInactive = daysSince(row.last_watched_at) ?? daysSince(row.enrolled_at);
-                          let statusColor = "bg-gray-100 text-gray-700";
-                          let statusLabel = "جديد";
-
-                          if (pct === 100) {
-                            statusColor =
-                              "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400";
-                            statusLabel = "مكتمل";
-                          } else if (row.bypassed_count > 0) {
-                            statusColor =
-                              "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400";
-                            statusLabel = "متجاوز";
-                          } else if (stalled) {
-                            statusColor =
-                              "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400";
-                            statusLabel = "متعثر";
-                          } else if (pct > 0) {
-                            statusColor =
-                              "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400";
-                            statusLabel = "جاري";
-                          } else {
-                            statusColor =
-                              "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400";
-                            statusLabel = "لم يبدأ";
-                          }
+                          const status = getStatus(row);
 
                           return (
                             <tr
-                              key={idx}
+                              key={`${row.student_id}-${row.course_id}`}
                               className={`hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors ${
                                 stalled ? "bg-amber-50/40 dark:bg-amber-950/10" : ""
                               }`}
                             >
                               <td className="px-4 py-3">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-9 h-9 rounded-full bg-white/10 text-[#155DFC] flex items-center justify-center font-black text-sm flex-shrink-0">
+                                  <div className="w-10 h-10 rounded-full bg-[#155DFC]/10 dark:bg-[#155DFC]/20 text-[#155DFC] dark:text-blue-400 flex items-center justify-center font-black text-sm flex-shrink-0">
                                     {row.full_name?.trim()?.charAt(0) || "؟"}
                                   </div>
                                   <div>
@@ -682,25 +718,41 @@ const colorClasses: Record<
                                   </div>
                                 </div>
                               </td>
-                              <td className="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                                {row.course_title || "—"}
-                              </td>
+                              {selectedCourse === "all" && (
+                                <td className="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs font-bold max-w-[180px] truncate">
+                                  {row.course_title || "—"}
+                                </td>
+                              )}
                               <td className="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap text-xs">
-                                {formatDateTime(row.enrolled_at)}
+                                {formatDate(row.enrolled_at)}
                               </td>
-                              <td className="px-4 py-3 whitespace-nowrap text-xs">
-                                <span className={stalled ? "text-amber-600 dark:text-amber-400 font-bold" : "text-gray-600 dark:text-gray-400"}>
-                                  {formatDateTime(row.last_watched_at)}
-                                </span>
-                                {stalled && daysInactive !== null && (
-                                  <p className="text-[10px] text-amber-500 dark:text-amber-500 font-bold mt-0.5">
-                                    منذ {daysInactive} يوم
+                              <td className="px-4 py-3 whitespace-nowrap">
+                                <p
+                                  className={`text-xs font-bold ${
+                                    stalled
+                                      ? "text-amber-600 dark:text-amber-400"
+                                      : "text-gray-700 dark:text-gray-300"
+                                  }`}
+                                >
+                                  {relativeDays(row.last_watched_at)}
+                                </p>
+                                {row.last_watched_at && (
+                                  <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+                                    {formatDateTime(row.last_watched_at)}
                                   </p>
                                 )}
                               </td>
                               <td className="px-4 py-3">
-                                <div className="flex items-center gap-2 min-w-[90px]">
-                                  <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                <div className="min-w-[140px]">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                                      {row.completed_lessons || 0} / {row.total_lessons || 0} درس
+                                    </span>
+                                    <span className="text-xs font-black text-gray-700 dark:text-gray-300">
+                                      {pct}%
+                                    </span>
+                                  </div>
+                                  <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                                     <div
                                       className={`h-full rounded-full transition-all duration-500 ${
                                         pct === 100 ? "bg-emerald-500" : stalled ? "bg-amber-500" : "bg-[#155DFC]"
@@ -708,27 +760,22 @@ const colorClasses: Record<
                                       style={{ width: `${pct}%` }}
                                     />
                                   </div>
-                                  <span className="text-xs font-black text-gray-700 dark:text-gray-300 w-9 text-left">
-                                    {pct}%
-                                  </span>
                                 </div>
                               </td>
                               <td className="px-4 py-3">
                                 <span
-                                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${statusColor}`}
+                                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap ${status.cls}`}
                                 >
                                   {stalled && <AlertTriangle size={11} />}
-                                  {statusLabel}
+                                  {status.label}
                                 </span>
                               </td>
                               <td className="px-4 py-3">
                                 <div className="flex gap-2">
                                   {row.phone && (
                                     <a
-                                      href={`https://wa.me/${row.phone.replace(
-                                        /^0/,
-                                        "20"
-                                      )}`}
+                                      href={buildWhatsAppLink(row)}
+                                      title="رسالة واتساب جاهزة"
                                       target="_blank"
                                       rel="noreferrer"
                                       className="p-2 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 rounded-lg transition-colors"
@@ -756,7 +803,7 @@ const colorClasses: Record<
                   {/* Pagination */}
                   {totalPages > 1 && (
                     <div className="flex items-center justify-between px-4 py-4 border-t border-gray-100 dark:border-[#2A2A2A]">
-                      <span className="text-xs font-bold text-[#155DFC]">
+                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
                         {(currentPage - 1) * rowsPerPage + 1} -{" "}
                         {Math.min(currentPage * rowsPerPage, filteredData.length)} من {filteredData.length}
                       </span>
@@ -768,8 +815,8 @@ const colorClasses: Record<
                         >
                           ‹
                         </button>
-                        <span className="w-8 h-8 rounded-lg bg-[#155DFC] text-white flex items-center justify-center text-xs font-black">
-                          {currentPage}
+                        <span className="px-3 h-8 rounded-lg bg-[#155DFC] text-white flex items-center justify-center text-xs font-black">
+                          {currentPage} / {totalPages}
                         </span>
                         <button
                           onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
