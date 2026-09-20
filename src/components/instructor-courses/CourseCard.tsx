@@ -8,17 +8,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const GRADE_LABELS: Record<string, string> = {
-  prep_1: "الصف الأول الإعدادي",
-  prep_2: "الصف الثاني الإعدادي",
-  prep_3: "الصف الثالث الإعدادي",
-  sec_1: "الصف الأول الثانوي",
-  sec_2: "الصف الثاني الثانوي",
-  sec_3: "الصف الثالث الثانوي",
-};
-
-const getGradeLabel = (grade?: string) =>
-  (grade && GRADE_LABELS[grade]) || grade || "غير محدد";
+const getGradeLabel = (grade?: string) => grade || "غير محدد";
 
 type Props = {
   course: any;

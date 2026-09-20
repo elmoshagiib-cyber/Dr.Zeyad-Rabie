@@ -66,23 +66,14 @@ interface EssayQuestion {
   image_url?: string;
 }
 
-const GRADE_LABELS: Record<string, string> = {
-  prep_1: "أولى إعدادي",
-  prep_2: "ثانية إعدادي",
-  prep_3: "ثالثة إعدادي",
-  sec_1: "أولى ثانوي",
-  sec_2: "ثانية ثانوي",
-  sec_3: "ثالثة ثانوي",
-};
-
 const GRADE_OPTIONS = [
   "الكل",
-  "أولى إعدادي",
-  "ثانية إعدادي",
-  "ثالثة إعدادي",
-  "أولى ثانوي",
-  "ثانية ثانوي",
-  "ثالثة ثانوي",
+  "الصف الأول الإعدادي",
+  "الصف الثاني الإعدادي",
+  "الصف الثالث الإعدادي",
+  "الصف الأول الثانوي",
+  "الصف الثاني الثانوي",
+  "الصف الثالث الثانوي",
 ];
 
 // شارة صغيرة بتوضح نوع ملف الإجابة (PDF / صورة / نص) - بتتحط جنب اسم الطالب في القائمة
@@ -235,7 +226,7 @@ export function InstructorHomeworkSubmissions() {
 
       const matchesHomework = homeworkFilter === "الكل" || item.homeworks?.title === homeworkFilter;
 
-      const gradeName = GRADE_LABELS[item.homeworks?.courses?.grade || ""] || "";
+      const gradeName = item.homeworks?.courses?.grade || "";
       const matchesGrade = gradeFilter === "الكل" || gradeName === gradeFilter;
 
       return matchesSearch && matchesStatus && matchesHomework && matchesGrade;
@@ -599,7 +590,7 @@ export function InstructorHomeworkSubmissions() {
                                   {submission.homeworks?.title}
                                 </p>
                                 <p className="text-[11px] font-bold text-[#155DFC] mt-1">
-                                  {GRADE_LABELS[submission.homeworks?.courses?.grade || ""] || ""}
+                                  {submission.homeworks?.courses?.grade || ""}
                                 </p>
                               </div>
                             </div>

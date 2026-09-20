@@ -303,15 +303,6 @@ const showToast = (message: string) => {
     notes: "",
   });
 
-  const gradeMap: Record<string, string> = {
-    "الصف الأول الثانوي": "sec_1",
-    "الصف الثاني الثانوي": "sec_2",
-    "الصف الثالث الثانوي": "sec_3",
-    "الصف الأول الإعدادي": "prep_1",
-    "الصف الثاني الإعدادي": "prep_2",
-    "الصف الثالث الإعدادي": "prep_3",
-  };
-
   const loadStudent = async () => {
     const { data, error } = await supabase
       .from("students")
@@ -366,14 +357,12 @@ const showToast = (message: string) => {
   const loadAvailableCourses = async () => {
     if (!student) return;
 
-    const gradeKey = gradeMap[student.grade] || student.grade;
-
     const { data, error } = await supabase
       .from("courses")
       .select("*")
       .eq("is_published", true)
       .eq("is_hidden", false)
-      .eq("grade", gradeKey);
+      .eq("grade", student.grade);
 
     if (error) {
       

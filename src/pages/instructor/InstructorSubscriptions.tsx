@@ -47,15 +47,6 @@ interface SubscriptionRow {
   course?: CourseLite;
 }
 
-const gradeLabels: Record<string, string> = {
-  prep_1: "الصف الأول الإعدادي",
-  prep_2: "الصف الثاني الإعدادي",
-  prep_3: "الصف الثالث الإعدادي",
-  sec_1: "الصف الأول الثانوي",
-  sec_2: "الصف الثاني الثانوي",
-  sec_3: "الصف الثالث الثانوي",
-};
-
 type StatusFilter = "all" | "active" | "expired";
 
 export function InstructorSubscriptions() {
@@ -327,9 +318,9 @@ export function InstructorSubscriptions() {
                   className="w-full h-11 rounded-xl border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#1A1A1A] px-3 text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[#155DFC]"
                 >
                   <option value="all">كل الصفوف</option>
-                  {Object.entries(gradeLabels).map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
+                  {[...new Set(rows.map((r) => r.student?.grade).filter(Boolean))].map((grade) => (
+                    <option key={grade} value={grade}>
+                      {grade}
                     </option>
                   ))}
                 </select>
@@ -433,7 +424,7 @@ export function InstructorSubscriptions() {
                             {r.student?.phone || "-"}
                           </td>
                           <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
-                            {gradeLabels[r.student?.grade || ""] || r.student?.grade || "-"}
+                            {r.student?.grade || "-"}
                           </td>
                           <td className="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">
                             {r.course?.title || "-"}

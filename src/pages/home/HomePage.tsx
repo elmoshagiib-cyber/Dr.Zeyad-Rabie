@@ -43,13 +43,6 @@ import InstallToast from "../../components/ui/InstallToast";
 import { ParentAccessModal } from "../../components/layout/navbar/ParentAccessModal";
 import { NotebookPen, X as CloseIcon, Loader2, Save, Plus, Trash2, ListChecks, StickyNote } from "lucide-react";
 
-const gradeColors: Record<string, string> = {
-  sec_3: "rose",
-  sec_2: "violet",
-  sec_1: "blue",
-  primary: "emerald",
-};
-
 export function HomePage() {
     
   const navigate = useNavigate();

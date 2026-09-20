@@ -104,12 +104,6 @@ export function CourseDetailPage() {
   const { user } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const gradeLabels: Record<string, string> = {
-    sec_3: "الصف الثالث الثانوي",
-    sec_2: "الصف الثاني الثانوي",
-    sec_1: "الصف الأول الثانوي",
-  };
-
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [openUnit, setOpenUnit] = useState<string | null>(null);
   const [toast, setToast] = useState<{ id: number; message: string } | null>(null);
@@ -1587,7 +1581,7 @@ const handleSeekClick = (e: React.MouseEvent<HTMLDivElement>) => {
                 </div>
               ) : (
                 <p className="mt-6 text-lg sm:text-xl font-bold text-right text-white">
-                  {gradeLabels[course.grade] || course.grade}
+                  {course.grade}
                 </p>
               )}
             </div>
