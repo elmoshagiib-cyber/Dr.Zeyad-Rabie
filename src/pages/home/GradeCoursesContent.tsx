@@ -264,9 +264,9 @@ backdrop-blur-md backdrop-blur-sm text-white
 </h3>
 
 <div className="flex items-center gap-0 mt-3">
-  <span className="w-[8px] h-[8px] rounded-full bg-[#5800a9] dark:bg-white flex-shrink-0" />
-  <span className="flex-1 h-[3px] rounded-full bg-[#5800a9] dark:bg-white" />
-  <span className="w-[8px] h-[8px] rounded-full bg-[#5800a9] dark:bg-white flex-shrink-0" />
+  <span className="w-[8px] h-[8px] rounded-full bg-[#5800a9] dark:bg-white group-hover:bg-[#b600d7] dark:group-hover:bg-[#b600d7] transition-colors duration-300 flex-shrink-0" />
+  <span className="flex-1 h-[3px] -mx-px bg-[#5800a9] dark:bg-white group-hover:bg-[#b600d7] dark:group-hover:bg-[#b600d7] transition-colors duration-300" />
+  <span className="w-[8px] h-[8px] rounded-full bg-[#5800a9] dark:bg-white group-hover:bg-[#b600d7] dark:group-hover:bg-[#b600d7] transition-colors duration-300 flex-shrink-0" />
 </div>
 
 <div className="mt-4">
@@ -295,12 +295,13 @@ backdrop-blur-md backdrop-blur-sm text-white
             : undefined
         }
         className="
-          text-sm
-          sm:text-base
-          leading-7
-          sm:leading-8
+          text-[13px]
+          sm:text-[14px]
+          leading-6
+          sm:leading-7
+          font-medium
           text-slate-500
-          dark:text-slate-300
+          dark:text-slate-400
           whitespace-pre-line
           break-words
         "
@@ -315,7 +316,7 @@ backdrop-blur-md backdrop-blur-sm text-white
           }
           className="
             mt-2 inline-flex items-center gap-1
-            text-[13px] sm:text-sm font-bold text-[#5800a9]
+            text-[12px] sm:text-[13px] font-bold text-[#5800a9]
             dark:text-[#c9a6ff]
             hover:text-[#b600d7]
             dark:hover:text-[#b600d7]
@@ -506,23 +507,23 @@ className="
   )}
 </div>
 
-  <div className="flex flex-col gap-2">
+  <div className="flex flex-col gap-2.5">
 
-    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-      <span className="text-[13px] font-medium">
+    <div className="flex items-center gap-2.5">
+      <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">
         {formatDate(course.updated_at)}
       </span>
-      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
-        <HiArrowPath className="text-[13px]" />
+      <span className="flex items-center justify-center w-7 h-7 rounded-full shrink-0 bg-[#F6EEFF] text-[#5800a9] dark:bg-[#2B103D] dark:text-[#c9a6ff]">
+        <HiArrowPath className="text-[14px]" />
       </span>
     </div>
 
-    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-      <span className="text-[13px] font-medium">
+    <div className="flex items-center gap-2.5">
+      <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">
         {formatDate(course.created_at)}
       </span>
-      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
-        <HiDocumentPlus className="text-[13px]" />
+      <span className="flex items-center justify-center w-7 h-7 rounded-full shrink-0 bg-[#F6EEFF] text-[#5800a9] dark:bg-[#2B103D] dark:text-[#c9a6ff]">
+        <HiDocumentPlus className="text-[14px]" />
       </span>
     </div>
 
