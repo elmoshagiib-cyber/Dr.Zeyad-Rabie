@@ -117,7 +117,7 @@ export default function GradesPage() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={{ y: -8, scale: 1.015 }}
-                onClick={() => navigate(`/grade/${grade.id}`)}
+                onClick={() => navigate(`/grade/${encodeURIComponent(grade.title)}`)}
                 className="
     bg-white
     dark:bg-[#111111]

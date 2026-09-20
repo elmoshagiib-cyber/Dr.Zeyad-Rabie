@@ -416,13 +416,13 @@ backdrop-blur-md backdrop-blur-sm text-white
         flex
         items-center
         gap-1.5
-        bg-emerald-100
-        dark:bg-emerald-900/40
-        text-emerald-700
+        bg-emerald-50
+        dark:bg-emerald-500/10
+        text-emerald-600
         dark:text-emerald-400
-        rounded-full
+        rounded-md
         px-4
-        py-2
+        py-[6px]
         text-[13px]
         font-black
         whitespace-nowrap
@@ -430,6 +430,17 @@ backdrop-blur-md backdrop-blur-sm text-white
         select-none
       "
     >
+      <svg
+        className="w-4 h-4 shrink-0"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M20 6L9 17l-5-5" />
+      </svg>
       كورس مجاني
     </span>
   ) : hasAccess ? (

@@ -1596,7 +1596,10 @@ duration-300
                                 `}
                               >
                                 {course.is_free ? (
-                                  <span className="flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded-full px-3.5 py-2 text-[12px] font-black whitespace-nowrap">
+                                  <span className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-md px-3.5 py-[6px] text-[12px] font-black whitespace-nowrap">
+                                    <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M20 6L9 17l-5-5" />
+                                    </svg>
                                     كورس مجاني
                                   </span>
                                 ) : hasAccess ? (
