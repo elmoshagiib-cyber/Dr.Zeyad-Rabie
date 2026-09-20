@@ -1120,6 +1120,7 @@ const coloredFlags = [false, true, false, true, true, false];
     "
   />
 </div>
+    </div>
 
       {/* Content */}
       
@@ -1127,6 +1128,7 @@ const coloredFlags = [false, true, false, true, true, false];
         
   <GradeCoursesContent grade={user?.grade ?? ""} />
 ) : (
+        <div className="max-w-[1150px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="
           grid grid-cols-1 sm:grid-cols-2
           gap-6 sm:gap-8 lg:gap-12
@@ -1319,8 +1321,8 @@ duration-300
 </motion.div>
 
         </div>
+        </div>
       )}
-    </div>
   </section>
 </ScrollReveal>
 
