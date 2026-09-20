@@ -1510,14 +1510,20 @@ duration-300
                           <h3
                             className="
                               text-[17px] sm:text-[19px] leading-tight font-black
-                              text-slate-900 dark:text-white
+                              text-[#5800a9] dark:text-white
                               line-clamp-2
-                              group-hover:text-[#5800a9] dark:group-hover:text-[#b600d7]
+                              group-hover:text-[#b600d7] dark:group-hover:text-[#b600d7]
                               transition-colors duration-300
                             "
                           >
                             {course.title}
                           </h3>
+
+                          <div className="flex items-center gap-1.5 -mt-1">
+                            <span className="w-[5px] h-[5px] rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
+                            <span className="flex-1 h-[1.5px] bg-[#5800a9]/50 dark:bg-[#b600d7]/50" />
+                            <span className="w-[5px] h-[5px] rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
+                          </div>
 
                           {description && (
                             <div>

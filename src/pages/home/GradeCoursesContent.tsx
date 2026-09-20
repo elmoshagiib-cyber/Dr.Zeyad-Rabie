@@ -251,10 +251,10 @@ backdrop-blur-md backdrop-blur-sm text-white
     sm:text-[24px]
     leading-tight
     font-black
-    text-slate-900
+    text-[#5800a9]
     dark:text-white
     line-clamp-2
-    group-hover:text-[#5800a9]
+    group-hover:text-[#b600d7]
     dark:group-hover:text-[#b600d7]
     transition-colors
     duration-300
@@ -263,6 +263,11 @@ backdrop-blur-md backdrop-blur-sm text-white
   {course.title}
 </h3>
 
+<div className="flex items-center gap-2 mt-3">
+  <span className="w-[6px] h-[6px] rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
+  <span className="flex-1 h-[1.5px] bg-[#5800a9]/50 dark:bg-[#b600d7]/50" />
+  <span className="w-[6px] h-[6px] rounded-full bg-[#5800a9] dark:bg-[#b600d7] flex-shrink-0" />
+</div>
 
 <div className="mt-4">
 
