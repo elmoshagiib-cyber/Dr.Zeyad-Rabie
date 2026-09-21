@@ -51,7 +51,7 @@ const MAX_IMAGE_MB = 5;
 ──────────────────────────────────────────────────────────── */
 
 const cardCls =
-  "bg-white dark:bg-[#151515] border border-gray-200 dark:border-[#262626] rounded-[26px] shadow-[0_4px_20px_rgba(0,0,0,.06)] p-5 sm:p-7";
+  "bg-white dark:bg-[#151515] border border-gray-200 dark:border-[#262626] rounded-3xl shadow-sm p-5 sm:p-7";
 
 const inputCls = `
   w-full h-12
@@ -163,7 +163,7 @@ function CoursePreview({
   price: string;
 }) {
   return (
-    <div className="group overflow-hidden rounded-[26px] border border-gray-200 dark:border-[#262626] bg-white dark:bg-[#151515] shadow-[0_4px_20px_rgba(0,0,0,.06)]">
+    <div className="group overflow-hidden rounded-3xl border border-slate-200 dark:border-[#262626] bg-white dark:bg-[#151515] shadow-sm">
       <div className="p-3 pb-0">
         <div className="relative aspect-[1000/563] overflow-hidden rounded-2xl bg-slate-100 dark:bg-[#1F1F1F]">
           {previewUrl ? (
@@ -940,10 +940,8 @@ export function CreateCourse() {
                   rounded-2xl
                   font-black text-base sm:text-lg
                   text-white
-                  bg-[#b600d7]
-                  border-2 border-[#b600d7]
-                  hover:bg-transparent
-                  hover:text-[#b600d7]
+                  bg-[#155DFC]
+                  hover:bg-[#1547D6]
                   active:scale-[0.98]
                   disabled:opacity-60
                   disabled:cursor-not-allowed
