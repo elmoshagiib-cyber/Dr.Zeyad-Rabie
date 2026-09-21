@@ -124,6 +124,7 @@ export interface Course {
   isFree: boolean;
   thumbnailUrl: string;
   grade: string;
+  category: string;
   published: boolean;
   hidden: boolean;
   sections: Section[];
@@ -401,6 +402,7 @@ const loadedCourse: Course = {
   thumbnailUrl: data.thumbnail || "",
 
   grade: data.grade || "",
+  category: data.category || "",
   published: data.is_published || false,
   hidden: data.is_hidden || false,
 
@@ -639,6 +641,7 @@ await supabase
   price: course.isFree ? 0 : course.price,
   is_free: course.isFree,
   grade: course.grade,
+  ...(course.category ? { category: course.category } : {}),
 
   thumbnail: course.thumbnailUrl,
 

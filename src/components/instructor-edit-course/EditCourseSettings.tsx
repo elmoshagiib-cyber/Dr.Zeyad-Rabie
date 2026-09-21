@@ -1,4 +1,5 @@
 import type { Course } from "../../pages/instructor/EditCourse";
+import { COURSE_CATEGORIES } from "../../lib/courseCategories";
 
 type Props = {
   course: Course;
@@ -52,7 +53,22 @@ export function EditCourseSettings({
 
     handleThumbnailChange(e);
   }
+  function handleCategoryChange(value: string) {
+    updateCourseField("category", value);
+    // تصنيف "مجاني" يعني الكورس مجاني
+    if (value === "free" && !course.isFree) {
+      updateCourseField("isFree", true);
+    }
+  }
 
+  function handleFreeToggle() {
+    const next = !course.isFree;
+    updateCourseField("isFree", next);
+    // لو قفلت المجاني والتصنيف كان "مجاني"، نرجعه لتصنيف عادي
+    if (!next && course.category === "free") {
+      updateCourseField("category", "term1");
+    }
+  }
   function clampWatchPercentage(value: number) {
     if (Number.isNaN(value)) return 0;
     return Math.min(100, Math.max(0, value));
@@ -112,6 +128,32 @@ export function EditCourseSettings({
               <option value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
             </select>
           </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">تصنيف الدورة</label>
+            <div className="flex flex-wrap gap-2.5">
+              {COURSE_CATEGORIES.map((c) => {
+                const active = course.category === c.value;
+                return (
+                  <button
+                    key={c.value}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => handleCategoryChange(c.value)}
+                    className={`min-h-[40px] px-4 py-2 rounded-xl border-2 text-[13px] font-bold transition-all duration-200 ${
+                      active
+                        ? "bg-[#155DFC] border-[#155DFC] text-white"
+                        : "bg-white border-slate-200 text-slate-700 hover:border-[#155DFC] hover:text-[#155DFC]"
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-slate-400 mt-1.5">
+              التصنيف بيحدد القسم اللي الدورة بتظهر فيه عند الطلاب.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -131,8 +173,8 @@ export function EditCourseSettings({
               role="switch"
               aria-checked={course.isFree}
               tabIndex={0}
-              onClick={() => updateCourseField("isFree", !course.isFree)}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateCourseField("isFree", !course.isFree); } }}
+              onClick={handleFreeToggle}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleFreeToggle(); } }}
               className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 ${course.isFree ? "bg-emerald-500" : "bg-slate-300"}`}
             >
               <span className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${course.isFree ? "-translate-x-6" : "translate-x-0"}`} />
