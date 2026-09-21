@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Check } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
@@ -193,14 +193,11 @@ const [browseCourses, setBrowseCourses] = useState<any[]>([]);
                         cursor-pointer transition-all duration-300
                         ${
                           active
-                            ? "bg-[#5800a9] border-[#5800a9] text-white dark:bg-[#b600d7] dark:border-[#b600d7] shadow-md"
-                            : "bg-white dark:bg-[#151515] border-gray-200 dark:border-[#262626] text-[#5800a9] dark:text-white shadow-sm hover:border-[#b600d7] hover:text-[#b600d7] dark:hover:border-[#b600d7] dark:hover:text-[#b600d7]"
+                            ? "bg-[#5800a9] border-[#5800a9] text-white dark:bg-[#b600d7] dark:border-[#b600d7]"
+                            : "bg-white dark:bg-[#151515] border-gray-200 dark:border-[#262626] text-[#5800a9] dark:text-white hover:border-[#b600d7] hover:text-[#b600d7] dark:hover:border-[#b600d7] dark:hover:text-[#b600d7]"
                         }
                       `}
                     >
-                      {active && (
-                        <Check size={15} strokeWidth={3} className="shrink-0" />
-                      )}
                       {cat.label}
                     </button>
                   );
