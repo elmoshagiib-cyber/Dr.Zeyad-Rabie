@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useApp } from "../../context/AppContext";
 import { HiArrowPath, HiDocumentPlus } from "react-icons/hi2";
+import { COURSE_CATEGORIES } from "../../lib/courseCategories";
 
 export function MyCoursesPage() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ export function MyCoursesPage() {
   const [loading, setLoading] = useState(true);
   const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+const [activeCategory, setActiveCategory] = useState<string>("all");
 
   useEffect(() => {
     loadCourses();
@@ -79,7 +81,21 @@ export function MyCoursesPage() {
     setEnrolledCourses(coursesWithSections);
     setLoading(false);
   };
+  // التصنيفات اللي الطالب عنده فيها كورسات بس
+  const availableCategories = COURSE_CATEGORIES.filter((cat) =>
+    enrolledCourses.some((c) => c.category === cat.value)
+  );
 
+  const currentCategory =
+    activeCategory === "all" ||
+    availableCategories.some((c) => c.value === activeCategory)
+      ? activeCategory
+      : "all";
+
+  const filteredCourses =
+    currentCategory === "all"
+      ? enrolledCourses
+      : enrolledCourses.filter((c) => c.category === currentCategory);
   const formatDate = (date: string) => {
     if (!date) return "-";
     return new Date(date).toLocaleDateString("ar-EG", {
@@ -127,7 +143,36 @@ export function MyCoursesPage() {
               <BookOpen className="text-white w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-
+          {/* فلتر التصنيفات */}
+          {!loading && availableCategories.length > 0 && (
+            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
+              {[{ value: "all", label: "الكل" }, ...availableCategories].map(
+                (cat) => {
+                  const active = currentCategory === cat.value;
+                  return (
+                    <button
+                      key={cat.value}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => setActiveCategory(cat.value)}
+                      className={`
+                        min-h-[44px] px-5 py-2.5 rounded-2xl border-2
+                        text-[13px] sm:text-[15px] font-black text-center
+                        cursor-pointer transition-all duration-300
+                        ${
+                          active
+                            ? "bg-[#5800a9] border-[#5800a9] text-white dark:bg-[#b600d7] dark:border-[#b600d7] shadow-md"
+                            : "bg-white dark:bg-[#151515] border-gray-200 dark:border-[#262626] text-[#5800a9] dark:text-white shadow-sm hover:border-[#b600d7] hover:text-[#b600d7] dark:hover:border-[#b600d7] dark:hover:text-[#b600d7]"
+                        }
+                      `}
+                    >
+                      {cat.label}
+                    </button>
+                  );
+                }
+              )}
+            </div>
+          )}
           {/* Loading skeleton */}
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -153,7 +198,7 @@ export function MyCoursesPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
-              {enrolledCourses.map((course: any) => {
+              {filteredCourses.map((course: any) => {
                 const sections = course.course_sections || [];
                 const lectures = sections.reduce(
                   (sum: number, section: any) =>
