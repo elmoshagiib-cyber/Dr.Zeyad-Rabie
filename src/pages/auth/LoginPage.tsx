@@ -4,7 +4,6 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../lib/supabase";
 import { useApp } from "../../context/AppContext";
-import { CURRENT_STUDENT } from "../../data/mockData";
 
 type LoginRole = "student" | "instructor" | "admin";
 

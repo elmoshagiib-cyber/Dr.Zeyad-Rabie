@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Clock, ChevronDown, ChevronUp, Play } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useApp } from "../../context/AppContext";
-import { HiOutlineCalendarDays, HiOutlineFolder } from "react-icons/hi2";
+import { HiArrowPath, HiDocumentPlus } from "react-icons/hi2";
 
 export function MyCoursesPage() {
   const navigate = useNavigate();
@@ -164,7 +164,7 @@ export function MyCoursesPage() {
 
                 const isExpanded = expandedId === course.id;
                 const description: string = course.description || "";
-                const isLongDescription = description.length > 90;
+                const isLongDescription = description.length > 150;
 
                 return (
                   <div
@@ -233,10 +233,10 @@ export function MyCoursesPage() {
                     <div className="p-4 sm:p-5 lg:p-6 flex flex-col gap-3">
                       <h3
                         className="
-                          text-lg xs:text-xl sm:text-[22px] md:text-[24px] leading-tight
+                          text-[21px] sm:text-[24px] leading-tight
                           font-black text-[#5800a9] dark:text-white
                           line-clamp-2
-                          group-hover:text-[#5800a9] dark:group-hover:text-[#b600d7]
+                          group-hover:text-[#b600d7] dark:group-hover:text-[#b600d7]
                           transition-colors duration-300
                           cursor-pointer
                         "
@@ -245,13 +245,22 @@ export function MyCoursesPage() {
                         {course.title}
                       </h3>
 
+                      {/* الخط الفاصل تحت العنوان */}
+                      <div className="flex items-center gap-0 mt-3">
+                        <span className="w-[8px] h-[8px] rounded-full bg-[#5800a9] dark:bg-white group-hover:bg-[#b600d7] dark:group-hover:bg-[#b600d7] transition-colors duration-300 flex-shrink-0" />
+                        <span className="flex-1 h-[3px] -mx-px bg-[#5800a9] dark:bg-white group-hover:bg-[#b600d7] dark:group-hover:bg-[#b600d7] transition-colors duration-300" />
+                        <span className="w-[8px] h-[8px] rounded-full bg-[#5800a9] dark:bg-white group-hover:bg-[#b600d7] dark:group-hover:bg-[#b600d7] transition-colors duration-300 flex-shrink-0" />
+                      </div>
+
                       {/* الوصف مع عرض تفاصيل / أقل */}
                       {description && (
-                        <div>
+                        <div className="mt-4">
                           <p
                             className={`
-                              text-sm sm:text-base leading-7 sm:leading-8
-                              text-slate-500 dark:text-slate-300
+                              text-[13px] sm:text-[14px]
+                              leading-6 sm:leading-7
+                              font-medium
+                              text-[#5800a9] dark:text-white
                               whitespace-pre-line break-words
                               ${!isExpanded && isLongDescription ? "line-clamp-3" : ""}
                             `}
@@ -266,28 +275,21 @@ export function MyCoursesPage() {
                               }
                               className="
                                 mt-2 inline-flex items-center gap-1
-                                text-[13px] sm:text-sm font-bold text-[#5800a9]
-                                dark:text-[#b600d7]
-                                hover:text-[#5800a9]
+                                text-[12px] sm:text-[13px] font-bold text-[#5800a9]
+                                dark:text-white
+                                hover:text-[#b600d7]
                                 dark:hover:text-[#b600d7]
                                 transition-colors
                               "
                             >
-                              {isExpanded ? (
-                                <>
-                                  أقل <ChevronUp size={14} />
-                                </>
-                              ) : (
-                                <>
-                                  عرض تفاصيل <ChevronDown size={14} />
-                                </>
-                              )}
+                              {isExpanded ? "أقل ▲" : "عرض تفاصيل ▼"}
                             </button>
                           )}
                         </div>
                       )}
 
-                      <div className="border-t border-slate-200 dark:border-[#262626] pt-5">
+                      {/* زر الدخول */}
+                      <div className="mt-7 border-t border-slate-200 dark:border-[#262626] pt-5">
                         <button
                           onClick={() => navigate(`/courses/${course.id}`)}
                           className="
@@ -295,10 +297,10 @@ export function MyCoursesPage() {
                             rounded-xl
                             font-black text-[15px]
                             text-white
-                            bg-[#5800a9] dark:bg-[#b600d7]
-                            border-2 border-[#5800a9] dark:border-[#b600d7]
+                            bg-[#b600d7]
+                            border-2 border-[#b600d7]
                             hover:bg-transparent
-                            hover:text-[#5800a9] dark:hover:text-[#b600d7]
+                            hover:text-[#b600d7]
                             !shadow-none
                             cursor-pointer
                             transition-all duration-300
@@ -309,50 +311,51 @@ export function MyCoursesPage() {
                       </div>
 
                       {/* بادچ الاشتراك + التواريخ */}
-                      <div className="mt-2 pt-5 border-t border-gray-200 dark:border-[#262626]">
+                      <div className="mt-3 pt-5 border-t border-gray-200 dark:border-[#262626]">
                         <div className="flex items-end justify-between gap-6">
-                          <span
-                            className="
-                              flex items-center gap-1.5
-                              bg-emerald-50 dark:bg-emerald-500/10
-                              text-emerald-600 dark:text-emerald-400
-                              rounded-md px-4 py-[6px]
-                              text-[13px] font-black
-                              whitespace-nowrap
-                              cursor-default select-none
-                              shrink-0
-                            "
-                          >
-                            <svg
-                              className="w-4 h-4 shrink-0"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="3"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                          <div className="inline-flex items-center gap-1 rounded-lg p-1 shrink-0">
+                            <span
+                              className="
+                                flex items-center gap-1.5
+                                bg-emerald-50 dark:bg-emerald-500/10
+                                text-emerald-600 dark:text-emerald-400
+                                rounded-md px-4 py-[6px]
+                                text-[13px] font-black
+                                whitespace-nowrap
+                                cursor-default select-none
+                              "
                             >
-                              <path d="M20 6L9 17l-5-5" />
-                            </svg>
-                            مشترك
-                          </span>
+                              <svg
+                                className="w-4 h-4 shrink-0"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M20 6L9 17l-5-5" />
+                              </svg>
+                              تم الاشتراك
+                            </span>
+                          </div>
 
-                          <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                              <span className="text-[13px] font-medium">
+                          <div className="flex flex-col w-fit gap-2.5">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[12px] font-medium text-[#5800a9] dark:text-white whitespace-nowrap">
                                 {formatDate(course.updated_at || course.created_at)}
                               </span>
-                              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
-                                <HiOutlineFolder className="text-[13px]" />
+                              <span className="flex items-center justify-center w-7 h-7 rounded-full shrink-0 bg-[#F6EEFF] text-[#5800a9] dark:bg-[#b600d7] dark:text-white">
+                                <HiArrowPath className="text-[14px]" />
                               </span>
                             </div>
 
-                            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                              <span className="text-[13px] font-medium">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[12px] font-medium text-[#5800a9] dark:text-white whitespace-nowrap">
                                 {formatDate(course.created_at)}
                               </span>
-                              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
-                                <HiOutlineCalendarDays className="text-[13px]" />
+                              <span className="flex items-center justify-center w-7 h-7 rounded-full shrink-0 bg-[#F6EEFF] text-[#5800a9] dark:bg-[#b600d7] dark:text-white">
+                                <HiDocumentPlus className="text-[14px]" />
                               </span>
                             </div>
                           </div>
