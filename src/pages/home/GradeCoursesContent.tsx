@@ -562,7 +562,7 @@ className="
     const firstPart = words.join(" ");
 
     return (
-      <section className="mb-12 sm:mb-16">
+      <section key={title} className="mb-12 sm:mb-16">
         <div className="flex items-center flex-wrap gap-x-4 gap-y-3 mb-5 sm:mb-7">
           {/* العنوان بالخطوط */}
           <div className="flex flex-col items-start">
@@ -596,24 +596,43 @@ className="
 
         </div>
 
-        {!isCollapsed && (
+        <div
+          className={`
+            grid transition-[grid-template-rows] duration-500 ease-in-out
+            motion-reduce:transition-none
+            ${isCollapsed ? "grid-rows-[0fr]" : "grid-rows-[1fr]"}
+          `}
+        >
           <div
-            className="
-              grid
-              grid-cols-1
-              md:grid-cols-2
-              2xl:grid-cols-3
-              gap-x-6
-              sm:gap-x-8
-              lg:gap-x-10
-              gap-y-10
-            "
+            className={`
+              min-h-0 overflow-hidden
+              transition-[opacity,transform,visibility] duration-500 ease-in-out
+              motion-reduce:transition-none
+              ${
+                isCollapsed
+                  ? "invisible opacity-0 -translate-y-4"
+                  : "visible opacity-100 translate-y-0"
+              }
+            `}
           >
-            {list.map((c) => (
-              <CourseCard key={c.id} course={c} />
-            ))}
+            <div
+              className="
+                grid
+                grid-cols-1
+                md:grid-cols-2
+                2xl:grid-cols-3
+                gap-x-6
+                sm:gap-x-8
+                lg:gap-x-10
+                gap-y-10
+              "
+            >
+              {list.map((c) => (
+                <CourseCard key={c.id} course={c} />
+              ))}
+            </div>
           </div>
-        )}
+        </div>
       </section>
     );
   };
@@ -712,23 +731,14 @@ return (
         <>
           {COURSE_CATEGORIES.filter(
             (cat) => cat.label !== "الامتحانات الشاملة لطلبة اليوتيوب"
-          ).map((cat) => (
-            <CourseSection
-              key={cat.value}
-              title={cat.sectionTitle}
-              icon={<BookOpen className="w-5 h-5" />}
-              list={courses.filter((c) => c.category === cat.value)}
-              accent={cat.accent}
-            />
-          ))}
-          {other.length > 0 && (
-            <CourseSection
-              title="كورسات أخرى"
-              icon={<BookOpen className="w-5 h-5" />}
-              list={other}
-              accent="bg-slate-400"
-            />
+          ).map((cat) =>
+            CourseSection({
+              title: cat.sectionTitle,
+              list: courses.filter((c) => c.category === cat.value),
+            })
           )}
+          {other.length > 0 &&
+            CourseSection({ title: "كورسات أخرى", list: other })}
         </>
       ) : (
         !loading && courses.length > 0 && (
