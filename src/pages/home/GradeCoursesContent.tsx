@@ -566,15 +566,15 @@ className="
         <div className="flex items-center flex-wrap gap-x-4 gap-y-3 mb-5 sm:mb-7">
           {/* العنوان بالخطوط */}
           <div className="flex flex-col items-start">
-            <span className="h-[3px] w-12 rounded-full bg-[#5800a9]/15 dark:bg-white/15" />
-            <h2 className="my-2.5 text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
+            <span className="h-[4px] w-12 rounded-full bg-[#5800a9] dark:bg-[#b600d7]" />
+            <h2 className="my-3 text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white">
               {firstPart && <>{firstPart} </>}
               <span className="text-[#5800a9] dark:text-[#b600d7]">
                 {lastWord}
               </span>
             </h2>
-            <span className="h-[3px] w-full rounded-full bg-[#5800a9]/15 dark:bg-white/15" />
-            <span className="mt-1 h-[3px] w-12 rounded-full bg-[#5800a9]/15 dark:bg-white/15" />
+            <span className="h-[4px] w-full rounded-full bg-[#5800a9] dark:bg-[#b600d7]" />
+            <span className="mt-1.5 h-[4px] w-12 rounded-full bg-[#5800a9] dark:bg-[#b600d7]" />
           </div>
 
           {/* زرار الإخفاء / العرض */}
