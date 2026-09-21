@@ -11,6 +11,7 @@ import { ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { HiArrowPath } from "react-icons/hi2";
 import { HiDocumentPlus } from "react-icons/hi2";
+import { COURSE_CATEGORIES, getCategoryLabel } from "../../lib/courseCategories";
 interface GradeCoursesContentProps {
   grade: string;
 }
@@ -217,10 +218,7 @@ backdrop-blur-md backdrop-blur-sm text-white
             text-xs font-semibold
             px-2.5 py-1 rounded-full
           ">
-            {course.category === 'term1' && 'الترم الأول'}
-            {course.category === 'term2' && 'الترم الثاني'}
-            {course.category === 'revision' && 'مراجعة'}
-            {course.category === 'free' && 'مجاني'}
+            {getCategoryLabel(course.category) || course.category}
           </span>
         )}
 
@@ -592,15 +590,9 @@ text-3xl">
     );
   };
 
-  const term1 = courses.filter(c => c.category === 'term1');
-  const term2 = courses.filter(c => c.category === 'term2');
-  const revision = courses.filter(c => c.category === 'revision');
-  const free = courses.filter(c => c.category === 'free');
-  const other = courses.filter(
-    c => !['term1', 'term2', 'revision', 'free'].includes(c.category)
-  );
-
-  const hasSections = term1.length || term2.length || revision.length || free.length;
+  const knownValues = COURSE_CATEGORIES.map((c) => c.value);
+  const other = courses.filter((c) => !knownValues.includes(c.category));
+  const hasSections = courses.some((c) => knownValues.includes(c.category));
 
  
 return (
@@ -690,30 +682,15 @@ return (
 
       {!loading && hasSections ? (
         <>
-          <CourseSection
-            title="كورسات الترم الأول"
-            icon={<BookOpen className="w-5 h-5" />}
-            list={term1}
-            accent="bg-purple-500"
-          />
-          <CourseSection
-            title="كورسات الترم الثاني"
-            icon={<BookOpen className="w-5 h-5" />}
-            list={term2}
-            accent="bg-blue-500"
-          />
-          <CourseSection
-            title="كورسات المراجعة"
-            icon={<BookOpen className="w-5 h-5" />}
-            list={revision}
-            accent="bg-amber-500"
-          />
-          <CourseSection
-            title="الكورسات المجانية"
-            icon={<BookOpen className="w-5 h-5" />}
-            list={free}
-            accent="bg-green-500"
-          />
+          {COURSE_CATEGORIES.map((cat) => (
+            <CourseSection
+              key={cat.value}
+              title={cat.sectionTitle}
+              icon={<BookOpen className="w-5 h-5" />}
+              list={courses.filter((c) => c.category === cat.value)}
+              accent={cat.accent}
+            />
+          ))}
           {other.length > 0 && (
             <CourseSection
               title="كورسات أخرى"

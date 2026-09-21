@@ -3,9 +3,11 @@ import { motion } from "framer-motion";
 import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
 import { supabase } from "../../lib/supabase";
 import { useNavigate } from "react-router-dom";
+import { COURSE_CATEGORIES as CATEGORIES } from "../../lib/courseCategories";
 import {
   AlertCircle,
   BookOpen,
+  Check,
   CheckCircle2,
   ChevronDown,
   DollarSign,
@@ -33,12 +35,6 @@ const GRADES = [
   "الصف الثالث الإعدادي",
 ];
 
-const CATEGORIES = [
-  { value: "term1", label: "الترم الأول" },
-  { value: "term2", label: "الترم الثاني" },
-  { value: "revision", label: "مراجعة" },
-  { value: "free", label: "مجاني" },
-];
 
 const PRICE_PRESETS = [100, 150, 200, 300, 500];
 
@@ -127,7 +123,9 @@ function ChoiceChip({
       aria-pressed={active}
       onClick={onClick}
       className={`
-        h-11 px-3 rounded-xl border-2 text-[13px] sm:text-sm font-black
+        inline-flex items-center justify-center gap-1.5
+        min-h-[44px] px-4 py-2 rounded-xl border-2 text-center
+        text-[13px] sm:text-sm font-black
         transition-all duration-200 cursor-pointer
         ${
           active
@@ -136,6 +134,7 @@ function ChoiceChip({
         }
       `}
     >
+      {active && <Check size={15} strokeWidth={3} className="shrink-0" />}
       {children}
     </button>
   );
@@ -711,7 +710,7 @@ export function CreateCourse() {
 
               <div>
                 <FieldHeader icon={<Tag size={15} />} label="تصنيف الكورس" />
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div className="flex flex-wrap gap-2.5">
                   {CATEGORIES.map((c) => (
                     <ChoiceChip
                       key={c.value}
