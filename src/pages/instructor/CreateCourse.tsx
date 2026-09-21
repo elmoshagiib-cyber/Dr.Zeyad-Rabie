@@ -51,20 +51,20 @@ const MAX_IMAGE_MB = 5;
 ──────────────────────────────────────────────────────────── */
 
 const cardCls =
-  "bg-white dark:bg-[#151515] border border-gray-200 dark:border-[#262626] rounded-3xl shadow-sm p-5 sm:p-7";
+  "bg-white dark:bg-[#151515] border border-slate-200 dark:border-[#262626] rounded-3xl shadow-sm p-5 sm:p-7";
 
 const inputCls = `
   w-full h-12
   rounded-xl
-  border border-gray-200 dark:border-[#2A2A2A]
-  bg-gray-50 dark:bg-[#181818]
+  border border-slate-200 dark:border-[#2A2A2A]
+  bg-slate-50 dark:bg-[#181818]
   px-4
   text-sm sm:text-base font-medium
   text-slate-800 dark:text-white
   placeholder:text-slate-400 dark:placeholder:text-slate-500
   outline-none transition-all duration-300
-  focus:border-[#5800a9] dark:focus:border-[#b600d7]
-  focus:ring-4 focus:ring-[#5800a9]/15 dark:focus:ring-[#b600d7]/25
+  focus:border-[#155DFC] dark:focus:border-[#3183FF]
+  focus:ring-4 focus:ring-[#155DFC]/15 dark:focus:ring-[#3183FF]/25
   disabled:opacity-50 disabled:cursor-not-allowed
 `;
 
@@ -86,10 +86,10 @@ function FieldHeader({
 }) {
   return (
     <div className="flex items-center gap-2.5 mb-3">
-      <div className="w-8 h-8 rounded-xl bg-[#F6EEFF] dark:bg-[#2B103D] text-[#5800a9] dark:text-[#c9a6ff] flex items-center justify-center">
+      <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-[#0F2147] text-[#155DFC] dark:text-[#93B4FF] flex items-center justify-center">
         {icon}
       </div>
-      <span className="font-black text-[#5800a9] dark:text-white">
+      <span className="font-black text-[#155DFC] dark:text-white">
         {label}
         {required && <span className="text-red-500 mr-1">*</span>}
       </span>
@@ -131,8 +131,8 @@ function ChoiceChip({
         transition-all duration-200 cursor-pointer
         ${
           active
-            ? "bg-[#5800a9] border-[#5800a9] text-white dark:bg-[#b600d7] dark:border-[#b600d7]"
-            : "bg-transparent border-gray-200 dark:border-[#2A2A2A] text-[#5800a9] dark:text-white hover:border-[#b600d7] hover:text-[#b600d7] dark:hover:border-[#b600d7] dark:hover:text-[#b600d7]"
+            ? "bg-[#155DFC] border-[#155DFC] text-white dark:bg-[#3183FF] dark:border-[#3183FF]"
+            : "bg-transparent border-slate-200 dark:border-[#2A2A2A] text-[#155DFC] dark:text-white hover:border-[#3183FF] hover:text-[#3183FF] dark:hover:border-[#3183FF] dark:hover:text-[#3183FF]"
         }
       `}
     >
@@ -189,12 +189,12 @@ function CoursePreview({
 
       <div className="p-4 sm:p-5 flex flex-col gap-3">
         {grade && (
-          <span className="self-start text-[11px] font-black text-[#5800a9] dark:text-[#c9a6ff] bg-[#F6EEFF] dark:bg-[#2B103D] px-2.5 py-1 rounded-full">
+          <span className="self-start text-[11px] font-black text-[#155DFC] dark:text-[#93B4FF] bg-blue-50 dark:bg-[#0F2147] px-2.5 py-1 rounded-full">
             {grade}
           </span>
         )}
 
-        <h3 className="text-[20px] leading-tight font-black text-[#5800a9] dark:text-white line-clamp-2 break-words">
+        <h3 className="text-[20px] leading-tight font-black text-[#155DFC] dark:text-white line-clamp-2 break-words">
           {title.trim() || (
             <span className="text-slate-300 dark:text-slate-600">
               اسم الكورس
@@ -203,12 +203,12 @@ function CoursePreview({
         </h3>
 
         <div className="flex items-center gap-0">
-          <span className="w-[8px] h-[8px] rounded-full bg-[#5800a9] dark:bg-white flex-shrink-0" />
-          <span className="flex-1 h-[3px] -mx-px bg-[#5800a9] dark:bg-white" />
-          <span className="w-[8px] h-[8px] rounded-full bg-[#5800a9] dark:bg-white flex-shrink-0" />
+          <span className="w-[8px] h-[8px] rounded-full bg-[#155DFC] dark:bg-white flex-shrink-0" />
+          <span className="flex-1 h-[3px] -mx-px bg-[#155DFC] dark:bg-white" />
+          <span className="w-[8px] h-[8px] rounded-full bg-[#155DFC] dark:bg-white flex-shrink-0" />
         </div>
 
-        <p className="text-[13px] leading-6 font-medium text-[#5800a9] dark:text-white whitespace-pre-line break-words line-clamp-3">
+        <p className="text-[13px] leading-6 font-medium text-[#155DFC] dark:text-white whitespace-pre-line break-words line-clamp-3">
           {description.trim() || (
             <span className="text-slate-300 dark:text-slate-600">
               وصف الكورس هيظهر هنا...
@@ -216,7 +216,7 @@ function CoursePreview({
           )}
         </p>
 
-        <div className="pt-4 border-t border-gray-200 dark:border-[#262626]">
+        <div className="pt-4 border-t border-slate-200 dark:border-[#262626]">
           {isFree ? (
             <span className="inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-md px-4 py-[6px] text-[13px] font-black">
               <svg
@@ -233,7 +233,7 @@ function CoursePreview({
               كورس مجاني
             </span>
           ) : (
-            <div className="inline-flex items-center gap-1 rounded-lg p-1 bg-[#5800a9] dark:bg-[#b600d7]">
+            <div className="inline-flex items-center gap-1 rounded-lg p-1 bg-[#155DFC] dark:bg-[#3183FF]">
               <span className="bg-white text-[#111111] rounded-md px-3 py-[5px] min-w-[46px] text-center text-[13px] font-black">
                 {Number(price || 0).toFixed(2)}
               </span>
@@ -588,7 +588,7 @@ export function CreateCourse() {
           initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-[#5800a9] dark:bg-[#b600d7] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white mb-6 flex items-center justify-between gap-4"
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-[#155DFC] dark:bg-[#3183FF] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-white mb-6 flex items-center justify-between gap-4"
         >
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0">
@@ -649,7 +649,7 @@ export function CreateCourse() {
                 <FieldError message={errors.title} />
               </div>
 
-              <div className="my-6 border-t border-gray-200 dark:border-[#262626]" />
+              <div className="my-6 border-t border-slate-200 dark:border-[#262626]" />
 
               <div>
                 <FieldHeader
@@ -664,14 +664,14 @@ export function CreateCourse() {
                   onChange={(e) => setDescription(e.target.value)}
                   className="
                     w-full rounded-xl p-4 resize-none
-                    border border-gray-200 dark:border-[#2A2A2A]
-                    bg-gray-50 dark:bg-[#181818]
+                    border border-slate-200 dark:border-[#2A2A2A]
+                    bg-slate-50 dark:bg-[#181818]
                     text-sm sm:text-base font-medium leading-7
                     text-slate-800 dark:text-white
                     placeholder:text-slate-400 dark:placeholder:text-slate-500
                     outline-none transition-all duration-300
-                    focus:border-[#5800a9] dark:focus:border-[#b600d7]
-                    focus:ring-4 focus:ring-[#5800a9]/15 dark:focus:ring-[#b600d7]/25
+                    focus:border-[#155DFC] dark:focus:border-[#3183FF]
+                    focus:ring-4 focus:ring-[#155DFC]/15 dark:focus:ring-[#3183FF]/25
                   "
                   placeholder="اكتب اللي الطالب هيتعلمه في الكورس، والمنهج اللي بيغطيه، وليه الكورس ده مناسب ليه..."
                 />
@@ -707,7 +707,7 @@ export function CreateCourse() {
                 <FieldError message={errors.grade} />
               </div>
 
-              <div className="my-6 border-t border-gray-200 dark:border-[#262626]" />
+              <div className="my-6 border-t border-slate-200 dark:border-[#262626]" />
 
               <div>
                 <FieldHeader icon={<Tag size={15} />} label="تصنيف الكورس" />
@@ -776,8 +776,8 @@ export function CreateCourse() {
                         h-9 px-3.5 rounded-lg text-[13px] font-black border-2 cursor-pointer transition-all duration-200
                         ${
                           Number(price) === p
-                            ? "bg-[#5800a9] border-[#5800a9] text-white dark:bg-[#b600d7] dark:border-[#b600d7]"
-                            : "border-gray-200 dark:border-[#2A2A2A] text-[#5800a9] dark:text-white hover:border-[#b600d7] hover:text-[#b600d7]"
+                            ? "bg-[#155DFC] border-[#155DFC] text-white dark:bg-[#3183FF] dark:border-[#3183FF]"
+                            : "border-slate-200 dark:border-[#2A2A2A] text-[#155DFC] dark:text-white hover:border-[#3183FF] hover:text-[#3183FF]"
                         }
                       `}
                     >
@@ -788,7 +788,7 @@ export function CreateCourse() {
               )}
 
               {/* مجاني toggle */}
-              <div className="mt-5 pt-5 border-t border-gray-200 dark:border-[#262626]">
+              <div className="mt-5 pt-5 border-t border-slate-200 dark:border-[#262626]">
                 <button
                   type="button"
                   role="switch"
@@ -801,7 +801,7 @@ export function CreateCourse() {
                       w-11 h-6 rounded-full transition-colors duration-300 flex items-center px-0.5
                       ${
                         isFree
-                          ? "bg-[#5800a9] dark:bg-[#b600d7]"
+                          ? "bg-[#155DFC] dark:bg-[#3183FF]"
                           : "bg-slate-200 dark:bg-[#2A2A2A]"
                       }
                     `}
@@ -813,7 +813,7 @@ export function CreateCourse() {
                       `}
                     />
                   </span>
-                  <span className="text-sm font-black text-[#5800a9] dark:text-white group-hover:text-[#b600d7] dark:group-hover:text-[#b600d7] transition-colors">
+                  <span className="text-sm font-black text-[#155DFC] dark:text-white group-hover:text-[#3183FF] dark:group-hover:text-[#3183FF] transition-colors">
                     الكورس مجاني
                   </span>
                 </button>
@@ -847,8 +847,8 @@ export function CreateCourse() {
                   transition-all duration-300
                   ${
                     dragOver
-                      ? "border-[#b600d7] bg-[#F6EEFF] dark:bg-[#2B103D]"
-                      : "border-gray-300 dark:border-[#333] bg-gray-50 dark:bg-[#181818] hover:border-[#b600d7] hover:bg-[#F6EEFF] dark:hover:bg-[#2B103D]"
+                      ? "border-[#3183FF] bg-blue-50 dark:bg-[#0F2147]"
+                      : "border-gray-300 dark:border-[#333] bg-slate-50 dark:bg-[#181818] hover:border-[#3183FF] hover:bg-blue-50 dark:hover:bg-[#0F2147]"
                   }
                 `}
               >
@@ -870,13 +870,13 @@ export function CreateCourse() {
                   </>
                 ) : (
                   <div className="text-center px-4">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-blue-50 dark:bg-[#0F2147] flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                       <ImagePlus
                         size={28}
-                        className="text-[#5800a9] dark:text-[#c9a6ff]"
+                        className="text-[#155DFC] dark:text-[#93B4FF]"
                       />
                     </div>
-                    <h3 className="text-lg sm:text-xl font-black text-[#5800a9] dark:text-white">
+                    <h3 className="text-lg sm:text-xl font-black text-[#155DFC] dark:text-white">
                       ارفع صورة الكورس
                     </h3>
                     <p className="mt-1 text-slate-500 dark:text-slate-400 text-sm">
@@ -909,7 +909,7 @@ export function CreateCourse() {
               <FieldError message={errors.thumbnail} />
 
               {thumbnail && (
-                <div className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-gray-50 dark:bg-[#181818] border border-gray-200 dark:border-[#2A2A2A] px-4 py-2.5">
+                <div className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-slate-50 dark:bg-[#181818] border border-slate-200 dark:border-[#2A2A2A] px-4 py-2.5">
                   <div className="min-w-0 text-right">
                     <p className="text-[13px] font-bold text-slate-700 dark:text-slate-200 truncate">
                       {thumbnail.name}
@@ -988,8 +988,8 @@ export function CreateCourse() {
           {/* ── Right: Preview + Checklist ── */}
           <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-6">
             <div>
-              <h2 className="text-lg font-black text-[#5800a9] dark:text-white mb-3 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#b600d7] inline-block" />
+              <h2 className="text-lg font-black text-[#155DFC] dark:text-white mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#3183FF] inline-block" />
                 كده هيظهر للطالب
               </h2>
 
@@ -1007,17 +1007,17 @@ export function CreateCourse() {
             {/* Checklist */}
             <div className={`${cardCls} !p-5`}>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-black text-[#5800a9] dark:text-white">
+                <h3 className="font-black text-[#155DFC] dark:text-white">
                   جاهزية الكورس
                 </h3>
-                <span className="text-xs font-black text-[#5800a9] dark:text-[#c9a6ff] bg-[#F6EEFF] dark:bg-[#2B103D] px-2.5 py-1 rounded-full">
+                <span className="text-xs font-black text-[#155DFC] dark:text-[#93B4FF] bg-blue-50 dark:bg-[#0F2147] px-2.5 py-1 rounded-full">
                   {doneCount}/{checklist.length}
                 </span>
               </div>
 
               <div className="w-full h-2 rounded-full bg-gray-100 dark:bg-[#2A2A2A] overflow-hidden mb-4">
                 <div
-                  className="h-full rounded-full bg-[#5800a9] dark:bg-[#b600d7] transition-all duration-500"
+                  className="h-full rounded-full bg-[#155DFC] dark:bg-[#3183FF] transition-all duration-500"
                   style={{ width: `${percent}%` }}
                 />
               </div>
@@ -1051,12 +1051,12 @@ export function CreateCourse() {
             </div>
 
             {/* تلميح */}
-            <div className="flex items-start gap-3 rounded-2xl border border-[#EAD8FF] dark:border-[#2A2A2A] bg-[#F6EEFF] dark:bg-[#1A1A1A] p-4">
+            <div className="flex items-start gap-3 rounded-2xl border border-blue-200 dark:border-[#2A2A2A] bg-blue-50 dark:bg-[#1A1A1A] p-4">
               <Lightbulb
                 size={18}
-                className="text-[#5800a9] dark:text-[#c9a6ff] shrink-0 mt-0.5"
+                className="text-[#155DFC] dark:text-[#93B4FF] shrink-0 mt-0.5"
               />
-              <p className="text-xs leading-6 font-bold text-[#5800a9] dark:text-[#c9a6ff]">
+              <p className="text-xs leading-6 font-bold text-[#155DFC] dark:text-[#93B4FF]">
                 بعد الإنشاء هتنتقل لصفحة تعديل الكورس عشان تضيف الأقسام
                 والمحاضرات، وتقدر تغيّر أي بيانات هنا بعدين.
               </p>
