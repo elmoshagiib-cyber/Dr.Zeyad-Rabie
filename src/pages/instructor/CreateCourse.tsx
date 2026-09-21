@@ -643,7 +643,7 @@ export function CreateCourse() {
                       ? "!border-red-400 focus:!ring-red-200 dark:focus:!ring-red-500/20"
                       : ""
                   }`}
-                  placeholder="مثال: شرح الباب الأول - الترم الأول"
+                  placeholder="مثال: شرح الباب الأول - الفصل الاول"
                 />
                 <FieldError message={errors.title} />
               </div>

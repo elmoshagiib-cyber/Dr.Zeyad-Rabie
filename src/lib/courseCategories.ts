@@ -7,8 +7,8 @@ export type CourseCategory = {
 
 export const COURSE_CATEGORIES: CourseCategory[] = [
   // القديمة (متغيرش قيمها عشان الكورسات الموجودة)
-  { value: "term1", label: "الترم الأول", sectionTitle: "كورسات الترم الأول", accent: "bg-purple-500" },
-  { value: "term2", label: "الترم الثاني", sectionTitle: "كورسات الترم الثاني", accent: "bg-blue-500" },
+  { value: "term1", label: "الشهور", sectionTitle: "كورسات الشهور", accent: "bg-purple-500" },
+  { value: "term2", label: "الفصول", sectionTitle: "كورسات الفصول", accent: "bg-blue-500" },
   { value: "revision", label: "مراجعة", sectionTitle: "كورسات المراجعة", accent: "bg-amber-500" },
   { value: "free", label: "مجاني", sectionTitle: "الكورسات المجانية", accent: "bg-green-500" },
 

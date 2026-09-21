@@ -2473,7 +2473,7 @@ async function uploadHomeworkInstructions(
 
             {item.chapters.length === 0 ? (
               <div className="text-center py-4 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs">
-                لا توجد فصول مضافة — الفصول اختيارية وتساعد الطالب على التنقل داخل الفيديو
+                لا توجد فصول مضافة — الشهور اختيارية وتساعد الطالب على التنقل داخل الفيديو
               </div>
             ) : (
               <div className="space-y-2">

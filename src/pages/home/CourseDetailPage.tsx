@@ -2322,7 +2322,7 @@ const handleSeekClick = (e: React.MouseEvent<HTMLDivElement>) => {
   />
 )}
 
-                {/* عناصر مخفية لتوليد صور الفصول المصغرة */}
+                {/* عناصر مخفية لتوليد صور الشهور المصغرة */}
                 <video
                   ref={thumbVideoRef}
                   src={videoPlayerUrl}
@@ -2553,7 +2553,7 @@ const handleSeekClick = (e: React.MouseEvent<HTMLDivElement>) => {
                         <button
                           onClick={() => setShowChapters((prev) => !prev)}
                           className={`transition-colors ${showChapters ? "text-[#5800a9] dark:text-[#b600d7]" : "text-white hover:text-gray-300"}`}
-                          title="الفصول"
+                          title="الشهور"
                         >
                           <ListVideo size={20} className="sm:w-6 sm:h-6" />
                         </button>
@@ -2582,7 +2582,7 @@ const handleSeekClick = (e: React.MouseEvent<HTMLDivElement>) => {
                       dir="rtl"
                     >
                       <div className="p-4 sm:p-5 border-b border-white/15 flex items-center justify-between">
-                        <h3 className="text-white font-black text-lg sm:text-xl">الفصول</h3>
+                        <h3 className="text-white font-black text-lg sm:text-xl">الشهور</h3>
                         <button
                           onClick={() => setShowChapters(false)}
                           className="text-gray-400 hover:text-white transition-colors"
