@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Check } from "lucide-react";
 import StudentLayout from "../../components/layout/student-dashboard/StudentLayout";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
@@ -156,6 +156,7 @@ const [activeCategory, setActiveCategory] = useState<string>("all");
                       aria-pressed={active}
                       onClick={() => setActiveCategory(cat.value)}
                       className={`
+                        inline-flex items-center justify-center gap-1.5
                         min-h-[44px] px-5 py-2.5 rounded-2xl border-2
                         text-[13px] sm:text-[15px] font-black text-center
                         cursor-pointer transition-all duration-300
@@ -166,6 +167,9 @@ const [activeCategory, setActiveCategory] = useState<string>("all");
                         }
                       `}
                     >
+                      {active && (
+                        <Check size={15} strokeWidth={3} className="shrink-0" />
+                      )}
                       {cat.label}
                     </button>
                   );
