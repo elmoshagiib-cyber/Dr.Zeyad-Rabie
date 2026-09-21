@@ -14,7 +14,7 @@ export function MyCoursesPage() {
   const [loading, setLoading] = useState(true);
   const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-const [activeCategory, setActiveCategory] = useState<string>("all");
+const [activeCategory, setActiveCategory] = useState<string>("mine");
 const [browseCourses, setBrowseCourses] = useState<any[]>([]);
 
   useEffect(() => {
@@ -101,9 +101,17 @@ const [browseCourses, setBrowseCourses] = useState<any[]>([]);
   const currentCategory = activeCategory;
 
   // "الكل" = كورساتي بس، وأي تصنيف = كل كورسات التصنيف (المشترك فيها الأول)
+  // "كورساتي" = المشترك فيها بس
+  // "الكل" = كل الكورسات (المشترك فيها الأول)
+  // أي تصنيف = كورسات التصنيف (المشترك فيها الأول)
   const filteredCourses =
-    currentCategory === "all"
+    currentCategory === "mine"
       ? enrolledCourses
+      : currentCategory === "all"
+      ? [
+          ...enrolledCourses,
+          ...browseCourses.filter((c) => !enrolledIds.has(String(c.id))),
+        ]
       : [
           ...enrolledCourses.filter((c) => c.category === currentCategory),
           ...browseCourses.filter(
@@ -163,7 +171,11 @@ const [browseCourses, setBrowseCourses] = useState<any[]>([]);
           {/* فلتر التصنيفات */}
           {!loading && (
             <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-              {[{ value: "all", label: "الكل" }, ...COURSE_CATEGORIES].map(
+              {[
+  { value: "mine", label: "كورساتي" },
+  { value: "all", label: "الكل" },
+  ...COURSE_CATEGORIES,
+].map(
                 (cat) => {
                   const active = currentCategory === cat.value;
                   return (
@@ -211,12 +223,12 @@ const [browseCourses, setBrowseCourses] = useState<any[]>([]);
                 <BookOpen className="text-[#B348FE]" size={36} />
               </div>
               <h3 className="text-base sm:text-lg font-black text-[#5800a9] dark:text-white">
-                {currentCategory === "all"
+                {currentCategory === "mine"
                   ? "لسه مشتركتش في أي كورس"
                   : "مفيش كورسات في التصنيف ده دلوقتي"}
               </h3>
               <p className="text-slate-500 dark:text-gray-400 text-xs sm:text-sm mt-2 max-w-xs">
-                {currentCategory === "all"
+                {currentCategory === "mine"
                   ? "اختار أي تصنيف من فوق وتصفح الكورسات المتاحة"
                   : "جرّب تصنيف تاني من الأعلى"}
               </p>
