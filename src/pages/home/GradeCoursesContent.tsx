@@ -563,18 +563,19 @@ className="
 
     return (
       <section className="mb-12 sm:mb-16">
-        <div className="flex items-center flex-wrap gap-x-4 gap-y-3 mb-5 sm:mb-7">
+        <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-3 mb-5 sm:mb-7">
           {/* العنوان بالخطوط */}
-          <div className="flex flex-col items-start">
-            <span className="h-[3px] w-12 rounded-full bg-[#5800a9]/15 dark:bg-white/15" />
-            <h2 className="my-2.5 text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
-              {firstPart && <>{firstPart} </>}
+          <div className="flex flex-col items-center">
+            <h2 className="group cursor-default text-2xl sm:text-3xl font-black">
+              {firstPart && (
+                <span className="text-gray-900 dark:text-white group-hover:text-[#b600d7] dark:group-hover:text-[#b600d7] transition-colors duration-300">
+                  {firstPart}{" "}
+                </span>
+              )}
               <span className="text-[#5800a9] dark:text-[#b600d7]">
                 {lastWord}
               </span>
             </h2>
-            <span className="h-[3px] w-full rounded-full bg-[#5800a9]/15 dark:bg-white/15" />
-            <span className="mt-1 h-[3px] w-12 rounded-full bg-[#5800a9]/15 dark:bg-white/15" />
           </div>
 
           {/* زرار الإخفاء / العرض */}
@@ -585,7 +586,7 @@ className="
             className="
               inline-flex items-center gap-2 cursor-pointer
               text-[13px] sm:text-[14px] font-bold
-              text-[#5800a9] dark:text-[#c9a6ff]
+              text-[#5800a9] dark:text-white
               hover:text-[#b600d7] dark:hover:text-[#b600d7]
               transition-colors
             "
