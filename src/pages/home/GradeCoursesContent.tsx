@@ -28,7 +28,7 @@ const [myCourses, setMyCourses] = useState<string[]>([]);
 const [expandedId, setExpandedId] = useState<string | null>(null);
 const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
 const toggleSection = (key: string) =>
-  setCollapsedSections((p) => ({ ...p, [key]: !p[key] }));
+  setCollapsedSections((p) => ({ ...p, [key]: !(p[key] ?? true) }));
 const [toast, setToast] = useState<{ id: number; message: string } | null>(null);
 const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -554,7 +554,7 @@ className="
   }) => {
     if (list.length === 0) return null;
 
-    const isCollapsed = !!collapsedSections[title];
+    const isCollapsed = collapsedSections[title] ?? true;
 
     // آخر كلمة في العنوان بلون المنصة
     const words = title.trim().split(/\s+/);
@@ -594,17 +594,6 @@ className="
             <span className="text-[10px]">{isCollapsed ? "▲" : "▼"}</span>
           </button>
 
-          {/* عدد الكورسات */}
-          <span
-            className="
-              mr-auto text-xs sm:text-sm font-bold
-              bg-[#F6EEFF] dark:bg-white/10
-              text-[#5800a9] dark:text-slate-300
-              px-2.5 py-1 rounded-full
-            "
-          >
-            {list.length} كورس
-          </span>
         </div>
 
         {!isCollapsed && (
@@ -628,7 +617,7 @@ className="
       </section>
     );
   };
-  
+
   const knownValues = COURSE_CATEGORIES.map((c) => c.value);
   const other = courses.filter((c) => !knownValues.includes(c.category));
   const hasSections = courses.some((c) => knownValues.includes(c.category));
