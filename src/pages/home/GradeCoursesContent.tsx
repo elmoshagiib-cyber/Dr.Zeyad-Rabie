@@ -193,7 +193,9 @@ return (
         <img
           src={
             course.thumbnail
-              ? `${import.meta.env.VITE_R2_PUBLIC_URL}/${course.thumbnail}`
+              ? /^https?:\/\//i.test(course.thumbnail)
+                ? course.thumbnail
+                : `${import.meta.env.VITE_R2_PUBLIC_URL}/${course.thumbnail}`
               : "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=800"
           }
           alt={course.title}
