@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useApp } from "../../context/AppContext";
 import { HiArrowPath, HiDocumentPlus } from "react-icons/hi2";
-import { COURSE_CATEGORIES } from "../../lib/courseCategories";
+import { COURSE_CATEGORIES, getCategoryLabel } from "../../lib/courseCategories";
 
 export function MyCoursesPage() {
   const navigate = useNavigate();
@@ -15,6 +15,7 @@ export function MyCoursesPage() {
   const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 const [activeCategory, setActiveCategory] = useState<string>("all");
+const [browseCourses, setBrowseCourses] = useState<any[]>([]);
 
   useEffect(() => {
     loadCourses();
@@ -24,6 +25,21 @@ const [activeCategory, setActiveCategory] = useState<string>("all");
     if (!user?.studentId) return;
 
     setLoading(true);
+
+        // كل الكورسات المنشورة (عشان الطالب يتصفح باقي الكورسات في كل تصنيف)
+    let browseQuery = supabase
+      .from("courses")
+      .select("*")
+      .eq("is_published", true)
+      .eq("is_hidden", false)
+      .order("created_at", { ascending: false });
+
+    // لو صف الطالب متخزن في الـ user، نعرض كورسات صفه بس
+    const studentGrade = (user as any)?.grade;
+    if (studentGrade) browseQuery = browseQuery.eq("grade", studentGrade);
+
+    const { data: browseData } = await browseQuery;
+    setBrowseCourses(browseData || []);
 
     const { data: enrollments } = await supabase
       .from("student_courses")
@@ -81,21 +97,22 @@ const [activeCategory, setActiveCategory] = useState<string>("all");
     setEnrolledCourses(coursesWithSections);
     setLoading(false);
   };
-  // التصنيفات اللي الطالب عنده فيها كورسات بس
-  const availableCategories = COURSE_CATEGORIES.filter((cat) =>
-    enrolledCourses.some((c) => c.category === cat.value)
-  );
+  const enrolledIds = new Set(enrolledCourses.map((c) => String(c.id)));
+  const currentCategory = activeCategory;
 
-  const currentCategory =
-    activeCategory === "all" ||
-    availableCategories.some((c) => c.value === activeCategory)
-      ? activeCategory
-      : "all";
-
+  // "الكل" = كورساتي بس، وأي تصنيف = كل كورسات التصنيف (المشترك فيها الأول)
   const filteredCourses =
     currentCategory === "all"
       ? enrolledCourses
-      : enrolledCourses.filter((c) => c.category === currentCategory);
+      : [
+          ...enrolledCourses.filter((c) => c.category === currentCategory),
+          ...browseCourses.filter(
+            (c) =>
+              c.category === currentCategory &&
+              !enrolledIds.has(String(c.id))
+          ),
+        ];
+        
   const formatDate = (date: string) => {
     if (!date) return "-";
     return new Date(date).toLocaleDateString("ar-EG", {
@@ -127,7 +144,7 @@ const [activeCategory, setActiveCategory] = useState<string>("all");
                 كورساتي
               </h1>
               <p className="text-white text-[11px] xs:text-xs sm:text-sm">
-                {enrolledCourses.length} كورس مشترك فيه
+                {enrolledCourses.length} كـورس مشتـرك فيـه
               </p>
             </div>
 
@@ -144,9 +161,9 @@ const [activeCategory, setActiveCategory] = useState<string>("all");
             </div>
           </div>
           {/* فلتر التصنيفات */}
-          {!loading && availableCategories.length > 0 && (
+          {!loading && (
             <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-              {[{ value: "all", label: "الكل" }, ...availableCategories].map(
+              {[{ value: "all", label: "الكل" }, ...COURSE_CATEGORIES].map(
                 (cat) => {
                   const active = currentCategory === cat.value;
                   return (
@@ -187,17 +204,21 @@ const [activeCategory, setActiveCategory] = useState<string>("all");
                 />
               ))}
             </div>
-          ) : enrolledCourses.length === 0 ? (
+          ) : filteredCourses.length === 0 ? (
             /* Empty state */
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="w-20 h-20 rounded-full bg-[#F6EEFF] dark:bg-[#2B103D] flex items-center justify-center mb-5">
                 <BookOpen className="text-[#B348FE]" size={36} />
               </div>
               <h3 className="text-base sm:text-lg font-black text-[#5800a9] dark:text-white">
-                لسه مشتركتش في أي كورس
+                {currentCategory === "all"
+                  ? "لسه مشتركتش في أي كورس"
+                  : "مفيش كورسات في التصنيف ده دلوقتي"}
               </h3>
               <p className="text-slate-500 dark:text-gray-400 text-xs sm:text-sm mt-2 max-w-xs">
-                تصفح الكورسات المتاحة وابدأ رحلتك التعليمية دلوقتي
+                {currentCategory === "all"
+                  ? "اختار أي تصنيف من فوق وتصفح الكورسات المتاحة"
+                  : "جرّب تصنيف تاني من الأعلى"}
               </p>
             </div>
           ) : (
@@ -214,6 +235,7 @@ const [activeCategory, setActiveCategory] = useState<string>("all");
                 const isExpanded = expandedId === course.id;
                 const description: string = course.description || "";
                 const isLongDescription = description.length > 150;
+                const isEnrolled = enrolledIds.has(String(course.id));
 
                 return (
                   <div
@@ -243,7 +265,9 @@ const [activeCategory, setActiveCategory] = useState<string>("all");
                         <img
                           src={
                             course.thumbnail
-                              ? `${import.meta.env.VITE_R2_PUBLIC_URL}/${course.thumbnail}`
+                              ? /^https?:\/\//i.test(course.thumbnail)
+                                ? course.thumbnail
+                                : `${import.meta.env.VITE_R2_PUBLIC_URL}/${course.thumbnail}`
                               : "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=600"
                           }
                           alt={course.title}
@@ -265,7 +289,9 @@ const [activeCategory, setActiveCategory] = useState<string>("all");
                             rounded-full
                           "
                         >
-                          {lectures} محاضرة
+                          {isEnrolled
+                            ? `${lectures} محاضرة`
+                            : getCategoryLabel(course.category) || "كورس"}
                         </span>
 
                         <div className="
@@ -362,6 +388,16 @@ const [activeCategory, setActiveCategory] = useState<string>("all");
                       {/* بادچ الاشتراك + التواريخ */}
                       <div className="mt-3 pt-5 border-t border-gray-200 dark:border-[#262626]">
                         <div className="flex items-end justify-between gap-6">
+                          {!isEnrolled && !course.is_free ? (
+                            <div className="inline-flex items-center gap-1 rounded-lg p-1 shrink-0 bg-[#5800a9] dark:bg-[#b600d7]">
+                              <span className="bg-white text-[#111111] rounded-md px-3 py-[5px] min-w-[46px] text-center text-[13px] font-black">
+                                {Number(course.price).toFixed(2)}
+                              </span>
+                              <span className="px-2 text-[13px] font-black text-white">
+                                جنيهًا
+                              </span>
+                            </div>
+                          ) : (
                           <div className="inline-flex items-center gap-1 rounded-lg p-1 shrink-0">
                             <span
                               className="
@@ -385,9 +421,10 @@ const [activeCategory, setActiveCategory] = useState<string>("all");
                               >
                                 <path d="M20 6L9 17l-5-5" />
                               </svg>
-                              تم الاشتراك
+                              {isEnrolled ? "تم الاشتراك" : "كورس مجاني"}
                             </span>
                           </div>
+                          )}
 
                           <div className="flex flex-col w-fit gap-2.5">
                             <div className="flex items-center justify-between gap-2">
