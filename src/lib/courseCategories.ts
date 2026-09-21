@@ -19,7 +19,6 @@ export const COURSE_CATEGORIES: CourseCategory[] = [
   { value: "per_lecture", label: "الاشتراك بالمحاضرة (الحصة بـ٦٠ جنيه)", sectionTitle: "الاشتراك بالمحاضرة", accent: "bg-blue-500" },
   { value: "foundation_2027", label: "الكورس التأسيسي 2027", sectionTitle: "الكورس التأسيسي 2027", accent: "bg-green-500" },
   { value: "workshops", label: "الورش منفصلة", sectionTitle: "الورش المنفصلة", accent: "bg-amber-500" },
-  { value: "youtube_exams", label: "الامتحانات الشاملة لطلبة اليوتيوب", sectionTitle: "الامتحانات الشاملة لطلبة اليوتيوب", accent: "bg-purple-500" },
 ];
 
 export const getCategoryLabel = (value?: string | null) =>

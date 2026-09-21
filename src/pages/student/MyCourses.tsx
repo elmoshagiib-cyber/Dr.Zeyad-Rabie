@@ -174,7 +174,9 @@ const [browseCourses, setBrowseCourses] = useState<any[]>([]);
               {[
   { value: "mine", label: "كورساتي" },
   { value: "all", label: "الكل" },
-  ...COURSE_CATEGORIES,
+  ...COURSE_CATEGORIES.filter(
+    (c) => c.label !== "الامتحانات الشاملة لطلبة اليوتيوب"
+  ),
 ].map(
                 (cat) => {
                   const active = currentCategory === cat.value;

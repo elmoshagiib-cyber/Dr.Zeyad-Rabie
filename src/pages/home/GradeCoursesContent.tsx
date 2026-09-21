@@ -26,6 +26,9 @@ const [subscriptionCode, setSubscriptionCode] = useState("");
 const [selectedCourse, setSelectedCourse] = useState<any>(null);
 const [myCourses, setMyCourses] = useState<string[]>([]);
 const [expandedId, setExpandedId] = useState<string | null>(null);
+const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+const toggleSection = (key: string) =>
+  setCollapsedSections((p) => ({ ...p, [key]: !p[key] }));
 const [toast, setToast] = useState<{ id: number; message: string } | null>(null);
 const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -540,56 +543,92 @@ className="
    
   );
 };
-  const CourseSection = ({
+   const CourseSection = ({
     title,
-    icon,
     list,
-    accent,
   }: {
     title: string;
-    icon: React.ReactNode;
+    icon?: React.ReactNode;
     list: any[];
-    accent: string;
+    accent?: string;
   }) => {
     if (list.length === 0) return null;
+
+    const isCollapsed = !!collapsedSections[title];
+
+    // آخر كلمة في العنوان بلون المنصة
+    const words = title.trim().split(/\s+/);
+    const lastWord = words.pop() || "";
+    const firstPart = words.join(" ");
+
     return (
       <section className="mb-12 sm:mb-16">
-        <div className="flex items-center gap-3 mb-5 sm:mb-7">
-          <div className={`w-1 h-8 rounded-full ${accent}`} />
-          <span className="text-slate-400 dark:text-slate-500">{icon}</span>
-          <h2 className="text-lg sm:text-2xl font-black text-gray-900
-dark:text-white
-text-3xl">
-            {title}
-          </h2>
-          <span className="
-            mr-auto text-xs sm:text-sm font-bold
-            bg-slate-100 dark:bg-white/10
-            text-slate-500 dark:text-slate-400
-            px-2.5 py-1 rounded-full
-          ">
+        <div className="flex items-center flex-wrap gap-x-4 gap-y-3 mb-5 sm:mb-7">
+          {/* العنوان بالخطوط */}
+          <div className="flex flex-col items-start">
+            <span className="h-[3px] w-12 rounded-full bg-[#5800a9]/15 dark:bg-white/15" />
+            <h2 className="my-2.5 text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
+              {firstPart && <>{firstPart} </>}
+              <span className="text-[#5800a9] dark:text-[#b600d7]">
+                {lastWord}
+              </span>
+            </h2>
+            <span className="h-[3px] w-full rounded-full bg-[#5800a9]/15 dark:bg-white/15" />
+            <span className="mt-1 h-[3px] w-12 rounded-full bg-[#5800a9]/15 dark:bg-white/15" />
+          </div>
+
+          {/* زرار الإخفاء / العرض */}
+          <button
+            type="button"
+            aria-expanded={!isCollapsed}
+            onClick={() => toggleSection(title)}
+            className="
+              inline-flex items-center gap-2 cursor-pointer
+              text-[13px] sm:text-[14px] font-bold
+              text-[#5800a9] dark:text-[#c9a6ff]
+              hover:text-[#b600d7] dark:hover:text-[#b600d7]
+              transition-colors
+            "
+          >
+            <span>{isCollapsed ? "عرض الكورسات" : "إخفاء الكورسات"}</span>
+            <span className="text-[10px]">{isCollapsed ? "▲" : "▼"}</span>
+          </button>
+
+          {/* عدد الكورسات */}
+          <span
+            className="
+              mr-auto text-xs sm:text-sm font-bold
+              bg-[#F6EEFF] dark:bg-white/10
+              text-[#5800a9] dark:text-slate-300
+              px-2.5 py-1 rounded-full
+            "
+          >
             {list.length} كورس
           </span>
         </div>
 
-<div
-  className="
-    grid
-    grid-cols-1
-    md:grid-cols-2
-    2xl:grid-cols-3
-    gap-x-6
-    sm:gap-x-8
-    lg:gap-x-10
-    gap-y-10
-  "
->
-          {list.map(c => <CourseCard key={c.id} course={c} />)}
-        </div>
+        {!isCollapsed && (
+          <div
+            className="
+              grid
+              grid-cols-1
+              md:grid-cols-2
+              2xl:grid-cols-3
+              gap-x-6
+              sm:gap-x-8
+              lg:gap-x-10
+              gap-y-10
+            "
+          >
+            {list.map((c) => (
+              <CourseCard key={c.id} course={c} />
+            ))}
+          </div>
+        )}
       </section>
     );
   };
-
+  
   const knownValues = COURSE_CATEGORIES.map((c) => c.value);
   const other = courses.filter((c) => !knownValues.includes(c.category));
   const hasSections = courses.some((c) => knownValues.includes(c.category));
@@ -682,7 +721,9 @@ return (
 
       {!loading && hasSections ? (
         <>
-          {COURSE_CATEGORIES.map((cat) => (
+          {COURSE_CATEGORIES.filter(
+            (cat) => cat.label !== "الامتحانات الشاملة لطلبة اليوتيوب"
+          ).map((cat) => (
             <CourseSection
               key={cat.value}
               title={cat.sectionTitle}

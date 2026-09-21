@@ -711,7 +711,9 @@ export function CreateCourse() {
               <div>
                 <FieldHeader icon={<Tag size={15} />} label="تصنيف الكورس" />
                 <div className="flex flex-wrap gap-2.5">
-                  {CATEGORIES.map((c) => (
+                  {CATEGORIES.filter(
+                    (c) => c.label !== "الامتحانات الشاملة لطلبة اليوتيوب"
+                  ).map((c) => (
                     <ChoiceChip
                       key={c.value}
                       active={category === c.value}
