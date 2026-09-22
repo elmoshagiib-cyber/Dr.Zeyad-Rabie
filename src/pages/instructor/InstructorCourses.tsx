@@ -441,10 +441,13 @@ rounded-2xl
 border
 border-slate-200
 bg-white
-px-4
+pr-11
+pl-4
 outline-none
 transition
 shadow-sm
+cursor-pointer
+hover:border-slate-300
 focus:border-[#155DFC]
 focus:ring-4
 focus:ring-blue-100
@@ -461,7 +464,13 @@ focus:ring-blue-100
           <p className="text-slate-500 mt-1">ابحث ورتب واعرض الكورسات بالطريقة المناسبة.</p>
         </div>
 
-        <div className="inline-flex items-center justify-center min-w-[95px] h-11 rounded-full bg-blue-100 text-[#155DFC] font-bold">
+        <div
+          className={`inline-flex items-center justify-center min-w-[95px] h-11 rounded-full font-bold transition-colors ${
+            resultsCount === 0
+              ? "bg-red-50 text-red-500"
+              : "bg-blue-100 text-[#155DFC]"
+          }`}
+        >
           {resultsCount} كورس
         </div>
       </div>
@@ -491,11 +500,13 @@ h-12
 rounded-2xl
 border
 border-slate-200
+bg-slate-50/60
 pr-11
 pl-4
 shadow-sm
 transition
 outline-none
+focus:bg-white
 focus:border-[#155DFC]
 focus:ring-4
 focus:ring-blue-100
@@ -504,7 +515,11 @@ focus:ring-blue-100
         </div>
 
         {/* Grade */}
-        <div className="w-full lg:w-[210px]">
+        <div className="relative w-full lg:w-[210px]">
+          <GraduationCap
+            size={16}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+          />
           <select
             value={gradeFilter}
             onChange={(e) => setGradeFilter(e.target.value)}
@@ -521,7 +536,11 @@ focus:ring-blue-100
         </div>
 
         {/* Status */}
-        <div className="w-full lg:w-[180px]">
+        <div className="relative w-full lg:w-[180px]">
+          <CheckCircle2
+            size={16}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+          />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -534,7 +553,11 @@ focus:ring-blue-100
         </div>
 
         {/* Sort */}
-        <div className="w-full lg:w-[170px]">
+        <div className="relative w-full lg:w-[170px]">
+          <Layers
+            size={16}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+          />
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
@@ -556,20 +579,24 @@ focus:ring-blue-100
               setStatusFilter("all");
               setSortBy("latest");
             }}
-            className="
+            disabled={activeFilters === 0 && search.trim() === ""}
+            className={`
       h-11
       px-5
       rounded-xl
       border
-      border-slate-200
-      hover:bg-slate-50
       transition
       flex
       items-center
       gap-2
       text-sm
       font-medium
-    "
+      ${
+        activeFilters > 0 || search.trim() !== ""
+          ? "border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
+          : "border-slate-100 text-slate-300 cursor-not-allowed"
+      }
+    `}
           >
             <RotateCcw size={16} />
             إعادة الضبط
