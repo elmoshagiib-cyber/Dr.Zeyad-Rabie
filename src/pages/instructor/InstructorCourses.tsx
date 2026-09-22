@@ -53,6 +53,7 @@ import {
 } from "lucide-react";
 
 import { supabase } from "../../lib/supabase";
+import toast from "react-hot-toast";
 import { DashboardLayout } from "../../components/layout/dashboard/DashboardLayout";
 import { useApp } from "../../context/AppContext";
 import { Button } from "../../components/ui/Button";
@@ -226,7 +227,7 @@ export function CourseStats({ courses }: CourseStatsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((item) => {
         const Icon = item.icon;
 
@@ -733,7 +734,7 @@ export function CourseCard({
               {course.is_free ? "مجاني" : `${course.price} ج.م`}
             </span>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap justify-end gap-2">
               {/* نشر / إخفاء */}
               <button
                 onClick={() => onTogglePublish?.(course.id)}
@@ -819,8 +820,8 @@ export function CourseCard({
       "
     >
       {/* ── الصورة ── */}
-      <div className="p-3 sm:p-3.5 pb-0">
-        <div className="relative aspect-[16/9] overflow-hidden rounded-2xl">
+      <div className="p-2.5 pb-0">
+        <div className="relative aspect-[16/9] max-h-[190px] overflow-hidden rounded-2xl">
           <img
             src={
               course.thumbnail
@@ -840,11 +841,19 @@ export function CourseCard({
           >
             {course.is_published ? "منشور" : "مسودة"}
           </span>
+
+          {/* تنبيه: كورس منشور بدون محتوى */}
+          {course.is_published && sections.length === 0 && (
+            <span className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold text-white bg-red-500">
+              <AlertTriangle size={11} />
+              بدون محتوى
+            </span>
+          )}
         </div>
       </div>
 
       {/* ── المحتوى ── */}
-      <div className="p-4 flex flex-col flex-1">
+      <div className="p-3.5 flex flex-col flex-1">
         {/* الصف الدراسي */}
         <div className="flex items-center gap-2 mb-2">
           <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
@@ -859,7 +868,7 @@ export function CourseCard({
         </div>
 
         {/* العنوان */}
-        <h2 className="text-base sm:text-lg font-black line-clamp-2 leading-snug">
+        <h2 className="text-sm sm:text-base font-black line-clamp-2 leading-snug">
           {course.title}
         </h2>
 
@@ -878,6 +887,12 @@ export function CourseCard({
             <BookOpen size={13} />
             {videos} محاضرة
           </div>
+          {formatDate(course.updated_at) && (
+            <div className="flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs text-slate-600">
+              <Clock size={13} />
+              {formatDate(course.updated_at)}
+            </div>
+          )}
         </div>
 
         {/* فاصل */}
@@ -886,7 +901,7 @@ export function CourseCard({
         {/* ── الفوتر ── */}
         <div className="mt-3 flex items-center justify-between gap-2">
           {/* أيقونات الأكشن */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             {/* 👁️ نشر / إخفاء */}
             <button
               onClick={() => onTogglePublish?.(course.id)}
@@ -990,7 +1005,9 @@ export function CourseGrid({
   return (
     <div
       className={
-        view === "grid" ? "grid xl:grid-cols-3 lg:grid-cols-2 gap-6" : "flex flex-col gap-6"
+        view === "grid"
+          ? "grid sm:grid-cols-2 xl:grid-cols-3 gap-5"
+          : "flex flex-col gap-5"
       }
     >
       {courses.map((course) => (
@@ -1125,7 +1142,7 @@ export function InstructorCourses() {
 
     if (error) {
       console.error(error);
-      alert("حدث خطأ أثناء تحديث الكورس");
+      toast.error("حدث خطأ أثناء تحديث الكورس");
       return;
     }
 
@@ -1145,11 +1162,12 @@ export function InstructorCourses() {
 
     if (error) {
       console.error(error);
-      alert("حدث خطأ أثناء تحديث حالة النشر");
+      toast.error("حدث خطأ أثناء تحديث حالة النشر");
       return;
     }
 
     setCourses((prev) => prev.map((c) => (c.id === id ? { ...c, is_published: newValue } : c)));
+    toast.success(newValue ? "تم نشر الكورس" : "تم إخفاء الكورس");
   };
 
   const duplicateCourse = async (id: string) => {
@@ -1173,17 +1191,18 @@ export function InstructorCourses() {
 
     if (error) {
       console.error(error);
-      alert("حدث خطأ أثناء نسخ الكورس");
+      toast.error("حدث خطأ أثناء نسخ الكورس");
       return;
     }
 
     loadCourses();
+    toast.success("تم نسخ الكورس بنجاح");
   };
 
   const copyCourseLink = (id: string) => {
     const link = `${window.location.origin}/course/${id}`;
     navigator.clipboard.writeText(link);
-    alert("تم نسخ رابط الكورس");
+    toast.success("تم نسخ رابط الكورس");
   };
 
   const deleteCourse = async (id: string) => {
@@ -1193,10 +1212,11 @@ export function InstructorCourses() {
 
     if (error) {
       console.error(error);
-      alert(error.message);
+      toast.error(error.message);
       return;
     }
     loadCourses();
+    toast.success("تم حذف الكورس");
   };
 
   return (
@@ -1256,6 +1276,15 @@ export function InstructorCourses() {
                 ? "لسه معملتش أي كورس، ابدأ بإنشاء أول كورس ليك"
                 : "لا توجد كورسات مطابقة لبحثك، جرّب تغيير الفلاتر"}
             </p>
+            {courses.length === 0 && (
+              <Button
+                onClick={() => navigate("/instructor/courses/create")}
+                className="mt-5 inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-[#155DFC] hover:bg-[#1547D6] text-white text-sm font-bold transition-colors"
+              >
+                <Plus size={16} />
+                إنشاء كورس جديد
+              </Button>
+            )}
           </div>
         ) : (
           <CourseGrid
