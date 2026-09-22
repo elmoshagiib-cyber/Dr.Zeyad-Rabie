@@ -23,9 +23,9 @@
 ============================================================ */
 
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
   BookOpen,
@@ -50,7 +50,9 @@ import {
   Clock,
   GraduationCap,
   Layers,
+  ChevronDown,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import { supabase } from "../../lib/supabase";
 import toast from "react-hot-toast";
@@ -422,6 +424,126 @@ type CourseFiltersProps = {
   resultsCount: number;
 };
 
+type SearchableSelectOption = { value: string; label: string };
+
+type SearchableSelectProps = {
+  icon: LucideIcon;
+  value: string;
+  onChange: (v: string) => void;
+  options: SearchableSelectOption[];
+  placeholder: string;
+  searchable?: boolean;
+};
+
+function SearchableSelect({
+  icon: Icon,
+  value,
+  onChange,
+  options,
+  placeholder,
+  searchable = true,
+}: SearchableSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+        setQuery("");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredOptions = options.filter((opt) =>
+    opt.label.toLowerCase().includes(query.toLowerCase())
+  );
+
+  const selectedLabel = options.find((opt) => opt.value === value)?.label;
+
+  return (
+    <div className="relative w-full" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((o) => !o)}
+        className={`
+          relative w-full h-12 rounded-2xl border bg-white
+          flex items-center gap-2 pr-11 pl-4
+          outline-none transition shadow-sm cursor-pointer
+          hover:border-slate-300
+          ${isOpen ? "border-[#155DFC] ring-4 ring-blue-100" : "border-slate-200"}
+        `}
+      >
+        <Icon
+          size={16}
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+        />
+        <span
+          className={`flex-1 text-right text-sm truncate ${
+            value ? "text-slate-700 font-medium" : "text-slate-400"
+          }`}
+        >
+          {selectedLabel || placeholder}
+        </span>
+        <ChevronDown
+          size={16}
+          className={`text-slate-400 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.15 }}
+            className="absolute top-full right-0 left-0 mt-2 z-50 rounded-2xl overflow-hidden shadow-2xl border border-slate-200 bg-white"
+          >
+            {searchable && (
+              <div className="px-4 py-2.5 border-b border-slate-100">
+                <input
+                  autoFocus
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="ابحث..."
+                  className="w-full bg-transparent outline-none text-sm text-right text-slate-700 placeholder-slate-400"
+                />
+              </div>
+            )}
+            <div className="max-h-60 overflow-y-auto">
+              {filteredOptions.length === 0 && (
+                <div className="px-4 py-3 text-sm text-slate-400 text-center">لا توجد نتائج</div>
+              )}
+              {filteredOptions.map((opt) => (
+                <div
+                  key={opt.value}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setIsOpen(false);
+                    setQuery("");
+                  }}
+                  className={`px-4 py-3 text-sm text-right cursor-pointer transition-colors ${
+                    opt.value === value
+                      ? "bg-slate-900 text-white font-bold"
+                      : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  {opt.label}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export function CourseFilters({
   search,
   setSearch,
@@ -435,24 +557,6 @@ export function CourseFilters({
   setView,
   resultsCount,
 }: CourseFiltersProps) {
-  const selectClass = `
-w-full
-h-12
-rounded-2xl
-border
-border-slate-200
-bg-white
-pr-11
-pl-4
-outline-none
-transition
-shadow-sm
-cursor-pointer
-hover:border-slate-300
-focus:border-[#155DFC]
-focus:ring-4
-focus:ring-blue-100
-`;
 
   const activeFilters = (gradeFilter !== "all" ? 1 : 0) + (statusFilter !== "all" ? 1 : 0);
 
@@ -516,59 +620,56 @@ focus:ring-blue-100
         </div>
 
         {/* Grade */}
-        <div className="relative w-full lg:w-[210px]">
-          <GraduationCap
-            size={16}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-          />
-          <select
+        <div className="w-full lg:w-[210px]">
+          <SearchableSelect
+            icon={GraduationCap}
             value={gradeFilter}
-            onChange={(e) => setGradeFilter(e.target.value)}
-            className={selectClass}
-          >
-            <option value="all">كل الصفوف</option>
-            <option value="الصف الأول الإعدادي">الصف الأول الإعدادي</option>
-            <option value="الصف الثاني الإعدادي">الصف الثاني الإعدادي</option>
-            <option value="الصف الثالث الإعدادي">الصف الثالث الإعدادي</option>
-            <option value="الصف الأول الثانوي">الصف الأول الثانوي</option>
-            <option value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
-            <option value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
-          </select>
+            onChange={setGradeFilter}
+            placeholder="كل الصفوف"
+            searchable={false}
+            options={[
+              { value: "all", label: "كل الصفوف" },
+              { value: "الصف الأول الإعدادي", label: "الصف الأول الإعدادي" },
+              { value: "الصف الثاني الإعدادي", label: "الصف الثاني الإعدادي" },
+              { value: "الصف الثالث الإعدادي", label: "الصف الثالث الإعدادي" },
+              { value: "الصف الأول الثانوي", label: "الصف الأول الثانوي" },
+              { value: "الصف الثاني الثانوي", label: "الصف الثاني الثانوي" },
+              { value: "الصف الثالث الثانوي", label: "الصف الثالث الثانوي" },
+            ]}
+          />
         </div>
 
         {/* Status */}
-        <div className="relative w-full lg:w-[180px]">
-          <CheckCircle2
-            size={16}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-          />
-          <select
+        <div className="w-full lg:w-[180px]">
+          <SearchableSelect
+            icon={CheckCircle2}
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className={selectClass}
-          >
-            <option value="all">كل الحالات</option>
-            <option value="published">منشور</option>
-            <option value="draft">مسودة</option>
-          </select>
+            onChange={setStatusFilter}
+            placeholder="كل الحالات"
+            searchable={false}
+            options={[
+              { value: "all", label: "كل الحالات" },
+              { value: "published", label: "منشور" },
+              { value: "draft", label: "مسودة" },
+            ]}
+          />
         </div>
 
         {/* Sort */}
-        <div className="relative w-full lg:w-[170px]">
-          <Layers
-            size={16}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-          />
-          <select
+        <div className="w-full lg:w-[170px]">
+          <SearchableSelect
+            icon={Layers}
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className={selectClass}
-          >
-            <option value="latest">الأحدث</option>
-            <option value="oldest">الأقدم</option>
-            <option value="price-low">السعر الأقل</option>
-            <option value="price-high">السعر الأعلى</option>
-          </select>
+            onChange={setSortBy}
+            placeholder="الأحدث"
+            searchable={false}
+            options={[
+              { value: "latest", label: "الأحدث" },
+              { value: "oldest", label: "الأقدم" },
+              { value: "price-low", label: "السعر الأقل" },
+              { value: "price-high", label: "السعر الأعلى" },
+            ]}
+          />
         </div>
 
         {/* Reset */}
