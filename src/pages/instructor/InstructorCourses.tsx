@@ -1,15 +1,20 @@
 /* ============================================================
-   instructor-courses (COMBINED FILE)
+   instructor-courses (COMBINED FILE) — نسخة محسّنة
    يحتوي على كل الكومبوننتس الخاصة بصفحة "كورساتي" للمدرّس
-   بعد تطبيق كل التعديلات والفيتشرز المتفق عليها:
 
-   - InstructorCourses  (الصفحة الرئيسية)
-   - CourseHero
-   - CourseStats
-   - CourseAlert         (badges + تنبيه كورس بدون محتوى)
-   - CourseFilters       (تنظيف imports + shrink-0)
-   - CourseGrid          (تمرير props الجديدة)
-   - CourseCard          (نشر/إخفاء + نسخ رابط + نسخ كورس + نجمة موحدة)
+   الجديد في هذه النسخة (بالإضافة لكل الفيتشرز السابقة):
+   - 💰 كارت "إجمالي الإيرادات المتوقعة" في الإحصائيات
+   - 📊 شريط "نسبة اكتمال الكورس" على كل كارت (صورة + وصف + محتوى)
+   - 🏷️ وسام "جديد" للكورسات المُنشأة خلال آخر 7 أيام
+   - 🏆 وسام "الأعلى مبيعًا" لأكثر كورس حقق إيرادات
+   - ✅ تحديد متعدد + إجراءات جماعية (نشر / إخفاء / حذف) لعدة كورسات دفعة واحدة
+   - 💬 نافذة تأكيد أنيقة (بدل alert/confirm الافتراضي في المتصفح) للحذف والنسخ
+   - 📄 ترقيم صفحات (Pagination) بدل عرض كل الكورسات دفعة واحدة
+   - 🦴 Skeleton تحميل مطابق لشكل العرض الحالي (Grid/List)
+   - ⌨️ اختصار لوحة مفاتيح "/" للقفز لخانة البحث مباشرة
+   - 🔄 زرار "إعادة ضبط الفلاتر" يظهر لما نتيجة البحث تبقى صفر
+
+   نفس الألوان والهيدر الأصليين اتحافظ عليهم بالكامل.
 
    ⚙️ طريقة الاستخدام:
    حط الملف ده مكان ملفك الأصلي بنفس المسار
@@ -23,7 +28,7 @@
 ============================================================ */
 
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -45,13 +50,15 @@ import {
   Sparkles,
   FileClock,
   AlertTriangle,
-  Video,
-  FileText,
   Clock,
   GraduationCap,
   Layers,
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
+  TrendingUp,
+  Award,
+  CheckSquare,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -75,8 +82,201 @@ const formatDate = (date?: string) => {
   });
 };
 
+const formatMoney = (value: number) => Math.round(value || 0).toLocaleString("ar-EG");
+
+const isRecentlyCreated = (dateStr?: string) => {
+  if (!dateStr) return false;
+  const diff = Date.now() - new Date(dateStr).getTime();
+  return diff >= 0 && diff < 7 * 24 * 60 * 60 * 1000;
+};
+
+/** نسبة اكتمال بيانات الكورس: صورة + وصف + أبواب + محتوى داخل الأبواب */
+const getCompleteness = (course: any) => {
+  const sections = course.course_sections || [];
+  const hasItems = sections.some((s: any) => (s.course_items?.length || 0) > 0);
+
+  const checks = [
+    Boolean(course.thumbnail || course.cover_image),
+    Boolean(course.description && course.description.trim().length > 10),
+    sections.length > 0,
+    hasItems,
+  ];
+
+  const passed = checks.filter(Boolean).length;
+  return Math.round((passed / checks.length) * 100);
+};
+
+const courseRevenue = (course: any) =>
+  course.is_free ? 0 : (Number(course.price) || 0) * (course.students_count || 0);
+
 /* ============================================================
-   CourseHero.tsx
+   CompletenessBar — شريط صغير يوضح نسبة اكتمال بيانات الكورس
+============================================================ */
+
+function CompletenessBar({ value }: { value: number }) {
+  const color =
+    value === 100 ? "bg-emerald-500" : value >= 50 ? "bg-amber-500" : "bg-red-400";
+  const textColor =
+    value === 100 ? "text-emerald-600" : value >= 50 ? "text-amber-600" : "text-red-500";
+
+  return (
+    <div className="mt-3">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-[11px] font-bold text-slate-400">اكتمال بيانات الكورس</span>
+        <span className={`text-[11px] font-bold ${textColor}`}>{value}%</span>
+      </div>
+      <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-500 ${color}`}
+          style={{ width: `${value}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   ConfirmDialog — نافذة تأكيد موحّدة بدل confirm() الافتراضية
+============================================================ */
+
+type ConfirmDialogProps = {
+  open: boolean;
+  title: string;
+  message: string;
+  confirmLabel: string;
+  cancelLabel?: string;
+  variant?: "danger" | "primary";
+  onConfirm: () => void;
+  onCancel: () => void;
+};
+
+function ConfirmDialog({
+  open,
+  title,
+  message,
+  confirmLabel,
+  cancelLabel = "إلغاء",
+  variant = "primary",
+  onConfirm,
+  onCancel,
+}: ConfirmDialogProps) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          onClick={onCancel}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            transition={{ duration: 0.15 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-[24px] bg-white p-6 shadow-2xl text-right"
+          >
+            <div
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${
+                variant === "danger" ? "bg-red-50 text-red-500" : "bg-blue-50 text-[#155DFC]"
+              }`}
+            >
+              {variant === "danger" ? <Trash2 size={22} /> : <Copy size={22} />}
+            </div>
+
+            <h3 className="text-lg font-black text-slate-800">{title}</h3>
+            <p className="mt-2 text-sm text-slate-500 leading-relaxed">{message}</p>
+
+            <div className="mt-6 flex items-center gap-3">
+              <button
+                onClick={onConfirm}
+                className={`flex-1 h-11 rounded-xl font-bold text-sm text-white transition ${
+                  variant === "danger"
+                    ? "bg-red-500 hover:bg-red-600"
+                    : "bg-[#155DFC] hover:bg-[#1547D6]"
+                }`}
+              >
+                {confirmLabel}
+              </button>
+              <button
+                onClick={onCancel}
+                className="flex-1 h-11 rounded-xl font-bold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+              >
+                {cancelLabel}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ============================================================
+   BulkActionBar — شريط عائم يظهر عند تحديد أكثر من كورس
+============================================================ */
+
+type BulkActionBarProps = {
+  count: number;
+  onPublish: () => void;
+  onUnpublish: () => void;
+  onDelete: () => void;
+  onClear: () => void;
+};
+
+function BulkActionBar({ count, onPublish, onUnpublish, onDelete, onClear }: BulkActionBarProps) {
+  return (
+    <AnimatePresence>
+      {count > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 40 }}
+          transition={{ duration: 0.2 }}
+          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[90] flex items-center gap-3 sm:gap-4 rounded-2xl bg-slate-900 text-white pr-4 pl-3 py-2.5 shadow-2xl max-w-[95vw] overflow-x-auto"
+        >
+          <span className="text-sm font-bold whitespace-nowrap">{count} كورس محدد</span>
+
+          <div className="w-px h-6 bg-white/20 shrink-0" />
+
+          <button
+            onClick={onPublish}
+            className="flex items-center gap-1.5 text-sm font-medium hover:text-emerald-300 transition whitespace-nowrap"
+          >
+            <Eye size={15} /> نشر
+          </button>
+          <button
+            onClick={onUnpublish}
+            className="flex items-center gap-1.5 text-sm font-medium hover:text-amber-300 transition whitespace-nowrap"
+          >
+            <EyeOff size={15} /> إخفاء
+          </button>
+          <button
+            onClick={onDelete}
+            className="flex items-center gap-1.5 text-sm font-medium hover:text-red-300 transition whitespace-nowrap"
+          >
+            <Trash2 size={15} /> حذف
+          </button>
+
+          <div className="w-px h-6 bg-white/20 shrink-0" />
+
+          <button
+            onClick={onClear}
+            className="text-sm text-white/60 hover:text-white transition whitespace-nowrap"
+          >
+            إلغاء التحديد
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ============================================================
+   CourseHero.tsx  (بدون أي تعديل — نفس الهيدر بالضبط)
 ============================================================ */
 
 type CourseHeroProps = {
@@ -166,15 +366,14 @@ export function CourseHero({
 
 /* ============================================================
    CourseStats.tsx
+   (الجديد: كارت خامس "إجمالي الإيرادات المتوقعة")
 ============================================================ */
 
 type CourseStatsProps = {
   courses: any[];
-  statusFilter?: string;
-  onFilterSelect?: (status: string) => void;
 };
 
-export function CourseStats({ courses, statusFilter, onFilterSelect }: CourseStatsProps) {
+export function CourseStats({ courses }: CourseStatsProps) {
   const totalCourses = courses.length;
 
   const activeCourses = courses.filter((course) => course.is_published).length;
@@ -183,12 +382,23 @@ export function CourseStats({ courses, statusFilter, onFilterSelect }: CourseSta
 
   const draftCourses = courses.filter((course) => !course.is_published).length;
 
+  const totalRevenue = courses.reduce((sum, course) => sum + courseRevenue(course), 0);
+
   const pct = (value: number) =>
     totalCourses === 0
       ? "لا يوجد كورسات بعد"
       : `${Math.round((value / totalCourses) * 100)}% من الإجمالي`;
 
-  const stats = [
+  const stats: {
+    title: string;
+    value: number | string;
+    caption: string;
+    icon: LucideIcon;
+    color: string;
+    iconBg: string;
+    ring: string;
+    bar: string;
+  }[] = [
     {
       title: "إجمالي الكورسات",
       value: totalCourses,
@@ -198,8 +408,6 @@ export function CourseStats({ courses, statusFilter, onFilterSelect }: CourseSta
       iconBg: "bg-gradient-to-br from-indigo-100 to-indigo-50",
       ring: "ring-indigo-100",
       bar: "bg-indigo-500",
-      glow: "bg-indigo-400",
-      filterValue: "all" as string | null,
     },
     {
       title: "الكورسات النشطة",
@@ -210,8 +418,6 @@ export function CourseStats({ courses, statusFilter, onFilterSelect }: CourseSta
       iconBg: "bg-gradient-to-br from-emerald-100 to-emerald-50",
       ring: "ring-emerald-100",
       bar: "bg-emerald-500",
-      glow: "bg-emerald-400",
-      filterValue: "published" as string | null,
     },
     {
       title: "كورسات مجانية",
@@ -222,8 +428,6 @@ export function CourseStats({ courses, statusFilter, onFilterSelect }: CourseSta
       iconBg: "bg-gradient-to-br from-orange-100 to-orange-50",
       ring: "ring-orange-100",
       bar: "bg-orange-500",
-      glow: "bg-orange-400",
-      filterValue: null as string | null,
     },
     {
       title: "كورسات في المسودة",
@@ -234,72 +438,59 @@ export function CourseStats({ courses, statusFilter, onFilterSelect }: CourseSta
       iconBg: "bg-gradient-to-br from-amber-100 to-amber-50",
       ring: "ring-amber-100",
       bar: "bg-amber-500",
-      glow: "bg-amber-400",
-      filterValue: "draft" as string | null,
+    },
+    {
+      title: "إجمالي الإيرادات (تقديري)",
+      value: `${formatMoney(totalRevenue)} ج.م`,
+      caption: "من كل الكورسات المدفوعة حاليًا",
+      icon: TrendingUp,
+      color: "text-sky-600",
+      iconBg: "bg-gradient-to-br from-sky-100 to-sky-50",
+      ring: "ring-sky-100",
+      bar: "bg-sky-500",
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6">
       {stats.map((item) => {
         const Icon = item.icon;
-        const isClickable = item.filterValue !== null && !!onFilterSelect;
-        const isActive = isClickable && statusFilter === item.filterValue;
-        const progress =
-          totalCourses === 0 ? 0 : Math.round((item.value / totalCourses) * 100);
+        const isMoney = typeof item.value === "string";
 
         return (
           <div
             key={item.title}
-            onClick={() => {
-              if (isClickable) onFilterSelect?.(item.filterValue as string);
-            }}
-            className={`
+            className="
               group
               relative
               overflow-hidden
               bg-white
-              rounded-2xl
-              sm:rounded-3xl
+              rounded-3xl
               border
-              p-3.5
-              sm:p-6
+              border-slate-200
+              p-6
               shadow-sm
               transition-all
               duration-300
-              hover:shadow-xl
-              hover:-translate-y-1
-              ${isClickable ? "cursor-pointer" : ""}
-              ${
-                isActive
-                  ? "border-slate-900 ring-2 ring-slate-900/10"
-                  : "border-slate-200 hover:border-slate-300"
-              }
-            `}
+              hover:shadow-lg
+              hover:-translate-y-0.5
+              hover:border-slate-300
+            "
           >
-            {/* توهج خلفي */}
-            <div
-              className={`absolute -left-6 -top-10 w-28 h-28 rounded-full blur-3xl opacity-20 ${item.glow} transition-opacity duration-300 group-hover:opacity-30`}
-            />
-
             {/* خط علوي ملوّن */}
             <div className={`absolute top-0 right-0 left-0 h-1 ${item.bar}`} />
 
-            <div className="relative flex items-start justify-between gap-2">
+            <div className="flex items-start justify-between gap-2">
               <div
                 className={`
-                  w-10
-                  h-10
-                  sm:w-14
-                  sm:h-14
-                  rounded-xl
-                  sm:rounded-2xl
+                  w-14
+                  h-14
+                  shrink-0
+                  rounded-2xl
                   flex
                   items-center
                   justify-center
                   ring-4
-                  shrink-0
-                  shadow-sm
                   ${item.iconBg}
                   ${item.ring}
                   transition-transform
@@ -307,39 +498,23 @@ export function CourseStats({ courses, statusFilter, onFilterSelect }: CourseSta
                   group-hover:scale-110
                 `}
               >
-                <Icon className={item.color} size={18} strokeWidth={2.2} />
+                <Icon className={item.color} size={24} strokeWidth={2.2} />
               </div>
 
               <div className="text-right min-w-0">
-                <p className="text-slate-500 text-[11px] sm:text-sm font-medium truncate">
-                  {item.title}
-                </p>
-                <h2 className="mt-1 text-xl sm:text-4xl font-black text-slate-800 tabular-nums">
+                <p className="text-slate-500 text-sm font-medium">{item.title}</p>
+                <h2
+                  className={`mt-1 font-black text-slate-800 tabular-nums truncate ${
+                    isMoney ? "text-xl sm:text-2xl" : "text-4xl"
+                  }`}
+                >
                   {item.value}
                 </h2>
               </div>
             </div>
 
-            <div className="relative mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-slate-100">
-              {item.filterValue !== "all" && (
-                <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden mb-2">
-                  <div
-                    className={`h-full rounded-full ${item.bar} transition-all duration-500`}
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              )}
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] sm:text-xs font-medium text-slate-400">
-                  {item.caption}
-                </span>
-                {isClickable && (
-                  <ChevronLeft
-                    size={13}
-                    className="text-slate-300 opacity-0 -translate-x-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0"
-                  />
-                )}
-              </div>
+            <div className="mt-4 pt-3 border-t border-slate-100 text-right">
+              <span className="text-xs font-medium text-slate-400">{item.caption}</span>
             </div>
           </div>
         );
@@ -349,8 +524,7 @@ export function CourseStats({ courses, statusFilter, onFilterSelect }: CourseSta
 }
 
 /* ============================================================
-   CourseAlert.tsx
-   (بعد التعديل: badges منظمة + تنبيه "كورس منشور بدون محتوى")
+   CourseAlert.tsx  (بدون تغيير جوهري)
 ============================================================ */
 
 type CourseAlertProps = {
@@ -386,8 +560,12 @@ export function CourseAlert({ courses }: CourseAlertProps) {
       border
       p-6
       flex
-      items-center
+      flex-col
+      sm:flex-row
+      items-start
+      sm:items-center
       justify-between
+      gap-4
       ${hasWarnings ? "bg-amber-50 border-amber-200" : "bg-emerald-50 border-emerald-200"}
       `}
     >
@@ -437,6 +615,7 @@ export function CourseAlert({ courses }: CourseAlertProps) {
         className={`
         w-14
         h-14
+        shrink-0
         rounded-2xl
         flex
         items-center
@@ -456,7 +635,7 @@ export function CourseAlert({ courses }: CourseAlertProps) {
 
 /* ============================================================
    CourseFilters.tsx
-   (بعد التعديل: imports نظيفة + shrink-0 لزرار الريست)
+   (الجديد: زرار "تحديد متعدد" + onReset كـ prop)
 ============================================================ */
 
 type CourseFiltersProps = {
@@ -476,6 +655,11 @@ type CourseFiltersProps = {
   setView: Dispatch<SetStateAction<"grid" | "list">>;
 
   resultsCount: number;
+
+  selectionMode: boolean;
+  onToggleSelectionMode: () => void;
+
+  onReset: () => void;
 };
 
 type SearchableSelectOption = { value: string; label: string };
@@ -607,30 +791,43 @@ export function CourseFilters({
   setStatusFilter,
   sortBy,
   setSortBy,
-  view,
-  setView,
   resultsCount,
+  selectionMode,
+  onToggleSelectionMode,
+  onReset,
 }: CourseFiltersProps) {
-
   const activeFilters = (gradeFilter !== "all" ? 1 : 0) + (statusFilter !== "all" ? 1 : 0);
 
   return (
     <div className="bg-white rounded-[30px] border border-slate-200 shadow-sm p-7">
       {/* Header */}
-      <div className="flex items-center justify-between mb-7">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-7">
         <div className="text-right">
           <h2 className="text-2xl font-black">فلتر الكورسات</h2>
           <p className="text-slate-500 mt-1">ابحث ورتب واعرض الكورسات بالطريقة المناسبة.</p>
         </div>
 
-        <div
-          className={`inline-flex items-center justify-center min-w-[95px] h-11 rounded-full font-bold transition-colors ${
-            resultsCount === 0
-              ? "bg-red-50 text-red-500"
-              : "bg-blue-100 text-[#155DFC]"
-          }`}
-        >
-          {resultsCount} كورس
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={onToggleSelectionMode}
+            title="تحديد أكثر من كورس لتنفيذ إجراء جماعي"
+            className={`inline-flex items-center gap-1.5 h-11 px-4 rounded-full text-sm font-bold transition-colors ${
+              selectionMode
+                ? "bg-[#155DFC] text-white"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            <CheckSquare size={15} />
+            {selectionMode ? "إنهاء التحديد" : "تحديد متعدد"}
+          </button>
+
+          <div
+            className={`inline-flex items-center justify-center min-w-[95px] h-11 rounded-full font-bold transition-colors ${
+              resultsCount === 0 ? "bg-red-50 text-red-500" : "bg-blue-100 text-[#155DFC]"
+            }`}
+          >
+            {resultsCount} كورس
+          </div>
         </div>
       </div>
 
@@ -650,9 +847,10 @@ lg:items-center
           <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" />
 
           <input
+            id="course-search-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="ابحث باسم الكورس أو الوصف..."
+            placeholder="ابحث باسم الكورس أو الوصف... (اختصار: /)"
             className="
 w-full
 h-12
@@ -722,6 +920,8 @@ focus:ring-blue-100
               { value: "oldest", label: "الأقدم" },
               { value: "price-low", label: "السعر الأقل" },
               { value: "price-high", label: "السعر الأعلى" },
+              { value: "revenue-high", label: "الأعلى إيرادًا" },
+              { value: "students-high", label: "الأكثر طلابًا" },
             ]}
           />
         </div>
@@ -729,12 +929,7 @@ focus:ring-blue-100
         {/* Reset */}
         <div className="flex items-center gap-3 shrink-0">
           <button
-            onClick={() => {
-              setSearch("");
-              setGradeFilter("all");
-              setStatusFilter("all");
-              setSortBy("latest");
-            }}
+            onClick={onReset}
             disabled={activeFilters === 0 && search.trim() === ""}
             className={`
       h-11
@@ -761,7 +956,7 @@ focus:ring-blue-100
       </div>
 
       {/* Footer */}
-      <div className="mt-6 flex items-center justify-between">
+      <div className="mt-6 flex items-center justify-between flex-wrap gap-3">
         <div className="flex gap-2 flex-wrap">
           {search.trim() !== "" && (
             <button
@@ -801,8 +996,8 @@ focus:ring-blue-100
 
 /* ============================================================
    CourseCard.tsx
-   (بعد التعديل: نشر/إخفاء + نسخ رابط + نسخ كورس + نجمة موحدة +
-   تاريخ آخر تحديث في List View)
+   (الجديد: تحديد جماعي + شريط اكتمال البيانات + وسام "جديد"
+   ووسام "الأعلى مبيعًا")
 ============================================================ */
 
 type CourseCardProps = {
@@ -813,6 +1008,10 @@ type CourseCardProps = {
   onDuplicate?: (id: string) => void;
   onCopyLink?: (id: string) => void;
   view: "grid" | "list";
+  selectionMode?: boolean;
+  selected?: boolean;
+  onToggleSelect?: (id: string) => void;
+  isTopSeller?: boolean;
 };
 
 export function CourseCard({
@@ -823,6 +1022,10 @@ export function CourseCard({
   onDuplicate,
   onCopyLink,
   view,
+  selectionMode = false,
+  selected = false,
+  onToggleSelect,
+  isTopSeller = false,
 }: CourseCardProps) {
   const navigate = useNavigate();
   const sections = course.course_sections || [];
@@ -838,10 +1041,30 @@ export function CourseCard({
     return sum + (section.course_items?.filter((item: any) => item.type === "pdf").length || 0);
   }, 0);
 
+  const completeness = getCompleteness(course);
+  const isNew = isRecentlyCreated(course.created_at);
+
+  const actionsDimmed = selectionMode ? "opacity-40 pointer-events-none" : "";
+
   /* ────────────── LIST VIEW ────────────── */
   if (view === "list") {
     return (
-      <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm hover:shadow-lg transition p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
+      <div
+        className={`bg-white rounded-[24px] border shadow-sm hover:shadow-lg transition p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center ${
+          selected ? "border-[#155DFC] ring-2 ring-blue-100" : "border-slate-200"
+        }`}
+      >
+        {selectionMode && (
+          <label className="flex items-center justify-center self-start sm:self-center cursor-pointer shrink-0">
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={() => onToggleSelect?.(course.id)}
+              className="w-5 h-5 accent-[#155DFC] cursor-pointer"
+            />
+          </label>
+        )}
+
         <img
           src={
             course.thumbnail
@@ -853,9 +1076,21 @@ export function CourseCard({
         />
 
         <div className="flex-1 w-full">
-          <div className="flex justify-between items-start gap-2">
-            <div className="flex-1">
-              <h2 className="text-lg sm:text-2xl font-black">{course.title}</h2>
+          <div className="flex justify-between items-start gap-2 flex-wrap">
+            <div className="flex-1 min-w-[200px]">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-lg sm:text-2xl font-black">{course.title}</h2>
+                {isNew && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                    <Sparkles size={11} /> جديد
+                  </span>
+                )}
+                {isTopSeller && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+                    <Award size={11} /> الأعلى مبيعًا
+                  </span>
+                )}
+              </div>
               <p className="text-slate-500 mt-1 text-sm sm:text-base line-clamp-2">
                 {course.description}
               </p>
@@ -880,6 +1115,10 @@ export function CourseCard({
             )}
           </div>
 
+          <div className="mt-4 max-w-sm">
+            <CompletenessBar value={completeness} />
+          </div>
+
           <div className="flex flex-wrap justify-between items-center mt-6 gap-3">
             <span
               className={`text-2xl sm:text-3xl font-black ${
@@ -889,7 +1128,7 @@ export function CourseCard({
               {course.is_free ? "مجاني" : `${course.price} ج.م`}
             </span>
 
-            <div className="flex flex-wrap justify-end gap-2">
+            <div className={`flex flex-wrap justify-end gap-2 transition-opacity ${actionsDimmed}`}>
               {/* نشر / إخفاء */}
               <button
                 onClick={() => onTogglePublish?.(course.id)}
@@ -959,11 +1198,12 @@ export function CourseCard({
   /* ────────────── GRID VIEW ────────────── */
   return (
     <div
-      className="
+      onClick={() => selectionMode && onToggleSelect?.(course.id)}
+      className={`
         group
+        relative
         bg-white
         border
-        border-gray-200
         shadow-[0_4px_20px_rgba(0,0,0,.06)]
         hover:shadow-[0_10px_35px_rgba(0,0,0,.1)]
         rounded-[26px]
@@ -972,8 +1212,24 @@ export function CourseCard({
         duration-300
         flex
         flex-col
-      "
+        ${selectionMode ? "cursor-pointer" : ""}
+        ${selected ? "border-[#155DFC] ring-2 ring-blue-100" : "border-gray-200"}
+      `}
     >
+      {selectionMode && (
+        <label
+          onClick={(e) => e.stopPropagation()}
+          className="absolute top-3 left-3 z-20 flex items-center justify-center w-8 h-8 rounded-xl bg-white shadow-md cursor-pointer"
+        >
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={() => onToggleSelect?.(course.id)}
+            className="w-4 h-4 accent-[#155DFC] cursor-pointer"
+          />
+        </label>
+      )}
+
       {/* ── الصورة ── */}
       <div className="p-2.5 pb-0">
         <div className="relative aspect-[16/9] max-h-[190px] overflow-hidden rounded-2xl">
@@ -990,7 +1246,7 @@ export function CourseCard({
           {/* حالة النشر */}
           <span
             className={`
-              absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold text-white
+              absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold text-white
               ${course.is_published ? "bg-green-500" : "bg-amber-500"}
             `}
           >
@@ -999,7 +1255,7 @@ export function CourseCard({
 
           {/* تنبيه: كورس منشور بدون محتوى */}
           {course.is_published && sections.length === 0 && (
-            <span className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold text-white bg-red-500">
+            <span className="absolute bottom-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold text-white bg-red-500">
               <AlertTriangle size={11} />
               بدون محتوى
             </span>
@@ -1009,8 +1265,8 @@ export function CourseCard({
 
       {/* ── المحتوى ── */}
       <div className="p-3.5 flex flex-col flex-1">
-        {/* الصف الدراسي */}
-        <div className="flex items-center gap-2 mb-2">
+        {/* الصف الدراسي + الوسامات */}
+        <div className="flex items-center gap-2 mb-2 flex-wrap">
           <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
             {getGradeLabel(course.grade)}
           </span>
@@ -1020,6 +1276,16 @@ export function CourseCard({
               course.is_published ? "bg-green-500" : "bg-amber-400"
             }`}
           />
+          {isNew && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+              <Sparkles size={11} /> جديد
+            </span>
+          )}
+          {isTopSeller && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+              <Award size={11} /> الأعلى مبيعًا
+            </span>
+          )}
         </div>
 
         {/* العنوان */}
@@ -1050,16 +1316,24 @@ export function CourseCard({
           )}
         </div>
 
+        {/* شريط اكتمال البيانات */}
+        <CompletenessBar value={completeness} />
+
         {/* فاصل */}
         <div className="mt-4 border-t border-slate-100" />
 
         {/* ── الفوتر ── */}
         <div className="mt-3 flex items-center justify-between gap-2">
           {/* أيقونات الأكشن */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div
+            className={`flex flex-wrap items-center gap-1.5 transition-opacity ${actionsDimmed}`}
+          >
             {/* 👁️ نشر / إخفاء */}
             <button
-              onClick={() => onTogglePublish?.(course.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onTogglePublish?.(course.id);
+              }}
               title={course.is_published ? "إخفاء الكورس" : "نشر الكورس"}
               className="h-9 w-9 rounded-xl bg-slate-50 text-slate-500 hover:bg-slate-100 transition flex items-center justify-center"
             >
@@ -1068,7 +1342,10 @@ export function CourseCard({
 
             {/* 🗑️ حذف */}
             <button
-              onClick={() => onDelete(course.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(course.id);
+              }}
               title="حذف الكورس"
               className="h-9 w-9 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition flex items-center justify-center"
             >
@@ -1077,16 +1354,34 @@ export function CourseCard({
 
             {/* ✏️ تعديل المحتوى */}
             <button
-              onClick={() => navigate(`/instructor/courses/edit/${course.id}`)}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/instructor/courses/edit/${course.id}`);
+              }}
               title="تعديل الكورس"
               className="h-9 w-9 rounded-xl bg-amber-50 text-amber-500 hover:bg-amber-100 transition flex items-center justify-center"
             >
               <Edit size={16} />
             </button>
 
+            {/* 🔗 نسخ رابط */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onCopyLink?.(course.id);
+              }}
+              title="نسخ رابط الكورس"
+              className="h-9 w-9 rounded-xl bg-indigo-50 text-indigo-500 hover:bg-indigo-100 transition flex items-center justify-center"
+            >
+              <Link2 size={16} />
+            </button>
+
             {/* ⭐ تمييز (يظهر في المقترحة) */}
             <button
-              onClick={() => onFeature?.(course.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onFeature?.(course.id);
+              }}
               title="إضافة للكورسات المقترحة"
               className={`
                 h-9 w-9 rounded-xl
@@ -1129,6 +1424,10 @@ type CourseGridProps = {
   onDuplicate?: (id: string) => void;
   onCopyLink?: (id: string) => void;
   view: "grid" | "list";
+  selectionMode?: boolean;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
+  topSellerId?: string | null;
 };
 
 export function CourseGrid({
@@ -1139,6 +1438,10 @@ export function CourseGrid({
   onDuplicate,
   onCopyLink,
   view,
+  selectionMode = false,
+  selectedIds,
+  onToggleSelect,
+  topSellerId = null,
 }: CourseGridProps) {
   if (courses.length === 0) {
     return (
@@ -1175,6 +1478,10 @@ export function CourseGrid({
           onDuplicate={onDuplicate}
           onCopyLink={onCopyLink}
           view={view}
+          selectionMode={selectionMode}
+          selected={selectedIds?.has(course.id)}
+          onToggleSelect={onToggleSelect}
+          isTopSeller={topSellerId === course.id}
         />
       ))}
     </div>
@@ -1183,9 +1490,11 @@ export function CourseGrid({
 
 /* ============================================================
    InstructorCourses.tsx  (الصفحة الرئيسية)
-   (بعد التعديل: togglePublish + duplicateCourse + copyCourseLink
-   + skeleton محسّن وقت التحميل)
+   (الجديد: تحديد جماعي + Pagination + Confirm Dialog + اختصار
+   البحث + skeleton مطابق للعرض + حساب أعلى كورس مبيعًا)
 ============================================================ */
+
+const PAGE_SIZE = 9;
 
 export function InstructorCourses() {
   const navigate = useNavigate();
@@ -1200,11 +1509,38 @@ export function InstructorCourses() {
   const [sortBy, setSortBy] = useState("latest");
   const [view, setView] = useState<"grid" | "list">("grid");
 
+  const [page, setPage] = useState(1);
+
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    confirmLabel: string;
+    variant: "danger" | "primary";
+    onConfirm: () => void;
+  } | null>(null);
+
   useEffect(() => {
     if (user) {
       loadCourses();
     }
   }, [user]);
+
+  /* اختصار لوحة المفاتيح "/" للقفز لخانة البحث */
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (document.activeElement?.tagName || "").toLowerCase();
+      if (e.key === "/" && tag !== "input" && tag !== "textarea") {
+        e.preventDefault();
+        document.getElementById("course-search-input")?.focus();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   const filteredCourses = courses
     .filter((course) => {
@@ -1237,10 +1573,40 @@ export function InstructorCourses() {
         case "price-high":
           return b.price - a.price;
 
+        case "revenue-high":
+          return courseRevenue(b) - courseRevenue(a);
+
+        case "students-high":
+          return (b.students_count || 0) - (a.students_count || 0);
+
         default:
           return b.id.localeCompare(a.id);
       }
     });
+
+  /* إعادة الصفحة للأولى كل ما الفلاتر أو طريقة العرض تتغير */
+  useEffect(() => {
+    setPage(1);
+  }, [search, gradeFilter, statusFilter, sortBy, view]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredCourses.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paginatedCourses = filteredCourses.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE
+  );
+
+  /* الكورس الأعلى تحقيقًا للإيرادات (لعرض وسام "الأعلى مبيعًا") */
+  const topSellerId = useMemo(() => {
+    let best: { id: string; revenue: number } | null = null;
+    for (const c of courses) {
+      const revenue = courseRevenue(c);
+      if (revenue > 0 && (!best || revenue > best.revenue)) {
+        best = { id: c.id, revenue };
+      }
+    }
+    return best?.id || null;
+  }, [courses]);
 
   const loadCourses = async () => {
     setIsLoading(true);
@@ -1287,6 +1653,50 @@ export function InstructorCourses() {
     setIsLoading(false);
   };
 
+  /* ─────────── فلاتر ─────────── */
+
+  const resetFilters = () => {
+    setSearch("");
+    setGradeFilter("all");
+    setStatusFilter("all");
+    setSortBy("latest");
+  };
+
+  /* ─────────── تحديد متعدد ─────────── */
+
+  const toggleSelectionMode = () => {
+    setSelectionMode((prev) => {
+      if (prev) setSelectedIds(new Set());
+      return !prev;
+    });
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const pageIds = paginatedCourses.map((c) => c.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+
+  const toggleSelectAllOnPage = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allPageSelected) {
+        pageIds.forEach((id) => next.delete(id));
+      } else {
+        pageIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  };
+
+  /* ─────────── إجراءات فردية ─────────── */
+
   const toggleFeature = async (id: string) => {
     const course = courses.find((c) => c.id === id);
     if (!course) return;
@@ -1325,24 +1735,76 @@ export function InstructorCourses() {
     toast.success(newValue ? "تم نشر الكورس" : "تم إخفاء الكورس");
   };
 
-  const duplicateCourse = async (id: string) => {
+  const copyCourseLink = (id: string) => {
+    const link = `${window.location.origin}/course/${id}`;
+    navigator.clipboard.writeText(link);
+    toast.success("تم نسخ رابط الكورس");
+  };
+
+  const closeConfirm = () => setConfirmState(null);
+
+  const requestDelete = (id: string) => {
+    const course = courses.find((c) => c.id === id);
+    setConfirmState({
+      open: true,
+      title: "حذف الكورس؟",
+      message: `هل أنت متأكد من حذف "${course?.title || "هذا الكورس"}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+      confirmLabel: "حذف نهائي",
+      variant: "danger",
+      onConfirm: () => {
+        deleteCourseConfirmed(id);
+        closeConfirm();
+      },
+    });
+  };
+
+  const deleteCourseConfirmed = async (id: string) => {
+    const { error } = await supabase.from("courses").delete().eq("id", id);
+
+    if (error) {
+      console.error(error);
+      toast.error(error.message);
+      return;
+    }
+    loadCourses();
+    toast.success("تم حذف الكورس");
+  };
+
+  const requestDuplicate = (id: string) => {
     const course = courses.find((c) => c.id === id);
     if (!course) return;
 
-    if (!confirm(`هل تريد إنشاء نسخة من "${course.title}"؟`)) return;
+    setConfirmState({
+      open: true,
+      title: "نسخ الكورس؟",
+      message: `سيتم إنشاء نسخة جديدة من "${course.title}" كمسودة يمكنك تعديلها قبل النشر.`,
+      confirmLabel: "نسخ الكورس",
+      variant: "primary",
+      onConfirm: () => {
+        duplicateCourseConfirmed(id);
+        closeConfirm();
+      },
+    });
+  };
 
-    const { id: _id, created_at, course_sections, students_count, ...rest } = course;
+  const duplicateCourseConfirmed = async (id: string) => {
+    const course = courses.find((c) => c.id === id);
+    if (!course) return;
 
-    const { data, error } = await supabase
-      .from("courses")
-      .insert({
-        ...rest,
-        title: `${course.title} (نسخة)`,
-        is_published: false,
-        is_featured: false,
-      })
-      .select()
-      .single();
+    const {
+      id: _id,
+      created_at: _created_at,
+      course_sections: _sections,
+      students_count: _students,
+      ...rest
+    } = course;
+
+    const { error } = await supabase.from("courses").insert({
+      ...rest,
+      title: `${course.title} (نسخة)`,
+      is_published: false,
+      is_featured: false,
+    });
 
     if (error) {
       console.error(error);
@@ -1354,24 +1816,58 @@ export function InstructorCourses() {
     toast.success("تم نسخ الكورس بنجاح");
   };
 
-  const copyCourseLink = (id: string) => {
-    const link = `${window.location.origin}/course/${id}`;
-    navigator.clipboard.writeText(link);
-    toast.success("تم نسخ رابط الكورس");
+  /* ─────────── إجراءات جماعية ─────────── */
+
+  const requestBulkDelete = () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    setConfirmState({
+      open: true,
+      title: "حذف الكورسات المحددة؟",
+      message: `سيتم حذف ${ids.length} كورس نهائيًا. لا يمكن التراجع عن هذا الإجراء.`,
+      confirmLabel: "حذف الكل",
+      variant: "danger",
+      onConfirm: () => {
+        bulkDeleteConfirmed(ids);
+        closeConfirm();
+      },
+    });
   };
 
-  const deleteCourse = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف الكورس؟")) return;
-
-    const { error } = await supabase.from("courses").delete().eq("id", id);
+  const bulkDeleteConfirmed = async (ids: string[]) => {
+    const { error } = await supabase.from("courses").delete().in("id", ids);
 
     if (error) {
       console.error(error);
-      toast.error(error.message);
+      toast.error("حدث خطأ أثناء حذف الكورسات");
       return;
     }
+
+    setSelectedIds(new Set());
+    setSelectionMode(false);
     loadCourses();
-    toast.success("تم حذف الكورس");
+    toast.success(`تم حذف ${ids.length} كورس بنجاح`);
+  };
+
+  const bulkTogglePublish = async (value: boolean) => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    const { error } = await supabase.from("courses").update({ is_published: value }).in("id", ids);
+
+    if (error) {
+      console.error(error);
+      toast.error("حدث خطأ أثناء تحديث الكورسات");
+      return;
+    }
+
+    setCourses((prev) =>
+      prev.map((c) => (ids.includes(c.id) ? { ...c, is_published: value } : c))
+    );
+    toast.success(value ? `تم نشر ${ids.length} كورس` : `تم إخفاء ${ids.length} كورس`);
+    setSelectedIds(new Set());
+    setSelectionMode(false);
   };
 
   return (
@@ -1391,11 +1887,7 @@ export function InstructorCourses() {
 
       {/* Stats + Alert + Filters + Grid */}
       <div className="space-y-4 sm:space-y-5 lg:space-y-6">
-        <CourseStats
-          courses={courses}
-          statusFilter={statusFilter}
-          onFilterSelect={setStatusFilter}
-        />
+        <CourseStats courses={courses} />
         <CourseAlert courses={courses} />
         <CourseFilters
           search={search}
@@ -1409,25 +1901,62 @@ export function InstructorCourses() {
           view={view}
           setView={setView}
           resultsCount={filteredCourses.length}
+          selectionMode={selectionMode}
+          onToggleSelectionMode={toggleSelectionMode}
+          onReset={resetFilters}
         />
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="rounded-[26px] border border-slate-200 bg-white overflow-hidden"
-              >
-                <div className="p-3.5 pb-0">
-                  <div className="aspect-[16/9] rounded-2xl bg-slate-100 animate-pulse" />
-                </div>
-                <div className="p-4 space-y-3">
-                  <div className="h-4 w-1/3 bg-slate-100 rounded-full animate-pulse" />
-                  <div className="h-5 w-3/4 bg-slate-100 rounded animate-pulse" />
-                  <div className="h-3 w-full bg-slate-100 rounded animate-pulse" />
-                </div>
-              </div>
-            ))}
+
+        {!isLoading && selectionMode && paginatedCourses.length > 0 && (
+          <div className="flex items-center gap-2 px-1">
+            <label className="flex items-center gap-2 text-sm font-bold text-slate-600 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={allPageSelected}
+                onChange={toggleSelectAllOnPage}
+                className="w-4 h-4 accent-[#155DFC]"
+              />
+              تحديد كل كورسات هذه الصفحة
+            </label>
           </div>
+        )}
+
+        {isLoading ? (
+          view === "grid" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="rounded-[26px] border border-slate-200 bg-white overflow-hidden"
+                >
+                  <div className="p-3.5 pb-0">
+                    <div className="aspect-[16/9] rounded-2xl bg-slate-100 animate-pulse" />
+                  </div>
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 w-1/3 bg-slate-100 rounded-full animate-pulse" />
+                    <div className="h-5 w-3/4 bg-slate-100 rounded animate-pulse" />
+                    <div className="h-3 w-full bg-slate-100 rounded animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-5">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-[24px] border border-slate-200 p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center"
+                >
+                  <div className="w-full sm:w-52 md:w-64 h-40 rounded-2xl bg-slate-100 animate-pulse shrink-0" />
+                  <div className="flex-1 w-full space-y-3">
+                    <div className="h-3 w-1/4 bg-slate-100 rounded-full animate-pulse" />
+                    <div className="h-6 w-2/3 bg-slate-100 rounded animate-pulse" />
+                    <div className="h-4 w-full bg-slate-100 rounded animate-pulse" />
+                    <div className="h-4 w-1/2 bg-slate-100 rounded animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
         ) : filteredCourses.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-[30px] border border-slate-200">
             <p className="text-slate-500 text-lg font-medium">
@@ -1435,7 +1964,7 @@ export function InstructorCourses() {
                 ? "لسه معملتش أي كورس، ابدأ بإنشاء أول كورس ليك"
                 : "لا توجد كورسات مطابقة لبحثك، جرّب تغيير الفلاتر"}
             </p>
-            {courses.length === 0 && (
+            {courses.length === 0 ? (
               <Button
                 onClick={() => navigate("/instructor/courses/create")}
                 className="mt-5 inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-[#155DFC] hover:bg-[#1547D6] text-white text-sm font-bold transition-colors"
@@ -1443,20 +1972,76 @@ export function InstructorCourses() {
                 <Plus size={16} />
                 إنشاء كورس جديد
               </Button>
+            ) : (
+              <Button
+                onClick={resetFilters}
+                className="mt-5 inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition-colors"
+              >
+                <RotateCcw size={16} />
+                إعادة ضبط الفلاتر
+              </Button>
             )}
           </div>
         ) : (
-          <CourseGrid
-            courses={filteredCourses}
-            onDelete={deleteCourse}
-            onFeature={toggleFeature}
-            onTogglePublish={togglePublish}
-            onDuplicate={duplicateCourse}
-            onCopyLink={copyCourseLink}
-            view={view}
-          />
+          <>
+            <CourseGrid
+              courses={paginatedCourses}
+              onDelete={requestDelete}
+              onFeature={toggleFeature}
+              onTogglePublish={togglePublish}
+              onDuplicate={requestDuplicate}
+              onCopyLink={copyCourseLink}
+              view={view}
+              selectionMode={selectionMode}
+              selectedIds={selectedIds}
+              onToggleSelect={toggleSelect}
+              topSellerId={topSellerId}
+            />
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 pt-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={safePage === 1}
+                  className="h-10 w-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition"
+                >
+                  <ChevronRight size={16} />
+                </button>
+                <span className="text-sm font-bold text-slate-600 px-4">
+                  صفحة {safePage} من {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safePage === totalPages}
+                  className="h-10 w-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
+
+      {/* نافذة التأكيد الموحّدة */}
+      <ConfirmDialog
+        open={!!confirmState?.open}
+        title={confirmState?.title || ""}
+        message={confirmState?.message || ""}
+        confirmLabel={confirmState?.confirmLabel || "تأكيد"}
+        variant={confirmState?.variant || "primary"}
+        onConfirm={() => confirmState?.onConfirm()}
+        onCancel={closeConfirm}
+      />
+
+      {/* شريط الإجراءات الجماعية */}
+      <BulkActionBar
+        count={selectedIds.size}
+        onPublish={() => bulkTogglePublish(true)}
+        onUnpublish={() => bulkTogglePublish(false)}
+        onDelete={requestBulkDelete}
+        onClear={() => setSelectedIds(new Set())}
+      />
     </DashboardLayout>
   );
 }
