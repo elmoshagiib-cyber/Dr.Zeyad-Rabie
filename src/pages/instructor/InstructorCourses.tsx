@@ -51,6 +51,7 @@ import {
   GraduationCap,
   Layers,
   ChevronDown,
+  ChevronLeft,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -169,9 +170,11 @@ export function CourseHero({
 
 type CourseStatsProps = {
   courses: any[];
+  statusFilter?: string;
+  onFilterSelect?: (status: string) => void;
 };
 
-export function CourseStats({ courses }: CourseStatsProps) {
+export function CourseStats({ courses, statusFilter, onFilterSelect }: CourseStatsProps) {
   const totalCourses = courses.length;
 
   const activeCourses = courses.filter((course) => course.is_published).length;
@@ -195,6 +198,8 @@ export function CourseStats({ courses }: CourseStatsProps) {
       iconBg: "bg-gradient-to-br from-indigo-100 to-indigo-50",
       ring: "ring-indigo-100",
       bar: "bg-indigo-500",
+      glow: "bg-indigo-400",
+      filterValue: "all" as string | null,
     },
     {
       title: "الكورسات النشطة",
@@ -205,6 +210,8 @@ export function CourseStats({ courses }: CourseStatsProps) {
       iconBg: "bg-gradient-to-br from-emerald-100 to-emerald-50",
       ring: "ring-emerald-100",
       bar: "bg-emerald-500",
+      glow: "bg-emerald-400",
+      filterValue: "published" as string | null,
     },
     {
       title: "كورسات مجانية",
@@ -215,6 +222,8 @@ export function CourseStats({ courses }: CourseStatsProps) {
       iconBg: "bg-gradient-to-br from-orange-100 to-orange-50",
       ring: "ring-orange-100",
       bar: "bg-orange-500",
+      glow: "bg-orange-400",
+      filterValue: null as string | null,
     },
     {
       title: "كورسات في المسودة",
@@ -225,47 +234,72 @@ export function CourseStats({ courses }: CourseStatsProps) {
       iconBg: "bg-gradient-to-br from-amber-100 to-amber-50",
       ring: "ring-amber-100",
       bar: "bg-amber-500",
+      glow: "bg-amber-400",
+      filterValue: "draft" as string | null,
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
       {stats.map((item) => {
         const Icon = item.icon;
+        const isClickable = item.filterValue !== null && !!onFilterSelect;
+        const isActive = isClickable && statusFilter === item.filterValue;
+        const progress =
+          totalCourses === 0 ? 0 : Math.round((item.value / totalCourses) * 100);
 
         return (
           <div
             key={item.title}
-            className="
+            onClick={() => {
+              if (isClickable) onFilterSelect?.(item.filterValue as string);
+            }}
+            className={`
               group
               relative
               overflow-hidden
               bg-white
-              rounded-3xl
+              rounded-2xl
+              sm:rounded-3xl
               border
-              border-slate-200
-              p-6
+              p-3.5
+              sm:p-6
               shadow-sm
               transition-all
               duration-300
-              hover:shadow-lg
-              hover:-translate-y-0.5
-              hover:border-slate-300
-            "
+              hover:shadow-xl
+              hover:-translate-y-1
+              ${isClickable ? "cursor-pointer" : ""}
+              ${
+                isActive
+                  ? "border-slate-900 ring-2 ring-slate-900/10"
+                  : "border-slate-200 hover:border-slate-300"
+              }
+            `}
           >
+            {/* توهج خلفي */}
+            <div
+              className={`absolute -left-6 -top-10 w-28 h-28 rounded-full blur-3xl opacity-20 ${item.glow} transition-opacity duration-300 group-hover:opacity-30`}
+            />
+
             {/* خط علوي ملوّن */}
             <div className={`absolute top-0 right-0 left-0 h-1 ${item.bar}`} />
 
-            <div className="flex items-start justify-between">
+            <div className="relative flex items-start justify-between gap-2">
               <div
                 className={`
-                  w-14
-                  h-14
-                  rounded-2xl
+                  w-10
+                  h-10
+                  sm:w-14
+                  sm:h-14
+                  rounded-xl
+                  sm:rounded-2xl
                   flex
                   items-center
                   justify-center
                   ring-4
+                  shrink-0
+                  shadow-sm
                   ${item.iconBg}
                   ${item.ring}
                   transition-transform
@@ -273,19 +307,39 @@ export function CourseStats({ courses }: CourseStatsProps) {
                   group-hover:scale-110
                 `}
               >
-                <Icon className={item.color} size={24} strokeWidth={2.2} />
+                <Icon className={item.color} size={18} strokeWidth={2.2} />
               </div>
 
-              <div className="text-right">
-                <p className="text-slate-500 text-sm font-medium">{item.title}</p>
-                <h2 className="mt-1 text-4xl font-black text-slate-800 tabular-nums">
+              <div className="text-right min-w-0">
+                <p className="text-slate-500 text-[11px] sm:text-sm font-medium truncate">
+                  {item.title}
+                </p>
+                <h2 className="mt-1 text-xl sm:text-4xl font-black text-slate-800 tabular-nums">
                   {item.value}
                 </h2>
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-100 text-right">
-              <span className="text-xs font-medium text-slate-400">{item.caption}</span>
+            <div className="relative mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-slate-100">
+              {item.filterValue !== "all" && (
+                <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden mb-2">
+                  <div
+                    className={`h-full rounded-full ${item.bar} transition-all duration-500`}
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] sm:text-xs font-medium text-slate-400">
+                  {item.caption}
+                </span>
+                {isClickable && (
+                  <ChevronLeft
+                    size={13}
+                    className="text-slate-300 opacity-0 -translate-x-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0"
+                  />
+                )}
+              </div>
             </div>
           </div>
         );
@@ -1337,7 +1391,11 @@ export function InstructorCourses() {
 
       {/* Stats + Alert + Filters + Grid */}
       <div className="space-y-4 sm:space-y-5 lg:space-y-6">
-        <CourseStats courses={courses} />
+        <CourseStats
+          courses={courses}
+          statusFilter={statusFilter}
+          onFilterSelect={setStatusFilter}
+        />
         <CourseAlert courses={courses} />
         <CourseFilters
           search={search}
