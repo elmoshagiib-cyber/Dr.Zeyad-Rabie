@@ -529,7 +529,7 @@ function SearchableSelect({
                   }}
                   className={`px-4 py-3 text-sm text-right cursor-pointer transition-colors ${
                     opt.value === value
-                      ? "bg-slate-900 text-white font-bold"
+                      ? "bg-[#155DFC] text-white font-bold border-r-4 border-blue-300/40"
                       : "text-slate-700 hover:bg-slate-50"
                   }`}
                 >
